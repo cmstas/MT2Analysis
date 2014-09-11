@@ -612,6 +612,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         hemJets = getHemJets(goodGenJets);  
         mt2_gen = HemMT2(met_genPt, met_genPhi, hemJets.at(0), hemJets.at(1));
       }
+      
+      //GEN JETS
+      ngenjet = 0; 
+      for(unsigned int iGenJet=0; iGenJet < cms2.genjets_p4NoMuNoNu().size(); iGenJet++){
+        genjet_pt[ngenjet]   = cms2.genjets_p4NoMuNoNu().at(iGenJet).pt();
+        genjet_eta[ngenjet]  = cms2.genjets_p4NoMuNoNu().at(iGenJet).eta();
+        genjet_phi[ngenjet]  = cms2.genjets_p4NoMuNoNu().at(iGenJet).phi();
+        genjet_mass[ngenjet]  = cms2.genjets_p4NoMuNoNu().at(iGenJet).mass();
+
+        ngenjet++;
+      }
 
 
       //TAUS
@@ -882,6 +893,11 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
   BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
   BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
+  BabyTree_->Branch("ngenjet", &ngenjet, "ngenjet/I" );
+  BabyTree_->Branch("genjet_pt", genjet_pt, "genjet_pt[ngenjet]/F" );
+  BabyTree_->Branch("genjet_eta", genjet_eta, "genjet_eta[ngenjet]/F" );
+  BabyTree_->Branch("genjet_phi", genjet_phi, "genjet_phi[ngenjet]/F" );
+  BabyTree_->Branch("genjet_mass", genjet_mass, "genjet_mass[ngenjet]/F" );
 
   return;
 }
@@ -941,6 +957,7 @@ void babyMaker::InitBabyNtuple () {
   ngamma = -999;
   ngenPart = -999;
   njet = -999;
+  ngenjet = -999;
   gamma_mt2 = -999.0;
   gamma_nJet40 = -999;
   gamma_nBJet40 = -999;

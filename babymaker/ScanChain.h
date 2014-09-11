@@ -211,6 +211,13 @@ class babyMaker {
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
 
+//----- GEN JETS
+  static const int max_ngenjet = 100;
+  Int_t           ngenjet;
+  Float_t         genjet_pt[max_ngenjet];   //[ngenjet]
+  Float_t         genjet_eta[max_ngenjet];   //[ngenjet]
+  Float_t         genjet_phi[max_ngenjet];   //[ngenjet]
+  Float_t         genjet_mass[max_ngenjet];   //[ngenjet]
 };
 
 #endif

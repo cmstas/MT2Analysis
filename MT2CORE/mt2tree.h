@@ -161,6 +161,11 @@ public :
    Float_t         jet_area[100];   //[njet]
    Int_t           jet_id[100];   //[njet]
    Int_t           jet_puId[100];   //[njet]
+   Int_t           ngenjet;
+   Float_t         genjet_pt[100];   //[ngenjet]
+   Float_t         genjet_eta[100];   //[ngenjet]
+   Float_t         genjet_phi[100];   //[ngenjet]
+   Float_t         genjet_mass[100];   //[ngenjet]
 
    // List of branches
    TBranch        *b_run;   //!
@@ -302,6 +307,11 @@ public :
    TBranch        *b_jet_area;   //!
    TBranch        *b_jet_id;   //!
    TBranch        *b_jet_puId;   //!
+   TBranch        *b_ngenjet;   //!
+   TBranch        *b_genjet_pt;   //!
+   TBranch        *b_genjet_eta;   //!
+   TBranch        *b_genjet_phi;   //!
+   TBranch        *b_genjet_mass;   //!
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -502,6 +512,11 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
    fChain->SetBranchAddress("jet_id", jet_id, &b_jet_id);
    fChain->SetBranchAddress("jet_puId", jet_puId, &b_jet_puId);
+   fChain->SetBranchAddress("ngenjet", &ngenjet, &b_ngenjet);
+   fChain->SetBranchAddress("genjet_pt", genjet_pt, &b_genjet_pt);
+   fChain->SetBranchAddress("genjet_eta", genjet_eta, &b_genjet_eta);
+   fChain->SetBranchAddress("genjet_phi", genjet_phi, &b_genjet_phi);
+   fChain->SetBranchAddress("genjet_mass", genjet_mass, &b_genjet_mass);
    Notify();
 }
 
