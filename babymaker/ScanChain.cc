@@ -614,8 +614,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }
       
       //GEN JETS
-      ngenjet = 0; 
+      ngenjet = 0;  // number passing pt cut
       for(unsigned int iGenJet=0; iGenJet < cms2.genjets_p4NoMuNoNu().size(); iGenJet++){
+        if(cms2.genjets_p4NoMuNoNu().at(iGenJet).pt() < 10.0) continue;
+
         genjet_pt[ngenjet]   = cms2.genjets_p4NoMuNoNu().at(iGenJet).pt();
         genjet_eta[ngenjet]  = cms2.genjets_p4NoMuNoNu().at(iGenJet).eta();
         genjet_phi[ngenjet]  = cms2.genjets_p4NoMuNoNu().at(iGenJet).phi();
