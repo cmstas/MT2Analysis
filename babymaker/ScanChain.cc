@@ -1089,6 +1089,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         ntau++;
       }
 
+      nfatjet = 0;
+      for(unsigned int iFatJet = 0; iFatJet < cms3.ak8jets_p4().size(); iFatJet++){
+        if(cms3.ak8jets_p4().at(iFatJet).pt() < 100.0) continue;
+        if(fabs(cms3.ak8jets_p4().at(iFatJet).eta()) > 2.4) continue;
+        fatJet_id[nfatjet] = -1;
+        fatJet_puId[nfatjet] = -1;
+        fatJet_btagCSV[nfatjet] = cms3.ak8jets_combinedSecondaryVertexBJetTag().at(iFatJet);
+        fatJet_rawPt[nfatjet] = cms3.ak8jets_p4().at(iFatJet).pt() * cms3.ak8Jets_undoJEC().at(iFatJet);
+        fatJet_mcPt[nfatjet] = -1;
+        fatJet_mcFlavour[nfatjet] = cms3.ak8jets_partonFlavour().at(iFatJet);
+        fatJet_mcMatchId[nfatjet] = -1;
+        fatJet_pt[nfatjet] = cms3.ak8jets_p4().at(iFatJet).pt();
+        fatJet_eta[nfatjet] = cms3.ak8jets_p4().at(iFatJet).eta();
+        fatJet_phi[nfatjet] = cms3.ak8jets_p4().at(iFatJet).phi();
+        fatJet_mass[nfatjet] = cms3.ak8jets_mass().at(iFatJet);
+        fatJet_prunedMass[nfatjet] = cms3.ak8jets_prunedMass().at(iFatJet);
+        fatJet_trimmedMass[nfatjet] = cms3.ak8jets_trimmedMass().at(iFatJet);
+        fatJet_tau1[nfatjet] = cms3.ak8jets_nJettinessTau1().at(iFatJet);
+        fatJet_tau2[nfatjet] = cms3.ak8jets_nJettinessTau2().at(iFatJet);
+        fatJet_tau3[nfatjet] = cms3.ak8jets_nJettinessTau3().at(iFatJet);
+        fatJet_filteredMass[nfatjet] = cms3.ak8jets_filteredMass().at(iFatJet);
+        fatJet_topMass[nfatjet] = cms3.ak8jets_topMass().at(iFatJet);
+        fatJet_minMass[nfatjet] = cms3.ak8jets_minMass().at(iFatJet);
+        fatJet_nSubJets[nfatjet] = cms3.ak8jets_nSubJets().at(iFatJet);
+        nfatjet++;
+      }
+
       FillBabyNtuple();
 
    }//end loop on events in a file
@@ -1346,6 +1373,27 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
   BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
   BabyTree_->Branch("weight_pdfs_DN", &weight_pdfs_DN );
+  BabyTree_->Branch("nfatjet", &nfatjet, "nfatjet/I" );
+  BabyTree_->Branch("fatJet_id", fatJet_id, "fatJet_id[nfatjet]/I" );
+  BabyTree_->Branch("fatJet_puId", fatJet_puId, "fatJet_puId[nfatjet]/I" );
+  BabyTree_->Branch("fatJet_btagCSV", fatJet_btagCSV, "fatJet_btagCSV[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_rawPt", fatJet_rawPt, "fatJet_rawPt[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_mcPt", fatJet_mcPt, "fatJet_mcPt[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_mcFlavour", fatJet_mcFlavour, "fatJet_mcFlavour[nfatjet]/I" );
+  BabyTree_->Branch("fatJet_mcMatchId", fatJet_mcMatchId, "fatJet_mcMatchId[nfatjet]/I" );
+  BabyTree_->Branch("fatJet_pt", fatJet_pt, "fatJet_pt[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_eta", fatJet_eta, "fatJet_eta[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_phi", fatJet_phi, "fatJet_phi[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_mass", fatJet_mass, "fatJet_mass[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_prunedMass", fatJet_prunedMass, "fatJet_prunedMass[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_trimmedMass", fatJet_trimmedMass, "fatJet_trimmedMass[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_tau1", fatJet_tau1, "fatJet_tau1[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_tau2", fatJet_tau2, "fatJet_tau2[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_tau3", fatJet_tau3, "fatJet_tau3[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_filteredMass", fatJet_filteredMass, "fatJet_filteredMass[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_topMass", fatJet_topMass, "fatJet_topMass[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_minMass", fatJet_minMass, "fatJet_minMass[nfatjet]/F" );
+  BabyTree_->Branch("fatJet_nSubJets", fatJet_nSubJets, "fatJet_nSubJets[nfatjet]/F" );
 
   // also make counter histogram
   count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -1478,6 +1526,7 @@ void babyMaker::InitBabyNtuple () {
   weight_scales_DN = 1.;
   weight_pdfs_UP = 1.;
   weight_pdfs_DN = 1.;
+  nfatjet = -1;
 
   for(int i=0; i < nlep; i++){
     lep_pt[i] = -999;
@@ -1599,6 +1648,28 @@ void babyMaker::InitBabyNtuple () {
     jet_puId[i] = -999;
   }
 
+  for(int i=0; i < nfatjet; i++){
+    fatJet_id[i] = -1;
+    fatJet_puId[i] = -1;
+    fatJet_btagCSV[i] = -1;
+    fatJet_rawPt[i] = -1;
+    fatJet_mcPt[i] = -1;
+    fatJet_mcFlavour[i] = -1;
+    fatJet_mcMatchId[i] = -1;
+    fatJet_pt[i] = -1;
+    fatJet_eta[i] = -1;
+    fatJet_phi[i] = -1;
+    fatJet_mass[i] = -1;
+    fatJet_prunedMass[i] = -1;
+    fatJet_trimmedMass[i] = -1;
+    fatJet_tau1[i] = -1;
+    fatJet_tau2[i] = -1;
+    fatJet_tau3[i] = -1;
+    fatJet_filteredMass[i] = -1;
+    fatJet_topMass[i] = -1;
+    fatJet_minMass[i] = -1;
+    fatJet_nSubJets[i] = -1;
+  }
 
   return;
 }

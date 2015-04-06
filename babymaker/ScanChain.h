@@ -307,6 +307,30 @@ class babyMaker {
   Float_t         weight_pdfs_UP;
   Float_t         weight_pdfs_DN;
 
+//----- FATJETS
+  static const int max_nfatjet = 6;
+  Int_t           nfatjet;
+  Int_t           fatJet_id[max_nfatjet];  //[nfatjet]
+  Int_t           fatJet_puId[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_btagCSV[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_rawPt[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_mcPt[max_nfatjet];  //[nfatjet]
+  Int_t           fatJet_mcFlavour[max_nfatjet];  //[nfatjet]
+  Int_t           fatJet_mcMatchId[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_pt[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_eta[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_phi[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_mass[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_prunedMass[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_trimmedMass[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_tau1[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_tau2[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_tau3[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_filteredMass[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_topMass[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_minMass[max_nfatjet];  //[nfatjet]
+  Float_t         fatJet_nSubJets[max_nfatjet];  //[nfatjet]
+
 };
 
 #endif
