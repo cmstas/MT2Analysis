@@ -46,7 +46,7 @@ cd ${DIR}
 
 DATADIR=$1
 COPYDIRBASE=$2
-COPYDIR=/hadoop/cms/store/user/${USERNAME}/mt2babies/${COPYDIRBASE}
+COPYDIR=/hadoop/cms/store/user/sicheng/mt2babies/${COPYDIRBASE}
 echo "[writeConfig] running on dataset ${DATADIR}"
 echo "[writeConfig] copying output to ${COPYDIR}"
 

@@ -41,6 +41,7 @@ class MT2Looper {
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosSRsoftMuon(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
@@ -48,6 +49,8 @@ class MT2Looper {
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
+			      const std::string& dir = "", const std::string& suffix = ""); 
+  void fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
@@ -62,6 +65,10 @@ class MT2Looper {
   float evtweight_;
   int nlepveto_;
   float leppt_;
+  float smupt_;
+  float smueta_;
+  float smuphi_;
+  int smuMotherId_;
   float mt_;
   bool isSignal_;
   std::map<std::string, TH1*> h_1d_global;

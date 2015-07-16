@@ -84,6 +84,28 @@ void MT2Looper::SetSignalRegions(){
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srHistMap, "", 1, 0, 2);
 
+    dir = (TDirectory*)outfile_->Get(("srsm"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("srsm"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmHistMap, "", 1, 0, 2);
+
+    dir = (TDirectory*)outfile_->Get(("srsmMt"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("srsmMt"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmMtHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmMtHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmMtHistMap, "", 1, 0, 2);
+
     dir = (TDirectory*)outfile_->Get(("crsl"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
       dir = outfile_->mkdir(("crsl"+SRVec.at(i).GetName()).c_str());
@@ -344,6 +366,67 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
+      //---------------------------
+      // 1st Select one muon < 20 GeV, down to 5 GeV, apply all other cuts back.
+      // 2nd requirement, MT > 100, need to be at different range, like hlt
+      // where to store muon pt? is leppt_ safe to use?
+      // what about lepton with high MT but pt < 10
+      // Check: does t.lep has lower to 5 GeV pushed?
+      // version1: consider softMu code different part
+      // version2: integrate into crsl loop, will have to care lowMT cut
+      // Data: /nfs-6/userdata/mt2/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv
+      //---------------------------
+      // if ((t.ngenLep + t.ngenLepFromTau + t.ngenTau) != 0) continue;
+      smuMotherId_ = 5;
+      bool softMu = false;
+      if (t.nMuons10 == 1) { 
+        for (int ilep = 0; ilep < t.nlep; ++ilep){
+          if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_pt[ilep] < 20 && t.lep_pt[ilep] > 10){
+            softMu = true;
+            smuMotherId_ = t.lep_mcMatchId[ilep];
+            smupt_ = t.lep_pt[ilep];
+            smueta_ = t.lep_eta[ilep];
+            smuphi_ = t.lep_phi[ilep];
+            mt_ = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) ); 
+            break;
+          }
+        }
+        // avoid double counts in lepveto
+        if ( softMu && t.nPFLep5LowMT > 0 ){
+          bool dualcount = false;
+          for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+            if (abs(t.isoTrack_pdgId[itrk]) != 13) continue;
+            if (t.isoTrack_pt[itrk] < 9.) continue;  // will 10 
+            if (t.isoTrack_absIso[itrk]/t.isoTrack_pt[itrk] > 0.2) continue;
+            if (fabs(t.isoTrack_eta[itrk]) > 2.4) continue;
+            float thisDR = DeltaR(t.isoTrack_eta[itrk], smueta_ , t.isoTrack_phi[itrk], smuphi_ );
+            if (thisDR < 0.1) {
+              dualcount = true;
+              break;
+            }
+          } // loop over reco leps
+          if (dualcount) nlepveto_--;
+        }
+      }
+      else if (t.nPFLep5LowMT == 1) {  // look into isoTracks to find muon with pt > 5 GeV
+        for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+          if (abs(t.isoTrack_pdgId[itrk]) != 13) continue;
+          if (t.isoTrack_pt[itrk] < 5.)  continue;  
+          if (t.isoTrack_pt[itrk] > 20.) continue;  
+          if (t.isoTrack_absIso[itrk]/t.isoTrack_pt[itrk] > 0.2) continue;  // Does this selection still apply in softMuon case?
+          mt_ = sqrt( 2 * t.met_pt * t.isoTrack_pt[itrk] * ( 1 - cos( t.met_phi - t.isoTrack_phi[itrk]) ) );
+          if (mt_ > 100.) continue;
+          smupt_  = t.isoTrack_pt[itrk];
+          smueta_ = t.isoTrack_eta[itrk];
+          smuMotherId_ = t.isoTrack_mcMatchId[itrk];
+          //if (softMu && nlepveto_ < 2) cout << "Bug!! Event including more than 1 softMuons but nlepveto_ < 2 !\n";
+          softMu = true;
+        }
+      }
+
+      // in following code the mt_value may be rewritten, so fill the histos right now
+      if (softMu) fillHistosSRsoftMuon("srsm");
+      
       // variables for single lep control region
       bool doSLplots = false;
       bool doSLMUplots = false;
@@ -719,6 +802,98 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 
   //plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Signal Region", 100, 0, 100);
 
+  return;
+}
+
+void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::string& suffix) {
+
+  // Fill up base region
+  std::map<std::string, float> valuesBase;
+  valuesBase["deltaPhiMin"] = t.deltaPhiMin;
+  valuesBase["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  valuesBase["nlep"]        = nlepveto_ - 1;
+  valuesBase["j1pt"]        = t.jet1_pt;
+  valuesBase["j2pt"]        = t.jet2_pt;
+  valuesBase["mt2"]         = t.mt2;
+  valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if(SRBase.PassesSelection(valuesBase)){
+    fillHistosSingleSoftMuon(SRBase.srsmHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmbase", "");
+    if (mt_ > 100) fillHistosSingleSoftMuon(SRBase.srsmMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmMtbase", "");
+  }
+
+  // Fill Signal Region
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nlepveto_ - 1;
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["njets"]       = t.nJet40;
+  values["nbjets"]      = t.nBJet20;
+  values["mt2"]         = t.mt2;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
+  //values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
+    if(SRVec.at(srN).PassesSelection(values)){
+      fillHistosSingleSoftMuon(SRVec.at(srN).srsmHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      if (mt_ > 100)
+        fillHistosSingleSoftMuon(SRVec.at(srN).srsmMtHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+"Mt"+SRVec.at(srN).GetName(), suffix);
+      break;//signal regions are orthogonal, event cannot be in more than one
+    }
+  }
+
+  return;
+}
+
+void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  } 
+  dir->cd();
+
+  plot1D("h_mupt"+s,      smupt_,   evtweight_, h_1d, ";p_{T}(#mu) [GeV]", 50, 0, 25);
+  plot1D("h_eta"+s,      smueta_,   evtweight_, h_1d, ";#eta(#mu) [GeV]", 50, -2.6, 2.6);
+  plot1D("h_mt"+s,           mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  if(smupt_ < 10 )      plot1D("h_mt_mpt5-10"+s,   mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  else if(smupt_ < 15 ) plot1D("h_mt_mpt10-15"+s,  mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  else                  plot1D("h_mt_mpt15-20"+s,  mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+
+  plot2D("h2d_nlep_nlepfrtau"+s, t.ngenLep, t.ngenLepFromTau, evtweight_, h_1d, ";ngenLep;ngenLepFromTau", 4 , 0, 4, 4, 0, 4);
+  plot2D("h2d_nlep_ntau"+s, t.ngenLep, t.ngenTau, evtweight_, h_1d, ";ngenLep;ngenTau", 4 , 0, 4, 4, 0, 4);
+  plot1D("h_smuMotherId"+s,      smuMotherId_,   evtweight_, h_1d, ";Mother pdgId of #mu", 30, 0, 30);
+  
+
+  // if (t.ngenLep == 1)   plot1D("h_genMupt"+s,    t.genLep_pt[0],   evtweight_, h_1d, ";p_{T}(gen #mu) [GeV]", 50, 0, 25);
+  // else if (t.ngenLepFromTau == 1) plot1D("h_genMuFromTaupt"+s,    t.genLep_pt[0],   evtweight_, h_1d, ";p_{T}(gen #mu from #tau) [GeV]", 50, 0, 25);
+  // else if ((t.ngenLep + t.ngenLepFromTau) != 0) cout << "Hey! we need a loop for gen lep!!\n";
+
+  bool fromGenTau = false;
+  int imu = -1;
+  for(int i = 0; i < t.ngenLepFromTau; ++i){
+    float dr = DeltaR(t.genLepFromTau_eta[i],  smueta_, t.genLepFromTau_phi[i],  smuphi_);
+    if (dr < 0.1) fromGenTau = true;
+    imu = i;
+    break;
+  }
+  if (fromGenTau) plot1D("h_genMuFromTaupt"+s,    t.genLepFromTau_pt[imu],   evtweight_, h_1d, ";p_{T}(gen #mu from #tau) [GeV]", 50, 0, 25);
+  else{
+    bool fromGenLep = false;
+    for(int i = 0; i < t.ngenLep; ++i){
+      float dr = DeltaR(t.genLep_eta[i],  smueta_, t.genLep_phi[i],  smuphi_);
+      if (dr < 0.1) fromGenLep = true;
+      imu = i;
+    }
+    if (fromGenLep) plot1D("h_genMupt"+s,    t.genLep_pt[imu],   evtweight_, h_1d, ";p_{T}(gen #mu) [GeV]", 50, 0, 25);
+    else plot1D("h_recMupt"+s,    smupt_,   evtweight_, h_1d, ";p_{T}(rec #mu) [GeV]", 50, 0, 25);
+  }
+
+  outfile_->cd();
+
+  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
   return;
 }
 
@@ -1148,7 +1323,7 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
   const int n_nbjbins = 4;
   const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
   
-  if (dirname=="crrlbase" || dirname=="crrlL" || dirname=="crrlM" || dirname=="crrlH") { 
+  if (dirname=="crrlbase" || dirname=="crrlL" || dirname=="crrlM" || dirname=="crrlH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
