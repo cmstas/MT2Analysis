@@ -65,6 +65,8 @@ class MT2Looper {
   float evtweight_;
   int nlepveto_;
   float leppt_;
+  float lepphi_;
+  float lepeta_;
   float smupt_;
   float smueta_;
   float smuphi_;

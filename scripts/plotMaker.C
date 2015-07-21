@@ -119,6 +119,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TString newhistname = Form("%s_%s_%s",histname.c_str(),histdir.c_str(),names.at(i).c_str());
     TH1D* h_temp = (TH1D*) samples.at(i)->Get(fullhistname);
     if (h_temp == 0) continue;
+    if (h_temp->Integral() < 0.001) cout << "Empty Hist!!\n";
     data_hist = (TH1D*) h_temp->Clone(newhistname);
     data_name = names.at(i);
     //    h->Sumw2();
@@ -329,7 +330,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 }
 
 //_______________________________________________________________________________
-void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs, string caption = "", int mt2bin = -1 ) {
+void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs, string caption = "", bool compare = false, int mt2bin = -1 ) {
 
   // read off yields from h_mt2bins hist in each topological region
 
@@ -353,8 +354,10 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   // header
   for (unsigned int idir = 0; idir < ndirs; ++idir) {
     //ofile << " & " << getRegionName(dirs.at(idir));
-    ofile << " & " << getJetBJetTableLabel(samples.at(0), dirs.at(idir));
+    if(compare)  ofile << " & " << dirs.at(idir);
+    else         ofile << " & " << getJetBJetTableLabel(samples.at(0), dirs.at(idir));
   }
+
   ofile << " \\\\" << endl
         << "\\hline\\hline" << endl;
 
@@ -451,6 +454,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     ofile << " \\\\" << endl;
   } // loop over samples
 
+  if(compare) caption += " (" + getJetBJetTableLabel(samples.at(0), dirs.at(0)) + ")";
   ofile << "\\hline" << std::endl;
   ofile << "\\end{tabular}" << std::endl;
   ofile << "\\caption{" << caption << "}" << std::endl;
@@ -644,17 +648,21 @@ void plotMaker(){
 
   // TFile* f_ttbar = new TFile(Form("%s/ttall_0genlep.root",input_dir.c_str()));
   TFile* f_ttbar = new TFile(Form("%s/ttall_msdecays.root",input_dir.c_str()));
-  // TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  // // TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
-  // TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
-  // TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
 
+  // TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
   // TFile* f_tth = new TFile(Form("%s/tth.root",input_dir.c_str()));
   // TFile* f_ttw = new TFile(Form("%s/ttwjets.root",input_dir.c_str()));
   // TFile* f_ttz = new TFile(Form("%s/ttzjets.root",input_dir.c_str()));
   // TFile* f_singletop = new TFile(Form("%s/singletop.root",input_dir.c_str()));
   // TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
 
+  TFile* f_T5qqqq_310_300 = new TFile(Form("%s/T5qqqqWWDeg_mGo1000_mCh310_mChi300.root",input_dir.c_str()));
+  TFile* f_T5qqqq_315_300 = new TFile(Form("%s/T5qqqqWWDeg_mGo1000_mCh315_mChi300.root",input_dir.c_str()));
+  TFile* f_T5qqqq_325_300 = new TFile(Form("%s/T5qqqqWWDeg_mGo1000_mCh325_mChi300.root",input_dir.c_str()));
+  TFile* f_T5qqqq_305_300 = new TFile(Form("%s/T5qqqqWWDeg_mGo800_mCh305_mChi300.root",input_dir.c_str()));
   // TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
   // TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
   // TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
@@ -686,15 +694,21 @@ void plotMaker(){
   vector<string>  names;
 
   // samples.push_back(f_qcd);   names.push_back("qcd");
+  samples.push_back(f_ttbar); names.push_back("ttbar");
   // samples.push_back(f_wjets); names.push_back("wjets");
   // samples.push_back(f_zinv);  names.push_back("zinv");
+
   //samples.push_back(f_gjet);  names.push_back("gjet");
   //samples.push_back(f_tth); names.push_back("tth");
   //samples.push_back(f_ttw); names.push_back("ttw");
   //samples.push_back(f_ttz); names.push_back("ttz");
   //samples.push_back(f_singletop); names.push_back("singletop");
-  samples.push_back(f_ttbar); names.push_back("ttbar");
   //samples.push_back(f_top); names.push_back("top");
+
+  // samples.push_back(f_T5qqqq_310_300); names.push_back("sig\\_T5qqqq\\_310\\_300");
+  // samples.push_back(f_T5qqqq_315_300); names.push_back("sig\\_T5qqqq\\_315\\_300");
+  // samples.push_back(f_T5qqqq_325_300); names.push_back("sig\\_T5qqqq\\_325\\_300");
+  // samples.push_back(f_T5qqqq_305_300); names.push_back("sig\\_T5qqqq\\_305\\_300");
 
   // samples.push_back(f_T1tttt_1500_100); names.push_back("sig_T1tttt_1500_100");
   // samples.push_back(f_T1tttt_1200_800); names.push_back("sig_T1tttt_1200_800");
@@ -744,7 +758,14 @@ void plotMaker(){
       // makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio );
   
       
-      makePlot( samples , names , dir_name , "h_smuMotherId" , "Mother pdgId of #mu" , "Events / 10 GeV" , -5 , 30 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_genMuftaupt" , "p_{T}(gen #mu from #tau) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_genMupt" , "p_{T}(gen #mu) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_resMupt" , "p_{T}(rec of other #mu) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_resleppt" , "p_{T}(rec #mu) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_genleppt" , "p_{T}(gen Lep) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_genlepftaupt" , "p_{T}(gen Lep) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      //makePlot( samples , names , dir_name , "h_genPartid" , "pdgId of gen Part" , "Events" , 0 , 50 , 1 , true, printplots, scalesig, doRatio );
+      //makePlot( samples , names , dir_name , "h_smuMotherId" , "Mother pdgId of #mu" , "Events / 10 GeV" , -5 , 30 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_mupt" , "p_{T} (#mu) [GeV]" , "Events / Bin" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_eta" , "#eta (#mu) [GeV]" , "Events / Bin" , -2.6 , 2.6 , 1 , true, printplots, scalesig, doRatio );
@@ -820,237 +841,237 @@ void plotMaker(){
      dirsH.push_back("srbase");
      dirsH.push_back("srsmbase");
      dirsH.push_back("srsmMtbase");
-     printTable(samples, names, dirsH, "SRbase vs SRSMbase vs SRSMmt100 in tt\\_0genLep");
+     printTable(samples, names, dirsH, "Base Cut", true);
      dirsH.clear();
-
+     /*
      dirsH.push_back("sr1L");
      dirsH.push_back("srsm1L");
      dirsH.push_back("srsmMt1L");
-     printTable(samples, names, dirsH, "SR 1L");
+     printTable(samples, names, dirsH, "1L", true);
      dirsH.clear();
      dirsH.push_back("sr2L");
      dirsH.push_back("srsm2L");
      dirsH.push_back("srsmMt2L");
-     printTable(samples, names, dirsH, "SR 2L");
+     printTable(samples, names, dirsH, "2L", true);
      dirsH.clear();
      dirsH.push_back("sr3L");
      dirsH.push_back("srsm3L");
      dirsH.push_back("srsmMt3L");
-     printTable(samples, names, dirsH, "SR 3L");
+     printTable(samples, names, dirsH, "3L", true);
      dirsH.clear();
      dirsH.push_back("sr4L");
      dirsH.push_back("srsm4L");
      dirsH.push_back("srsmMt4L");
-     printTable(samples, names, dirsH, "SR 4L");
+     printTable(samples, names, dirsH, "4L", true);
      dirsH.clear();
      dirsH.push_back("sr5L");
      dirsH.push_back("srsm5L");
      dirsH.push_back("srsmMt5L");
-     printTable(samples, names, dirsH, "SR 5L");
+     printTable(samples, names, dirsH, "5L", true);
      dirsH.clear();
      dirsH.push_back("sr6L");
      dirsH.push_back("srsm6L");
      dirsH.push_back("srsmMt6L");
-     printTable(samples, names, dirsH, "SR 6L");
+     printTable(samples, names, dirsH, "6L", true);
      dirsH.clear();
 
      dirsH.push_back("sr7L");
      dirsH.push_back("srsm7L");
      dirsH.push_back("srsmMt7L");
-     printTable(samples, names, dirsH, "SR 7L");
+     printTable(samples, names, dirsH, "7L", true);
      dirsH.clear();
      dirsH.push_back("sr8L");
      dirsH.push_back("srsm8L");
      dirsH.push_back("srsmMt8L");
-     printTable(samples, names, dirsH, "SR 8L");
+     printTable(samples, names, dirsH, "8L", true);
      dirsH.clear();
      dirsH.push_back("sr9L");
      dirsH.push_back("srsm9L");
      dirsH.push_back("srsmMt9L");
-     printTable(samples, names, dirsH, "SR 9L");
+     printTable(samples, names, dirsH, "9L", true);
      dirsH.clear();
      dirsH.push_back("sr10L");
      dirsH.push_back("srsm10L");
      dirsH.push_back("srsmMt10L");
-     printTable(samples, names, dirsH, "SR 10L");
+     printTable(samples, names, dirsH, "10L", true);
      dirsH.clear();
      dirsH.push_back("sr11L");
      dirsH.push_back("srsm11L");
      dirsH.push_back("srsmMt11L");
-     printTable(samples, names, dirsH, "SR 11L");
+     printTable(samples, names, dirsH, "11L", true);
      dirsH.clear();
 
      dirsH.push_back("sr1M");
      dirsH.push_back("srsm1M");
      dirsH.push_back("srsmMt1M");
-     printTable(samples, names, dirsH, "SR 1M");
+     printTable(samples, names, dirsH, "1M", true);
      dirsH.clear();
      dirsH.push_back("sr2M");
      dirsH.push_back("srsm2M");
      dirsH.push_back("srsmMt2M");
-     printTable(samples, names, dirsH, "SR 2M");
+     printTable(samples, names, dirsH, "2M", true);
      dirsH.clear();
      dirsH.push_back("sr3M");
      dirsH.push_back("srsm3M");
      dirsH.push_back("srsmMt3M");
-     printTable(samples, names, dirsH, "SR 3M");
+     printTable(samples, names, dirsH, "3M", true);
      dirsH.clear();
      dirsH.push_back("sr4M");
      dirsH.push_back("srsm4M");
      dirsH.push_back("srsmMt4M");
-     printTable(samples, names, dirsH, "SR 4M");
+     printTable(samples, names, dirsH, "4M", true);
      dirsH.clear();
      dirsH.push_back("sr5M");
      dirsH.push_back("srsm5M");
      dirsH.push_back("srsmMt5M");
-     printTable(samples, names, dirsH, "SR 5M");
+     printTable(samples, names, dirsH, "5M", true);
      dirsH.clear();
      dirsH.push_back("sr6M");
      dirsH.push_back("srsm6M");
      dirsH.push_back("srsmMt6M");
-     printTable(samples, names, dirsH, "SR 6M");
+     printTable(samples, names, dirsH, "6M", true);
      dirsH.clear();
 
      dirsH.push_back("sr7M");
      dirsH.push_back("srsm7M");
      dirsH.push_back("srsmMt7M");
-     printTable(samples, names, dirsH, "SR 7M");
+     printTable(samples, names, dirsH, "7M", true);
      dirsH.clear();
      dirsH.push_back("sr8M");
      dirsH.push_back("srsm8M");
      dirsH.push_back("srsmMt8M");
-     printTable(samples, names, dirsH, "SR 8M");
+     printTable(samples, names, dirsH, "8M", true);
      dirsH.clear();
      dirsH.push_back("sr9M");
      dirsH.push_back("srsm9M");
      dirsH.push_back("srsmMt9M");
-     printTable(samples, names, dirsH, "SR 9M");
+     printTable(samples, names, dirsH, "9M", true);
      dirsH.clear();
      dirsH.push_back("sr10M");
      dirsH.push_back("srsm10M");
      dirsH.push_back("srsmMt10M");
-     printTable(samples, names, dirsH, "SR 10M");
+     printTable(samples, names, dirsH, "10M", true);
      dirsH.clear();
      dirsH.push_back("sr11M");
      dirsH.push_back("srsm11M");
      dirsH.push_back("srsmMt11M");
-     printTable(samples, names, dirsH, "SR 11M");
+     printTable(samples, names, dirsH, "11M", true);
      dirsH.clear();
 
      dirsH.push_back("sr1H");
      dirsH.push_back("srsm1H");
      dirsH.push_back("srsmMt1H");
-     printTable(samples, names, dirsH, "SR 1H");
+     printTable(samples, names, dirsH, "1H", true);
      dirsH.clear();     
      dirsH.push_back("sr2H");
      dirsH.push_back("srsm2H");
      dirsH.push_back("srsmMt2H");
-     printTable(samples, names, dirsH, "SR 2H");
+     printTable(samples, names, dirsH, "2H", true);
      dirsH.clear();     
      dirsH.push_back("sr3H");
      dirsH.push_back("srsm3H");
      dirsH.push_back("srsmMt3H");
-     printTable(samples, names, dirsH, "SR 3H");
+     printTable(samples, names, dirsH, "3H", true);
      dirsH.clear();     
      dirsH.push_back("sr4H");
      dirsH.push_back("srsm4H");
      dirsH.push_back("srsmMt4H");
-     printTable(samples, names, dirsH, "SR 4H");
+     printTable(samples, names, dirsH, "4H", true);
      dirsH.clear();     
      dirsH.push_back("sr5H");
      dirsH.push_back("srsm5H");
      dirsH.push_back("srsmMt5H");
-     printTable(samples, names, dirsH, "SR 5H");
+     printTable(samples, names, dirsH, "5H", true);
      dirsH.clear();     
      dirsH.push_back("sr6H");
      dirsH.push_back("srsm6H");
      dirsH.push_back("srsmMt6H");
-     printTable(samples, names, dirsH, "SR 6H");
+     printTable(samples, names, dirsH, "6H", true);
      dirsH.clear();     
                         
      dirsH.push_back("sr7H");
      dirsH.push_back("srsm7H");
      dirsH.push_back("srsmMt7H");
-     printTable(samples, names, dirsH, "SR 7H");
+     printTable(samples, names, dirsH, "7H", true);
      dirsH.clear();
      dirsH.push_back("sr8H");
      dirsH.push_back("srsm8H");
      dirsH.push_back("srsmMt8H");
-     printTable(samples, names, dirsH, "SR 8H");
+     printTable(samples, names, dirsH, "8H", true);
      dirsH.clear();
      dirsH.push_back("sr9H");
      dirsH.push_back("srsm9H");
      dirsH.push_back("srsmMt9H");
-     printTable(samples, names, dirsH, "SR 9H");
+     printTable(samples, names, dirsH, "9H", true);
      dirsH.clear();
      dirsH.push_back("sr10H");
      dirsH.push_back("srsm10H");
      dirsH.push_back("srsmMt10H");
-     printTable(samples, names, dirsH, "SR 10H");
+     printTable(samples, names, dirsH, "10H", true);
      dirsH.clear();
      dirsH.push_back("sr11H");
      dirsH.push_back("srsm11H");
      dirsH.push_back("srsmMt11H");
-     printTable(samples, names, dirsH, "SR 11H");
+     printTable(samples, names, dirsH, "11H", true);
      dirsH.clear();
 
      dirsH.push_back("sr1UH");
      dirsH.push_back("srsm1UH");
      dirsH.push_back("srsmMt1UH");
-     printTable(samples, names, dirsH, "SR 1UH");
+     printTable(samples, names, dirsH, "1UH", true);
      dirsH.clear();
      dirsH.push_back("sr2UH");
      dirsH.push_back("srsm2UH");
      dirsH.push_back("srsmMt2UH");
-     printTable(samples, names, dirsH, "SR 2UH");
+     printTable(samples, names, dirsH, "2UH", true);
      dirsH.clear();
      dirsH.push_back("sr3UH");
      dirsH.push_back("srsm3UH");
      dirsH.push_back("srsmMt3UH");
-     printTable(samples, names, dirsH, "SR 3UH");
+     printTable(samples, names, dirsH, "3UH", true);
      dirsH.clear();
      dirsH.push_back("sr4UH");
      dirsH.push_back("srsm4UH");
      dirsH.push_back("srsmMt4UH");
-     printTable(samples, names, dirsH, "SR 4UH");
+     printTable(samples, names, dirsH, "4UH", true);
      dirsH.clear();
      dirsH.push_back("sr5UH");
      dirsH.push_back("srsm5UH");
      dirsH.push_back("srsmMt5UH");
-     printTable(samples, names, dirsH, "SR 5UH");
+     printTable(samples, names, dirsH, "5UH", true);
      dirsH.clear();
      dirsH.push_back("sr6UH");
      dirsH.push_back("srsm6UH");
      dirsH.push_back("srsmMt6UH");
-     printTable(samples, names, dirsH, "SR 6UH");
+     printTable(samples, names, dirsH, "6UH", true);
      dirsH.clear();
 
      dirsH.push_back("sr7UH");
      dirsH.push_back("srsm7UH");
      dirsH.push_back("srsmMt7UH");
-     printTable(samples, names, dirsH, "SR 7UH");
+     printTable(samples, names, dirsH, "7UH", true);
      dirsH.clear();
      dirsH.push_back("sr8UH");
      dirsH.push_back("srsm8UH");
      dirsH.push_back("srsmMt8UH");
-     printTable(samples, names, dirsH, "SR 8UH");
+     printTable(samples, names, dirsH, "8UH", true);
      dirsH.clear();
      dirsH.push_back("sr9UH");
      dirsH.push_back("srsm9UH");
      dirsH.push_back("srsmMt9UH");
-     printTable(samples, names, dirsH, "SR 9UH");
+     printTable(samples, names, dirsH, "9UH", true);
      dirsH.clear();
      dirsH.push_back("sr10UH");
      dirsH.push_back("srsm10UH");
      dirsH.push_back("srsmMt10UH");
-     printTable(samples, names, dirsH, "SR 10UH");
+     printTable(samples, names, dirsH, "10UH", true);
      dirsH.clear();
      dirsH.push_back("sr11UH");
      dirsH.push_back("srsm11UH");
      dirsH.push_back("srsmMt11UH");
-     printTable(samples, names, dirsH, "SR 11UH");
+     printTable(samples, names, dirsH, "11UH", true);
      dirsH.clear();
-
+     */
 
   ofile << "\\end{document}" << std::endl;
   //ofile.close();
