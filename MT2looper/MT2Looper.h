@@ -65,12 +65,9 @@ class MT2Looper {
   float evtweight_;
   int nlepveto_;
   float leppt_;
-  float lepphi_;
-  float lepeta_;
   float smupt_;
   float smueta_;
   float smuphi_;
-  int smuMotherId_;
   float mt_;
   bool isSignal_;
   std::map<std::string, TH1*> h_1d_global;

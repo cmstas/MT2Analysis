@@ -367,61 +367,11 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
 
       //---------------------------
-      // 1st Select one muon < 20 GeV, down to 5 GeV, apply all other cuts back.
-      // 2nd requirement, MT > 100, need to be at different range, like hlt
-      // where to store muon pt? is leppt_ safe to use?
-      // what about lepton with high MT but pt < 10
-      // Check: does t.lep has lower to 5 GeV pushed?
-      // version1: consider softMu code different part
-      // version2: integrate into crsl loop, will have to care lowMT cut
-      // Data: /nfs-6/userdata/mt2/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv
+      // Select one and only one muon < 20 GeV, down to 5 GeV, apply all other cuts back.
       //---------------------------
-      // if ((t.ngenLep + t.ngenLepFromTau + t.ngenTau) != 0) continue;
-      // smuMotherId_ = 5;
-/*
-      int nsoftMu = 0;
-      for (int ilep = 0; ilep < t.nlep; ++ilep){
-        if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_pt[ilep] < 20 && t.lep_pt[ilep] > 5){
-          ++nsoftMu;
-          smuMotherId_ = t.lep_mcMatchId[ilep];
-          smupt_ = t.lep_pt[ilep];
-          smueta_ = t.lep_eta[ilep];
-          smuphi_ = t.lep_phi[ilep];
-          mt_ = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) ); 
-        }
-      }
-      // avoid double counts in lepveto
-      if ( nsoftMu == 1 && t.nPFLep5LowMT > 0 ){
-        bool dualcount = false;
-        for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-          if (abs(t.isoTrack_pdgId[itrk]) != 13) continue;
-          if (t.isoTrack_pt[itrk] < 9.) continue;  // will 10 
-          if (t.isoTrack_absIso[itrk]/t.isoTrack_pt[itrk] > 0.2) continue;
-          if (fabs(t.isoTrack_eta[itrk]) > 2.4) continue;
-          float thisDR = DeltaR(t.isoTrack_eta[itrk], smueta_ , t.isoTrack_phi[itrk], smuphi_ );
-          if (thisDR < 0.1) {
-            dualcount = true;
-            break;
-          }
-        } // loop over reco leps
-        if (dualcount) nlepveto_--;
-      }
-      else if (nsoftMu == 0 && t.nPFLep5LowMT > 0) {  // look into isoTracks to find muon with pt > 5 GeV
-        for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-          if (abs(t.isoTrack_pdgId[itrk]) != 13) continue;
-          if (t.isoTrack_pt[itrk] < 5.)  continue;  
-          if (t.isoTrack_pt[itrk] > 20.) continue;  
-          if (t.isoTrack_absIso[itrk]/t.isoTrack_pt[itrk] > 0.2) continue;  // Does this selection still apply in softMuon case?
-          mt_ = sqrt( 2 * t.met_pt * t.isoTrack_pt[itrk] * ( 1 - cos( t.met_phi - t.isoTrack_phi[itrk]) ) );
-          if (mt_ > 100.) continue;
-          smupt_  = t.isoTrack_pt[itrk];
-          smueta_ = t.isoTrack_eta[itrk];
-          smuMotherId_ = t.isoTrack_mcMatchId[itrk];
-          //if (softMu && nlepveto_ < 2) cout << "Bug!! Event including more than 1 softMuons but nlepveto_ < 2 !\n";
-          ++nsoftMu;
-        }
-      }
-*/
+
+      // if ((t.ngenLep + t.ngenTau) != 0) continue;
+
       bool softMu = false;
       // if has reco muon use the information
       if (t.nMuons10 == 1){
@@ -452,8 +402,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // otherwise check PF leps that don't overlap with a reco lepton
       else if (t.nMuons10 == 0 && t.nPFLep5LowMT == 1) {
         for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-          int pdgId = t.isoTrack_pdgId[itrk];
-          if (abs(pdgId) != 13) continue;
+          if (abs(t.isoTrack_pdgId[itrk]) != 13) continue;
           float pt = t.isoTrack_pt[itrk];
           if (pt < 5. || pt > 20.) continue;
           if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
@@ -468,9 +417,10 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
           break;
         } // loop on isotracks
       }
+
       // in following code the mt_ value may be rewritten, so fill the histos right now
       if (softMu) fillHistosSRsoftMuon("srsm");
-      
+
       // variables for single lep control region
       bool doSLplots = false;
       bool doSLMUplots = false;
@@ -494,8 +444,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
 	    // good candidate: save
 	    leppt_ = t.lep_pt[ilep];
-            lepphi_ = t.lep_phi[ilep];
-            lepeta_ = t.lep_eta[ilep];
 	    mt_ = mt;
 	    cand_pdgId = t.lep_pdgId[ilep];
 	    foundlep = true;
@@ -527,8 +475,6 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
 	    // good candidate: save
 	    leppt_ = pt;
-            lepphi_ = t.isoTrack_phi[itrk];
-            lepeta_ = t.isoTrack_eta[itrk];
 	    mt_ = mt;
 	    cand_pdgId = pdgId;
 	    foundlep = true;
@@ -915,42 +861,8 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
   // else                  plot2D("h2d_nlep_frtau_mpt15-20"+s, t.ngenLep, t.ngenLepFromTau, evtweight_, h_1d, ";ngenLep;ngenLepFromTau", 4 , 0, 4, 4, 0, 4);
 
   plot2D("h2d_nlep_ntau"+s, t.ngenLep, t.ngenTau, evtweight_, h_1d, ";ngenLep;ngenTau", 4 , 0, 4, 4, 0, 4);
-  plot1D("h_smuMotherId"+s,      smuMotherId_,   evtweight_, h_1d, ";Mother pdgId of #mu", 30, 0, 30);
+  // plot1D("h_smuMotherId"+s,      smuMotherId_,   evtweight_, h_1d, ";Mother pdgId of #mu", 30, 0, 30);
   
-  // if(t.ngenLepFromTau != t.ngenTau){
-  //   cout << t.ngenLepFromTau << "  " << t.ngenTau << "  " << DeltaR(t.genLepFromTau_eta[0],  t.genTau_eta[0], t.genLepFromTau_phi[0],  t.genTau_phi[0]) << endl;
-  // }
-  // if (t.ngenLep == 1)   plot1D("h_genMupt"+s,    t.genLep_pt[0],   evtweight_, h_1d, ";p_{T}(gen #mu) [GeV]", 50, 0, 25);
-  // else if (t.ngenLepFromTau == 1) plot1D("h_genMuFromTaupt"+s,    t.genLep_pt[0],   evtweight_, h_1d, ";p_{T}(gen #mu from #tau) [GeV]", 50, 0, 25);
-  // else if ((t.ngenLep + t.ngenLepFromTau) != 0) cout << "Hey! we need a loop for gen lep!!\n";
-  // if(t.ngenLep == 0 && t.ngenLepFromTau == 1){
-  //   plot1D("h_genMuftaupt"+s,    t.genLepFromTau_pt[0],   evtweight_, h_1d, ";p_{T}(gen #mu from #tau) [GeV]", 50, 0, 25);
-  // }
-  // else if(t.ngenLep == 1 && t.ngenLepFromTau == 0){
-  //   plot1D("h_genMupt"+s,    t.genLep_pt[0],   evtweight_, h_1d, ";p_{T}(gen #mu) [GeV]", 50, 0, 25);
-  // }
-  // else{
-  //   plot1D("h_resMupt"+s,    smupt_,   evtweight_, h_1d, ";p_{T}(rec of other #mu) [GeV]", 50, 0, 25);
-  // }
-  
-  // for(int i = 0; i < t.ngenLepFromTau; ++i){
-  //   plot1D("h_genLeppt"+s,    t.genLepFromTau_pt[i],   evtweight_, h_1d, ";p_{T}(gen lep) [GeV]", 50, 0, 25);
-  // }
-  // for(int i = 0; i < t.ngenLep; ++i){
-  //   plot1D("h_genLeppt"+s,    t.genLep_pt[i],   evtweight_, h_1d, ";p_{T}(gen lep) [GeV]", 50, 0, 25);
-  // }
-  
-  //cout << t.ngenPart << "  " << t.genPart_pt[0] << "  " << t.ngenLep << " " << t.ngenLepFromTau << " " << t.ngenTau << endl;
-  // No genPart Information yet
-  // for(int i = 0; i < t.ngenPart; ++i){
-  //   cout << i << "  " << t.genPart_pdgId[i] << endl;
-  //   if(abs(t.genPart_pdgId[i]) == 13){
-  //     cout << "eiHey!\n";
-  //     plot1D("h_genPartpt"+s,    t.genLep_pt[i],      evtweight_, h_1d, ";p_{T}(gen Part) [GeV]", 50, 0, 25);
-  //     plot1D("h_genPartid"+s,    t.genLep_pdgId[i],   evtweight_, h_1d, ";pdgId(gen Part) [GeV]", 50, 0, 50);
-  //   }
-  // }
-
   bool fromGenTau = false;
   int imu = -1;
   for(int i = 0; i < t.ngenLepFromTau; ++i){
@@ -1266,36 +1178,6 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_
 
   plot1D("h_leppt"+s,      leppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   plot1D("h_mt"+s,            mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
-
-  // FOR CLEANUP
-  // if(leppt_ < 20){
-  //   bool fromGenTau = false;
-  //   int imu = -1;
-  //   for(int i = 0; i < t.ngenLepFromTau; ++i){
-  //     float dr = DeltaR(t.genLepFromTau_eta[i],  lepeta_, t.genLepFromTau_phi[i],  lepphi_);
-  //     cout << "frTau " <<  t.ngenLepFromTau << " " << dr << " " << i << endl;
-  //     if (dr < 0.1){
-  //       fromGenTau = true;
-  //       imu = i;
-  //       break;
-  //     }
-  //   }
-  //   if (fromGenTau) plot1D("h_genlepftaupt"+s,    t.genLepFromTau_pt[imu],   evtweight_, h_1d, ";p_{T}(gen lep from #tau) [GeV]", 50, 0, 25);
-  //   else{
-  //     bool fromGenLep = false;
-  //     for(int i = 0; i < t.ngenLep; ++i){
-  //       float dr = DeltaR(t.genLep_eta[i],  lepeta_, t.genLep_phi[i],  lepphi_);
-  //       cout << "frLep " << t.ngenLep << " " << dr << " " << i << endl;
-  //       if (dr < 0.1) {
-  //         fromGenLep = true;
-  //         imu = i;
-  //         break;
-  //       }
-  //     }
-  //     if (fromGenLep) plot1D("h_genleppt"+s,    t.genLep_pt[imu],   evtweight_, h_1d, ";p_{T}(gen lep) [GeV]", 50, 0, 25);
-  //     else plot1D("h_resleppt"+s,    leppt_,   evtweight_, h_1d, ";p_{T}(deltaR doesn't mathch genLep) [GeV]", 50, 0, 25);
-  //   }
-  // }
 
   outfile_->cd();
 
