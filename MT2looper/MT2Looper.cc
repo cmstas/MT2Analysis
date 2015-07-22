@@ -369,9 +369,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       //---------------------------
       // Select one and only one muon < 20 GeV, down to 5 GeV, apply all other cuts back.
       //---------------------------
-
-      // if ((t.ngenLep + t.ngenTau) != 0) continue;
-
+      //if ((t.ngenLep + t.ngenTau) != 2) continue;
       bool softMu = false;
       // if has reco muon use the information
       if (t.nMuons10 == 1){
@@ -382,6 +380,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
           smupt_ = t.lep_pt[ilep];
           smuphi_ = t.lep_phi[ilep];
           smueta_ = t.lep_eta[ilep];
+          smuMotherId_ = t.lep_mcMatchId[ilep];
           softMu = true;
           break;
         }
@@ -412,6 +411,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
           smupt_ = pt;
           smuphi_ = t.isoTrack_phi[itrk];
           smueta_ = t.isoTrack_eta[itrk];
+          smuMotherId_ = t.isoTrack_mcMatchId[itrk];
           mt_ = mt;
           softMu = true;
           break;
@@ -420,6 +420,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       // in following code the mt_ value may be rewritten, so fill the histos right now
       if (softMu) fillHistosSRsoftMuon("srsm");
+
 
       // variables for single lep control region
       bool doSLplots = false;
@@ -816,6 +817,45 @@ void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::strin
     if (mt_ > 100) fillHistosSingleSoftMuon(SRBase.srsmMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmMtbase", "");
   }
 
+  //------------------
+  // n-1 plots start
+  //-----------------
+  // TDirectory * dir = (TDirectory*)outfile_->Get("srsmbase");
+  // if (dir == 0) {
+  //   dir = outfile_->mkdir("srsmbase");
+  // }
+  // dir->cd();
+
+  // std::map<std::string, float> valuesBase1;
+  // valuesBase1["deltaPhiMin"] = t.deltaPhiMin;
+  // valuesBase1["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  // valuesBase1["nlep"]        = nlepveto_ - 1; // t.nElectrons10 + t.nPFHad10LowMT;
+  // valuesBase1["j1pt"]        = t.jet1_pt;
+  // valuesBase1["j2pt"]        = t.jet2_pt;
+  // valuesBase1["mt2"]         = 205; // (to remove the mt2 cut and show qcd events do get small events enter)
+  // valuesBase1["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  // if(SRBase.PassesSelection(valuesBase1)){
+  //   plot1D("h_n-1_mt2",      t.mt2,   evtweight_, SRBase.srsmHistMap, ";M_{T2} (srsm) [GeV]", 100, 0, 1000);
+  // }
+
+  // std::map<std::string, float> valuesBase2;
+  // valuesBase2["deltaPhiMin"] = t.deltaPhiMin;
+  // valuesBase2["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  // valuesBase2["nlep"]        = nlepveto_ - 1; // t.nElectrons10 + t.nPFHad10LowMT;
+  // valuesBase2["j1pt"]        = t.jet1_pt;
+  // valuesBase2["j2pt"]        = t.jet2_pt;
+  // valuesBase2["mt2"]         = t.mt2; // (to remove the mt2 cut and show qcd events do get small events enter)
+  // valuesBase2["passesHtMet"] = true; // ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  // if(SRBase.PassesSelection(valuesBase1)){
+  //   plot1D("h_n-1_met",      t.met_pt,   evtweight_, SRBase.srsmHistMap, ";MET (srsm) [GeV]", 100, 0, 800);
+  //   plot1D("h_n-1_ht",           t.ht,   evtweight_, SRBase.srsmHistMap, ";HT (srsm) [GeV]", 100, 0, 2000);
+  // }
+
+  // outfile_->cd();
+  //--- end -----
+
   // Fill Signal Region
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -861,7 +901,7 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
   // else                  plot2D("h2d_nlep_frtau_mpt15-20"+s, t.ngenLep, t.ngenLepFromTau, evtweight_, h_1d, ";ngenLep;ngenLepFromTau", 4 , 0, 4, 4, 0, 4);
 
   plot2D("h2d_nlep_ntau"+s, t.ngenLep, t.ngenTau, evtweight_, h_1d, ";ngenLep;ngenTau", 4 , 0, 4, 4, 0, 4);
-  // plot1D("h_smuMotherId"+s,      smuMotherId_,   evtweight_, h_1d, ";Mother pdgId of #mu", 30, 0, 30);
+  plot1D("h_smuMotherId"+s,      smuMotherId_,   evtweight_, h_1d, ";Mother pdgId of #mu", 30, 0, 30);
   
   bool fromGenTau = false;
   int imu = -1;
