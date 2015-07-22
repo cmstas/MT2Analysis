@@ -19,20 +19,20 @@ for SAMPLE in ${Samples[@]};
   nohup root -b -q -l doAll.C\(\"${INDIR}\",\"${SAMPLE}\",\"${OUTDIR}\"\) >& log_${SAMPLE}.txt &
 done
 
-INDIR2=/home/users/sicheng/MT2Analysis/babymaker/
-declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300 T5qqqqWWDeg_mGo1000_mCh315_mChi300 T5qqqqWWDeg_mGo1000_mCh325_mChi300 T5qqqqWWDeg_mGo800_mCh305_mChi300)
-#declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300)
+# INDIR2=/home/users/sicheng/MT2Analysis/babymaker/
+# declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300 T5qqqqWWDeg_mGo1000_mCh315_mChi300 T5qqqqWWDeg_mGo1000_mCh325_mChi300 T5qqqqWWDeg_mGo800_mCh305_mChi300)
+# #declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300)
 
-for SAMPLE2 in ${Samples2[@]};
-  do echo root -b -q -l doAll.C\(\"${INDIR2}\",\"${SAMPLE2}\",\"${OUTDIR}\"\)
-  nohup root -b -q -l doAll.C\(\"${INDIR2}\",\"${SAMPLE2}\",\"${OUTDIR}\"\) >& log_${SAMPLE2}.txt &
-done
+# for SAMPLE2 in ${Samples2[@]};
+#   do echo root -b -q -l doAll.C\(\"${INDIR2}\",\"${SAMPLE2}\",\"${OUTDIR}\"\)
+#   nohup root -b -q -l doAll.C\(\"${INDIR2}\",\"${SAMPLE2}\",\"${OUTDIR}\"\) >& log_${SAMPLE2}.txt &
+# done
 
-INDIR3=/nfs-6/userdata/mt2/sctest_skim_trig_nj2_ht450_met30_Zinv/
-declare -a Samples3=(qcd_pt)
+# INDIR3=/nfs-6/userdata/mt2/sctest_skim_trig_nj2_ht450_met30_Zinv/
+# declare -a Samples3=(qcd_pt)
 
-for SAMPLE3 in ${Samples3[@]};
-  do echo root -b -q -l doAll.C\(\"${INDIR3}\",\"${SAMPLE3}\",\"${OUTDIR}\"\)
-  nohup root -b -q -l doAll.C\(\"${INDIR3}\",\"${SAMPLE3}\",\"${OUTDIR}\"\) >& log_${SAMPLE3}.txt &
-done
+# for SAMPLE3 in ${Samples3[@]};
+#   do echo root -b -q -l doAll.C\(\"${INDIR3}\",\"${SAMPLE3}\",\"${OUTDIR}\"\)
+#   nohup root -b -q -l doAll.C\(\"${INDIR3}\",\"${SAMPLE3}\",\"${OUTDIR}\"\) >& log_${SAMPLE3}.txt &
+# done
 
