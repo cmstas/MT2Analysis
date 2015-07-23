@@ -68,7 +68,8 @@ void MT2Looper::SetSignalRegions(){
   //SRVec = getSignalRegions2015LowLumi(); //Phys14 AN selection
   //SRVec =  getSignalRegions2015SevenJets_UltraHighHT(); //new selection with additional njet boundary at 7 jets, 4th ht bin
   //SRVec =  getSignalRegionsZurich(); //same as getSignalRegions2015SevenJets_UltraHighHT(), but with minMT binning removed
-  SRVec =  getSignalRegionsZurich_jetpt40(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 40 GeV
+  //SRVec =  getSignalRegionsZurich_jetpt40(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 40 GeV
+  SRVec =  getSignalRegionsSoftMuon(); //same as getSignalRegionsZurich(), but with with small modifications 
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -132,7 +133,7 @@ void MT2Looper::SetSignalRegions(){
   }
 
   SRBase.SetName("srbase");
-  SRBase.SetVar("mt2", 200, -1);
+  SRBase.SetVar("mt2", 100, -1);  // Modifying!!: 200
   SRBase.SetVar("j1pt", 40, -1);
   SRBase.SetVar("j2pt", 40, -1);
   SRBase.SetVar("deltaPhiMin", 0.3, -1);
@@ -820,11 +821,11 @@ void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::strin
   //------------------
   // n-1 plots start
   //-----------------
-  // TDirectory * dir = (TDirectory*)outfile_->Get("srsmbase");
-  // if (dir == 0) {
-  //   dir = outfile_->mkdir("srsmbase");
-  // }
-  // dir->cd();
+  TDirectory * dir = (TDirectory*)outfile_->Get("srsmbase");
+  if (dir == 0) {
+    dir = outfile_->mkdir("srsmbase");
+  }
+  dir->cd();
 
   // std::map<std::string, float> valuesBase1;
   // valuesBase1["deltaPhiMin"] = t.deltaPhiMin;
@@ -839,21 +840,21 @@ void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::strin
   //   plot1D("h_n-1_mt2",      t.mt2,   evtweight_, SRBase.srsmHistMap, ";M_{T2} (srsm) [GeV]", 100, 0, 1000);
   // }
 
-  // std::map<std::string, float> valuesBase2;
-  // valuesBase2["deltaPhiMin"] = t.deltaPhiMin;
-  // valuesBase2["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  // valuesBase2["nlep"]        = nlepveto_ - 1; // t.nElectrons10 + t.nPFHad10LowMT;
-  // valuesBase2["j1pt"]        = t.jet1_pt;
-  // valuesBase2["j2pt"]        = t.jet2_pt;
-  // valuesBase2["mt2"]         = t.mt2; // (to remove the mt2 cut and show qcd events do get small events enter)
-  // valuesBase2["passesHtMet"] = true; // ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  std::map<std::string, float> valuesBase2;
+  valuesBase2["deltaPhiMin"] = t.deltaPhiMin;
+  valuesBase2["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  valuesBase2["nlep"]        = nlepveto_ - 1; // t.nElectrons10 + t.nPFHad10LowMT;
+  valuesBase2["j1pt"]        = t.jet1_pt;
+  valuesBase2["j2pt"]        = t.jet2_pt;
+  valuesBase2["mt2"]         = t.mt2; // (to remove the mt2 cut and show qcd events do get small events enter)
+  valuesBase2["passesHtMet"] = true; // ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
-  // if(SRBase.PassesSelection(valuesBase1)){
-  //   plot1D("h_n-1_met",      t.met_pt,   evtweight_, SRBase.srsmHistMap, ";MET (srsm) [GeV]", 100, 0, 800);
-  //   plot1D("h_n-1_ht",           t.ht,   evtweight_, SRBase.srsmHistMap, ";HT (srsm) [GeV]", 100, 0, 2000);
-  // }
+  if(SRBase.PassesSelection(valuesBase2)){
+    plot1D("h_n-1_met",      t.met_pt,   evtweight_, SRBase.srsmHistMap, ";MET (srsm) [GeV]", 100, 0, 800);
+    plot1D("h_n-1_ht",           t.ht,   evtweight_, SRBase.srsmHistMap, ";HT (srsm) [GeV]", 100, 0, 2000);
+  }
 
-  // outfile_->cd();
+  outfile_->cd();
   //--- end -----
 
   // Fill Signal Region

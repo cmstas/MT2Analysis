@@ -104,7 +104,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
   
   //TLegend* leg = new TLegend(0.55,0.6,0.85,0.92);
-  TLegend* leg = new TLegend(0.55,0.6,0.85,0.90);
+  TLegend* leg = new TLegend(0.65,0.7,0.85,0.90);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
@@ -638,7 +638,8 @@ void plotMaker(){
 
   //string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-00-12_test/";
   //string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/srsm/";
+  //string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/srsm/";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/noMT2/";
 
   // ----------------------------------------
   //  samples definition
@@ -693,10 +694,10 @@ void plotMaker(){
   vector<TFile*> samples;
   vector<string> names;
 
-  //samples.push_back(f_qcd);   names.push_back("qcd");
   samples.push_back(f_zinv);  names.push_back("zinv");
   samples.push_back(f_ttbar); names.push_back("ttbar");
   samples.push_back(f_wjets); names.push_back("wjets");
+  samples.push_back(f_qcd);   names.push_back("qcd");
 
   //samples.push_back(f_gjet);  names.push_back("gjet");
   //samples.push_back(f_tth); names.push_back("tth");
@@ -749,33 +750,30 @@ void plotMaker(){
       if(dir_name == "") continue;
       if(dir_name != "srsmbase") continue; //to do only srbase
       //if(dir_name != "sr1H") continue; //for testing
-      // makePlot( samples , names , dir_name , "h_n-1_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_n-1_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-      // makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-      // makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
-      // makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
-      // makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_j1pt" , "p_{T}(jet1) [GeV]" , "Events / Bin" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_n-1_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_n-1_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+      // // makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
+      // // makePlot( samples , names , dir_name , "h_nJet40" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio );
+      // // makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio );
+      // // makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
+      // // makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio );
+      // // makePlot( samples , names , dir_name , "h_j1pt" , "p_{T}(jet1) [GeV]" , "Events / Bin" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
 
       // makePlot( samples , names , dir_name , "h_genMuftaupt" , "p_{T}(gen #mu from #tau) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_genMupt" , "p_{T}(gen #mu) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_resMupt" , "p_{T}(other rec #mu) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_resleppt" , "p_{T}(other rec Lep) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_genleppt" , "p_{T}(gen Lep) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_genlepftaupt" , "p_{T}(gen Lep) [GeV]" , "Events" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_smuMotherId" , "Mother pdgId of #mu" , "Events / 10 GeV" , -5 , 30 , 1 , true, printplots, scalesig, doRatio );
       
       // makePlot( samples , names , dir_name , "h_n-1_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots, scalesig, doRatio );
-      // makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_mupt" , "p_{T} (#mu) [GeV]" , "Events / Bin" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_eta" , "#eta (#mu) " , "Events / Bin" , -2.6 , 2.6 , 1 , true, printplots, scalesig, doRatio );
+      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_mupt" , "p_{T} (#mu) [GeV]" , "Events / Bin" , 0 , 25 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_eta" , "#eta (#mu) " , "Events / Bin" , -2.6 , 2.6 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / Bin" , 0 , 250 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_mt_muftau" , "M_{T}(gen #mu from #tau)[GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_mt_mufw"   , "M_{T}(gen #mu)[GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
-      makePlot( samples , names , dir_name , "h_mt_resmu"  , "M_{T}(other #mus)[GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_mt_muftau" , "M_{T}(gen #mu from #tau)[GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_mt_mufw"   , "M_{T}(gen #mu)[GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
+      // makePlot( samples , names , dir_name , "h_mt_resmu"  , "M_{T}(other #mus)[GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_mt_mpt5-10" , "M_{T} [GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_mt_mpt10-15" , "M_{T} [GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
       // makePlot( samples , names , dir_name , "h_mt_mpt15-20" , "M_{T} [GeV]" , "Events / Bin" , 0 , 200 , 1 , true, printplots, scalesig, doRatio );
