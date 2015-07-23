@@ -40,6 +40,10 @@ int getColor(const string& sample) {
   if (sample.find("T1tttt") != string::npos) return kRed;
   if (sample.find("T1bbbb") != string::npos) return kMagenta;
   if (sample.find("T1qqqq") != string::npos) return kOrange;
+  if (sample.find("T5WW4q_310_300") != string::npos) return kCyan;
+  if (sample.find("T5WW4q_315_300") != string::npos) return kGreen;
+  if (sample.find("T5WW4q_325_300") != string::npos) return kMagenta;
+  if (sample.find("T5WW4q_305_300") != string::npos) return kRed;
   if (sample.find("T2tt") != string::npos) return kCyan;
   if (sample.find("T2bb") != string::npos) return kMagenta+3;
 
@@ -64,6 +68,10 @@ string getLegendName(const string& sample) {
   if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
   if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
   if (sample.find("T1qqqq_1000_800") != string::npos) return "T1qqqq 1000, 800";
+  if (sample.find("T5WW4q_310_300") != string::npos) return "T5WW4q 310, 300";
+  if (sample.find("T5WW4q_315_300") != string::npos) return "T5WW4q 315, 300";
+  if (sample.find("T5WW4q_325_300") != string::npos) return "T5WW4q 325, 300";
+  if (sample.find("T5WW4q_305_300") != string::npos) return "T5WW4q 305, 300";
   if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
   if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
   if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
@@ -107,6 +115,10 @@ string getTableName(const string& sample) {
   if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
   if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
   if (sample.find("T1qqqq_1000_800") != string::npos) return "T1qqqq 1000, 800";
+  if (sample.find("T5WW4q_310_300") != string::npos) return "T5WW4q 310, 300";
+  if (sample.find("T5WW4q_315_300") != string::npos) return "T5WW4q 315, 300";
+  if (sample.find("T5WW4q_325_300") != string::npos) return "T5WW4q 325, 300";
+  if (sample.find("T5WW4q_305_300") != string::npos) return "T5WW4q 305, 300";
   if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
   if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
   if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";

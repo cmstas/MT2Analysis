@@ -892,6 +892,7 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
   plot1D("h_mupt"+s,      smupt_,   evtweight_, h_1d, ";p_{T}(#mu) [GeV]", 50, 0, 25);
   plot1D("h_eta"+s,      smueta_,   evtweight_, h_1d, ";#eta(#mu) [GeV]", 50, -2.6, 2.6);
   plot1D("h_mt"+s,           mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  plot1D("h_j1pt"+s,   t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 200, 0, 1000);
   if(smupt_ < 10 )      plot1D("h_mt_mpt5-10"+s,   mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
   else if(smupt_ < 15 ) plot1D("h_mt_mpt10-15"+s,  mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
   else                  plot1D("h_mt_mpt15-20"+s,  mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
@@ -913,7 +914,10 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
       break;
     }
   }
-  if (fromGenTau) plot1D("h_genMuftaupt"+s,    t.genLepFromTau_pt[imu],   evtweight_, h_1d, ";p_{T}(gen #mu from #tau) [GeV]", 50, 0, 25);
+  if (fromGenTau) {
+    plot1D("h_genMuftaupt"+s,    t.genLepFromTau_pt[imu],   evtweight_, h_1d, ";p_{T}(gen #mu from #tau) [GeV]", 50, 0, 25);
+    plot1D("h_mt_muftau"+s,    mt_ ,   evtweight_, h_1d, ";M_{T}(gen #mu from #tau) [GeV]", 100, 0, 250);
+  }
   else{
     bool fromGenLep = false;
     for(int i = 0; i < t.ngenLep; ++i){
@@ -924,8 +928,14 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
         break;
       }
     }
-    if (fromGenLep) plot1D("h_genMupt"+s,    t.genLep_pt[imu],   evtweight_, h_1d, ";p_{T}(gen #mu) [GeV]", 50, 0, 25);
-    else plot1D("h_resMupt"+s,    smupt_,   evtweight_, h_1d, ";p_{T}(rec of other #mu) [GeV]", 50, 0, 25);
+    if (fromGenLep) {
+      plot1D("h_genMupt"+s,    t.genLep_pt[imu],   evtweight_, h_1d, ";p_{T}(gen #mu) [GeV]", 50, 0, 25);
+      plot1D("h_mt_mufw"+s,    mt_ ,   evtweight_, h_1d, ";M_{T}(gen #mu) [GeV]", 100, 0, 250);
+    }
+    else {
+      plot1D("h_resMupt"+s,    smupt_,   evtweight_, h_1d, ";p_{T}(rec of other #mu) [GeV]", 50, 0, 25);
+      plot1D("h_mt_resmu"+s,    mt_ ,   evtweight_, h_1d, ";M_{T}(other #mus) [GeV]", 100, 0, 250);
+    }
   }
 
   outfile_->cd();

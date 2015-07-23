@@ -16,7 +16,8 @@
   //  ch->Add("/home/users/gzevi/miniAOD/CMSSW_7_0_6/src/CMS2/NtupleMaker/test/MT2ntuple1000.root");
   //  ch->Add("/hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/merged/merged_ntuple_190.root");
   //ch->Add("/home/users/jgran/CMSSW_7_0_6_patch1/src/CMS2/NtupleMaker/ntuple_first1000.root");
-  ch->Add("/nfs-7/userdata/olivito/mt2/phys14/ttjets_cms3_1000.root");
+  //ch->Add("/nfs-7/userdata/olivito/mt2/phys14/ttjets_cms3_1000.root");
+  ch->Add("/nfs-7/userdata/ss2015/signalSamples/V07-02-08/T5ttttDeg_mGo1300_mStop300_mCh285_mChi280_23bodydec_v2/merged_ntuple_1.root");
   //ch->Add("/nfs-7/userdata/olivito/mt2/phys14/gjets_ht200to400_cms3_1000.root");
 
   babyMaker *looper = new babyMaker();
