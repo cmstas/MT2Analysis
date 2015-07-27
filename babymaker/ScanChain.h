@@ -150,6 +150,26 @@ class babyMaker {
   Int_t           lep_convVeto[max_nlep];   //[nlep]
   Int_t           lep_tightCharge[max_nlep];   //[nlep]
 
+//----- SOFT MUONS
+  static const int max_nsmu = 5;
+  Int_t           nsoftMu;
+  Float_t         softMu_pt;
+  Float_t         softMu_eta;
+  Float_t         softMu_phi;
+  Float_t         softMu_mass;
+  Int_t           softMu_charge;
+  Int_t           softMu_pdgId;
+  Float_t         softMu_dxy;
+  Float_t         softMu_dz;
+  Int_t           softMu_tightId;
+  Float_t         softMu_relIso03;
+  Float_t         softMu_relIso04;
+  Float_t         softMu_miniRelIso;
+  Int_t           softMu_mcMatchId;
+  Int_t           softMu_lostHits;
+  Int_t           softMu_convVeto;
+  Int_t           softMu_tightCharge;
+
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;
   Int_t             nisoTrack;

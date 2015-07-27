@@ -427,6 +427,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	}
       } // !isData
 
+
+      // Soft Muons 5
+      nsoftMu = 0;
+      for(unsigned int imu = 0; imu < cms3.mus_p4().size(); imu++){
+        if(cms3.mus_p4().at(imu).pt() < 5.0) continue;
+        if(cms3.mus_p4().at(imu).pt() > 20.0) continue;
+        if(fabs(cms3.mus_p4().at(imu).eta()) > 2.4) continue;
+        if(!muonID(imu,id_level_t::HAD_loose_noiso_v2)) continue;  // use noiso muonID
+        nsoftMu++;
+        softMu_pt = cms3.mus_p4().at(imu).pt();
+        softMu_eta = cms3.mus_p4().at(imu).eta();
+        softMu_phi = cms3.mus_p4().at(imu).phi();
+        softMu_mass = cms3.mus_mass().at(imu);
+        softMu_charge = cms3.mus_charge().at(imu);
+        softMu_pdgId = (-13)*cms3.mus_charge().at(imu);
+        softMu_dxy = cms3.mus_dxyPV().at(imu); // this uses the silicon track. should we use best track instead?
+        softMu_dz = cms3.mus_dzPV().at(imu); // this uses the silicon track. should we use best track instead?
+        softMu_tightId = muTightID(imu,analysis_t::HAD,2) ;
+        softMu_relIso03 = muRelIso03(imu,analysis_t::HAD) ;
+        softMu_relIso04 = muRelIso04(imu,analysis_t::HAD) ;
+        softMu_miniRelIso = muMiniRelIso(imu) ;
+        if (!isData && cms3.mus_mc3dr().at(imu) < 0.2 && cms3.mus_mc3idx().at(imu) != -9999 && abs(cms3.mus_mc3_id().at(imu)) == 13) { // matched to a prunedGenParticle muon?
+          int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(imu)]);
+          softMu_mcMatchId = (momid != 13) ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(imu)]; // if mother is different store mother, otherwise store grandmother
+	}
+	else softMu_mcMatchId = 0;
+        softMu_lostHits = cms3.mus_exp_innerlayers().at(imu); // use defaults as if "good muon"
+        softMu_convVeto = 1;// use defaults as if "good muon"
+        softMu_tightCharge = tightChargeMuon(imu);
+      }
+
       //LEPTONS
       std::vector<std::pair<int, float> > lep_pt_ordering;
       vector<float>vec_lep_pt;
@@ -1581,6 +1612,23 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
   BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
+  BabyTree_->Branch("nsoftMu", &nsoftMu);
+  BabyTree_->Branch("softMu_pt", softMu_pt);
+  BabyTree_->Branch("softMu_eta", softMu_eta);
+  BabyTree_->Branch("softMu_phi", softMu_phi);
+  BabyTree_->Branch("softMu_mass", softMu_mass);
+  BabyTree_->Branch("softMu_charge", softMu_charge);
+  BabyTree_->Branch("softMu_pdgId", softMu_pdgId);
+  BabyTree_->Branch("softMu_dxy", softMu_dxy);
+  BabyTree_->Branch("softMu_dz", softMu_dz);
+  BabyTree_->Branch("softMu_tightId", softMu_tightId);
+  BabyTree_->Branch("softMu_relIso03", softMu_relIso03);
+  BabyTree_->Branch("softMu_relIso04", softMu_relIso04);
+  BabyTree_->Branch("softMu_miniRelIso", softMu_miniRelIso);
+  BabyTree_->Branch("softMu_mcMatchId", softMu_mcMatchId);
+  BabyTree_->Branch("softMu_lostHits", softMu_lostHits);
+  BabyTree_->Branch("softMu_convVeto", softMu_convVeto);
+  BabyTree_->Branch("softMu_tightCharge", softMu_tightCharge);
   BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
   BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
@@ -1835,6 +1883,7 @@ void babyMaker::InitBabyNtuple () {
   HLT_DoubleMu = -999;   
   HLT_Photons = -999;   
   nlep = -999;
+  nsoftMu = -999;
   nisoTrack = -999;
   nPFLep5LowMT = -999;
   nPFHad10LowMT = -999;
@@ -1926,6 +1975,23 @@ void babyMaker::InitBabyNtuple () {
     lep_convVeto[i] = -999;
     lep_tightCharge[i] = -999;
   }
+
+  softMu_pt = -999;
+  softMu_eta = -999;
+  softMu_phi = -999;
+  softMu_mass = -999;
+  softMu_charge = -999;
+  softMu_pdgId = -999;
+  softMu_dxy = -999;
+  softMu_dz = -999;
+  softMu_tightId = -999;
+  softMu_relIso03 = -999;
+  softMu_relIso04 = -999;
+  softMu_miniRelIso = -999;
+  softMu_mcMatchId = -999;
+  softMu_lostHits = -999;
+  softMu_convVeto = -999;
+  softMu_tightCharge = -999;
 
   for(int i=0; i < max_nisoTrack; i++){
     isoTrack_pt[i] = -999;

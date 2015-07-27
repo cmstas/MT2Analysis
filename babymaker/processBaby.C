@@ -185,6 +185,11 @@ void processBaby( TString outfileid = "tt_test", TString infile = "/hadoop/cms/s
   else if (infile.Contains("SMS-T1tttt"))                            sample = Form("T1tttt_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1qqqq"))                            sample = Form("T1qqqq_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T1bbbb"))                            sample = Form("T1bbbb_%s",          outfileid.Data());
+  else if (infile.Contains("T5qqqqWWDeg_mGo1000_mCh325_mChi300"))    sample = Form("T5qqqqWW_325_300%s", outfileid.Data());
+  else if (infile.Contains("T5qqqqWWDeg_mGo1000_mCh315_mChi300"))    sample = Form("T5qqqqWW_315_300%s", outfileid.Data());
+  else if (infile.Contains("T5qqqqWWDeg_mGo1000_mCh310_mChi300"))    sample = Form("T5qqqqWW_310_300%s", outfileid.Data());
+  else if (infile.Contains("T5qqqqWWDeg_mGo800_mCh310_mChi300"))     sample = Form("T5qqqqWW_305_300%s", outfileid.Data());
+
   //Data
   // //single mu-had
   // else if (infile.Contains("MuHad_Run2012A-recover-06Aug2012-v1_AOD"))          sample =  Form("MuHad2012A_recover06Aug2012v1V532_%s",     outfileid.Data());
