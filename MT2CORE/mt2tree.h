@@ -112,6 +112,23 @@ public :
    Int_t           lep_lostHits[50];   //[nlep]
    Int_t           lep_convVeto[50];   //[nlep]
    Int_t           lep_tightCharge[50];   //[nlep]
+   Int_t           nsoftMu;
+   Float_t         softMu_pt;
+   Float_t         softMu_eta;
+   Float_t         softMu_phi;
+   Float_t         softMu_mass;
+   Int_t           softMu_charge;
+   Int_t           softMu_pdgId;
+   Float_t         softMu_dxy;
+   Float_t         softMu_dz;
+   Int_t           softMu_tightId;
+   Float_t         softMu_relIso03;
+   Float_t         softMu_relIso04;
+   Float_t         softMu_miniRelIso;
+   Int_t           softMu_mcMatchId;
+   Int_t           softMu_lostHits;
+   Int_t           softMu_convVeto;
+   Int_t           softMu_tightCharge;
    Int_t           nisoTrack;
    Float_t         isoTrack_pt[50];   //[nisoTrack]
    Float_t         isoTrack_eta[50];   //[nisoTrack]
@@ -375,6 +392,23 @@ public :
    TBranch        *b_lep_lostHits;   //!
    TBranch        *b_lep_convVeto;   //!
    TBranch        *b_lep_tightCharge;   //!
+   TBranch        *b_nsoftMu;   //!
+   TBranch        *b_softMu_pt;   //!
+   TBranch        *b_softMu_eta;   //!
+   TBranch        *b_softMu_phi;   //!
+   TBranch        *b_softMu_mass;   //!
+   TBranch        *b_softMu_charge;   //!
+   TBranch        *b_softMu_pdgId;   //!
+   TBranch        *b_softMu_dxy;   //!
+   TBranch        *b_softMu_dz;   //!
+   TBranch        *b_softMu_tightId;   //!
+   TBranch        *b_softMu_relIso03;   //!
+   TBranch        *b_softMu_relIso04;   //!
+   TBranch        *b_softMu_miniRelIso;   //!
+   TBranch        *b_softMu_mcMatchId;   //!
+   TBranch        *b_softMu_lostHits;   //!
+   TBranch        *b_softMu_convVeto;   //!
+   TBranch        *b_softMu_tightCharge;   //!
    TBranch        *b_nisoTrack;   //!
    TBranch        *b_isoTrack_pt;   //!
    TBranch        *b_isoTrack_eta;   //!
@@ -697,6 +731,23 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_lostHits", lep_lostHits, &b_lep_lostHits);
    fChain->SetBranchAddress("lep_convVeto", lep_convVeto, &b_lep_convVeto);
    fChain->SetBranchAddress("lep_tightCharge", lep_tightCharge, &b_lep_tightCharge);
+   fChain->SetBranchAddress("nsoftMu", &nsoftMu, &b_nsoftMu);
+   fChain->SetBranchAddress("softMu_pt", &softMu_pt, &b_softMu_pt);
+   fChain->SetBranchAddress("softMu_eta", &softMu_eta, &b_softMu_eta);
+   fChain->SetBranchAddress("softMu_phi", &softMu_phi, &b_softMu_phi);
+   fChain->SetBranchAddress("softMu_mass", &softMu_mass, &b_softMu_mass);
+   fChain->SetBranchAddress("softMu_charge", &softMu_charge, &b_softMu_charge);
+   fChain->SetBranchAddress("softMu_pdgId", &softMu_pdgId, &b_softMu_pdgId);
+   fChain->SetBranchAddress("softMu_dxy", &softMu_dxy, &b_softMu_dxy);
+   fChain->SetBranchAddress("softMu_dz", &softMu_dz, &b_softMu_dz);
+   fChain->SetBranchAddress("softMu_tightId", &softMu_tightId, &b_softMu_tightId);
+   fChain->SetBranchAddress("softMu_relIso03", &softMu_relIso03, &b_softMu_relIso03);
+   fChain->SetBranchAddress("softMu_relIso04", &softMu_relIso04, &b_softMu_relIso04);
+   fChain->SetBranchAddress("softMu_miniRelIso", &softMu_miniRelIso, &b_softMu_miniRelIso);
+   fChain->SetBranchAddress("softMu_mcMatchId", &softMu_mcMatchId, &b_softMu_mcMatchId);
+   fChain->SetBranchAddress("softMu_lostHits", &softMu_lostHits, &b_softMu_lostHits);
+   fChain->SetBranchAddress("softMu_convVeto", &softMu_convVeto, &b_softMu_convVeto);
+   fChain->SetBranchAddress("softMu_tightCharge", &softMu_tightCharge, &b_softMu_tightCharge);
    fChain->SetBranchAddress("nisoTrack", &nisoTrack, &b_nisoTrack);
    fChain->SetBranchAddress("isoTrack_pt", isoTrack_pt, &b_isoTrack_pt);
    fChain->SetBranchAddress("isoTrack_eta", isoTrack_eta, &b_isoTrack_eta);
