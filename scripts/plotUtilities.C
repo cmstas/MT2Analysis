@@ -40,9 +40,9 @@ int getColor(const string& sample) {
   if (sample.find("T1tttt") != string::npos) return kRed;
   if (sample.find("T1bbbb") != string::npos) return kMagenta;
   if (sample.find("T1qqqq") != string::npos) return kOrange;
-  if (sample.find("T5WW4q_310_300") != string::npos) return kCyan;
+  if (sample.find("T5WW4q_310_300") != string::npos) return kOrange;
   if (sample.find("T5WW4q_315_300") != string::npos) return kGreen;
-  if (sample.find("T5WW4q_325_300") != string::npos) return kMagenta;
+  if (sample.find("T5WW4q_325_300") != string::npos) return kBlack;
   if (sample.find("T5WW4q_305_300") != string::npos) return kRed;
   if (sample.find("T2tt") != string::npos) return kCyan;
   if (sample.find("T2bb") != string::npos) return kMagenta+3;
