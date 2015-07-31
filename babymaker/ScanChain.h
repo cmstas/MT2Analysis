@@ -166,8 +166,8 @@ class babyMaker {
   Float_t         softmus_relIso04[max_nlep];
   Float_t         softmus_miniRelIso[max_nlep];
   Int_t           softmus_mcMatchId[max_nlep];
-  Bool_t          softmus_isReco[max_nlep];
-  Bool_t          softmus_isPF[max_nlep];
+  Int_t           softmus_isReco[max_nlep];
+  Int_t           softmus_isPF[max_nlep];
 
 //----- ELECTRONS
   Int_t           nelecs;
@@ -185,8 +185,8 @@ class babyMaker {
   Float_t         elecs_relIso04[max_nlep];
   Float_t         elecs_miniRelIso[max_nlep];
   Int_t           elecs_mcMatchId[max_nlep];
-  Bool_t          elecs_isReco[max_nlep];
-  Bool_t          elecs_isPF[max_nlep];
+  Int_t           elecs_isReco[max_nlep];
+  Int_t           elecs_isPF[max_nlep];
 
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;

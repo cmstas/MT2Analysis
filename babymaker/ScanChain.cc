@@ -450,8 +450,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<float>vec_softmus_relIso04;
       vector<float>vec_softmus_miniRelIso;
       vector<int>  vec_softmus_mcMatchId;
-      vector<bool> vec_softmus_isReco;
-      vector<bool> vec_softmus_isPF;
+      vector<int>  vec_softmus_isReco;
+      vector<int>  vec_softmus_isPF;
 
       std::vector<std::pair<int, float> > elecs_pt_ordering;
       vector<float>vec_elecs_pt;
@@ -468,8 +468,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<float>vec_elecs_relIso04;
       vector<float>vec_elecs_miniRelIso;
       vector<int>  vec_elecs_mcMatchId;
-      vector<bool> vec_elecs_isReco;
-      vector<bool> vec_elecs_isPF;
+      vector<int>  vec_elecs_isReco;
+      vector<int>  vec_elecs_isPF;
 
       // Soft Muons 5
       nsoftmus = 0;
@@ -542,10 +542,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       int ibsm = 0;
       std::sort(softmus_pt_ordering.begin(), softmus_pt_ordering.end(), sortByValueReverse);
       for(std::vector<std::pair<int, float> >::iterator it = softmus_pt_ordering.begin(); it!= softmus_pt_ordering.end(); ++it){
-	if (ibsm >= max_nlep) {
+        if (ibsm >= max_nlep) {
           std::cout << "WARNING: attempted to fill more than " << max_nlep << " leptons" << std::endl;
-	  break;
-	}
+          break;
+        }
         softmus_isReco[ibsm]      = vec_softmus_isReco.at(it->first);
         softmus_isPF[ibsm]        = vec_softmus_isPF.at(it->first);
         softmus_pt[ibsm]          = vec_softmus_pt.at(it->first);
@@ -565,30 +565,32 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         ibsm++;
       }
 
-      // normal electrons at 10
+      // Normal Electrons at 10
       nelecs = 0;
-      for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
-        if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
-        if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
-        if(!electronID(iEl,id_level_t::HAD_veto_v2)) continue;  // to take out 
+      for(unsigned int iel = 0; iel < cms3.els_p4().size(); iel++){
+        if(cms3.els_p4().at(iel).pt() < 10.0) continue;
+        if(fabs(cms3.els_p4().at(iel).eta()) > 2.4) continue;
+        if(!electronID(iel,id_level_t::HAD_veto_noiso_v2)) continue;
+        elecs_pt_ordering.push_back( std::pair<int,float>(nelecs, cms3.els_p4().at(iel).pt()) );
         nelecs++;
-        elecs_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
-        vec_elecs_pt.push_back ( cms3.els_p4().at(iEl).pt());
-        vec_elecs_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
-        vec_elecs_phi.push_back ( cms3.els_p4().at(iEl).phi());
-        vec_elecs_mass.push_back ( cms3.els_mass().at(iEl));
-        vec_elecs_charge.push_back ( cms3.els_charge().at(iEl));
-        vec_elecs_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
-        vec_elecs_dxy.push_back ( cms3.els_dxyPV().at(iEl));
-        vec_elecs_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_elecs_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
-        vec_elecs_absIso.push_back (  eleRelIso03(iEl,analysis_t::HAD) * cms3.els_p4().at(iEl).pt());
-        vec_elecs_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
+        vec_elecs_isReco.push_back ( true);
+        vec_elecs_isPF.push_back ( false);
+        vec_elecs_pt.push_back ( cms3.els_p4().at(iel).pt());
+        vec_elecs_eta.push_back ( cms3.els_p4().at(iel).eta()); //save eta, even though we use SCeta for ID
+        vec_elecs_phi.push_back ( cms3.els_p4().at(iel).phi());
+        vec_elecs_mass.push_back ( cms3.els_mass().at(iel));
+        vec_elecs_charge.push_back ( cms3.els_charge().at(iel));
+        vec_elecs_pdgId.push_back ( (-11)*cms3.els_charge().at(iel));
+        vec_elecs_dxy.push_back ( cms3.els_dxyPV().at(iel));
+        vec_elecs_dz.push_back ( cms3.els_dzPV().at(iel));
+        vec_elecs_tightId.push_back ( eleTightID(iel,analysis_t::HAD,2) );
+        vec_elecs_absIso.push_back (  eleRelIso03(iel,analysis_t::HAD) * cms3.els_p4().at(iel).pt());
+        vec_elecs_relIso03.push_back (  eleRelIso03(iel,analysis_t::HAD));
         vec_elecs_relIso04.push_back ( 0);
-        vec_elecs_miniRelIso.push_back ( elMiniRelIso(iEl) );
-        if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
-          int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
-          vec_elecs_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
+        vec_elecs_miniRelIso.push_back ( elMiniRelIso(iel) );
+        if (!isData && cms3.els_mc3dr().at(iel) < 0.2 && cms3.els_mc3idx().at(iel) != -9999 && abs(cms3.els_mc3_id().at(iel)) == 11) { // matched to a prunedGenParticle electron?
+          int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iel)]);
+          vec_elecs_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iel)]); // if mother is different store mother, otherwise store grandmother
         }
         else vec_elecs_mcMatchId.push_back (0);
       }
@@ -609,6 +611,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           }
         } // loop over reco leps
         if (!overlap) {
+          elecs_pt_ordering.push_back( std::pair<int,float>(nelecs, cms3.pfcands_p4().at(ipf).pt()) );
           nelecs++;
           float absiso = TrackIso(ipf);
           float reliso = absiso / cms3.pfcands_p4().at(ipf).pt();
@@ -633,10 +636,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       int ibel = 0;
       std::sort(elecs_pt_ordering.begin(), elecs_pt_ordering.end(), sortByValueReverse);
       for(std::vector<std::pair<int, float> >::iterator it = elecs_pt_ordering.begin(); it!= elecs_pt_ordering.end(); ++it){
-	if (ibel >= max_nlep) {
-          std::cout << "WARNING: attempted to fill more than " << max_nlep << " leptons" << std::endl;
-	  break;
-	}
+        if (ibel >= max_nlep) {
+          std::cout << "WARNING: attempted to fill more than " << max_nlep << " electrons" << std::endl;
+          break;
+        }
         elecs_isReco[ibel]      = vec_elecs_isReco.at(it->first);
         elecs_isPF[ibel]        = vec_elecs_isPF.at(it->first);
         elecs_pt[ibel]          = vec_elecs_pt.at(it->first);
@@ -1811,7 +1814,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
   BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
-  BabyTree_->Branch("nsoftmus", &nsoftmus, "nsofmtus/I" );
+  BabyTree_->Branch("nsoftmus", &nsoftmus, "nsoftmus/I" );
   BabyTree_->Branch("softmus_pt", softmus_pt, "softmus_pt[nsoftmus]/F");
   BabyTree_->Branch("softmus_eta", softmus_eta, "softmus_eta[nsoftmus]/F" );
   BabyTree_->Branch("softmus_phi", softmus_phi, "softmus_phi[nsoftmus]/F" );
