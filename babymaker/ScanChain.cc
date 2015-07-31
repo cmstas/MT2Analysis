@@ -63,6 +63,11 @@ inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,f
     return pair1.second > pair2.second;
 }
 
+// This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
+inline bool sortByValueReverse(const std::pair<int,float>& pair1, const std::pair<int,float>& pair2 ) {
+    return pair1.second < pair2.second;
+}
+
 //--------------------------------------------------------------------
 
 void babyMaker::ScanChain(TChain* chain, std::string baby_name){
@@ -427,36 +432,230 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	}
       } // !isData
 
+      //---------------------------------------
+      // New branch for soft muons study: with mus(5-inf) and elecs(10-inf) include both reco and pf
+      //---------------------------------------
+      std::vector<std::pair<int, float> > softmus_pt_ordering;
+      vector<float>vec_softmus_pt;
+      vector<float>vec_softmus_eta;
+      vector<float>vec_softmus_phi;
+      vector<float>vec_softmus_mass;
+      vector<float>vec_softmus_charge;
+      vector<int>  vec_softmus_pdgId;
+      vector<float>vec_softmus_dxy;
+      vector<float>vec_softmus_dz;
+      vector<int>  vec_softmus_tightId;
+      vector<float>vec_softmus_absIso;
+      vector<float>vec_softmus_relIso03;
+      vector<float>vec_softmus_relIso04;
+      vector<float>vec_softmus_miniRelIso;
+      vector<int>  vec_softmus_mcMatchId;
+      vector<bool> vec_softmus_isReco;
+      vector<bool> vec_softmus_isPF;
+
+      std::vector<std::pair<int, float> > elecs_pt_ordering;
+      vector<float>vec_elecs_pt;
+      vector<float>vec_elecs_eta;
+      vector<float>vec_elecs_phi;
+      vector<float>vec_elecs_mass;
+      vector<float>vec_elecs_charge;
+      vector<int>  vec_elecs_pdgId;
+      vector<float>vec_elecs_dxy;
+      vector<float>vec_elecs_dz;
+      vector<int>  vec_elecs_tightId;
+      vector<float>vec_elecs_absIso;
+      vector<float>vec_elecs_relIso03;
+      vector<float>vec_elecs_relIso04;
+      vector<float>vec_elecs_miniRelIso;
+      vector<int>  vec_elecs_mcMatchId;
+      vector<bool> vec_elecs_isReco;
+      vector<bool> vec_elecs_isPF;
 
       // Soft Muons 5
-      nsoftMu = 0;
+      nsoftmus = 0;
       for(unsigned int imu = 0; imu < cms3.mus_p4().size(); imu++){
         if(cms3.mus_p4().at(imu).pt() < 5.0) continue;
-        if(cms3.mus_p4().at(imu).pt() > 20.0) continue;
         if(fabs(cms3.mus_p4().at(imu).eta()) > 2.4) continue;
         if(!muonID(imu,id_level_t::HAD_loose_noiso_v2)) continue;  // use noiso muonID
-        nsoftMu++;
-        softMu_pt = cms3.mus_p4().at(imu).pt();
-        softMu_eta = cms3.mus_p4().at(imu).eta();
-        softMu_phi = cms3.mus_p4().at(imu).phi();
-        softMu_mass = cms3.mus_mass().at(imu);
-        softMu_charge = cms3.mus_charge().at(imu);
-        softMu_pdgId = (-13)*cms3.mus_charge().at(imu);
-        softMu_dxy = cms3.mus_dxyPV().at(imu); // this uses the silicon track. should we use best track instead?
-        softMu_dz = cms3.mus_dzPV().at(imu); // this uses the silicon track. should we use best track instead?
-        softMu_tightId = muTightID(imu,analysis_t::HAD,2) ;
-        softMu_relIso03 = muRelIso03(imu,analysis_t::HAD) ;
-        softMu_relIso04 = muRelIso04(imu,analysis_t::HAD) ;
-        softMu_miniRelIso = muMiniRelIso(imu) ;
+        softmus_pt_ordering.push_back( std::pair<int,float>(nsoftmus, cms3.mus_p4().at(imu).pt()) );
+        nsoftmus++;
+        vec_softmus_isReco.push_back( true);
+        vec_softmus_isPF.push_back( false);
+        vec_softmus_pt.push_back( cms3.mus_p4().at(imu).pt());
+        vec_softmus_eta.push_back( cms3.mus_p4().at(imu).eta());
+        vec_softmus_phi.push_back( cms3.mus_p4().at(imu).phi());
+        vec_softmus_mass.push_back( cms3.mus_mass().at(imu));
+        vec_softmus_charge.push_back( cms3.mus_charge().at(imu));
+        vec_softmus_pdgId.push_back( (-13)*cms3.mus_charge().at(imu));
+        vec_softmus_dxy.push_back( cms3.mus_dxyPV().at(imu)); // this uses the silicon track. should we use best track instead?
+        vec_softmus_dz.push_back( cms3.mus_dzPV().at(imu)); // this uses the silicon track. should we use best track instead?
+        vec_softmus_tightId.push_back( muTightID(imu,analysis_t::HAD,2) );
+        vec_softmus_absIso.push_back( muRelIso03(imu,analysis_t::HAD) * cms3.mus_p4().at(imu).pt());
+        vec_softmus_relIso03.push_back( muRelIso03(imu,analysis_t::HAD) );
+        vec_softmus_relIso04.push_back( muRelIso04(imu,analysis_t::HAD) );
+        vec_softmus_miniRelIso.push_back( muMiniRelIso(imu) );
         if (!isData && cms3.mus_mc3dr().at(imu) < 0.2 && cms3.mus_mc3idx().at(imu) != -9999 && abs(cms3.mus_mc3_id().at(imu)) == 13) { // matched to a prunedGenParticle muon?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(imu)]);
-          softMu_mcMatchId = (momid != 13) ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(imu)]; // if mother is different store mother, otherwise store grandmother
-	}
-	else softMu_mcMatchId = 0;
-        softMu_lostHits = cms3.mus_exp_innerlayers().at(imu); // use defaults as if "good muon"
-        softMu_convVeto = 1;// use defaults as if "good muon"
-        softMu_tightCharge = tightChargeMuon(imu);
+          vec_softmus_mcMatchId.push_back( (momid != 13) ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(imu)]); // if mother is different store mother, otherwise store grandmother
+        }
+        else vec_softmus_mcMatchId.push_back(0);
       }
+      for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+        if(cms3.pfcands_particleId().at(ipf) != 13) continue;
+        if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+        if(cms3.pfcands_p4().at(ipf).pt() < 5) continue;
+        // use PF leptons for hemispheres etc same as reco leptons
+        // check if pf muon already identified as reco muons
+        bool overlap = false;
+        int nrecMus = nsoftmus;
+        for(int irmu = 0; irmu < nrecMus; irmu++){
+          float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), vec_softmus_eta[irmu], pfcands_p4().at(ipf).phi(), vec_softmus_phi[irmu]);
+          if (thisDR < 0.1) {
+            overlap = true;
+            vec_softmus_isPF[irmu] = true;
+            break;
+          }
+        } // loop over reco leps
+        if (!overlap) {
+          softmus_pt_ordering.push_back( std::pair<int,float>(nsoftmus, cms3.pfcands_p4().at(ipf).pt()) );
+          nsoftmus++;
+          float absiso = TrackIso(ipf);
+          float reliso = absiso / cms3.pfcands_p4().at(ipf).pt();
+          vec_softmus_isReco.push_back( false);
+          vec_softmus_isPF.push_back( true);
+          vec_softmus_pt.push_back( cms3.pfcands_p4().at(ipf).pt());
+          vec_softmus_eta.push_back( cms3.pfcands_p4().at(ipf).eta());
+          vec_softmus_phi.push_back( cms3.pfcands_p4().at(ipf).phi());
+          vec_softmus_mass.push_back( cms3.pfcands_mass().at(ipf));
+          vec_softmus_charge.push_back( cms3.pfcands_charge().at(ipf));
+          vec_softmus_pdgId.push_back( cms3.pfcands_particleId().at(ipf));
+          vec_softmus_dxy.push_back(-1); // this uses the silicon track. should we use best track instead?
+          vec_softmus_dz.push_back( cms3.pfcands_dz().at(ipf)); // this uses the silicon track. should we use best track instead?
+          vec_softmus_tightId.push_back(-1);
+          vec_softmus_absIso.push_back(absiso);
+          vec_softmus_relIso03.push_back(reliso);
+          vec_softmus_relIso04.push_back(-1);
+          vec_softmus_miniRelIso.push_back(max(reliso, absiso/40));
+          vec_softmus_mcMatchId.push_back(0);
+        }
+      }
+      int ibsm = 0;
+      std::sort(softmus_pt_ordering.begin(), softmus_pt_ordering.end(), sortByValueReverse);
+      for(std::vector<std::pair<int, float> >::iterator it = softmus_pt_ordering.begin(); it!= softmus_pt_ordering.end(); ++it){
+	if (ibsm >= max_nlep) {
+          std::cout << "WARNING: attempted to fill more than " << max_nlep << " leptons" << std::endl;
+	  break;
+	}
+        softmus_isReco[ibsm]      = vec_softmus_isReco.at(it->first);
+        softmus_isPF[ibsm]        = vec_softmus_isPF.at(it->first);
+        softmus_pt[ibsm]          = vec_softmus_pt.at(it->first);
+        softmus_eta[ibsm]         = vec_softmus_eta.at(it->first);
+        softmus_phi[ibsm]         = vec_softmus_phi.at(it->first);
+        softmus_mass[ibsm]        = vec_softmus_mass.at(it->first);
+        softmus_charge[ibsm]      = vec_softmus_charge.at(it->first);
+        softmus_pdgId[ibsm]       = vec_softmus_pdgId.at(it->first);
+        softmus_dz[ibsm]          = vec_softmus_dz.at(it->first);
+        softmus_dxy[ibsm]         = vec_softmus_dxy.at(it->first);
+        softmus_tightId[ibsm]     = vec_softmus_tightId.at(it->first);
+        softmus_absIso[ibsm]      = vec_softmus_absIso.at(it->first);
+        softmus_relIso03[ibsm]    = vec_softmus_relIso03.at(it->first);
+        softmus_relIso04[ibsm]    = vec_softmus_relIso04.at(it->first);
+        softmus_miniRelIso[ibsm]  = vec_softmus_miniRelIso.at(it->first);
+        softmus_mcMatchId[ibsm]   = vec_softmus_mcMatchId.at(it->first);
+        ibsm++;
+      }
+
+      // normal electrons at 10
+      nelecs = 0;
+      for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
+        if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
+        if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
+        if(!electronID(iEl,id_level_t::HAD_veto_v2)) continue;  // to take out 
+        nelecs++;
+        elecs_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
+        vec_elecs_pt.push_back ( cms3.els_p4().at(iEl).pt());
+        vec_elecs_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
+        vec_elecs_phi.push_back ( cms3.els_p4().at(iEl).phi());
+        vec_elecs_mass.push_back ( cms3.els_mass().at(iEl));
+        vec_elecs_charge.push_back ( cms3.els_charge().at(iEl));
+        vec_elecs_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
+        vec_elecs_dxy.push_back ( cms3.els_dxyPV().at(iEl));
+        vec_elecs_dz.push_back ( cms3.els_dzPV().at(iEl));
+        vec_elecs_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
+        vec_elecs_absIso.push_back (  eleRelIso03(iEl,analysis_t::HAD) * cms3.els_p4().at(iEl).pt());
+        vec_elecs_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
+        vec_elecs_relIso04.push_back ( 0);
+        vec_elecs_miniRelIso.push_back ( elMiniRelIso(iEl) );
+        if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
+          int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
+          vec_elecs_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
+        }
+        else vec_elecs_mcMatchId.push_back (0);
+      }
+      for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+        if(cms3.pfcands_particleId().at(ipf) != 11) continue;
+        if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+        if(cms3.pfcands_p4().at(ipf).pt() < 5) continue;
+        // use PF leptons for hemispheres etc same as reco leptons
+        // check if pf elec already identified as reco elecs
+        bool overlap = false;
+        int nrecEls = nelecs;
+        for(int irel = 0; irel < nrecEls; irel++){
+          float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), vec_elecs_eta[irel], pfcands_p4().at(ipf).phi(), vec_elecs_phi[irel]);
+          if (thisDR < 0.1) {
+            overlap = true;
+            vec_elecs_isPF[irel] = true;
+            break;
+          }
+        } // loop over reco leps
+        if (!overlap) {
+          nelecs++;
+          float absiso = TrackIso(ipf);
+          float reliso = absiso / cms3.pfcands_p4().at(ipf).pt();
+          vec_elecs_isReco.push_back( false);
+          vec_elecs_isPF.push_back( true);
+          vec_elecs_pt.push_back( cms3.pfcands_p4().at(ipf).pt());
+          vec_elecs_eta.push_back( cms3.pfcands_p4().at(ipf).eta());
+          vec_elecs_phi.push_back( cms3.pfcands_p4().at(ipf).phi());
+          vec_elecs_mass.push_back( cms3.pfcands_mass().at(ipf));
+          vec_elecs_charge.push_back( cms3.pfcands_charge().at(ipf));
+          vec_elecs_pdgId.push_back( cms3.pfcands_particleId().at(ipf));
+          vec_elecs_dxy.push_back(-1); // this uses the silicon track. should we use best track instead?
+          vec_elecs_dz.push_back( cms3.pfcands_dz().at(ipf)); // this uses the silicon track. should we use best track instead?
+          vec_elecs_tightId.push_back(-1);
+          vec_elecs_absIso.push_back(absiso);
+          vec_elecs_relIso03.push_back(reliso);
+          vec_elecs_relIso04.push_back(-1);
+          vec_elecs_miniRelIso.push_back(max(reliso, absiso/40));
+          vec_elecs_mcMatchId.push_back(0);
+        }
+      }
+      int ibel = 0;
+      std::sort(elecs_pt_ordering.begin(), elecs_pt_ordering.end(), sortByValueReverse);
+      for(std::vector<std::pair<int, float> >::iterator it = elecs_pt_ordering.begin(); it!= elecs_pt_ordering.end(); ++it){
+	if (ibel >= max_nlep) {
+          std::cout << "WARNING: attempted to fill more than " << max_nlep << " leptons" << std::endl;
+	  break;
+	}
+        elecs_isReco[ibel]      = vec_elecs_isReco.at(it->first);
+        elecs_isPF[ibel]        = vec_elecs_isPF.at(it->first);
+        elecs_pt[ibel]          = vec_elecs_pt.at(it->first);
+        elecs_eta[ibel]         = vec_elecs_eta.at(it->first);
+        elecs_phi[ibel]         = vec_elecs_phi.at(it->first);
+        elecs_mass[ibel]        = vec_elecs_mass.at(it->first);
+        elecs_charge[ibel]      = vec_elecs_charge.at(it->first);
+        elecs_pdgId[ibel]       = vec_elecs_pdgId.at(it->first);
+        elecs_dz[ibel]          = vec_elecs_dz.at(it->first);
+        elecs_dxy[ibel]         = vec_elecs_dxy.at(it->first);
+        elecs_tightId[ibel]     = vec_elecs_tightId.at(it->first);
+        elecs_absIso[ibel]      = vec_elecs_absIso.at(it->first);
+        elecs_relIso03[ibel]    = vec_elecs_relIso03.at(it->first);
+        elecs_relIso04[ibel]    = vec_elecs_relIso04.at(it->first);
+        elecs_miniRelIso[ibel]  = vec_elecs_miniRelIso.at(it->first);
+        elecs_mcMatchId[ibel]   = vec_elecs_mcMatchId.at(it->first);
+        ibel++;
+      }
+      //------------------------------------
 
       //LEPTONS
       std::vector<std::pair<int, float> > lep_pt_ordering;
@@ -518,7 +717,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
           vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
         }
-	else vec_lep_mcMatchId.push_back (0);
+        else vec_lep_mcMatchId.push_back (0);
 
         vec_lep_lostHits.push_back ( cms3.els_exp_innerlayers().at(iEl)); //cms3.els_lost_pixelhits().at(iEl);
         vec_lep_convVeto.push_back ( !cms3.els_conv_vtx_flag().at(iEl));
@@ -1612,23 +1811,40 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
   BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
-  BabyTree_->Branch("nsoftMu", &nsoftMu);
-  BabyTree_->Branch("softMu_pt", &softMu_pt);
-  BabyTree_->Branch("softMu_eta", &softMu_eta);
-  BabyTree_->Branch("softMu_phi", &softMu_phi);
-  BabyTree_->Branch("softMu_mass", &softMu_mass);
-  BabyTree_->Branch("softMu_charge", &softMu_charge);
-  BabyTree_->Branch("softMu_pdgId", &softMu_pdgId);
-  BabyTree_->Branch("softMu_dxy", &softMu_dxy);
-  BabyTree_->Branch("softMu_dz", &softMu_dz);
-  BabyTree_->Branch("softMu_tightId", &softMu_tightId);
-  BabyTree_->Branch("softMu_relIso03", &softMu_relIso03);
-  BabyTree_->Branch("softMu_relIso04", &softMu_relIso04);
-  BabyTree_->Branch("softMu_miniRelIso", &softMu_miniRelIso);
-  BabyTree_->Branch("softMu_mcMatchId", &softMu_mcMatchId);
-  BabyTree_->Branch("softMu_lostHits", &softMu_lostHits);
-  BabyTree_->Branch("softMu_convVeto", &softMu_convVeto);
-  BabyTree_->Branch("softMu_tightCharge", &softMu_tightCharge);
+  BabyTree_->Branch("nsoftmus", &nsoftmus, "nsofmtus/I" );
+  BabyTree_->Branch("softmus_pt", softmus_pt, "softmus_pt[nsoftmus]/F");
+  BabyTree_->Branch("softmus_eta", softmus_eta, "softmus_eta[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_phi", softmus_phi, "softmus_phi[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_mass", softmus_mass, "softmus_mass[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_charge", softmus_charge, "softmus_charge[nsoftmus]/I" );
+  BabyTree_->Branch("softmus_pdgId", softmus_pdgId, "softmus_pdgId[nsoftmus]/I" );
+  BabyTree_->Branch("softmus_dxy", softmus_dxy, "softmus_dxy[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_dz", softmus_dz, "softmus_dz[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_tightId", softmus_tightId, "softmus_tightId[nsoftmus]/I" );
+  BabyTree_->Branch("softmus_absIso", softmus_absIso, "softmus_absIso[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_relIso03", softmus_relIso03, "softmus_relIso03[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_relIso04", softmus_relIso04, "softmus_relIso04[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_miniRelIso", softmus_miniRelIso, "softmus_miniRelIso[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_mcMatchId", softmus_mcMatchId, "softmus_mcMatchId[nsoftmus]/I" );
+  BabyTree_->Branch("softmus_isReco", softmus_isReco, "softmus_isReco[nsoftmus]/I" );
+  BabyTree_->Branch("softmus_isPF", softmus_isPF, "softmus_isPF[nsoftmus]/I" );
+  BabyTree_->Branch("nelecs", &nelecs, "nelecs/I" );
+  BabyTree_->Branch("elecs_pt", elecs_pt, "elecs_pt[nelecs]/F");
+  BabyTree_->Branch("elecs_eta", elecs_eta, "elecs_eta[nelecs]/F" );
+  BabyTree_->Branch("elecs_phi", elecs_phi, "elecs_phi[nelecs]/F" );
+  BabyTree_->Branch("elecs_mass", elecs_mass, "elecs_mass[nelecs]/F" );
+  BabyTree_->Branch("elecs_charge", elecs_charge, "elecs_charge[nelecs]/I" );
+  BabyTree_->Branch("elecs_pdgId", elecs_pdgId, "elecs_pdgId[nelecs]/I" );
+  BabyTree_->Branch("elecs_dxy", elecs_dxy, "elecs_dxy[nelecs]/F" );
+  BabyTree_->Branch("elecs_dz", elecs_dz, "elecs_dz[nelecs]/F" );
+  BabyTree_->Branch("elecs_tightId", elecs_tightId, "elecs_tightId[nelecs]/I" );
+  BabyTree_->Branch("elecs_absIso", elecs_absIso, "elecs_absIso[nelecs]/F" );
+  BabyTree_->Branch("elecs_relIso03", elecs_relIso03, "elecs_relIso03[nelecs]/F" );
+  BabyTree_->Branch("elecs_relIso04", elecs_relIso04, "elecs_relIso04[nelecs]/F" );
+  BabyTree_->Branch("elecs_miniRelIso", elecs_miniRelIso, "elecs_miniRelIso[nelecs]/F" );
+  BabyTree_->Branch("elecs_mcMatchId", elecs_mcMatchId, "elecs_mcMatchId[nelecs]/I" );
+  BabyTree_->Branch("elecs_isReco", elecs_isReco, "elecs_isReco[nelecs]/I" );
+  BabyTree_->Branch("elecs_isPF", elecs_isPF, "elecs_isPF[nelecs]/I" );
   BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
   BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
@@ -1883,7 +2099,8 @@ void babyMaker::InitBabyNtuple () {
   HLT_DoubleMu = -999;   
   HLT_Photons = -999;   
   nlep = -999;
-  nsoftMu = -999;
+  nsoftmus = -999;
+  nelecs = -999;
   nisoTrack = -999;
   nPFLep5LowMT = -999;
   nPFHad10LowMT = -999;
@@ -1975,24 +2192,42 @@ void babyMaker::InitBabyNtuple () {
     lep_convVeto[i] = -999;
     lep_tightCharge[i] = -999;
   }
-
-  softMu_pt = -999;
-  softMu_eta = -999;
-  softMu_phi = -999;
-  softMu_mass = -999;
-  softMu_charge = -999;
-  softMu_pdgId = -999;
-  softMu_dxy = -999;
-  softMu_dz = -999;
-  softMu_tightId = -999;
-  softMu_relIso03 = -999;
-  softMu_relIso04 = -999;
-  softMu_miniRelIso = -999;
-  softMu_mcMatchId = -999;
-  softMu_lostHits = -999;
-  softMu_convVeto = -999;
-  softMu_tightCharge = -999;
-
+  for(int i=0; i < max_nlep; i++){
+    softmus_pt[i] = -999;
+    softmus_eta[i] = -999;
+    softmus_phi[i] = -999;
+    softmus_mass[i] = -999;
+    softmus_charge[i] = -999;
+    softmus_pdgId[i] = -999;
+    softmus_dxy[i] = -999;
+    softmus_dz[i] = -999;
+    softmus_tightId[i] = -999;
+    softmus_absIso[i] = -999;
+    softmus_relIso03[i] = -999;
+    softmus_relIso04[i] = -999;
+    softmus_miniRelIso[i] = -999;
+    softmus_mcMatchId[i] = -999;
+    softmus_isReco[i] = false;
+    softmus_isPF[i] = false;
+  }
+  for(int i=0; i < max_nlep; i++){
+    elecs_pt[i] = -999;
+    elecs_eta[i] = -999;
+    elecs_phi[i] = -999;
+    elecs_mass[i] = -999;
+    elecs_charge[i] = -999;
+    elecs_pdgId[i] = -999;
+    elecs_dxy[i] = -999;
+    elecs_dz[i] = -999;
+    elecs_tightId[i] = -999;
+    elecs_absIso[i] = -999;
+    elecs_relIso03[i] = -999;
+    elecs_relIso04[i] = -999;
+    elecs_miniRelIso[i] = -999;
+    elecs_mcMatchId[i] = -999;
+    elecs_isReco[i] = false;
+    elecs_isPF[i] = false;
+  }
   for(int i=0; i < max_nisoTrack; i++){
     isoTrack_pt[i] = -999;
     isoTrack_eta[i] = -999;

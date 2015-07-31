@@ -151,24 +151,42 @@ class babyMaker {
   Int_t           lep_tightCharge[max_nlep];   //[nlep]
 
 //----- SOFT MUONS
-  static const int max_nsmu = 5;
-  Int_t           nsoftMu;
-  Float_t         softMu_pt;
-  Float_t         softMu_eta;
-  Float_t         softMu_phi;
-  Float_t         softMu_mass;
-  Int_t           softMu_charge;
-  Int_t           softMu_pdgId;
-  Float_t         softMu_dxy;
-  Float_t         softMu_dz;
-  Int_t           softMu_tightId;
-  Float_t         softMu_relIso03;
-  Float_t         softMu_relIso04;
-  Float_t         softMu_miniRelIso;
-  Int_t           softMu_mcMatchId;
-  Int_t           softMu_lostHits;
-  Int_t           softMu_convVeto;
-  Int_t           softMu_tightCharge;
+  Int_t           nsoftmus;
+  Float_t         softmus_pt[max_nlep];
+  Float_t         softmus_eta[max_nlep];
+  Float_t         softmus_phi[max_nlep];
+  Float_t         softmus_mass[max_nlep];
+  Int_t           softmus_charge[max_nlep];
+  Int_t           softmus_pdgId[max_nlep];
+  Float_t         softmus_dxy[max_nlep];
+  Float_t         softmus_dz[max_nlep];
+  Int_t           softmus_tightId[max_nlep];
+  Float_t         softmus_absIso[max_nlep];
+  Float_t         softmus_relIso03[max_nlep];
+  Float_t         softmus_relIso04[max_nlep];
+  Float_t         softmus_miniRelIso[max_nlep];
+  Int_t           softmus_mcMatchId[max_nlep];
+  Bool_t          softmus_isReco[max_nlep];
+  Bool_t          softmus_isPF[max_nlep];
+
+//----- ELECTRONS
+  Int_t           nelecs;
+  Float_t         elecs_pt[max_nlep];
+  Float_t         elecs_eta[max_nlep];
+  Float_t         elecs_phi[max_nlep];
+  Float_t         elecs_mass[max_nlep];
+  Int_t           elecs_charge[max_nlep];
+  Int_t           elecs_pdgId[max_nlep];
+  Float_t         elecs_dxy[max_nlep];
+  Float_t         elecs_dz[max_nlep];
+  Int_t           elecs_tightId[max_nlep];
+  Float_t         elecs_absIso[max_nlep];
+  Float_t         elecs_relIso03[max_nlep];
+  Float_t         elecs_relIso04[max_nlep];
+  Float_t         elecs_miniRelIso[max_nlep];
+  Int_t           elecs_mcMatchId[max_nlep];
+  Bool_t          elecs_isReco[max_nlep];
+  Bool_t          elecs_isPF[max_nlep];
 
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;
