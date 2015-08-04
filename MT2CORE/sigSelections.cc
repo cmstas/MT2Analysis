@@ -1054,17 +1054,38 @@ std::vector<SR> getSignalRegionsZurich_jetpt40(){
 
 }
 
+std::vector<SR> getSignalRegionsZurich_jetpt30(){
+
+  std::vector<SR> SRVec = getSignalRegionsZurich();
+
+  //change j1pt and j2pt cuts to 30 GeV
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    SRVec.at(i).RemoveVar("j1pt");
+    SRVec.at(i).RemoveVar("j2pt");
+    SRVec.at(i).SetVar("j1pt", 30, -1);
+    SRVec.at(i).SetVar("j2pt", 30, -1);
+
+    SRVec.at(i).RemoveVarCRSL("j1pt");
+    SRVec.at(i).RemoveVarCRSL("j2pt");
+    SRVec.at(i).SetVarCRSL("j1pt", 30, -1);
+    SRVec.at(i).SetVarCRSL("j2pt", 30, -1);
+  }
+
+  return SRVec;
+
+}
+
 std::vector<SR> getSignalRegionsSoftMuon(){
 
-    std::vector<SR> SRVec = getSignalRegionsZurich_jetpt40();
+    std::vector<SR> SRVec = getSignalRegionsZurich_jetpt30();
 
-  //change j1pt and j2pt cuts to 40 GeV
+  //change the mt2 cut to 100 GeV
   for(unsigned int i = 0; i < SRVec.size(); i++){
     SRVec.at(i).RemoveVar("mt2");
     SRVec.at(i).SetVar("mt2", 100, -1);
 
-    // SRVec.at(i).RemoveVarCRSL("mt2");
-    // SRVec.at(i).SetVarCRSL("mt2", 0, -1);
+    SRVec.at(i).RemoveVarCRSL("mt2");
+    SRVec.at(i).SetVarCRSL("mt2", 100, -1);
   }
 
   return SRVec;

@@ -3,9 +3,14 @@
 make -j12
 
 #INDIR=/nfs-6/userdata/mt2/V00-00-12/
-INDIR=/nfs-6/userdata/mt2/SRSM_skim_trig_nj2_ht450_met30_Zinv
-OUTDIR=output/noisomt2_100/
-#OUTDIR=output/srsmNew/
+#INDIR=/nfs-6/userdata/mt2/SRSM/
+#INDIR=/nfs-6/userdata/mt2/scsm_skim_trig_nj2_ht450_met30_Zinv
+#INDIR=/nfs-6/userdata/mt2/SRSM_skim_trig_nj2_ht450_met30_Zinv
+INDIR=/nfs-6/userdata/mt2/SRSM_skim_trig_nj2_ht450_met30_mt2g200_Zinv
+#INDIR=/nfs-6/userdata/mt2/V00-00-12_skim_trig_nj2_ht450_met30_mt2gt200_Zinv
+#OUTDIR=output/rawBabyOld/
+#OUTDIR=output/noisomt2_200/
+OUTDIR=output/test/
 
 #declare -a Samples=(ttall_msdecays wjets_ht zinv_ht dyjetsll_ht qcd_ht gjet_ht)
 #declare -a Samples=(T1tttt_1500_100 T1tttt_1200_800 T1bbbb_1500_100 T1bbbb_1000_900 T1qqqq_1400_100 T1qqqq_1000_800 T2tt_850_100 T2tt_650_325 T2tt_500_325 T2tt_425_325 T2bb_900_100 T2bb_600_580 T2qq_1200_100 T2qq_600_550)
@@ -22,8 +27,9 @@ for SAMPLE in ${Samples[@]};
   nohup root -b -q -l doAll.C\(\"${INDIR}\",\"${SAMPLE}\",\"${OUTDIR}\"\) >& log_${SAMPLE}.txt &
 done
 
-# INDIR2=/home/users/sicheng/MT2Analysis/babymaker/
-# declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300 T5qqqqWWDeg_mGo1000_mCh315_mChi300 T5qqqqWWDeg_mGo1000_mCh325_mChi300 T5qqqqWWDeg_mGo800_mCh305_mChi300)
+#INDIR2=/home/users/sicheng/MT2Analysis/babymaker/
+# INDIR2=/nfs-6/userdata/mt2/SRSM_skim_trig_nj2_ht450_met30_Zinv
+# declare -a Samples2=(T5qqqqWW_315_300 T5qqqqWW_325_300 T5qqqqWW_310_300 T5qqqqWW_305_300)
 # #declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300)
 
 # for SAMPLE2 in ${Samples2[@]};
