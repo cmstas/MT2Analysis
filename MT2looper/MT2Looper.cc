@@ -393,7 +393,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       //---------------------------
       // Select one and only one muon < 20 GeV, down to 5 GeV, apply all other cuts back.
       //---------------------------
-      if ((t.ngenLep + t.ngenTau) != 0) continue;   // to find the origin of muon
+      //if ((t.ngenLep + t.ngenTau) != 0) continue;   // to find the origin of muon
       
       smulepveto_ = nlepveto_ - 1;
       bool softMuon = false;
@@ -464,7 +464,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
         smumreliso_ = t.softmus_miniRelIso[0];
         mt_ = sqrt( 2 * t.met_pt * smupt_ * ( 1 - cos( t.met_phi - smuphi_) ) );
 
-        if (abs(t.softmus_eta[0]) < 1.4)
+        //if (abs(t.softmus_eta[0]) < 1.4)
         if ((t.softmus_isReco && t.softmus_miniRelIso[0] < 0.2) || (!t.softmus_isReco && t.softmus_isPF && smureliso_ < 0.2))
           fillHistosSRsoftMuonNew("srsmNew");
       }
