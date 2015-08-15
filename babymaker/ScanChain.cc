@@ -444,6 +444,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_softmus_pdgId;
       vector<float>vec_softmus_dxy;
       vector<float>vec_softmus_dz;
+      vector<float>vec_softmus_sip;
       vector<int>  vec_softmus_tightId;
       vector<float>vec_softmus_absIso;
       vector<float>vec_softmus_relIso03;
@@ -462,6 +463,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<int>  vec_elecs_pdgId;
       vector<float>vec_elecs_dxy;
       vector<float>vec_elecs_dz;
+      vector<float>vec_elecs_sip;
       vector<int>  vec_elecs_tightId;
       vector<float>vec_elecs_absIso;
       vector<float>vec_elecs_relIso03;
@@ -489,6 +491,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_softmus_pdgId.push_back( (-13)*cms3.mus_charge().at(imu));
         vec_softmus_dxy.push_back( cms3.mus_dxyPV().at(imu)); // this uses the silicon track. should we use best track instead?
         vec_softmus_dz.push_back( cms3.mus_dzPV().at(imu)); // this uses the silicon track. should we use best track instead?
+        vec_softmus_sip.push_back( fabs(cms3.mus_ip3d().at(imu) / cms3.mus_ip3derr().at(imu))); // 
         vec_softmus_tightId.push_back( muTightID(imu,analysis_t::HAD,2) );
         vec_softmus_absIso.push_back( muRelIso03(imu,analysis_t::HAD) * cms3.mus_p4().at(imu).pt());
         vec_softmus_relIso03.push_back( muRelIso03(imu,analysis_t::HAD) );
@@ -531,6 +534,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           vec_softmus_pdgId.push_back( cms3.pfcands_particleId().at(ipf));
           vec_softmus_dxy.push_back(-1); // this uses the silicon track. should we use best track instead?
           vec_softmus_dz.push_back( cms3.pfcands_dz().at(ipf)); // this uses the silicon track. should we use best track instead?
+          vec_softmus_sip.push_back(-1); 
           vec_softmus_tightId.push_back(-1);
           vec_softmus_absIso.push_back(absiso);
           vec_softmus_relIso03.push_back(reliso);
@@ -554,8 +558,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         softmus_mass[ibsm]        = vec_softmus_mass.at(it->first);
         softmus_charge[ibsm]      = vec_softmus_charge.at(it->first);
         softmus_pdgId[ibsm]       = vec_softmus_pdgId.at(it->first);
-        softmus_dz[ibsm]          = vec_softmus_dz.at(it->first);
         softmus_dxy[ibsm]         = vec_softmus_dxy.at(it->first);
+        softmus_dz[ibsm]          = vec_softmus_dz.at(it->first);
+        softmus_sip[ibsm]         = vec_softmus_sip.at(it->first);
         softmus_tightId[ibsm]     = vec_softmus_tightId.at(it->first);
         softmus_absIso[ibsm]      = vec_softmus_absIso.at(it->first);
         softmus_relIso03[ibsm]    = vec_softmus_relIso03.at(it->first);
@@ -583,6 +588,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_elecs_pdgId.push_back ( (-11)*cms3.els_charge().at(iel));
         vec_elecs_dxy.push_back ( cms3.els_dxyPV().at(iel));
         vec_elecs_dz.push_back ( cms3.els_dzPV().at(iel));
+        vec_elecs_sip.push_back ( fabs(cms3.els_ip3d().at(iel) / cms3.els_ip3derr().at(iel)));
         vec_elecs_tightId.push_back ( eleTightID(iel,analysis_t::HAD,2) );
         vec_elecs_absIso.push_back (  eleRelIso03(iel,analysis_t::HAD) * cms3.els_p4().at(iel).pt());
         vec_elecs_relIso03.push_back (  eleRelIso03(iel,analysis_t::HAD));
@@ -625,6 +631,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
           vec_elecs_pdgId.push_back( cms3.pfcands_particleId().at(ipf));
           vec_elecs_dxy.push_back(-1); // this uses the silicon track. should we use best track instead?
           vec_elecs_dz.push_back( cms3.pfcands_dz().at(ipf)); // this uses the silicon track. should we use best track instead?
+          vec_elecs_sip.push_back (-1);
           vec_elecs_tightId.push_back(-1);
           vec_elecs_absIso.push_back(absiso);
           vec_elecs_relIso03.push_back(reliso);
@@ -648,8 +655,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         elecs_mass[ibel]        = vec_elecs_mass.at(it->first);
         elecs_charge[ibel]      = vec_elecs_charge.at(it->first);
         elecs_pdgId[ibel]       = vec_elecs_pdgId.at(it->first);
-        elecs_dz[ibel]          = vec_elecs_dz.at(it->first);
         elecs_dxy[ibel]         = vec_elecs_dxy.at(it->first);
+        elecs_dz[ibel]          = vec_elecs_dz.at(it->first);
+        elecs_sip[ibel]         = vec_elecs_sip.at(it->first);
         elecs_tightId[ibel]     = vec_elecs_tightId.at(it->first);
         elecs_absIso[ibel]      = vec_elecs_absIso.at(it->first);
         elecs_relIso03[ibel]    = vec_elecs_relIso03.at(it->first);
@@ -1823,6 +1831,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("softmus_pdgId", softmus_pdgId, "softmus_pdgId[nsoftmus]/I" );
   BabyTree_->Branch("softmus_dxy", softmus_dxy, "softmus_dxy[nsoftmus]/F" );
   BabyTree_->Branch("softmus_dz", softmus_dz, "softmus_dz[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_sip", softmus_sip, "softmus_sip[nsoftmus]/F" );
   BabyTree_->Branch("softmus_tightId", softmus_tightId, "softmus_tightId[nsoftmus]/I" );
   BabyTree_->Branch("softmus_absIso", softmus_absIso, "softmus_absIso[nsoftmus]/F" );
   BabyTree_->Branch("softmus_relIso03", softmus_relIso03, "softmus_relIso03[nsoftmus]/F" );
@@ -1840,6 +1849,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("elecs_pdgId", elecs_pdgId, "elecs_pdgId[nelecs]/I" );
   BabyTree_->Branch("elecs_dxy", elecs_dxy, "elecs_dxy[nelecs]/F" );
   BabyTree_->Branch("elecs_dz", elecs_dz, "elecs_dz[nelecs]/F" );
+  BabyTree_->Branch("elecs_sip", elecs_sip, "elecs_sip[nelecs]/F" );
   BabyTree_->Branch("elecs_tightId", elecs_tightId, "elecs_tightId[nelecs]/I" );
   BabyTree_->Branch("elecs_absIso", elecs_absIso, "elecs_absIso[nelecs]/F" );
   BabyTree_->Branch("elecs_relIso03", elecs_relIso03, "elecs_relIso03[nelecs]/F" );
@@ -2204,14 +2214,15 @@ void babyMaker::InitBabyNtuple () {
     softmus_pdgId[i] = -999;
     softmus_dxy[i] = -999;
     softmus_dz[i] = -999;
+    softmus_sip[i] = -999;
     softmus_tightId[i] = -999;
     softmus_absIso[i] = -999;
     softmus_relIso03[i] = -999;
     softmus_relIso04[i] = -999;
     softmus_miniRelIso[i] = -999;
     softmus_mcMatchId[i] = -999;
-    softmus_isReco[i] = false;
-    softmus_isPF[i] = false;
+    softmus_isReco[i] = -999;
+    softmus_isPF[i] = -999;
   }
   for(int i=0; i < max_nlep; i++){
     elecs_pt[i] = -999;
@@ -2222,14 +2233,15 @@ void babyMaker::InitBabyNtuple () {
     elecs_pdgId[i] = -999;
     elecs_dxy[i] = -999;
     elecs_dz[i] = -999;
+    elecs_sip[i] = -999;
     elecs_tightId[i] = -999;
     elecs_absIso[i] = -999;
     elecs_relIso03[i] = -999;
     elecs_relIso04[i] = -999;
     elecs_miniRelIso[i] = -999;
     elecs_mcMatchId[i] = -999;
-    elecs_isReco[i] = false;
-    elecs_isPF[i] = false;
+    elecs_isReco[i] = -999;
+    elecs_isPF[i] = -999;
   }
   for(int i=0; i < max_nisoTrack; i++){
     isoTrack_pt[i] = -999;

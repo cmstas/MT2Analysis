@@ -160,6 +160,7 @@ class babyMaker {
   Int_t           softmus_pdgId[max_nlep];
   Float_t         softmus_dxy[max_nlep];
   Float_t         softmus_dz[max_nlep];
+  Float_t         softmus_sip[max_nlep];
   Int_t           softmus_tightId[max_nlep];
   Float_t         softmus_absIso[max_nlep];
   Float_t         softmus_relIso03[max_nlep];
@@ -179,6 +180,7 @@ class babyMaker {
   Int_t           elecs_pdgId[max_nlep];
   Float_t         elecs_dxy[max_nlep];
   Float_t         elecs_dz[max_nlep];
+  Float_t         elecs_sip[max_nlep];
   Int_t           elecs_tightId[max_nlep];
   Float_t         elecs_absIso[max_nlep];
   Float_t         elecs_relIso03[max_nlep];

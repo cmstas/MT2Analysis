@@ -122,14 +122,15 @@ public :
    Int_t           softmus_pdgId[50];   //[nlep]
    Float_t         softmus_dxy[50];   //[nlep]
    Float_t         softmus_dz[50];   //[nlep]
+   Float_t         softmus_sip[50];   //[nlep]
    Int_t           softmus_tightId[50];   //[nlep]
    Float_t         softmus_absIso[50];   //[nlep]
    Float_t         softmus_relIso03[50];   //[nlep]
    Float_t         softmus_relIso04[50];   //[nlep]
    Float_t         softmus_miniRelIso[50];   //[nlep]
    Int_t           softmus_mcMatchId[50];   //[nlep]
-   Bool_t          softmus_isReco[50];
-   Bool_t          softmus_isPF[50];
+   Int_t           softmus_isReco[50];
+   Int_t           softmus_isPF[50];
    Int_t           nelecs;
    Float_t         elecs_pt[50];   //[nlep]
    Float_t         elecs_eta[50];   //[nlep]
@@ -139,14 +140,15 @@ public :
    Int_t           elecs_pdgId[50];   //[nlep]
    Float_t         elecs_dxy[50];   //[nlep]
    Float_t         elecs_dz[50];   //[nlep]
+   Float_t         elecs_sip[50];   //[nlep]
    Int_t           elecs_tightId[50];   //[nlep]
    Float_t         elecs_absIso[50];   //[nlep]
    Float_t         elecs_relIso03[50];   //[nlep]
    Float_t         elecs_relIso04[50];   //[nlep]
    Float_t         elecs_miniRelIso[50];   //[nlep]
    Int_t           elecs_mcMatchId[50];   //[nlep]
-   Bool_t          elecs_isReco[50];
-   Bool_t          elecs_isPF[50];
+   Int_t           elecs_isReco[50];
+   Int_t           elecs_isPF[50];
    Int_t           nisoTrack;
    Float_t         isoTrack_pt[50];   //[nisoTrack]
    Float_t         isoTrack_eta[50];   //[nisoTrack]
@@ -421,6 +423,7 @@ public :
    TBranch        *b_softmus_pdgId;   //!
    TBranch        *b_softmus_dxy;   //!
    TBranch        *b_softmus_dz;   //!
+   TBranch        *b_softmus_sip;   //!
    TBranch        *b_softmus_tightId;   //!
    TBranch        *b_softmus_absIso;   //!
    TBranch        *b_softmus_relIso03;   //!
@@ -438,6 +441,7 @@ public :
    TBranch        *b_elecs_pdgId;   //!
    TBranch        *b_elecs_dxy;   //!
    TBranch        *b_elecs_dz;   //!
+   TBranch        *b_elecs_sip;   //!
    TBranch        *b_elecs_tightId;   //!
    TBranch        *b_elecs_absIso;   //!
    TBranch        *b_elecs_relIso03;   //!
@@ -779,6 +783,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("softmus_pdgId", &softmus_pdgId, &b_softmus_pdgId);
    fChain->SetBranchAddress("softmus_dxy", &softmus_dxy, &b_softmus_dxy);
    fChain->SetBranchAddress("softmus_dz", &softmus_dz, &b_softmus_dz);
+   fChain->SetBranchAddress("softmus_sip", &softmus_sip, &b_softmus_sip);
    fChain->SetBranchAddress("softmus_tightId", &softmus_tightId, &b_softmus_tightId);
    fChain->SetBranchAddress("softmus_absIso", &softmus_absIso, &b_softmus_absIso);
    fChain->SetBranchAddress("softmus_relIso03", &softmus_relIso03, &b_softmus_relIso03);
@@ -796,6 +801,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("elecs_pdgId", &elecs_pdgId, &b_elecs_pdgId);
    fChain->SetBranchAddress("elecs_dxy", &elecs_dxy, &b_elecs_dxy);
    fChain->SetBranchAddress("elecs_dz", &elecs_dz, &b_elecs_dz);
+   fChain->SetBranchAddress("elecs_sip", &elecs_sip, &b_elecs_sip);
    fChain->SetBranchAddress("elecs_tightId", &elecs_tightId, &b_elecs_tightId);
    fChain->SetBranchAddress("elecs_absIso", &elecs_absIso, &b_elecs_absIso);
    fChain->SetBranchAddress("elecs_relIso03", &elecs_relIso03, &b_elecs_relIso03);
