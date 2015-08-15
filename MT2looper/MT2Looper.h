@@ -43,7 +43,7 @@ class MT2Looper {
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosSRsoftMuon(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosSRsoftMuonNew(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosGenMuon(const std::string& prefix = "", const std::string& suffix = "");
+   int fillHistosGenMuon(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
@@ -74,6 +74,7 @@ class MT2Looper {
   float smuabsiso_;
   float smureliso_;
   float smumreliso_;
+  float smusip_;
   float mt_;
   bool isSignal_;
   std::map<std::string, TH1*> h_1d_global;
