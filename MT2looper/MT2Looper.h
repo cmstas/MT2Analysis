@@ -44,6 +44,7 @@ class MT2Looper {
   void fillHistosSRsoftMuon(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosSRsoftMuonNew(const std::string& prefix = "", const std::string& suffix = "");
    int fillHistosGenMuon(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosMuonIso(const std::string& prefix = "", const int lepveto = 0);
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");

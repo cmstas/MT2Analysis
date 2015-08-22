@@ -468,15 +468,14 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
         } // loop on isotracks
       }
       // in following code the mt_ value may be rewritten, so fill the histos right now
-      //if (t.nsoftMu == 2 && t.softMu_pt < 10. && smulepveto_ < 1 && softMuon == true) {softMuon = false;}
       if (softMuon) fillHistosSRsoftMuon("srsm");
 
-      bool filledsrsm = false;
+      // bool filledsrsm = false;
       // New version of the selection, using the new baby, keeping the old one to see if it would be any difference
       int nIsoMuons = 0;
       int iism = -1;   // index of the iso muon
       for (int i=0; i < t.nsoftmus; i++) {
-        if (t.softmus_absIso[i] < 10) {
+        if (t.softmus_miniRelIso[i] < 0.2) {   // Iso selection here
           nIsoMuons++;
           iism = i;
         }
@@ -496,13 +495,12 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
         mt_ = sqrt( 2 * t.met_pt * smupt_ * ( 1 - cos( t.met_phi - smuphi_) ) );
 
         //if (abs(t.softmus_eta[0]) < 1.4)
-        //if ((t.softmus_isReco && t.softmus_miniRelIso[0] < 0.2) || (!t.softmus_isReco && t.softmus_isPF && smureliso_ < 0.2))
-        //if (t.softmus_absIso[0] < 5 )
-          fillHistosSRsoftMuonNew("srsmNew");
-          filledsrsm = true;
+        fillHistosSRsoftMuonNew("srsmNew");
+        // filledsrsm = true;
       }
 
-      int ifillgensm = fillHistosGenMuon("srsmNew");
+      if (fillHistosGenMuon("srsmNew") == 1) ;
+      fillHistosMuonIso("srsmNew", nIsoElecs + t.nPFHad10LowMT);
       //if(ifillgensm == 1) nGenMuon++;
       // if(ifillgensm == 1 && !filledsrsm){
       //   //nGenButNotReco++;
@@ -847,7 +845,7 @@ void MT2Looper::fillHistosSRBase() {
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = 0; //nlepveto_;  // MODIFYING
+  values["nlep"]        = nlepveto_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
@@ -1154,9 +1152,9 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
 
 int MT2Looper::fillHistosGenMuon(const std::string& prefix , const std::string& suffix ) {
 
-  if(t.ngenLep + t.ngenLepFromTau != 1) return -2;
+  if(t.ngenLep + t.ngenLepFromTau != 1) return -(t.ngenLep + t.ngenLepFromTau);
   if( (t.ngenLep == 1 && abs(t.genLep_pdgId[0]) != 13) || (t.ngenLepFromTau == 1 && abs(t.genLepFromTau_pdgId[0]) != 13) ) return -1;
-
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1192,10 +1190,107 @@ int MT2Looper::fillHistosGenMuon(const std::string& prefix , const std::string& 
       }
     }
     outfile_->cd();
-
     return 2;
   }
+  outfile_->cd();
+
   return 0;
+}
+
+void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto ) {
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = 0; // lepveto
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["mt2"]         = t.mt2;
+  values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if(SRBase.PassesSelection(values)) {
+    TDirectory * dir = (TDirectory*)outfile_->Get("srsmNewbase");
+    if (dir == 0) {
+      dir = outfile_->mkdir("srsmNewbase");
+    }
+    dir->cd();
+
+    for(int i=0; i < t.ngenLep; i++) {
+      if(abs(t.genLep_pdgId[i]) == 13 && t.genLep_pt[i] < 20 && t.genLep_pt[i] > 5 && fabs(t.genLep_eta[i]) < 2.4)
+        plot1D("h_allgoodgenmu_pt",  t.genLep_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+    }
+
+    for(int i=0; i < t.ngenLepFromTau; i++) {
+      if(abs(t.genLepFromTau_pdgId[i]) == 13 && t.genLepFromTau_pt[i] < 20 && t.genLepFromTau_pt[i] > 5 && fabs(t.genLepFromTau_eta[i]) < 2.4)
+        plot1D("h_allgoodgenmu_pt",  t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+    }
+
+    for (int j=0; j < t.nsoftmus; j++) {
+      float pt  = t.softmus_pt[j];
+      float eta = t.softmus_eta[j];
+      if ( pt > 20 || fabs(eta) > 2.4) continue;
+      float phi = t.softmus_phi[j];
+      float reliso  = t.softmus_relIso03[j];
+      float absiso  = t.softmus_absIso[j];
+      float mreliso = t.softmus_miniRelIso[j];
+      float sip     = t.softmus_sip[j];
+      bool fromGenTau = false;
+      for(int i = 0; i < t.ngenLepFromTau; ++i){
+        float dr = DeltaR(t.genLepFromTau_eta[i],  eta, t.genLepFromTau_phi[i],  phi);
+        if (dr < 0.1){
+          fromGenTau = true;
+          plot1D("h_matgoodgenmu_pt",  t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+          plot1D("h_diff_recogen_pt",  pt - t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";diff p_{T}^{#mu} (gen #mu) [GeV]", 50, -5, 5);
+          pt = t.genLepFromTau_pt[i];
+          break;
+        }
+      }
+      if (fromGenTau ) {
+        plot1D("h_smu_pt_real_noiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+        if (mreliso < 0.2) plot1D("h_smu_pt_real_wiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+        if (absiso < 5) plot1D("h_smu_pt_real_absiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+        plot1D("h_smu_reliso_real",   reliso,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
+        plot1D("h_smu_absiso_real",   absiso,   evtweight_, SRBase.srsmNewHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
+        plot1D("h_smu_mreliso_real",  mreliso,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
+        plot1D("h_smu_sip_real",        sip,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+      }
+      else{
+        bool fromGenLep = false;
+        for(int i = 0; i < t.ngenLep; ++i){
+          float dr = DeltaR(t.genLep_eta[i],  eta, t.genLep_phi[i],  phi);
+          if (dr < 0.1) {
+            fromGenLep = true;
+            plot1D("h_matgoodgenmu_pt",  t.genLep_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+            plot1D("h_diff_recogen_pt",  pt - t.genLep_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";diff p_{T}^{#mu} (gen #mu) [GeV]", 50, -5, 5);
+            pt = t.genLep_pt[i];
+            break;
+          }
+        }
+        if (fromGenLep) {
+          plot1D("h_smu_pt_real_noiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          if (mreliso < 0.2) plot1D("h_smu_pt_real_wiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          if (absiso < 5) plot1D("h_smu_pt_real_absiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          plot1D("h_smu_reliso_real",   reliso,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
+          plot1D("h_smu_absiso_real",   absiso,   evtweight_, SRBase.srsmNewHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
+          plot1D("h_smu_mreliso_real",  mreliso,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
+          plot1D("h_smu_sip_real",      sip,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+        }
+        else {
+          // if(t.ngenLep == 1) 
+          //   cout << "t.genLep_pt[0] = " << t.genLep_pt[0]  << "  eta = " << t.genLep_eta[0] << "  phi = " << t.genLep_phi[0] << endl
+          //        << "t.softmus_pt[j]= " << t.softmus_pt[j] << "  eta = " << eta << "  phi = " << phi << endl;
+          // if(t.ngenLepFromTau == 1) 
+          //   cout << "t.genLepFromTau_pt[0] = " << t.genLepFromTau_pt[0]  << "  eta = " << t.genLepFromTau_eta[0] << "  phi = " << t.genLepFromTau_phi[0] << endl
+          //        << "t.softmus_pt[j]= " << t.softmus_pt[j] << "  eta = " << eta << "  phi = " << phi << endl << endl;
+          plot1D("h_smu_pt_fake",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          plot1D("h_smu_reliso_fake",   reliso,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
+          plot1D("h_smu_absiso_fake",   absiso,   evtweight_, SRBase.srsmNewHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
+          plot1D("h_smu_mreliso_fake",  mreliso,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
+          plot1D("h_smu_sip_fake",      sip,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+        }
+      }
+    }
+  }
 }
 
 // hists for single lepton control region
@@ -1272,7 +1367,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   std::string add="";
 
   float passPtMT2 = false;
-  if (t.mt2 < 200 && t.gamma_pt[0]>160.) passPtMT2 = true;  // changing MT2 HERE!!
+  if (t.mt2 < 200 && t.gamma_pt[0]>160.) passPtMT2 = true;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
@@ -1445,7 +1540,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
   plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
   plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
-  plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+  plot1D("h_nlepveto"+s,     nlepveto_ ,  evtweight_, h_1d, ";N(leps)", 10, 0, 10);
   plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
   plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);

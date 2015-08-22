@@ -46,12 +46,64 @@ inline void plotDiv(TH1F* h_div, string name = "div", string ytitle = "withIso/n
   delete can;
 }
 
+inline void plotDiv(TH1F* h1, TH1F* h2, string name = "div", string title1 = "", string title2 = "")
+{
+  gStyle->SetOptStat("");
+  gStyle->SetCanvasColor(0);
+  gStyle->SetPadGridX(0);
+  gStyle->SetPadGridY(0);
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
+  gStyle->SetLineStyle(2);
+  gStyle->SetFrameBorderMode(0);
+
+  gStyle->SetPadTopMargin(0.08);
+  gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadRightMargin(0.05);
+
+  TCanvas* can = new TCanvas("c1", "c1", 600, 400);
+
+  h1->SetMarkerStyle(20);
+  h2->SetMarkerStyle(21);
+  h2->SetMarkerColor(kRed);
+  //h_div->SetMarkerSize(1.2);
+  h1->SetMaximum(1);
+
+  //h1->SetTitle("");
+  float labelsize = 1.5 * h1->GetXaxis()->GetLabelSize();
+  h1->GetXaxis()->SetLabelSize(labelsize);
+  h1->GetYaxis()->SetLabelSize(labelsize);
+  h1->GetXaxis()->SetTitle("p_{T} [GeV]");
+  h1->GetXaxis()->SetTitleSize(labelsize);
+  // h1->GetXaxis()->CenterTitle();
+  h1->GetYaxis()->SetTitle(title1.c_str());
+  h1->GetYaxis()->SetTitleSize(1.2*labelsize);
+  //TLine* l1 = new TLine(0, 1, 25, 1);
+  TLine* l2 = new TLine(0, 0.5, 25, 0.5);
+  TLegend* leg = new TLegend(0.75, 0.6, 0.92, 0.7);
+  leg->AddEntry(h1, title1.c_str());
+  leg->AddEntry(h2, title2.c_str());
+
+  h1->Draw("Phist");
+  h2->Draw("Phistsame");
+  //l1->Draw("same");
+  l2->Draw("same");
+  leg->Draw("same");
+
+  can->Print(Form("plots/c_%s.pdf", name.c_str()));
+  can->Clear();
+  delete can;
+
+}
+
 
 void plotIso()
 {
+  /*
   TFile* fni_ttbar = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/noiso_mt2g200/ttall_msdecays.root");
   TFile* fni_wjets = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/noiso_mt2g200/wjets_ht.root");
-
+  
   TH1F* h_genmu_ttbar = (TH1F*) fni_ttbar->Get("srsmNewbase/h_allgenmu_pt");
   TH1F* h_genmu_wjets = (TH1F*) fni_wjets->Get("srsmNewbase/h_allgenmu_pt");
 
@@ -143,8 +195,8 @@ void plotIso()
   h_absdiv_ttbar->Divide(h_recmu_ttbar);
   h_absdiv_wjets->Divide(h_recmu_wjets);
 
-  plotDiv(h_absdiv_ttbar, "abs_ttbar", "absIso/noIso");
-  plotDiv(h_absdiv_wjets, "abs_wjets", "absIso/noIso");
+  // plotDiv(h_absdiv_ttbar, "abs_ttbar", "absIso/noIso");
+  // plotDiv(h_absdiv_wjets, "abs_wjets", "absIso/noIso");
 
   TH1F* h_mridiv_ttbar = (TH1F*) h_wirecmu_ttbar->Clone("eff_miniRelIso_ttbar");
   TH1F* h_mridiv_wjets = (TH1F*) h_wirecmu_wjets->Clone("eff_miniRelIso_wjets");
@@ -155,8 +207,8 @@ void plotIso()
   h_mridiv_ttbar->Divide(h_recmu_ttbar);
   h_mridiv_wjets->Divide(h_recmu_wjets);
 
-  plotDiv(h_mridiv_ttbar, "mri_ttbar", "miniRelIso/noIso");
-  plotDiv(h_mridiv_wjets, "mri_wjets", "miniRelIso/noIso");
+  // plotDiv(h_mridiv_ttbar, "mri_ttbar", "miniRelIso/noIso");
+  // plotDiv(h_mridiv_wjets, "mri_wjets", "miniRelIso/noIso");
 
   TH1F* h_mrigen_ttbar = (TH1F*) h_wirecmu_ttbar->Clone("effnew_miniRelIso_ttbar");
   TH1F* h_mrigen_wjets = (TH1F*) h_wirecmu_wjets->Clone("effnew_miniRelIso_wjets");
@@ -170,8 +222,8 @@ void plotIso()
   h_mrigen_ttbar->Divide(h_goodmu_ttbar);
   h_mrigen_wjets->Divide(h_goodmu_wjets);
 
-  plotDiv(h_mrigen_ttbar, "mrigen_ttbar", "reco/gen");
-  plotDiv(h_mrigen_wjets, "mrigen_wjets", "reco/gen");
+  // plotDiv(h_mrigen_ttbar, "mrigen_ttbar", "reco/gen");
+  // plotDiv(h_mrigen_wjets, "mrigen_wjets", "reco/gen");
 
   
   TH1F* h_absgen_ttbar = (TH1F*) h_airecmu_ttbar->Clone("effnew_absIso_ttbar");
@@ -183,8 +235,88 @@ void plotIso()
   h_absgen_ttbar->Divide(h_goodmu_ttbar);
   h_absgen_wjets->Divide(h_goodmu_wjets);
 
-  plotDiv(h_absgen_ttbar, "absgen_ttbar", "reco/gen");
-  plotDiv(h_absgen_wjets, "absgen_wjets", "reco/gen");
+  // plotDiv(h_absgen_ttbar, "absgen_ttbar", "reco/gen");
+  // plotDiv(h_absgen_wjets, "absgen_wjets", "reco/gen");
+  */
+  TFile* ftest_ttbar = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/test/ttall_msdecays.root");
+  TFile* ftest_wjets = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/test/wjets_ht.root");
+
+  TH1F* h_smuReal_noiso_ttbar = (TH1F*) ftest_ttbar->Get("srsmNewbase/h_smu_pt_real_noiso");
+  TH1F* h_smuReal_noiso_wjets = (TH1F*) ftest_wjets->Get("srsmNewbase/h_smu_pt_real_noiso");
+
+  TH1F* h_smuReal_wiso_ttbar = (TH1F*) ftest_ttbar->Get("srsmNewbase/h_smu_pt_real_wiso");
+  TH1F* h_smuReal_wiso_wjets = (TH1F*) ftest_wjets->Get("srsmNewbase/h_smu_pt_real_wiso");
+  
+  TH1F* h_smuReal_absiso_ttbar = (TH1F*) ftest_ttbar->Get("srsmNewbase/h_smu_pt_real_absiso");
+  TH1F* h_smuReal_absiso_wjets = (TH1F*) ftest_wjets->Get("srsmNewbase/h_smu_pt_real_absiso");
+  
+  h_smuReal_noiso_ttbar ->Rebin(5);
+  h_smuReal_noiso_wjets ->Rebin(5);
+
+  TH1F* h_mat_mri_ttbar  = (TH1F*) h_smuReal_wiso_ttbar->Clone("effmat_mRelIso_ttbar");
+  TH1F* h_mat_mri_wjets  = (TH1F*) h_smuReal_wiso_wjets->Clone("effmat_mRelIso_wjets");
+
+  h_mat_mri_ttbar  ->Rebin(5);
+  h_mat_mri_wjets  ->Rebin(5);
+
+  h_mat_mri_ttbar  ->Divide(h_smuReal_noiso_ttbar);
+  h_mat_mri_wjets  ->Divide(h_smuReal_noiso_wjets);
+
+  // plotDiv(h_mat_mri_ttbar, "eff_real_mri_ttbar", "mRelIso/noIso");
+  // plotDiv(h_mat_mri_wjets, "eff_real_mri_wjets", "mRelIso/noIso");
+
+  TH1F* h_mat_abs_ttbar = (TH1F*) h_smuReal_absiso_ttbar->Clone("effmat_absIso_ttbar");
+  TH1F* h_mat_abs_wjets = (TH1F*) h_smuReal_absiso_wjets->Clone("effmat_absIso_wjets");
+
+  h_mat_abs_ttbar->Rebin(5);
+  h_mat_abs_wjets->Rebin(5);
+
+  h_mat_abs_ttbar->Divide(h_smuReal_noiso_ttbar);
+  h_mat_abs_wjets->Divide(h_smuReal_noiso_wjets);
+
+  // plotDiv(h_mat_abs_ttbar, "eff_real_abs_ttbar", "absIso/noIso");
+  // plotDiv(h_mat_abs_wjets, "eff_real_abs_wjets", "absIso/noIso");
+
+  // delete h_goodmu_ttbar;
+  // delete h_goodmu_wjets;
+
+  TH1F* h_goodmu_ttbar = (TH1F*) ftest_ttbar->Get("srsmNewbase/h_allgoodgenmu_pt");
+  TH1F* h_goodmu_wjets = (TH1F*) ftest_wjets->Get("srsmNewbase/h_allgoodgenmu_pt");
+
+  h_goodmu_ttbar->Rebin(5);
+  h_goodmu_wjets->Rebin(5);
+
+  TH1F* h_real_mrigen_ttbar = (TH1F*) h_smuReal_wiso_ttbar->Clone("effgen_mRelIso_ttbar");
+  TH1F* h_real_mrigen_wjets = (TH1F*) h_smuReal_wiso_wjets->Clone("effgen_mRelIso_wjets");
+
+  h_real_mrigen_ttbar->Rebin(5);
+  h_real_mrigen_wjets->Rebin(5);
+
+  h_real_mrigen_ttbar->Divide(h_goodmu_ttbar);
+  h_real_mrigen_wjets->Divide(h_goodmu_wjets);
+
+  // plotDiv(h_real_mrigen_ttbar, "eff_real_mrigen_ttbar", "reco/gen");
+  // plotDiv(h_real_mrigen_wjets, "eff_real_mrigen_wjets", "reco/gen");
+
+  TH1F* h_real_absgen_ttbar = (TH1F*) h_smuReal_absiso_ttbar->Clone("effgen_absIso_ttbar");
+  TH1F* h_real_absgen_wjets = (TH1F*) h_smuReal_absiso_wjets->Clone("effgen_absIso_wjets");
+  
+  h_real_absgen_ttbar->Rebin(5);
+  h_real_absgen_wjets->Rebin(5);
+
+  h_real_absgen_ttbar->Divide(h_goodmu_ttbar);
+  h_real_absgen_wjets->Divide(h_goodmu_wjets);
+
+  // plotDiv(h_real_absgen_ttbar, "eff_real_absgen_ttbar", "reco/gen");
+  // plotDiv(h_real_absgen_wjets, "eff_real_absgen_wjets", "reco/gen");
+
+  plotDiv(h_mat_mri_ttbar, h_real_mrigen_ttbar, "eff_comb_mri_ttbar", "mRelIso/reco" , "mRelIso/gen");
+  plotDiv(h_mat_abs_ttbar, h_real_absgen_ttbar, "eff_comb_abs_ttbar",  "absIso/reco" ,  "absIso/gen");
+
+  plotDiv(h_mat_mri_wjets, h_real_mrigen_wjets, "eff_comb_mri_wjets", "mRelIso/reco" , "mRelIso/gen");
+  plotDiv(h_mat_abs_wjets, h_real_absgen_wjets, "eff_comb_abs_wjets",  "absIso/reco" ,  "absIso/gen");
+
+  
 
 
 }
