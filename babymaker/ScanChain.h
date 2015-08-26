@@ -83,6 +83,7 @@ class babyMaker {
   Float_t         gamma_minMTBMet;
   Float_t         zll_minMTBMet;
   Float_t         rl_minMTBMet;
+  Float_t         softlep_minMTBMet;
 
   Float_t         ht;
   Float_t         mt2;
@@ -171,6 +172,26 @@ class babyMaker {
   Int_t           lep_convVeto[max_nlep];   //[nlep]
   Int_t           lep_tightCharge[max_nlep];   //[nlep]
 
+//----- SOFT MUONS
+  Int_t           nsoftmus;
+  Float_t         softmus_pt[max_nlep];
+  Float_t         softmus_eta[max_nlep];
+  Float_t         softmus_phi[max_nlep];
+  Float_t         softmus_mass[max_nlep];
+  Int_t           softmus_charge[max_nlep];
+  Int_t           softmus_pdgId[max_nlep];
+  Float_t         softmus_dxy[max_nlep];
+  Float_t         softmus_dz[max_nlep];
+  Float_t         softmus_sip[max_nlep];
+  Int_t           softmus_tightId[max_nlep];
+  Float_t         softmus_absIso[max_nlep];
+  Float_t         softmus_relIso03[max_nlep];
+  Float_t         softmus_relIso04[max_nlep];
+  Float_t         softmus_miniRelIso[max_nlep];
+  Int_t           softmus_mcMatchId[max_nlep];
+  Int_t           softmus_isReco[max_nlep];
+  Int_t           softmus_isPF[max_nlep];
+  
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;
   Int_t             nisoTrack;
@@ -276,6 +297,20 @@ class babyMaker {
   Float_t         rl_phi;
   Float_t         rl_ht;
 
+  //event level vars recalculated for soft leptons
+  Float_t         softlep_mt2;
+  Float_t         softlep_deltaPhiMin;
+  Float_t         softlep_diffMetMht;
+  Float_t         softlep_met_pt;
+  Float_t         softlep_met_phi;
+  Float_t         softlep_mht_pt;
+  Float_t         softlep_mht_phi;
+  Float_t         softlep_mass;
+  Float_t         softlep_pt;
+  Float_t         softlep_eta;
+  Float_t         softlep_phi;
+  Float_t         softlep_ht;
+  
 //----- GEN PARTICLES
   static const int max_ngenPart = 300;
   Int_t           ngenPart;
