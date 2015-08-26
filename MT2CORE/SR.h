@@ -52,7 +52,9 @@ class SR {
     std::map<std::string, RooDataSet*> crgjRooDataSetMap;
     std::map<std::string, TH1*> crdyHistMap;
     std::map<std::string, TH1*> crrlHistMap;
-
+    std::map<std::string, TH1*> crsoftlHistMap;
+    std::map<std::string, TH1*> srsoftlHistMap;
+ 
   private:
 
     std::string srName_;
