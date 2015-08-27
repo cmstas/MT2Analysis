@@ -643,13 +643,21 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       ///   time to fill histograms    /// 
       ////////////////////////////////////
 
-      fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
+      // fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
-      fillHistosSignalRegion("sr");
+      // fillHistosSignalRegion("sr");
 
-      fillHistosSRBase();
-      fillHistosInclusive();
+      // fillHistosSRBase();
+      // fillHistosInclusive();
 
+      //turn off other CRs for soft lep studies
+      doGJplots = false;
+      doDYplots = false;
+      doRLplots = false;
+      doSLplots = false;
+      doSLMUplots = false;
+      doSLELplots = false;
+      
       if (doGJplots) {
         saveGJplots = true;
 	//fillHistosCRGJ("crgj");
@@ -703,13 +711,13 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
-  savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
-  savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
-  savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
-  savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
-  savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
-  savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
-  savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
+  // savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
+  // savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
+  // savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
+  // savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
+  // savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
+  // savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
+  // savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
