@@ -109,7 +109,7 @@ public :
    Int_t           HLT_Mu8_EleX;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_Photons;   
-   Int_t           HLT_Photon165_HE10;
+   Int_t           HLT_Photon165_HE10;   
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
    Int_t           HLT_ht600prescale;   
