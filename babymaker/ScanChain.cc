@@ -22,13 +22,15 @@
 #include "../CORE/MCSelections.h"
 #include "../CORE/IsoTrackVeto.h"
 #include "../CORE/IsolationTools.h"
+#include "../CORE/MetSelections.h"
 
 // Tools
-#include "../Tools/utils.h"
-#include "../Tools/hemJet.h" 
-#include "../Tools/MT2/MT2.h"
-#include "../Tools/JetCorrector.h"
-#include "../Tools/jetcorr/FactorizedJetCorrector.h"
+#include "../CORE/Tools/utils.h"
+#include "../CORE/Tools/hemJet.h" 
+#include "../CORE/Tools/MT2/MT2.h"
+#include "../CORE/Tools/JetCorrector.h"
+#include "../CORE/Tools/jetcorr/FactorizedJetCorrector.h"
+#include "../CORE/Tools/goodrun.h"
 
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
@@ -40,16 +42,26 @@
 using namespace std;
 using namespace tas;
 
-// turn on to add debugging statements
+// turn on to add debugging statements (default false)
 const bool verbose = false;
-// turn on to apply JEC from text files
+// turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
-// turn on to save prunedGenParticle collection
+// turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
-// turn on to apply trigger cuts to ntuples -> OR of all triggers used
+// turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
 const bool applyTriggerCuts = false;
-// turn on to apply dummy weights for lepton SFs, btag SFs, etc
-const bool applyDummyWeights = true;
+// turn on to apply dummy weights for lepton SFs, btag SFs, etc (default false)
+const bool applyDummyWeights = false;
+// turn on to apply json file to data (default true)
+const bool applyJSON = true;
+// for testing purposes, running on unmerged files (default false)
+const bool removePostProcVars = false;
+// for merging prompt reco with reMINIAOD (default true)
+const bool removeEarlyPromptReco = true;
+// turn on to remove jets overlapping with leptons (default true)
+const bool doJetLepOverlapRemoval = true;
+// turn on to save only isolated leptons (default true)
+const bool applyLeptonIso = true;
 
 //--------------------------------------------------------------------
 
@@ -70,16 +82,43 @@ inline bool sortByValueReverse(const std::pair<int,float>& pair1, const std::pai
 
 //--------------------------------------------------------------------
 
-void babyMaker::ScanChain(TChain* chain, std::string baby_name){
+void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
+  if (bx != 25 && bx != 50) {
+    cout << "ERROR: invalid value for bx: " << bx << ".  Exiting" << endl;
+    return;
+  }
+
+  isPromptReco = false;
+  if (baby_name.find("data_Run2015") != std::string::npos) {
+    isDataFromFileName = true;
+    cout << "running on DATA, based on file name" << endl;
+    if (baby_name.find("PromptReco") != std::string::npos) {
+      isPromptReco = true;
+      cout << "  DATA is PromptReco" << endl;
+      if (removeEarlyPromptReco) cout << "  Removing runs <= 251562" << endl;
+    }
+  } else {
+    isDataFromFileName = false;
+    cout << "running on MC, based on file name" << endl;
+  }
+
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
+
+  const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  if (applyJSON) {
+    cout << "Loading json file: " << json_file << endl;
+    set_goodrun_file(json_file);
+  }
 
   // File Loop
   int nDuplicates = 0;
+  int nFailJSON = 0;
+  int nFailRunNumber = 0;
   int nEvents = chain->GetEntries();
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
@@ -109,10 +148,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     if (applyJECfromFile) {
       jetcorr_filenames_pfL1FastJetL2L3.clear();
 
-      // files for Phys14 MC  
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V4_MC_L2Relative_AK4PFchs.txt");
-      jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt");
+      // files for RunIISpring15 MC
+      if (bx == 50) {
+	if (isDataFromFileName) {
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L1FastJet_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2Relative_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L3Absolute_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_DATA_L2L3Residual_AK4PFchs.txt");
+	} else {
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L1FastJet_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L2Relative_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_50nsV4_MC_L3Absolute_AK4PFchs.txt");
+	}
+      }
+      else if (bx == 25) {
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L3Absolute_AK4PFchs.txt");
+      }
+
+      cout << "applying JEC from the following files:" << endl;
+      for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
+	cout << "   " << jetcorr_filenames_pfL1FastJetL2L3.at(ifile) << endl;
+      }
 
       jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
     }
@@ -120,7 +178,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 100; ++event) {
+    //for( unsigned int event = 0; event < 1000; ++event) {
 
       // Get Event Content
       tree->LoadTree(event);
@@ -134,34 +192,73 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       InitBabyNtuple();
 
       isData = cms3.evt_isRealData();
+      // sanity check on whether this is data
+      if (bool(isData) != isDataFromFileName) {
+	cout << "ERROR: file name and content disagree on whether this is real data!! Exiting" << endl;
+	return;
+      }
 
       if (verbose) cout << "before trigger" << endl;
 
       //TRIGGER - check first to enable cuts
-      HLT_HT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_MET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v"); 
-      HLT_ht350met120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v"); 
+      HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
+      HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v"); 
+      HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v"); 
+      HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
 
-      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu20_eta2p1_IterTrk02_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_IterTrk02_v"); 
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); 
-      HLT_MuEG         = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v") || passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); 
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") || passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-      HLT_Photons      = passHLTTriggerPattern("HLT_Photon155_v"); 
+      HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
+	passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
+	passHLTTriggerPattern("HLT_IsoTkMu20_v"); 
+      HLT_SingleEl     = passHLTTriggerPattern("HLT_Ele23_WPLoose_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WPLoose_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele23_WP75_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WP75_Gsf_v") || passHLTTriggerPattern("HLT_Ele32_eta2p1_WP75_Gsf_v");
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+	passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
+      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v"); 
+      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v"); 
+      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v"); 
+      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
+      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
 
-      if (!isData && applyTriggerCuts && !(HLT_HT900 || HLT_ht350met120 || HLT_Photons || HLT_SingleMu 
-					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG)) continue;
+      if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
+					   || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
 
       run  = cms3.evt_run();
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
 
-      evt_nEvts = cms3.evt_nEvts();
-      evt_scale1fb = cms3.evt_scale1fb();
-      evt_xsec = cms3.evt_xsec_incl();
-      evt_kfactor = cms3.evt_kfactor();
-      evt_filter = cms3.evt_filt_eff();
-      puWeight = 1.;
-      nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+      if ( applyJSON && isData && !goodrun(run, lumi) ) {
+	++nFailJSON;
+	continue;
+      }
+      
+      if ( isData && isPromptReco && removeEarlyPromptReco && (run <= 251562) ) {
+	++nFailRunNumber;
+	continue;
+      }
+      
+      if (!removePostProcVars) {
+	evt_nEvts = cms3.evt_nEvts();
+	evt_scale1fb = cms3.evt_scale1fb();
+	evt_xsec = cms3.evt_xsec_incl();
+	evt_kfactor = cms3.evt_kfactor();
+	evt_filter = cms3.evt_filt_eff();
+      }
+      if (!isData) {
+	genWeight = cms3.genps_weight();
+	puWeight = 1.;
+	nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
+      }
+      
       rho = cms3.evt_fixgridfastjet_all_rho(); //this one is used in JECs
 
       if (verbose) cout << "before vertices" << endl;
@@ -187,7 +284,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       }
       met_rawPt  = cms3.evt_pfmet_raw();
       met_rawPhi = cms3.evt_pfmetPhi_raw();
-
+      met_caloPt  = cms3.evt_calomet();
+      met_caloPhi = cms3.evt_calometPhi();
+      metStruct trkmet = trackerMET(0.1);
+      met_trkPt = trkmet.met;
+      met_trkPhi = trkmet.metphi;
+      
       // MET FILTERS
       Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
       Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
@@ -202,11 +304,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       // note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
       Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
       // note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
-      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+      //      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+      // recompute HBHE noise filter decision using CORE to avoid maxZeros issue
+      Flag_HBHENoiseFilter                          = hbheNoiseFilter();
+      Flag_HBHEIsoNoiseFilter                       = hbheIsoNoiseFilter();
       // necessary?
       Flag_METFilters                               = cms3.filt_metfilter();
 
       // gen block -- for MC only
+      ngenPart = 0;
+      ngenLep = 0;
+      ngenStat23 = 0;
+      ngenGamma = 0;
+      ngenTau = 0;
+      ngenLepFromTau = 0;
       if (!isData) {
 	if (verbose) cout << "before sparm values" << endl;
 
@@ -227,12 +338,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	if (verbose) cout << "before gen particles" << endl;
 
 	//GEN PARTICLES
-	ngenPart = 0;
-	ngenLep = 0;
-	ngenStat23 = 0;
-	ngenGamma = 0;
-	ngenTau = 0;
-	ngenLepFromTau = 0;
 	LorentzVector recoil(0,0,0,0);
 	int nHardScatter = 0;
 	for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
@@ -682,12 +787,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<float>vec_lep_relIso03;
       vector<float>vec_lep_relIso04;
       vector<float>vec_lep_miniRelIso;
+      vector<float>vec_lep_relIsoAn04;
       vector<int>  vec_lep_mcMatchId;
       vector<int>  vec_lep_lostHits;
       vector<int>  vec_lep_convVeto;
       vector<int>  vec_lep_tightCharge;
 
-      vector<LorentzVector> p4sLeptonsForJetCleaning;
+      vector<LorentzVector> p4sUniqueLeptons;
 
       vector<LorentzVector> p4sForHems;
       vector<LorentzVector> p4sForHemsGamma;
@@ -709,8 +815,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
-        if(!electronID(iEl,id_level_t::HAD_veto_v2)) continue;
-        nElectrons10++;
+	// first check ID then iso
+        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v3)) continue;
+	bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v3);
+	if(applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
@@ -723,7 +831,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,2) );
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
-        vec_lep_miniRelIso.push_back ( elMiniRelIso(iEl) );
+        vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl) );
+        vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
         if (!isData && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
           vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
@@ -736,10 +845,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         nlep++;
 
-	// for mt2 and mht in lepton control region
-	p4sForHems.push_back(cms3.els_p4().at(iEl));
-	p4sForDphi.push_back(cms3.els_p4().at(iEl));
-	p4sLeptonsForJetCleaning.push_back(cms3.els_p4().at(iEl));
+	// only use isolated leptons for counters, overlaps, etc
+	if (pass_iso) {
+	  nElectrons10++;
+	  p4sUniqueLeptons.push_back(cms3.els_p4().at(iEl));
+
+	  // for mt2 and mht in lepton control region
+	  if (doJetLepOverlapRemoval) {
+	    p4sForHems.push_back(cms3.els_p4().at(iEl));
+	    p4sForDphi.push_back(cms3.els_p4().at(iEl));
+	  }
+	}
 
 	if (!isData && applyDummyWeights) {
 	  weightStruct weights = getLepSF(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
@@ -757,8 +873,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
         if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
-        if(!muonID(iMu,id_level_t::HAD_loose_v2)) continue;
-        nMuons10++;
+	// first check ID then iso
+        if(!muonID(iMu,id_level_t::HAD_loose_noiso_v3)) continue;
+        bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v3);
+	if (applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
         vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
@@ -771,7 +889,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_lep_tightId.push_back ( muTightID(iMu,analysis_t::HAD,2) );
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
-        vec_lep_miniRelIso.push_back ( muMiniRelIso(iMu) );
+        vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu) );
+        vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
         if (!isData && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
           vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
@@ -783,10 +902,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         nlep++;
 
-	// for mt2 and mht in lepton control region
-	p4sForHems.push_back(cms3.mus_p4().at(iMu));
-	p4sForDphi.push_back(cms3.mus_p4().at(iMu));
-	p4sLeptonsForJetCleaning.push_back(cms3.mus_p4().at(iMu));
+	// only use isolated leptons for counters, overlaps, etc
+	if (pass_iso) {
+	  nMuons10++;
+	  p4sUniqueLeptons.push_back(cms3.mus_p4().at(iMu));
+
+	  // for mt2 and mht in lepton control region
+	  if (doJetLepOverlapRemoval) {
+	    p4sForHems.push_back(cms3.mus_p4().at(iMu));
+	    p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+	  }
+	}
 
 	if (!isData && applyDummyWeights) {
 	  weightStruct weights = getLepSF(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
@@ -820,6 +946,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         lep_relIso03[i]    = vec_lep_relIso03.at(it->first);
         lep_relIso04[i]    = vec_lep_relIso04.at(it->first);
         lep_miniRelIso[i]  = vec_lep_miniRelIso.at(it->first);
+        lep_relIsoAn04[i]  = vec_lep_relIsoAn04.at(it->first);
         lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->first);
         lep_lostHits[i]    = vec_lep_lostHits.at(it->first);
         lep_convVeto[i]    = vec_lep_convVeto.at(it->first);
@@ -908,6 +1035,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       vector<float>vec_isoTrack_phi;
       vector<float>vec_isoTrack_mass;
       vector<float>vec_isoTrack_absIso;
+      vector<float>vec_isoTrack_relIsoAn04;
       vector<float>vec_isoTrack_dz;
       vector<int>  vec_isoTrack_pdgId;
       vector<int>  vec_isoTrack_mcMatchId;
@@ -915,19 +1043,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nisoTrack = 0;
       nPFLep5LowMT = 0;
       nPFHad10LowMT = 0;
+      nPFCHCand3 = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
  
         if(cms3.pfcands_charge().at(ipf) == 0) continue;
         if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
 
         float cand_pt = cms3.pfcands_p4().at(ipf).pt();
+	if(cand_pt > 3) ++nPFCHCand3;
         if(cand_pt < 5) continue;
  
         float absiso  = TrackIso(ipf);
-        if(absiso >= min(0.2*cand_pt, 8.0)) continue;
+        if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
 	float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
 	int pdgId = abs(cms3.pfcands_particleId().at(ipf));
+	float an04 = PFCandRelIsoAn04(ipf);
 
 	if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
 	  ++nPFLep5LowMT;
@@ -935,19 +1066,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  // use PF leptons for hemispheres etc same as reco leptons
 	  //  BUT first do overlap removal with reco leptons to avoid double counting
 	  bool overlap = false;
-	  for(int iLep = 0; iLep < nlep; iLep++){
-	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), lep_eta[iLep], pfcands_p4().at(ipf).phi(), lep_phi[iLep]);
+	  for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
+	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
 	    if (thisDR < 0.1) {
 	      overlap = true;
 	      break;
 	    }
 	  } // loop over reco leps
 	  if (!overlap) {
-	    p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
-	    p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
-	    p4sLeptonsForJetCleaning.push_back(cms3.pfcands_p4().at(ipf));
+	    p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
+	    if (doJetLepOverlapRemoval) {
+	      p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
+	      p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
+	    }
 	  }
-	} 
+	} // passing pflepton 
 
 	if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
 
@@ -958,6 +1091,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         vec_isoTrack_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
         vec_isoTrack_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
         vec_isoTrack_absIso.push_back( absiso                           );
+        vec_isoTrack_relIsoAn04.push_back( an04                         );
         vec_isoTrack_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
         vec_isoTrack_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
         vec_isoTrack_mcMatchId.push_back ( 0 );
@@ -980,6 +1114,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
         isoTrack_phi[i]    = vec_isoTrack_phi.at(it->first);
         isoTrack_mass[i]   = vec_isoTrack_mass.at(it->first);
         isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->first);
+        isoTrack_relIsoAn04[i] = vec_isoTrack_relIsoAn04.at(it->first);
         isoTrack_dz[i]     = vec_isoTrack_dz.at(it->first);
         isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->first);
         isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->first);
@@ -989,8 +1124,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       // count number of unique lowMT leptons (e/mu)
       //  same collection as those used for jet/lepton overlap, but require MT < 100 explicitly
       nLepLowMT = 0;
-      for (unsigned int ilep = 0; ilep < p4sLeptonsForJetCleaning.size(); ++ilep) {
-	float mt = MT(p4sLeptonsForJetCleaning.at(ilep).pt(),p4sLeptonsForJetCleaning.at(ilep).phi(),met_pt,met_phi);
+      for (unsigned int ilep = 0; ilep < p4sUniqueLeptons.size(); ++ilep) {
+	float mt = MT(p4sUniqueLeptons.at(ilep).pt(),p4sUniqueLeptons.at(ilep).phi(),met_pt,met_phi);
 	if (mt < 100.) ++nLepLowMT;
       }
         
@@ -1140,9 +1275,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
         if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
         if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-	// note this uses the eta of the jet as stored in CMS3
-	//  chance for small discrepancies if JEC changes direction slightly..
-        if(!isLoosePFJetV2(iJet)) continue;
 
         passJets.push_back( std::pair<int,float>(iJet, pfjet_p4_cor.pt()) );
 
@@ -1155,8 +1287,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
       //check overlapping with leptons
       //only want to remove the closest jet to a lepton, threshold deltaR < 0.4
+      // if a jet is the closest one to 2 leptons, only remove that 1 jet. This loop will find it twice
       vector<int> removedJets; //index of jets to be removed because they overlap with a lepton
-      for(unsigned int iLep = 0; iLep < p4sLeptonsForJetCleaning.size(); iLep++){
+      for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
 
         float minDR = 0.4;
         int minIndex = -1;
@@ -1166,18 +1299,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if(!isLoosePFJetV2(iJet)) continue;
 
-          bool alreadyRemoved = false;
-          for(unsigned int j=0; j<removedJets.size(); j++){
-            if(iJet == removedJets.at(j)){
-              alreadyRemoved = true;
-              break;
-            }
-          }
-          if(alreadyRemoved) continue;
-
-          float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), p4sLeptonsForJetCleaning.at(iLep).eta(), p4sCorrJets.at(iJet).phi(), p4sLeptonsForJetCleaning.at(iLep).phi());
+          float thisDR = DeltaR(p4sCorrJets.at(iJet).eta(), p4sUniqueLeptons.at(iLep).eta(), p4sCorrJets.at(iJet).phi(), p4sUniqueLeptons.at(iLep).phi());
           if(thisDR < minDR){
             minDR = thisDR; 
             minIndex = iJet;
@@ -1202,7 +1325,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
           if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
-          if(!isLoosePFJetV2(iJet)) continue;
 
           bool alreadyRemoved = false;
           for(unsigned int j=0; j<removedJetsGamma.size(); j++){
@@ -1227,15 +1349,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
       nJet40 = 0;
       nBJet20 = 0;
       nBJet25 = 0;
+      nBJet30 = 0;
       nBJet40 = 0;
+      nJet30FailId = 0;
+      nJet100FailId = 0;
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
 
       gamma_nJet30 = 0;
       gamma_nJet40 = 0;
+      gamma_nJet30FailId = 0;
+      gamma_nJet100FailId = 0;
       gamma_nBJet20 = 0;
       gamma_nBJet25 = 0;
+      gamma_nBJet30 = 0;
       gamma_nBJet40 = 0;
       gamma_minMTBMet = 999999.;
       gamma_jet1_pt = 0.;
@@ -1268,7 +1396,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
             break;
           }
         }
-        if(isOverlapJet) continue;
+        if(doJetLepOverlapRemoval && isOverlapJet) continue;
+
+	bool isOverlapJetGamma = false;
+	if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) { 
+	  //check against list of jets that overlap with a photon
+	  for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	    if(iJet == removedJetsGamma.at(j)){
+	      isOverlapJetGamma = true;
+	      break;
+	    }
+	  }
+	} // pt 20 eta 2.5
 
 	if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
@@ -1276,21 +1415,38 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	}
 
 	// only save jets with pt 20 eta 4.7
-        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ){ 
+        if( (p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 4.7) ) {
+	  
+	  // first check jet ID - count the number of jets that fail
+	  if(!isLoosePFJet_50nsV1(iJet)) {
+	    if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
+	    if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
+	    if (!isOverlapJetGamma) {
+	      if (p4sCorrJets.at(iJet).pt() > 30.0) ++gamma_nJet30FailId;
+	      if (p4sCorrJets.at(iJet).pt() > 100.0) ++gamma_nJet100FailId;
+	    }
+	    continue;
+	  }
+
 	  jet_pt[njet]   = p4sCorrJets.at(iJet).pt();
 	  jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
 	  jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
 	  jet_mass[njet] = cms3.pfjets_mass().at(iJet);
-	  jet_btagCSV[njet] = cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
-	  jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
-	  jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	  jet_btagCSV[njet] = cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
+	  if (!isData) {
+	    jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
+	    jet_mcFlavour[njet] = cms3.pfjets_partonFlavour().at(iJet);
+	  } else {
+	    jet_mcPt[njet] = -999.;
+	    jet_mcFlavour[njet] = -999;
+	  }
 	  //jet_qgl
 	  jet_area[njet] = cms3.pfjets_area().at(iJet);
 	  jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-	  if(isTightPFJet(iJet))  jet_id[njet] = 3;
-	  else if(isMediumPFJet(iJet)) jet_id[njet] = 2;
-	  else jet_id[njet] = 1; //required to be loose above
+	  if (isTightPFJet_50nsV1(iJet)) jet_id[njet] = 3;
+	  else if (isLoosePFJet_50nsV1(iJet)) jet_id[njet] = 1;
+	  else jet_id[njet] = 0;
 
 	  jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
@@ -1313,7 +1469,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	      if (jet_pt[njet] > 40.) nJet40++;
 	    } // pt40
 	    //CSVv2IVFM
-	    if(jet_btagCSV[njet] >= 0.814) {
+	    if(jet_btagCSV[njet] >= 0.890) {
 	      nBJet20++; 
 	      // dummy btag SF
 	      if (!isData && applyDummyWeights) {
@@ -1332,8 +1488,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		}
 	      }
 	      if (jet_pt[njet] > 25.0) nBJet25++; 
-	      if (jet_pt[njet] > 40.0) {
-		nBJet40++; 
+	      if (jet_pt[njet] > 30.0) {
+		nBJet30++; 
+		if (jet_pt[njet] > 40.0) nBJet40++; 
 		float mt = MT(jet_pt[njet],jet_phi[njet],met_pt,met_phi);
 		if (mt < minMTBMet) minMTBMet = mt;
 		if (nlep == 2) {
@@ -1344,7 +1501,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		  float rlmt = MT(jet_pt[njet],jet_phi[njet],rl_met_pt,rl_met_phi);
 		  if (rlmt < rl_minMTBMet) rl_minMTBMet = rlmt;
 		}
-	      } // pt 40
+	      } // pt 30
 	    } // pass med btag
 	    else if (!isData && applyDummyWeights) { // fail med btag -- needed for SF event weights
 	      float eff = getBtagEff(jet_pt[njet], jet_eta[njet], jet_mcFlavour[njet]);
@@ -1369,16 +1526,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	  }
 
 	  // fill gamma_XXX variables before checking for lepton overlap. Why? Let's keep them consistent with the lepton-overlapped jets
-	  if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ){ 
-	    //check against list of jets that overlap with a photon
-	    bool isOverlapJetGamma = false;
-	    for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-	      if(iJet == removedJetsGamma.at(j)){
-		isOverlapJetGamma = true;
-		break;
-	      }
-	    }
-
+	  if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) { 
 	    if(!isOverlapJetGamma) {
 	      if (p4sCorrJets.at(iJet).pt() > 30.0) {
 		// store leading/subleading central jet pt.
@@ -1390,14 +1538,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 		gamma_nJet30++;
 		if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
 	      } // pt40
-	      if(cms3.pfjets_combinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.814) { //CSVv2IVFM
+	      if(cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet) >= 0.890) { //CSVv2IVFM
 		gamma_nBJet20++; 
 		if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
-		if (p4sCorrJets.at(iJet).pt() > 40.0) {
-		  gamma_nBJet40++; 
+		if (p4sCorrJets.at(iJet).pt() > 30.0) {
+		  gamma_nBJet30++;
+		  if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nBJet40++; 
 		  float mt = MT( p4sCorrJets.at(iJet).pt(),p4sCorrJets.at(iJet).phi(),gamma_met_pt,gamma_met_phi);
 		  if (mt < gamma_minMTBMet) gamma_minMTBMet = mt;	 
-		} // pt40
+		} // pt30
 	      } // pass med btag  
 	    } // not overlap with photon
 	  } // pt 20 eta 2.5 
@@ -1692,6 +1841,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 	}
       }
 
+      if (verbose) cout << "before fill" << endl;
+
       FillBabyNtuple();
 
    }//end loop on events in a file
@@ -1706,6 +1857,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
   }
 
   cout << nDuplicates << " duplicate events were skipped." << endl;
+  cout << nFailJSON << " events were removed by JSON." << endl;
+  cout << nFailRunNumber << " events were removed due to run number." << endl;
 
   CloseBabyNtuple();
 
@@ -1723,9 +1876,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name){
 
 void babyMaker::MakeBabyNtuple(const char *BabyFilename){
 
-  //
-  TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
-  rootdir->cd();
   BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
   BabyFile_->cd();
   BabyTree_ = new TTree("mt2", "A Baby Ntuple");
@@ -1740,6 +1890,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("evt_filter", &evt_filter );
   BabyTree_->Branch("evt_nEvts", &evt_nEvts, "evt_nEvts/l" );
   BabyTree_->Branch("evt_id", &evt_id );
+  BabyTree_->Branch("genWeight", &genWeight );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
@@ -1748,12 +1899,16 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nJet40", &nJet40 );
   BabyTree_->Branch("nBJet20", &nBJet20 );
   BabyTree_->Branch("nBJet25", &nBJet25 );
+  BabyTree_->Branch("nBJet30", &nBJet30 );
   BabyTree_->Branch("nBJet40", &nBJet40 );
+  BabyTree_->Branch("nJet30FailId", &nJet30FailId );
+  BabyTree_->Branch("nJet100FailId", &nJet100FailId );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
   BabyTree_->Branch("nLepLowMT", &nLepLowMT );
   BabyTree_->Branch("nTaus20", &nTaus20 );
   BabyTree_->Branch("nGammas20", &nGammas20 );
+  BabyTree_->Branch("nPFCHCand3", &nPFCHCand3 );
   BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
   BabyTree_->Branch("diffMetMht", &diffMetMht );
   BabyTree_->Branch("minMTBMet", &minMTBMet );
@@ -1782,6 +1937,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("met_rawPhi", &met_rawPhi );
   BabyTree_->Branch("met_caloPt",  &met_caloPt );
   BabyTree_->Branch("met_caloPhi", &met_caloPhi );
+  BabyTree_->Branch("met_trkPt",  &met_trkPt );
+  BabyTree_->Branch("met_trkPhi", &met_trkPhi );
   BabyTree_->Branch("met_genPt",  &met_genPt );
   BabyTree_->Branch("met_genPhi", &met_genPhi );
   BabyTree_->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter );
@@ -1794,17 +1951,27 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
   BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
   BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
+  BabyTree_->Branch("Flag_HBHEIsoNoiseFilter", &Flag_HBHEIsoNoiseFilter );
   BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
   BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
   BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
-  BabyTree_->Branch("HLT_HT900", &HLT_HT900 );
-  BabyTree_->Branch("HLT_MET170", &HLT_MET170 );
-  BabyTree_->Branch("HLT_ht350met120", &HLT_ht350met120 );
+  BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
+  BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
+  BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
+  BabyTree_->Branch("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100 );
+  BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
   BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
+  BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
   BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
-  BabyTree_->Branch("HLT_MuEG", &HLT_MuEG );
+  BabyTree_->Branch("HLT_MuX_Ele12", &HLT_MuX_Ele12 );
+  BabyTree_->Branch("HLT_Mu8_EleX", &HLT_Mu8_EleX );
   BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
-  BabyTree_->Branch("HLT_Photons", &HLT_Photons );
+  BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
+  BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+  BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+  BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+  BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
+  BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
   BabyTree_->Branch("nlep", &nlep, "nlep/I" );
   BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
   BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
@@ -1818,6 +1985,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
   BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
   BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
+  BabyTree_->Branch("lep_relIsoAn04", lep_relIsoAn04, "lep_relIsoAn04[nlep]/F" );
   BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
   BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
   BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
@@ -1864,6 +2032,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_relIsoAn04", isoTrack_relIsoAn04, "isoTrack_relIsoAn04[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
   BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
   BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
@@ -1898,8 +2067,11 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
   BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
   BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
+  BabyTree_->Branch("gamma_nJet30FailId", &gamma_nJet30FailId );
+  BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
   BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
   BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
+  BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
   BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
   BabyTree_->Branch("gamma_ht", &gamma_ht );
   BabyTree_->Branch("gamma_deltaPhiMin", &gamma_deltaPhiMin );
@@ -1941,59 +2113,65 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("rl_eta", &rl_eta );
   BabyTree_->Branch("rl_phi", &rl_phi );
   BabyTree_->Branch("rl_ht", &rl_ht );
-  if (saveGenParticles) {
-    BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
-    BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
-    BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
-    BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
-    BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
-    BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
-    BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
-    BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
-    BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
-    BabyTree_->Branch("genPart_grandmotherId", genPart_grandmotherId, "genPart_grandmotherId[ngenPart]/I" );
+  if (!isDataFromFileName) {
+    if (saveGenParticles) {
+      BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
+      BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
+      BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
+      BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
+      BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
+      BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
+      BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
+      BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
+      BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
+      BabyTree_->Branch("genPart_grandmotherId", genPart_grandmotherId, "genPart_grandmotherId[ngenPart]/I" );
+    }
+    BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
+    BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
+    BabyTree_->Branch("genLep_eta", genLep_eta, "genLep_eta[ngenLep]/F" );
+    BabyTree_->Branch("genLep_phi", genLep_phi, "genLep_phi[ngenLep]/F" );
+    BabyTree_->Branch("genLep_mass", genLep_mass, "genLep_mass[ngenLep]/F" );
+    BabyTree_->Branch("genLep_pdgId", genLep_pdgId, "genLep_pdgId[ngenLep]/I" );
+    BabyTree_->Branch("genLep_status", genLep_status, "genLep_status[ngenLep]/I" );
+    BabyTree_->Branch("genLep_charge", genLep_charge, "genLep_charge[ngenLep]/F" );
+    BabyTree_->Branch("genLep_sourceId", genLep_sourceId, "genLep_sourceId[ngenLep]/I" );
+    BabyTree_->Branch("ngenStat23", &ngenStat23, "ngenStat23/I" );
+    BabyTree_->Branch("genStat23_pt", genStat23_pt, "genStat23_pt[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_eta", genStat23_eta, "genStat23_eta[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_phi", genStat23_phi, "genStat23_phi[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_mass", genStat23_mass, "genStat23_mass[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_pdgId", genStat23_pdgId, "genStat23_pdgId[ngenStat23]/I" );
+    BabyTree_->Branch("genStat23_status", genStat23_status, "genStat23_status[ngenStat23]/I" );
+    BabyTree_->Branch("genStat23_charge", genStat23_charge, "genStat23_charge[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_sourceId", genStat23_sourceId, "genStat23_sourceId[ngenStat23]/I" );
+    BabyTree_->Branch("ngenGamma", &ngenGamma, "ngenGamma/I" );
+    BabyTree_->Branch("genGamma_pt", genGamma_pt, "genGamma_pt[ngenGamma]/F" );
+    BabyTree_->Branch("genGamma_eta", genGamma_eta, "genGamma_eta[ngenGamma]/F" );
+    BabyTree_->Branch("genGamma_phi", genGamma_phi, "genGamma_phi[ngenGamma]/F" );
+    BabyTree_->Branch("genGamma_motherId", genGamma_motherId, "genGamma_motherId[ngenGamma]/I" );
+    BabyTree_->Branch("ngenTau", &ngenTau, "ngenTau/I" );
+    BabyTree_->Branch("genTau_pt", genTau_pt, "genTau_pt[ngenTau]/F" );
+    BabyTree_->Branch("genTau_eta", genTau_eta, "genTau_eta[ngenTau]/F" );
+    BabyTree_->Branch("genTau_phi", genTau_phi, "genTau_phi[ngenTau]/F" );
+    BabyTree_->Branch("genTau_mass", genTau_mass, "genTau_mass[ngenTau]/F" );
+    BabyTree_->Branch("genTau_pdgId", genTau_pdgId, "genTau_pdgId[ngenTau]/I" );
+    BabyTree_->Branch("genTau_status", genTau_status, "genTau_status[ngenTau]/I" );
+    BabyTree_->Branch("genTau_charge", genTau_charge, "genTau_charge[ngenTau]/F" );
+    BabyTree_->Branch("genTau_sourceId", genTau_sourceId, "genTau_sourceId[ngenTau]/I" );
+    BabyTree_->Branch("ngenLepFromTau", &ngenLepFromTau, "ngenLepFromTau/I" );
+    BabyTree_->Branch("genLepFromTau_pt", genLepFromTau_pt, "genLepFromTau_pt[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_eta", genLepFromTau_eta, "genLepFromTau_eta[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_phi", genLepFromTau_phi, "genLepFromTau_phi[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_mass", genLepFromTau_mass, "genLepFromTau_mass[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_pdgId", genLepFromTau_pdgId, "genLepFromTau_pdgId[ngenLepFromTau]/I" );
+    BabyTree_->Branch("genLepFromTau_status", genLepFromTau_status, "genLepFromTau_status[ngenLepFromTau]/I" );
+    BabyTree_->Branch("genLepFromTau_charge", genLepFromTau_charge, "genLepFromTau_charge[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
+    BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
+    BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
+    BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
+    BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
   }
-  BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
-  BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
-  BabyTree_->Branch("genLep_eta", genLep_eta, "genLep_eta[ngenLep]/F" );
-  BabyTree_->Branch("genLep_phi", genLep_phi, "genLep_phi[ngenLep]/F" );
-  BabyTree_->Branch("genLep_mass", genLep_mass, "genLep_mass[ngenLep]/F" );
-  BabyTree_->Branch("genLep_pdgId", genLep_pdgId, "genLep_pdgId[ngenLep]/I" );
-  BabyTree_->Branch("genLep_status", genLep_status, "genLep_status[ngenLep]/I" );
-  BabyTree_->Branch("genLep_charge", genLep_charge, "genLep_charge[ngenLep]/F" );
-  BabyTree_->Branch("genLep_sourceId", genLep_sourceId, "genLep_sourceId[ngenLep]/I" );
-  BabyTree_->Branch("ngenStat23", &ngenStat23, "ngenStat23/I" );
-  BabyTree_->Branch("genStat23_pt", genStat23_pt, "genStat23_pt[ngenStat23]/F" );
-  BabyTree_->Branch("genStat23_eta", genStat23_eta, "genStat23_eta[ngenStat23]/F" );
-  BabyTree_->Branch("genStat23_phi", genStat23_phi, "genStat23_phi[ngenStat23]/F" );
-  BabyTree_->Branch("genStat23_mass", genStat23_mass, "genStat23_mass[ngenStat23]/F" );
-  BabyTree_->Branch("genStat23_pdgId", genStat23_pdgId, "genStat23_pdgId[ngenStat23]/I" );
-  BabyTree_->Branch("genStat23_status", genStat23_status, "genStat23_status[ngenStat23]/I" );
-  BabyTree_->Branch("genStat23_charge", genStat23_charge, "genStat23_charge[ngenStat23]/F" );
-  BabyTree_->Branch("genStat23_sourceId", genStat23_sourceId, "genStat23_sourceId[ngenStat23]/I" );
-  BabyTree_->Branch("ngenGamma", &ngenGamma, "ngenGamma/I" );
-  BabyTree_->Branch("genGamma_pt", genGamma_pt, "genGamma_pt[ngenGamma]/F" );
-  BabyTree_->Branch("genGamma_eta", genGamma_eta, "genGamma_eta[ngenGamma]/F" );
-  BabyTree_->Branch("genGamma_phi", genGamma_phi, "genGamma_phi[ngenGamma]/F" );
-  BabyTree_->Branch("genGamma_motherId", genGamma_motherId, "genGamma_motherId[ngenGamma]/I" );
-  BabyTree_->Branch("ngenTau", &ngenTau, "ngenTau/I" );
-  BabyTree_->Branch("genTau_pt", genTau_pt, "genTau_pt[ngenTau]/F" );
-  BabyTree_->Branch("genTau_eta", genTau_eta, "genTau_eta[ngenTau]/F" );
-  BabyTree_->Branch("genTau_phi", genTau_phi, "genTau_phi[ngenTau]/F" );
-  BabyTree_->Branch("genTau_mass", genTau_mass, "genTau_mass[ngenTau]/F" );
-  BabyTree_->Branch("genTau_pdgId", genTau_pdgId, "genTau_pdgId[ngenTau]/I" );
-  BabyTree_->Branch("genTau_status", genTau_status, "genTau_status[ngenTau]/I" );
-  BabyTree_->Branch("genTau_charge", genTau_charge, "genTau_charge[ngenTau]/F" );
-  BabyTree_->Branch("genTau_sourceId", genTau_sourceId, "genTau_sourceId[ngenTau]/I" );
-  BabyTree_->Branch("ngenLepFromTau", &ngenLepFromTau, "ngenLepFromTau/I" );
-  BabyTree_->Branch("genLepFromTau_pt", genLepFromTau_pt, "genLepFromTau_pt[ngenLepFromTau]/F" );
-  BabyTree_->Branch("genLepFromTau_eta", genLepFromTau_eta, "genLepFromTau_eta[ngenLepFromTau]/F" );
-  BabyTree_->Branch("genLepFromTau_phi", genLepFromTau_phi, "genLepFromTau_phi[ngenLepFromTau]/F" );
-  BabyTree_->Branch("genLepFromTau_mass", genLepFromTau_mass, "genLepFromTau_mass[ngenLepFromTau]/F" );
-  BabyTree_->Branch("genLepFromTau_pdgId", genLepFromTau_pdgId, "genLepFromTau_pdgId[ngenLepFromTau]/I" );
-  BabyTree_->Branch("genLepFromTau_status", genLepFromTau_status, "genLepFromTau_status[ngenLepFromTau]/I" );
-  BabyTree_->Branch("genLepFromTau_charge", genLepFromTau_charge, "genLepFromTau_charge[ngenLepFromTau]/F" );
-  BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
   BabyTree_->Branch("njet", &njet, "njet/I" );
   BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
   BabyTree_->Branch("jet_eta", jet_eta, "jet_eta[njet]/F" );
@@ -2007,10 +2185,6 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
   BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
   BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
-  BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
-  BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
-  BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
-  BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
   BabyTree_->Branch("weight_lepsf", &weight_lepsf );
   BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
   BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
@@ -2045,6 +2219,7 @@ void babyMaker::InitBabyNtuple () {
   evt_filter = -999.0;
   evt_nEvts = 0;
   //evt_id = -1; // don't reset every event
+  genWeight = 0;
   puWeight = -999.0;
   nVert = -999;
   nTrueInt = -999;
@@ -2053,12 +2228,16 @@ void babyMaker::InitBabyNtuple () {
   nJet40 = -999;
   nBJet20 = -999;
   nBJet25 = -999;
+  nBJet30 = -999;
   nBJet40 = -999;
+  nJet30FailId = -999;
+  nJet100FailId = -999;
   nMuons10 = -999;
   nElectrons10 = -999;
   nLepLowMT = -999;
   nTaus20 = -999;
   nGammas20 = -999;
+  nPFCHCand3 = -999;
   deltaPhiMin = -999.0;
   diffMetMht = -999.0;
   minMTBMet = -999.0;
@@ -2088,6 +2267,8 @@ void babyMaker::InitBabyNtuple () {
   met_rawPhi = -999.0;
   met_caloPt = -999.0;
   met_caloPhi = -999.0;
+  met_trkPt = -999.0;
+  met_trkPhi = -999.0;
   met_genPt = -999.0;
   met_genPhi = -999.0;
   Flag_EcalDeadCellTriggerPrimitiveFilter = -999;
@@ -2100,17 +2281,27 @@ void babyMaker::InitBabyNtuple () {
   Flag_trackingFailureFilter = -999;
   Flag_CSCTightHaloFilter = -999;
   Flag_HBHENoiseFilter = -999;
+  Flag_HBHEIsoNoiseFilter = -999;
   Flag_goodVertices = -999;
   Flag_eeBadScFilter = -999;
   Flag_METFilters = -999;
-  HLT_HT900 = -999;
-  HLT_MET170 = -999;
-  HLT_ht350met120 = -999;
+  HLT_PFHT800 = -999;
+  HLT_PFHT900 = -999;
+  HLT_PFMET170 = -999;
+  HLT_PFHT350_PFMET100 = -999;
+  HLT_PFHT350_PFMET120 = -999;
   HLT_SingleMu = -999;   
+  HLT_SingleEl = -999;   
   HLT_DoubleEl = -999;   
-  HLT_MuEG = -999;   
+  HLT_MuX_Ele12 = -999;   
+  HLT_Mu8_EleX = -999;   
   HLT_DoubleMu = -999;   
-  HLT_Photons = -999;   
+  HLT_Photon165_HE10 = -999;   
+  HLT_PFHT350_Prescale = -999;
+  HLT_PFHT475_Prescale = -999;
+  HLT_PFHT600_Prescale = -999;
+  HLT_DiCentralPFJet70_PFMET120 = -999;
+  HLT_DiCentralPFJet55_PFMET110 = -999;
   nlep = -999;
   nsoftmus = -999;
   nelecs = -999;
@@ -2120,12 +2311,20 @@ void babyMaker::InitBabyNtuple () {
   ntau = -999;
   ngamma = -999;
   ngenPart = -999;
+  ngenLep = -999;
+  ngenStat23 = -999;
+  ngenGamma = -999;
+  ngenTau = -999;
+  ngenLepFromTau = -999;
   njet = -999;
   gamma_mt2 = -999.0;
   gamma_nJet30 = -999;
   gamma_nJet40 = -999;
+  gamma_nJet30FailId = -999;
+  gamma_nJet100FailId = -999;
   gamma_nBJet20 = -999;
   gamma_nBJet25 = -999;
+  gamma_nBJet30 = -999;
   gamma_nBJet40 = -999;
   gamma_ht = -999.0;
   gamma_deltaPhiMin = -999.0;
@@ -2200,6 +2399,7 @@ void babyMaker::InitBabyNtuple () {
     lep_relIso03[i] = -999;
     lep_relIso04[i] = -999;
     lep_miniRelIso[i] = -999;
+    lep_relIsoAn04[i] = -999;
     lep_mcMatchId[i] = -999;
     lep_lostHits[i] = -999;
     lep_convVeto[i] = -999;
@@ -2249,6 +2449,7 @@ void babyMaker::InitBabyNtuple () {
     isoTrack_phi[i] = -999;
     isoTrack_mass[i] = -999;
     isoTrack_absIso[i] = -999;
+    isoTrack_relIsoAn04[i] = -999;
     isoTrack_dz[i] = -999;
     isoTrack_pdgId[i] = -999;
     isoTrack_mcMatchId[i] = -999;
@@ -2339,14 +2540,14 @@ void babyMaker::InitBabyNtuple () {
   }
 
   for(int i=0; i < max_ngenLepFromTau; i++){
-      genLepFromTau_pt[i] = -999;
-      genLepFromTau_eta[i] = -999;
-      genLepFromTau_phi[i] = -999;
-      genLepFromTau_mass[i] = -999;
-      genLepFromTau_pdgId[i] = -999;
-      genLepFromTau_status[i] = -999;
-      genLepFromTau_charge[i] = -999;
-      genLepFromTau_sourceId[i] = -999;
+    genLepFromTau_pt[i] = -999;
+    genLepFromTau_eta[i] = -999;
+    genLepFromTau_phi[i] = -999;
+    genLepFromTau_mass[i] = -999;
+    genLepFromTau_pdgId[i] = -999;
+    genLepFromTau_status[i] = -999;
+    genLepFromTau_charge[i] = -999;
+    genLepFromTau_sourceId[i] = -999;
   }
 
   for(int i=0; i < max_njet; i++){
