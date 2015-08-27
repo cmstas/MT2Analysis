@@ -524,6 +524,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // in following code the mt_ value may be rewritten, so fill the histos right now
       if (softMuon) fillHistosSRsoftMuon("srsm");
 
+/*
       // bool filledsrsm = false;
       // New version of the selection, using the new baby, keeping the old one to see if it would be any difference
       int nIsoMuons = 0;
@@ -555,6 +556,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 
       if (fillHistosGenMuon("srsmNew") == 1) ;
       fillHistosMuonIso("srsmNew", nIsoElecs + t.nPFHad10LowMT);
+*/
       //if(ifillgensm == 1) nGenMuon++;
       // if(ifillgensm == 1 && !filledsrsm){
       //   //nGenButNotReco++;
