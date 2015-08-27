@@ -4,7 +4,7 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-01-02_25ns_softLepTest"
+TAG="V00-01-02_25ns_softmus"
 
 #
 # DATA
