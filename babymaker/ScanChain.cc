@@ -109,7 +109,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  const char* json_file = "jsons/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -162,9 +162,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	}
       }
       else if (bx == 25) {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/PY8_RunIISpring15DR74_bx25_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer15_25nsV2_MC_L3Absolute_AK4PFchs.txt");
       }
 
       cout << "applying JEC from the following files:" << endl;
@@ -1103,7 +1103,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	  bool overlap = false;
 	  for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
 	    float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
-	    if (thisDR < 0.1) {
+	    // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
+	    if (thisDR < 0.01) {
 	      overlap = true;
 	      break;
 	    }
