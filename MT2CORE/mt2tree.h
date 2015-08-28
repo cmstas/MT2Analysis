@@ -149,10 +149,30 @@ public :
    Float_t         softmus_absIso[50];   //[nlep]
    Float_t         softmus_relIso03[50];   //[nlep]
    Float_t         softmus_relIso04[50];   //[nlep]
+   Float_t         softmus_relIsoAn04[50];   //[nlep]
    Float_t         softmus_miniRelIso[50];   //[nlep]
    Int_t           softmus_mcMatchId[50];   //[nlep]
    Int_t           softmus_isReco[50];
    Int_t           softmus_isPF[50];
+   Int_t           nelecs;
+   Float_t         elecs_pt[50];   //[nlep]
+   Float_t         elecs_eta[50];   //[nlep]
+   Float_t         elecs_phi[50];   //[nlep]
+   Float_t         elecs_mass[50];   //[nlep]
+   Int_t           elecs_charge[50];   //[nlep]
+   Int_t           elecs_pdgId[50];   //[nlep]
+   Float_t         elecs_dxy[50];   //[nlep]
+   Float_t         elecs_dz[50];   //[nlep]
+   Float_t         elecs_sip[50];   //[nlep]
+   Int_t           elecs_tightId[50];   //[nlep]
+   Float_t         elecs_absIso[50];   //[nlep]
+   Float_t         elecs_relIso03[50];   //[nlep]
+   Float_t         elecs_relIso04[50];   //[nlep]
+   Float_t         elecs_relIsoAn04[50];   //[nlep]
+   Float_t         elecs_miniRelIso[50];   //[nlep]
+   Int_t           elecs_mcMatchId[50];   //[nlep]
+   Int_t           elecs_isReco[50];
+   Int_t           elecs_isPF[50];
    Int_t           nisoTrack;
    Float_t         isoTrack_pt[50];   //[nisoTrack]
    Float_t         isoTrack_eta[50];   //[nisoTrack]
@@ -470,10 +490,30 @@ public :
    TBranch        *b_softmus_absIso;   //!
    TBranch        *b_softmus_relIso03;   //!
    TBranch        *b_softmus_relIso04;   //!
+   TBranch        *b_softmus_relIsoAn04;   //!
    TBranch        *b_softmus_miniRelIso;   //!
    TBranch        *b_softmus_mcMatchId;   //!
    TBranch        *b_softmus_isReco;   //!
    TBranch        *b_softmus_isPF;   //!
+   TBranch        *b_nelecs;   //!
+   TBranch        *b_elecs_pt;   //!
+   TBranch        *b_elecs_eta;   //!
+   TBranch        *b_elecs_phi;   //!
+   TBranch        *b_elecs_mass;   //!
+   TBranch        *b_elecs_charge;   //!
+   TBranch        *b_elecs_pdgId;   //!
+   TBranch        *b_elecs_dxy;   //!
+   TBranch        *b_elecs_dz;   //!
+   TBranch        *b_elecs_sip;   //!
+   TBranch        *b_elecs_tightId;   //!
+   TBranch        *b_elecs_absIso;   //!
+   TBranch        *b_elecs_relIso03;   //!
+   TBranch        *b_elecs_relIso04;   //!
+   TBranch        *b_elecs_relIsoAn04;   //!
+   TBranch        *b_elecs_miniRelIso;   //!
+   TBranch        *b_elecs_mcMatchId;   //!
+   TBranch        *b_elecs_isReco;   //!
+   TBranch        *b_elecs_isPF;   //!
    TBranch        *b_nisoTrack;   //!
    TBranch        *b_isoTrack_pt;   //!
    TBranch        *b_isoTrack_eta;   //!
@@ -850,10 +890,30 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("softmus_absIso", &softmus_absIso, &b_softmus_absIso);
    fChain->SetBranchAddress("softmus_relIso03", &softmus_relIso03, &b_softmus_relIso03);
    fChain->SetBranchAddress("softmus_relIso04", &softmus_relIso04, &b_softmus_relIso04);
+   fChain->SetBranchAddress("softmus_relIsoAn04", &softmus_relIsoAn04, &b_softmus_relIsoAn04);
    fChain->SetBranchAddress("softmus_miniRelIso", &softmus_miniRelIso, &b_softmus_miniRelIso);
    fChain->SetBranchAddress("softmus_mcMatchId", &softmus_mcMatchId, &b_softmus_mcMatchId);
    fChain->SetBranchAddress("softmus_isReco", &softmus_isReco, &b_softmus_isReco);
    fChain->SetBranchAddress("softmus_isPF", &softmus_isPF, &b_softmus_isPF);
+   fChain->SetBranchAddress("nelecs", &nelecs, &b_nelecs);
+   fChain->SetBranchAddress("elecs_pt", &elecs_pt, &b_elecs_pt);
+   fChain->SetBranchAddress("elecs_eta", &elecs_eta, &b_elecs_eta);
+   fChain->SetBranchAddress("elecs_phi", &elecs_phi, &b_elecs_phi);
+   fChain->SetBranchAddress("elecs_mass", &elecs_mass, &b_elecs_mass);
+   fChain->SetBranchAddress("elecs_charge", &elecs_charge, &b_elecs_charge);
+   fChain->SetBranchAddress("elecs_pdgId", &elecs_pdgId, &b_elecs_pdgId);
+   fChain->SetBranchAddress("elecs_dxy", &elecs_dxy, &b_elecs_dxy);
+   fChain->SetBranchAddress("elecs_dz", &elecs_dz, &b_elecs_dz);
+   fChain->SetBranchAddress("elecs_sip", &elecs_sip, &b_elecs_sip);
+   fChain->SetBranchAddress("elecs_tightId", &elecs_tightId, &b_elecs_tightId);
+   fChain->SetBranchAddress("elecs_absIso", &elecs_absIso, &b_elecs_absIso);
+   fChain->SetBranchAddress("elecs_relIso03", &elecs_relIso03, &b_elecs_relIso03);
+   fChain->SetBranchAddress("elecs_relIso04", &elecs_relIso04, &b_elecs_relIso04);
+   fChain->SetBranchAddress("elecs_relIsoAn04", &elecs_relIsoAn04, &b_elecs_relIsoAn04);
+   fChain->SetBranchAddress("elecs_miniRelIso", &elecs_miniRelIso, &b_elecs_miniRelIso);
+   fChain->SetBranchAddress("elecs_mcMatchId", &elecs_mcMatchId, &b_elecs_mcMatchId);
+   fChain->SetBranchAddress("elecs_isReco", &elecs_isReco, &b_elecs_isReco);
+   fChain->SetBranchAddress("elecs_isPF", &elecs_isPF, &b_elecs_isPF);
    fChain->SetBranchAddress("nisoTrack", &nisoTrack, &b_nisoTrack);
    fChain->SetBranchAddress("isoTrack_pt", isoTrack_pt, &b_isoTrack_pt);
    fChain->SetBranchAddress("isoTrack_eta", isoTrack_eta, &b_isoTrack_eta);

@@ -188,25 +188,47 @@ class babyMaker {
   Float_t         softmus_relIso03[max_nlep];
   Float_t         softmus_relIso04[max_nlep];
   Float_t         softmus_miniRelIso[max_nlep];
+  Float_t         softmus_relIsoAn04[max_nlep];
   Int_t           softmus_mcMatchId[max_nlep];
   Int_t           softmus_isReco[max_nlep];
   Int_t           softmus_isPF[max_nlep];
   
+//----- SOFT ELECTRONS
+  Int_t           nelecs;
+  Float_t         elecs_pt[max_nlep];
+  Float_t         elecs_eta[max_nlep];
+  Float_t         elecs_phi[max_nlep];
+  Float_t         elecs_mass[max_nlep];
+  Int_t           elecs_charge[max_nlep];
+  Int_t           elecs_pdgId[max_nlep];
+  Float_t         elecs_dxy[max_nlep];
+  Float_t         elecs_dz[max_nlep];
+  Float_t         elecs_sip[max_nlep];
+  Int_t           elecs_tightId[max_nlep];
+  Float_t         elecs_absIso[max_nlep];
+  Float_t         elecs_relIso03[max_nlep];
+  Float_t         elecs_relIso04[max_nlep];
+  Float_t         elecs_miniRelIso[max_nlep];
+  Float_t         elecs_relIsoAn04[max_nlep];
+  Int_t           elecs_mcMatchId[max_nlep];
+  Int_t           elecs_isReco[max_nlep];
+  Int_t           elecs_isPF[max_nlep];
+  
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;
-  Int_t             nisoTrack;
-  Float_t           isoTrack_pt[max_nisoTrack];
-  Float_t           isoTrack_eta[max_nisoTrack];
-  Float_t           isoTrack_phi[max_nisoTrack];
-  Float_t           isoTrack_mass[max_nisoTrack];
-  Float_t           isoTrack_absIso[max_nisoTrack];
-  Float_t           isoTrack_relIsoAn04[max_nisoTrack];
-  Float_t           isoTrack_dz[max_nisoTrack];
-  Int_t             isoTrack_pdgId[max_nisoTrack];
-  Int_t             isoTrack_mcMatchId[max_nisoTrack];
+  Int_t           nisoTrack;
+  Float_t         isoTrack_pt[max_nisoTrack];
+  Float_t         isoTrack_eta[max_nisoTrack];
+  Float_t         isoTrack_phi[max_nisoTrack];
+  Float_t         isoTrack_mass[max_nisoTrack];
+  Float_t         isoTrack_absIso[max_nisoTrack];
+  Float_t         isoTrack_relIsoAn04[max_nisoTrack];
+  Float_t         isoTrack_dz[max_nisoTrack];
+  Int_t           isoTrack_pdgId[max_nisoTrack];
+  Int_t           isoTrack_mcMatchId[max_nisoTrack];
 
-  Int_t             nPFLep5LowMT;
-  Int_t             nPFHad10LowMT;
+  Int_t           nPFLep5LowMT;
+  Int_t           nPFHad10LowMT;
 
 //----- TAUS
   static const int max_ntau = 50;
