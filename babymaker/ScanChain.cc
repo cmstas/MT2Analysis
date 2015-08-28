@@ -47,7 +47,7 @@ const bool verbose = false;
 // turn on to apply JEC from text files (default true)
 const bool applyJECfromFile = true;
 // turn on to save prunedGenParticle collection (default false)
-const bool saveGenParticles = false;
+const bool saveGenParticles = true;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
 const bool applyTriggerCuts = false;
 // turn on to apply dummy weights for lepton SFs, btag SFs, etc (default false)
@@ -538,7 +538,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       } // !isData
 
       //---------------------------------------
-      // New branch for soft muons study: with mus(5-inf) and elecs(10-inf) include both reco and pf
+      // New branch for soft muons study: with mus and elecs (5-inf) include both reco and pf
       //---------------------------------------
       std::vector<std::pair<int, float> > softmus_pt_ordering;
       vector<float>vec_softmus_pt;
@@ -554,6 +554,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       vector<float>vec_softmus_absIso;
       vector<float>vec_softmus_relIso03;
       vector<float>vec_softmus_relIso04;
+      vector<float>vec_softmus_relIsoAn04;
       vector<float>vec_softmus_miniRelIso;
       vector<int>  vec_softmus_mcMatchId;
       vector<int>  vec_softmus_isReco;
@@ -573,6 +574,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       vector<float>vec_elecs_absIso;
       vector<float>vec_elecs_relIso03;
       vector<float>vec_elecs_relIso04;
+      vector<float>vec_elecs_relIsoAn04;
       vector<float>vec_elecs_miniRelIso;
       vector<int>  vec_elecs_mcMatchId;
       vector<int>  vec_elecs_isReco;
@@ -583,7 +585,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       for(unsigned int imu = 0; imu < cms3.mus_p4().size(); imu++){
         if(cms3.mus_p4().at(imu).pt() < 5.0) continue;
         if(fabs(cms3.mus_p4().at(imu).eta()) > 2.4) continue;
-        if(!muonID(imu,id_level_t::HAD_loose_noiso_v2)) continue;  // use noiso muonID
+        if(!muonID(imu,id_level_t::HAD_loose_noiso_v3)) continue;  // use noiso muonID
         softmus_pt_ordering.push_back( std::pair<int,float>(nsoftmus, cms3.mus_p4().at(imu).pt()) );
         nsoftmus++;
         vec_softmus_isReco.push_back( true);
@@ -601,6 +603,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_softmus_absIso.push_back( muRelIso03(imu,analysis_t::HAD) * cms3.mus_p4().at(imu).pt());
         vec_softmus_relIso03.push_back( muRelIso03(imu,analysis_t::HAD) );
         vec_softmus_relIso04.push_back( muRelIso04(imu,analysis_t::HAD) );
+        vec_softmus_relIsoAn04.push_back( muRelIsoAn04(imu) );
         vec_softmus_miniRelIso.push_back( muMiniRelIso(imu) );
         if (!isData && cms3.mus_mc3dr().at(imu) < 0.2 && cms3.mus_mc3idx().at(imu) != -9999 && abs(cms3.mus_mc3_id().at(imu)) == 13) { // matched to a prunedGenParticle muon?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(imu)]);
@@ -644,10 +647,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
           vec_softmus_absIso.push_back(absiso);
           vec_softmus_relIso03.push_back(reliso);
           vec_softmus_relIso04.push_back(-1);
+          vec_softmus_relIsoAn04.push_back(-1);
           vec_softmus_miniRelIso.push_back(max(reliso, absiso/40));
           vec_softmus_mcMatchId.push_back(0);
         }
       }
+
       int ibsm = 0;
       std::sort(softmus_pt_ordering.begin(), softmus_pt_ordering.end(), sortByValueReverse);
       for(std::vector<std::pair<int, float> >::iterator it = softmus_pt_ordering.begin(); it!= softmus_pt_ordering.end(); ++it){
@@ -670,17 +675,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         softmus_absIso[ibsm]      = vec_softmus_absIso.at(it->first);
         softmus_relIso03[ibsm]    = vec_softmus_relIso03.at(it->first);
         softmus_relIso04[ibsm]    = vec_softmus_relIso04.at(it->first);
+        softmus_relIsoAn04[ibsm]  = vec_softmus_relIsoAn04.at(it->first);
         softmus_miniRelIso[ibsm]  = vec_softmus_miniRelIso.at(it->first);
         softmus_mcMatchId[ibsm]   = vec_softmus_mcMatchId.at(it->first);
         ibsm++;
       }
+      //--------end soft muons---------
 
-      // Normal Electrons at 10
+      // All Electrons starting from 5
       nelecs = 0;
       for(unsigned int iel = 0; iel < cms3.els_p4().size(); iel++){
-        if(cms3.els_p4().at(iel).pt() < 10.0) continue;
+        if(cms3.els_p4().at(iel).pt() < 5.0) continue;  // go down to 5 at the stage
         if(fabs(cms3.els_p4().at(iel).eta()) > 2.4) continue;
-        if(!electronID(iel,id_level_t::HAD_veto_noiso_v2)) continue;
+        if(!electronID(iel,id_level_t::HAD_veto_noiso_v3)) continue;
         elecs_pt_ordering.push_back( std::pair<int,float>(nelecs, cms3.els_p4().at(iel).pt()) );
         nelecs++;
         vec_elecs_isReco.push_back ( true);
@@ -698,6 +705,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         vec_elecs_absIso.push_back (  eleRelIso03(iel,analysis_t::HAD) * cms3.els_p4().at(iel).pt());
         vec_elecs_relIso03.push_back (  eleRelIso03(iel,analysis_t::HAD));
         vec_elecs_relIso04.push_back ( 0);
+        vec_elecs_relIsoAn04.push_back ( elRelIsoAn04(iel) );
         vec_elecs_miniRelIso.push_back ( elMiniRelIso(iel) );
         if (!isData && cms3.els_mc3dr().at(iel) < 0.2 && cms3.els_mc3idx().at(iel) != -9999 && abs(cms3.els_mc3_id().at(iel)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iel)]);
@@ -741,6 +749,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
           vec_elecs_absIso.push_back(absiso);
           vec_elecs_relIso03.push_back(reliso);
           vec_elecs_relIso04.push_back(-1);
+          vec_elecs_relIsoAn04.push_back(-1);
           vec_elecs_miniRelIso.push_back(max(reliso, absiso/40));
           vec_elecs_mcMatchId.push_back(0);
         }
@@ -767,11 +776,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
         elecs_absIso[ibel]      = vec_elecs_absIso.at(it->first);
         elecs_relIso03[ibel]    = vec_elecs_relIso03.at(it->first);
         elecs_relIso04[ibel]    = vec_elecs_relIso04.at(it->first);
+        elecs_relIsoAn04[ibel]  = vec_elecs_relIsoAn04.at(it->first);
         elecs_miniRelIso[ibel]  = vec_elecs_miniRelIso.at(it->first);
         elecs_mcMatchId[ibel]   = vec_elecs_mcMatchId.at(it->first);
         ibel++;
       }
-      //------------------------------------
+      //---------- end of elecs ----------
+
 
       //LEPTONS
       std::vector<std::pair<int, float> > lep_pt_ordering;
@@ -800,12 +811,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       vector<LorentzVector> p4sForHemsZll;
       vector<LorentzVector> p4sForHemsZllMT;
       vector<LorentzVector> p4sForHemsRl;
+      vector<LorentzVector> p4sForHemsSoftlep;
 
       vector<LorentzVector> p4sForDphi;
       vector<LorentzVector> p4sForDphiGamma;
       vector<LorentzVector> p4sForDphiZll;
       vector<LorentzVector> p4sForDphiZllMT;
       vector<LorentzVector> p4sForDphiRl;
+      vector<LorentzVector> p4sForDphiSoftlep;
 
       if (verbose) cout << "before electrons" << endl;
 
@@ -1026,6 +1039,27 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	rl_phi = 0;
       }
 
+      //--for soft lepton control regions
+      if (nlep == 1) {
+	float softlep_met_px = lep_pt[0] * cos(lep_phi[0]);
+	float softlep_met_py = lep_pt[0] * sin(lep_phi[0]);
+	// recalculated MET with photons added
+	TVector2 softlep_met_vec(softlep_met_px, softlep_met_py);
+	softlep_met_pt = softlep_met_vec.Mod();
+	softlep_met_phi = TVector2::Phi_mpi_pi(softlep_met_vec.Phi());      
+	// TLorentzVector l0(0,0,0,0);
+	// TLorentzVector l1(0,0,0,0);
+	// l0.SetPtEtaPhiM(lep_pt[0], lep_eta[0], lep_phi[0], lep_mass[0]);
+	// TLorentzVector ll = l0;
+	// softlep_mass = ll.M();
+	// softlep_pt = ll.Pt();
+	// softlep_eta = ll.Eta();
+	// softlep_phi = ll.Phi();
+	softlep_mass = 0;
+	softlep_pt = 0;
+	softlep_eta = 0;
+	softlep_phi = 0;
+      }
       if (verbose) cout << "before isotracks" << endl;
 
       //ISOTRACK
@@ -1048,12 +1082,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
  
         if(cms3.pfcands_charge().at(ipf) == 0) continue;
         if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+        if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
 
         float cand_pt = cms3.pfcands_p4().at(ipf).pt();
 	if(cand_pt > 3) ++nPFCHCand3;
         if(cand_pt < 5) continue;
  
-        float absiso  = TrackIso(ipf);
+        float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
         if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
 	float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
@@ -1370,6 +1405,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
       gamma_jet2_pt = 0.;
       zll_minMTBMet = 999999.;
       rl_minMTBMet = 999999.;
+      softlep_minMTBMet = 999999.;
 
       // for applying btagging SFs, using Method 1a from the twiki below:
       //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
@@ -1465,6 +1501,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	      p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
 	      p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
 	      p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
+	      p4sForHemsSoftlep.push_back(p4sCorrJets.at(iJet));
+	      p4sForDphiSoftlep.push_back(p4sCorrJets.at(iJet));
 	      nJet30++;
 	      if (jet_pt[njet] > 40.) nJet40++;
 	    } // pt40
@@ -1500,6 +1538,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 		if (nlep == 1) {
 		  float rlmt = MT(jet_pt[njet],jet_phi[njet],rl_met_pt,rl_met_phi);
 		  if (rlmt < rl_minMTBMet) rl_minMTBMet = rlmt;
+		}
+		if (nsoftmus == 1) {
+		  float softlepmt = MT(jet_pt[njet],jet_phi[njet],softlep_met_pt,softlep_met_phi);
+		  if (softlepmt < softlep_minMTBMet) softlep_minMTBMet = softlepmt;
 		}
 	      } // pt 30
 	    } // pass med btag
@@ -1775,6 +1817,41 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx){
 	rl_diffMetMht = (mhtVectorRl - metVectorRl).Mod();
 
       }
+
+      // MT2, MHT for soft lepton control region
+      softlep_ht = 0;
+      if (nlep == 1) {
+        softlep_deltaPhiMin = 999;
+        LorentzVector sumMhtp4Softlep = LorentzVector(0,0,0,0);
+
+	// compute MHT using same objects as MT2 inputs
+	for (unsigned int ip4 = 0; ip4 < p4sForHemsSoftlep.size(); ++ip4) {
+	  softlep_ht += p4sForHemsSoftlep.at(ip4).pt();
+	  sumMhtp4Softlep -= p4sForHemsSoftlep.at(ip4);
+	}
+
+	// min(dphi) of 4 leading objects
+	for (unsigned int ip4 = 0; ip4 < p4sForDphiSoftlep.size(); ++ip4) {
+	  if(ip4 < 4) softlep_deltaPhiMin = min(softlep_deltaPhiMin, DeltaPhi( softlep_met_phi, p4sForDphiSoftlep.at(ip4).phi() ));
+	}
+
+	vector<LorentzVector> hemJetsSoftlep;
+	if(p4sForHemsSoftlep.size() > 1){
+	  //Hemispheres used in MT2 calculation
+	  hemJetsSoftlep = getHemJets(p4sForHemsSoftlep);  
+	  
+	  softlep_mt2 = HemMT2(softlep_met_pt, softlep_met_phi, hemJetsSoftlep.at(0), hemJetsSoftlep.at(1));
+	}	  
+	
+	softlep_mht_pt  = sumMhtp4Softlep.pt();
+	softlep_mht_phi = sumMhtp4Softlep.phi();
+	
+	TVector2 mhtVectorSoftlep = TVector2(softlep_mht_pt*cos(softlep_mht_phi), softlep_mht_pt*sin(softlep_mht_phi));
+	TVector2 metVectorSoftlep = TVector2(softlep_met_pt*cos(softlep_met_phi), softlep_met_pt*sin(softlep_met_phi));
+	softlep_diffMetMht = (mhtVectorSoftlep - metVectorSoftlep).Mod();
+
+      }
+      
       if (!isData) {
 	//GEN MT2
 	vector<LorentzVector> goodGenJets;
@@ -2004,6 +2081,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("softmus_absIso", softmus_absIso, "softmus_absIso[nsoftmus]/F" );
   BabyTree_->Branch("softmus_relIso03", softmus_relIso03, "softmus_relIso03[nsoftmus]/F" );
   BabyTree_->Branch("softmus_relIso04", softmus_relIso04, "softmus_relIso04[nsoftmus]/F" );
+  BabyTree_->Branch("softmus_relIsoAn04", softmus_relIsoAn04, "softmus_relIsoAn04[nsoftmus]/F" );
   BabyTree_->Branch("softmus_miniRelIso", softmus_miniRelIso, "softmus_miniRelIso[nsoftmus]/F" );
   BabyTree_->Branch("softmus_mcMatchId", softmus_mcMatchId, "softmus_mcMatchId[nsoftmus]/I" );
   BabyTree_->Branch("softmus_isReco", softmus_isReco, "softmus_isReco[nsoftmus]/I" );
@@ -2022,6 +2100,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("elecs_absIso", elecs_absIso, "elecs_absIso[nelecs]/F" );
   BabyTree_->Branch("elecs_relIso03", elecs_relIso03, "elecs_relIso03[nelecs]/F" );
   BabyTree_->Branch("elecs_relIso04", elecs_relIso04, "elecs_relIso04[nelecs]/F" );
+  BabyTree_->Branch("elecs_relIsoAn04", elecs_relIsoAn04, "elecs_relIsoAn04[nelecs]/F" );
   BabyTree_->Branch("elecs_miniRelIso", elecs_miniRelIso, "elecs_miniRelIso[nelecs]/F" );
   BabyTree_->Branch("elecs_mcMatchId", elecs_mcMatchId, "elecs_mcMatchId[nelecs]/I" );
   BabyTree_->Branch("elecs_isReco", elecs_isReco, "elecs_isReco[nelecs]/I" );
@@ -2113,6 +2192,18 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("rl_eta", &rl_eta );
   BabyTree_->Branch("rl_phi", &rl_phi );
   BabyTree_->Branch("rl_ht", &rl_ht );
+  BabyTree_->Branch("softlep_mt2", &softlep_mt2 );
+  BabyTree_->Branch("softlep_deltaPhiMin", &softlep_deltaPhiMin );
+  BabyTree_->Branch("softlep_diffMetMht", &softlep_diffMetMht );
+  BabyTree_->Branch("softlep_met_pt", &softlep_met_pt );
+  BabyTree_->Branch("softlep_met_phi", &softlep_met_phi );
+  BabyTree_->Branch("softlep_mht_pt", &softlep_mht_pt );
+  BabyTree_->Branch("softlep_mht_phi", &softlep_mht_phi );
+  BabyTree_->Branch("softlep_mass", &softlep_mass );
+  BabyTree_->Branch("softlep_pt", &softlep_pt );
+  BabyTree_->Branch("softlep_eta", &softlep_eta );
+  BabyTree_->Branch("softlep_phi", &softlep_phi );
+  BabyTree_->Branch("softlep_ht", &softlep_ht );
   if (!isDataFromFileName) {
     if (saveGenParticles) {
       BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
@@ -2243,6 +2334,7 @@ void babyMaker::InitBabyNtuple () {
   minMTBMet = -999.0;
   zll_minMTBMet = -999.0;
   rl_minMTBMet = -999.0;
+  softlep_minMTBMet = -999.0;
   gamma_minMTBMet = -999.0;
   ht = -999.0;
   mt2 = -999.0;
@@ -2366,6 +2458,18 @@ void babyMaker::InitBabyNtuple () {
   rl_eta = -999.0;
   rl_phi = -999.0;
   rl_ht = -999.0;
+  softlep_mt2 = -999.0;
+  softlep_deltaPhiMin = -999.0;
+  softlep_diffMetMht = -999.0;
+  softlep_met_pt = -999.0;
+  softlep_met_phi = -999.0;
+  softlep_mht_pt = -999.0;
+  softlep_mht_phi = -999.0;
+  softlep_mass = -999.0;
+  softlep_pt = -999.0;
+  softlep_eta = -999.0;
+  softlep_phi = -999.0;
+  softlep_ht = -999.0;
   GenSusyMScan1 = 0;
   GenSusyMScan2 = 0;
   GenSusyMScan3 = 0;
@@ -2419,6 +2523,7 @@ void babyMaker::InitBabyNtuple () {
     softmus_absIso[i] = -999;
     softmus_relIso03[i] = -999;
     softmus_relIso04[i] = -999;
+    softmus_relIsoAn04[i] = -999;
     softmus_miniRelIso[i] = -999;
     softmus_mcMatchId[i] = -999;
     softmus_isReco[i] = -999;
@@ -2438,6 +2543,7 @@ void babyMaker::InitBabyNtuple () {
     elecs_absIso[i] = -999;
     elecs_relIso03[i] = -999;
     elecs_relIso04[i] = -999;
+    elecs_relIsoAn04[i] = -999;
     elecs_miniRelIso[i] = -999;
     elecs_mcMatchId[i] = -999;
     elecs_isReco[i] = -999;

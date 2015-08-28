@@ -150,6 +150,7 @@ public :
    Float_t         softmus_absIso[50];   //[nlep]
    Float_t         softmus_relIso03[50];   //[nlep]
    Float_t         softmus_relIso04[50];   //[nlep]
+   Float_t         softmus_relIsoAn04[50];   //[nlep]
    Float_t         softmus_miniRelIso[50];   //[nlep]
    Int_t           softmus_mcMatchId[50];   //[nlep]
    Int_t           softmus_isReco[50];
@@ -168,6 +169,7 @@ public :
    Float_t         elecs_absIso[50];   //[nlep]
    Float_t         elecs_relIso03[50];   //[nlep]
    Float_t         elecs_relIso04[50];   //[nlep]
+   Float_t         elecs_relIsoAn04[50];   //[nlep]
    Float_t         elecs_miniRelIso[50];   //[nlep]
    Int_t           elecs_mcMatchId[50];   //[nlep]
    Int_t           elecs_isReco[50];
@@ -264,6 +266,19 @@ public :
    Float_t         rl_phi;
    Float_t         rl_ht;
    Float_t         rl_minMTBMet;
+   Float_t         softlep_mt2;
+   Float_t         softlep_met_pt;
+   Float_t         softlep_met_phi;
+   Float_t         softlep_mht_pt;
+   Float_t         softlep_mht_phi;
+   Float_t         softlep_deltaPhiMin;
+   Float_t         softlep_diffMetMht;
+   Float_t         softlep_mass;
+   Float_t         softlep_pt;
+   Float_t         softlep_eta;
+   Float_t         softlep_phi;
+   Float_t         softlep_ht;
+   Float_t         softlep_minMTBMet;
    Int_t           ngenPart;
    Float_t         genPart_pt[200];   //[ngenPart]
    Float_t         genPart_eta[200];   //[ngenPart]
@@ -477,6 +492,7 @@ public :
    TBranch        *b_softmus_absIso;   //!
    TBranch        *b_softmus_relIso03;   //!
    TBranch        *b_softmus_relIso04;   //!
+   TBranch        *b_softmus_relIsoAn04;   //!
    TBranch        *b_softmus_miniRelIso;   //!
    TBranch        *b_softmus_mcMatchId;   //!
    TBranch        *b_softmus_isReco;   //!
@@ -495,6 +511,7 @@ public :
    TBranch        *b_elecs_absIso;   //!
    TBranch        *b_elecs_relIso03;   //!
    TBranch        *b_elecs_relIso04;   //!
+   TBranch        *b_elecs_relIsoAn04;   //!
    TBranch        *b_elecs_miniRelIso;   //!
    TBranch        *b_elecs_mcMatchId;   //!
    TBranch        *b_elecs_isReco;   //!
@@ -591,6 +608,19 @@ public :
    TBranch        *b_rl_phi;
    TBranch        *b_rl_ht;
    TBranch        *b_rl_minMTBMet;
+   TBranch        *b_softlep_mt2;
+   TBranch        *b_softlep_met_pt;
+   TBranch        *b_softlep_met_phi;
+   TBranch        *b_softlep_mht_pt;
+   TBranch        *b_softlep_mht_phi;
+   TBranch        *b_softlep_deltaPhiMin;
+   TBranch        *b_softlep_diffMetMht;
+   TBranch        *b_softlep_mass;
+   TBranch        *b_softlep_pt;
+   TBranch        *b_softlep_eta;
+   TBranch        *b_softlep_phi;
+   TBranch        *b_softlep_ht;
+   TBranch        *b_softlep_minMTBMet;
    TBranch        *b_ngenPart;   //!
    TBranch        *b_genPart_pt;   //!
    TBranch        *b_genPart_eta;   //!
@@ -863,6 +893,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("softmus_absIso", &softmus_absIso, &b_softmus_absIso);
    fChain->SetBranchAddress("softmus_relIso03", &softmus_relIso03, &b_softmus_relIso03);
    fChain->SetBranchAddress("softmus_relIso04", &softmus_relIso04, &b_softmus_relIso04);
+   fChain->SetBranchAddress("softmus_relIsoAn04", &softmus_relIsoAn04, &b_softmus_relIsoAn04);
    fChain->SetBranchAddress("softmus_miniRelIso", &softmus_miniRelIso, &b_softmus_miniRelIso);
    fChain->SetBranchAddress("softmus_mcMatchId", &softmus_mcMatchId, &b_softmus_mcMatchId);
    fChain->SetBranchAddress("softmus_isReco", &softmus_isReco, &b_softmus_isReco);
@@ -881,6 +912,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("elecs_absIso", &elecs_absIso, &b_elecs_absIso);
    fChain->SetBranchAddress("elecs_relIso03", &elecs_relIso03, &b_elecs_relIso03);
    fChain->SetBranchAddress("elecs_relIso04", &elecs_relIso04, &b_elecs_relIso04);
+   fChain->SetBranchAddress("elecs_relIsoAn04", &elecs_relIsoAn04, &b_elecs_relIsoAn04);
    fChain->SetBranchAddress("elecs_miniRelIso", &elecs_miniRelIso, &b_elecs_miniRelIso);
    fChain->SetBranchAddress("elecs_mcMatchId", &elecs_mcMatchId, &b_elecs_mcMatchId);
    fChain->SetBranchAddress("elecs_isReco", &elecs_isReco, &b_elecs_isReco);
@@ -977,6 +1009,19 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rl_phi", &rl_phi, &b_rl_phi);
    fChain->SetBranchAddress("rl_ht", &rl_ht, &b_rl_ht);
    fChain->SetBranchAddress("rl_minMTBMet", &rl_minMTBMet, &b_rl_minMTBMet);
+   fChain->SetBranchAddress("softlep_mt2", &softlep_mt2, &b_softlep_mt2);
+   fChain->SetBranchAddress("softlep_met_pt", &softlep_met_pt, &b_softlep_met_pt);
+   fChain->SetBranchAddress("softlep_met_phi", &softlep_met_phi, &b_softlep_met_phi);
+   fChain->SetBranchAddress("softlep_mht_pt", &softlep_mht_pt, &b_softlep_mht_pt);
+   fChain->SetBranchAddress("softlep_mht_phi", &softlep_mht_phi, &b_softlep_mht_phi);
+   fChain->SetBranchAddress("softlep_deltaPhiMin", &softlep_deltaPhiMin, &b_softlep_deltaPhiMin);
+   fChain->SetBranchAddress("softlep_diffMetMht", &softlep_diffMetMht, &b_softlep_diffMetMht);
+   fChain->SetBranchAddress("softlep_mass", &softlep_mass, &b_softlep_mass);
+   fChain->SetBranchAddress("softlep_pt", &softlep_pt, &b_softlep_pt);
+   fChain->SetBranchAddress("softlep_eta", &softlep_eta, &b_softlep_eta);
+   fChain->SetBranchAddress("softlep_phi", &softlep_phi, &b_softlep_phi);
+   fChain->SetBranchAddress("softlep_ht", &softlep_ht, &b_softlep_ht);
+   fChain->SetBranchAddress("softlep_minMTBMet", &softlep_minMTBMet, &b_softlep_minMTBMet);
    fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
    fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
    fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);

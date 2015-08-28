@@ -51,6 +51,8 @@ class MT2Looper {
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRRL(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosSoftL(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosSoftLCR(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
@@ -60,9 +62,13 @@ class MT2Looper {
   void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
-			      const std::string& dir = "", const std::string& suffix = ""); 
+			      const std::string& dir = "", const std::string& suffix = "");
   void fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
+			      const std::string& dir = "", const std::string& suffix = "");
+  void fillHistosSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
 			      const std::string& dir = "", const std::string& suffix = ""); 
+  //void fillHistosSoftLeptonCR(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
+  //		      const std::string& dir = "", const std::string& suffix = ""); 
  private:
 
   TFile * outfile_;
@@ -89,6 +95,10 @@ class MT2Looper {
   SR CRSL_WJets;
   SR CRSL_TTbar;
   TH1D* h_nvtx_weights_;
+  
+  int Widx_;
+  int NUidx_;
+
 };
 
 #endif
