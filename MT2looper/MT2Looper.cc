@@ -840,14 +840,13 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // fillHistosSRBase();
       // fillHistosInclusive();
 
-      //turn off other CRs for soft lep studies
       doGJplots = false;
       doDYplots = false;
       doRLplots = false;
       doSLplots = false;
       doSLMUplots = false;
       doSLELplots = false;
-      
+
       if (doGJplots) {
         saveGJplots = true;
 	//fillHistosCRGJ("crgj");
