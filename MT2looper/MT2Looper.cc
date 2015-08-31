@@ -885,7 +885,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_HT800 || t.HLT_PFHT350_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin; 
@@ -923,7 +923,7 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
 void MT2Looper::fillHistosSoftLCR(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_HT800 || t.HLT_PFHT350_PFMET100)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin; //use reco MET for this cut
@@ -1336,7 +1336,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_simplemet"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_gammaPt"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
-    if (t.HLT_Photons) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
+    if (t.HLT_Photon165_HE10) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet30"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nBJet20"+s,      t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
