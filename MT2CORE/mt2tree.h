@@ -36,7 +36,7 @@ public :
    Int_t           nVert;
    Int_t           nTrueInt;
    Float_t         rho;
-   Float_t         rho25;
+   // Float_t         rho25;
    Int_t           nJet30;
    Int_t           nJet40;
    Int_t           nJet30FailId;
@@ -94,25 +94,25 @@ public :
    Int_t           HLT_PFHT800;
    Int_t           HLT_PFHT900;
    Int_t           HLT_PFMET170;
-   Int_t           HLT_HT800;
-   Int_t           HLT_HT900;
-   Int_t           HLT_MET170;
-   Int_t           HLT_ht350met100;
-   Int_t           HLT_ht350met120;
+   // Int_t           HLT_HT800;
+   // Int_t           HLT_HT900;
+   // Int_t           HLT_MET170;
+   // Int_t           HLT_ht350met100;
+   // Int_t           HLT_ht350met120;
    Int_t           HLT_PFHT350_PFMET100;
    Int_t           HLT_PFHT350_PFMET120;
    Int_t           HLT_SingleMu;   
    Int_t           HLT_SingleEl;   
    Int_t           HLT_DoubleEl;   
-   Int_t           HLT_MuEG;   
+   // Int_t           HLT_MuEG;   
    Int_t           HLT_MuX_Ele12;   
    Int_t           HLT_Mu8_EleX;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_Photons;   
-  // Int_t           HLT_Photon165_HE10;   
-   Int_t           HLT_ht350prescale;   
-   Int_t           HLT_ht475prescale;   
-   Int_t           HLT_ht600prescale;   
+   Int_t           HLT_Photon165_HE10;   
+   // Int_t           HLT_ht350prescale;   
+   // Int_t           HLT_ht475prescale;   
+   // Int_t           HLT_ht600prescale;   
    Int_t           HLT_PFHT350_Prescale;   
    Int_t           HLT_PFHT475_Prescale;   
    Int_t           HLT_PFHT600_Prescale;   
@@ -194,10 +194,10 @@ public :
    Int_t           tau_charge[50];   //[ntau]
    Float_t         tau_dxy[50];   //[ntau]
    Float_t         tau_dz[50];   //[ntau]
-   Float_t         tau_isoMVA2[50];   //[ntau]
+   // Float_t         tau_isoMVA2[50];   //[ntau]
    Int_t           tau_idCI3hit[50];   //[ntau]
    Float_t         tau_isoCI3hit[50];   //[ntau]
-   Int_t           tau_idMVA2[50];   //[ntau]
+   // Int_t           tau_idMVA2[50];   //[ntau]
    Int_t           tau_mcMatchId[50];   //[ntau]
    Int_t           ngamma;
    Float_t         gamma_pt[50];   //[ngamma]
@@ -205,7 +205,7 @@ public :
    Float_t         gamma_phi[50];   //[ngamma]
    Float_t         gamma_mass[50];   //[ngamma]
    Int_t           gamma_mcMatchId[50];   //[ngamma]
-   Float_t         gamma_genIso[50];   //[ngamma]
+   // Float_t         gamma_genIso[50];   //[ngamma]
    Float_t         gamma_genIso04[50];   //[ngamma]
    Float_t         gamma_drMinParton[50];   //[ngamma]
    Float_t         gamma_chHadIso[50];   //[ngamma]
@@ -378,7 +378,7 @@ public :
    TBranch        *b_nVert;   //!
    TBranch        *b_nTrueInt;   //!
    TBranch        *b_rho;   //!
-   TBranch        *b_rho25;   //!
+   // TBranch        *b_rho25;   //!
    TBranch        *b_nJet30;   //!
    TBranch        *b_nJet40;   //!
    TBranch        *b_nJet30FailId;   //!
@@ -433,28 +433,28 @@ public :
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
-   TBranch        *b_HLT_HT800;   //!
-   TBranch        *b_HLT_HT900;   //!
-   TBranch        *b_HLT_MET170;   //!
+   // TBranch        *b_HLT_HT800;   //!
+   // TBranch        *b_HLT_HT900;   //!
+   // TBranch        *b_HLT_MET170;   //!
    TBranch        *b_HLT_PFHT800;   //!
    TBranch        *b_HLT_PFHT900;   //!
    TBranch        *b_HLT_PFMET170;   //!
-   TBranch        *b_HLT_ht350met100;   //!
-   TBranch        *b_HLT_ht350met120;   //!
+   // TBranch        *b_HLT_ht350met100;   //!
+   // TBranch        *b_HLT_ht350met120;   //!
    TBranch        *b_HLT_PFHT350_PFMET100;   //!
    TBranch        *b_HLT_PFHT350_PFMET120;   //!
    TBranch        *b_HLT_SingleMu;   //!
    TBranch        *b_HLT_SingleEl;   //!
    TBranch        *b_HLT_DoubleEl;   //!
-   TBranch        *b_HLT_MuEG;   //!
+   // TBranch        *b_HLT_MuEG;   //!
    TBranch        *b_HLT_MuX_Ele12;   //!
    TBranch        *b_HLT_Mu8_EleX;   //!
    TBranch        *b_HLT_DoubleMu;   //!
    TBranch        *b_HLT_Photons;   //!
-  // TBranch        *b_HLT_Photon165_HE10;   //!
-   TBranch        *b_HLT_ht350prescale;   //!
-   TBranch        *b_HLT_ht475prescale;   //!
-   TBranch        *b_HLT_ht600prescale;   //!
+   TBranch        *b_HLT_Photon165_HE10;   //!
+   // TBranch        *b_HLT_ht350prescale;   //!
+   // TBranch        *b_HLT_ht475prescale;   //!
+   // TBranch        *b_HLT_ht600prescale;   //!
    TBranch        *b_HLT_PFHT350_Prescale;   //!
    TBranch        *b_HLT_PFHT475_Prescale;   //!
    TBranch        *b_HLT_PFHT600_Prescale;   //!
@@ -536,10 +536,10 @@ public :
    TBranch        *b_tau_charge;   //!
    TBranch        *b_tau_dxy;   //!
    TBranch        *b_tau_dz;   //!
-   TBranch        *b_tau_isoMVA2;   //!
+   // TBranch        *b_tau_isoMVA2;   //!
    TBranch        *b_tau_idCI3hit;   //!
    TBranch        *b_tau_isoCI3hit;   //!
-   TBranch        *b_tau_idMVA2;   //!
+   // TBranch        *b_tau_idMVA2;   //!
    TBranch        *b_tau_mcMatchId;   //!
    TBranch        *b_ngamma;   //!
    TBranch        *b_gamma_pt;   //!
@@ -547,7 +547,7 @@ public :
    TBranch        *b_gamma_phi;   //!
    TBranch        *b_gamma_mass;   //!
    TBranch        *b_gamma_mcMatchId;   //!
-   TBranch        *b_gamma_genIso;   //!
+   // TBranch        *b_gamma_genIso;   //!
    TBranch        *b_gamma_genIso04;   //!
    TBranch        *b_gamma_drMinParton;   //!
    TBranch        *b_gamma_chHadIso;   //!
@@ -779,7 +779,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nVert", &nVert, &b_nVert);
    fChain->SetBranchAddress("nTrueInt", &nTrueInt, &b_nTrueInt);
    fChain->SetBranchAddress("rho", &rho, &b_rho);
-   fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
+   // fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
    fChain->SetBranchAddress("nJet30", &nJet30, &b_nJet30);
    fChain->SetBranchAddress("nJet40", &nJet40, &b_nJet40);
    fChain->SetBranchAddress("nJet30FailId", &nJet30FailId, &b_nJet30FailId);
@@ -834,28 +834,28 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
-   fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
-   fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
-   fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);
+   // fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
+   // fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
+   // fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);
    fChain->SetBranchAddress("HLT_PFHT800", &HLT_PFHT800, &b_HLT_PFHT800);
    fChain->SetBranchAddress("HLT_PFHT900", &HLT_PFHT900, &b_HLT_PFHT900);
    fChain->SetBranchAddress("HLT_PFMET170", &HLT_PFMET170, &b_HLT_PFMET170);
-   fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
-   fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
+   // fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
+   // fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100, &b_HLT_PFHT350_PFMET100);
    fChain->SetBranchAddress("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120, &b_HLT_PFHT350_PFMET120);
    fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
    fChain->SetBranchAddress("HLT_SingleEl", &HLT_SingleEl, &b_HLT_SingleEl);
    fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
-   fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
+   // fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
    fChain->SetBranchAddress("HLT_MuX_Ele12", &HLT_MuX_Ele12, &b_HLT_MuX_Ele12);
    fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
-   // fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
-   fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
-   fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
-   fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
+   fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
+   // fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
+   // fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
+   // fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
    fChain->SetBranchAddress("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale, &b_HLT_PFHT350_Prescale);
    fChain->SetBranchAddress("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale, &b_HLT_PFHT475_Prescale);
    fChain->SetBranchAddress("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale, &b_HLT_PFHT600_Prescale);
@@ -937,10 +937,10 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("tau_charge", tau_charge, &b_tau_charge);
    fChain->SetBranchAddress("tau_dxy", tau_dxy, &b_tau_dxy);
    fChain->SetBranchAddress("tau_dz", tau_dz, &b_tau_dz);
-   fChain->SetBranchAddress("tau_isoMVA2", tau_isoMVA2, &b_tau_isoMVA2);
+   // fChain->SetBranchAddress("tau_isoMVA2", tau_isoMVA2, &b_tau_isoMVA2);
    fChain->SetBranchAddress("tau_idCI3hit", tau_idCI3hit, &b_tau_idCI3hit);
    fChain->SetBranchAddress("tau_isoCI3hit", tau_isoCI3hit, &b_tau_isoCI3hit);
-   fChain->SetBranchAddress("tau_idMVA2", tau_idMVA2, &b_tau_idMVA2);
+   // fChain->SetBranchAddress("tau_idMVA2", tau_idMVA2, &b_tau_idMVA2);
    fChain->SetBranchAddress("tau_mcMatchId", tau_mcMatchId, &b_tau_mcMatchId);
    fChain->SetBranchAddress("ngamma", &ngamma, &b_ngamma);
    fChain->SetBranchAddress("gamma_pt", gamma_pt, &b_gamma_pt);
@@ -948,7 +948,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_phi", gamma_phi, &b_gamma_phi);
    fChain->SetBranchAddress("gamma_mass", gamma_mass, &b_gamma_mass);
    fChain->SetBranchAddress("gamma_mcMatchId", gamma_mcMatchId, &b_gamma_mcMatchId);
-   fChain->SetBranchAddress("gamma_genIso", gamma_genIso, &b_gamma_genIso);
+   // fChain->SetBranchAddress("gamma_genIso", gamma_genIso, &b_gamma_genIso);
    fChain->SetBranchAddress("gamma_genIso04", gamma_genIso04, &b_gamma_genIso04);
    fChain->SetBranchAddress("gamma_drMinParton", gamma_drMinParton, &b_gamma_drMinParton);
    fChain->SetBranchAddress("gamma_chHadIso", gamma_chHadIso, &b_gamma_chHadIso);

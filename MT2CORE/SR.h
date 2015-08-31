@@ -46,8 +46,10 @@ class SR {
     std::map<std::string, TH1*> srHistMap;
     std::map<std::string, TH1*> srsmHistMap;
     std::map<std::string, TH1*> srsmMtHistMap;
-    std::map<std::string, TH1*> srsmNewHistMap;
-    std::map<std::string, TH1*> srsmNewMtHistMap;
+    std::map<std::string, TH1*> srseHistMap;
+    std::map<std::string, TH1*> srseMtHistMap;
+    std::map<std::string, TH1*> srsmAllHistMap;
+    std::map<std::string, TH1*> srsmAllMtHistMap;
     std::map<std::string, TH1*> crslHistMap;
     std::map<std::string, TH1*> crslmuHistMap;
     std::map<std::string, TH1*> crslelHistMap;

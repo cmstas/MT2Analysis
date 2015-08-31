@@ -45,10 +45,10 @@ run ttall_mg_lo
 #
 
 run wjets_amcatnlo
-run wjets_ht100to200
-run wjets_ht200to400
-run wjets_ht400to600
-run wjets_ht600toInf
+# run wjets_ht100to200
+# run wjets_ht200to400
+# run wjets_ht400to600
+# run wjets_ht600toInf
 
 #
 # SINGLE TOP
@@ -63,30 +63,30 @@ run singletop_powheg_5f_tWchan
 # DY+JETS
 #
 
-run zjets_amcatnlo
-run dyjetsll_ht100to200
-run dyjetsll_ht200to400
-run dyjetsll_ht400to600
-run dyjetsll_ht600toInf
+# run zjets_amcatnlo
+# run dyjetsll_ht100to200
+# run dyjetsll_ht200to400
+# run dyjetsll_ht400to600
+# run dyjetsll_ht600toInf
 
 
 #
 # GAMMA + JETS
 #
 
-run gjet_ht100to200
-run gjet_ht200to400
-run gjet_ht400to600
-run gjet_ht600toInf
+# run gjet_ht100to200
+# run gjet_ht200to400
+# run gjet_ht400to600
+# run gjet_ht600toInf
 
 #
 # Z INVISIBLE
 #
 
-run zinv_ht100to200
-run zinv_ht200to400
-run zinv_ht400to600
-run zinv_ht600toInf
+run zinv_ht100To200
+run zinv_ht200To400
+run zinv_ht400To600
+run zinv_ht600ToInf
 
 #
 # DIBOSON

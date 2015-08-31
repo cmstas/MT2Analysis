@@ -100,6 +100,28 @@ void MT2Looper::SetSignalRegions(){
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srHistMap, "", 1, 0, 2);
 
+    dir = (TDirectory*)outfile_->Get(("srsmAll"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("srsmAll"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmAllHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmAllHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmAllHistMap, "", 1, 0, 2);
+
+    dir = (TDirectory*)outfile_->Get(("srsmAllMt"+SRVec.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("srsmAllMt"+SRVec.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmAllMtHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmAllMtHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmAllMtHistMap, "", 1, 0, 2);
+
     dir = (TDirectory*)outfile_->Get(("srsm"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
       dir = outfile_->mkdir(("srsm"+SRVec.at(i).GetName()).c_str());
@@ -122,27 +144,49 @@ void MT2Looper::SetSignalRegions(){
     }
     plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmMtHistMap, "", 1, 0, 2);
 
-    dir = (TDirectory*)outfile_->Get(("srsmNew"+SRVec.at(i).GetName()).c_str());
+    dir = (TDirectory*)outfile_->Get(("srse"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
-      dir = outfile_->mkdir(("srsmNew"+SRVec.at(i).GetName()).c_str());
+      dir = outfile_->mkdir(("srse"+SRVec.at(i).GetName()).c_str());
     } 
     dir->cd();
     for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmNewHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmNewHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srseHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srseHistMap, "", 1, 0, 2);
     }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmNewHistMap, "", 1, 0, 2);
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srseHistMap, "", 1, 0, 2);
 
-    dir = (TDirectory*)outfile_->Get(("srsmNewMt"+SRVec.at(i).GetName()).c_str());
+    dir = (TDirectory*)outfile_->Get(("srseMt"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
-      dir = outfile_->mkdir(("srsmNewMt"+SRVec.at(i).GetName()).c_str());
+      dir = outfile_->mkdir(("srseMt"+SRVec.at(i).GetName()).c_str());
     } 
     dir->cd();
     for(unsigned int j = 0; j < vars.size(); j++){
-      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmNewMtHistMap, "", 1, 0, 2);
-      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmNewMtHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srseMtHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srseMtHistMap, "", 1, 0, 2);
     }
-    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmNewMtHistMap, "", 1, 0, 2);
+    plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srseMtHistMap, "", 1, 0, 2);
+
+    // dir = (TDirectory*)outfile_->Get(("srsmNew"+SRVec.at(i).GetName()).c_str());
+    // if (dir == 0) {
+    //   dir = outfile_->mkdir(("srsmNew"+SRVec.at(i).GetName()).c_str());
+    // } 
+    // dir->cd();
+    // for(unsigned int j = 0; j < vars.size(); j++){
+    //   plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmNewHistMap, "", 1, 0, 2);
+    //   plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmNewHistMap, "", 1, 0, 2);
+    // }
+    // plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmNewHistMap, "", 1, 0, 2);
+
+    // dir = (TDirectory*)outfile_->Get(("srsmNewMt"+SRVec.at(i).GetName()).c_str());
+    // if (dir == 0) {
+    //   dir = outfile_->mkdir(("srsmNewMt"+SRVec.at(i).GetName()).c_str());
+    // } 
+    // dir->cd();
+    // for(unsigned int j = 0; j < vars.size(); j++){
+    //   plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBound(vars.at(j)), SRVec.at(i).srsmNewMtHistMap, "", 1, 0, 2);
+    //   plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBound(vars.at(j)), SRVec.at(i).srsmNewMtHistMap, "", 1, 0, 2);
+    // }
+    // plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).srsmNewMtHistMap, "", 1, 0, 2);
 
     dir = (TDirectory*)outfile_->Get(("crsl"+SRVec.at(i).GetName()).c_str());
     if (dir == 0) {
@@ -198,6 +242,42 @@ void MT2Looper::SetSignalRegions(){
     plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBase.GetUpperBound(vars.at(j)), SRBase.srHistMap, "", 1, 0, 2);
   }
   plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+  dir = (TDirectory*)outfile_->Get("srsmAllbase");
+  if (dir == 0) {
+    dir = outfile_->mkdir("srsmAllbase");
+  } 
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBase.GetLowerBound(vars.at(j)), SRBase.srsmAllHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBase.GetUpperBound(vars.at(j)), SRBase.srsmAllHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srsmAllHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+  dir = (TDirectory*)outfile_->Get("srsmbase");
+  if (dir == 0) {
+    dir = outfile_->mkdir("srsmbase");
+  } 
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBase.GetLowerBound(vars.at(j)), SRBase.srsmHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBase.GetUpperBound(vars.at(j)), SRBase.srsmHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srsmHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+  dir = (TDirectory*)outfile_->Get("srsebase");
+  if (dir == 0) {
+    dir = outfile_->mkdir("srsebase");
+  } 
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBase.GetLowerBound(vars.at(j)), SRBase.srseHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBase.GetUpperBound(vars.at(j)), SRBase.srseHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.srseHistMap, "", 1, 0, 2);
   outfile_->cd();
 
   std::vector<std::string> varsCRSL = SRBase.GetListOfVariablesCRSL();
@@ -466,7 +546,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // Select one and only one muon < 20 GeV, down to 5 GeV, apply all other cuts back.
       //---------------------------
       //if ((t.ngenLep + t.ngenTau) != 0) continue;   // to find the origin of muon
-
+/*
       smulepveto_ = nlepveto_ - 1;
       bool softMuon = false;
       // if has reco muon use the information
@@ -526,19 +606,16 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // in following code the mt_ value may be rewritten, so fill the histos right now
       if (softMuon) fillHistosSRsoftMuon("srsm");
 
-/*
+*/
       // bool filledsrsm = false;
       // New version of the selection, using the new baby, keeping the old one to see if it would be any difference
       int nIsoMuons = 0;
       int iism = -1;   // index of the iso muon
-      for (int i=0; i < t.nsoftmus; i++) {
-        if (t.softmus_miniRelIso[i] < 0.2) {   // Iso selection here
-          nIsoMuons++;
-          iism = i;
-        }
-      }
+      for (int i=0; i < t.nsoftmus; i++) if (t.softmus_miniRelIso[i] < 0.2) {nIsoMuons++; iism = i;}
+      
       int nIsoElecs = 0;
-      for (int i=0; i < t.nelecs; i++) if (t.elecs_miniRelIso[i] < 0.2) nIsoElecs++;
+      int iiel = -1;   // index of the iso electron
+      for (int i=0; i < t.nelecs; i++) if (t.elecs_miniRelIso[i] < 0.2 && t.elecs_pt[i] > 5) {nIsoElecs++; iiel = i;}
 
       if (nIsoMuons == 1 && t.softmus_pt[iism] < 20) { 
         smulepveto_ = nIsoMuons + nIsoElecs + t.nPFHad10LowMT - 1;
@@ -552,13 +629,25 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
         mt_ = sqrt( 2 * t.met_pt * smupt_ * ( 1 - cos( t.met_phi - smuphi_) ) );
 
         //if (abs(t.softmus_eta[0]) < 1.4)
-        fillHistosSRsoftMuonNew("srsmNew");
-        // filledsrsm = true;
+        fillHistosSRsoftMuon("srsm");
+      }
+      else if (nIsoMuons == 0 && nIsoElecs == 1 && t.elecs_pt[iiel] < 20) { 
+        smulepveto_ = t.nPFHad10LowMT;
+        smupt_      = t.elecs_pt[iiel];
+        smueta_     = t.elecs_eta[iiel];
+        smuphi_     = t.elecs_phi[iiel];
+        smuabsiso_  = t.elecs_absIso[iiel];
+        smureliso_  = t.elecs_relIso03[iiel];
+        smumreliso_ = t.elecs_miniRelIso[iiel];
+        smusip_     = t.elecs_sip[iiel];
+        mt_ = sqrt( 2 * t.met_pt * smupt_ * ( 1 - cos( t.met_phi - smuphi_) ) );
+        
+        fillHistosSRsoftMuon("srse");
       }
 
-      if (fillHistosGenMuon("srsmNew") == 1) ;
-      fillHistosMuonIso("srsmNew", nIsoElecs + t.nPFHad10LowMT);
-*/
+      // fillHistosGenMuon("srsm");
+      // fillHistosMuonIso("srsm", nIsoElecs + t.nPFHad10LowMT);
+
       //if(ifillgensm == 1) nGenMuon++;
       // if(ifillgensm == 1 && !filledsrsm){
       //   //nGenButNotReco++;
@@ -645,7 +734,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	    bool overlap = false;
 	    for(int ilep = 0; ilep < t.nlep; ilep++){
 	      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
-	      if (thisDR < 0.1) {
+	      if (thisDR < 0.01) {
 		overlap = true;
 		break;
 	      }
@@ -665,6 +754,30 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	  std::cout << "MT2Looper::Loop: WARNING! didn't find a lowMT candidate when expected: evt: " << t.evt
 		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
 		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
+
+      	  // for (int ilep = 0; ilep < t.nlep; ++ilep) {
+      	  //   float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
+          //   std::cout << "i: " << ilep << "  id: " << std::setw(3) << t.lep_pdgId[ilep] << "   mt: " << mt << "  pt: " << t.lep_pt[ilep] << "  eta: " << t.lep_eta[ilep] << "  phi: " << t.lep_phi[ilep] << std::endl;
+	  //   // good candidate: save
+          // }
+      	  // for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	  //   float pt = t.isoTrack_pt[itrk];
+	  //   // if (pt < 5.) continue;
+      	  //   int pdgId = t.isoTrack_pdgId[itrk];
+	  //   // if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
+      	  //   // if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+      	  //   float mt = sqrt( 2 * t.met_pt * pt * ( 1 - cos( t.met_phi - t.isoTrack_phi[itrk]) ) );
+	  //   int overlap = -1;
+	  //   for(int ilep = 0; ilep < t.nlep; ilep++){
+	  //     float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+	  //     if (thisDR < 0.1) {
+	  //       overlap = ilep;
+	  //       break;
+	  //     }
+	  //   } // loop over reco leps
+          //   std::cout << "i: " << itrk << "  id: " << std::setw(3) << pdgId << "   mt: " << mt << "  pt: " << pt << "  overlap: " << overlap << "  eta: " << t.isoTrack_eta[itrk] << "  phi: " << t.isoTrack_phi[itrk] << "  iso: " << t.isoTrack_absIso[itrk]/pt << std::endl;
+          // }
+
 	}
 
 	if (abs(cand_pdgId) == 11) doSLELplots = true;
@@ -1071,7 +1184,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   return;
 }
 
-void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::string& suffix) {
+void MT2Looper::fillHistosSRsoftMuonOld(const std::string& prefix, const std::string& suffix) {
 
   // Fill up base region
   std::map<std::string, float> valuesBase;
@@ -1156,7 +1269,7 @@ void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::strin
 void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin; 
@@ -1191,7 +1304,7 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
   return;
 }
 
-void MT2Looper::fillHistosSRsoftMuonNew(const std::string& prefix, const std::string& suffix) {
+void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::string& suffix) {
 
   // Fill up base region
   std::map<std::string, float> valuesBase;
@@ -1204,8 +1317,14 @@ void MT2Looper::fillHistosSRsoftMuonNew(const std::string& prefix, const std::st
   valuesBase["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(valuesBase)){
-    fillHistosSingleSoftMuon(SRBase.srsmNewHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmNewbase", "");
-    if (mt_ > 100) fillHistosSingleSoftMuon(SRBase.srsmNewMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmNewMtbase", "");
+    fillHistosSingleSoftMuon(SRBase.srsmAllHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmAllbase", "");
+    if (prefix == "srsm") fillHistosSingleSoftMuon(SRBase.srsmHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"base", "");
+    else if(prefix == "srse") fillHistosSingleSoftMuon(SRBase.srseHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"base", "");
+    if (mt_ > 100) {
+      fillHistosSingleSoftMuon(SRBase.srsmAllMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmAllMtbase", "");
+      if(prefix == "srsm") fillHistosSingleSoftMuon(SRBase.srsmMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"Mtbase", "");
+      else if(prefix == "srse") fillHistosSingleSoftMuon(SRBase.srseMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"Mtbase", "");
+    }
   }
 
   // Check the soft muon iso distribuion #smuiso
@@ -1213,9 +1332,9 @@ void MT2Looper::fillHistosSRsoftMuonNew(const std::string& prefix, const std::st
   //------------------
   // n-1 plots start
   //-----------------
-  TDirectory * dir = (TDirectory*)outfile_->Get("srsmNewbase");
+  TDirectory * dir = (TDirectory*)outfile_->Get("srsmAllbase");
   if (dir == 0) {
-    dir = outfile_->mkdir("srsmNewbase");
+    dir = outfile_->mkdir("srsmAllbase");
   }
   dir->cd();
 
@@ -1229,7 +1348,7 @@ void MT2Looper::fillHistosSRsoftMuonNew(const std::string& prefix, const std::st
   valuesBase1["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(valuesBase1)){
-    plot1D("h_n-1_mt2",      t.mt2,   evtweight_, SRBase.srsmNewHistMap, ";M_{T2} (srsmNew) [GeV]", 100, 0, 1000);
+    plot1D("h_n-1_mt2",      t.mt2,   evtweight_, SRBase.srsmAllHistMap, ";M_{T2} (srsmAll) [GeV]", 100, 0, 1000);
   }
 
   std::map<std::string, float> valuesBase2;
@@ -1242,8 +1361,8 @@ void MT2Looper::fillHistosSRsoftMuonNew(const std::string& prefix, const std::st
   valuesBase2["passesHtMet"] = true; // ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(valuesBase2)){
-    plot1D("h_n-1_met",      t.met_pt,   evtweight_, SRBase.srsmNewHistMap, ";MET (srsmNew) [GeV]", 100, 0, 800);
-    plot1D("h_n-1_ht",           t.ht,   evtweight_, SRBase.srsmNewHistMap, ";HT (srsmNew) [GeV]", 100, 0, 2000);
+    plot1D("h_n-1_met",      t.met_pt,   evtweight_, SRBase.srsmAllHistMap, ";MET (srsmAll) [GeV]", 100, 0, 800);
+    plot1D("h_n-1_ht",           t.ht,   evtweight_, SRBase.srsmAllHistMap, ";HT (srsmAll) [GeV]", 100, 0, 2000);
   }
 
   outfile_->cd();
@@ -1265,9 +1384,14 @@ void MT2Looper::fillHistosSRsoftMuonNew(const std::string& prefix, const std::st
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-      fillHistosSingleSoftMuon(SRVec.at(srN).srsmNewHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      if (mt_ > 100)
-        fillHistosSingleSoftMuon(SRVec.at(srN).srsmNewMtHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+"Mt"+SRVec.at(srN).GetName(), suffix);
+      fillHistosSingleSoftMuon(SRVec.at(srN).srsmAllHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "srsmAll"+SRVec.at(srN).GetName(), suffix);
+      if (prefix == "srsm") fillHistosSingleSoftMuon(SRVec.at(srN).srsmHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      else if (prefix == "srse") fillHistosSingleSoftMuon(SRVec.at(srN).srseHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      if (mt_ > 100){
+        fillHistosSingleSoftMuon(SRVec.at(srN).srsmAllMtHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "srsmAllMt"+SRVec.at(srN).GetName(), suffix);
+        if (prefix == "srsm") fillHistosSingleSoftMuon(SRVec.at(srN).srsmMtHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+"Mt"+SRVec.at(srN).GetName(), suffix);
+        else if (prefix == "srse") fillHistosSingleSoftMuon(SRVec.at(srN).srseMtHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+"Mt"+SRVec.at(srN).GetName(), suffix);
+      }
       break; //signal regions are orthogonal, event cannot be in more than one
     }
   }
@@ -1348,10 +1472,10 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
   return;
 }
 
-int MT2Looper::fillHistosGenMuon(const std::string& prefix , const std::string& suffix ) {
+void MT2Looper::fillHistosGenMuon(const std::string& prefix , const std::string& suffix ) {
 
-  if(t.ngenLep + t.ngenLepFromTau != 1) return -(t.ngenLep + t.ngenLepFromTau);
-  if( (t.ngenLep == 1 && abs(t.genLep_pdgId[0]) != 13) || (t.ngenLepFromTau == 1 && abs(t.genLepFromTau_pdgId[0]) != 13) ) return -1;
+  if(t.ngenLep + t.ngenLepFromTau != 1) return;// -(t.ngenLep + t.ngenLepFromTau);
+  if( (t.ngenLep == 1 && abs(t.genLep_pdgId[0]) != 13) || (t.ngenLepFromTau == 1 && abs(t.genLepFromTau_pdgId[0]) != 13) ) return;// -1;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1363,36 +1487,36 @@ int MT2Looper::fillHistosGenMuon(const std::string& prefix , const std::string& 
   values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(values)) {
-    TDirectory * dir = (TDirectory*)outfile_->Get("srsmNewbase");
+    TDirectory * dir = (TDirectory*)outfile_->Get("srsmbase");
     if (dir == 0) {
-      dir = outfile_->mkdir("srsmNewbase");
+      dir = outfile_->mkdir("srsmbase");
     }
     dir->cd();
 
     if(t.ngenLep == 1){
-      plot1D("h_allgenmu_pt",      t.genLep_pt[0],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 200, 0, 1000);
-      plot1D("h_allgenmu_eta",    t.genLep_eta[0],   evtweight_, SRBase.srsmNewHistMap, ";#eta (gen #mu) ", 50, -4, 4);
+      plot1D("h_allgenmu_pt",      t.genLep_pt[0],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 200, 0, 1000);
+      plot1D("h_allgenmu_eta",    t.genLep_eta[0],   evtweight_, SRBase.srsmHistMap, ";#eta (gen #mu) ", 50, -4, 4);
       if(t.genLep_pt[0] < 20 && t.genLep_pt[0] > 5 && abs(t.genLep_eta[0]) < 2.4){
-        plot1D("h_goodgenmu_pt",      t.genLep_pt[0],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
-        plot1D("h_goodgenmu_eta",    t.genLep_eta[0],   evtweight_, SRBase.srsmNewHistMap, ";#eta (gen #mu) ", 50, -2.6, 2.6);
-        return 1;
+        plot1D("h_goodgenmu_pt",      t.genLep_pt[0],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+        plot1D("h_goodgenmu_eta",    t.genLep_eta[0],   evtweight_, SRBase.srsmHistMap, ";#eta (gen #mu) ", 50, -2.6, 2.6);
+        return;// 1;
       }
     }
     else if (t.ngenLepFromTau == 1){
-      plot1D("h_allgenmu_pt",      t.genLepFromTau_pt[0],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 200, 0, 1000);
-      plot1D("h_allgenmu_eta",    t.genLepFromTau_eta[0],   evtweight_, SRBase.srsmNewHistMap, ";#eta (gen #mu) ", 50, -4, 4);
+      plot1D("h_allgenmu_pt",      t.genLepFromTau_pt[0],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 200, 0, 1000);
+      plot1D("h_allgenmu_eta",    t.genLepFromTau_eta[0],   evtweight_, SRBase.srsmHistMap, ";#eta (gen #mu) ", 50, -4, 4);
       if(t.genLepFromTau_pt[0] < 20 && t.genLepFromTau_pt[0] > 5 && abs(t.genLepFromTau_eta[0]) < 2.4){
-        plot1D("h_goodgenmu_pt",      t.genLepFromTau_pt[0],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
-        plot1D("h_goodgenmu_eta",    t.genLepFromTau_eta[0],   evtweight_, SRBase.srsmNewHistMap, ";#eta (gen #mu) ", 50, -2.6, 2.6);
-        return 1;
+        plot1D("h_goodgenmu_pt",      t.genLepFromTau_pt[0],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+        plot1D("h_goodgenmu_eta",    t.genLepFromTau_eta[0],   evtweight_, SRBase.srsmHistMap, ";#eta (gen #mu) ", 50, -2.6, 2.6);
+        return;// 1;
       }
     }
     outfile_->cd();
-    return 2;
+    return;// 2;
   }
   outfile_->cd();
 
-  return 0;
+  return;// 0;
 }
 
 void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto ) {
@@ -1407,20 +1531,20 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
   values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(values)) {
-    TDirectory * dir = (TDirectory*)outfile_->Get("srsmNewbase");
+    TDirectory * dir = (TDirectory*)outfile_->Get("srsmbase");
     if (dir == 0) {
-      dir = outfile_->mkdir("srsmNewbase");
+      dir = outfile_->mkdir("srsmbase");
     }
     dir->cd();
 
     for(int i=0; i < t.ngenLep; i++) {
       if(abs(t.genLep_pdgId[i]) == 13 && t.genLep_pt[i] < 20 && t.genLep_pt[i] > 5 && fabs(t.genLep_eta[i]) < 2.4)
-        plot1D("h_allgoodgenmu_pt",  t.genLep_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+        plot1D("h_allgoodgenmu_pt",  t.genLep_pt[i],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
     }
 
     for(int i=0; i < t.ngenLepFromTau; i++) {
       if(abs(t.genLepFromTau_pdgId[i]) == 13 && t.genLepFromTau_pt[i] < 20 && t.genLepFromTau_pt[i] > 5 && fabs(t.genLepFromTau_eta[i]) < 2.4)
-        plot1D("h_allgoodgenmu_pt",  t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+        plot1D("h_allgoodgenmu_pt",  t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
     }
 
     for (int j=0; j < t.nsoftmus; j++) {
@@ -1437,20 +1561,20 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
         float dr = DeltaR(t.genLepFromTau_eta[i],  eta, t.genLepFromTau_phi[i],  phi);
         if (dr < 0.1){
           fromGenTau = true;
-          plot1D("h_matgoodgenmu_pt",  t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
-          plot1D("h_diff_recogen_pt",  pt - t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";diff p_{T}^{#mu} (gen #mu) [GeV]", 50, -5, 5);
+          plot1D("h_matgoodgenmu_pt",  t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+          plot1D("h_diff_recogen_pt",  pt - t.genLepFromTau_pt[i],   evtweight_, SRBase.srsmHistMap, ";diff p_{T}^{#mu} (gen #mu) [GeV]", 50, -5, 5);
           pt = t.genLepFromTau_pt[i];
           break;
         }
       }
       if (fromGenTau ) {
-        plot1D("h_smu_pt_real_noiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-        if (mreliso < 0.2) plot1D("h_smu_pt_real_wiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-        if (absiso < 5) plot1D("h_smu_pt_real_absiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-        plot1D("h_smu_reliso_real",   reliso,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
-        plot1D("h_smu_absiso_real",   absiso,   evtweight_, SRBase.srsmNewHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
-        plot1D("h_smu_mreliso_real",  mreliso,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
-        plot1D("h_smu_sip_real",        sip,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+        plot1D("h_smu_pt_real_noiso",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+        if (mreliso < 0.2) plot1D("h_smu_pt_real_wiso",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+        if (absiso < 5) plot1D("h_smu_pt_real_absiso",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+        plot1D("h_smu_reliso_real",   reliso,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
+        plot1D("h_smu_absiso_real",   absiso,   evtweight_, SRBase.srsmHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
+        plot1D("h_smu_mreliso_real",  mreliso,   evtweight_, SRBase.srsmHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
+        plot1D("h_smu_sip_real",        sip,   evtweight_, SRBase.srsmHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
       }
       else{
         bool fromGenLep = false;
@@ -1458,20 +1582,20 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
           float dr = DeltaR(t.genLep_eta[i],  eta, t.genLep_phi[i],  phi);
           if (dr < 0.1) {
             fromGenLep = true;
-            plot1D("h_matgoodgenmu_pt",  t.genLep_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
-            plot1D("h_diff_recogen_pt",  pt - t.genLep_pt[i],   evtweight_, SRBase.srsmNewHistMap, ";diff p_{T}^{#mu} (gen #mu) [GeV]", 50, -5, 5);
+            plot1D("h_matgoodgenmu_pt",  t.genLep_pt[i],   evtweight_, SRBase.srsmHistMap, ";p_{T}^{#mu} (gen #mu) [GeV]", 50, 0, 25);
+            plot1D("h_diff_recogen_pt",  pt - t.genLep_pt[i],   evtweight_, SRBase.srsmHistMap, ";diff p_{T}^{#mu} (gen #mu) [GeV]", 50, -5, 5);
             pt = t.genLep_pt[i];
             break;
           }
         }
         if (fromGenLep) {
-          plot1D("h_smu_pt_real_noiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-          if (mreliso < 0.2) plot1D("h_smu_pt_real_wiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-          if (absiso < 5) plot1D("h_smu_pt_real_absiso",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-          plot1D("h_smu_reliso_real",   reliso,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
-          plot1D("h_smu_absiso_real",   absiso,   evtweight_, SRBase.srsmNewHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
-          plot1D("h_smu_mreliso_real",  mreliso,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
-          plot1D("h_smu_sip_real",      sip,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+          plot1D("h_smu_pt_real_noiso",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          if (mreliso < 0.2) plot1D("h_smu_pt_real_wiso",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          if (absiso < 5) plot1D("h_smu_pt_real_absiso",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          plot1D("h_smu_reliso_real",   reliso,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
+          plot1D("h_smu_absiso_real",   absiso,   evtweight_, SRBase.srsmHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
+          plot1D("h_smu_mreliso_real",  mreliso,   evtweight_, SRBase.srsmHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
+          plot1D("h_smu_sip_real",      sip,   evtweight_, SRBase.srsmHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
         }
         else {
           // if(t.ngenLep == 1) 
@@ -1480,11 +1604,11 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
           // if(t.ngenLepFromTau == 1) 
           //   cout << "t.genLepFromTau_pt[0] = " << t.genLepFromTau_pt[0]  << "  eta = " << t.genLepFromTau_eta[0] << "  phi = " << t.genLepFromTau_phi[0] << endl
           //        << "t.softmus_pt[j]= " << t.softmus_pt[j] << "  eta = " << eta << "  phi = " << phi << endl << endl;
-          plot1D("h_smu_pt_fake",  pt ,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
-          plot1D("h_smu_reliso_fake",   reliso,   evtweight_, SRBase.srsmNewHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
-          plot1D("h_smu_absiso_fake",   absiso,   evtweight_, SRBase.srsmNewHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
-          plot1D("h_smu_mreliso_fake",  mreliso,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
-          plot1D("h_smu_sip_fake",      sip,   evtweight_, SRBase.srsmNewHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+          plot1D("h_smu_pt_fake",  pt ,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 50, 0, 25);
+          plot1D("h_smu_reliso_fake",   reliso,   evtweight_, SRBase.srsmHistMap, ";relIso(#mu) [GeV]", 200, 0, 50);
+          plot1D("h_smu_absiso_fake",   absiso,   evtweight_, SRBase.srsmHistMap, ";absIso(#mu) [GeV]", 100, 0, 200);
+          plot1D("h_smu_mreliso_fake",  mreliso,   evtweight_, SRBase.srsmHistMap, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
+          plot1D("h_smu_sip_fake",      sip,   evtweight_, SRBase.srsmHistMap, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
         }
       }
     }
@@ -1494,7 +1618,7 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
 void MT2Looper::fillHistosSoftLCR(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_ht350met100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin; //use reco MET for this cut
@@ -1919,7 +2043,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_met"+s,       t.gamma_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_simplemet"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_gammaPt"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
-    if (t.HLT_Photons) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
+    if (t.HLT_Photon165_HE10) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet30"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nJet40"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
