@@ -885,7 +885,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_PFHT350_PFMET100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin; 
@@ -923,7 +923,7 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
 void MT2Looper::fillHistosSoftLCR(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_HT800 || t.HLT_PFHT350_PFMET100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin; //use reco MET for this cut
