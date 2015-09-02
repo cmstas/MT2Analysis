@@ -1535,9 +1535,9 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
   values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(values)) {
-    TDirectory * dir = (TDirectory*)outfile_->Get("srsmbase");
+    TDirectory * dir = (TDirectory*)outfile_->Get(prefix+"base");
     if (dir == 0) {
-      dir = outfile_->mkdir("srsmbase");
+      dir = outfile_->mkdir(prefix+"base");
     }
     dir->cd();
 

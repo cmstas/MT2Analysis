@@ -757,8 +757,8 @@ void plotMaker(){
 
   float scalesig = -1.;
   //float scalesig = 50.;
-  //bool printplots = true;
-  bool printplots = false;
+  bool printplots = true;
+  //bool printplots = false;
   bool doRatio = false;
 
   if(printplots){
@@ -772,7 +772,7 @@ void plotMaker(){
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
-      if(dir_name != "srsmAllbase") continue; //to do only srbase
+      if(dir_name != "srsebase") continue; //to do only srbase
       //if(dir_name != "sr1H") continue; //for testing
       // // makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots );
       // // makePlot( samples , names , dir_name , "h_minMTBMet"  , "min M_{T}(b,MET) [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots );
