@@ -506,8 +506,8 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      //      const float lumi = 4.;
-      const float lumi = 1;
+      const float lumi = 4.;
+      //const float lumi = 1;
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -613,12 +613,17 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       int iism = -1;   // index of the iso muon
       for (int i=0; i < t.nsoftmus; i++) if (t.softmus_miniRelIso[i] < 0.2) {nIsoMuons++; iism = i;}
       
-      int nIsoElecs = 0;
+      int nIsoElecs5 = 0;
+      int nIsoElecs10 = 0;
       int iiel = -1;   // index of the iso electron
-      for (int i=0; i < t.nelecs; i++) if (t.elecs_miniRelIso[i] < 0.2 && t.elecs_pt[i] > 5) {nIsoElecs++; iiel = i;}
+      for (int i=0; i < t.nelecs; i++) {
+        if (t.elecs_miniRelIso[i] < 0.2 && t.elecs_pt[i] > 5) {nIsoElecs5++; iiel = i;}
+        if (t.elecs_isReco && t.elecs_pt[i] < 10) continue;
+        if (t.elecs_miniRelIso[i] < 0.2) nIsoElecs10++; 
+      }
 
       if (nIsoMuons == 1 && t.softmus_pt[iism] < 20) { 
-        smulepveto_ = nIsoMuons + nIsoElecs + t.nPFHad10LowMT - 1;
+        smulepveto_ = nIsoElecs10 + t.nPFHad10LowMT;
         smupt_      = t.softmus_pt[iism];
         smueta_     = t.softmus_eta[iism];
         smuphi_     = t.softmus_phi[iism];
@@ -631,7 +636,7 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
         //if (abs(t.softmus_eta[0]) < 1.4)
         fillHistosSRsoftMuon("srsm");
       }
-      else if (nIsoMuons == 0 && nIsoElecs == 1 && t.elecs_pt[iiel] < 20) { 
+      else if (nIsoMuons == 0 && nIsoElecs5 == 1 && t.elecs_pt[iiel] < 20) { 
         smulepveto_ = t.nPFHad10LowMT;
         smupt_      = t.elecs_pt[iiel];
         smueta_     = t.elecs_eta[iiel];
@@ -946,12 +951,12 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       ///   time to fill histograms    /// 
       ////////////////////////////////////
 
-      // fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
+      fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
-      // fillHistosSignalRegion("sr");
+      fillHistosSignalRegion("sr");
 
-      // fillHistosSRBase();
-      // fillHistosInclusive();
+      fillHistosSRBase();
+      fillHistosInclusive();
 
       doGJplots = false;
       doDYplots = false;
@@ -1318,12 +1323,12 @@ void MT2Looper::fillHistosSRsoftMuon(const std::string& prefix, const std::strin
 
   if(SRBase.PassesSelection(valuesBase)){
     fillHistosSingleSoftMuon(SRBase.srsmAllHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmAllbase", "");
-    if (prefix == "srsm") fillHistosSingleSoftMuon(SRBase.srsmHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"base", "");
-    else if(prefix == "srse") fillHistosSingleSoftMuon(SRBase.srseHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"base", "");
+    if (prefix == "srsm") fillHistosSingleSoftMuon(SRBase.srsmHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmbase", "");
+    else if(prefix == "srse") fillHistosSingleSoftMuon(SRBase.srseHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsebase", "");
     if (mt_ > 100) {
       fillHistosSingleSoftMuon(SRBase.srsmAllMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmAllMtbase", "");
-      if(prefix == "srsm") fillHistosSingleSoftMuon(SRBase.srsmMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"Mtbase", "");
-      else if(prefix == "srse") fillHistosSingleSoftMuon(SRBase.srseMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"Mtbase", "");
+      if(prefix == "srsm") fillHistosSingleSoftMuon(SRBase.srsmMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsmMtbase", "");
+      else if(prefix == "srse") fillHistosSingleSoftMuon(SRBase.srseMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srseMtbase", "");
     }
   }
 
@@ -1424,8 +1429,7 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
   plot1D("h_smu_absiso"+s,   smuabsiso_,   evtweight_, h_1d, ";absIso(#mu) [GeV]", 100, 0, 200);
   plot1D("h_smu_mreliso"+s,  smumreliso_ ,   evtweight_, h_1d, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
 
-  if(smusip_ != -1)
-    plot1D("h_smu_sip"+s,  fabs(smusip_) ,   evtweight_, h_1d, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+  plot1D("h_smu_sip"+s,  fabs(smusip_) ,   evtweight_, h_1d, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
 
   bool fromGenTau = false;
   int imu = -1;
