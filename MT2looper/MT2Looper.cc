@@ -589,30 +589,32 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       bool doSoftLCRplots = false;
       Widx_ = -1;
       NUidx_ = -1;
-      if (t.nlep == 1 && abs(t.lep_pdgId[0])==13) {
+      if (t.nsoftmus == 1) {
 
 	//pT cut to save time
-	if (t.lep_pt[0] < 40 && t.lep_pt[0]>20) continue;
+	if (t.softmus_pt[0] < 40 && t.softmus_pt[0]>20) continue;
 	
 	//muon cuts
-	if (abs(t.lep_mcMatchId[0]) != 24) continue;
-	//	if (fabs(t.lep_eta[0])>2.4) continue;
-	if (t.lep_miniRelIso[0] != 0 && t.lep_miniRelIso[0] > 0.2) continue;
+	if (abs(t.softmus_mcMatchId[0]) != 24) continue;
+	if (fabs(t.softmus_eta[0])>2.4) continue;
+	if (t.softmus_isReco[0] && t.softmus_miniRelIso[0] > 0.2) continue;
+	if (t.softmus_isPF[0] && t.softmus_relIso03[0] > 0.2) continue;
+	if (t.nlep >1 ) continue;
 
-	//if miniRelIso == 0, check for matching isotrack.
-	if (t.lep_miniRelIso[0] == 0 ) {
-	  //default false, if no matching isoTrack found will fail selection
-	  bool failsIso = true;
-	  for (int trkIdx = 0; trkIdx < t.nisoTrack; trkIdx++) {
-	    if (abs(t.isoTrack_pdgId[trkIdx]) != 13) continue;
-	    float thisDR = DeltaR(t.isoTrack_eta[trkIdx], t.lep_eta[0], t.isoTrack_phi[trkIdx], t.lep_phi[0]);
-	    if (thisDR > 0.1) continue;
-	    //found matching isoTrack
-	    if (t.isoTrack_absIso[trkIdx]/t.isoTrack_pt[trkIdx] < 0.2) failsIso = false;
-	    break;
-	  }
-	  if (failsIso) continue;
-	}
+	// //if miniRelIso == 0, check for matching isotrack.
+	// if (t.softmus_miniRelIso[0] == 0 ) {
+	//   //default false, if no matching isoTrack found will fail selection
+	//   bool failsIso = true;
+	//   for (int trkIdx = 0; trkIdx < t.nisoTrack; trkIdx++) {
+	//     if (abs(t.isoTrack_pdgId[trkIdx]) != 13) continue;
+	//     float thisDR = DeltaR(t.isoTrack_eta[trkIdx], t.softmus_eta[0], t.isoTrack_phi[trkIdx], t.softmus_phi[0]);
+	//     if (thisDR > 0.1) continue;
+	//     //found matching isoTrack
+	//     if (t.isoTrack_absIso[trkIdx]/t.isoTrack_pt[trkIdx] < 0.2) failsIso = false;
+	//     break;
+	//   }
+	//   if (failsIso) continue;
+	// }
 	
 	//find index of the W, for MC plots later
 	for ( int k = 0; k < t.ngenPart; k++) {
@@ -628,12 +630,12 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
 	//   cout << "w pt : " << t.genPart_pt[Widx_] << endl;
 	//   cout << "nu idx : " << NUidx_ << endl;
 	//   cout << "nu pt : " << t.genPart_pt[NUidx_] << endl;
-	//   cout << "lep pt : " << t.lep_pt[0] << endl;
+	//   cout << "lep pt : " << t.softmus_pt[0] << endl;
 	//   cout << "evt : " << t.evt << endl;
 	// }
 	
-	if ( t.lep_pt[0] < 20 && t.lep_pt[0] > 5 ) {doSoftLplots = true; }
-	if ( t.lep_pt[0] > 40 ) {doSoftLCRplots = true; }
+	if ( t.softmus_pt[0] < 20 && t.softmus_pt[0] > 5 ) {doSoftLplots = true; }
+	if ( t.softmus_pt[0] > 40 ) {doSoftLCRplots = true; }
 	
       } // nlep == 1
 
@@ -1441,9 +1443,9 @@ void MT2Looper::fillHistosSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt
   } 
   dir->cd();
 
-  plot1D("h_mt2binsCR"+s,       t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-  plot1D("h_mt2CR"+s,       t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
-  plot1D("h_metCR"+s,       t.rl_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+  plot1D("h_mt2binsCR"+s,       t.softlep_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_mt2CR"+s,       t.softlep_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_metCR"+s,       t.softlep_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
 
   plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_mt2"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
@@ -1454,8 +1456,8 @@ void MT2Looper::fillHistosSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt
     plot1D("h_thismt2"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 80, 200, 1000);
   }
   else {
-    plot1D("h_thismet"+s,       t.rl_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 80, 200, 1000);
-    plot1D("h_thismt2"+s,       t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 80, 200, 1000);
+    plot1D("h_thismet"+s,       t.softlep_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 80, 200, 1000);
+    plot1D("h_thismt2"+s,       t.softlep_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 80, 200, 1000);
   }
        
   plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
@@ -1465,8 +1467,8 @@ void MT2Looper::fillHistosSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt
   plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
   plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
 
-  plot1D("h_leppt"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
-  plot1D("h_nupt"+s,      t.genPart_pt[NUidx_],   evtweight_, h_1d, ";p_{T}(nu) [GeV]", 200, 0, 1000);
+  plot1D("h_leppt"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 100, 0, 1000);
+  plot1D("h_nupt"+s,      t.genPart_pt[NUidx_],   evtweight_, h_1d, ";p_{T}(nu) [GeV]", 100, 0, 1000);
   plot1D("h_lepptshort"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_nuptshort"+s,      t.genPart_pt[NUidx_],   evtweight_, h_1d, ";p_{T}(nu) [GeV]", 30, 0, 30);
 
@@ -1480,11 +1482,16 @@ void MT2Looper::fillHistosSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt
   float metY = t.met_pt * sin(t.met_phi);
   float nuX = t.genPart_pt[NUidx_] * cos(t.genPart_phi[NUidx_]);
   float nuY = t.genPart_pt[NUidx_] * sin(t.genPart_phi[NUidx_]);
+  float muX = t.softmus_pt[0] * cos(t.softmus_phi[0]);
+  float muY = t.softmus_pt[0] * sin(t.softmus_phi[0]);
 
   plot1D("h_metXdiff"+s,       metX - nuX,   evtweight_, h_1d, ";met_x - nu_x [GeV]", 100, -500, 500);
   plot1D("h_metYdiff"+s,       metY - nuY,   evtweight_, h_1d, ";met_x - nu_x [GeV]", 100, -500, 500);
+  plot1D("h_metXdiffMU"+s,       metX - muX,   evtweight_, h_1d, ";met_x - mu_x [GeV]", 100, -500, 500);
+  plot1D("h_metYdiffMU"+s,       metY - muY,   evtweight_, h_1d, ";met_x - mu_x [GeV]", 100, -500, 500);
 
   plot1D("h_deltaPhiWminusNU"+s,  t.genPart_phi[Widx_]-t.genPart_phi[NUidx_],   evtweight_, h_1d, ";#Delta#phi_{W-NU}", 64, -3.2, 3.2);
+  plot1D("h_deltaPhiWminusMU"+s,  t.genPart_phi[Widx_]-t.softmus_phi[0],   evtweight_, h_1d, ";#Delta#phi_{W-NU}", 64, -3.2, 3.2);
    
   outfile_->cd();
   return;
