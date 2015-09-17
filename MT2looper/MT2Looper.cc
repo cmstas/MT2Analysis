@@ -611,15 +611,15 @@ void MT2Looper::loop(TChain* chain, std::string output_name){
       // New version of the selection, using the new baby, keeping the old one to see if it would be any difference
       int nIsoMuons = 0;
       int iism = -1;   // index of the iso muon
-      for (int i=0; i < t.nsoftmus; i++) if (t.softmus_miniRelIso[i] < 0.2) {nIsoMuons++; iism = i;}
+      for (int i=0; i < t.nsoftmus; i++) if (t.softmus_absIso[i] < 5) {nIsoMuons++; iism = i;}
       
-      int nIsoElecs5 = 0;
-      int nIsoElecs10 = 0;
+      int nIsoElecs5 = 0;       // Iso electrons with pt > 5
+      int nIsoElecs10 = 0;      // Iso electrons with Reco_elec pt > 10, PF_elec pt > 5
       int iiel = -1;   // index of the iso electron
       for (int i=0; i < t.nelecs; i++) {
-        if (t.elecs_miniRelIso[i] < 0.2 && t.elecs_pt[i] > 5) {nIsoElecs5++; iiel = i;}
+        if (t.elecs_absIso[i] < 5 && t.elecs_pt[i] > 5) {nIsoElecs5++; iiel = i;}
         if (t.elecs_isReco && t.elecs_pt[i] < 10) continue;
-        if (t.elecs_miniRelIso[i] < 0.2) nIsoElecs10++; 
+        if (t.elecs_absIso[i] < 5) nIsoElecs10++; 
       }
 
       if (nIsoMuons == 1 && t.softmus_pt[iism] < 20) { 
@@ -1535,9 +1535,9 @@ void MT2Looper::fillHistosMuonIso(const std::string& prefix , const int lepveto 
   values["passesHtMet"] = ( (t.ht > 450. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if(SRBase.PassesSelection(values)) {
-    TDirectory * dir = (TDirectory*)outfile_->Get(prefix+"base");
+    TDirectory * dir = (TDirectory*)outfile_->Get("srsmAllbase");
     if (dir == 0) {
-      dir = outfile_->mkdir(prefix+"base");
+      dir = outfile_->mkdir("srsmAllbase");
     }
     dir->cd();
 

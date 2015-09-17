@@ -21,10 +21,11 @@ make -j12
 #declare -a Samples=(T5qqqqWW_315_300 T5qqqqWW_325_300 T5qqqqWW_310_300 T5qqqqWW_305_300)
 
 #INDIR=/nfs-6/userdata/mt2/V00-00-12_root6
-INDIR=/nfs-6/userdata/mt2/V00-01-04_25ns_softleps
-OUTDIR=output/raw_elec5/
+#INDIR=/nfs-6/userdata/mt2/V00-01-04_25ns_softleps
+INDIR=/nfs-6/userdata/mt2/V00-01-04_25ns_softleps_skim_trig_njets30_ht_met_mt2_Zinv
+OUTDIR=output/elec5_absiso/
 
-declare -a Samples=(ttall_mg_lo wjets_ht zinv_ht qcd_pt)
+declare -a Samples=(ttall_mg_lo wjets_ht zinv_ht qcd_pt T5qqqqWW_1000_775_750)
 #declare -a Samples=(wjets_ht100to200 wjets_ht200to400 wjets_ht400to600 wjets_ht600toInf wjets_ht600to800 wjets_ht800to1200 wjets_ht1200to2500 wjets_ht2500toInf)
 
 mkdir -p ${OUTDIR}
@@ -34,14 +35,14 @@ for SAMPLE in ${Samples[@]};
   nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& log_${SAMPLE}.txt &
 done
 
-#INDIR2=/home/users/sicheng/MT2Analysis/babymaker/
-# INDIR2=/nfs-6/userdata/mt2/SRSM_skim_trig_nj2_ht450_met30_Zinv
-# declare -a Samples2=(T5qqqqWW_315_300 T5qqqqWW_325_300 T5qqqqWW_310_300 T5qqqqWW_305_300)
+# INDIR2=/hadoop/cms/store/user/sicheng/mt2babies
+# # INDIR2=/nfs-6/userdata/mt2/SRSM_skim_trig_nj2_ht450_met30_Zinv
+# declare -a Samples2=(T5qqqqWW_1000_775_750) 
 # #declare -a Samples2=(T5qqqqWWDeg_mGo1000_mCh310_mChi300)
 
 # for SAMPLE2 in ${Samples2[@]};
-#   do echo root -b -q -l doAll.C\(\"${INDIR2}\",\"${SAMPLE2}\",\"${OUTDIR}\"\)
-#   nohup root -b -q -l doAll.C\(\"${INDIR2}\",\"${SAMPLE2}\",\"${OUTDIR}\"\) >& log_${SAMPLE2}.txt &
+#   do echo ./runLooper ${INDIR2} ${SAMPLE2} ${OUTDIR}
+#   nohup ./runLooper ${INDIR2} ${SAMPLE2} ${OUTDIR} >& log_${SAMPLE2}.txt &
 # done
 
 # INDIR3=/nfs-6/userdata/mt2/sctest_skim_trig_nj2_ht450_met30_Zinv/

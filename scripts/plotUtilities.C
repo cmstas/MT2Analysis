@@ -45,6 +45,7 @@ int getColor(const string& sample) {
   if (sample.find("T5WW4q_315_300") != string::npos) return kGreen;
   if (sample.find("T5WW4q_325_300") != string::npos) return kBlack;
   if (sample.find("T5WW4q_305_300") != string::npos) return kRed;
+  if (sample.find("T5qqqqWW_775_750") != string::npos) return kOrange;
   if (sample.find("T2tt") != string::npos) return kCyan;
   if (sample.find("T2bb") != string::npos) return kMagenta+3;
 
@@ -74,6 +75,7 @@ string getLegendName(const string& sample) {
   if (sample.find("T5WW4q_315_300") != string::npos) return "T5WW4q 315, 300";
   if (sample.find("T5WW4q_325_300") != string::npos) return "T5WW4q 325, 300";
   if (sample.find("T5WW4q_305_300") != string::npos) return "T5WW4q 305, 300";
+  if (sample.find("T5qqqqWW_775_750") != string::npos) return "1000 775, 750";
   if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
   if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
   if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
@@ -121,6 +123,7 @@ string getTableName(const string& sample) {
   if (sample.find("T5WW4q_315_300") != string::npos) return "T5WW4q 315, 300";
   if (sample.find("T5WW4q_325_300") != string::npos) return "T5WW4q 325, 300";
   if (sample.find("T5WW4q_305_300") != string::npos) return "T5WW4q 305, 300";
+  if (sample.find("T5qqqqWW_775_750") != string::npos) return "1000 775, 750";
   if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
   if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
   if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";

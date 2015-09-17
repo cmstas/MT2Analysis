@@ -647,7 +647,8 @@ void plotMaker(){
   //string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mt2_100/";
   //string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/wiso_mt2g200/";
   //string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/";
-  string input_dir = "/home/users/sicheng/tas/MT2Analysis/MT2looper/output/raw_elec5/";
+  //string input_dir = "/home/users/sicheng/tas/MT2Analysis/MT2looper/output/raw_elec5/";
+  string input_dir = "/home/users/sicheng/tas/MT2Analysis/MT2looper/output/elec5_absiso/";
   //string input_dir = "/home/users/sicheng/play/MT2Analysis/MT2looper/output/test_slroot6/";
   //string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/test/";
   //string input_dir = "/home/users/sicheng/play/MT2Analysis/MT2looper/output/test/";
@@ -683,6 +684,7 @@ void plotMaker(){
   // TFile* f_singletop = new TFile(Form("%s/singletop.root",input_dir.c_str()));
   // TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
 
+  TFile* f_T5qqqqWW_775_750 = new TFile(Form("%s/T5qqqqWW_1000_775_750.root",input_dir.c_str()));
   // TFile* f_T5WW4q_325_300 = new TFile(Form("%s/T5qqqqWW_325_300.root",input_dir.c_str()));
   // TFile* f_T5WW4q_315_300 = new TFile(Form("%s/T5qqqqWW_315_300.root",input_dir.c_str()));
   // TFile* f_T5WW4q_310_300 = new TFile(Form("%s/T5qqqqWW_310_300.root",input_dir.c_str()));
@@ -729,6 +731,7 @@ void plotMaker(){
   //samples.push_back(f_singletop); names.push_back("singletop");
   //samples.push_back(f_top); names.push_back("top");
 
+  samples.push_back(f_T5qqqqWW_775_750); names.push_back("sig_T5qqqqWW_310_300");
   // samples.push_back(f_T5WW4q_310_300); names.push_back("sig_T5WW4q_310_300");
   // samples.push_back(f_T5WW4q_315_300); names.push_back("sig_T5WW4q_315_300");
   // samples.push_back(f_T5WW4q_325_300); names.push_back("sig_T5WW4q_325_300");
