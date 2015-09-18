@@ -1429,7 +1429,7 @@ void MT2Looper::fillHistosSingleSoftMuon(std::map<std::string, TH1*>& h_1d, int 
   plot1D("h_smu_absiso"+s,   smuabsiso_,   evtweight_, h_1d, ";absIso(#mu) [GeV]", 100, 0, 200);
   plot1D("h_smu_mreliso"+s,  smumreliso_ ,   evtweight_, h_1d, ";miniRelIso(#mu) [GeV]", 200, 0, 5);
 
-  plot1D("h_smu_sip"+s,  fabs(smusip_) ,   evtweight_, h_1d, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
+  if(smusip_ != -1) plot1D("h_smu_sip"+s,  smusip_ ,   evtweight_, h_1d, ";miniRelIso(#mu) [GeV]", 100, 0, 20);
 
   bool fromGenTau = false;
   int imu = -1;
