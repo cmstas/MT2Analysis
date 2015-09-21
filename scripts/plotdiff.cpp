@@ -1,7 +1,8 @@
 #include "TFile.h"
-#include "../../tas/Software/dataMCplotMaker/PlotMaker2D.h"
 #include "TH1F.h"
+#include "THStack.h"
 #include "TLine.h"
+#include "TStyle.h"
 #include <iostream>
 #include <string>
 
@@ -105,79 +106,108 @@ void plotdiff()
   TFile* f_qcd   = new TFile("/home/users/sicheng/tas/MT2Analysis/MT2looper/output/skim_elec5_absiso/qcd_pt.root");
   TFile* f_sig   = new TFile("/home/users/sicheng/tas/MT2Analysis/MT2looper/output/skim_elec5_absiso/T5qqqqWW_1000_775_750.root");
   
-  TH1F* h_mupt_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_smu_pt");
-  TH1F* h_mupt_wjets = (TH1F*) f_wjets->Get("srsmbase/h_smu_pt");
-  TH1F* h_mupt_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_smu_pt");
-  TH1F* h_mupt_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_smu_pt");
+  TH1F* h_mupt_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_mupt");
+  TH1F* h_mupt_wjets = (TH1F*) f_wjets->Get("srsmbase/h_mupt");
+  TH1F* h_mupt_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_mupt");
+  TH1F* h_mupt_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_mupt");
 
-  TH1F* h_ept_ttbar  = (TH1F*) f_ttbar->Get("srsebase/h_smu_pt");
-  TH1F* h_ept_wjets  = (TH1F*) f_wjets->Get("srsebase/h_smu_pt");
-  TH1F* h_ept_zinv   = (TH1F*) f_zinv ->Get("srsebase/h_smu_pt");
-  TH1F* h_ept_qcd    = (TH1F*) f_qcd  ->Get("srsebase/h_smu_pt");
+  TH1F* h_ept_ttbar  = (TH1F*) f_ttbar->Get("srsebase/h_mupt");
+  TH1F* h_ept_wjets  = (TH1F*) f_wjets->Get("srsebase/h_mupt");
+  TH1F* h_ept_zinv   = (TH1F*) f_zinv ->Get("srsebase/h_mupt");
+  TH1F* h_ept_qcd    = (TH1F*) f_qcd  ->Get("srsebase/h_mupt");
 
-  THStack* t = new THStack(Form("stack_%s_%s",histdir.c_str(),histname.c_str()),Form("stack_%s_%s",histdir.c_str(),histname.c_str()));
+  THStack* stack_mupt = new THStack("stack_mupt", "stack of mupt");
+  THStack* stack_ept  = new THStack("stack_ept" , "stack of ept" );
+
+
+  h_mupt_zinv ->SetFillColor(419);
+  h_mupt_wjets->SetFillColor(417);
+  h_mupt_ttbar->SetFillColor(855);
+
+  stack_mupt->Add(h_mupt_zinv );
+  stack_mupt->Add(h_mupt_ttbar);
+  stack_mupt->Add(h_mupt_wjets);
+  stack_mupt->Add(h_mupt_qcd  );
+ 
+  h_ept_zinv ->SetMarkerColor(kGreen+3);
+  h_ept_wjets->SetMarkerColor(kCyan+2);
+  h_ept_ttbar->SetMarkerColor(kGreen-4);
+  h_ept_qcd  ->SetMarkerColor(kOrange+2);
+
+  h_ept_zinv ->SetMarkerStyle(20);
+  h_ept_wjets->SetMarkerStyle(20);
+  h_ept_ttbar->SetMarkerStyle(20);
+  h_ept_qcd  ->SetMarkerStyle(20);
+
+  stack_ept->Add(h_ept_zinv );
+  stack_ept->Add(h_ept_wjets);
+  stack_ept->Add(h_ept_ttbar);
+  stack_ept->Add(h_ept_qcd  );
+  
+  stack_mupt->Draw("hist");
+  stack_ept->Draw("same");
 
   // ---------------------------
   // Get Separate Yields in mupt
   // ---------------------------
-  TH1F* h_mupt1_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_h_mt_mpt5-10");
-  TH1F* h_mupt1_wjets = (TH1F*) f_wjets->Get("srsmbase/h_h_mt_mpt5-10");
-  TH1F* h_mupt1_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_h_mt_mpt5-10");
-  TH1F* h_mupt1_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_h_mt_mpt5-10");
-  TH1F* h_mupt1_sig   = (TH1F*) f_sig  ->Get("srsmbase/h_h_mt_mpt5-10");
+  TH1F* h_mupt1_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_mt_mpt5-10");
+  TH1F* h_mupt1_wjets = (TH1F*) f_wjets->Get("srsmbase/h_mt_mpt5-10");
+  TH1F* h_mupt1_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_mt_mpt5-10");
+  TH1F* h_mupt1_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_mt_mpt5-10");
+  TH1F* h_mupt1_sig   = (TH1F*) f_sig  ->Get("srsmbase/h_mt_mpt5-10");
 
-  TH1F* h_mupt2_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_h_mt_mpt10-15");
-  TH1F* h_mupt2_wjets = (TH1F*) f_wjets->Get("srsmbase/h_h_mt_mpt10-15");
-  TH1F* h_mupt2_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_h_mt_mpt10-15");
-  TH1F* h_mupt2_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_h_mt_mpt10-15");
-  TH1F* h_mupt2_sig   = (TH1F*) f_sig  ->Get("srsmbase/h_h_mt_mpt5-10");
+  TH1F* h_mupt2_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_mt_mpt10-15");
+  TH1F* h_mupt2_wjets = (TH1F*) f_wjets->Get("srsmbase/h_mt_mpt10-15");
+  TH1F* h_mupt2_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_mt_mpt10-15");
+  TH1F* h_mupt2_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_mt_mpt10-15");
+  TH1F* h_mupt2_sig   = (TH1F*) f_sig  ->Get("srsmbase/h_mt_mpt10-15");
 
-  TH1F* h_mupt3_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_h_mt_mpt15-20");
-  TH1F* h_mupt3_wjets = (TH1F*) f_wjets->Get("srsmbase/h_h_mt_mpt15-20");
-  TH1F* h_mupt3_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_h_mt_mpt15-20");
-  TH1F* h_mupt3_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_h_mt_mpt15-20");
-  TH1F* h_mupt3_sig   = (TH1F*) f_sig  ->Get("srsmbase/h_h_mt_mpt5-10");
+  TH1F* h_mupt3_ttbar = (TH1F*) f_ttbar->Get("srsmbase/h_mt_mpt15-20");
+  TH1F* h_mupt3_wjets = (TH1F*) f_wjets->Get("srsmbase/h_mt_mpt15-20");
+  TH1F* h_mupt3_zinv  = (TH1F*) f_zinv ->Get("srsmbase/h_mt_mpt15-20");
+  TH1F* h_mupt3_qcd   = (TH1F*) f_qcd  ->Get("srsmbase/h_mt_mpt15-20");
+  TH1F* h_mupt3_sig   = (TH1F*) f_sig  ->Get("srsmbase/h_mt_mpt15-20");
 
-  TH1F* h_smbg1 = new TH1F("sepBG_1","Background with mupt5-10 ", 50, 0, 25);
-  TH1F* h_smbg2 = new TH1F("sepBG_2","Background with mupt10-15", 50, 0, 25);
-  TH1F* h_smbg3 = new TH1F("sepBG_3","Background with mupt15-20", 50, 0, 25);
+  TH1F* h_smbg1 = new TH1F("sepmBG_1","Background with mupt5-10 ", 200, 0, 500);
+  TH1F* h_smbg2 = new TH1F("sepmBG_2","Background with mupt10-15", 200, 0, 500);
+  TH1F* h_smbg3 = new TH1F("sepmBG_3","Background with mupt15-20", 200, 0, 500);
 
   h_smbg1->Add(h_mupt1_ttbar);
   h_smbg1->Add(h_mupt1_wjets);
   h_smbg1->Add(h_mupt1_zinv );
-  h_smbg1->Add(h_mupt1_qcd  );
+  // h_smbg1->Add(h_mupt1_qcd  );
 
   h_smbg2->Add(h_mupt2_ttbar);
   h_smbg2->Add(h_mupt2_wjets);
   h_smbg2->Add(h_mupt2_zinv );
-  h_smbg2->Add(h_mupt2_qcd  );
+  // h_smbg2->Add(h_mupt2_qcd  );
 
   h_smbg3->Add(h_mupt3_ttbar);
   h_smbg3->Add(h_mupt3_wjets);
   h_smbg3->Add(h_mupt3_zinv );
-  h_smbg3->Add(h_mupt3_qcd  );
+  // h_smbg3->Add(h_mupt3_qcd  );
 
-  TH1F* h_ept1_ttbar = (TH1F*) f_ttbar->Get("srsebase/h_h_mt_mpt5-10");
-  TH1F* h_ept1_wjets = (TH1F*) f_wjets->Get("srsebase/h_h_mt_mpt5-10");
-  TH1F* h_ept1_zinv  = (TH1F*) f_zinv ->Get("srsebase/h_h_mt_mpt5-10");
-  TH1F* h_ept1_qcd   = (TH1F*) f_qcd  ->Get("srsebase/h_h_mt_mpt5-10");
-  TH1F* h_ept1_sig   = (TH1F*) f_sig  ->Get("srsebase/h_h_mt_mpt5-10");
+  TH1F* h_ept1_ttbar = (TH1F*) f_ttbar->Get("srsebase/h_mt_mpt5-10");
+  TH1F* h_ept1_wjets = (TH1F*) f_wjets->Get("srsebase/h_mt_mpt5-10");
+  TH1F* h_ept1_zinv  = (TH1F*) f_zinv ->Get("srsebase/h_mt_mpt5-10");
+  TH1F* h_ept1_qcd   = (TH1F*) f_qcd  ->Get("srsebase/h_mt_mpt5-10");
+  TH1F* h_ept1_sig   = (TH1F*) f_sig  ->Get("srsebase/h_mt_mpt5-10");
 
-  TH1F* h_ept2_ttbar = (TH1F*) f_ttbar->Get("srsebase/h_h_mt_mpt10-15");
-  TH1F* h_ept2_wjets = (TH1F*) f_wjets->Get("srsebase/h_h_mt_mpt10-15");
-  TH1F* h_ept2_zinv  = (TH1F*) f_zinv ->Get("srsebase/h_h_mt_mpt10-15");
-  TH1F* h_ept2_qcd   = (TH1F*) f_qcd  ->Get("srsebase/h_h_mt_mpt10-15");
-  TH1F* h_ept2_sig   = (TH1F*) f_sig  ->Get("srsebase/h_h_mt_mpt5-10");
+  TH1F* h_ept2_ttbar = (TH1F*) f_ttbar->Get("srsebase/h_mt_mpt10-15");
+  TH1F* h_ept2_wjets = (TH1F*) f_wjets->Get("srsebase/h_mt_mpt10-15");
+  TH1F* h_ept2_zinv  = (TH1F*) f_zinv ->Get("srsebase/h_mt_mpt10-15");
+  TH1F* h_ept2_qcd   = (TH1F*) f_qcd  ->Get("srsebase/h_mt_mpt10-15");
+  TH1F* h_ept2_sig   = (TH1F*) f_sig  ->Get("srsebase/h_mt_mpt10-15");
 
-  TH1F* h_ept3_ttbar = (TH1F*) f_ttbar->Get("srsebase/h_h_mt_mpt15-20");
-  TH1F* h_ept3_wjets = (TH1F*) f_wjets->Get("srsebase/h_h_mt_mpt15-20");
-  TH1F* h_ept3_zinv  = (TH1F*) f_zinv ->Get("srsebase/h_h_mt_mpt15-20");
-  TH1F* h_ept3_qcd   = (TH1F*) f_qcd  ->Get("srsebase/h_h_mt_mpt15-20");
-  TH1F* h_ept3_sig   = (TH1F*) f_sig  ->Get("srsebase/h_h_mt_mpt5-10");
+  TH1F* h_ept3_ttbar = (TH1F*) f_ttbar->Get("srsebase/h_mt_mpt15-20");
+  TH1F* h_ept3_wjets = (TH1F*) f_wjets->Get("srsebase/h_mt_mpt15-20");
+  TH1F* h_ept3_zinv  = (TH1F*) f_zinv ->Get("srsebase/h_mt_mpt15-20");
+  TH1F* h_ept3_qcd   = (TH1F*) f_qcd  ->Get("srsebase/h_mt_mpt15-20");
+  TH1F* h_ept3_sig   = (TH1F*) f_sig  ->Get("srsebase/h_mt_mpt15-20");
 
-  TH1F* h_sebg1 = new TH1F("sepBG_1","Background with ept5-10 ", 50, 0, 25);
-  TH1F* h_sebg2 = new TH1F("sepBG_2","Background with ept10-15", 50, 0, 25);
-  TH1F* h_sebg3 = new TH1F("sepBG_3","Background with ept15-20", 50, 0, 25);
+  TH1F* h_sebg1 = new TH1F("sepeBG_1","Background with ept5-10 ", 200, 0, 500);
+  TH1F* h_sebg2 = new TH1F("sepeBG_2","Background with ept10-15", 200, 0, 500);
+  TH1F* h_sebg3 = new TH1F("sepeBG_3","Background with ept15-20", 200, 0, 500);
 
   h_sebg1->Add(h_ept1_ttbar);
   h_sebg1->Add(h_ept1_wjets);
@@ -187,7 +217,7 @@ void plotdiff()
   h_sebg2->Add(h_ept2_ttbar);
   h_sebg2->Add(h_ept2_wjets);
   h_sebg2->Add(h_ept2_zinv );
-  h_sebg2->Add(h_ept2_qcd  );
+  // h_sebg2->Add(h_ept2_qcd  );
 
   h_sebg3->Add(h_ept3_ttbar);
   h_sebg3->Add(h_ept3_wjets);
@@ -200,23 +230,24 @@ void plotdiff()
        << "\\centering" << endl
        << "\\begin{tabular}{r|c|c|c||c|c|c}" << endl
        << "\\hline" << endl << "\\hline" << endl
-       << "Sample \& \\multicolumn{3}{|c|}{srsmbase} \& \\multicolumn{3}{|c}{srsebase} \\\\" << endl
-       << " \& $5 < p_{\mathrm{T}}^\mu < 10$ \& $10 < p_{\mathrm{T}}^\mu < 15$ \& $15 < p_{\mathrm{T}}^\mu < 20$ \& "
-       << "$5 < p_{\mathrm{T}}^\mu < 10$ \& $10 < p_{\mathrm{T}}^\mu < 15$ \& $15 < p_{\mathrm{T}}^\mu < 20$ \\\\" << endl
+       << "Sample & \\multicolumn{3}{|c||}{srsmbase} & \\multicolumn{3}{|c}{srsebase} \\\\" << endl
+       << " & $5 < p_{\\mathrm{T}}^\\mu < 10$ & $10 < p_{\\mathrm{T}}^\\mu < 15$ & $15 < p_{\\mathrm{T}}^\\mu < 20$ & "
+       << "$5 < p_{\\mathrm{T}}^e < 10$ & $10 < p_{\\mathrm{T}}^e < 15$ & $15 < p_{\\mathrm{T}}^e < 20$ \\\\" << endl
        << "\\hline" << endl << "\\hline" << endl
-       << "ttbar \& " << h_mupt1_ttbar->Integral() << " \& " << h_mupt2_ttbar->Integral() << " \& " << h_mupt3_ttbar->Integral()
-       << " \& " << h_ept1_ttbar->Integral() << " \& " << h_ept2_ttbar->Integral() << " \& " << h_ept3_ttbar->Integral() << "\\\\" << endl
-       << "wjets \& " << h_mupt1_wjets->Integral() << " \& " << h_mupt2_wjets->Integral() << " \& " << h_mupt3_wjets->Integral()
-       << " \& " << h_ept1_wjets->Integral() << " \& " << h_ept2_wjets->Integral() << " \& " << h_ept3_wjets->Integral() << "\\\\" << endl
-       << "zinv \& " << h_mupt1_zinv->Integral() << " \& " << h_mupt2_zinv->Integral() << " \& " << h_mupt3_zinv->Integral()
-       << " \& " << h_ept1_zinv->Integral() << " \& " << h_ept2_zinv->Integral() << " \& " << h_ept3_zinv->Integral() << "\\\\" << endl
-       << "qcd \& " << h_mupt1_qcd->Integral() << " \& " << h_mupt2_qcd->Integral() << " \& " << h_mupt3_qcd->Integral()
-       << " \& " << h_ept1_qcd->Integral() << " \& " << h_ept2_qcd->Integral() << " \& " << h_ept3_qcd->Integral() << "\\\\" << endl
-       << "Total SM" << h_smbg1->Integral() << " \& " << h_smbg2->Integral() << " \& " << h_smbg2->Integral() << " \& "
-       << h_s3bg1->Integral() << " \& " << h_sebg2->Integral() << " \& " << h_sebg3->Integral() << " \\\\" << endl
+       << "ttbar & " << h_mupt1_ttbar->Integral() << " & " << h_mupt2_ttbar->Integral() << " & " << h_mupt3_ttbar->Integral()
+       << " & " << h_ept1_ttbar->Integral() << " & " << h_ept2_ttbar->Integral() << " & " << h_ept3_ttbar->Integral() << " \\\\" << endl
+       << "wjets & " << h_mupt1_wjets->Integral() << " & " << h_mupt2_wjets->Integral() << " & " << h_mupt3_wjets->Integral()
+       << " & " << h_ept1_wjets->Integral() << " & " << h_ept2_wjets->Integral() << " & " << h_ept3_wjets->Integral() << " \\\\" << endl
+       << "zinv & " << h_mupt1_zinv->Integral() << " & " << h_mupt2_zinv->Integral() << " & " << h_mupt3_zinv->Integral()
+       << " & " << h_ept1_zinv->Integral() << " & " << h_ept2_zinv->Integral() << " & " << h_ept3_zinv->Integral() << " \\\\" << endl
+       // << "qcd & " << h_mupt1_qcd->Integral() << " & " << h_mupt2_qcd->Integral() << " & " << h_mupt3_qcd->Integral()
+       // << " & " << h_ept1_qcd->Integral() << " & " << h_ept2_qcd->Integral() << " & " << h_ept3_qcd->Integral() << "\\\\" << endl
        << "\\hline" << endl
-       << "1000 775, 750 \& " <<  h_mupt1_sig->Integral() << " \& " << h_mupt2_sig->Integral() << " \& " << h_mupt3_sig->Integral()
-       << " \& " << h_ept1_sig->Integral() << " \& " << h_ept2_sig->Integral() << " \& " << h_ept3_sig->Integral() << "\\\\" << endl
+       << "Total SM & " << h_smbg1->Integral() << " & " << h_smbg2->Integral() << " & " << h_smbg3->Integral() << " & "
+       << h_sebg1->Integral() << " & " << h_sebg2->Integral() << " & " << h_sebg3->Integral() << " \\\\" << endl
+       << "\\hline" << endl
+       << "1000 775, 750 & " <<  h_mupt1_sig->Integral() << " & " << h_mupt2_sig->Integral() << " & " << h_mupt3_sig->Integral()
+       << " & " << h_ept1_sig->Integral() << " & " << h_ept2_sig->Integral() << " & " << h_ept3_sig->Integral() << " \\\\" << endl
        << "\\hline" << endl
        << "\\end{tabular}" << endl
        << "\\caption{Num. of yields in separate of lep pt}" << endl
