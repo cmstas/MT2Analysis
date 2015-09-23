@@ -5,6 +5,7 @@
 #include "TStyle.h"
 #include <iostream>
 #include <string>
+#include "/home/users/sicheng/tas/Software/dataMCplotMaker/dataMCplotMaker.h"
 
 inline void plotDiv(TH1F* h_div, string name = "div", string ytitle = "withIso/noIso")
 {
@@ -116,7 +117,7 @@ void plotdiff()
   TH1F* h_ept_zinv   = (TH1F*) f_zinv ->Get("srsebase/h_mupt");
   TH1F* h_ept_qcd    = (TH1F*) f_qcd  ->Get("srsebase/h_mupt");
 
-  THStack* stack_mupt = new THStack("stack_mupt", "stack of mupt");
+  THStack* stack_mupt = new THStack("stack_mupt", "Comparison of p_{T} between #mu and e ");
   THStack* stack_ept  = new THStack("stack_ept" , "stack of ept" );
 
 
@@ -124,28 +125,51 @@ void plotdiff()
   h_mupt_wjets->SetFillColor(417);
   h_mupt_ttbar->SetFillColor(855);
 
+  h_mupt_zinv ->Rebin(5);
+  h_mupt_ttbar->Rebin(5);
+  h_mupt_wjets->Rebin(5);
+  //h_mupt_qcd  ->Rebin(2);
+  
   stack_mupt->Add(h_mupt_zinv );
   stack_mupt->Add(h_mupt_ttbar);
   stack_mupt->Add(h_mupt_wjets);
-  stack_mupt->Add(h_mupt_qcd  );
- 
-  h_ept_zinv ->SetMarkerColor(kGreen+3);
-  h_ept_wjets->SetMarkerColor(kCyan+2);
-  h_ept_ttbar->SetMarkerColor(kGreen-4);
-  h_ept_qcd  ->SetMarkerColor(kOrange+2);
+  //stack_mupt->Add(h_mupt_qcd  );
+  
+  // h_ept_zinv ->SetMarkerColor(kGreen+3);
+  // h_ept_wjets->SetMarkerColor(kCyan+2);
+  // h_ept_ttbar->SetMarkerColor(kGreen-4);
+  // h_ept_qcd  ->SetMarkerColor(kOrange+2);
+  h_ept_zinv ->Rebin(5);
+  h_ept_ttbar->Rebin(5);
+  h_ept_wjets->Rebin(5);
+  //h_ept_qcd  ->Rebin(2);
 
-  h_ept_zinv ->SetMarkerStyle(20);
-  h_ept_wjets->SetMarkerStyle(20);
+  h_ept_zinv ->SetMarkerStyle(22);
   h_ept_ttbar->SetMarkerStyle(20);
-  h_ept_qcd  ->SetMarkerStyle(20);
+  h_ept_wjets->SetMarkerStyle(21);
+  h_ept_qcd  ->SetMarkerStyle(23);
 
   stack_ept->Add(h_ept_zinv );
-  stack_ept->Add(h_ept_wjets);
   stack_ept->Add(h_ept_ttbar);
-  stack_ept->Add(h_ept_qcd  );
+  stack_ept->Add(h_ept_wjets);
+  //stack_ept->Add(h_ept_qcd  );
+  h_mupt_ttbar->GetXaxis()->SetTitle("p_{T} [GeV]");
   
+  TCanvas* c0 = new TCanvas("c0", "c0", 600, 600);
+  //c1->SetLogy();
+  TLegend* leg = new TLegend(0.75, 0.6, 0.9, 0.9);
+  leg->AddEntry(h_mupt_zinv , "mu_zinv ");
+  leg->AddEntry(h_mupt_ttbar, "mu_ttbar");
+  leg->AddEntry(h_mupt_wjets, "mu_wjets");
+
+  leg->AddEntry(h_ept_zinv , "e_zinv ");
+  leg->AddEntry(h_ept_ttbar, "e_ttbar");
+  leg->AddEntry(h_ept_wjets, "e_wjets");
+
+
   stack_mupt->Draw("hist");
   stack_ept->Draw("same");
+  leg->Draw("same");
 
   // ---------------------------
   // Get Separate Yields in mupt
