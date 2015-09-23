@@ -75,6 +75,7 @@ class MT2Looper {
   SR CRSL_WJets;
   SR CRSL_TTbar;
   TH1D* h_nvtx_weights_;
+  std::map<std::string, float> RS_vars_; 
 };
 
 #endif
