@@ -41,6 +41,7 @@ class RebalanceLooper {
   std::vector<float> rebalanceFactors;
   std::vector<int> useJet;
   int status;
+  int prescale;
 };
 
 #endif

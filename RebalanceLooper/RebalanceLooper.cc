@@ -42,7 +42,7 @@ float pt_soft_x;
 float pt_soft_y;
 
 void setup_fits(){
-  TFile* fitFile = new TFile("/home/users/jgran/temp/RS_update/MT2Analysis/RebalanceLooper/template_fits.root", "READ");
+  TFile* fitFile = new TFile("template_fits.root", "READ");
   TIter it(fitFile->GetListOfKeys());
   TKey* key;
   while ( (key = (TKey *)it()) ) {
@@ -229,6 +229,17 @@ void RebalanceLooper::loop(TChain* chain, std::string output_name){
         continue;
       }
 
+      if(t.HLT_PFHT800) prescale = 1;
+      else if(t.HLT_PFHT600_Prescale) prescale = t.HLT_PFHT600_Prescale;
+      else if(t.HLT_PFHT475_Prescale) prescale = t.HLT_PFHT475_Prescale;
+      else if(t.HLT_PFHT350_Prescale) prescale = t.HLT_PFHT350_Prescale;
+      else if(t.HLT_PFHT300_Prescale) prescale = t.HLT_PFHT300_Prescale;
+      else {
+        status = -1;
+        FillNtuple(); 
+        continue;
+      }
+
       //---------------------
       // skip duplicates -- will need this eventually
       //---------------------
@@ -287,7 +298,7 @@ void RebalanceLooper::loop(TChain* chain, std::string output_name){
       pt_soft_x = -met_x - jet_x;
       pt_soft_y = -met_y - jet_y;
       float pt_soft = sqrt(pt_soft_x*pt_soft_x + pt_soft_y*pt_soft_y);
-      sigma_soft = 25.0;
+      sigma_soft = 20.0;
       //sigma_soft = 1.5*t.nVert;
       //sigma_soft = 5.0*sqrt(t.nVert);
 
@@ -395,6 +406,7 @@ void RebalanceLooper::MakeNtuple(const char *Filename){
   outTree_->Branch("rebalanceFactors", &rebalanceFactors );
   outTree_->Branch("useJet", &useJet );
   outTree_->Branch("status", &status );
+  outTree_->Branch("prescale", &prescale );
 
   return;
 }
@@ -403,6 +415,7 @@ void RebalanceLooper::InitNtuple () {
   rebalanceFactors.clear();
   useJet.clear();
   status = -999;
+  prescale = -999;
   return;
 }
 
