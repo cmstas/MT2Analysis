@@ -819,6 +819,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 0, 1);
   sr.SetVarCRSL("njets", 2, 4);
   sr.SetVarCRSL("nbjets", 0, 1);
+  sr.SetVarCRRSInvertDPhi("njets", 2, 4);
+  sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+  sr.SetVarCRRSMT2SideBand("njets", 2, 4);
+  sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+  sr.SetVarCRRSDPhiMT2("njets", 2, 4);
+  sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -827,6 +833,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 1, 2);
   sr.SetVarCRSL("njets", 2, 4);
   sr.SetVarCRSL("nbjets", 1, 2);
+  sr.SetVarCRRSInvertDPhi("njets", 2, 4);
+  sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
+  sr.SetVarCRRSMT2SideBand("njets", 2, 4);
+  sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
+  sr.SetVarCRRSDPhiMT2("njets", 2, 4);
+  sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -835,6 +847,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 2, 3);
   sr.SetVarCRSL("njets", 2, 4);
   sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarCRRSInvertDPhi("njets", 2, 4);
+  sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
+  sr.SetVarCRRSMT2SideBand("njets", 2, 4);
+  sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
+  sr.SetVarCRRSDPhiMT2("njets", 2, 4);
+  sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -843,6 +861,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 0, 1);
   sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 0, 1);
+  sr.SetVarCRRSInvertDPhi("njets", 4, 7);
+  sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+  sr.SetVarCRRSMT2SideBand("njets", 4, 7);
+  sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+  sr.SetVarCRRSDPhiMT2("njets", 4, 7);
+  sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -851,6 +875,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 1, 2);
   sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 1, 2);
+  sr.SetVarCRRSInvertDPhi("njets", 4, 7);
+  sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
+  sr.SetVarCRRSMT2SideBand("njets", 4, 7);
+  sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
+  sr.SetVarCRRSDPhiMT2("njets", 4, 7);
+  sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -859,6 +889,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 2, 3);
   sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarCRRSInvertDPhi("njets", 4, 7);
+  sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
+  sr.SetVarCRRSMT2SideBand("njets", 4, 7);
+  sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
+  sr.SetVarCRRSDPhiMT2("njets", 4, 7);
+  sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -867,6 +903,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 0, 1);
   sr.SetVarCRSL("njets", 7, -1);
   sr.SetVarCRSL("nbjets", 0, 1);
+  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+  sr.SetVarCRRSInvertDPhi("nbjets", 0, 1);
+  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+  sr.SetVarCRRSMT2SideBand("nbjets", 0, 1);
+  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+  sr.SetVarCRRSDPhiMT2("nbjets", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -876,6 +918,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 1, 2);
   sr.SetVarCRSL("njets", 7, -1);
   sr.SetVarCRSL("nbjets", 1, 3);
+  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+  sr.SetVarCRRSInvertDPhi("nbjets", 1, 2);
+  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+  sr.SetVarCRRSMT2SideBand("nbjets", 1, 2);
+  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+  sr.SetVarCRRSDPhiMT2("nbjets", 1, 2);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -885,6 +933,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 2, 3);
   sr.SetVarCRSL("njets", 7, -1);
   sr.SetVarCRSL("nbjets", 1, 3);
+  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+  sr.SetVarCRRSInvertDPhi("nbjets", 2, 3);
+  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+  sr.SetVarCRRSMT2SideBand("nbjets", 2, 3);
+  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+  sr.SetVarCRRSDPhiMT2("nbjets", 2, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -893,6 +947,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 3, -1);
   sr.SetVarCRSL("njets", 2, 7);
   sr.SetVarCRSL("nbjets", 3, -1);
+  sr.SetVarCRRSInvertDPhi("njets", 2, 7);
+  sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
+  sr.SetVarCRRSMT2SideBand("njets", 2, 7);
+  sr.SetVarCRRSMT2SideBand("nbjets", 3, -1);
+  sr.SetVarCRRSDPhiMT2("njets", 2, 7);
+  sr.SetVarCRRSDPhiMT2("nbjets", 3, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -902,6 +962,12 @@ std::vector<SR> getSignalRegionsZurich(){
   sr.SetVar("nbjets", 3, -1);
   sr.SetVarCRSL("njets", 7, -1);
   sr.SetVarCRSL("nbjets", 1, 3);
+  sr.SetVarCRRSInvertDPhi("njets", 7, -1);
+  sr.SetVarCRRSInvertDPhi("nbjets", 3, -1);
+  sr.SetVarCRRSMT2SideBand("njets", 7, -1);
+  sr.SetVarCRRSMT2SideBand("nbjets", 3, -1);
+  sr.SetVarCRRSDPhiMT2("njets", 7, -1);
+  sr.SetVarCRRSDPhiMT2("nbjets", 3, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -914,6 +980,12 @@ std::vector<SR> getSignalRegionsZurich(){
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 450, 575);
     fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRRSInvertDPhi("ht", 450, 575);
+    fullSR.SetVarCRRSInvertDPhi("met", 200, -1);
+    fullSR.SetVarCRRSMT2SideBand("ht", 450, 575);
+    fullSR.SetVarCRRSMT2SideBand("met", 200, -1);
+    fullSR.SetVarCRRSDPhiMT2("ht", 450, 575);
+    fullSR.SetVarCRRSDPhiMT2("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
@@ -936,6 +1008,12 @@ std::vector<SR> getSignalRegionsZurich(){
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 575, 1000);
     fullSR.SetVarCRSL("met", 200, -1);
+    fullSR.SetVarCRRSInvertDPhi("ht", 575, 1000);
+    fullSR.SetVarCRRSInvertDPhi("met", 200, -1);
+    fullSR.SetVarCRRSMT2SideBand("ht", 575, 1000);
+    fullSR.SetVarCRRSMT2SideBand("met", 200, -1);
+    fullSR.SetVarCRRSDPhiMT2("ht", 575, 1000);
+    fullSR.SetVarCRRSDPhiMT2("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
@@ -958,6 +1036,12 @@ std::vector<SR> getSignalRegionsZurich(){
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1000, 1500);
     fullSR.SetVarCRSL("met", 30, -1);
+    fullSR.SetVarCRRSInvertDPhi("ht", 1000, 1500);
+    fullSR.SetVarCRRSInvertDPhi("met", 30, -1);
+    fullSR.SetVarCRRSMT2SideBand("ht", 1000, 1500);
+    fullSR.SetVarCRRSMT2SideBand("met", 30, -1);
+    fullSR.SetVarCRRSDPhiMT2("ht", 1000, 1500);
+    fullSR.SetVarCRRSDPhiMT2("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
@@ -980,6 +1064,12 @@ std::vector<SR> getSignalRegionsZurich(){
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1500, -1);
     fullSR.SetVarCRSL("met", 30, -1);
+    fullSR.SetVarCRRSInvertDPhi("ht", 1500, -1);
+    fullSR.SetVarCRRSInvertDPhi("met", 30, -1);
+    fullSR.SetVarCRRSMT2SideBand("ht", 1500, -1);
+    fullSR.SetVarCRRSMT2SideBand("met", 30, -1);
+    fullSR.SetVarCRRSDPhiMT2("ht", 1500, -1);
+    fullSR.SetVarCRRSDPhiMT2("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
@@ -1013,6 +1103,27 @@ std::vector<SR> getSignalRegionsZurich(){
   baseSR.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRSL("nlep", 1, 2);
 
+  baseSR.SetVarCRRSInvertDPhi("mt2", 200, -1);
+  baseSR.SetVarCRRSInvertDPhi("j1pt", 100, -1);
+  baseSR.SetVarCRRSInvertDPhi("j2pt", 100, -1);
+  baseSR.SetVarCRRSInvertDPhi("deltaPhiMin", 0.0, 0.3);
+  baseSR.SetVarCRRSInvertDPhi("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetVarCRRSInvertDPhi("nlep", 0, 1);
+
+  baseSR.SetVarCRRSMT2SideBand("mt2", 100, 200);
+  baseSR.SetVarCRRSMT2SideBand("j1pt", 100, -1);
+  baseSR.SetVarCRRSMT2SideBand("j2pt", 100, -1);
+  baseSR.SetVarCRRSMT2SideBand("deltaPhiMin", 0.3, -1);
+  baseSR.SetVarCRRSMT2SideBand("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetVarCRRSMT2SideBand("nlep", 0, 1);
+
+  baseSR.SetVarCRRSDPhiMT2("mt2", 100, 200);
+  baseSR.SetVarCRRSDPhiMT2("j1pt", 100, -1);
+  baseSR.SetVarCRRSDPhiMT2("j2pt", 100, -1);
+  baseSR.SetVarCRRSDPhiMT2("deltaPhiMin", 0.0, 0.3);
+  baseSR.SetVarCRRSDPhiMT2("diffMetMhtOverMet", 0, 0.5);
+  baseSR.SetVarCRRSDPhiMT2("nlep", 0, 1);
+
   //add baseline selections to all signal regions 
   std::vector<std::string> vars = baseSR.GetListOfVariables();
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -1026,6 +1137,27 @@ std::vector<SR> getSignalRegionsZurich(){
   for(unsigned int i = 0; i < SRVec.size(); i++){
     for(unsigned int j = 0; j < varsCRSL.size(); j++){
       SRVec.at(i).SetVarCRSL(varsCRSL.at(j), baseSR.GetLowerBoundCRSL(varsCRSL.at(j)), baseSR.GetUpperBoundCRSL(varsCRSL.at(j)));
+    }
+  }
+
+  std::vector<std::string> varsCRRSInvertDPhi = baseSR.GetListOfVariablesCRRSInvertDPhi();
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    for(unsigned int j = 0; j < varsCRRSInvertDPhi.size(); j++){
+      SRVec.at(i).SetVarCRRSInvertDPhi(varsCRRSInvertDPhi.at(j), baseSR.GetLowerBoundCRRSInvertDPhi(varsCRSL.at(j)), baseSR.GetUpperBoundCRRSInvertDPhi(varsCRSL.at(j)));
+    }
+  }
+
+  std::vector<std::string> varsCRRSMT2SideBand = baseSR.GetListOfVariablesCRRSMT2SideBand();
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    for(unsigned int j = 0; j < varsCRRSMT2SideBand.size(); j++){
+      SRVec.at(i).SetVarCRRSMT2SideBand(varsCRRSMT2SideBand.at(j), baseSR.GetLowerBoundCRRSMT2SideBand(varsCRSL.at(j)), baseSR.GetUpperBoundCRRSMT2SideBand(varsCRSL.at(j)));
+    }
+  }
+
+  std::vector<std::string> varsCRRSDPhiMT2 = baseSR.GetListOfVariablesCRRSDPhiMT2();
+  for(unsigned int i = 0; i < SRVec.size(); i++){
+    for(unsigned int j = 0; j < varsCRRSDPhiMT2.size(); j++){
+      SRVec.at(i).SetVarCRRSDPhiMT2(varsCRRSDPhiMT2.at(j), baseSR.GetLowerBoundCRRSDPhiMT2(varsCRSL.at(j)), baseSR.GetUpperBoundCRRSDPhiMT2(varsCRSL.at(j)));
     }
   }
 
@@ -1069,6 +1201,21 @@ std::vector<SR> getSignalRegionsZurich_jetpt30(){
     SRVec.at(i).RemoveVarCRSL("j2pt");
     SRVec.at(i).SetVarCRSL("j1pt", 30, -1);
     SRVec.at(i).SetVarCRSL("j2pt", 30, -1);
+
+    SRVec.at(i).RemoveVarCRRSInvertDPhi("j1pt");
+    SRVec.at(i).RemoveVarCRRSInvertDPhi("j2pt");
+    SRVec.at(i).SetVarCRRSInvertDPhi("j1pt", 30, -1);
+    SRVec.at(i).SetVarCRRSInvertDPhi("j2pt", 30, -1);
+
+    SRVec.at(i).RemoveVarCRRSMT2SideBand("j1pt");
+    SRVec.at(i).RemoveVarCRRSMT2SideBand("j2pt");
+    SRVec.at(i).SetVarCRRSMT2SideBand("j1pt", 30, -1);
+    SRVec.at(i).SetVarCRRSMT2SideBand("j2pt", 30, -1);
+
+    SRVec.at(i).RemoveVarCRRSDPhiMT2("j1pt");
+    SRVec.at(i).RemoveVarCRRSDPhiMT2("j2pt");
+    SRVec.at(i).SetVarCRRSDPhiMT2("j1pt", 30, -1);
+    SRVec.at(i).SetVarCRRSDPhiMT2("j2pt", 30, -1);
   }
 
   return SRVec;
