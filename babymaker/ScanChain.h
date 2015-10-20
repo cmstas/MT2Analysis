@@ -11,10 +11,14 @@
 #include "TChain.h"
 #include "TTree.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
+
+class BTagCalibration;
+class BTagCalibrationReader;
 
 class babyMaker {
 
@@ -26,7 +30,7 @@ class babyMaker {
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample", int bx = 50);
+  void ScanChain(TChain*, std::string = "testSample", int bx = 50, bool isFastsim = false);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -35,6 +39,8 @@ class babyMaker {
 
  private:
 
+  float getBtagEffFromFile(float pt, float eta, int mcFlavour);
+  
   TFile *BabyFile_;
   TTree *BabyTree_;
 
@@ -42,6 +48,19 @@ class babyMaker {
 
   bool isDataFromFileName;
   bool isPromptReco;
+
+  // for btag SFs
+  BTagCalibration* calib;
+  BTagCalibrationReader* reader_heavy;
+  BTagCalibrationReader* reader_heavy_UP;
+  BTagCalibrationReader* reader_heavy_DN;
+  BTagCalibrationReader* reader_light;
+  BTagCalibrationReader* reader_light_UP;
+  BTagCalibrationReader* reader_light_DN;
+
+  TH2D* h_btag_eff_b;
+  TH2D* h_btag_eff_c;
+  TH2D* h_btag_eff_udsg;
   
   //baby ntuple variables
 
@@ -137,12 +156,17 @@ class babyMaker {
   Int_t           HLT_PFMET170;
   Int_t           HLT_PFHT350_PFMET100;   
   Int_t           HLT_PFHT350_PFMET120;   
+  Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
+  Int_t           HLT_PFMET90_PFMHT90;
   Int_t           HLT_SingleMu;   
   Int_t           HLT_SingleEl;   
   Int_t           HLT_DoubleEl;   
   Int_t           HLT_MuX_Ele12;   
   Int_t           HLT_Mu8_EleX;   
   Int_t           HLT_DoubleMu;   
+  Int_t           HLT_Photon120;   
   Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_PFHT350_Prescale;   
   Int_t           HLT_PFHT475_Prescale;   
@@ -162,6 +186,7 @@ class babyMaker {
   Float_t         lep_dxy[max_nlep];   //[nlep]
   Float_t         lep_dz[max_nlep];   //[nlep]
   Int_t           lep_tightId[max_nlep];   //[nlep]
+  Int_t           lep_heepId[max_nlep];   //[nlep]
   Float_t         lep_relIso03[max_nlep];   //[nlep]
   Float_t         lep_relIso04[max_nlep];   //[nlep]
   Float_t         lep_miniRelIso[max_nlep];   //[nlep]
@@ -335,6 +360,8 @@ class babyMaker {
   Float_t         genTau_charge[max_ngenTau];   //[ngenTau]
   Int_t           genTau_sourceId[max_ngenTau];   //[ngenTau]
   Int_t           genTau_decayMode[max_ngenTau];   //[ngenTau]
+  Float_t         genTau_leadTrackPt[max_ngenTau];   //[ngenTau]
+  Int_t           genTau_neutralDaughters[max_ngenTau];   //[ngenTau]
 
 //----- GEN LEPTONS FROM TAUS
   static const int max_ngenLepFromTau = 10;
@@ -387,6 +414,11 @@ class babyMaker {
   Float_t         weight_pdfs_UP;
   Float_t         weight_pdfs_DN;
 
+//----- MC SCALE AND PDF WEIGHTS
+  static const int max_nLHEweight = 500;
+  Int_t           nLHEweight;
+  Float_t         LHEweight_wgt[max_nLHEweight];   //[nmcweights]
+  
 };
 
 #endif

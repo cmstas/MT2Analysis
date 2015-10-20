@@ -36,6 +36,9 @@ int getColor(const string& sample) {
   if (sample.find("wjets") != string::npos) return 417;
   if (sample.find("zinv") != string::npos) return 419;
   if (sample.find("qcd") != string::npos) return 401;
+  if (sample.find("gjet") != string::npos) return 18;
+  if (sample.find("fakephoton") != string::npos) return 46;
+  if (sample.find("fragphoton") != string::npos) return 38;
   if (sample.find("dyjets") != string::npos) return 430;
   if (sample.find("zjets") != string::npos) return 430;
   if (sample.find("T1tttt") != string::npos) return kRed;
@@ -56,7 +59,10 @@ string getLegendName(const string& sample) {
   if (sample.find("top") != string::npos) return "Top";
   if (sample.find("wjets") != string::npos) return "W+jets";
   if (sample.find("zinv") != string::npos) return "Z+jets";
-  if (sample.find("gjet") != string::npos) return "Gamma+jets";
+  if (sample.find("gjet") != string::npos) return "Prompt #gamma";
+  if (sample.find("fakephotonMC") != string::npos) return "Fake #gamma";
+  if (sample.find("fakephotonData") != string::npos) return "Fake #gamma (data)";
+  if (sample.find("fragphoton") != string::npos) return "Frag. #gamma";
   if (sample.find("qcd") != string::npos) return "QCD";
   if (sample.find("dyjets") != string::npos) return "Z+jets";
   if (sample.find("zjets") != string::npos) return "Z+jets";

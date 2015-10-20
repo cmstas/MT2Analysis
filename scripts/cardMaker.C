@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <set>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -23,6 +24,7 @@ TFile* f_zinv = 0;
 TFile* f_purity = 0;
 TFile* f_qcd = 0;
 TFile* f_sig = 0;
+TFile* f_data = 0;
 
 const bool verbose = false;
 
@@ -59,7 +61,7 @@ double round(double d)
 }
 
 //_______________________________________________________________________________
-void printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
+int printCard( string dir_str , int mt2bin , string signal, string output_dir, int scanM1 = -1, int scanM2 = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
 
@@ -70,7 +72,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = fullhistname+"CRyield";
   TString fullhistnameRatio  = fullhistname+"Ratio";
-  TString fullhistnamePurity = dir + "/h_puritySieieSB";
+  TString fullhistnamePurity = dir + "/h_purityFailSieieData";
 
   TString signame(signal);
   if (scanM1 >= 0 && scanM2 >= 0) {
@@ -88,6 +90,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   double err_zinv_purity(0.);
   double n_qcd(0.);
   double n_bkg(0.);
+  double n_data(0.);
 
   double n_sig(0.);
 
@@ -95,7 +98,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   // pick point out of signal scan
   if (scanM1 >= 0 && scanM2 >= 0) {
     TH3D* h_sigscan = (TH3D*) f_sig->Get(fullhistnameScan);
-    if (!h_sigscan) return;
+    if (!h_sigscan) return 0;
     int binx = h_sigscan->GetXaxis()->FindBin(scanM1);
     int biny = h_sigscan->GetYaxis()->FindBin(scanM2);
     h_sig = h_sigscan->ProjectionZ(Form("h_mt2bins_%d_%d_%s",scanM1,scanM2,dir_str.c_str()),binx,binx,biny,biny);
@@ -105,7 +108,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
     h_sig = (TH1D*) f_sig->Get(fullhistname);
   }
 
-  if (!h_sig) return;
+  if (!h_sig) return 0;
   n_sig = h_sig->GetBinContent(mt2bin);
   
   //Get variable boundaries for signal region.
@@ -211,7 +214,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   // Pure GJet yield (useful when extracting G_i/G_int for integral estimate)
   TH1D* h_gjetyield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
 
-  // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake)
+  // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake, or Data)
   TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
   if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) {
     n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
@@ -247,7 +250,7 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
     // Extract values corresponding to this bin
     if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_mt2 == 0) {
       cout<<"Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"<<endl;
-      return;
+      return 0;
     }
     int bin_nj   = h_zllgamma_nj ->FindBin(njets_LOW + 0.5);     
     int bin_nb   = h_zllgamma_nb ->FindBin(nbjets_LOW + 0.5);
@@ -273,7 +276,18 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
 
   if (suppressZeroBins && ((n_sig < 0.1) || (n_sig/n_bkg < 0.02))) {
     if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
-    return;
+    return 0;
+  }
+
+  if (f_data) {
+    // n_data is 0 by default
+    TH1D* h_data = (TH1D*) f_data->Get(fullhistname);
+    if (h_data != 0) {
+      n_data = h_data->GetBinContent(mt2bin);
+    } 
+  } else {
+    // using only MC: take observation == total bkg
+    n_data = n_bkg;
   }
 
   int n_syst = 0;
@@ -381,71 +395,71 @@ void printCard( string dir_str , int mt2bin , string signal, string output_dir, 
   double sig_syst = 1.10;
   ++n_syst;
 
-  ofstream* ofile = new ofstream();
-  ofile->open(cardname);
+  ofstream ofile;
+  ofile.open(cardname);
 
-  *ofile <<  "imax 1  number of channels"                                                    << endl;
-  *ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
-  *ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
-  *ofile <<  "------------"                                                                  << endl;
-  *ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
-  *ofile <<  Form("observation %.0f",n_bkg)                                                  << endl;
-  *ofile <<  "------------"                                                                  << endl;
-  *ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
-  *ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
-  *ofile <<  "process           0         1           2         3"                                      << endl;
-  *ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
-  *ofile <<  "------------"                                                                  << endl;
+  ofile <<  "imax 1  number of channels"                                                    << endl;
+  ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
+  ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
+  ofile <<  "------------"                                                                  << endl;
+  ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
+  ofile <<  Form("observation %.0f",n_data)                                                 << endl;
+  ofile <<  "------------"                                                                  << endl;
+  ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
+  ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
+  ofile <<  "process           0         1           2         3"                                      << endl;
+  ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig,n_zinv,n_lostlep,n_qcd) << endl;
+  ofile <<  "------------"                                                                  << endl;
 
   // ---- sig systs
-  *ofile <<  Form("sig_syst                                            lnN   %.3f    -      -     - ",sig_syst)  << endl;
+  ofile <<  Form("sig_syst                                            lnN   %.3f    -      -     - ",sig_syst)  << endl;
 
   // ---- Zinv systs
   if (nbjets_HI == 1 || nbjets_HI == 2) {
-    *ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
-    *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
+    ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
     if (fourNuisancesPerBinZGratio) {
-      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
-      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
-      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
-      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
     }
     else {
-      *ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma.Data(),zinv_zgamma)  << endl;     
     }
-    *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
     if (integratedZinvEstimate)
-      *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
+      ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
   }
   if (nbjets_LOW >= 2) {
-    *ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_mcsyst.Data(),zinv_mcsyst)  << endl;
   }
 
   // ---- lostlep systs
   if (lostlep_decorrelate_bin && n_lostlep > 0.) {
     // taking MC directly - use lnN uncertainty
-    *ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
+    ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_crstat.Data(),lostlep_crstat)  << endl;
   } else {
-    *ofile <<  Form("%s                 gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
+    ofile <<  Form("%s                 gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
   }
-  *ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
+  ofile <<  Form("%s                 lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
   if (n_lostlep > 0.) {
-    *ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
-    *ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
+    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
+    ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
   }
 
   // ---- QCD systs
-  if (n_qcd > 0.) *ofile <<  Form("%s     lnN    -      -       -   %.3f ",name_qcd_syst.Data(),qcd_syst)  << endl;
+  if (n_qcd > 0.) ofile <<  Form("%s     lnN    -      -       -   %.3f ",name_qcd_syst.Data(),qcd_syst)  << endl;
 
-  ofile->close();
+  ofile.close();
 
   if (verbose) std::cout << "Wrote card: " << cardname << std::endl;
 
-  return;
+  return 1;
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false){
+void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = false){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -464,7 +478,9 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie()) {
+  if (doData) f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
+
+  if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || (doData && f_data->IsZombie()) ) {
     std::cout << "Input file does not exist" << std::endl;
     return;
   }
@@ -473,25 +489,26 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
   //  cards definitions
   // ----------------------------------------
 
-  
+  set<pair<int, int> > signal_points;  
   //Loop through list of every directory in the signal file.
   //if directory begins with "sr", excluding "srbase", make cards for it.
   TIter it(f_sig->GetListOfKeys());
   TKey* k;
-  std::string keep = "sr";
-  std::string skip = "srbase";
+  string keep = "sr";
+  string skip = "srbase";
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
-      std::string mt2_hist_name = (k->GetTitle());
+      string mt2_hist_name = (k->GetTitle());
       mt2_hist_name += "/h_n_mt2bins";
       TH1D* h_n_mt2bins = (TH1D*) f_sig->Get(TString(mt2_hist_name));
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
-	  for (int im1 = 400; im1 <= 2000; im1 += 50) {
-	    for (int im2 = 0; im2 <= 1600; im2 += 50) {
-	      printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
+	  for (int im1 = 400; im1 <= 2000; im1 += 25) {
+	    for (int im2 = 0; im2 <= 1600; im2 += 25) {
+	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
+	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop
 	  } // scanM1 loop
 	} // if isScan
@@ -502,6 +519,19 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
     }
   }
 
+  if (isScan) {
+    TString filename = Form("%s/points_%s.txt",output_dir.c_str(),signal.c_str());
+    ofstream ofile;
+    ofile.open(filename);
+    cout << "--------------------------------------------" << endl
+	 << "- saw nonzero signal entries for the following points: " << endl;
+    for (set<pair<int,int> >::iterator it=signal_points.begin(); it!=signal_points.end(); ++it) {
+      cout << signal << "_" << (*it).first << "_" << (*it).second << endl;
+      ofile << signal << "_" << (*it).first << "_" << (*it).second << endl;
+    }
+    ofile.close();
+  }
+  
   bmark->Stop("benchmark");
   cout << endl;
   cout << "------------------------------" << endl;
