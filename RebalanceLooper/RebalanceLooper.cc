@@ -37,7 +37,7 @@ std::vector<float> jeteta;
 std::vector<float> jetphi;
 std::map<std::string, std::vector<double> > responseMap;
 std::map<std::string, std::pair<TF1, float> > fitMap;
-float sigma_soft;
+//float sigma_soft;
 float pt_soft_x;
 float pt_soft_y;
 
@@ -48,11 +48,13 @@ void setup_fits(){
   while ( (key = (TKey *)it()) ) {
     std::string fit_name = (key->GetTitle());
     TF1* f = (TF1*) fitFile->Get(TString(fit_name));
-    float f_scale = 0.01/f->Integral(0, 10, 1.e-5);//hist bin size = 0.01;
+    //float f_scale = 0.01/f->Integral(0, 10, 1.e-5);//hist bin size = 0.01;//FIXME Phys14 templates
+    float f_scale = 0.02/f->Integral(0, 3, 1.e-5);//hist bin size = 0.01;//Spring15 templates
     float max_scale = 1E10;
     f_scale = min(f_scale, max_scale);
-    std::cout << fit_name << std::endl;
-    std::cout << "f_scale = " << f_scale << std::endl;
+    //std::cout << fit_name << std::endl;
+    //std::cout << "f->Integral = " << 0.02/f->Integral(0, 3, 1.e-5) << std::endl;
+    //std::cout << "f_scale = " << f_scale << std::endl;
     std::pair<TF1, float> my_pair;
     my_pair.second = f_scale;
     if(!f){
@@ -92,11 +94,11 @@ float GetProb(float pt, float eta, double par){
   else if(pt < 570.0)  pt_string = "Pt10";
   else if(pt < 680.0)  pt_string = "Pt11";
   else if(pt < 800.0)  pt_string = "Pt12";
-  else pt_string = "Pt13";
-/*
   else if(pt < 1000.0) pt_string = "Pt13";
   else if(pt < 1300.0) pt_string = "Pt14";
   else if(pt < 1700.0) pt_string = "Pt15";
+  else pt_string = "Pt16";
+/*
   else if(pt < 2200.0) pt_string = "Pt16";
   else if(pt < 2800.0) pt_string = "Pt17";
   else if(pt < 3500.0) pt_string = "Pt18";
@@ -107,15 +109,67 @@ float GetProb(float pt, float eta, double par){
   //else if(pt < 6500.0) pt_string = "Pt21";
 
   std::string eta_string;
-  if(eta < 0.3) eta_string = "Eta0";
-  else if(eta < 0.5)   eta_string = "Eta1";
-  else if(eta < 0.8)   eta_string = "Eta2";
-  else if(eta < 1.1)   eta_string = "Eta3";
-  else if(eta < 1.4)  eta_string = "Eta4";
-  else if(eta < 1.7)  eta_string = "Eta5";
-  else if(eta < 2.3)  eta_string = "Eta6";
-  else if(eta < 2.8)  eta_string = "Eta7";
-  else eta_string = "Eta8";
+   
+  if(pt < 300.0){
+    if(eta < 0.3) eta_string = "Eta0";
+    else if(eta < 0.5)  eta_string = "Eta1";
+    else if(eta < 0.8)  eta_string = "Eta2";
+    else if(eta < 1.1)  eta_string = "Eta3";
+    else if(eta < 1.4)  eta_string = "Eta4";
+    else if(eta < 1.7)  eta_string = "Eta5";
+    else if(eta < 2.3)  eta_string = "Eta6";
+    else if(eta < 2.8)  eta_string = "Eta7";
+    else if(eta < 3.2)  eta_string = "Eta8";
+    else if(eta < 4.1)  eta_string = "Eta9";
+    else eta_string = "Eta10";
+  }
+  else if(pt < 570.0){
+    if(eta < 0.3) eta_string = "Eta0";
+    else if(eta < 0.5)  eta_string = "Eta1";
+    else if(eta < 0.8)  eta_string = "Eta2";
+    else if(eta < 1.1)  eta_string = "Eta3";
+    else if(eta < 1.4)  eta_string = "Eta4";
+    else if(eta < 1.7)  eta_string = "Eta5";
+    else if(eta < 2.3)  eta_string = "Eta6";
+    else if(eta < 2.8)  eta_string = "Eta7";
+    else if(eta < 3.2)  eta_string = "Eta8";
+    else eta_string = "Eta9";
+  }
+  else if(pt < 1000.0){
+    if(eta < 0.3) eta_string = "Eta0";
+    else if(eta < 0.5)  eta_string = "Eta1";
+    else if(eta < 0.8)  eta_string = "Eta2";
+    else if(eta < 1.1)  eta_string = "Eta3";
+    else if(eta < 1.4)  eta_string = "Eta4";
+    else if(eta < 1.7)  eta_string = "Eta5";
+    else if(eta < 2.3)  eta_string = "Eta6";
+    else if(eta < 2.8)  eta_string = "Eta7";
+    else eta_string = "Eta8";
+  }
+  else if(pt < 1300.0){
+    if(eta < 0.3) eta_string = "Eta0";
+    else if(eta < 0.5)  eta_string = "Eta1";
+    else if(eta < 0.8)  eta_string = "Eta2";
+    else if(eta < 1.1)  eta_string = "Eta3";
+    else if(eta < 1.4)  eta_string = "Eta4";
+    else if(eta < 1.7)  eta_string = "Eta5";
+    else if(eta < 2.3)  eta_string = "Eta6";
+    else eta_string = "Eta7";
+  }
+  else if(pt < 1700.0){
+    if(eta < 0.3) eta_string = "Eta0";
+    else if(eta < 0.5)  eta_string = "Eta1";
+    else if(eta < 0.8)  eta_string = "Eta2";
+    else if(eta < 1.1)  eta_string = "Eta3";
+    else if(eta < 1.4)  eta_string = "Eta4";
+    else if(eta < 1.7)  eta_string = "Eta5";
+    else eta_string = "Eta6";
+  }
+  else{
+    if(eta < 0.3) eta_string = "Eta0";
+    else if(eta < 0.5)  eta_string = "Eta1";
+    else eta_string = "Eta2";
+  }
 /*
   else if(eta < 3.2)  eta_string = "Eta8";
   else if(eta < 4.1)  eta_string = "Eta9";
@@ -128,9 +182,10 @@ float GetProb(float pt, float eta, double par){
   double g_scale = fitMap.at(fit_name).first.GetParameter(0);
   double g_mean  = fitMap.at(fit_name).first.GetParameter(1);
   double g_sigma = fitMap.at(fit_name).first.GetParameter(2);
-  
+
   double my_prob = ComputeGaussianValue(g_scale, g_mean, g_sigma, par);
   double my_scale = fitMap.at(fit_name).second;
+  //std::cout << "probability = " << my_prob*my_scale << std::endl;
   return my_prob*my_scale;
 }
 
@@ -146,8 +201,10 @@ void minuitFunction(int& nDim, double* gout, double& result, double par[], int f
     pt_constrained_x -= (jetpt.at(i))*cos(jetphi.at(i))/par[i];
     pt_constrained_y -= (jetpt.at(i))*sin(jetphi.at(i))/par[i];
   }
-  float x1 = (pt_soft_x - pt_constrained_x)/sigma_soft;
-  float x2 = (pt_soft_y - pt_constrained_y)/sigma_soft;
+  //float x1 = (pt_soft_x - pt_constrained_x)/sigma_soft;
+  //float x2 = (pt_soft_y - pt_constrained_y)/sigma_soft;
+  float x1 = (pt_soft_x - pt_constrained_x)/20.0;
+  float x2 = (pt_soft_y - pt_constrained_y)/20.0;
   likelihood += -x1*x1/2;
   likelihood += -x2*x2/2;
 
@@ -199,8 +256,8 @@ void RebalanceLooper::loop(TChain* chain, std::string output_name){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-    //for( unsigned int event = 0; event < 1000; ++event) {
-    //for( unsigned int event = 0; event < (nEventsTree/100); ++event) {
+    //for( unsigned int event = 0; event < 100; ++event) {
+    //for( unsigned int event = 0; event < (nEventsTree/10); ++event) {
 
       t.GetEntry(event);
       
@@ -228,17 +285,42 @@ void RebalanceLooper::loop(TChain* chain, std::string output_name){
         FillNtuple(); 
         continue;
       }
+    
 
-      if(t.HLT_PFHT800) prescale = 1;
-      else if(t.HLT_PFHT600_Prescale) prescale = t.HLT_PFHT600_Prescale;
-      else if(t.HLT_PFHT475_Prescale) prescale = t.HLT_PFHT475_Prescale;
-      else if(t.HLT_PFHT350_Prescale) prescale = t.HLT_PFHT350_Prescale;
-      else if(t.HLT_PFHT300_Prescale) prescale = t.HLT_PFHT300_Prescale;
-      else {
-        status = -1;
-        FillNtuple(); 
-        continue;
+      if(t.isData){
+          bool pass_trigger = false;
+          if(t.HLT_PFHT800 > 0 && t.ht > 900.0) pass_trigger = true;
+          else if(t.HLT_PFHT600_Prescale > 0 && t.ht > 700.0) pass_trigger = true;
+          else if(t.HLT_PFHT475_Prescale > 0 && t.ht > 575.0) pass_trigger = true;
+          else if(t.HLT_PFHT350_Prescale > 0 && t.ht > 450.0) pass_trigger = true;
+          else if(t.HLT_PFHT300_Prescale > 0 && t.ht > 400.0) pass_trigger = true;
+          else if(t.HLT_PFHT200_Prescale > 0 && t.ht > 300.0) pass_trigger = true;
+
+          if(!pass_trigger) {
+            status = -1;
+            FillNtuple(); 
+            continue;
+          }
+
+          prescale = 9999999;
+          if(t.HLT_PFHT600_Prescale > 0 && t.ht > 700.0) prescale = min(t.HLT_PFHT600_Prescale, prescale);
+          if(t.HLT_PFHT475_Prescale > 0 && t.ht > 575.0) prescale = min(t.HLT_PFHT475_Prescale, prescale);
+          if(t.HLT_PFHT350_Prescale > 0 && t.ht > 450.0) prescale = min(t.HLT_PFHT350_Prescale, prescale);
+          if(t.HLT_PFHT300_Prescale > 0 && t.ht > 400.0) prescale = min(t.HLT_PFHT300_Prescale, prescale);
+          if(t.HLT_PFHT200_Prescale > 0 && t.ht > 300.0) prescale = min(t.HLT_PFHT200_Prescale, prescale);
+          if(t.HLT_PFHT800 > 0 && t.ht > 900.0) prescale = 1;
+
+          if(prescale < 0){
+            std::cout << "WARNING: prescale_lt_zero" << std::endl;
+            std::cout << t.HLT_PFHT600_Prescale << std::endl;
+            std::cout << t.HLT_PFHT475_Prescale << std::endl;
+            std::cout << t.HLT_PFHT350_Prescale << std::endl;
+            std::cout << t.HLT_PFHT300_Prescale << std::endl;
+            std::cout << t.HLT_PFHT200_Prescale << std::endl;
+          }
       }
+      else prescale = 1;
+
 
       //---------------------
       // skip duplicates -- will need this eventually
@@ -298,7 +380,8 @@ void RebalanceLooper::loop(TChain* chain, std::string output_name){
       pt_soft_x = -met_x - jet_x;
       pt_soft_y = -met_y - jet_y;
       float pt_soft = sqrt(pt_soft_x*pt_soft_x + pt_soft_y*pt_soft_y);
-      sigma_soft = 20.0;
+      //sigma_soft = 20.0;
+      //sigma_soft = 18.0;
       //sigma_soft = 1.5*t.nVert;
       //sigma_soft = 5.0*sqrt(t.nVert);
 
