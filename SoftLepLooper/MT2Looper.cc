@@ -743,7 +743,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 
       } //nUniqueLep_==1
-
       
       //recompute dPhiMin for SR/CR
       for(int ijet = 0; ijet < t.njet; ijet++){
@@ -808,7 +807,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (minDR < 0.1) softlepMatched = true;
 	}
       }//if doSoftLep plots
-
+      
       //-------------------------------------//
       //----------2 lep control region-------//
       //-------------------------------------//
@@ -929,6 +928,55 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	
       }//nUniqueLep_==2
+
+      
+      //-------------------------------------//
+      //-------find lost lepton for 2-lep----//
+      //-------------------------------------//
+      bool foundMissingLep = false;
+      bool foundMissingLepFromTau = false;
+      bool foundMissingTau = false;
+      missIdx_ = -1;
+      missPt_ = -1;
+      
+      if (doSoftLepSRplots || doSoftLepCRplots || doDoubleLepCRplots) {
+
+	for(int ilep = 0; ilep < t.ngenLep; ilep++){
+	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
+	  if (thisDR > 0.1) {
+	    missIdx_ = ilep;
+	    missPt_ = t.genLep_pt[ilep];
+	    foundMissingLep = true;
+	    break;
+	  }
+	}//ngenLep
+
+	if (!foundMissingLep) {
+	  for(int ilep = 0; ilep < t.ngenLepFromTau; ilep++){
+	    float thisDR = DeltaR(t.genLepFromTau_eta[ilep], softlepeta_, t.genLepFromTau_phi[ilep], softlepphi_);
+	    if (thisDR > 0.1) {
+	      missIdx_ = ilep;
+	      missPt_ = t.genLepFromTau_pt[ilep];
+	      foundMissingLepFromTau = true;
+	      break;
+	    }
+	  }//ngenLepFromTau
+	}
+	
+	if (!foundMissingLep && !foundMissingLepFromTau) {
+	  for(int ilep = 0; ilep < t.ngenTau; ilep++){
+	    float thisDR = DeltaR(t.genTau_eta[ilep], softlepeta_, t.genTau_phi[ilep], softlepphi_);
+	    if (thisDR > 0.1) {
+	      missIdx_ = ilep;
+	      missPt_ = t.genTau_pt[ilep];
+	      foundMissingTau = true;
+	      break;
+	    }
+	  }//ngenTau
+	}
+	
+      }//doSoftLepSRplots || doSoftLepCRplots
+
       
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
@@ -1143,6 +1191,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (softlepMatched) fillHistosSoftL("srsoftl");
 	else fillHistosSoftL("srsoftl", "Fake");
         fillHistosLepSignalRegions("srLep");
+
+	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "Missing");
+	
+	if (foundMissingTau) fillHistosSoftL("srsoftl", "MissingTau");
+	else if (foundMissingLepFromTau) fillHistosSoftL("srsoftl", "MissingLepFromTau");
+	else if (foundMissingLep) fillHistosSoftL("srsoftl", "MissingLep");
       }
       if (doSoftLepMuSRplots && !doMinimalPlots) {
         //saveSoftLplots = true;
@@ -1158,6 +1212,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         //saveSoftLplots = true;
         if (softlepMatched) fillHistosSoftL("crsoftl");
 	else fillHistosSoftL("crsoftl","Fake");
+
+	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("crsoftl", "Missing");
+
+	if (foundMissingTau) fillHistosSoftL("crsoftl", "MissingTau");
+	else if (foundMissingLepFromTau) fillHistosSoftL("crsoftl", "MissingLepFromTau");
+	else if (foundMissingLep) fillHistosSoftL("crsoftl", "MissingLep");
       }
       if (doSoftLepMuCRplots && !doMinimalPlots) {
         //saveSoftLplots = true;
@@ -1171,7 +1231,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doDoubleLepCRplots) {
         //saveSoftLplots = true;
-         fillHistosDoubleL("crdoublel");
+	fillHistosDoubleL("crdoublel");
+
+	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("crdoublel", "Missing");
+	
+	if (foundMissingTau) fillHistosDoubleL("crdoublel", "MissingTau");
+	else if (foundMissingLepFromTau) fillHistosDoubleL("crdoublel", "MissingLepFromTau");
+	else if (foundMissingLep) fillHistosDoubleL("crdoublel", "MissingLep");
       }
 
 
@@ -2099,6 +2165,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
   // workaround for monojet bins
   float mt2_temp = t.mt2;
+  TString directoryname(dirname);
   if (t.nJet30 == 1) mt2_temp = t.jet1_pt;
 
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -2294,6 +2361,9 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_softlepht"+s,       t.ht-softleppt_,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
   plot1D("h_rlht"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
 
+  //missing lep
+  plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+  
   //compute stuff for soft lep
   float metX = t.met_pt * cos(t.met_phi);
   float metY = t.met_pt * sin(t.met_phi);

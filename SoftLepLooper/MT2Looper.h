@@ -94,6 +94,9 @@ class MT2Looper {
   float softlepmt2_;
   float softlepDPhiMin_;
 
+  int missIdx_;
+  float missPt_;
+
   //2-lep softLep CR variables
   float lep1pt_;
   float lep1eta_;
