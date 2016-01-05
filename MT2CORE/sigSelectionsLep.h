@@ -9,6 +9,7 @@ namespace mt2
 {
 
   std::vector<SR> getSignalRegionsLep();
+  std::vector<SR> getSignalRegionsLep2();
 
 } // namespace mt2
 
