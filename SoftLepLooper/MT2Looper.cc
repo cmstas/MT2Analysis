@@ -813,6 +813,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //-------------------------------------//
       
       bool doDoubleLepCRplots = false;
+      float hardlep_pt = -1;
+      float hardlep_eta = -1;
+      float hardlep_phi = -1;
       lep1pt_ = -1;
       lep1eta_ = -1;
       lep1phi_ = -1;
@@ -920,6 +923,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
 	//if you get to here, fill in CR
 	doDoubleLepCRplots = true;
+
+	//sort the leptons by pT
+	if (lep1pt_ > lep2pt_){
+	  hardlep_pt = lep1pt_;
+	  hardlep_eta = lep1eta_;
+	  hardlep_phi = lep1phi_;
+	}
+	if (lep1pt_ < lep2pt_){
+	  hardlep_pt = lep2pt_;
+	  hardlep_eta = lep2eta_;
+	  hardlep_phi = lep2phi_;
+	}
 	
 	if (nfoundlep != 2) {
 	  std::cout << "MT2Looper::Loop: WARNING! didn't find 2 leptons when expected: evt: " << t.evt
@@ -939,7 +954,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       missIdx_ = -1;
       missPt_ = -1;
       
-      if (doSoftLepSRplots || doSoftLepCRplots || doDoubleLepCRplots) {
+      if (doSoftLepSRplots || doSoftLepCRplots) {
 
 	for(int ilep = 0; ilep < t.ngenLep; ilep++){
 	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
@@ -977,7 +992,45 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
       }//doSoftLepSRplots || doSoftLepCRplots
 
-      
+      //same but for the 2-lep CR
+      if (doDoubleLepCRplots) {
+
+	for(int ilep = 0; ilep < t.ngenLep; ilep++){
+	  float thisDR = DeltaR(t.genLep_eta[ilep], hardlep_eta, t.genLep_phi[ilep], hardlep_phi);
+	  if (thisDR > 0.1) {
+	    missIdx_ = ilep;
+	    missPt_ = t.genLep_pt[ilep];
+	    foundMissingLep = true;
+	    break;
+	  }
+	}//ngenLep
+
+	if (!foundMissingLep) {
+	  for(int ilep = 0; ilep < t.ngenLepFromTau; ilep++){
+	    float thisDR = DeltaR(t.genLepFromTau_eta[ilep], hardlep_eta, t.genLepFromTau_phi[ilep], hardlep_phi);
+	    if (thisDR > 0.1) {
+	      missIdx_ = ilep;
+	      missPt_ = t.genLepFromTau_pt[ilep];
+	      foundMissingLepFromTau = true;
+	      break;
+	    }
+	  }//ngenLepFromTau
+	}
+	
+	if (!foundMissingLep && !foundMissingLepFromTau) {
+	  for(int ilep = 0; ilep < t.ngenTau; ilep++){
+	    float thisDR = DeltaR(t.genTau_eta[ilep], hardlep_eta, t.genTau_phi[ilep], hardlep_phi);
+	    if (thisDR > 0.1) {
+	      missIdx_ = ilep;
+	      missPt_ = t.genTau_pt[ilep];
+	      foundMissingTau = true;
+	      break;
+	    }
+	  }//ngenTau
+	}
+	
+      }//doDoubleLepCRplots
+
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
 	doSLplots = true;
