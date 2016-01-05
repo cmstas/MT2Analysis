@@ -1395,30 +1395,45 @@ void plotMakerSoftLepSRMissingLep(){
       //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      if(dir_name != "srsoftlbase") continue; //to do only this dir
-      //if(dir_name != "srsoftlmubase" && dir_name != "srsoftlelbase") continue; //to do only this dir
-     
-      makePlot( samples , names , dir_name , "h_mtMissing" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mtMissingLep" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mtMissingLepFromTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mtMissingTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
-
-      makePlot( samples , names , dir_name , "h_missinglepptMissing" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_missinglepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_missinglepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_missinglepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+      if(dir_name == "srsoftlbase") {
       
-      //log plots
-   
-      makePlot( samples , names , dir_name , "h_mtMissing" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mtMissingLep" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mtMissingLepFromTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mtMissingTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissing" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissingLep" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissingLepFromTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissingTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
 
-      makePlot( samples , names , dir_name , "h_missinglepptMissing" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_missinglepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_missinglepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_missinglepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissing" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	
+	//log plots
+   
+	makePlot( samples , names , dir_name , "h_mtMissing" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissingLep" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissingLepFromTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtMissingTau" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	
+	makePlot( samples , names , dir_name , "h_missinglepptMissing" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_missinglepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      }
+
+      if(dir_name == "crdoublelbase") {
+
+	makePlot( samples , names , dir_name , "h_highlepptMissing" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+
+	//log plots
+	makePlot( samples , names , dir_name , "h_highlepptMissing" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+
+      }
       
     }
   }
