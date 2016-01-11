@@ -1479,6 +1479,7 @@ void plotMakerSoftLepSR(){
   TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
   TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
   //TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
@@ -1490,6 +1491,7 @@ void plotMakerSoftLepSR(){
   samples.push_back(f_st); names.push_back("st fakeLep");
   samples.push_back(f_tt1l); names.push_back("tt+1l fakeLep");
   samples.push_back(f_wjets); names.push_back("wjets fakeLep");
+  samples.push_back(f_dy); names.push_back("dyjets");
   samples.push_back(f_tt2l); names.push_back("tt+2l");
   samples.push_back(f_st); names.push_back("st");
   //samples.push_back(f_ttbar); names.push_back("top");
@@ -1805,10 +1807,10 @@ void plotMakerSoft(){
   //plotMakerGJets(); return;
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
-  //plotMakerSoftLepSR(); return;
+  plotMakerSoftLepSR(); return;
   //plotMakerSoftLepSRMissingLep(); return;
   //plotMakerSoftLepCR(); return;
-  plotMakerDoubleLepCR(); return;
+  //plotMakerDoubleLepCR(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
