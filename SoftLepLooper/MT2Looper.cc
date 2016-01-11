@@ -638,6 +638,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	int pdgId = t.isoTrack_pdgId[itrk];
 	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
 	if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+	if (t.isoTrack_relIsoAn04[itrk] > 0.4) continue;
+
+	if (abs(pdgId) == 11 && abs(t.isoTrack_eta[itrk] > 1.5)) continue; //exclude low-pt endcap electrons
 
 
 	//overlap removal with reco leps
@@ -653,7 +656,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	nPFlepLowPt++;
       }
-      nUniqueLep_ = t.nMuons10 + t.nElectrons10 + nPFlepLowPt;
+
+      //loop over leps to find isolated leps with pt > 10 GeV
+      int nIsoLep = 0;
+      for (int ilep = 0; ilep < t.nlep; ilep++){
+	int pdgId = t.lep_pdgId[ilep];
+	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
+	float pt = t.lep_pt[ilep];
+	if (pt < 10) continue;
+	if (t.lep_relIsoAn04[ilep]>0.4) continue;
+	nIsoLep++;
+      }
+      
+      nUniqueLep_ = nIsoLep + nPFlepLowPt;
 
       //if nleps==1, find soft lepton
       if (nUniqueLep_ == 1) {
@@ -664,6 +679,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// if reco leps, check those
 	if (t.nlep > 0) {
       	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+
+	    if (t.lep_relIsoAn04[ilep]>0.4) continue;
+
       	    float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 
 	    // good candidate: save
@@ -693,6 +711,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       	    int pdgId = t.isoTrack_pdgId[itrk];
 	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
       	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+	    if (t.isoTrack_relIsoAn04[itrk]>0.4) continue;
+	    if (abs(pdgId) == 11 && abs(t.isoTrack_eta[itrk] > 1.5)) continue; //exclude low-pt endcap electrons
 	    float eta = t.isoTrack_eta[itrk];
 	    float phi = t.isoTrack_phi[itrk];
 	    float mass = t.isoTrack_mass[itrk];
@@ -816,6 +836,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       float hardlep_pt = -1;
       float hardlep_eta = -1;
       float hardlep_phi = -1;
+      bool hardlep_reco = false;
       lep1pt_ = -1;
       lep1eta_ = -1;
       lep1phi_ = -1;
@@ -830,10 +851,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	int nfoundlep = 0;
 	int cand1_pdgId = 0;
 	int cand2_pdgId = 0;
-
+	bool recolep1 = false;
+	bool recolep2 = false;
+	
 	// if reco leps, check those
 	if (t.nlep > 0) {
       	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+
+	    if (t.lep_relIsoAn04[ilep]>0.4) continue;
 
 	    // good candidate: save
 	    if (nfoundlep == 0){
@@ -842,6 +867,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      lep1phi_ = t.lep_phi[ilep];
 	      lep1M_ = t.lep_mass[ilep];
 	      cand1_pdgId = t.lep_pdgId[ilep];
+	      recolep1 = true;
 	      nfoundlep++;
 	      continue;
 	    }
@@ -851,6 +877,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      lep2phi_ = t.lep_phi[ilep];
 	      lep2M_ = t.lep_mass[ilep];
 	      cand2_pdgId = t.lep_pdgId[ilep];
+	      recolep2 = true;
 	      nfoundlep++;
 	      break;
 	    }
@@ -859,12 +886,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	// otherwise check PF leps that don't overlap with a reco lepton
 	if (nfoundlep < 2) {
-      	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	    float pt = t.isoTrack_pt[itrk];
 	    if (pt < 5. || pt > 10.) continue;
       	    int pdgId = t.isoTrack_pdgId[itrk];
 	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
       	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
+	    if (t.isoTrack_relIsoAn04[itrk]>0.4) continue;
 	    float eta = t.isoTrack_eta[itrk];
 	    float phi = t.isoTrack_phi[itrk];
 	    float mass = t.isoTrack_mass[itrk];
@@ -903,12 +931,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  } // loop on isotracks	  
 	} //nfoundlep < 2
 
+	if (nfoundlep != 2) continue; //this should never happen
+	
 	//at least one soft lepton
 	if (lep1pt_ > 20 && lep2pt_ > 20) { continue; }
 	
 	//opposite sign
 	if (((cand1_pdgId < 0) && (cand2_pdgId < 0)) || ((cand1_pdgId > 0) && (cand2_pdgId > 0)) ){ continue; }
-	
 	
 	//construct dilep mass
 	TLorentzVector lep1_p4(0,0,0,0);
@@ -921,21 +950,29 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	//z-window veto
 	if (dilepmll_ > 76 && dilepmll_ < 106) { continue; }
 	
-	//if you get to here, fill in CR
-	doDoubleLepCRplots = true;
-
 	//sort the leptons by pT
 	if (lep1pt_ > lep2pt_){
 	  hardlep_pt = lep1pt_;
 	  hardlep_eta = lep1eta_;
 	  hardlep_phi = lep1phi_;
+	  hardlep_reco = recolep1;
 	}
 	if (lep1pt_ < lep2pt_){
 	  hardlep_pt = lep2pt_;
 	  hardlep_eta = lep2eta_;
 	  hardlep_phi = lep2phi_;
+	  hardlep_reco = recolep2;
 	}
+
+	//require 2nd lepton to be >20 GeV
+	if (hardlep_pt < 20) continue;
+
+	//require 2nd lep to be a reco lep
+	if (!hardlep_reco) continue;
 	
+	//if you get to here, fill in CR
+	doDoubleLepCRplots = true;
+
 	if (nfoundlep != 2) {
 	  std::cout << "MT2Looper::Loop: WARNING! didn't find 2 leptons when expected: evt: " << t.evt
 		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
@@ -1706,7 +1743,6 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
       //t.rl_deltaPhiMin > 0.3 &&
       t.diffMetMht/t.met_pt < 0.5 
       ) passBaseline = true;
-
   
   if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublelbase", suffix);
  
