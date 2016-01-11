@@ -34,6 +34,7 @@ int getColor(const string& sample) {
   //softLep fakes
   if (sample.find("wjets fakeLep") != string::npos) return 417+3;
   if (sample.find("zinv fakeLep") != string::npos) return 419+3;
+  if (sample.find("dyjets fakeLep") != string::npos) return 430+3;
   if (sample.find("tt+1l fakeLep") != string::npos) return kAzure+2+3;
   if (sample.find("tt+2l fakeLep") != string::npos) return kOrange-1+3;
   if (sample.find("st fakeLep") != string::npos) return kViolet+3;
@@ -57,6 +58,7 @@ int getColor(const string& sample) {
   if (sample.find("tt+1l") != string::npos) return kAzure+2;
   if (sample.find("tt+2l") != string::npos) return kOrange-1;
   if (sample.find("st") != string::npos) return kViolet;
+  if (sample.find("ww") != string::npos) return kSpring+3;
 
   cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
   return kBlack;
@@ -69,6 +71,7 @@ string getLegendName(const string& sample) {
   if (sample.find("wjets fakeLep") != string::npos) return "Fake W+jets";
   if (sample.find("st fakeLep") != string::npos) return "Fake singletop";
   if (sample.find("zinv fakeLep") != string::npos) return "Fake Z #rightarrow #nu#nu";
+  if (sample.find("dyjets fakeLep") != string::npos) return "Fake Z+jets";
   if (sample.find("tt+1l fakeLep") != string::npos) return "Fake tt + 1l";
   if (sample.find("tt+2l fakeLep") != string::npos) return "Fake tt + 2l";
 
@@ -102,6 +105,7 @@ string getLegendName(const string& sample) {
   if (sample.find("tt+1l") != string::npos) return "tt + 1l";
   if (sample.find("tt+2l") != string::npos) return "tt + 2l";
   if (sample.find("st") != string::npos) return "singletop";
+  if (sample.find("ww") != string::npos) return "WW";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;

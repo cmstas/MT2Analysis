@@ -831,6 +831,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //-------------------------------------//
       //----------2 lep control region-------//
       //-------------------------------------//
+
+      //flag MC events with 2 gen leptons
+      bool isDilepton = false;
+      if (t.ngenLep + t.ngenTau == 2) isDilepton = true;
       
       bool doDoubleLepCRplots = false;
       float hardlep_pt = -1;
@@ -948,7 +952,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	dilepmll_ = dilep_p4.M();
 
 	//z-window veto
-	if (dilepmll_ > 76 && dilepmll_ < 106) { continue; }
+	//if (dilepmll_ > 76 && dilepmll_ < 106) { continue; }
 	
 	//sort the leptons by pT
 	if (lep1pt_ > lep2pt_){
@@ -1282,6 +1286,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	else fillHistosSoftL("srsoftl", "Fake");
         fillHistosLepSignalRegions("srLep");
 
+	if (isDilepton) fillHistosSoftL("srsoftl","Dilepton");
+
 	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "Missing");
 	
 	if (foundMissingTau) fillHistosSoftL("srsoftl", "MissingTau");
@@ -1321,15 +1327,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doDoubleLepCRplots) {
         //saveSoftLplots = true;
-	fillHistosDoubleL("crdoublel");
+	if (isDilepton) fillHistosDoubleL("crdoublel","Dilepton");
+	else fillHistosDoubleL("crdoublel","Fake");
 
-	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("crdoublel", "Missing");
-	
-	if (foundMissingTau) fillHistosDoubleL("crdoublel", "MissingTau");
-	else if (foundMissingLepFromTau) fillHistosDoubleL("crdoublel", "MissingLepFromTau");
-	else if (foundMissingLep) fillHistosDoubleL("crdoublel", "MissingLep");
+	if (isDilepton){
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("crdoublel", "Missing");
+	  
+	  if (foundMissingTau) fillHistosDoubleL("crdoublel", "MissingTau");
+	  else if (foundMissingLepFromTau) fillHistosDoubleL("crdoublel", "MissingLepFromTau");
+	  else if (foundMissingLep) fillHistosDoubleL("crdoublel", "MissingLep");
+	}
+
       }
-
 
    }//end loop on events in a file
   
@@ -2567,6 +2576,8 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_lep2ptshort"+s,      lep2pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lep2phi"+s,      lep2phi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lep2eta"+s,      lep2eta_,   evtweight_, h_1d, "eta",  60, -3, 3);
+
+  plot1D("h_dilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
   
   //compute mt with softest lepton for soft lep
   float lowpt = -1;

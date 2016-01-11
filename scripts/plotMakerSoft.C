@@ -1373,6 +1373,7 @@ void plotMakerSoftLepSRMissingLep(){
   TFile* f_tt2l = new TFile(Form("%s/ttdl.root",input_dir.c_str())); 
   TFile* f_st = new TFile(Form("%s/singletop.root",input_dir.c_str())); 
   TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* f_dyjets = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -1380,7 +1381,8 @@ void plotMakerSoftLepSRMissingLep(){
   //samples.push_back(f_st); names.push_back("st");
   //samples.push_back(f_tt1l); names.push_back("tt+1l");
   //samples.push_back(f_wjets); names.push_back("wjets");
-  samples.push_back(f_tt2l); names.push_back("tt+2l");
+  //samples.push_back(f_tt2l); names.push_back("tt+2l");
+  samples.push_back(f_dyjets); names.push_back("dyjets");
 
   
   // ----------------------------------------
@@ -1487,6 +1489,7 @@ void plotMakerSoftLepSR(){
 
   samples.push_back(f_qcd); names.push_back("qcd");
   samples.push_back(f_tt2l); names.push_back("tt+2l fakeLep");
+  samples.push_back(f_dy); names.push_back("dyjets fakeLep");
   samples.push_back(f_zinv); names.push_back("zinv fakeLep");
   samples.push_back(f_st); names.push_back("st fakeLep");
   samples.push_back(f_tt1l); names.push_back("tt+1l fakeLep");
@@ -1494,7 +1497,6 @@ void plotMakerSoftLepSR(){
   samples.push_back(f_dy); names.push_back("dyjets");
   samples.push_back(f_tt2l); names.push_back("tt+2l");
   samples.push_back(f_st); names.push_back("st");
-  //samples.push_back(f_ttbar); names.push_back("top");
   samples.push_back(f_tt1l); names.push_back("tt+1l");
   samples.push_back(f_wjets); names.push_back("wjets");
   // samples.push_back(f_data); names.push_back("data");
@@ -1533,6 +1535,7 @@ void plotMakerSoftLepSR(){
       makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_Events_w" , "Events" , "Events" , 0 , 2 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       
       //log plots
       makePlot( samples , names , dir_name , "h_lepptshort" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 25 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1544,6 +1547,7 @@ void plotMakerSoftLepSR(){
       makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_Events_w" , "Events" , "Events" , 0 , 2 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       
     }
   }
@@ -1624,6 +1628,7 @@ void plotMakerSoftLepCR(){
       makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_Events_w" , "Events" , "Events" , 0 , 2 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
 
       //log plots
       makePlot( samples , names , dir_name , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 200 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1636,6 +1641,7 @@ void plotMakerSoftLepCR(){
       makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_Events_w" , "Events" , "Events" , 0 , 2 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
 
     }
   }
@@ -1667,17 +1673,19 @@ void plotMakerDoubleLepCR(){
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
   TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  TFile* f_ww = new TFile(Form("%s/ww.root",input_dir.c_str()));
   //TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
   vector<string>  names;
 
-  samples.push_back(f_qcd); names.push_back("qcd");
-  samples.push_back(f_zinv); names.push_back("zinv");
+  //samples.push_back(f_qcd); names.push_back("qcd");
+  //samples.push_back(f_zinv); names.push_back("zinv");
   samples.push_back(f_st); names.push_back("st");
+  samples.push_back(f_ww); names.push_back("ww");
   samples.push_back(f_dy); names.push_back("dyjets");
-  samples.push_back(f_wjets); names.push_back("wjets");
-  samples.push_back(f_tt1l); names.push_back("tt+1l");
+  //samples.push_back(f_wjets); names.push_back("wjets");
+  //samples.push_back(f_tt1l); names.push_back("tt+1l");
   samples.push_back(f_tt2l); names.push_back("tt+2l");
   // samples.push_back(f_data); names.push_back("data");
 
@@ -1701,33 +1709,61 @@ void plotMakerDoubleLepCR(){
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       //if(dir_name != "srsoftlbase") continue; //to do only this dir
-      if(dir_name != "crdoublelbase") continue; //to do only this dir
+      if(dir_name != "crdoublelbase" && dir_name != "srsoftlbase") continue; //to do only this dir
+      
+      if(dir_name == "crdoublelbase"){
+	makePlot( samples , names , dir_name , "h_lowlepptDilepton" , "Soft Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptDilepton" , "Hard Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_htDilepton"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_metDilepton"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30Dilepton" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nBJet20Dilepton" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J0ptDilepton" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J1ptDilepton" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtDilepton" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_typeDilepton" , "type" , "Events" , 0 , 3 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_Events_wDilepton" , "Events" , "Events" , 0 , 2 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_dilepmllDilepton" , "m_{ll} [GeV]" , "Events" , 0 , 150 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	
+	//log plots
+	makePlot( samples , names , dir_name , "h_lowlepptDilepton" , "Soft Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_highlepptDilepton" , "Hard Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_htDilepton"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_metDilepton"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30Dilepton" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nBJet20Dilepton" , "N(b jets)" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J0ptDilepton" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J1ptDilepton" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtDilepton" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_typeDilepton" , "type" , "Events" , 0 , 3 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_Events_wDilepton" , "Events" , "Events" , 0 , 2 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_dilepmllDilepton" , "m_{ll} [GeV]" , "Events" , 0 , 150 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      }
+      
 
-      makePlot( samples , names , dir_name , "h_lowleppt" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_highleppt" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_type" , "type" , "Events" , 0 , 3 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-
-      //log plots
-      makePlot( samples , names , dir_name , "h_lowleppt" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_highleppt" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_J0pt" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_J1pt" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_type" , "type" , "Events" , 0 , 3 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
-
-
-
+      if(dir_name == "srsoftlbase"){
+	makePlot( samples , names , dir_name , "h_lepptshortDilepton" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_htDilepton"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_metDilepton"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30Dilepton" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nBJet20Dilepton" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J0ptDilepton" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J1ptDilepton" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtDilepton" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_Events_wDilepton" , "Events" , "Events" , 0 , 2 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
+	
+	//log plots
+	makePlot( samples , names , dir_name , "h_lepptshortDilepton" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_htDilepton"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_metDilepton"  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30Dilepton" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nBJet20Dilepton" , "N(b jets)" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J0ptDilepton" , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_J1ptDilepton" , "p_{T}(jet2) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_mtDilepton" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_Events_wDilepton" , "Events" , "Events" , 0 , 2 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+      }
+      
     }
   }
 }
@@ -1807,8 +1843,8 @@ void plotMakerSoft(){
   //plotMakerGJets(); return;
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
-  plotMakerSoftLepSR(); return;
-  //plotMakerSoftLepSRMissingLep(); return;
+  //plotMakerSoftLepSR(); return;
+  plotMakerSoftLepSRMissingLep(); return;
   //plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
 
