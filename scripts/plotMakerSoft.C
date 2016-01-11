@@ -1413,7 +1413,12 @@ void plotMakerSoftLepSRMissingLep(){
 	makePlot( samples , names , dir_name , "h_missinglepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_missinglepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_missinglepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
-	
+
+	makePlot( samples , names , dir_name , "h_nJet30Missing" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30MissingLep" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30MissingLepFromTau" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30MissingTau" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+
 	//log plots
 	makePlot( samples , names , dir_name , "h_mtMissing" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_mtMissingLep" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 250 , 5 , true , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1438,6 +1443,11 @@ void plotMakerSoftLepSRMissingLep(){
 	makePlot( samples , names , dir_name , "h_highlepptMissingLep" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_highlepptMissingLepFromTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_highlepptMissingTau" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 1 , true , printplots, scalesig, doRatio, scaleBGtoData );
+
+	makePlot( samples , names , dir_name , "h_nJet30Missing" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30MissingLep" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30MissingLepFromTau" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+	makePlot( samples , names , dir_name , "h_nJet30MissingTau" , "N(jets)" , "Events" , 0 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
 
       }
       
@@ -1797,8 +1807,8 @@ void plotMakerSoft(){
   //plotMakerCRSL(); return;
   //plotMakerSoftLepSR(); return;
   //plotMakerSoftLepSRMissingLep(); return;
-  plotMakerSoftLepCR(); return;
-  //plotMakerDoubleLepCR(); return;
+  //plotMakerSoftLepCR(); return;
+  plotMakerDoubleLepCR(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
