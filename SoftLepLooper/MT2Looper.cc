@@ -1613,11 +1613,12 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
   values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
       fillHistosSingleSoftLepton(SRVecLep.at(srN).srHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
-      break;//signal regions are orthogonal, event cannot be in more than one
+      //break;//signal regions are orthogonal, event cannot be in more than one
     }
   }
 
@@ -2444,6 +2445,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_lepphi"+s,      softlepphi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lepeta"+s,      softlepeta_,   evtweight_, h_1d, "eta",  60, -3, 3);
   plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
+  plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_softlepmt2"+s,    softlepmt2_,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
   plot1D("h_rlmt2"+s,    t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
   plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
