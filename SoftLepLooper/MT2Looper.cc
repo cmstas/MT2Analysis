@@ -1334,11 +1334,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doDoubleLepCRplots) {
         //saveSoftLplots = true;
 	if (isDilepton) fillHistosDoubleL("crdoublel","Dilepton");
-	else fillHistosDoubleL("crdoublel","Fake");
+	fillHistosDoubleL("crdoublel");
 
 	if (isDilepton){
-	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("crdoublel", "Missing");
-	  
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("crdoublel", "Missing");	  
 	  if (foundMissingTau) fillHistosDoubleL("crdoublel", "MissingTau");
 	  else if (foundMissingLepFromTau) fillHistosDoubleL("crdoublel", "MissingLepFromTau");
 	  else if (foundMissingLep) fillHistosDoubleL("crdoublel", "MissingLep");
@@ -1670,7 +1669,7 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
   //if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
 
   bool passBaseline = false;
-  if (t.ht > 200 &&
+  if (t.ht-softleppt_ > 200 &&
       t.mt2 > 200 &&
       //t.nBJet20 < 2 &&
       t.nJet30 >= 2 &&
@@ -1706,7 +1705,7 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
   }
 
   bool passCRBaseline = false;
-  if (t.ht > 200 &&
+  if (t.ht-softleppt_ > 200 &&
       t.met_pt < 100 && //upper bound on met to constrain W pt
       softlepmt2_ > 200 &&
       //t.nBJet20 < 2 &&
