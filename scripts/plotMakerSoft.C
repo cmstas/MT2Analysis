@@ -1615,8 +1615,8 @@ void plotMakerSoftLepCR(){
       //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      if(dir_name != "crsoftlbase") continue; //to do only this dir
-      //if(dir_name != "crsoftlmubase" && dir_name != "crsoftlelbase") continue; //to do only this dir
+      if(dir_name != "cr1Lbase") continue; //to do only this dir
+      //if(dir_name != "cr1Lmubase" && dir_name != "cr1Lelbase") continue; //to do only this dir
 
       makePlot( samples , names , dir_name , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 5 GeV" , 200 , 500 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_softlepht"  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );

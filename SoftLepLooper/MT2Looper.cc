@@ -419,6 +419,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   bool saveSLELplots = false;
   bool saveQCDplots = false;
   bool saveSoftLplots = false;
+  bool save1Lplots = false;
+  bool save1Lmuplots = false;
+  bool save1Lelplots = false;
 
   // File Loop
   int nDuplicates = 0;
@@ -1315,25 +1318,26 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	else fillHistosSoftL("srsoftlel", "Fake");
       }
       if (doSoftLepCRplots) {
-        //saveSoftLplots = true;
-        if (softlepMatched) fillHistosSoftL("crsoftl");
-	else fillHistosSoftL("crsoftl","Fake");
+        save1Lplots = true;
+        if (softlepMatched) fillHistosSoftL("cr1L");
+	else fillHistosSoftL("cr1L","Fake");
 
-	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("crsoftl", "Missing");
-
-	if (foundMissingTau) fillHistosSoftL("crsoftl", "MissingTau");
-	else if (foundMissingLepFromTau) fillHistosSoftL("crsoftl", "MissingLepFromTau");
-	else if (foundMissingLep) fillHistosSoftL("crsoftl", "MissingLep");
+	if (!doMinimalPlots) {
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("cr1L", "Missing");
+	  if (foundMissingTau) fillHistosSoftL("cr1L", "MissingTau");
+	  else if (foundMissingLepFromTau) fillHistosSoftL("cr1L", "MissingLepFromTau");
+	  else if (foundMissingLep) fillHistosSoftL("cr1L", "MissingLep");
+	}
       }
       if (doSoftLepMuCRplots && !doMinimalPlots) {
-        //saveSoftLplots = true;
-         if (softlepMatched) fillHistosSoftL("crsoftlmu");
-	 else fillHistosSoftL("crsoftlmu","Fake");
+        save1Lmuplots = true;
+	if (softlepMatched) fillHistosSoftL("cr1Lmu");
+	else fillHistosSoftL("cr1Lmu","Fake");
       }
       if (doSoftLepElCRplots && !doMinimalPlots) {
-        //saveSoftLplots = true;
-         if (softlepMatched) fillHistosSoftL("crsoftlel");
-	 else fillHistosSoftL("crsoftlel","Fake");
+	save1Lelplots = true;
+	if (softlepMatched) fillHistosSoftL("cr1Lel");
+	else fillHistosSoftL("cr1Lel","Fake");
       }
       if (doDoubleLepCRplots) {
         //saveSoftLplots = true;
@@ -1379,18 +1383,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
   //softlepton
-  savePlotsDir(SRBase.crloosesoftlHistMap,outfile_,"crloosesoftl");
-  savePlotsDir(SRBase.crloosesoftlmuHistMap,outfile_,"crloosesoftlmu");
-  savePlotsDir(SRBase.crloosesoftlelHistMap,outfile_,"crloosesoftlel");
-  savePlotsDir(SRBase.crsoftlHistMap,outfile_,"crsoftlbase");
-  savePlotsDir(SRBase.crsoftlmuHistMap,outfile_,"crsoftlmubase");
-  savePlotsDir(SRBase.crsoftlelHistMap,outfile_,"crsoftlelbase");
-  savePlotsDir(SRBase.crsoftlLowMtHistMap,outfile_,"crsoftlLowMt");
-  savePlotsDir(SRBase.crsoftlmuLowMtHistMap,outfile_,"crsoftlmuLowMt");
-  savePlotsDir(SRBase.crsoftlelLowMtHistMap,outfile_,"crsoftlelLowMt");
-  savePlotsDir(SRBase.crsoftlHighMtHistMap,outfile_,"crsoftlHighMt");
-  savePlotsDir(SRBase.crsoftlmuHighMtHistMap,outfile_,"crsoftlmuHighMt");
-  savePlotsDir(SRBase.crsoftlelHighMtHistMap,outfile_,"crsoftlelHighMt");
   savePlotsDir(SRBase.srsoftlHistMap,outfile_,"srsoftlbase");
   savePlotsDir(SRBase.srsoftlmuHistMap,outfile_,"srsoftlmubase");
   savePlotsDir(SRBase.srsoftlelHistMap,outfile_,"srsoftlelbase");
@@ -1476,6 +1468,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if(!SRVecLep.at(srN).srHistMap.empty()){
 	cout<<"Saving srLep"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).srHistMap, outfile_, ("srLep"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (save1Lplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).cr1LHistMap.empty()){
+	cout<<"Saving cr1L"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).cr1LHistMap, outfile_, ("cr1L"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (save1Lmuplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).cr1LmuHistMap.empty()){
+	cout<<"Saving cr1Lmu"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).cr1LmuHistMap, outfile_, ("cr1Lmu"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (save1Lelplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).cr1LelHistMap.empty()){
+	cout<<"Saving cr1Lel"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).cr1LelHistMap, outfile_, ("cr1Lel"+SRVecLep.at(srN).GetName()).c_str());
       }
     }
   }
@@ -1644,33 +1660,6 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
 //hists for soft lepton regions
 void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& suffix) {
 
-  //cuts for wjets loose CR
-  bool passSoftLepLoose = true;
-  //trigger
-  if (!t.HLT_SingleMu && !t.HLT_SingleEl) passSoftLepLoose = false;
-  //tighter electron id
-  if (abs(softlepId_) == 11 && !softlepElId_) passSoftLepLoose = false;
-  //min ht cut
-  if (t.ht < 200) passSoftLepLoose = false;
-  //inverted lepton pT
-  if (softleppt_ < 30) passSoftLepLoose = false;
-  //inverted MT cut
-  if (softlepmt_ > 100) passSoftLepLoose = false;
-  //met cut
-  if (t.met_pt < 50) passSoftLepLoose = false;
-  //b veto
-  if (t.nBJet20 != 0) passSoftLepLoose = false;
-
-  //fill for soft lep loose CR cuts
-  if (passSoftLepLoose) {
-    if(prefix=="crsoftl") fillHistosSingleSoftLepton(SRBase.crloosesoftlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crloosesoftl", suffix);
-    else if(prefix=="crsoftlmu") fillHistosSingleSoftLepton(SRBase.crloosesoftlmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crloosesoftlmu", suffix);
-    else if(prefix=="crsoftlel") fillHistosSingleSoftLepton(SRBase.crloosesoftlelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crloosesoftlel", suffix);
-  }
-  
-  // trigger requirement on data
-  //if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
-
   bool passBaseline = false;
   if (t.ht-softleppt_ > 200 &&
       t.mt2 > 200 &&
@@ -1689,59 +1678,26 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
     else if(prefix=="srsoftlel") fillHistosSingleSoftLepton(SRBase.srsoftlelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlelbase", suffix);
   }
 
-  bool passSRLowMt = false;
-  bool passSRHighMt = false;
-  if (passBaseline && softlepmt_ < 120 && softlepmt_ > 90 && t.nJet30 > 5 && t.nBJet20 == 0 && t.mt2 > 200) passSRLowMt = true;
-  if (passBaseline && softlepmt_ > 120 && t.nJet30 > 5 && t.nBJet20 == 0 && t.mt2 > 200) passSRHighMt = true;
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
 
-  if (passSRLowMt) { 
-    //cout << "test sr low mt" << endl;
-    if(prefix=="srsoftl") fillHistosSingleSoftLepton(SRBase.srsoftlLowMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlLowMt", suffix);
-    else if(prefix=="srsoftlmu") fillHistosSingleSoftLepton(SRBase.srsoftlmuLowMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlmuLowMt", suffix);
-    else if(prefix=="srsoftlel") fillHistosSingleSoftLepton(SRBase.srsoftlelLowMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlelLowMt", suffix);
-  }
-  if (passSRHighMt) {
-    //cout << "test sr high mt" << endl;
-    if(prefix=="srsoftl") fillHistosSingleSoftLepton(SRBase.srsoftlHighMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlHighMt", suffix);
-    else if(prefix=="srsoftlmu") fillHistosSingleSoftLepton(SRBase.srsoftlmuHighMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlmuHighMt", suffix);
-    else if(prefix=="srsoftlel") fillHistosSingleSoftLepton(SRBase.srsoftlelHighMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlelHighMt", suffix);
-  }
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = softlepDPhiMin_;
+  values["diffMetMhtOverMet"]  = 0; //removed in 1L CR
+  values["nlep"]        = nUniqueLep_;
+  values["njets"]       = t.nJet30;
+  values["nbjets"]      = t.nBJet20;
+  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
+  values["ht"]          = t.ht-softleppt_;
+  values["met"]         = t.met_pt;
 
-  bool passCRBaseline = false;
-  if (t.ht-softleppt_ > 200 &&
-      t.met_pt < 100 && //upper bound on met to constrain W pt
-      softlepmt2_ > 200 &&
-      //t.nBJet20 < 2 &&
-      t.nJet30 >= 2 &&
-      softleppt_ > 200 && //replace MET with lepton pt
-      softlepDPhiMin_ > 0.3 //deltaPhiMin compute only with jet objects
-      //t.deltaPhiMin > 0.3
-      //t.rl_deltaPhiMin > 0.3 &&
-      //t.diffMetMht/t.met_pt < 0.5
-      ) passCRBaseline = true;
-
-  if (passCRBaseline) {
-    if(prefix=="crsoftl") fillHistosSingleSoftLepton(SRBase.crsoftlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlbase", suffix);
-    else if(prefix=="crsoftlmu") fillHistosSingleSoftLepton(SRBase.crsoftlmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlmubase", suffix);
-    else if(prefix=="crsoftlel") fillHistosSingleSoftLepton(SRBase.crsoftlelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlelbase", suffix);
-  }
-  
-  bool passCRLowMt = false;
-  bool passCRHighMt = false;
-  if (passCRBaseline && softlepmt_ < 120 && softlepmt_ > 90 && t.nJet30 > 5 && t.nBJet20 == 0 /*&& t.mt2 > 200*/) passCRLowMt = true;
-  if (passCRBaseline && softlepmt_ > 120 && t.nJet30 > 5 && t.nBJet20 == 0 /*&& t.mt2 > 200*/) passCRHighMt = true;
-
-  if (passCRLowMt) {
-    //cout << "test cr low mt" << endl;
-    if(prefix=="crsoftl") fillHistosSingleSoftLepton(SRBase.crsoftlLowMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlLowMt", suffix);
-    else if(prefix=="crsoftlmu") fillHistosSingleSoftLepton(SRBase.crsoftlmuLowMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlmuLowMt", suffix);
-    else if(prefix=="crsoftlel") fillHistosSingleSoftLepton(SRBase.crsoftlelLowMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlelLowMt", suffix);
-  }
-  if (passCRHighMt) {
-    //cout << "test cr low mt" << endl;
-    if(prefix=="crsoftl") fillHistosSingleSoftLepton(SRBase.crsoftlHighMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlHighMt", suffix);
-    else if(prefix=="crsoftlmu") fillHistosSingleSoftLepton(SRBase.crsoftlmuHighMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlmuHighMt", suffix);
-    else if(prefix=="crsoftlel") fillHistosSingleSoftLepton(SRBase.crsoftlelHighMtHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crsoftlelHighMt", suffix);
+  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+    if(SRVecLep.at(srN).PassesSelection(values)){
+      if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      //break;//signal regions are orthogonal, event cannot be in more than one
+    }
   }
  
   return;
