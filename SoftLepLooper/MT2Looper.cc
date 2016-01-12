@@ -422,6 +422,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   bool save1Lplots = false;
   bool save1Lmuplots = false;
   bool save1Lelplots = false;
+  bool save2Lplots = false;
 
   // File Loop
   int nDuplicates = 0;
@@ -1340,15 +1341,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	else fillHistosSoftL("cr1Lel","Fake");
       }
       if (doDoubleLepCRplots) {
-        //saveSoftLplots = true;
-	if (isDilepton) fillHistosDoubleL("crdoublel","Dilepton");
-	fillHistosDoubleL("crdoublel");
+        save2Lplots = true;
+	fillHistosDoubleL("cr2L");
+	if (isDilepton) fillHistosDoubleL("cr2L","Dilepton");
 
-	if (isDilepton){
-	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("crdoublel", "Missing");	  
-	  if (foundMissingTau) fillHistosDoubleL("crdoublel", "MissingTau");
-	  else if (foundMissingLepFromTau) fillHistosDoubleL("crdoublel", "MissingLepFromTau");
-	  else if (foundMissingLep) fillHistosDoubleL("crdoublel", "MissingLep");
+	if (isDilepton && !doMinimalPlots){
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("cr2L", "Missing");	  
+	  if (foundMissingTau) fillHistosDoubleL("cr2L", "MissingTau");
+	  else if (foundMissingLepFromTau) fillHistosDoubleL("cr2L", "MissingLepFromTau");
+	  else if (foundMissingLep) fillHistosDoubleL("cr2L", "MissingLep");
 	}
       }
 
@@ -1392,7 +1393,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   savePlotsDir(SRBase.srsoftlHighMtHistMap,outfile_,"srsoftlHighMt");
   savePlotsDir(SRBase.srsoftlmuHighMtHistMap,outfile_,"srsoftlmuHighMt");
   savePlotsDir(SRBase.srsoftlelHighMtHistMap,outfile_,"srsoftlelHighMt");
-  savePlotsDir(SRBase.crdoublelHistMap,outfile_,"crdoublelbase");
   
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
@@ -1492,6 +1492,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if(!SRVecLep.at(srN).cr1LelHistMap.empty()){
 	cout<<"Saving cr1Lel"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).cr1LelHistMap, outfile_, ("cr1Lel"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (save2Lplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).cr2LHistMap.empty()){
+	cout<<"Saving cr2L"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).cr2LHistMap, outfile_, ("cr2L"+SRVecLep.at(srN).GetName()).c_str());
       }
     }
   }
@@ -1706,20 +1714,40 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
 
 void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& suffix) {
 
-  bool passBaseline = false;
-  if (t.ht-lep1pt_-lep2pt_ > 200 &&
-      t.mt2 > 200 &&
-      //t.nBJet20 < 2 &&
-      t.nJet30 >= 2 &&
-      t.met_pt > 200 &&
-      softlepDPhiMin_ > 0.3 && //deltaPhiMin compute only with jet objects
-      //t.deltaPhiMin > 0.3 &&
-      //t.rl_deltaPhiMin > 0.3 &&
-      t.diffMetMht/t.met_pt < 0.5 
-      ) passBaseline = true;
+  // bool passBaseline = false;
+  // if (t.ht-lep1pt_-lep2pt_ > 200 &&
+  //     t.mt2 > 200 &&
+  //     //t.nBJet20 < 2 &&
+  //     t.nJet30 >= 2 &&
+  //     t.met_pt > 200 &&
+  //     softlepDPhiMin_ > 0.3 && //deltaPhiMin compute only with jet objects
+  //     //t.deltaPhiMin > 0.3 &&
+  //     //t.rl_deltaPhiMin > 0.3 &&
+  //     t.diffMetMht/t.met_pt < 0.5 
+  //     ) passBaseline = true;
   
-  if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublelbase", suffix);
- 
+  // if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublelbase", suffix);
+
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = softlepDPhiMin_;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = 1; //removed for double lepton CR
+  values["njets"]       = t.nJet30;
+  values["nbjets"]      = t.nBJet20;
+  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
+  values["ht"]          = t.ht-lep1pt_-lep2pt_;
+  values["met"]         = t.met_pt;
+
+  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+    if(SRVecLep.at(srN).PassesSelection(values)){
+      if (prefix=="cr2L") fillHistosDoubleLepton(SRVecLep.at(srN).cr2LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      //break;//signal regions are orthogonal, event cannot be in more than one
+    }
+  }
+  
   return;
 } //double lep
 
