@@ -1286,13 +1286,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	else fillHistosSoftL("srsoftl", "Fake");
         fillHistosLepSignalRegions("srLep");
 
-	if (isDilepton) fillHistosSoftL("srsoftl","Dilepton");
-
-	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "Missing");
+	if (isDilepton) {
+	  fillHistosSoftL("srsoftl","Dilepton");
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "DileptonMissing");
+	  if (foundMissingTau) fillHistosSoftL("srsoftl", "DileptonMissingTau");
+	  else if (foundMissingLepFromTau) fillHistosSoftL("srsoftl", "DileptonMissingLepFromTau");
+	  else if (foundMissingLep) fillHistosSoftL("srsoftl", "DileptonMissingLep");
+	}
 	
+	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "Missing");
 	if (foundMissingTau) fillHistosSoftL("srsoftl", "MissingTau");
 	else if (foundMissingLepFromTau) fillHistosSoftL("srsoftl", "MissingLepFromTau");
 	else if (foundMissingLep) fillHistosSoftL("srsoftl", "MissingLep");
+	
       }
       if (doSoftLepMuSRplots && !doMinimalPlots) {
         //saveSoftLplots = true;
@@ -1743,7 +1749,7 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
 void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& suffix) {
 
   bool passBaseline = false;
-  if (t.ht > 200 &&
+  if (t.ht-lep1pt_-lep2pt_ > 200 &&
       t.mt2 > 200 &&
       //t.nBJet20 < 2 &&
       t.nJet30 >= 2 &&
@@ -2576,6 +2582,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_lep2ptshort"+s,      lep2pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lep2phi"+s,      lep2phi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lep2eta"+s,      lep2eta_,   evtweight_, h_1d, "eta",  60, -3, 3);
+  plot1D("h_softlepht"+s,       t.ht-lep1pt_-lep2pt_,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
 
   plot1D("h_dilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
   
