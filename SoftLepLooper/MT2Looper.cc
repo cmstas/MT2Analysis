@@ -128,7 +128,7 @@ void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVecLep =  getSignalRegionsLep(); 
+  SRVecLep =  getSignalRegionsLep2(); 
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
@@ -356,10 +356,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_heavy_DN_ = 0;
   h_sig_avgweight_btagsf_light_DN_ = 0;
   h_sig_avgweight_isr_ = 0;
-  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
+  if ((doScanWeights || applyBtagSF) && 
+      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos))) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
+    else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -532,6 +534,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (isSignal_ 
           && !(t.GenSusyMScan1 == 400 && t.GenSusyMScan2 == 325)
           && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 200)
+	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 975)
+          //&& !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 700)
 	  //&& !(t.GenSusyMScan1 == 900 && t.GenSusyMScan2 == 875 && sample == "T1bbbb_mGluino-875-900-925")
           ) continue;
 
@@ -763,6 +767,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 
       } //nUniqueLep_==1
+
       
       //recompute dPhiMin for SR/CR
       for(int ijet = 0; ijet < t.njet; ijet++){
@@ -827,7 +832,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (minDR < 0.1) softlepMatched = true;
 	}
       }//if doSoftLep plots
-      
+
       //-------------------------------------//
       //----------2 lep control region-------//
       //-------------------------------------//
@@ -984,7 +989,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	
       }//nUniqueLep_==2
-
+      
       
       //-------------------------------------//
       //-------find lost lepton for 2-lep----//
@@ -1285,7 +1290,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (softlepMatched) fillHistosSoftL("srsoftl");
 	else fillHistosSoftL("srsoftl", "Fake");
         fillHistosLepSignalRegions("srLep");
-
 	if (isDilepton) {
 	  fillHistosSoftL("srsoftl","Dilepton");
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "DileptonMissing");
@@ -1342,7 +1346,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  else if (foundMissingLepFromTau) fillHistosDoubleL("crdoublel", "MissingLepFromTau");
 	  else if (foundMissingLep) fillHistosDoubleL("crdoublel", "MissingLep");
 	}
-
       }
 
    }//end loop on events in a file
@@ -2269,7 +2272,6 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
   // workaround for monojet bins
   float mt2_temp = t.mt2;
-  TString directoryname(dirname);
   if (t.nJet30 == 1) mt2_temp = t.jet1_pt;
 
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -2294,6 +2296,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   }
+
+  TString directoryname(dirname);
 
   if (isSignal_) {
     plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
@@ -2468,7 +2472,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
 
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
-  
+
   //compute stuff for soft lep
   float metX = t.met_pt * cos(t.met_phi);
   float metY = t.met_pt * sin(t.met_phi);

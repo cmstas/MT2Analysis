@@ -206,23 +206,23 @@ std::vector<SR> getSignalRegionsLep2(){
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "VL");
-    fullSR.SetVar("ht", 200, 450);
+    fullSR.SetName(fullSR.GetName() + "L");
+    fullSR.SetVar("ht", 200, 300);
     float mtbins[4] = {0, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "L");
-    fullSR.SetVar("ht", 450, 575);
+    fullSR.SetName(fullSR.GetName() + "M");
+    fullSR.SetVar("ht", 300, 600);
     float mtbins[4] = {0, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SR fullSR = temp_SR_vec.at(iSR);  
-    fullSR.SetName(fullSR.GetName() + "M");
-    fullSR.SetVar("ht", 575, -1);
+    fullSR.SetName(fullSR.GetName() + "H");
+    fullSR.SetVar("ht", 600, -1);
     float mtbins[4] = {0, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
