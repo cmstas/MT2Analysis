@@ -125,16 +125,11 @@ void MT2Looper::SetSignalRegions(){
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
-  storeHistWithCutValues(SRVec, "sr");
-  storeHistWithCutValues(SRVec, "crsl");
-  storeHistWithCutValues(SRVec, "crgj");
-  storeHistWithCutValues(SRVec, "crrl");
-  storeHistWithCutValues(SRVecMonojet, "sr");
-  storeHistWithCutValues(SRVecMonojet, "crsl");
-  storeHistWithCutValues(SRVecMonojet, "crgj");
-  storeHistWithCutValues(SRVecMonojet, "crrl");
-
   storeHistWithCutValues(SRVecLep, "srLep");
+  storeHistWithCutValues(SRVecLep, "cr1L");
+  storeHistWithCutValues(SRVecLep, "cr1Lmu");
+  storeHistWithCutValues(SRVecLep, "cr1Lel");
+  storeHistWithCutValues(SRVecLep, "cr2L");
 
   SRBase.SetName("srbase");
   SRBase.SetVar("mt2", 200, -1);
@@ -228,17 +223,6 @@ void MT2Looper::SetSignalRegions(){
     } 
   }
 
-  // CRSL inclusive regions to isolate W+jets and ttbar
-  CRSL_WJets = SRBase;
-  CRSL_WJets.SetName("crslwjets");
-  CRSL_WJets.SetVarCRSL("nbjets", 0, 1);
-  CRSL_WJets.crslHistMap.clear();
-
-  CRSL_TTbar = SRBase;
-  CRSL_TTbar.SetName("crslttbar");
-  CRSL_TTbar.SetVarCRSL("nbjets", 2, -1);
-  CRSL_TTbar.crslHistMap.clear();
-
   // ----- monojet base regions
 
   SRBaseMonojet.SetName("srbaseJ");
@@ -267,7 +251,6 @@ void MT2Looper::storeHistWithCutValues(std::vector<SR> & srvector, TString SR) {
   
   for(unsigned int i = 0; i < srvector.size(); i++){
     std::vector<std::string> vars = srvector.at(i).GetListOfVariables();
-    if (SR=="crsl") vars = srvector.at(i).GetListOfVariablesCRSL();
     TString dirname = SR+srvector.at(i).GetName();
     TDirectory * dir = (TDirectory*)outfile_->Get(dirname);
     if (dir == 0) {
@@ -275,27 +258,22 @@ void MT2Looper::storeHistWithCutValues(std::vector<SR> & srvector, TString SR) {
     } 
     dir->cd();
     for(unsigned int j = 0; j < vars.size(); j++){
-      if (SR=="crsl") {
-	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBoundCRSL(vars.at(j)), srvector.at(i).crslHistMap, "", 1, 0, 2);
-	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBoundCRSL(vars.at(j)), srvector.at(i).crslHistMap, "", 1, 0, 2);
+      if (SR=="cr1L") {
+	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
       }
-      else if (SR=="crgj") {
-	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crgjHistMap, "", 1, 0, 2);
-	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crgjHistMap, "", 1, 0, 2);
-      }
-      else if (SR=="crrl") {
-	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crrlHistMap, "", 1, 0, 2);
-	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).crrlHistMap, "", 1, 0, 2);
+      if (SR=="cr2L") {
+	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
       }
       else {
 	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
 	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
       }
     }
-    if (SR=="crsl")       plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).crslHistMap, "", 1, 0, 2);
-    else if (SR=="crgj")  plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).crgjHistMap, "", 1, 0, 2);
-    else if (SR=="crrl")  plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).crrlHistMap, "", 1, 0, 2);
-    else                  plot1D("h_n_mt2bins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).srHistMap, "", 1, 0, 2);
+    if (SR=="cr1L")  plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
+    else if (SR=="cr2L")  plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
+    else                  plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).srHistMap, "", 1, 0, 2);
     
   }
   outfile_->cd();
@@ -1065,6 +1043,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         // if (softlepMatched) fillHistosCR1L("srLep");
 	// else fillHistosCR1L("srLep", "Fake");
         fillHistosLepSignalRegions("srLep");
+	
 	if (isDilepton) {
 	  fillHistosLepSignalRegions("srLep","Dilepton");
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
@@ -1553,39 +1532,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
-  
-  // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
-  else if (!t.isData && doLepEffVars && directoryname.Contains("crsl")) {
-    // lepsf was already applied as a central value, take it back out
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / t.weight_lepsf * t.weight_lepsf_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    
-    // --------------------------------------------------------
-    // -------------- old dummy uncertainty code --------------
-    // --------------------------------------------------------
-    // float unc_lepeff = 0.;
-    // if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
-    //   // loop on gen e/mu
-    //   for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
-    // 	// check acceptance for veto: pt > 5
-    //    if (t.genLep_pt[ilep] < 5.) continue;
-    //    if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
-    //    unc_lepeff += 0.03; // 3% relative uncertainty for finding lepton
-    //   }
-    //   for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
-    // 	// check acceptance for veto: pt > 5
-    //    if (t.genLepFromTau_pt[ilep] < 5.) continue;
-    //    if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
-    //    unc_lepeff += 0.03; // 3% relative uncertainty for finding lepton
-    //   }
-    // }
-
-    // // if lepeff goes up, number of events in CR should go up
-    // plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    // plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    // --------------------------------------------------------
-  }
-  
+   
   outfile_->cd();
   return;
 }
