@@ -1290,55 +1290,55 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // }
       
       if (doSoftLepSRplots) {
-        //saveSoftLplots = true;
-        if (softlepMatched) fillHistosSoftL("srsoftl");
-	else fillHistosSoftL("srsoftl", "Fake");
+        saveSoftLplots = true;
+        // if (softlepMatched) fillHistosCR1L("srLep");
+	// else fillHistosCR1L("srLep", "Fake");
         fillHistosLepSignalRegions("srLep");
 	if (isDilepton) {
-	  fillHistosSoftL("srsoftl","Dilepton");
-	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "DileptonMissing");
-	  if (foundMissingTau) fillHistosSoftL("srsoftl", "DileptonMissingTau");
-	  else if (foundMissingLepFromTau) fillHistosSoftL("srsoftl", "DileptonMissingLepFromTau");
-	  else if (foundMissingLep) fillHistosSoftL("srsoftl", "DileptonMissingLep");
+	  fillHistosLepSignalRegions("srLep","Dilepton");
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
+	  if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
+	  else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "DileptonMissingLepFromTau");
+	  else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissingLep");
 	}
 	
-	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("srsoftl", "Missing");
-	if (foundMissingTau) fillHistosSoftL("srsoftl", "MissingTau");
-	else if (foundMissingLepFromTau) fillHistosSoftL("srsoftl", "MissingLepFromTau");
-	else if (foundMissingLep) fillHistosSoftL("srsoftl", "MissingLep");
+	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
+	if (foundMissingTau) fillHistosLepSignalRegions("srLep", "MissingTau");
+	else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MissingLepFromTau");
+	else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MissingLep");
 	
       }
       if (doSoftLepMuSRplots && !doMinimalPlots) {
         //saveSoftLplots = true;
-        if (softlepMatched) fillHistosSoftL("srsoftlmu");
-	else  fillHistosSoftL("srsoftlmu", "Fake");
+        // if (softlepMatched) fillHistosCR1L("srsoftlmu");
+	// else  fillHistosCR1L("srsoftlmu", "Fake");
       }
       if (doSoftLepElSRplots && !doMinimalPlots) {
         //saveSoftLplots = true;
-        if (softlepMatched) fillHistosSoftL("srsoftlel");
-	else fillHistosSoftL("srsoftlel", "Fake");
+        // if (softlepMatched) fillHistosCR1L("srsoftlel");
+	// else fillHistosCR1L("srsoftlel", "Fake");
       }
       if (doSoftLepCRplots) {
         save1Lplots = true;
-        if (softlepMatched) fillHistosSoftL("cr1L");
-	else fillHistosSoftL("cr1L","Fake");
+        if (softlepMatched) fillHistosCR1L("cr1L");
+	else fillHistosCR1L("cr1L","Fake");
 
 	if (!doMinimalPlots) {
-	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosSoftL("cr1L", "Missing");
-	  if (foundMissingTau) fillHistosSoftL("cr1L", "MissingTau");
-	  else if (foundMissingLepFromTau) fillHistosSoftL("cr1L", "MissingLepFromTau");
-	  else if (foundMissingLep) fillHistosSoftL("cr1L", "MissingLep");
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosCR1L("cr1L", "Missing");
+	  if (foundMissingTau) fillHistosCR1L("cr1L", "MissingTau");
+	  else if (foundMissingLepFromTau) fillHistosCR1L("cr1L", "MissingLepFromTau");
+	  else if (foundMissingLep) fillHistosCR1L("cr1L", "MissingLep");
 	}
       }
       if (doSoftLepMuCRplots && !doMinimalPlots) {
         save1Lmuplots = true;
-	if (softlepMatched) fillHistosSoftL("cr1Lmu");
-	else fillHistosSoftL("cr1Lmu","Fake");
+	if (softlepMatched) fillHistosCR1L("cr1Lmu");
+	else fillHistosCR1L("cr1Lmu","Fake");
       }
       if (doSoftLepElCRplots && !doMinimalPlots) {
 	save1Lelplots = true;
-	if (softlepMatched) fillHistosSoftL("cr1Lel");
-	else fillHistosSoftL("cr1Lel","Fake");
+	if (softlepMatched) fillHistosCR1L("cr1Lel");
+	else fillHistosCR1L("cr1Lel","Fake");
       }
       if (doDoubleLepCRplots) {
         save2Lplots = true;
@@ -1382,23 +1382,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   }
   savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
   savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
-
-  //softlepton
-  savePlotsDir(SRBase.srsoftlHistMap,outfile_,"srsoftlbase");
-  savePlotsDir(SRBase.srsoftlmuHistMap,outfile_,"srsoftlmubase");
-  savePlotsDir(SRBase.srsoftlelHistMap,outfile_,"srsoftlelbase");
-  savePlotsDir(SRBase.srsoftlLowMtHistMap,outfile_,"srsoftlLowMt");
-  savePlotsDir(SRBase.srsoftlmuLowMtHistMap,outfile_,"srsoftlmuLowMt");
-  savePlotsDir(SRBase.srsoftlelLowMtHistMap,outfile_,"srsoftlelLowMt");
-  savePlotsDir(SRBase.srsoftlHighMtHistMap,outfile_,"srsoftlHighMt");
-  savePlotsDir(SRBase.srsoftlmuHighMtHistMap,outfile_,"srsoftlmuHighMt");
-  savePlotsDir(SRBase.srsoftlelHighMtHistMap,outfile_,"srsoftlelHighMt");
   
-  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(!SRVec.at(srN).srHistMap.empty()){
-      savePlotsDir(SRVec.at(srN).srHistMap, outfile_, ("sr"+SRVec.at(srN).GetName()).c_str());
-    }
-  }
   if (saveGJplots) {
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(!SRVec.at(srN).crgjHistMap.empty()){
@@ -1666,25 +1650,7 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
 }
 
 //hists for soft lepton regions
-void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& suffix) {
-
-  bool passBaseline = false;
-  if (t.ht-softleppt_ > 200 &&
-      t.mt2 > 200 &&
-      //t.nBJet20 < 2 &&
-      t.nJet30 >= 2 &&
-      t.met_pt > 200 &&
-      softlepDPhiMin_ > 0.3 && //deltaPhiMin compute only with jet objects
-      //t.deltaPhiMin > 0.3 &&
-      //t.rl_deltaPhiMin > 0.3 &&
-      t.diffMetMht/t.met_pt < 0.5 
-      ) passBaseline = true;
-
-  if (passBaseline) {
-    if(prefix=="srsoftl") fillHistosSingleSoftLepton(SRBase.srsoftlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlbase", suffix);
-    else if(prefix=="srsoftlmu") fillHistosSingleSoftLepton(SRBase.srsoftlmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlmubase", suffix);
-    else if(prefix=="srsoftlel") fillHistosSingleSoftLepton(SRBase.srsoftlelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "srsoftlelbase", suffix);
-  }
+void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
@@ -1713,20 +1679,6 @@ void MT2Looper::fillHistosSoftL(const std::string& prefix, const std::string& su
 
 
 void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& suffix) {
-
-  // bool passBaseline = false;
-  // if (t.ht-lep1pt_-lep2pt_ > 200 &&
-  //     t.mt2 > 200 &&
-  //     //t.nBJet20 < 2 &&
-  //     t.nJet30 >= 2 &&
-  //     t.met_pt > 200 &&
-  //     softlepDPhiMin_ > 0.3 && //deltaPhiMin compute only with jet objects
-  //     //t.deltaPhiMin > 0.3 &&
-  //     //t.rl_deltaPhiMin > 0.3 &&
-  //     t.diffMetMht/t.met_pt < 0.5 
-  //     ) passBaseline = true;
-  
-  // if (passBaseline) fillHistosDoubleLepton(SRBase.crdoublelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdoublelbase", suffix);
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;

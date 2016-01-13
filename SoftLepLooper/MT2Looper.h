@@ -47,7 +47,7 @@ class MT2Looper {
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosLepSignalRegions(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosSoftL(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosCR1L(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosDoubleL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
