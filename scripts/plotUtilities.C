@@ -135,12 +135,17 @@ string getTableName(const string& sample) {
   if (sample.find("qcd") != string::npos) return "QCD";
   if (sample.find("singletop") != string::npos) return "Single Top";
   if (sample.find("ttv") != string::npos) return "ttV";
+  if (sample.find("fake") != string::npos) return "Fake Lep";
+  if (sample.find("onelep") != string::npos) return "1 Lep";
+  if (sample.find("dilep") != string::npos) return "2 Lep";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
   if (sample.find("T1bbbb_1500_100") != string::npos) return "T1bbbb 1500, 100";
   if (sample.find("T1qqqq_1400_100") != string::npos) return "T1qqqq 1400, 100";
   if (sample.find("T1qqqq_1000_800") != string::npos) return "T1qqqq 1000, 800";
+  if (sample.find("T2tt_400_325") != string::npos) return "T2tt 400, 325";
+  if (sample.find("T2tt_275_200") != string::npos) return "T2tt 275, 200";
   if (sample.find("T2tt_425_325") != string::npos) return "T2tt 425, 325";
   if (sample.find("T2tt_500_325") != string::npos) return "T2tt 500, 325";
   if (sample.find("T2tt_650_325") != string::npos) return "T2tt 650, 325";
@@ -254,7 +259,8 @@ string getMETTableLabel(TFile* f, std::string dir_str) {
     met_LOW = h_met_LOW->GetBinContent(1);
   }
 
-  return "$\\MET > " + toString(met_LOW) + " $~GeV ";
+//  return "$\\MET > " + toString(met_LOW) + " $~GeV ";
+  return "MET $> " + toString(met_LOW) + " $~GeV ";
 
 }
 
