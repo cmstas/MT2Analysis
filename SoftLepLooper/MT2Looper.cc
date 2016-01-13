@@ -2545,6 +2545,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   float mt = sqrt( 2 * t.met_pt * lowpt * ( 1 - cos( t.met_phi - lowphi) ) );
 
   plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
+  plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      lowpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_highleppt"+s,      highpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
 
