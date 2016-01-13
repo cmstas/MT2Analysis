@@ -260,11 +260,11 @@ void MT2Looper::storeHistWithCutValues(std::vector<SR> & srvector, TString SR) {
     for(unsigned int j = 0; j < vars.size(); j++){
       if (SR=="cr1L") {
 	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
-	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBound(vars.at(j)), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
       }
       if (SR=="cr2L") {
 	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
-	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
+	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
       }
       else {
 	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
