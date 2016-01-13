@@ -785,7 +785,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       //flag MC events with 2 gen leptons
       bool isDilepton = false;
-      if (t.ngenLep + t.ngenTau == 2) isDilepton = true;
+      if (t.ngenLep + t.ngenTau >= 2) isDilepton = true;
       
       bool doDoubleLepCRplots = false;
       float hardlep_pt = -1;
@@ -1040,22 +1040,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       
       if (doSoftLepSRplots) {
         saveSoftLplots = true;
-        // if (softlepMatched) fillHistosCR1L("srLep");
-	// else fillHistosCR1L("srLep", "Fake");
         fillHistosLepSignalRegions("srLep");
-	
+
 	if (isDilepton) {
-	  fillHistosLepSignalRegions("srLep","Dilepton");
-	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
-	  if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
-	  else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "DileptonMissingLepFromTau");
-	  else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissingLep");
+	  fillHistosLepSignalRegions("srLep","Dilepton");	  
+	  // if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
+	  // if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
+	  // else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "DileptonMissingLepFromTau");
+	  // else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissingLep");
 	}
-	
-	if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
-	if (foundMissingTau) fillHistosLepSignalRegions("srLep", "MissingTau");
-	else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MissingLepFromTau");
-	else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MissingLep");
+	else if (softlepMatched) fillHistosLepSignalRegions("srLep","Onelep");
+	else fillHistosLepSignalRegions("srLep","Fake");
+
+	if (!doMinimalPlots) {
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
+	  if (foundMissingTau) fillHistosLepSignalRegions("srLep", "MissingTau");
+	  else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MissingLepFromTau");
+	  else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MissingLep");
+	}
 	
       }
       if (doSoftLepMuSRplots && !doMinimalPlots) {
@@ -1070,7 +1072,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doSoftLepCRplots) {
         save1Lplots = true;
-        if (softlepMatched) fillHistosCR1L("cr1L");
+        fillHistosCR1L("cr1L");
+
+	if (softlepMatched) fillHistosCR1L("cr1L","Onelep");
 	else fillHistosCR1L("cr1L","Fake");
 
 	if (!doMinimalPlots) {
@@ -1082,19 +1086,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doSoftLepMuCRplots && !doMinimalPlots) {
         save1Lmuplots = true;
-	if (softlepMatched) fillHistosCR1L("cr1Lmu");
+	fillHistosCR1L("cr1Lmu");
+	if (softlepMatched) fillHistosCR1L("cr1Lmu","Onelep"); 
 	else fillHistosCR1L("cr1Lmu","Fake");
       }
       if (doSoftLepElCRplots && !doMinimalPlots) {
 	save1Lelplots = true;
-	if (softlepMatched) fillHistosCR1L("cr1Lel");
+	fillHistosCR1L("cr1Lel");
+	if (softlepMatched) fillHistosCR1L("cr1Lel","Onelep");
 	else fillHistosCR1L("cr1Lel","Fake");
       }
       if (doDoubleLepCRplots) {
         save2Lplots = true;
 	fillHistosDoubleL("cr2L");
+	
 	if (isDilepton) fillHistosDoubleL("cr2L","Dilepton");
-
+	//else if (softlepMatched) fillHistosDoubleL("cr2L","Onelep"); //can never happen in cr2L, softlepMatched always false
+	else fillHistosDoubleL("cr2L","Fake");
+	
 	if (isDilepton && !doMinimalPlots){
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("cr2L", "Missing");	  
 	  if (foundMissingTau) fillHistosDoubleL("cr2L", "MissingTau");
