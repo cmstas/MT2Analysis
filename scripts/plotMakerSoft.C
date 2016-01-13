@@ -34,6 +34,7 @@ const int iPeriod = 4; // 13 tev
 // mode generally : 
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
+bool found_data = false;
 
 //______________________________________________________________________________
 // returns the error on C = A*B (or C = A/B)
@@ -501,10 +502,13 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     if( TString(names.at(i)).Contains("sig")  ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-      TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+      TString fullhistname = Form("%s/h_mtbins",dirs.at(idir).c_str());
       // if (names.at(i)=="gjets" || names.at(i)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
       // if (names.at(i)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
       // if (names.at(i)=="wjets") fullhistname.ReplaceAll("sr","crrl");
+      if (names.at(i)=="onelep") fullhistname += "Onelep";
+      if (names.at(i)=="dilep") fullhistname += "Dilep";
+      if (names.at(i)=="fake") fullhistname += "Fake";
       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -563,7 +567,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
       if( !TString(names.at(i)).Contains("data") ) continue;
       cout << getTableName(names.at(i));
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-	TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+	TString fullhistname = Form("%s/h_mtbins",dirs.at(idir).c_str());
 	TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
 	double yield = 0.;
 	if (h) {
@@ -592,7 +596,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     if( !TString(names.at(i)).Contains("sig") ) continue;
     cout << getTableName(names.at(i));
     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-      TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+      TString fullhistname = Form("%s/h_mtbins",dirs.at(idir).c_str());
       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -771,20 +775,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   const unsigned int n = samples.size();
 
 
-  TString nbinshistname = Form("%s/h_n_mt2bins",dir.c_str());
-  TH1D* h_n_mt2bins = (TH1D*) samples.at(0)->Get(nbinshistname);
-  int n_mt2bins;
-  if(h_n_mt2bins){
-    n_mt2bins = h_n_mt2bins->GetBinContent(1);
-  }
-  else{
-    std::cout << "Couldn't get number of mt2 bins" << std::endl;
-    return;
-  }
-  vector<double> bgtot(n_mt2bins,0.);
-  vector<double> bgerr(n_mt2bins,0.);
-
-  TString binshistname = Form("%s/h_mt2bins",dir.c_str());
+  TString binshistname = Form("%s/h_mtbins",dir.c_str());
   TH1D* h_mt2bins(0);
   for(unsigned int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
     h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
@@ -792,12 +783,15 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   }
   
   if(!h_mt2bins) std::cout << "Couldn't get the mt2 binning" << std::endl;
+  int n_mt2bins = h_mt2bins->GetNbinsX();
+  vector<double> bgtot(n_mt2bins,0.);
+  vector<double> bgerr(n_mt2bins,0.);
 
   std::cout << "\\begin{table}[htbp]" << std::endl;
-  std::cout << "\\caption{Background and signal yields in bins of \\mttwo for ";
-  std::cout << getHTTableLabel(samples.at(0), dir) << ", ";
-  std::cout << getJetBJetTableLabel(samples.at(0), dir) << ". ";
-  std::cout << "The yields are normalized to \\lumival.}" << std::endl;
+//  std::cout << "\\caption{Background and signal yields in bins of \\mttwo for ";
+//  std::cout << getHTTableLabel(samples.at(0), dir) << ", ";
+//  std::cout << getJetBJetTableLabel(samples.at(0), dir) << ". ";
+//  std::cout << "The yields are normalized to \\lumival.}" << std::endl;
   std::cout << "\\scriptsize" << std::endl;
   std::cout << "\\centering" << std::endl;
   std::cout << "\\makebox[\\textwidth][c]{" << std::endl;
@@ -816,9 +810,9 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
   // header
   for (int ibin = 1; ibin < n_mt2bins; ++ibin) {
-    cout << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ \\mttwo $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
+    cout << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ mT $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
   }
-  cout << " & \\mttwo $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
+  cout << " & mT $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
   cout << " \\\\" << endl
     << "\\hline\\hline" << endl;
 
@@ -828,9 +822,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     if( TString(names.at(isamp)).Contains("sig")  ) continue;
     cout << getTableName(names.at(isamp));
     for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
-      TString fullhistname = Form("%s/h_mt2bins",dir.c_str());
+      TString fullhistname = Form("%s/h_mtbins",dir.c_str());
       if (names.at(isamp)=="gjets" || names.at(isamp)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
       if (names.at(isamp)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
+      if (names.at(isamp)=="onelep") fullhistname += "Onelep";
+      if (names.at(isamp)=="dilep") fullhistname += "Dilep";
+      if (names.at(isamp)=="fake") fullhistname += "Fake";
       TH1D* h = (TH1D*) samples.at(isamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -885,7 +882,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     if( !TString(names.at(jsamp)).Contains("sig") ) continue;
     cout << getTableName(names.at(jsamp));
     for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
-      TString fullhistname = Form("%s/h_mt2bins",dir.c_str());
+      TString fullhistname = Form("%s/h_mtbins",dir.c_str());
       TH1D* h = (TH1D*) samples.at(jsamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -1846,121 +1843,62 @@ void plotMakerSoft(){
   //plotMakerSoftLepSR(); return;
   //plotMakerSoftLepSRMissingLep(); return;
   //plotMakerSoftLepCR(); return;
-  plotMakerDoubleLepCR(); return;
-
-  //  gROOT->LoadMacro("CMS_lumi.C");
+  //plotMakerDoubleLepCR(); return;
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  //lumi_13TeV = "42 pb^{-1}";
-  lumi_13TeV = "8.6 pb^{-1}";
-
-  string input_dir = "/home/olivito/cms3/MT2Analysis/MT2looper/output/V00-01-04_25ns_skim_8p6pb_mt2gt100_metfilt/";
-
+  lumi_13TeV = "2.2 fb^{-1}";
+  
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/SR6Jan16/";
+  
   
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
-
+  
   // get input files
-
-  TFile* f_ttbar = new TFile(Form("%s/ttall_mg_lo.root",input_dir.c_str()));
-  //TFile* f_ttbar = new TFile(Form("%s/ttall_powheg.root",input_dir.c_str()));
-  //TFile* f_ttbar = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
-  //TFile* f_zjets = new TFile(Form("%s/zjets_amcatnlo.root",input_dir.c_str()));
-  // TFile* f_dyjets = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
-  //TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  // TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
-  //TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
-  TFile* f_wjets = new TFile(Form("%s/wjets_amcatnlo.root",input_dir.c_str()));
-  //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
-  // TFile* f_tth = new TFile(Form("%s/tth.root",input_dir.c_str()));
-  // TFile* f_ttw = new TFile(Form("%s/ttwjets.root",input_dir.c_str()));
-  // TFile* f_ttz = new TFile(Form("%s/ttzjets.root",input_dir.c_str()));
-  // TFile* f_singletop = new TFile(Form("%s/singletop.root",input_dir.c_str()));
-  // //  TFile* f_singletop_wrong = new TFile(Form("%s/singletop_wrong_scale1fb.root",input_dir.c_str()));
-  //TFile* f_fakedata = new TFile(Form("%s/lostlep.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop, wjets
-  //  TFile* f_fakedata = new TFile(Form("%s/fakedata.root",input_dir.c_str())); 
-  //TFile* f_data = new TFile(Form("%s/data_Run2015B.root",input_dir.c_str())); 
-  TFile* f_data = new TFile(Form("%s/data_Run2015C.root",input_dir.c_str())); 
-
-  // TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
-  // TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
-  // TFile* f_T1bbbb_1500_100 = new TFile(Form("%s/T1bbbb_1500_100.root",input_dir.c_str()));
-  // TFile* f_T1bbbb_1000_900 = new TFile(Form("%s/T1bbbb_1000_900.root",input_dir.c_str()));
-  // TFile* f_T1qqqq_1400_100 = new TFile(Form("%s/T1qqqq_1400_100.root",input_dir.c_str()));
-  // TFile* f_T1qqqq_1000_800 = new TFile(Form("%s/T1qqqq_1000_800.root",input_dir.c_str()));
-
-  // TFile* f_T2tt_425_325 = new TFile(Form("%s/T2tt_425_325.root",input_dir.c_str()));
-  // TFile* f_T2tt_500_325 = new TFile(Form("%s/T2tt_500_325.root",input_dir.c_str()));
-  // TFile* f_T2tt_650_325 = new TFile(Form("%s/T2tt_650_325.root",input_dir.c_str()));
-  // TFile* f_T2tt_850_100 = new TFile(Form("%s/T2tt_850_100.root",input_dir.c_str()));
-
-  // TFile* f_T2bb_900_100 = new TFile(Form("%s/T2bb_900_100.root",input_dir.c_str()));
-  // TFile* f_T2bb_600_580 = new TFile(Form("%s/T2bb_600_580.root",input_dir.c_str()));
-  // TFile* f_T2qq_1200_100 = new TFile(Form("%s/T2qq_1200_100.root",input_dir.c_str()));
-  // TFile* f_T2qq_600_550 = new TFile(Form("%s/T2qq_600_550.root",input_dir.c_str()));
-
-  //TFile* f_zinv_ht100to200 = new TFile(Form("%s/zinv_ht100to200.root",input_dir.c_str()));
-  //TFile* f_zinv_ht200to400 = new TFile(Form("%s/zinv_ht200to400.root",input_dir.c_str()));
-  //TFile* f_zinv_ht400to600 = new TFile(Form("%s/zinv_ht400to600.root",input_dir.c_str()));
-  //TFile* f_zinv_ht600toInf = new TFile(Form("%s/zinv_ht600toInf.root",input_dir.c_str()));
-
-  //TFile* f_wjets_ht100to200 = new TFile(Form("%s/wjets_ht100to200.root",input_dir.c_str()));
-  //TFile* f_wjets_ht200to400 = new TFile(Form("%s/wjets_ht200to400.root",input_dir.c_str()));
-  //TFile* f_wjets_ht400to600 = new TFile(Form("%s/wjets_ht400to600.root",input_dir.c_str()));
-  //TFile* f_wjets_ht600toInf = new TFile(Form("%s/wjets_ht600toInf.root",input_dir.c_str()));
-
+  
+  TFile* f_ttbar = new TFile(Form("%s/top.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* f_zjets = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  //TFile* f_data = new TFile(Form("%s/data_Run2015C.root",input_dir.c_str()));
+  
   vector<TFile*> samples;
   vector<string>  names;
-
-  //samples.push_back(f_qcd); names.push_back("qcd");
-  //samples.push_back(f_wjets); names.push_back("wjets");
-  //samples.push_back(f_zinv);  names.push_back("zinv");
-  //samples.push_back(f_gjet);  names.push_back("gjet");
-  // samples.push_back(f_tth); names.push_back("tth");
-  // samples.push_back(f_ttw); names.push_back("ttw");
-  // samples.push_back(f_ttz); names.push_back("ttz");
-  // samples.push_back(f_singletop); names.push_back("singletop");
-  //  samples.push_back(f_ttbar); names.push_back("ttbar");
-  samples.push_back(f_wjets); names.push_back("wjets");
-  samples.push_back(f_ttbar); names.push_back("ttbar");
-  //samples.push_back(f_ttbar); names.push_back("top");
-  //samples.push_back(f_zjets); names.push_back("zjets");
-  //samples.push_back(f_dyjets); names.push_back("dyjets");
-  samples.push_back(f_data); names.push_back("data");
-
-  // samples.push_back(f_singletop_wrong); names.push_back("singletop_wrong");
-  // samples.push_back(f_singletop); names.push_back("singletop");
-
-  // samples.push_back(f_T1tttt_1500_100); names.push_back("sig_T1tttt_1500_100");
-  // samples.push_back(f_T1tttt_1200_800); names.push_back("sig_T1tttt_1200_800");
-  // samples.push_back(f_T1bbbb_1500_100); names.push_back("sig_T1bbbb_1500_100");
-  // samples.push_back(f_T1bbbb_1000_900); names.push_back("sig_T1bbbb_1000_900");
-  // samples.push_back(f_T1qqqq_1400_100); names.push_back("sig_T1qqqq_1400_100");
-  // samples.push_back(f_T1qqqq_1000_800); names.push_back("sig_T1qqqq_1000_800");
-
-  // samples.push_back(f_T2tt_850_100); names.push_back("sig_T2tt_850_100");
-  // samples.push_back(f_T2tt_650_325); names.push_back("sig_T2tt_650_325");
-  // samples.push_back(f_T2tt_500_325); names.push_back("sig_T2tt_500_325");
-  // samples.push_back(f_T2tt_425_325); names.push_back("sig_T2tt_425_325");
-
-  // samples.push_back(f_T2bb_900_100); names.push_back("sig_T2bb_900_100");
-  // samples.push_back(f_T2bb_600_580); names.push_back("sig_T2bb_600_580");
-  // samples.push_back(f_T2qq_1200_100); names.push_back("sig_T2qq_1200_100");
-  // samples.push_back(f_T2qq_600_550); names.push_back("sig_T2qq_600_550");
-
+    samples.push_back(f_qcd); names.push_back("qcd");
+    samples.push_back(f_zjets); names.push_back("zinv");
+    samples.push_back(f_ttbar); names.push_back("top");
+    samples.push_back(f_wjets); names.push_back("wjets");
+  
+  
+//  TFile* f_bkg = new TFile(Form("%s/bkg.root",input_dir.c_str()));
+//  samples.push_back(f_bkg); names.push_back("onelep");
+//  samples.push_back(f_bkg); names.push_back("dilep");
+//  samples.push_back(f_bkg); names.push_back("fake");
+  
+  
+  //samples.push_back(f_data); names.push_back("data");
+  
+  
+  //  TFile* f_T2tt_400_325 = new TFile(Form("%s/T2tt_mStop-400to475_mLSP-1to400.root",input_dir.c_str()));
+  //  TFile* f_T2tt_275_200 = new TFile(Form("%s/T2tt_mStop-275_mLSP-75to200.root",input_dir.c_str()));
+  //  TFile* f_T5qqqqVV_1100_975 = new TFile(Form("%s/T5qqqqVV_mGluino-1100To1175_mLSP-1to1050.root",input_dir.c_str()));
+  //  samples.push_back(f_T2tt_400_325); names.push_back("sig_T2tt_400_325");
+  //  samples.push_back(f_T2tt_275_200); names.push_back("sig_T2tt_275_200");
+  //  samples.push_back(f_T5qqqqVV_1100_975); names.push_back("sig_T5qqqqVV_1100_975");
+  
   // ----------------------------------------
   //  plots definitions
   // ----------------------------------------
-
+  
   float scalesig = -1.;
   //float scalesig = 50.;
-  bool printplots = false;
-  bool doRatio = true;
+  bool printplots = true;
+  bool doRatio = false;
   bool scaleBGtoData = false;
-
+  
   if(printplots){
     TIter it(f_ttbar->GetListOfKeys());
     TKey* k;
@@ -1971,149 +1909,98 @@ void plotMakerSoft(){
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
-      if(dir_name != "srbase") continue; //to do only this dir
-      //if(dir_name != "sr1H") continue; //for testing
-
+      //if(dir_name != "srbase") continue; //to do only this dir
+      if(dir_name != "srLepbase") continue; //for testing
+      //      if(! TString(dir_name).Contains("srLep")) continue; //for testing
+      
       makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 100 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-
+      makePlot( samples , names , dir_name , "h_mtbins" , "M_{T} [GeV]" , "Events / Bin" , 0 , 300 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_lepptshort" , "p_{T} [GeV]" , "Events / Bin" , 0 , 20 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      
     }
   }
-
+  
   std::cout << "\\documentclass[landscape, 10pt]{article}" << std::endl;
   std::cout << "\\usepackage{amsmath}" << std::endl;
   std::cout << "\\usepackage{amssymb}" << std::endl;
   std::cout << "\\usepackage{graphicx}" << std::endl;
   std::cout << "\\usepackage[left=.1in,top=1in,right=.1in,bottom=.1in,nohead]{geometry}" << std::endl;
   std::cout << "\\begin{document}" << std::endl;
-
+  
   vector<string> dirs;
-  dirs.push_back("sr1L");
-  // dirs.push_back("sr2L");
-  // dirs.push_back("sr3L");
-  // dirs.push_back("sr4L");
-  // dirs.push_back("sr5L");
-  // dirs.push_back("sr6L");
-  // dirs.push_back("sr7L");
-  // dirs.push_back("sr8L");
-  // dirs.push_back("sr9L");
-  // dirs.push_back("sr10L");
-  // dirs.push_back("sr11L");
-  // dirs.push_back("sr1M");
-  // dirs.push_back("sr2M");
-  // dirs.push_back("sr3M");
-  // dirs.push_back("sr4M");
-  // dirs.push_back("sr5M");
-  // dirs.push_back("sr6M");
-  // dirs.push_back("sr7M");
-  // dirs.push_back("sr8M");
-  // dirs.push_back("sr9M");
-  // dirs.push_back("sr10M");
-  // dirs.push_back("sr11M");
-  // dirs.push_back("sr1H");
-  // dirs.push_back("sr2H");
-  // dirs.push_back("sr3H");
-  // dirs.push_back("sr4H");
-  // dirs.push_back("sr5H");
-  // dirs.push_back("sr6H");
-  // dirs.push_back("sr7H");
-  // dirs.push_back("sr8H");
-  // dirs.push_back("sr9H");
-  // dirs.push_back("sr10H");
-  // dirs.push_back("sr11H");
-  // dirs.push_back("sr1UH");
-  // dirs.push_back("sr2UH");
-  // dirs.push_back("sr3UH");
-  // dirs.push_back("sr4UH");
-  // dirs.push_back("sr5UH");
-  // dirs.push_back("sr6UH");
-  // dirs.push_back("sr7UH");
-  // dirs.push_back("sr8UH");
-  // dirs.push_back("sr9UH");
-  // dirs.push_back("sr10UH");
-  // dirs.push_back("sr11UH");
+  dirs.push_back("srLep1L");
+  dirs.push_back("srLep2L");
+  dirs.push_back("srLep3L");
+  dirs.push_back("srLep4L");
+  dirs.push_back("srLep5L");
+  dirs.push_back("srLep6L");
+  dirs.push_back("srLep1M");
+  dirs.push_back("srLep2M");
+  dirs.push_back("srLep3M");
+  dirs.push_back("srLep4M");
+  dirs.push_back("srLep5M");
+  dirs.push_back("srLep6M");
+  dirs.push_back("srLep1H");
+  dirs.push_back("srLep2H");
+  dirs.push_back("srLep3H");
+  dirs.push_back("srLep4H");
+  dirs.push_back("srLep5H");
+  dirs.push_back("srLep6H");
+  
+  
+  //  dirs.push_back("srLepJ1");
+  //  dirs.push_back("srLepJ2");
 
+  
   for(unsigned int i=0; i<dirs.size(); i++){
     printDetailedTable(samples, names, dirs.at(i));
-    if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+    if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   }
+  
+  
+  vector<string> dirsH;
+  
+  dirsH.push_back("srLep1L");
+  dirsH.push_back("srLep2L");
+  dirsH.push_back("srLep3L");
+  dirsH.push_back("srLep4L");
+  dirsH.push_back("srLep5L");
+  dirsH.push_back("srLep6L");
+  printTable(samples, names, dirsH, -1);
+  dirsH.clear();
 
-  /*
-     vector<string> dirsH;
-     dirsH.push_back("sr1L");
-     dirsH.push_back("sr2L");
-     dirsH.push_back("sr3L");
-     dirsH.push_back("sr4L");
-     dirsH.push_back("sr5L");
-     dirsH.push_back("sr6L");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
+  
+  dirsH.push_back("srLep1M");
+  dirsH.push_back("srLep2M");
+  dirsH.push_back("srLep3M");
+  dirsH.push_back("srLep4M");
+  dirsH.push_back("srLep5M");
+  dirsH.push_back("srLep6M");
+  printTable(samples, names, dirsH, -1);
+  dirsH.clear();
 
-     dirsH.push_back("sr7L");
-     dirsH.push_back("sr8L");
-     dirsH.push_back("sr9L");
-     dirsH.push_back("sr10L");
-     dirsH.push_back("sr11L");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
+  
+  dirsH.push_back("srLep1H");
+  dirsH.push_back("srLep2H");
+  dirsH.push_back("srLep3H");
+  dirsH.push_back("srLep4H");
+  dirsH.push_back("srLep5H");
+  dirsH.push_back("srLep6H");
+  printTable(samples, names, dirsH, -1);
+  dirsH.clear();
 
-     dirsH.push_back("sr1M");
-     dirsH.push_back("sr2M");
-     dirsH.push_back("sr3M");
-     dirsH.push_back("sr4M");
-     dirsH.push_back("sr5M");
-     dirsH.push_back("sr6M");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
-
-     dirsH.push_back("sr7M");
-     dirsH.push_back("sr8M");
-     dirsH.push_back("sr9M");
-     dirsH.push_back("sr10M");
-     dirsH.push_back("sr11M");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
-
-     dirsH.push_back("sr1H");
-     dirsH.push_back("sr2H");
-     dirsH.push_back("sr3H");
-     dirsH.push_back("sr4H");
-     dirsH.push_back("sr5H");
-     dirsH.push_back("sr6H");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
-
-     dirsH.push_back("sr7H");
-     dirsH.push_back("sr8H");
-     dirsH.push_back("sr9H");
-     dirsH.push_back("sr10H");
-     dirsH.push_back("sr11H");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
-
-     dirsH.push_back("sr1UH");
-     dirsH.push_back("sr2UH");
-     dirsH.push_back("sr3UH");
-     dirsH.push_back("sr4UH");
-     dirsH.push_back("sr5UH");
-     dirsH.push_back("sr6UH");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
-
-     dirsH.push_back("sr7UH");
-     dirsH.push_back("sr8UH");
-     dirsH.push_back("sr9UH");
-     dirsH.push_back("sr10UH");
-     dirsH.push_back("sr11UH");
-     printTable(samples, names, dirsH);
-     dirsH.clear();
-     */
+  
+  dirsH.push_back("srLepJ1");
+  dirsH.push_back("srLepJ2");
+  printTable(samples, names, dirsH, -1);
+  dirsH.clear();
+  
+  
+  std::cout << "\\end{document}" << std::endl;
 
   std::cout << "\\end{document}" << std::endl;
 
