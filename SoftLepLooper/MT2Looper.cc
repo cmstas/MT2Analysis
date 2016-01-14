@@ -718,6 +718,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       } //nUniqueLep_==1
 
+
+      //-----------------------------------------------------//
+      //-------recompute some soft lep event variables-------//
+      //-----------------------------------------------------//
+
       
       //recompute dPhiMin for SR/CR
       for(int ijet = 0; ijet < t.njet; ijet++){
@@ -752,7 +757,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  hemJets = getHemJets(p4sForHems);
 	  softlepmt2_ = HemMT2(softleppt_, softlepphi_, hemJets.at(0), hemJets.at(1));
 	}
-      }//softlep recompute CR
+      }//softlep recompute MT2
 
       //dR matching for soft-lepton
       bool softlepMatched = false;
@@ -777,7 +782,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 	  if (minDR < 0.1) softlepMatched = true;
 	}
-      }//if doSoftLep plots
+      }//if doSoftLep SR || CR1L plots
 
       //-------------------------------------//
       //----------2 lep control region-------//
@@ -917,10 +922,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 
 	//require 2nd lepton to be >20 GeV
-	if (hardlep_pt < 20) continue;
+	//if (hardlep_pt < 20) continue;
 
 	//require 2nd lep to be a reco lep
-	if (!hardlep_reco) continue;
+	//if (!hardlep_reco) continue;
 	
 	//if you get to here, fill in CR
 	doDoubleLepCRplots = true;
@@ -949,8 +954,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
 	  if (thisDR > 0.1) {
 	    missIdx_ = ilep;
-	    missPt_ = t.genLep_pt[ilep];
+	    missPt_ = t.genLep_pt[ilep];	
 	    foundMissingLep = true;
+	    //construct dilep mass
+	    TLorentzVector misslep_p4(0,0,0,0);
+	    TLorentzVector softlep_p4(0,0,0,0);
+	    misslep_p4.SetPtEtaPhiM(t.genLep_pt[ilep],t.genLep_eta[ilep],t.genLep_phi[ilep],t.genLep_mass[ilep]);
+	    softlep_p4.SetPtEtaPhiM(softleppt_,softlepeta_,softlepphi_,softlepM_);
+	    TLorentzVector dilep_p4 = misslep_p4 + softlep_p4;
+	    dilepmll_ = dilep_p4.M();
 	    break;
 	  }
 	}//ngenLep
@@ -962,6 +974,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      missIdx_ = ilep;
 	      missPt_ = t.genLepFromTau_pt[ilep];
 	      foundMissingLepFromTau = true;
+	      //construct dilep mass
+	      TLorentzVector misslep_p4(0,0,0,0);
+	      TLorentzVector softlep_p4(0,0,0,0);
+	      misslep_p4.SetPtEtaPhiM(t.genLepFromTau_pt[ilep],t.genLepFromTau_eta[ilep],t.genLepFromTau_phi[ilep],t.genLepFromTau_mass[ilep]);
+	      softlep_p4.SetPtEtaPhiM(softleppt_,softlepeta_,softlepphi_,softlepM_);
+	      TLorentzVector dilep_p4 = misslep_p4 + softlep_p4;
+	      dilepmll_ = dilep_p4.M();
 	      break;
 	    }
 	  }//ngenLepFromTau
@@ -974,6 +993,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      missIdx_ = ilep;
 	      missPt_ = t.genTau_pt[ilep];
 	      foundMissingTau = true;
+	      //construct dilep mass
+	      TLorentzVector misslep_p4(0,0,0,0);
+	      TLorentzVector softlep_p4(0,0,0,0);
+	      misslep_p4.SetPtEtaPhiM(t.genTau_pt[ilep],t.genTau_eta[ilep],t.genTau_phi[ilep],t.genTau_mass[ilep]);
+	      softlep_p4.SetPtEtaPhiM(softleppt_,softlepeta_,softlepphi_,softlepM_);
+	      TLorentzVector dilep_p4 = misslep_p4 + softlep_p4;
+	      dilepmll_ = dilep_p4.M();
 	      break;
 	    }
 	  }//ngenTau
@@ -1342,15 +1368,18 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
 
+  //require reco MET < 100 in CR1L
+  if (t.met_pt > 100) return;
+  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = softlepDPhiMin_;
   values["diffMetMhtOverMet"]  = 0; //dummy variable for 1L CR
   values["nlep"]        = nUniqueLep_;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
-  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
-  values["ht"]          = t.ht-softleppt_;
-  values["met"]         = t.met_pt;
+  values["mt2"]         = t.nJet30 > 1 ? softlepmt2_ : softleppt_; // require large MT2 for multijet events //replace met with lepton pT in cr1L
+  values["ht"]          = t.ht-softleppt_; //corrected ht in this CR
+  values["met"]         = softleppt_; //replace met with lepton pT in cr1L
 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
@@ -1567,7 +1596,8 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
 
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
-
+  plot1D("h_missingdilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
+  
   //compute stuff for soft lep
   float metX = t.met_pt * cos(t.met_phi);
   float metY = t.met_pt * sin(t.met_phi);
@@ -1707,11 +1737,10 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
 
   //save type
   int type = -1;
-  if (lep1pt_ < 20 && lep2pt_ < 20) type = 0;
-  else if (lep1pt_ > 20 && lep2pt_ < 20) type = 1;
-  else if (lep1pt_ < 20 && lep2pt_ > 20) type = 1;
-  //else if (lep1pt_ > 20 && lep2pt_ > 20) type = 2;
-  plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 2, 0, 2);
+  if (highpt>20) type = 2;
+  else if (highpt<20 && highpt>10) type = 1;
+  else if (highpt>5 && highpt<10) type = 0;
+  plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 3, 0, 3);
 
   
   outfile_->cd();
