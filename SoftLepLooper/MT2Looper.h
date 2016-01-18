@@ -63,7 +63,8 @@ class MT2Looper {
   mt2tree t;
   float evtweight_;
   int nlepveto_;
-
+  int nVetoTracks_;
+    
   //soft lep variables
   int nUniqueLep_;
   float softleppt_;
@@ -89,6 +90,8 @@ class MT2Looper {
   float lep2phi_;
   float lep2M_;
   float dilepmll_;
+  
+  float dilepmllTrack_;
   
   int nJet30Eta3_;
   bool isSignal_;

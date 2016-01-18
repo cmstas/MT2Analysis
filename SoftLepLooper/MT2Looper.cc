@@ -596,10 +596,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	int pdgId = t.isoTrack_pdgId[itrk];
 	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
 	if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
-	if (t.isoTrack_relIsoAn04[itrk] > 0.4) continue;
-
-	if (abs(pdgId) == 11 && abs(t.isoTrack_eta[itrk] > 1.5)) continue; //exclude low-pt endcap electrons
-
+	//if (t.isoTrack_relIsoAn04[itrk] > 0.4) continue;
 
 	//overlap removal with reco leps
 	bool overlap = false;
@@ -622,11 +619,45 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
 	float pt = t.lep_pt[ilep];
 	if (pt < 10) continue;
-	if (t.lep_relIsoAn04[ilep]>0.4) continue;
+	//if (t.lep_relIsoAn04[ilep]>0.4) continue;
 	nIsoLep++;
       }
       
       nUniqueLep_ = nIsoLep + nPFlepLowPt;
+
+      //counter to find isolated tracks
+      nVetoTracks_ = 0;
+      int idxTrk = -1;
+      float maxTrkPt = 0;
+      for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
+	float pt = t.isoTrack_pt[itrk];
+	if (pt < 10.) continue;
+	int pdgId = t.isoTrack_pdgId[itrk];
+	if (abs(pdgId) != 211) continue;
+	if (t.isoTrack_absIso[itrk]/pt > 0.1) continue;
+
+	//overlap removal with reco leps
+	bool overlap = false;
+	for(int ilep = 0; ilep < t.nlep; ilep++){
+	  float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+	  if (thisDR < 0.01) {
+	    overlap = true;
+	    break;
+	  }
+	} // loop over reco leps
+	if (overlap) continue;
+
+	if (pt > maxTrkPt){
+	  maxTrkPt = pt;
+	  idxTrk = itrk;
+	}
+	
+	nVetoTracks_++;
+      }
+      
+      //---------------------------------//
+      //-------Soft SR/CR1L Region-------//
+      //---------------------------------//
 
       //if nleps==1, find soft lepton
       if (nUniqueLep_ == 1) {
@@ -698,27 +729,29 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    break;
 	  } // loop on isotracks
 	} //!foundlep
-	    
-	if (softleppt_ < 20 && softleppt_ > 5) doSoftLepSRplots = true;
-	if (softleppt_ > 30) doSoftLepCRplots = true;
-	if (abs(softlepId_) == 13) {
-	  if (softleppt_ < 20 && softleppt_ > 5) doSoftLepMuSRplots = true;
-	  if (softleppt_ > 30) doSoftLepMuCRplots = true;
+
+	if (!foundlep) continue;
+	
+	if (softleppt_ < 20 && softleppt_ > 5) {
+	  doSoftLepSRplots = true;
+	  if (abs(softlepId_) == 13)doSoftLepMuSRplots = true;
+	  if (abs(softlepId_) == 11) doSoftLepElSRplots = true;
 	}
-	if (abs(softlepId_) == 11) {
-	  if (softleppt_ < 20 && softleppt_ > 5) doSoftLepElSRplots = true;
-	  if (softleppt_ > 30) doSoftLepElCRplots = true;
+
+	if (softleppt_ > 30) {
+	  
+	  //additional cuts for 1-lep CR  
+	  if (!t.HLT_SingleMu && !t.HLT_SingleEl) continue;
+	  if (t.met_pt > 60) continue;
+	  if (abs(softlepId_) == 11 && !softlepElId_) continue;
+	  
+	  doSoftLepCRplots = true;
+	  if (abs(softlepId_) == 13)doSoftLepMuCRplots = true;
+	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
 	}
 	
-	if (!foundlep) {
-	  std::cout << "MT2Looper::Loop: WARNING! didn't find a lowMT candidate when expected: evt: " << t.evt
-		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
-		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
-	}
-
       } //nUniqueLep_==1
-
-
+    
       //-----------------------------------------------------//
       //-------recompute some soft lep event variables-------//
       //-----------------------------------------------------//
@@ -797,6 +830,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       float hardlep_eta = -1;
       float hardlep_phi = -1;
       bool hardlep_reco = false;
+      float cr2Lmt = -1;
       lep1pt_ = -1;
       lep1eta_ = -1;
       lep1phi_ = -1;
@@ -853,6 +887,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
       	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
 	    if (t.isoTrack_relIsoAn04[itrk]>0.4) continue;
+	    if (abs(pdgId) == 11 && abs(t.isoTrack_eta[itrk] > 1.5)) continue; //exclude low-pt endcap electrons
 	    float eta = t.isoTrack_eta[itrk];
 	    float phi = t.isoTrack_phi[itrk];
 	    float mass = t.isoTrack_mass[itrk];
@@ -891,7 +926,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  } // loop on isotracks	  
 	} //nfoundlep < 2
 
-	if (nfoundlep != 2) continue; //this should never happen
+	if (nfoundlep != 2) continue; 
 	
 	//at least one soft lepton
 	if (lep1pt_ > 20 && lep2pt_ > 20) { continue; }
@@ -913,12 +948,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  hardlep_eta = lep1eta_;
 	  hardlep_phi = lep1phi_;
 	  hardlep_reco = recolep1;
+	  cr2Lmt = sqrt( 2 * t.met_pt * lep2pt_ * ( 1 - cos( t.met_phi - lep2phi_) ) );
 	}
 	if (lep1pt_ < lep2pt_){
 	  hardlep_pt = lep2pt_;
 	  hardlep_eta = lep2eta_;
 	  hardlep_phi = lep2phi_;
 	  hardlep_reco = recolep2;
+	  cr2Lmt = sqrt( 2 * t.met_pt * lep1pt_ * ( 1 - cos( t.met_phi - lep1phi_) ) );
 	}
 
 	//require 2nd lepton to be >20 GeV
@@ -947,6 +984,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool foundMissingTau = false;
       missIdx_ = -1;
       missPt_ = -1;
+      int decayMode = -1;
       
       if (doSoftLepSRplots || doSoftLepCRplots) {
 
@@ -991,7 +1029,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    float thisDR = DeltaR(t.genTau_eta[ilep], softlepeta_, t.genTau_phi[ilep], softlepphi_);
 	    if (thisDR > 0.1) {
 	      missIdx_ = ilep;
-	      missPt_ = t.genTau_pt[ilep];
+	      missPt_ = t.genTau_leadTrackPt[ilep];
 	      foundMissingTau = true;
 	      //construct dilep mass
 	      TLorentzVector misslep_p4(0,0,0,0);
@@ -1000,6 +1038,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      softlep_p4.SetPtEtaPhiM(softleppt_,softlepeta_,softlepphi_,softlepM_);
 	      TLorentzVector dilep_p4 = misslep_p4 + softlep_p4;
 	      dilepmll_ = dilep_p4.M();
+
+	      decayMode = t.genTau_decayMode[ilep];
+	      
 	      break;
 	    }
 	  }//ngenTau
@@ -1037,15 +1078,29 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    float thisDR = DeltaR(t.genTau_eta[ilep], hardlep_eta, t.genTau_phi[ilep], hardlep_phi);
 	    if (thisDR > 0.1) {
 	      missIdx_ = ilep;
-	      missPt_ = t.genTau_pt[ilep];
+	      missPt_ = t.genTau_leadTrackPt[ilep];
 	      foundMissingTau = true;
+
+	      decayMode = t.genTau_decayMode[ilep];
+
 	      break;
 	    }
 	  }//ngenTau
 	}
 	
       }//doDoubleLepCRplots
- 
+
+      //compute invariant mass between softlep and highest pT isolated (veto) track
+      dilepmllTrack_ = -1;
+      if (doSoftLepSRplots && nVetoTracks_ > 0){
+	TLorentzVector track_p4(0,0,0,0);
+	TLorentzVector softlep_p4(0,0,0,0);
+	track_p4.SetPtEtaPhiM(t.isoTrack_pt[idxTrk],t.isoTrack_eta[idxTrk],t.isoTrack_phi[idxTrk],t.isoTrack_mass[idxTrk]);
+	softlep_p4.SetPtEtaPhiM(softleppt_,softlepeta_,softlepphi_,softlepM_);
+	TLorentzVector dilep_p4 = track_p4 + softlep_p4;
+	dilepmllTrack_ = dilep_p4.M();
+      }
+
       ////////////////////////////////////
       /// done with overall selection  /// 
       ////////////////////////////////////
@@ -1063,12 +1118,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
       }
 
-      
       if (doSoftLepSRplots) {
         saveSoftLplots = true;
+	
         fillHistosLepSignalRegions("srLep");
 	if (softlepMatched) {
-	  if (t.ngenLep + t.ngenTau >= 2) {
+	  if (isDilepton) {
 	    fillHistosLepSignalRegions("srLep", "Dilepton");
 	    // if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
 	    // if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
@@ -1079,11 +1134,37 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	else fillHistosLepSignalRegions("srLep", "Fake");
 
+	if (softlepmt_>20){
+	  fillHistosLepSignalRegions("srLep","MT20");
+	  if (softlepMatched) {
+	    if (isDilepton) fillHistosLepSignalRegions("srLep","MT20Dilepton");	  	
+	    else fillHistosLepSignalRegions("srLep","MT20Onelep");
+	  }
+	  else fillHistosLepSignalRegions("srLep","MT20Fake");	
+	}
+
 	if (!doMinimalPlots) {
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
-	  if (foundMissingTau) fillHistosLepSignalRegions("srLep", "MissingTau");
+	  if ( softlepmt_>20 && (foundMissingTau || foundMissingLepFromTau || foundMissingLep)) fillHistosLepSignalRegions("srLep", "MT20Missing");
+	  if ( softlepmt_>20 && isDilepton && (foundMissingTau || foundMissingLepFromTau || foundMissingLep)) fillHistosLepSignalRegions("srLep", "MT20MissingDilepton");
+	  if (foundMissingTau) {
+	    fillHistosLepSignalRegions("srLep", "MissingTau");
+	    if (decayMode == 1) fillHistosLepSignalRegions("srLep", "MissingTauDecay1");
+	    else if (decayMode == 3) fillHistosLepSignalRegions("srLep", "MissingTauDecay3");	    
+	  }
 	  else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MissingLepFromTau");
 	  else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MissingLep");
+	}
+
+	if (softlepMatched && !doMinimalPlots) {
+	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "MatchedMissing");
+	  if (foundMissingTau) {
+	    fillHistosLepSignalRegions("srLep", "MatchedMissingTau");
+	    if (decayMode == 1) fillHistosLepSignalRegions("srLep", "MatchedMissingTauDecay1");
+	    else if (decayMode == 3) fillHistosLepSignalRegions("srLep", "MatchedMissingTauDecay3");	    
+	  }
+	  else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MatchedMissingLepFromTau");
+	  else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MatchedMissingLep");
 	}
 	
       }
@@ -1099,14 +1180,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doSoftLepCRplots) {
         save1Lplots = true;
+	
         fillHistosCR1L("cr1L");
-
 	if (softlepMatched) fillHistosCR1L("cr1L","Onelep");
 	else fillHistosCR1L("cr1L","Fake");
 
+	if (softlepmt_>20){
+	  fillHistosCR1L("cr1L","MT20");
+	  if (softlepMatched) fillHistosCR1L("cr1L","MT20Onelep");
+	  else fillHistosCR1L("cr1L","MT20Fake");
+	}
+	
 	if (!doMinimalPlots) {
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosCR1L("cr1L", "Missing");
-	  if (foundMissingTau) fillHistosCR1L("cr1L", "MissingTau");
+	  if (foundMissingTau) {
+	    fillHistosLepSignalRegions("cr1L", "MissingTau");
+	    if (decayMode == 1) fillHistosLepSignalRegions("cr1L", "MissingTauDecay1");
+	    else if (decayMode == 3) fillHistosLepSignalRegions("cr1L", "MissingTauDecay3");	    
+	  }
 	  else if (foundMissingLepFromTau) fillHistosCR1L("cr1L", "MissingLepFromTau");
 	  else if (foundMissingLep) fillHistosCR1L("cr1L", "MissingLep");
 	}
@@ -1125,15 +1216,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doDoubleLepCRplots) {
         save2Lplots = true;
-	fillHistosDoubleL("cr2L");
 	
+	fillHistosDoubleL("cr2L");
 	if (isDilepton) fillHistosDoubleL("cr2L","Dilepton");
-	//else if (softlepMatched) fillHistosDoubleL("cr2L","Onelep"); //can never happen in cr2L, softlepMatched always false
 	else fillHistosDoubleL("cr2L","Fake");
+
+	if (cr2Lmt>20){
+	  fillHistosDoubleL("cr2L","MT20");
+	  if (isDilepton) fillHistosDoubleL("cr2L","MT20Dilepton");
+	  else fillHistosDoubleL("cr2L","MT20Fake");
+	}
 	
 	if (isDilepton && !doMinimalPlots){
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("cr2L", "Missing");	  
-	  if (foundMissingTau) fillHistosDoubleL("cr2L", "MissingTau");
+	  if (foundMissingTau) {
+	    fillHistosLepSignalRegions("cr2L", "MissingTau");
+	    if (decayMode == 1) fillHistosLepSignalRegions("cr2L", "MissingTauDecay1");
+	    else if (decayMode == 3) fillHistosLepSignalRegions("cr2L", "MissingTauDecay3");	    
+	  }
 	  else if (foundMissingLepFromTau) fillHistosDoubleL("cr2L", "MissingLepFromTau");
 	  else if (foundMissingLep) fillHistosDoubleL("cr2L", "MissingLep");
 	}
@@ -1347,11 +1447,11 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   std::map<std::string, float> values;
   values["deltaPhiMin"] = softlepDPhiMin_;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = nUniqueLep_;
+  values["nlep"]        = nUniqueLep_+nVetoTracks_;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
-  values["ht"]          = t.ht;
+  values["ht"]          = t.ht-softleppt_;
   values["met"]         = t.met_pt;
 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
@@ -1365,17 +1465,11 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
 
 //hists for soft lepton regions
 void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suffix) {
-
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
-
-  //require reco MET < 100 in CR1L
-  if (t.met_pt > 100) return;
-  
+ 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = softlepDPhiMin_;
   values["diffMetMhtOverMet"]  = 0; //dummy variable for 1L CR
-  values["nlep"]        = nUniqueLep_;
+  values["nlep"]        = nUniqueLep_+nVetoTracks_;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.nJet30 > 1 ? softlepmt2_ : softleppt_; // require large MT2 for multijet events //replace met with lepton pT in cr1L
@@ -1438,7 +1532,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_htbins2"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
   plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
   plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
-  if (!doMinimalPlots) {
+  //if (!doMinimalPlots) {
     plot1D("h_mt2"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
     plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
@@ -1452,7 +1546,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
-  }
+    //}
 
   TString directoryname(dirname);
 
@@ -1590,7 +1684,6 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
   plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_softlepmt2"+s,    softlepmt2_,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
-  plot1D("h_rlmt2"+s,    t.rl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
   plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
   plot1D("h_softlepht"+s,       t.ht-softleppt_,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
   plot1D("h_rlht"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
@@ -1598,6 +1691,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   plot1D("h_missingdilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
+  plot1D("h_trackdilepmll"+s,     dilepmllTrack_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
   
   //compute stuff for soft lep
   float metX = t.met_pt * cos(t.met_phi);
@@ -1637,35 +1731,67 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
     Lrf = ROOT::Math::VectorUtil::boost(Lvec, Wrf);
     TVector3 Lrf3 = Lrf.Vect(); //3vector piece of boosted lepton 4vector
     
-    //polarization variables
-    float cmsPol = Lp.Dot(Wp) / (wPt*wPt);
-    float atlasPol = Wp.Dot(Lrf3)/(wPt*Lrf3.Mag());
-
-    //some test plots to debug difference between cmsPol,cmsPol2
-    plot1D("h_wMagDiff"+s,      wPt/Wp.Mag(),   evtweight_, h_1d, "wPt / Wp.Mag", 20, 0, 2);
-    plot1D("h_wPhiDiff"+s,      TMath::ATan(wY/wX) - Wp.Phi(),   evtweight_, h_1d, "arctan(wx/wy) - Wp.Phi",  64, -3.2, 3.2);
-    plot1D("h_phi1"+s,      TMath::ATan(wY/wX),   evtweight_, h_1d, "arctan(wx/wy)",  64, -3.2, 3.2);
-    plot1D("h_phi2"+s,       Wp.Phi(),   evtweight_, h_1d, "Wp.Phi",  64, -3.2, 3.2);
-    plot1D("h_eta"+s,       Wp.Eta(),   evtweight_, h_1d, "Wp.Phi",  64, -3.2, 3.2);
-    plot1D("h_lepPhi"+s,       softlepphi_,   evtweight_, h_1d, " lep Phi",  64, -3.2, 3.2);
-    plot1D("h_metPhi"+s,       t.met_phi,   evtweight_, h_1d, "MET Phi",  64, -3.2, 3.2);
-    
-    plot1D("h_cmsPol"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 26, -1.3, 1.3);
-    plot1D("h_cmsPol2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 26, -1.3, 1.3);
-    plot1D("h_atlasPol"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
-    if (softlepId_ > 0) {
-    plot1D("h_cmsPolMinus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
-    plot1D("h_cmsPol2Minus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
-    plot1D("h_atlasPolMinus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
+    //polarization stuff
+    {
+      //3vectors in transverse plane
+      //set eta to zero for both lepton and MET 3-vectors
+      //sum gives "transverse W" vector
+      TVector3 Lp(0,0,0);
+      TVector3 METp(0,0,0);
+      TVector3 Wp(0,0,0);
+      Lp.SetPtEtaPhi(softleppt_,0,softlepphi_);
+      METp.SetPtEtaPhi(t.met_pt,0,t.met_phi);
+      Wp = Lp+METp;
+      
+      //4vectors in transverse plane
+      //set eta to zero for both lepton and MET 4-vectors
+      //sum gives "transverse W" vector
+      TLorentzVector Lvec(0,0,0,0);
+      TLorentzVector METvec(0,0,0,0);
+      TLorentzVector Wvec(0,0,0,0); 
+      TVector3 Wrf(0,0,0); //3vector to boost to W rest frame
+      TLorentzVector Lrf(0,0,0,0); //4vector of lepton boosted to W rest frame
+      Lvec.SetPtEtaPhiM(softleppt_,0,softlepphi_,softlepM_);
+      METvec.SetPtEtaPhiM(t.met_pt,0,t.met_phi,0); // m=0 for met vector
+      Wvec = Lvec+METvec;
+      Wrf = Wvec.BoostVector(); //boost vector to w rest frame
+      Lrf = ROOT::Math::VectorUtil::boost(Lvec, Wrf);
+      TVector3 Lrf3 = Lrf.Vect(); //3vector piece of boosted lepton 4vector
+      
+      //polarization variables
+      float cmsPol = Lp.Dot(Wp) / (wPt*wPt);
+      float atlasPol = Wp.Dot(Lrf3)/(wPt*Lrf3.Mag());
+      
+      //some test plots to debug difference between cmsPol,cmsPol2
+      plot1D("h_wMagDiff"+s,      wPt/Wp.Mag(),   evtweight_, h_1d, "wPt / Wp.Mag", 20, 0, 2);
+      plot1D("h_wPhiDiff"+s,      TMath::ATan(wY/wX) - Wp.Phi(),   evtweight_, h_1d, "arctan(wx/wy) - Wp.Phi",  64, -3.2, 3.2);
+      plot1D("h_phi1"+s,      TMath::ATan(wY/wX),   evtweight_, h_1d, "arctan(wx/wy)",  64, -3.2, 3.2);
+      plot1D("h_phi2"+s,       Wp.Phi(),   evtweight_, h_1d, "Wp.Phi",  64, -3.2, 3.2);
+      plot1D("h_eta"+s,       Wp.Eta(),   evtweight_, h_1d, "Wp.Phi",  64, -3.2, 3.2);
+      plot1D("h_lepPhi"+s,       softlepphi_,   evtweight_, h_1d, " lep Phi",  64, -3.2, 3.2);
+      plot1D("h_metPhi"+s,       t.met_phi,   evtweight_, h_1d, "MET Phi",  64, -3.2, 3.2);
+      
+      plot1D("h_cmsPol"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_atlasPol"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
+      if (softlepId_ > 0) {
+	plot1D("h_cmsPolMinus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Minus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolMinus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
+      }
+      if (softlepId_ < 0) {
+	plot1D("h_cmsPolPlus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Plus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolPlus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
+      }
     }
-    if (softlepId_ < 0) {
-    plot1D("h_cmsPolPlus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
-    plot1D("h_cmsPol2Plus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
-    plot1D("h_atlasPolPlus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
-    }
-
     
-
+    plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    // if (t.met_pt < 90 || softleppt_ < 20)  plot1D("h_Wpt90"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    // if (t.met_pt < 80 || softleppt_ < 20)  plot1D("h_Wpt80"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    // if (t.met_pt < 70 || softleppt_ < 20)  plot1D("h_Wpt70"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    // if (t.met_pt < 60 || softleppt_ < 20)  plot1D("h_Wpt60"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    // if (t.met_pt < 50 || softleppt_ < 20)  plot1D("h_Wpt50"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
     plot1D("h_deltaPhiMETminusLep"+s, t.met_phi - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{MET-Lep}", 64, -3.2, 3.2);
     plot1D("h_deltaPhiWminusLep"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
     
