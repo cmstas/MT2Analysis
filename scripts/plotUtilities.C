@@ -38,6 +38,9 @@ int getColor(const string& sample) {
   if (sample.find("tt+1l fakeLep") != string::npos) return kAzure+2+3;
   if (sample.find("tt+2l fakeLep") != string::npos) return kOrange-1+3;
   if (sample.find("st fakeLep") != string::npos) return kViolet+3;
+  if (sample.find("qcd fakeLep") != string::npos) return 401+3;
+  if (sample.find("ww fakeLep") != string::npos) return kSpring+3+3;
+  if (sample.find("top fakeLep") != string::npos) return 855-3;
   
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
@@ -74,6 +77,27 @@ string getLegendName(const string& sample) {
   if (sample.find("dyjets fakeLep") != string::npos) return "Fake Z+jets";
   if (sample.find("tt+1l fakeLep") != string::npos) return "Fake tt + 1l";
   if (sample.find("tt+2l fakeLep") != string::npos) return "Fake tt + 2l";
+  if (sample.find("qcd fakeLep") != string::npos) return "Fake QCD";
+  if (sample.find("ww fakeLep") != string::npos) return "Fake WW";
+  if (sample.find("top fakeLep") != string::npos) return "Fake Top";
+
+  if (sample.find("wjets onelep") != string::npos) return "W+jets (1L)";
+  if (sample.find("st onelep") != string::npos) return "singletop (1L)";
+  if (sample.find("dyjets onelep") != string::npos) return "Z+jets (1L)";
+  if (sample.find("tt+1l onelep") != string::npos) return "tt + 1l (1L)";
+  if (sample.find("tt+2l onelep") != string::npos) return "tt + 2l (1L)";
+  if (sample.find("qcd onelep") != string::npos) return "QCD (1L)";
+  if (sample.find("ww onelep") != string::npos) return "WW (1L)";
+  if (sample.find("top onelep") != string::npos) return "Top (1L)";
+  
+  if (sample.find("wjets dilep") != string::npos) return "W+jets (2L)";
+  if (sample.find("st dilep") != string::npos) return "singletop (2L)";
+  if (sample.find("dyjets dilep") != string::npos) return "Z+jets (2L)";
+  if (sample.find("tt+1l dilep") != string::npos) return "tt + 1l (2L)";
+  if (sample.find("tt+2l dilep") != string::npos) return "tt + 2l (2L)";
+  if (sample.find("qcd dilep") != string::npos) return "QCD (2L)";
+  if (sample.find("ww dilep") != string::npos) return "WW (2L)";
+  if (sample.find("top dilep") != string::npos) return "Top (2L)";
 
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
@@ -102,9 +126,9 @@ string getLegendName(const string& sample) {
   if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
-  if (sample.find("tt+1l") != string::npos) return "tt + 1l";
-  if (sample.find("tt+2l") != string::npos) return "tt + 2l";
-  if (sample.find("st") != string::npos) return "singletop";
+  if (sample.find("tt+1l") != string::npos) return "tt #rightarrow 1l";
+  if (sample.find("tt+2l") != string::npos) return "tt #rightarrow 2l";
+  if (sample.find("st") != string::npos) return "Single Top";
   if (sample.find("ww") != string::npos) return "WW";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
@@ -140,6 +164,11 @@ string getTableName(const string& sample) {
   if (sample.find("fake") != string::npos) return "Fake Lep";
   if (sample.find("onelep") != string::npos) return "1 Lep";
   if (sample.find("dilep") != string::npos) return "2 Lep";
+  if (sample.find("tt+1l") != string::npos) return "tt $\\rightarrow$ 1l";
+  if (sample.find("tt+2l") != string::npos) return "tt $\\rightarrow$ 2l";
+  if (sample.find("st") != string::npos) return "Single Top";
+  if (sample.find("ww") != string::npos) return "WW";
+  if (sample.find("dyjets") != string::npos) return "Z+jets";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
@@ -319,6 +348,80 @@ string getJetBJetTableLabel(TFile* f, std::string dir_str) {
   if(njets_HI != -1) njets_HI--;
   if(nbjets_HI != -1) nbjets_HI--;
 
+  std::string jet_string; 
+  std::string bjet_string; 
+
+  if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
+  else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
+  else jet_string = "$\\geq$" + toString(njets_LOW) + "j";
+
+  if( (nbjets_HI - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
+  else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
+  else bjet_string = "$\\geq$" + toString(nbjets_LOW) + "b";
+
+  return jet_string + ", " + bjet_string;
+
+}
+
+string getJetBJetTableLabel2(TFile* f, std::string dir_str) {
+
+  TString dir= TString(dir_str);
+
+  TH1D* h_njets = (TH1D*) f->Get(dir+"/h_nJet30");
+  TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
+  
+  int njets_LOW = 0;
+  int njets_HI = -1;
+  if(h_njets){
+    //loop to find first non-empty bin
+    for (int i = 0; i < h_njets->GetSize(); ++i){
+      if (h_njets->GetBinContent(i) > 0) {
+	njets_LOW = h_njets->GetBinLowEdge(i);
+	break;
+      }
+    }
+    //reverse loop to find max non-empty bin
+    for (int i = h_njets->GetSize(); i > 0; i--){
+      if (h_njets->GetBinContent(i) > 0) {
+	njets_HI = h_njets->GetBinLowEdge(i);
+	break;
+      }
+    }
+  }
+  else{
+    njets_LOW = 0;
+    njets_HI = -1;
+  }
+
+  if (h_njets_HI->GetBinContent(1) < 0) njets_HI = -1;
+  
+  TH1D* h_nbjets = (TH1D*) f->Get(dir+"/h_nBJet20");
+  TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
+  int nbjets_LOW = 0;
+  int nbjets_HI = -1;
+  if(h_nbjets){
+    //loop to find first non-empty bin
+    for (int i = 0; i < h_nbjets->GetSize(); i++){
+      if (h_nbjets->GetBinContent(i) > 0) {
+	nbjets_LOW = h_nbjets->GetBinLowEdge(i);
+	break;
+      }
+    }
+    //reverse loop to find max non-empty bin
+    for (int i = h_nbjets->GetSize(); i > 0; i--){
+      if (h_nbjets->GetBinContent(i) > 0) {
+	nbjets_HI = h_nbjets->GetBinLowEdge(i);
+	break;
+      }
+    }
+  }
+  else{
+    nbjets_LOW = 0;
+    nbjets_HI = -1;
+  }
+
+  if (h_nbjets_HI->GetBinContent(1) < 0) nbjets_HI = -1;
+  
   std::string jet_string; 
   std::string bjet_string; 
 

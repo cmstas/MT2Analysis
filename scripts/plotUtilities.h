@@ -17,3 +17,4 @@ std::string getHTTableLabel(TFile* f, std::string dir_str);
 std::string getMETTableLabel(TFile* f, std::string dir_str);
 std::string getMT2PlotLabel(TFile* f, std::string dir_str);
 std::string getJetBJetTableLabel(TFile* f, std::string dir_str);
+std::string getJetBJetTableLabel2(TFile* f, std::string dir_str);
