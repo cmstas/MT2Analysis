@@ -196,7 +196,7 @@ std::vector<SR> getSignalRegionsLep2(){
     SR fullSR = temp_SR_vec.at(iSR);  
     fullSR.SetName(fullSR.GetName() + "L");
     fullSR.SetVar("ht", 200, 300);
-    float mtbins[4] = {0, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 
@@ -204,14 +204,14 @@ std::vector<SR> getSignalRegionsLep2(){
     SR fullSR = temp_SR_vec.at(iSR);  
     fullSR.SetName(fullSR.GetName() + "M");
     fullSR.SetVar("ht", 300, 600);
-    float mtbins[4] = {0, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SR fullSR = temp_SR_vec.at(iSR);  
     fullSR.SetName(fullSR.GetName() + "H");
     fullSR.SetVar("ht", 600, -1);
-    float mtbins[4] = {0, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 
@@ -220,7 +220,7 @@ std::vector<SR> getSignalRegionsLep2(){
   sr3B.SetVar("njets", 2, -1);
   sr3B.SetVar("nbjets", 3, -1);
   sr3B.SetVar("ht", 200, -1);
-  float mtbins[4] = {0, 90, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
+  float mtbins[4] = {20, 90, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
   SRVec.push_back(sr3B);
 
   SR srJ1L;
@@ -252,6 +252,7 @@ std::vector<SR> getSignalRegionsLep2(){
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVar("nlep", 1, 2);
+  baseSR.SetVar("mt", 20, -1);
 
   //add baseline selections to all signal regions 
   std::vector<std::string> vars = baseSR.GetListOfVariables();
@@ -267,7 +268,8 @@ std::vector<SR> getSignalRegionsLep2(){
   inclusivebase.SetVar("njets", 2, -1);
   inclusivebase.SetVar("nbjets", 0, -1);
   inclusivebase.SetVar("ht", 200, -1);
-  float mtbinsBase[4] = {0, 90, 120, 300};      
+  inclusivebase.SetVar("mt", 20, -1);
+  float mtbinsBase[4] = {20, 90, 120, 300};      
   inclusivebase.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebase);
 
@@ -276,6 +278,7 @@ std::vector<SR> getSignalRegionsLep2(){
   inclusivebaseJ1.SetVar("njets", 1, 2);
   inclusivebaseJ1.SetVar("nbjets", 0, 1);
   inclusivebaseJ1.SetVar("ht", 200, -1);
+  inclusivebaseJ1.SetVar("mt", 20, -1);
   inclusivebaseJ1.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebaseJ1);
 
@@ -284,6 +287,7 @@ std::vector<SR> getSignalRegionsLep2(){
   inclusivebaseJ2.SetVar("njets", 1, 2);
   inclusivebaseJ2.SetVar("nbjets", 1, -1);
   inclusivebaseJ2.SetVar("ht", 200, -1);
+  inclusivebaseJ2.SetVar("mt", 20, -1);
   inclusivebaseJ2.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebaseJ2);
 
