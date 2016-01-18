@@ -1786,7 +1786,6 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       }
     }
     
-    plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
     // if (t.met_pt < 90 || softleppt_ < 20)  plot1D("h_Wpt90"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
     // if (t.met_pt < 80 || softleppt_ < 20)  plot1D("h_Wpt80"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
     // if (t.met_pt < 70 || softleppt_ < 20)  plot1D("h_Wpt70"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
