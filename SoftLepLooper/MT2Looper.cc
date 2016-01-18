@@ -266,14 +266,14 @@ void MT2Looper::storeHistWithCutValues(std::vector<SR> & srvector, TString SR) {
 	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
 	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBound(vars.at(j)), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
       }
-      else {
+      if (SR=="srLep") {
 	plot1D("h_"+vars.at(j)+"_"+"LOW",  1, srvector.at(i).GetLowerBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
 	plot1D("h_"+vars.at(j)+"_"+"HI",   1, srvector.at(i).GetUpperBound(vars.at(j)), srvector.at(i).srHistMap, "", 1, 0, 2);
       }
     }
     if (SR=="cr1L")  plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).cr1LHistMap, "", 1, 0, 2);
     else if (SR=="cr2L")  plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).cr2LHistMap, "", 1, 0, 2);
-    else                  plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).srHistMap, "", 1, 0, 2);
+    else if (SR=="srLep") plot1D("h_n_mtbins",  1, srvector.at(i).GetNumberOfMT2Bins(), srvector.at(i).srHistMap, "", 1, 0, 2);
     
   }
   outfile_->cd();
@@ -1067,16 +1067,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doSoftLepSRplots) {
         saveSoftLplots = true;
         fillHistosLepSignalRegions("srLep");
-
-	if (isDilepton) {
-	  fillHistosLepSignalRegions("srLep","Dilepton");	  
-	  // if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
-	  // if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
-	  // else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "DileptonMissingLepFromTau");
-	  // else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissingLep");
+	if (softlepMatched) {
+	  if (t.ngenLep + t.ngenTau >= 2) {
+	    fillHistosLepSignalRegions("srLep", "Dilepton");
+	    // if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
+	    // if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
+	    // else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "DileptonMissingLepFromTau");
+	    // else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissingLep");
+	  }
+	  else fillHistosLepSignalRegions("srLep", "Onelep");
 	}
-	else if (softlepMatched) fillHistosLepSignalRegions("srLep","Onelep");
-	else fillHistosLepSignalRegions("srLep","Fake");
+	else fillHistosLepSignalRegions("srLep", "Fake");
 
 	if (!doMinimalPlots) {
 	  if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
@@ -1607,9 +1608,10 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   float wY   = metY + lepY;
   float wPt  = sqrt(wX*wX + wY*wY);
   //float wPhi = (wX > 0) ? TMath::ATan(wY/wX) : (TMath::ATan(wY/wX) + TMath::Pi()/2);
-
-  //polarization stuff
-  {
+  plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
+  
+    //polarization stuff
+  if (!doMinimalPlots) {
     //3vectors in transverse plane
     //set eta to zero for both lepton and MET 3-vectors
     //sum gives "transverse W" vector
@@ -1661,33 +1663,33 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
     plot1D("h_cmsPol2Plus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
     plot1D("h_atlasPolPlus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
     }
+
+    
+
+    plot1D("h_deltaPhiMETminusLep"+s, t.met_phi - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{MET-Lep}", 64, -3.2, 3.2);
+    plot1D("h_deltaPhiWminusLep"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    
+    //dPhi for diff Wpt cuts
+    if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLep_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    if (wPt < 200 && wPt > 100) plot1D("h_deltaPhiWminusLep_W100t200"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLep_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLep_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    
+    if (softlepId_ > 0) {
+      plot1D("h_deltaPhiWminusLepMinus"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLepMinus_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 200 && wPt > 100) plot1D("h_deltaPhiWminusLepMinus_W100t200"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLepMinus_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLepMinus_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    }
+    if (softlepId_ < 0) {
+      plot1D("h_deltaPhiWminusLepPlus"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLepPlus_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 200 && wPt > 100) plot1D("h_deltaPhiWminusLepPlus_W100t200"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLepPlus_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+      if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLepPlus_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+    }
   }
-
-  plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
-  plot1D("h_deltaPhiMETminusLep"+s, t.met_phi - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{MET-Lep}", 64, -3.2, 3.2);
-  plot1D("h_deltaPhiWminusLep"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-
-  //dPhi for diff Wpt cuts
-  if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLep_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-  if (wPt < 200 && wPt > 100) plot1D("h_deltaPhiWminusLep_W100t200"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-  if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLep_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-  if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLep_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-
-  if (softlepId_ > 0) {
-    plot1D("h_deltaPhiWminusLepMinus"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLepMinus_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 200 && wPt > 100) plot1D("h_deltaPhiWminusLepMinus_W100t200"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLepMinus_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLepMinus_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-  }
-  if (softlepId_ < 0) {
-    plot1D("h_deltaPhiWminusLepPlus"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLepPlus_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 200 && wPt > 100) plot1D("h_deltaPhiWminusLepPlus_W100t200"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLepPlus_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-    if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLepPlus_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
-  }
-
   
   outfile_->cd();
 
