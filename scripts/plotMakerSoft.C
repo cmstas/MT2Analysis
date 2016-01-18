@@ -1401,7 +1401,7 @@ void plotMakerSoftLepSRMissingLep(){
       //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      if(dir_name == "srsoftlbase") {
+      if(dir_name == "srLepbase") {
       
 	makePlot( samples , names , dir_name , "h_mtMissing" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_mtMissingLep" , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 500 , 5 , false , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1520,7 +1520,7 @@ void plotMakerSoftLepSR(){
       //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      if(dir_name != "srsoftlbase") continue; //to do only this dir
+      if(dir_name != "srLepbase") continue; //to do only this dir
       //if(dir_name != "srsoftlmubase" && dir_name != "srsoftlelbase") continue; //to do only this dir
 
       makePlot( samples , names , dir_name , "h_lepptshort" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 25 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1705,8 +1705,8 @@ void plotMakerDoubleLepCR(){
       //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      //if(dir_name != "srsoftlbase") continue; //to do only this dir
-      if(dir_name != "cr2Lbase" && dir_name != "srsoftlbase") continue; //to do only this dir
+      //if(dir_name != "srLepbase") continue; //to do only this dir
+      if(dir_name != "cr2Lbase" && dir_name != "srLepbase") continue; //to do only this dir
       
       if(dir_name == "cr2Lbase"){
 	makePlot( samples , names , dir_name , "h_lowlepptDilepton" , "Soft Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1738,7 +1738,7 @@ void plotMakerDoubleLepCR(){
       }
       
 
-      if(dir_name == "srsoftlbase"){
+      if(dir_name == "srLepbase"){
 	makePlot( samples , names , dir_name , "h_lepptshortDilepton" , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , false , printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_softlephtDilepton"  , "H_{T} [GeV]" , "Events / 100 GeV" , 0 , 2000 , 4 , false, printplots, scalesig, doRatio, scaleBGtoData );
 	makePlot( samples , names , dir_name , "h_metDilepton"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );

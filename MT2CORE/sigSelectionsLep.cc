@@ -168,7 +168,7 @@ std::vector<SR> getSignalRegionsLep2(){
   
   sr.SetName("3");
   sr.SetVar("njets", 2, 4);
-  sr.SetVar("nbjets", 2, -1);
+  sr.SetVar("nbjets", 2, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
   
@@ -186,23 +186,11 @@ std::vector<SR> getSignalRegionsLep2(){
 
   sr.SetName("6");
   sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 2, -1);
+  sr.SetVar("nbjets", 2, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
   
-  sr.SetName("J1");
-  sr.SetVar("njets", 1, 2);
-  sr.SetVar("nbjets", 0, 1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-  
-  sr.SetName("J2");
-  sr.SetVar("njets", 1, 2);
-  sr.SetVar("nbjets", 1, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  
+ 
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
     SR fullSR = temp_SR_vec.at(iSR);  
@@ -227,6 +215,37 @@ std::vector<SR> getSignalRegionsLep2(){
     SRVec.push_back(fullSR);
   }
 
+  SR sr3B;
+  sr3B.SetName("B3");
+  sr3B.SetVar("njets", 2, -1);
+  sr3B.SetVar("nbjets", 3, -1);
+  sr3B.SetVar("ht", 200, -1);
+  float mtbins[4] = {0, 90, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
+  SRVec.push_back(sr3B);
+
+  SR srJ1L;
+  srJ1L.SetName("J1L");
+  srJ1L.SetVar("njets", 1, 2);
+  srJ1L.SetVar("nbjets", 0, 1);
+  srJ1L.SetVar("ht", 200, 300);
+  srJ1L.SetMT2Bins(3, mtbins);
+  SRVec.push_back(srJ1L);
+  SR srJ1M;
+  srJ1M.SetName("J1M");
+  srJ1M.SetVar("njets", 1, 2);
+  srJ1M.SetVar("nbjets", 0, 1);
+  srJ1M.SetVar("ht", 300, -1);
+  srJ1M.SetMT2Bins(3, mtbins);
+  SRVec.push_back(srJ1M);
+  SR srJ2L;
+  srJ2L.SetName("J2L");
+  srJ2L.SetVar("njets", 1, 2);
+  srJ2L.SetVar("nbjets", 1, -1);
+  srJ2L.SetVar("ht", 200, -1);
+  srJ2L.SetMT2Bins(3, mtbins);
+  SRVec.push_back(srJ2L);
+  
+
   //define baseline selections commmon to all signal regions 
   baseSR.SetVar("mt2", 100, -1);
   baseSR.SetVar("met", 200, -1);
@@ -242,15 +261,31 @@ std::vector<SR> getSignalRegionsLep2(){
     }
   }
 
-  // Also put in the inclusive region
+  // Also put in the inclusive region2
   SR inclusivebase = baseSR;  
   inclusivebase.SetName("base");
   inclusivebase.SetVar("njets", 2, -1);
   inclusivebase.SetVar("nbjets", 0, -1);
   inclusivebase.SetVar("ht", 200, -1);
-  float mtbins[4] = {0, 90, 120, 300};      
-  inclusivebase.SetMT2Bins(3, mtbins);
+  float mtbinsBase[4] = {0, 90, 120, 300};      
+  inclusivebase.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebase);
+
+  SR inclusivebaseJ1 = baseSR;  
+  inclusivebaseJ1.SetName("baseJ1");
+  inclusivebaseJ1.SetVar("njets", 1, 2);
+  inclusivebaseJ1.SetVar("nbjets", 0, 1);
+  inclusivebaseJ1.SetVar("ht", 200, -1);
+  inclusivebaseJ1.SetMT2Bins(3, mtbinsBase);
+  SRVec.push_back(inclusivebaseJ1);
+
+  SR inclusivebaseJ2 = baseSR;  
+  inclusivebaseJ2.SetName("baseJ2");
+  inclusivebaseJ2.SetVar("njets", 1, 2);
+  inclusivebaseJ2.SetVar("nbjets", 1, -1);
+  inclusivebaseJ2.SetVar("ht", 200, -1);
+  inclusivebaseJ2.SetMT2Bins(3, mtbinsBase);
+  SRVec.push_back(inclusivebaseJ2);
 
 
   return SRVec;

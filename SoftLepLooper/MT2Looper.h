@@ -14,7 +14,6 @@
 #include "TH2.h"
 #include "Math/LorentzVector.h"
 
-#include "RooDataSet.h"
 
 //MT2
 #include "../MT2CORE/mt2tree.h"
@@ -47,29 +46,14 @@ class MT2Looper {
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosLepSignalRegions(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosSoftL(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosCR1L(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosDoubleL(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosCRRL(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosCRQCD(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = "");
   void fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
-			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, 
-			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
-			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, 
-			      const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
-			      const std::string& dir = "", const std::string& suffix = "");
   void fillLepUncSR();
   void fillLepCorSRfastsim();
   
@@ -79,8 +63,6 @@ class MT2Looper {
   mt2tree t;
   float evtweight_;
   int nlepveto_;
-  float leppt_;
-  float mt_;
 
   //soft lep variables
   int nUniqueLep_;
