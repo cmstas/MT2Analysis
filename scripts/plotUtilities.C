@@ -121,6 +121,8 @@ string getTableName(const string& sample) {
   if (sample.find("tth") != string::npos) return "tth";
   if (sample.find("singletop") != string::npos) return "single top";
   if (sample.find("top") != string::npos) return "Top";
+  if (sample.find("ww") != string::npos) return "WW";
+  if (sample.find("dyjets") != string::npos) return "DY+jets";
   if (sample.find("wjets_ht100to200") != string::npos) return "W+jets HT100to200";
   if (sample.find("wjets_ht200to400") != string::npos) return "W+jets HT200to400";
   if (sample.find("wjets_ht400to600") != string::npos) return "W+jets HT400to600";
