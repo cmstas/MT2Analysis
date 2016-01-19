@@ -489,7 +489,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 2.115;
+      const float lumi = 2.26;
       //const float lumi = 4;
 
       if (isSignal_ 
