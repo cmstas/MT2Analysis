@@ -926,7 +926,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
 	//at least one soft lepton
 	//if (lep1pt_ > 20 && lep2pt_ > 20) { continue; }
-	if (lep1pt_ > 20 && lep2pt_ > 20) { hasSoftLepton = true; }
+	if (lep1pt_ < 20 || lep2pt_ < 20) { hasSoftLepton = true; }
 	
 	//opposite sign
 	if (((cand1_pdgId < 0) && (cand2_pdgId < 0)) || ((cand1_pdgId > 0) && (cand2_pdgId > 0)) ){ continue; }
@@ -1192,6 +1192,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  fillHistosDoubleL("cr2L");
 	  if (isDilepton) fillHistosDoubleL("cr2L","Dilepton");
 	  else fillHistosDoubleL("cr2L","Fake");
+
+	  if (!doMinimalPlots){
+	    if (isEE){
+	      fillHistosDoubleL("cr2L","EE");
+	      if (isDilepton) fillHistosDoubleL("cr2L","EEDilepton");
+	      else fillHistosDoubleL("cr2L","EEFake");
+	    }
+	    else if (isMuMu){
+	      fillHistosDoubleL("cr2L","MuMu");
+	      if (isDilepton) fillHistosDoubleL("cr2L","MuMuDilepton");
+	      else fillHistosDoubleL("cr2L","MuMuFake");
+	    }
+	    else{
+	      fillHistosDoubleL("cr2L","EMu");
+	      if (isDilepton) fillHistosDoubleL("cr2L","EMuDilepton");
+	      else fillHistosDoubleL("cr2L","EMuFake");
+	    }
+	  }
 	}
 	
 	if (!hasSoftLepton && !doMinimalPlots) {
@@ -1199,21 +1217,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (isDilepton) fillHistosDoubleL("cr2L","HardDilepton");
 	  else fillHistosDoubleL("cr2L","HardFake");
 	  
-	  if (isEE){
-	    fillHistosDoubleL("cr2L","HardEE");
-	    if (isDilepton) fillHistosDoubleL("cr2L","HardEEDilepton");
-	    else fillHistosDoubleL("cr2L","HardEEFake");
-	  }
-	  else if (isMuMu){
-	    fillHistosDoubleL("cr2L","HardMuMu");
-	    if (isDilepton) fillHistosDoubleL("cr2L","HardMuMuDilepton");
-	    else fillHistosDoubleL("cr2L","HardMuMuFake");
-	  }
-	  else{
-	    fillHistosDoubleL("cr2L","HardEMu");
-	    if (isDilepton) fillHistosDoubleL("cr2L","HardEMuDilepton");
-	    else fillHistosDoubleL("cr2L","HardEMuFake");
-	  }	
+	  // if (isEE){
+	  //   fillHistosDoubleL("cr2L","HardEE");
+	  //   if (isDilepton) fillHistosDoubleL("cr2L","HardEEDilepton");
+	  //   else fillHistosDoubleL("cr2L","HardEEFake");
+	  // }
+	  // else if (isMuMu){
+	  //   fillHistosDoubleL("cr2L","HardMuMu");
+	  //   if (isDilepton) fillHistosDoubleL("cr2L","HardMuMuDilepton");
+	  //   else fillHistosDoubleL("cr2L","HardMuMuFake");
+	  // }
+	  // else{
+	  //   fillHistosDoubleL("cr2L","HardEMu");
+	  //   if (isDilepton) fillHistosDoubleL("cr2L","HardEMuDilepton");
+	  //   else fillHistosDoubleL("cr2L","HardEMuFake");
+	  // }
+	  
 	}
 	
 	// if (isDilepton && !doMinimalPlots){
