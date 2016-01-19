@@ -394,7 +394,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 
   if (scaleBGtoData && data_hist) {
     TString scale_label = Form("MC scaled by %.2f #pm %.2f",bg_sf,bg_sf_err);
-    label.DrawLatex(0.6,0.55,scale_label);
+    label.DrawLatex(0.6,0.50,scale_label);
   }
 
   
@@ -938,7 +938,7 @@ void plotMakerSoftLepSRMissingLep(){
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "2.115 fb^{-1}";
+  lumi_13TeV = "2.26 fb^{-1}";
 
   string input_dir = "../SoftLepLooper/output/softLepSR";
   
@@ -1062,7 +1062,7 @@ void plotMakerSoftLepSR(){
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "2.115 fb^{-1}";
+  lumi_13TeV = "2.26 fb^{-1}";
 
   string suffix = "MT20";
   bool doFake = false;
@@ -1177,9 +1177,9 @@ void plotMakerSoftLepCR(){
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "2.115 fb^{-1}";
+  lumi_13TeV = "2.26 fb^{-1}";
 
-  string suffix = "MT20";
+  string suffix = "HighMET";
   bool doOnlyTrue = false;
   bool doData = true;
   string input_dir = "../SoftLepLooper/output/softLepCR";
@@ -1199,7 +1199,8 @@ void plotMakerSoftLepCR(){
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_ww = new TFile(Form("%s/ww.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
-  TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str())); 
+  TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str())); 
+  TFile* f_data = new TFile(Form("%s/data.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -1232,12 +1233,19 @@ void plotMakerSoftLepCR(){
     // samples.push_back(f_tt2l); names.push_back("tt+2l");
     // samples.push_back(f_tt1l); names.push_back("tt+1l");
     // samples.push_back(f_st); names.push_back("st");
-    samples.push_back(f_qcd); names.push_back("qcd");
-    samples.push_back(f_zinv); names.push_back("zinv");
-    samples.push_back(f_dy); names.push_back("dyjets");
-    samples.push_back(f_ww); names.push_back("ww");
-    samples.push_back(f_top); names.push_back("top");
-    samples.push_back(f_wjets); names.push_back("wjets");
+    // samples.push_back(f_qcd); names.push_back("qcd");
+    // samples.push_back(f_zinv); names.push_back("zinv");
+    // samples.push_back(f_dy); names.push_back("dyjets");
+    // samples.push_back(f_ww); names.push_back("ww");
+    // samples.push_back(f_top); names.push_back("top");
+    // samples.push_back(f_wjets); names.push_back("wjets");
+
+    
+    samples.push_back(f_bkg); names.push_back("fakeLep");
+    samples.push_back(f_ww); names.push_back("ww onelep");
+    samples.push_back(f_dy); names.push_back("dyjets onelep");
+    samples.push_back(f_top); names.push_back("top onelep");
+    samples.push_back(f_wjets); names.push_back("wjets onelep");
     samples.push_back(f_data); names.push_back("data");
   }
   
@@ -1267,10 +1275,10 @@ void plotMakerSoftLepCR(){
       if (dir_name == "cr1Lbase") {
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
-	  makePlot( samples , names , dir_name , "h_leppt"+suffix , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 800 , 2 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_softlepht"+suffix , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_mt2"+suffix , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_met"+suffix  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 800 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_leppt"+suffix , "Lepton p_{T} [GeV]" , "Events / 25 GeV" , 0 , 800 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_softlepht"+suffix , "H_{T} [GeV]" , "Events / 100 GeV" , 0 , 2000 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_mt2"+suffix , "M_{T2} [GeV]" , "Events / 10 GeV" , 0 , 100 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_met"+suffix  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 100 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_nJet30"+suffix , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_nBJet20"+suffix , "N(b jets)" , "Events" , 0 , 6 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  //makePlot( samples , names , dir_name , "h_J0pt"+suffix , "p_{T}(jet1) [GeV]" , "Events / 20 GeV" , 0 , 1000 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1293,9 +1301,9 @@ void plotMakerDoubleLepCR(){
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "2.115 fb^{-1}";
+  lumi_13TeV = "2.26 fb^{-1}";
 
-  string suffix = "MT20";
+  string suffix = "HardEMu";
   bool doSRDilepton = false;
   bool doOnlyTrue = false;
   bool doData = true;
@@ -1317,7 +1325,8 @@ void plotMakerDoubleLepCR(){
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_ww = new TFile(Form("%s/ww.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
-  TFile* f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str())); 
+  TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str())); 
+  TFile* f_data = new TFile(Form("%s/data.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -1350,12 +1359,17 @@ void plotMakerDoubleLepCR(){
     // samples.push_back(f_tt2l); names.push_back("tt+2l");
     // samples.push_back(f_tt1l); names.push_back("tt+1l");
     // samples.push_back(f_st); names.push_back("st");
-    samples.push_back(f_qcd); names.push_back("qcd");
-    samples.push_back(f_zinv); names.push_back("zinv");
-    samples.push_back(f_dy); names.push_back("dyjets");
-    samples.push_back(f_ww); names.push_back("ww");
-    samples.push_back(f_wjets); names.push_back("wjets");
-    samples.push_back(f_top); names.push_back("top");
+    // samples.push_back(f_qcd); names.push_back("qcd");
+    // samples.push_back(f_zinv); names.push_back("zinv");
+    // samples.push_back(f_dy); names.push_back("dyjets");
+    // samples.push_back(f_ww); names.push_back("ww");
+    // samples.push_back(f_wjets); names.push_back("wjets");
+    // samples.push_back(f_top); names.push_back("top");
+
+    samples.push_back(f_bkg); names.push_back("fakeLep");
+    samples.push_back(f_dy); names.push_back("dyjets dilep");
+    samples.push_back(f_ww); names.push_back("ww dilep");
+    samples.push_back(f_top); names.push_back("top dilep");
     samples.push_back(f_data); names.push_back("data");
   }
   
@@ -1432,8 +1446,8 @@ void plotMakerSoft(){
   //plotMakerCRSL(); return;
   //plotMakerSoftLepSR(); return;
   //plotMakerSoftLepSRMissingLep(); return;
-  plotMakerSoftLepCR(); return;
-  //plotMakerDoubleLepCR(); return;
+  //plotMakerSoftLepCR(); return;
+  plotMakerDoubleLepCR(); return;
   
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;

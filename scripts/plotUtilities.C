@@ -41,6 +41,7 @@ int getColor(const string& sample) {
   if (sample.find("qcd fakeLep") != string::npos) return 401+3;
   if (sample.find("ww fakeLep") != string::npos) return kSpring+3+3;
   if (sample.find("top fakeLep") != string::npos) return 855-3;
+  if (sample.find("fakeLep") != string::npos) return kMagenta+2;
   
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
@@ -80,6 +81,7 @@ string getLegendName(const string& sample) {
   if (sample.find("qcd fakeLep") != string::npos) return "Fake QCD";
   if (sample.find("ww fakeLep") != string::npos) return "Fake WW";
   if (sample.find("top fakeLep") != string::npos) return "Fake Top";
+  if (sample.find("fakeLep") != string::npos) return "Fakes";
 
   if (sample.find("wjets onelep") != string::npos) return "W+jets (1L)";
   if (sample.find("st onelep") != string::npos) return "singletop (1L)";
