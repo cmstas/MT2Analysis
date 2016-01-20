@@ -121,7 +121,7 @@ void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVecLep =  getSignalRegionsLep2(); 
+  SRVecLep =  getSignalRegionsLep3(); 
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
