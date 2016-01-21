@@ -798,14 +798,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       //ELECTRONS
       nlep = 0;
+      nlepIso = 0;
       nElectrons10 = 0;
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 5.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         // first check ID then iso
         if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
-        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4);
-        if(applyLeptonIso && !pass_iso) continue;
+        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4); 
+        bool pass_isoLoose = elMiniRelIsoCMS3_EA(iEl,1) < 2; 
+        //if(applyLeptonIso && !pass_iso) continue;
+        if(applyLeptonIso && !pass_isoLoose) continue;
+        if(pass_iso) nlepIso++;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
@@ -834,7 +838,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         nlep++;
 
         // only use isolated leptons for counters, overlaps, etc
-        if (pass_iso) {
+        if (pass_isoLoose) {
           nElectrons10++;
           p4sUniqueLeptons.push_back(cms3.els_p4().at(iEl));
 
@@ -870,7 +874,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // first check ID then iso
         if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
         bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v4);
-        if (applyLeptonIso && !pass_iso) continue;
+        bool pass_isoLoose = muMiniRelIsoCMS3_EA(iMu,1) < 2;
+        //if (applyLeptonIso && !pass_iso) continue;
+        if (pass_iso) nlepIso++;
+        if(applyLeptonIso && !pass_isoLoose) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
         vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
@@ -898,7 +905,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         nlep++;
 
         // only use isolated leptons for counters, overlaps, etc
-        if (pass_iso) {
+        if (pass_isoLoose) {
           nMuons10++;
           p4sUniqueLeptons.push_back(cms3.mus_p4().at(iMu));
 
@@ -1041,6 +1048,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       nisoTrack = 0;
       nPFLep5LowMT = 0;
       nPFHad10LowMT = 0;
+      nPFHad10 = 0;
       nPFCHCand3 = 0;
       for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
 
@@ -1102,6 +1110,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // } // passing pflepton 
 
         if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
+        if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1)) ++nPFHad10;
 
         pt_ordering.push_back(std::pair<int,float>(nisoTrack,cand_pt));
 
@@ -1738,6 +1747,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         hemJets = getHemJets(p4sForHems);  
 
         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
+	if (nlep > 0) sl_mt2 = HemMT2(lep_pt[0], lep_phi[0], hemJets.at(0), hemJets.at(1));
 
         // order hemispheres by pt for saving
         int idx_lead = 0;
@@ -2121,6 +2131,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
     BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
     BabyTree_->Branch("nlep", &nlep, "nlep/I" );
+    BabyTree_->Branch("nlepIso", &nlepIso, "nlepIso/I" );
     BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
     BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
     BabyTree_->Branch("lep_phi", lep_phi, "lep_phi[nlep]/F" );
@@ -2151,6 +2162,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
     BabyTree_->Branch("nPFLep5LowMT", &nPFLep5LowMT, "nPFLep5LowMT/I" );
     BabyTree_->Branch("nPFHad10LowMT", &nPFHad10LowMT, "nPFHad10LowMT/I" );
+    BabyTree_->Branch("nPFHad10", &nPFHad10, "nPFHad10/I" );
     BabyTree_->Branch("ntau", &ntau, "ntau/I" );
     BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
     BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
@@ -2177,6 +2189,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
     BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
     BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
+    BabyTree_->Branch("sl_mt2", &sl_mt2 );
     BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
     BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
     BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
@@ -2440,9 +2453,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_DiCentralPFJet70_PFMET120 = -999;
     HLT_DiCentralPFJet55_PFMET110 = -999;
     nlep = -999;
+    nlepIso = -999;
     nisoTrack = -999;
     nPFLep5LowMT = -999;
     nPFHad10LowMT = -999;
+    nPFHad10 = -999;
     ntau = -999;
     ngamma = -999;
     ngenPart = -999;
@@ -2454,6 +2469,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     ngenTau3Prong = -999;
     ngenLepFromTau = -999;
     njet = -999;
+    sl_mt2 = -999.0;
     gamma_mt2 = -999.0;
     gamma_nJet30 = -999;
     gamma_nJet40 = -999;

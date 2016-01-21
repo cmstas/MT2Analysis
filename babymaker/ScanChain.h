@@ -189,6 +189,7 @@ class babyMaker {
 //----- LEPTONS
   static const int max_nlep = 50;
   Int_t           nlep;
+  Int_t           nlepIso;
   Float_t         lep_pt[max_nlep];   //[nlep]
   Float_t         lep_eta[max_nlep];   //[nlep]
   Float_t         lep_phi[max_nlep];   //[nlep]
@@ -223,6 +224,7 @@ class babyMaker {
 
   Int_t             nPFLep5LowMT;
   Int_t             nPFHad10LowMT;
+  Int_t             nPFHad10;
 
 //----- TAUS
   static const int max_ntau = 50;
@@ -256,6 +258,9 @@ class babyMaker {
   Float_t         gamma_hOverE[max_ngamma];   //[ngamma]
   Int_t           gamma_idCutBased[max_ngamma];   //[ngamma]
 
+  // event level vars recalculated for soft lep 1L control region
+  Float_t sl_mt2;
+  
   // event level vars recalculated for photon+jets control region
   Float_t         gamma_mt2;
   Int_t           gamma_nJet30;
