@@ -782,6 +782,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<LorentzVector> p4sUniqueLeptons;
 
       vector<LorentzVector> p4sForHems;
+      vector<LorentzVector> p4sForHemsMHT;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
       vector<LorentzVector> p4sForHemsZllMT;
@@ -837,10 +838,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           nElectrons10++;
           p4sUniqueLeptons.push_back(cms3.els_p4().at(iEl));
 
-          // for mt2 and mht in lepton control region
+          // for mht
           if (doJetLepOverlapRemoval) {
-            p4sForHems.push_back(cms3.els_p4().at(iEl));
-            p4sForDphi.push_back(cms3.els_p4().at(iEl));
+            p4sForHemsMHT.push_back(cms3.els_p4().at(iEl));
           }
 
 	  if (!isData && applyLeptonSFs) {
@@ -902,10 +902,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           nMuons10++;
           p4sUniqueLeptons.push_back(cms3.mus_p4().at(iMu));
 
-          // for mt2 and mht in lepton control region
+          // for mht 
           if (doJetLepOverlapRemoval) {
-            p4sForHems.push_back(cms3.mus_p4().at(iMu));
-            p4sForDphi.push_back(cms3.mus_p4().at(iMu));
+            p4sForHemsMHT.push_back(cms3.mus_p4().at(iMu));
           }
 	  
 	  if (!isData && applyLeptonSFs) {
@@ -1060,46 +1059,47 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         int pdgId = abs(cms3.pfcands_particleId().at(ipf));
         float an04 = PFCandRelIsoAn04(ipf);
 
-        if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
-          ++nPFLep5LowMT;
+	if (pdgId == 11 || pdgId == 13) continue;
+        // if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
+        //   ++nPFLep5LowMT;
 
-          // use PF leptons for hemispheres etc same as reco leptons
-          //  BUT first do overlap removal with reco leptons to avoid double counting
-          bool overlap = false;
-          for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
-            float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
-            // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
-            if (thisDR < 0.01) {
-              overlap = true;
-              break;
-            }
-          } // loop over reco leps
-          if (!overlap) {
+        //   // use PF leptons for hemispheres etc same as reco leptons
+        //   //  BUT first do overlap removal with reco leptons to avoid double counting
+        //   bool overlap = false;
+        //   for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
+        //     float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
+        //     // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
+        //     if (thisDR < 0.01) {
+        //       overlap = true;
+        //       break;
+        //     }
+        //   } // loop over reco leps
+        //   if (!overlap) {
 
-            p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
-            if (doJetLepOverlapRemoval) {
-              p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
-              p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
-            }
+        //     p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
+        //     if (doJetLepOverlapRemoval) {
+        //       p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
+        //       p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
+        //     }
 
-	    // // -------------- WORK IN PROGRESS -----------------
-	    // // update scale factor and uncertainty.  Assume SFs are 1 for fullsim, based on isolation T&P results.  use only uncertainty.
-	    // //  for fastsim, assume that ID + iso results apply, use SF and uncertainty
-	    // if (!isData && applyLeptonSFs) {
-	    //   weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    //   //weight_lepsf *= weights.cent;
-	    //   weight_lepsf_UP *= weights.up;
-	    //   weight_lepsf_DN *= weights.dn;
-	    //   if (isFastsim) {
-	    // 	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    // 	weight_lepsf *= weights_fastsim.cent;
-	    // 	weight_lepsf_UP *= weights_fastsim.up;
-	    // 	weight_lepsf_DN *= weights_fastsim.dn;
-	    //   }
-	    // }
+	//     // // -------------- WORK IN PROGRESS -----------------
+	//     // // update scale factor and uncertainty.  Assume SFs are 1 for fullsim, based on isolation T&P results.  use only uncertainty.
+	//     // //  for fastsim, assume that ID + iso results apply, use SF and uncertainty
+	//     // if (!isData && applyLeptonSFs) {
+	//     //   weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	//     //   //weight_lepsf *= weights.cent;
+	//     //   weight_lepsf_UP *= weights.up;
+	//     //   weight_lepsf_DN *= weights.dn;
+	//     //   if (isFastsim) {
+	//     // 	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
+	//     // 	weight_lepsf *= weights_fastsim.cent;
+	//     // 	weight_lepsf_UP *= weights_fastsim.up;
+	//     // 	weight_lepsf_DN *= weights_fastsim.dn;
+	//     //   }
+	//     // }
 	    
-          }
-        } // passing pflepton 
+        //   }
+        // } // passing pflepton 
 
         if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
 
@@ -1537,6 +1537,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
               else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
               p4sForHems.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsMHT.push_back(p4sCorrJets.at(iJet));
               p4sForDphi.push_back(p4sCorrJets.at(iJet));
               p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
               p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
@@ -1703,6 +1704,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       // sort vectors by pt for hemisphere calculation
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
+      sort(p4sForHemsMHT.begin(), p4sForHemsMHT.end(), sortByPt);
       sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
       sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
       sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
@@ -1722,7 +1724,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // compute HT, MHT using same objects as MT2 inputs
       for (unsigned int ip4 = 0; ip4 < p4sForHems.size(); ++ip4) {
         ht += p4sForHems.at(ip4).pt();
-        sumMhtp4 -= p4sForHems.at(ip4);
+        sumMhtp4 -= p4sForHemsMHT.at(ip4);
       }
 
       // min(dphi) of 4 leading objects
