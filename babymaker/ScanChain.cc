@@ -799,7 +799,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       nlep = 0;
       nElectrons10 = 0;
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
-        if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
+        if(cms3.els_p4().at(iEl).pt() < 5.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         // first check ID then iso
         if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
@@ -865,7 +865,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       //MUONS
       nMuons10 = 0;
       for(unsigned int iMu = 0; iMu < cms3.mus_p4().size(); iMu++){
-        if(cms3.mus_p4().at(iMu).pt() < 10.0) continue;
+        if(cms3.mus_p4().at(iMu).pt() < 5.0) continue;
         if(fabs(cms3.mus_p4().at(iMu).eta()) > 2.4) continue;
         // first check ID then iso
         if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
