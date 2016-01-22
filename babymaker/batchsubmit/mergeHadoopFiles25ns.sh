@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-01-07_25ns_miniaodv2
+TAG=softLep_V00-01-10_25ns_miniaodv2
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -101,10 +101,10 @@ run dyjetsll_ht600toInf
 # GAMMA + JETS
 #
 
-run gjet_ht100to200
-run gjet_ht200to400
-run gjet_ht400to600
-run gjet_ht600toInf
+# run gjet_ht100to200
+# run gjet_ht200to400
+# run gjet_ht400to600
+# run gjet_ht600toInf
 
 #
 # Z INVISIBLE
@@ -118,6 +118,17 @@ run zinv_ht600toInf
 #
 # DIBOSON
 #
+
+run wwlnln_powheg
+run wwlnqq_powheg
+run wzllln_powheg
+run wzllqq_amcnlo
+run wzlnnn_amcnlo
+run wzlnqq_amcnlo
+run zzllll_powheg
+run zzllnn_powheg
+run zzllqq_amcatnlo
+run zzqqnn_amcatnlo
 
 #
 # TRIBOSON
@@ -163,9 +174,9 @@ run qcd_ht2000toInf
 # SIGNAL
 #
 
-run T1tttt_1500_100
-run T1tttt_1200_800
-run T1bbbb_1500_100
-run T1bbbb_1000_900
-run T1qqqq_1400_100
-run T1qqqq_1000_800
+# run T1tttt_1500_100
+# run T1tttt_1200_800
+# run T1bbbb_1500_100
+# run T1bbbb_1000_900
+# run T1qqqq_1400_100
+# run T1qqqq_1000_800
