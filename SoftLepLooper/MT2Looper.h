@@ -56,12 +56,16 @@ class MT2Looper {
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillLepUncSR();
   void fillLepCorSRfastsim();
+  void fillMissLepSF(int igenlep, bool isFastsim, float & lostSF, float & lostSFup, float & lostSFdn);
+
   
  private:
 
   TFile * outfile_;
   mt2tree t;
   float evtweight_;
+  float evtweight_lepEffUp_;
+  float evtweight_lepEffDn_;
   int nlepveto_;
   int nVetoTracks_;
     
@@ -77,6 +81,7 @@ class MT2Looper {
   float softlepmt2_;
   float softlepDPhiMin_;
 
+  bool foundMissingTau_;
   int missIdx_;
   float missPt_;
 

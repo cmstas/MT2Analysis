@@ -77,9 +77,9 @@ bool applyLeptonSF = true;
 // turn on to apply reweighting to ttbar based on top pt
 bool applyTopPtReweight = true;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
-bool applyLeptonSFfastsim = false;
+bool applyLeptonSFfastsim = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = false;
+bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
@@ -91,11 +91,11 @@ bool doScanWeights = true;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = false;
 // make variation histograms for tau efficiency
-bool doGenTauVars = false;
+bool doGenTauVars = true;
 // make variation histograms for e+mu efficiency
-bool doLepEffVars = false;
+bool doLepEffVars = true;
 // make only minimal hists needed for results
-bool doMinimalPlots = false;
+bool doMinimalPlots = true;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -532,15 +532,27 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
-	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
-	  fillLepCorSRfastsim();
-	  evtweight_ *= (1. + cor_lepeff_sr_);
+
+//MT2	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
+//MT2	  fillLepCorSRfastsim();
+//MT2	  evtweight_ *= (1. + cor_lepeff_sr_);
+//MT2	}
+//MT2	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
+	
+	// always apply SF (need to add the Fastsim ones to babies)
+	// will have to revert later when using UP ar DN variations 
+	if (applyLeptonSF) {
+	  evtweight_ *= t.weight_lepsf;
+	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
+	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
+	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
+
 	}
-	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
-	if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
+
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
+
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
@@ -954,7 +966,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  hardlep_phi = lep2phi_;
 	  cr2Lmt_ = sqrt( 2 * t.met_pt * lep1pt_ * ( 1 - cos( t.met_phi - lep1phi_) ) );
 	}
-
+	softlepmt_ = cr2Lmt_;
 	//if you get to here, fill in CR
 	doDoubleLepCRplots = true;
 
@@ -972,7 +984,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //-------------------------------------//
       bool foundMissingLep = false;
       bool foundMissingLepFromTau = false;
-      bool foundMissingTau = false;
+      foundMissingTau_ = false;
       missIdx_ = -1;
       missPt_ = -1;
       int decayMode = -1;
@@ -1021,7 +1033,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    if (thisDR > 0.1) {
 	      missIdx_ = ilep;
 	      missPt_ = t.genTau_leadTrackPt[ilep];
-	      foundMissingTau = true;
+	      foundMissingTau_ = true;
 	      //construct dilep mass
 	      TLorentzVector misslep_p4(0,0,0,0);
 	      TLorentzVector softlep_p4(0,0,0,0);
@@ -1070,7 +1082,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    if (thisDR > 0.1) {
 	      missIdx_ = ilep;
 	      missPt_ = t.genTau_leadTrackPt[ilep];
-	      foundMissingTau = true;
+	      foundMissingTau_ = true;
 
 	      decayMode = t.genTau_decayMode[ilep];
 
@@ -1080,6 +1092,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	
       }//doDoubleLepCRplots
+
+
+      // Scale factors (and uncertainties) for SR events with a lost lepton
+      if ( (foundMissingLep || foundMissingLepFromTau) && ( applyLeptonSFfastsim || applyLeptonSF ) && doSoftLepSRplots) {
+	  bool fastsim = isSignal_ && applyLeptonSFfastsim;
+	  float lostsf = 1.;
+	  float lostsf_up = 1.;
+	  float lostsf_dn = 1.;
+	  
+	  if (missIdx_ != -1) fillMissLepSF(missIdx_, fastsim, lostsf, lostsf_up, lostsf_dn);
+	  //cout<<"found lost lep SF weights to be "<<lostsf<<", "<<lostsf_up<<", "<<lostsf_dn<<endl;
+	  evtweight_ *= lostsf;
+	  evtweight_lepEffUp_ *= lostsf_up;
+	  evtweight_lepEffDn_ *= lostsf_dn;
+
+      }
+
 
       //compute invariant mass between softlep and highest pT isolated (veto) track
       dilepmllTrack_ = -1;
@@ -1528,7 +1557,7 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
   values["ht"]          = t.ht-lep1pt_-lep2pt_;
   values["met"]         = t.met_pt;
-  values["mt"]          = cr2Lmt_;
+  values["mt"]          = softlepmt_;
 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
@@ -1577,7 +1606,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   TString directoryname(dirname);
 
   if (isSignal_) {
-    plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mtbins_sigscan"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
   if (!t.isData && isSignal_ && doSystVariationPlots) {
@@ -1588,10 +1617,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     float avgweight_isr_DN = h_sig_avgweight_isr_->GetBinContent(binx,biny);
     float weight_isr_UP = 2. - weight_isr_DN;
     float avgweight_isr_UP = 2. - avgweight_isr_DN;
-    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot1D("h_mtbins_isr_UP"+s,       softlepmt_,   evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_isr_DN"+s,       softlepmt_,   evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot3D("h_mtbins_sigscan_isr_UP"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mtbins_sigscan_isr_DN"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
   if (!t.isData && applyBtagSF && doSystVariationPlots) {
@@ -1614,35 +1643,42 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     }
 
     // assume weights are already applied to central value
-    plot1D("h_mt2bins_btagsf_heavy_UP"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_btagsf_light_UP"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_btagsf_heavy_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_btagsf_light_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_btagsf_heavy_UP"+s,       softlepmt_,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_btagsf_light_UP"+s,       softlepmt_,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_btagsf_heavy_DN"+s,       softlepmt_,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_btagsf_light_DN"+s,       softlepmt_,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
     if (isSignal_) {
-      plot3D("h_mt2bins_sigscan_btagsf_heavy_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_light_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_heavy_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_light_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mtbins_sigscan_btagsf_heavy_UP"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mtbins_sigscan_btagsf_light_UP"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mtbins_sigscan_btagsf_heavy_DN"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mtbins_sigscan_btagsf_light_DN"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }
   }
 
   if (!t.isData && doGenTauVars) {
+//MT2       float unc_tau1p = 0.;
+//MT2       float unc_tau3p = 0.;
+//MT2       if (t.ngenTau1Prong > 0 || t.ngenTau3Prong > 0) {
+//MT2         // loop on gen taus
+//MT2         for (int itau = 0; itau < t.ngenTau; ++itau) {
+//MT2   	// check acceptance for veto: pt > 10
+//MT2          if (t.genTau_leadTrackPt[itau] < 10.) continue;
+//MT2          if (t.genTau_decayMode[itau] == 1) unc_tau1p += 0.14; // 14% relative uncertainty for missing a 1-prong tau
+//MT2          else if (t.genTau_decayMode[itau] == 3) unc_tau3p += 0.06; // 6% relative uncertainty for missing a 3-prong tau
+//MT2         }
+//MT2       }
     float unc_tau1p = 0.;
     float unc_tau3p = 0.;
-    if (t.ngenTau1Prong > 0 || t.ngenTau3Prong > 0) {
-      // loop on gen taus
-      for (int itau = 0; itau < t.ngenTau; ++itau) {
-	// check acceptance for veto: pt > 10
-       if (t.genTau_leadTrackPt[itau] < 10.) continue;
-       if (t.genTau_decayMode[itau] == 1) unc_tau1p += 0.14; // 14% relative uncertainty for missing a 1-prong tau
-       else if (t.genTau_decayMode[itau] == 3) unc_tau3p += 0.06; // 6% relative uncertainty for missing a 3-prong tau
+    if (foundMissingTau_ && missIdx_ != -1) {
+      if (t.genTau_leadTrackPt[missIdx_] > 10.) {
+	if (t.genTau_decayMode[missIdx_] == 1) unc_tau1p += 0.14; // 14% relative uncertainty for missing a 1-prong tau
+	else if (t.genTau_decayMode[missIdx_] == 3) unc_tau3p += 0.06; // 6% relative uncertainty for missing a 3-prong tau
       }
     }
-    
-    plot1D("h_mt2bins_tau1p_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_tau1p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_tau1p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau1p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_tau3p_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_tau3p_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_tau3p), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_tau1p_UP"+s,       softlepmt_,   evtweight_ * (1. + unc_tau1p), h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_tau1p_DN"+s,       softlepmt_,   evtweight_ * (1. - unc_tau1p), h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_tau3p_UP"+s,       softlepmt_,   evtweight_ * (1. + unc_tau3p), h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_tau3p_DN"+s,       softlepmt_,   evtweight_ * (1. - unc_tau3p), h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
   }
 
   // --------------------------------------------------------
@@ -1674,24 +1710,34 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   // }
   // --------------------------------------------------------
 
-  // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
-  if (!t.isData && isSignal_ && doLepEffVars && applyLeptonSFfastsim && directoryname.Contains("sr")) {
+//MT2  // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
+//MT2  if (!t.isData && isSignal_ && doLepEffVars && applyLeptonSFfastsim && directoryname.Contains("sr")) {
+//MT2
+//MT2    // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
+//MT2    //  need to first remove lepeff SF
+//MT2    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+//MT2    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+//MT2    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+//MT2    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+//MT2    
+//MT2  }
+//MT2
+//MT2  else if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
+//MT2    // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
+//MT2    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+//MT2    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+//MT2  }
 
-    // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
-    //  need to first remove lepeff SF
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    
+  // lepton efficiency variations for MT2+lepton: just apply the weight, which already contains: *SF for each lepton, and *lostSF for one lost lepton
+  if (!t.isData && doLepEffVars) {
+    plot1D("h_mtbins_lepeff_UP"+s,       softlepmt_,   evtweight_lepEffUp_, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_lepeff_DN"+s,       softlepmt_,   evtweight_lepEffDn_, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
+    if (isSignal_ && applyLeptonSFfastsim && directoryname.Contains("sr")) {
+      plot3D("h_mtbins_sigscan_lepeff_UP"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_lepEffUp_, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mtbins_sigscan_lepeff_DN"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_lepEffDn_, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    }
   }
-
-  else if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
-    // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-  }
-   
+  
   outfile_->cd();
   return;
 }
@@ -1983,3 +2029,21 @@ void MT2Looper::fillLepCorSRfastsim() {
 
   return;
 }
+
+
+void MT2Looper::fillMissLepSF(int igenlep, bool isFastsim, float & lostSF, float & lostSFup, float & lostSFdn) {
+  
+  weightStruct sf_struct = getLepSFFromFile(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
+  if (isFastsim) sf_struct = getLepSFFromFile_fastsim(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
+  float sf = sf_struct.cent;
+  float sfup = sf_struct.up;
+  float sfdn = sf_struct.dn;
+  float vetoeff = getLepVetoEffFromFile_fullsim(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
+  if (isFastsim) vetoeff = getLepVetoEffFromFile_fastsim(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
+  lostSF = (1 - vetoeff * sf) / (1 - vetoeff);
+  lostSFup = (1 - vetoeff * sfup) / (1 - vetoeff);
+  lostSFdn = (1 - vetoeff * sfdn) / (1 - vetoeff);
+  
+  return;
+}
+
