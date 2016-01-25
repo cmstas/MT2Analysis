@@ -164,7 +164,7 @@ void makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../SoftLepLooper/output", string dataname = "data"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output", string dataname = "data"){
 
 
   string output_name = input_dir+"/pred_CR1L.root";
