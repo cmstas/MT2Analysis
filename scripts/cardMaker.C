@@ -93,6 +93,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   double n_lostlep(0.);
   double n_lostlep_cr(0.);
+  double lostlep_alpha(0.);
   double err_lostlep_mcstat(0.);
   double n_zinv(0.);
   double n_zinv_cr(0.);
@@ -149,11 +150,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   if (!h_sig) {
     if (verbose) cout<<"No signal found in this region"<<endl;
-    return 0;
+    if (suppressZeroBins || suppressZeroTRs) return 0;
+  } else {
+    n_sig = h_sig->GetBinContent(mt2bin);
+    n_sig_TR = h_sig->Integral(0,-1);
+    err_sig_mcstat = h_sig->GetBinError(mt2bin);
   }
-  n_sig = h_sig->GetBinContent(mt2bin);
-  n_sig_TR = h_sig->Integral(0,-1);
-  err_sig_mcstat = h_sig->GetBinError(mt2bin);
   if (h_sig_btagsf_heavy_UP) n_sig_btagsf_heavy_UP = h_sig_btagsf_heavy_UP->GetBinContent(mt2bin);
   if (h_sig_btagsf_light_UP) n_sig_btagsf_light_UP = h_sig_btagsf_light_UP->GetBinContent(mt2bin);
   if (h_sig_lepeff_UP) n_sig_lepeff_UP = h_sig_lepeff_UP->GetBinContent(mt2bin);
@@ -176,8 +178,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int njets_LOW = h_njets_LOW->GetBinContent(1);
   int njets_HI = h_njets_HI->GetBinContent(1);
 
-  int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
-  int mt2_HI = mt2_LOW + h_sig->GetBinWidth(mt2bin);
+  int mt2_LOW = h_sig ? h_sig->GetBinLowEdge(mt2bin) : 0;
+  int mt2_HI = h_sig ? mt2_LOW + h_sig->GetBinWidth(mt2bin) : 1500;
   // hardcode the current edge of our highest bin..
   if (mt2_HI == 1500) mt2_HI = -1;
 
@@ -251,6 +253,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_lostlep_cryield = (TH1D*) f_lostlep->Get(fullhistnameCRyield);
   if (h_lostlep_cryield != 0) 
     n_lostlep_cr = round(h_lostlep_cryield->Integral(0,-1));
+  // note that this alpha value does NOT match our prediction, it's only for bins with 0 CR events
+  //   this alpha is:                 N_MC^SR(MT2) / N_MC^CR(MT2)
+  //   our prediction normally uses:  N_MC^SR(MT2) * N_Data^CR / N_MC^CR
+  //     where the last two values are integrated over MT2
+  TH1D* h_lostlep_alpha = (TH1D*) f_lostlep->Get(fullhistnameAlpha);
+  if (h_lostlep_alpha != 0) 
+    lostlep_alpha = h_lostlep_alpha->GetBinContent(mt2bin);
 
   
   TH1D* h_zinv = (TH1D*) f_zinv->Get(fullhistname);
@@ -275,7 +284,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // Photon yield (includes GJetPrompt+QCDPrompt+QCDFake, or Data)
   TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
-  if (h_zinv_cryield != 0 && h_zinv_cryield->GetBinContent(mt2bin) != 0) {
+  if (h_zinv_cryield != 0) {
     n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
     if (integratedZinvEstimate)  n_zinv_cr = round(h_zinv_cryield->Integral(0,-1));
   }
@@ -370,11 +379,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int n_syst = 0;
   // ----- lost lepton bkg uncertainties
   double lostlep_shape = 1.0;
-  double lostlep_crstat = 1; // transfer factor
   double lostlep_mcstat = 1. + err_lostlep_mcstat; // transfer factor stat uncertainty
-  double lostlep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double lostlep_lepeff = 1.15;
-  double lostlep_bTag = 1.2; // special for 7jets with b-tags
+  double lostlep_alphaerr = 1. + 0.10; // transfer factor syst uncertainty
+  double lostlep_lepeff = 1.07; // transfer factor uncertainty from lepton eff
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
   TString name_lostlep_shape = Form("llep_shape_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
@@ -382,35 +389,36 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_lostlep_mcstat = Form("llep_MCstat_%s", channel.c_str());
   TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
   TString name_lostlep_lepeff = Form("llep_lepeff_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_bTag = Form("llep_bTag_%s_%s_%s", ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
 
+  // if nonzero CR stats: compute alpha for this bin based on CR yield and SR pred
+  // note that if n_lostlep_cr == 0, we will just use lostlep_alpha (straight from MC) in the datacard
   if (n_lostlep_cr > 0.) {
-    lostlep_crstat = n_lostlep / n_lostlep_cr > 0 ? n_lostlep / n_lostlep_cr : last_lostlep_transfer;
-    if (lostlep_crstat > 2.) lostlep_crstat = 2.; // hard bound to avoid statistical fluctuations
-    if (lostlep_crstat > 0.) last_lostlep_transfer = lostlep_crstat;
+    lostlep_alpha = n_lostlep / n_lostlep_cr;
+    if (lostlep_alpha > 3.) {
+      lostlep_alpha = 3.; // hard bound to avoid statistical fluctuations
+      n_lostlep = n_lostlep_cr * lostlep_alpha;
+    }
   }
-  else {
-    lostlep_crstat = last_lostlep_transfer;
-  }
+  if (lostlep_alpha > 0.) last_lostlep_transfer = lostlep_alpha; // cache last good alpha value
+  else lostlep_alpha = last_lostlep_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
   n_syst += 4; // lostlep_crstat, lostlep_mcstat, lostlep_alphaerr, lostlep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_lostlep > 0.) {
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
-      for (int ibin=1; ibin<h_lostlep->GetNbinsX(); ibin++) 
+      for (int ibin=2; ibin<=h_lostlep->GetNbinsX(); ibin++) 
 	increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_lostlep->GetBinContent(ibin);
-      lostlep_shape = 1. - increment/n_zinv;
+      lostlep_shape = 1. - increment/n_lostlep;
     }
     else
       lostlep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
     n_syst++;  // lostlep_shape
   }
- 
-  if ( njets_LOW == 7 && nbjets_LOW >= 1) {
-    if (verbose) cout<<"special case with 7jets 1btag"<<endl;
-    n_syst++; // nBtag extrapolation
-  }
+
+  // special cases with larger alpha error
+  if ( ht_LOW == 200 && njets_LOW == 7) lostlep_alphaerr = 1.40; // due to JES
+  else if ( njets_LOW == 7 && nbjets_LOW >= 3) lostlep_alphaerr = 1.15; // due to btag eff
 
 
   // ----- zinv bkg uncertainties - depend on signal region, b selection
@@ -423,9 +431,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_zinv_puritysyst = integratedZinvEstimate ? "zinv_puritySyst_"+perTopoRegion : "zinv_puritySyst_"+perChannel;
   TString name_zinv_zgamma = "zinv_ZGratio";
   if (uncorrelatedZGratio) name_zinv_zgamma = Form("zinv_ZGratio_%s",channel.c_str());
-  TString name_zinv_zgamma_nj  = Form("zinv_ZGratio_nj_%s" , jet_str.c_str()  );
-  TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_nb_%s" , bjet_str.c_str() );
-  TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_ht_%s" , ht_str.c_str()   );
+  TString name_zinv_zgamma_nj  = Form("zinv_ZGratio_%s" , jet_str.c_str()  );
+  TString name_zinv_zgamma_nb  = Form("zinv_ZGratio_%s" , bjet_str.c_str() );
+  TString name_zinv_zgamma_ht  = Form("zinv_ZGratio_%s" , ht_str.c_str()   );
   // Only a low edge for MT2, since we want to maintain correlations between differently sized MT2 bins with the same lower edge
   TString name_zinv_zgamma_mt2 = "zinv_ZGratio_m" + to_string(mt2_LOW); 
   TString name_zinv_doubleRatioOffset = "zinv_doubleRatioOffset";
@@ -436,7 +444,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinv_alphaerr = 1. + err_zinv_mcstat;
   double zinv_purityerr = 1. + err_zinv_purity;
   double zinv_puritysyst = 1.10;
-  double zinv_doubleRatioOffset = 1.07;
+  double zinv_doubleRatioOffset = 1.11;
   double zinv_zgamma = -1.;
   double zinv_zgamma_nj = 1., zinv_zgamma_nb = 1., zinv_zgamma_ht = 1., zinv_zgamma_mt2 = 1.;
   double zinv_mcsyst = -1.;
@@ -458,7 +466,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       if (mt2bin == 1 && n_zinv > 0) {
 	// first bin needs to compensate normalization from the rest
 	float increment = 0.;
-	for (int ibin=1; ibin<h_zinv->GetNbinsX(); ibin++) 
+	for (int ibin=2; ibin<=h_zinv->GetNbinsX(); ibin++) 
 	  increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_zinv->GetBinContent(ibin);
 	zinv_shape = 1. - increment/n_zinv;
       }
@@ -493,7 +501,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
  
   // fully uncorrelated for all except fit related, those are correlated within HT bins
   TString name_qcd_crstat = "qcd_CRstat_"+perChannel;
-  TString name_qcd_alphaerr = "qcd_alphaerr_"+perChannel;
+  TString name_qcd_alphaerr = "qcd_alphaErr_"+perChannel;
   TString name_qcd_fjrbsyst = "qcd_FJRBsyst_"+perChannel;
   TString name_qcd_fitstat = Form("qcd_RPHIstat_%s",ht_str.c_str());
   TString name_qcd_fitsyst = Form("qcd_RPHIsyst_%s",ht_str.c_str());
@@ -534,7 +542,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   ofile <<  "imax 1  number of channels"                                                    << endl;
   ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
-  ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
+  ofile <<  "kmax *"                                                                        << endl;
   ofile <<  "------------"                                                                  << endl;
   ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
   ofile <<  Form("observation %.0f",n_data)                                                 << endl;
@@ -566,9 +574,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_doubleRatioOffset.Data(),zinv_doubleRatioOffset )  << endl;
     if (fourNuisancesPerBinZGratio) {
+      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nj.Data() ,zinv_zgamma_nj )  << endl;
       ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_nb.Data() ,zinv_zgamma_nb )  << endl;
-      ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_ht.Data() ,zinv_zgamma_ht )  << endl;
       if (!integratedZinvEstimate)
         ofile <<  Form("%s      lnN    -   %.3f    -    - ",name_zinv_zgamma_mt2.Data(),zinv_zgamma_mt2)  << endl;
     }
@@ -578,16 +586,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_puritysyst.Data(),zinv_puritysyst)  << endl;
     ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_purityerr.Data(),zinv_purityerr)  << endl;
     ofile <<  Form("%s     gmN %.0f    -  %.5f   -   - ",name_zinv_crstat.Data(),n_zinv_cr,zinv_alpha)  << endl;
-    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
     if (integratedZinvEstimate && n_mt2bins > 1)
       ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_shape.Data(),zinv_shape)  << endl;
+    ofile <<  Form("%s       lnN    -   %.3f   -    - ",name_zinv_alphaerr.Data(),zinv_alphaerr)  << endl;
   }
 
   // ---- lostlep systs
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_lepeff.Data(),lostlep_lepeff)  << endl;
-  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_crstat)  << endl;
-  if ( njets_LOW == 7 && nbjets_LOW >= 1) 
-    ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_bTag.Data(),lostlep_bTag)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
@@ -595,13 +601,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
 
   // ---- QCD systs
-  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    -   %.5f",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat)  << endl;
   if (njets_LOW == 1) {
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
   } else {
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fjrbsyst.Data(),qcd_fjrbsyst)  << endl;
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fitstat.Data(),qcd_fitstat)  << endl;
-    ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_qcd_fitsyst.Data(),qcd_fitsyst)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_fjrbsyst.Data(),qcd_fjrbsyst)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_fitstat.Data(),qcd_fitstat)  << endl;
+    ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_fitsyst.Data(),qcd_fitsyst)  << endl;
   }
 
   ofile.close();
@@ -612,7 +618,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 }
 
 //_______________________________________________________________________________
-void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = false){
+void cardMaker(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = true){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -633,7 +639,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
-  if (doData) f_data = new TFile(Form("%s/data_Run2015D.root",input_dir.c_str()));
+  if (doData) f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
 
   if( f_lostlep->IsZombie() || f_zinv->IsZombie() || f_purity->IsZombie() || f_qcd->IsZombie() || f_sig->IsZombie() || f_zgratio ->IsZombie() || (doData && f_data->IsZombie()) ) {
   // Trick to look at estimates even if QCD prediction is broken
@@ -662,7 +668,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
-	  for (int im1 = 400; im1 <= 2000; im1 += 25) {
+	  for (int im1 = 0; im1 <= 2000; im1 += 25) {
 	    for (int im2 = 0; im2 <= 1600; im2 += 25) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
