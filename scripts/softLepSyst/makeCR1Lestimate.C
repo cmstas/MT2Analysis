@@ -164,10 +164,10 @@ void makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output", string dataname = "data"){
+void makeCR1Lestimate(string input_dirSR = "../../SoftLepLooper/output/softLepSR/", string input_dirCR = "../../SoftLepLooper/output/softLepCR/", string dataname = "data"){
 
 
-  string output_name = input_dir+"/pred_CR1L.root";
+  string output_name = input_dirSR+"/pred_CR1L.root";
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -180,9 +180,9 @@ void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output", string da
   TString datanamestring(dataname);
 
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) isData = true;
-  TFile* f_dataCR = new TFile(Form("%s/softLepCR/%s.root",input_dir.c_str(),dataname.c_str())); //data or dummy-data file
-  TFile* f_mcCR   = new TFile(Form("%s/softLepCR/allBkg.root",input_dir.c_str()));
-  TFile* f_mcSR   = new TFile(Form("%s/softLepSR/allBkg.root",input_dir.c_str()));
+  TFile* f_dataCR = new TFile(Form("%s/%s.root",input_dirCR.c_str(),dataname.c_str())); //data or dummy-data file
+  TFile* f_mcCR   = new TFile(Form("%s/allBkg.root",input_dirCR.c_str()));
+  TFile* f_mcSR   = new TFile(Form("%s/allBkg.root",input_dirSR.c_str()));
 
 
   if(f_dataCR->IsZombie() || f_mcCR->IsZombie() || f_mcSR->IsZombie()) {
