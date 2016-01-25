@@ -1,0 +1,4 @@
+*.txt
+job_input/*
+NtupleTools/
+submitAll.sh

@@ -1,0 +1,10 @@
+*.o
+*.cmd
+*.log
+*.so
+*.d
+*.pcm
+*.cxx
+*.root
+CORE/
+CMSSW*/
