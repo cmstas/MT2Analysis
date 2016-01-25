@@ -76,9 +76,9 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
   // h_purity->SetName("h_purity");
 
   //normalized histogram to extrapolate in MT
-  TH1D* h_kFactor = sameBin(h_crMC, "h_kFactor");
-  h_kFactor->Add(h_srMConelep);
-  h_kFactor->Scale(1/h_kFactor->Integral(0,-1));
+  TH1D* h_kMT = sameBin(h_crMC, "h_kMT");
+  h_kMT->Add(h_srMConelep);
+  h_kMT->Scale(1/h_kMT->Integral(0,-1));
   
   //initialize pred histogram
   TH1D* h_pred = sameBin(h_crMC, "h_pred");
@@ -91,22 +91,22 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
     double binRatio          = h_ratioInt   ->GetBinContent(1);
     double binPurity         = h_purityInt  ->GetBinContent(1);
     //double binPurity         = h_purity  ->GetEfficiency(ibin);
-    double binkFactor        = h_kFactor    ->GetBinContent(ibin);
+    double binkMT            = h_kMT    ->GetBinContent(ibin);
 
     //get bin errors
-    double binDataCR_err     = h_crDataInt  ->GetBinError(1);
-    double binRatio_err      = h_ratioInt   ->GetBinError(1);
-    double binPurity_err     = h_purityInt  ->GetBinError(1);
+    double binDataCR_err     = (binDataCR != 0) ? h_crDataInt  ->GetBinError(1) / binDataCR : 0;
+    double binRatio_err      = (binRatio != 0)  ? h_ratioInt   ->GetBinError(1) / binRatio : 0;
+    double binPurity_err     = (binPurity != 0) ? h_purityInt  ->GetBinError(1) / binPurity : 0;
     // double binPurity_errL    = h_purity  ->GetEfficiencyErrorLow(ibin); binPurity_errL = (binPurity_errL > 0) ? binPurity_errL : 0;
     // double binPurity_errU    = h_purity  ->GetEfficiencyErrorUp(ibin); binPurity_errU = (binPurity_errU > 0) ? binPurity_errU : 0;
     // double binPurity_err     = max(binPurity_errL, binPurity_errU);  //for now, just take larger of asymmetric errors
-    double binkFactor_err    = h_kFactor    ->GetBinError(ibin);
+    double binkMT_err        = (binkMT != 0)    ? h_kMT        ->GetBinError(ibin) / binkMT : 0;
     
-    //calculate pred = N(CR, data) * Ratio(SR/CR, mc) * Purity * k-Factor (MT)
-    double binPred = binDataCR * binRatio * binPurity * binkFactor;
+    //calculate pred = N(CR, data) * Ratio(SR/CR, mc) * Purity * k(MT)
+    double binPred = binDataCR * binRatio * binPurity * binkMT;
       
     //calculate total error in quadrature
-    double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkFactor_err * binkFactor_err;
+    double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkMT_err * binkMT_err;
 
     //set bin content/error
     h_pred->SetBinContent(ibin, binPred);
@@ -131,7 +131,7 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
   h_crDataInt     ->Write();
   h_ratioInt      ->Write();
   h_purityInt     ->Write();
-  h_kFactor       ->Write();
+  h_kMT           ->Write();
   h_pred          ->Write();
 
   return 0;

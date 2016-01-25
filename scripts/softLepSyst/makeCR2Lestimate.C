@@ -129,17 +129,17 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
   // h_purity->SetName("h_purity");
 
   //normalized histogram to extrapolate in HT
-  TH1D* h_kFactor_ht = sameBin(h_crMCInt, "h_kFactor_ht");
+  TH1D* h_k_ht = sameBin(h_crMCInt, "h_k_ht");
   if (doHTsum) {
-    h_kFactor_ht->Add(h_srMCDileptonInt,h_srMCDileptonInt2,1,-1);
-    h_kFactor_ht->Divide(h_srMCDileptonInt);
+    h_k_ht->Add(h_srMCDileptonInt,h_srMCDileptonInt2,1,-1);
+    h_k_ht->Divide(h_srMCDileptonInt);
   }
   
   //normalized histogram to extrapolate in MT, given HT bin
-  TH1D* h_kFactor_mt = sameBin(h_crMC, "h_kFactor_mt");
-  if (doHTsum) h_kFactor_mt->Add(h_srMCDilepton,h_srMCDilepton2,1,-1);
-  else h_kFactor_mt->Add(h_srMCDilepton);
-  h_kFactor_mt->Scale(1/h_kFactor_mt->Integral(0,-1));
+  TH1D* h_k_mt = sameBin(h_crMC, "h_k_mt");
+  if (doHTsum) h_k_mt->Add(h_srMCDilepton,h_srMCDilepton2,1,-1);
+  else h_k_mt->Add(h_srMCDilepton);
+  h_k_mt->Scale(1/h_k_mt->Integral(0,-1));
   
   //initialize pred histogram
   TH1D* h_pred = sameBin(h_crMC, "h_pred");
@@ -152,26 +152,26 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
     double binRatio          = h_ratioInt   ->GetBinContent(1);
     double binPurity         = h_purityInt  ->GetBinContent(1);
     //double binPurity         = h_purity  ->GetEfficiency(ibin);
-    double binkFactor_ht     = h_kFactor_ht  ->GetBinContent(1);
-    double binkFactor_mt     = h_kFactor_mt  ->GetBinContent(ibin);
+    double bink_ht           = h_k_ht  ->GetBinContent(1);
+    double bink_mt           = h_k_mt  ->GetBinContent(ibin);
 
     //get bin errors
-    double binDataCR_err     = h_crDataInt  ->GetBinError(1);
-    double binRatio_err      = h_ratioInt   ->GetBinError(1);
-    double binPurity_err     = h_purityInt  ->GetBinError(1);
+    double binDataCR_err     = ( binDataCR != 0) ? h_crDataInt ->GetBinError(1) / binDataCR : 0;
+    double binRatio_err      = ( binRatio != 0) ? h_ratioInt ->GetBinError(1) / binRatio : 0;
+    double binPurity_err     = ( binPurity != 0) ? h_purityInt ->GetBinError(1) / binPurity : 0;
     // double binPurity_errL    = h_purity  ->GetEfficiencyErrorLow(ibin); binPurity_errL = (binPurity_errL > 0) ? binPurity_errL : 0;
     // double binPurity_errU    = h_purity  ->GetEfficiencyErrorUp(ibin); binPurity_errU = (binPurity_errU > 0) ? binPurity_errU : 0;
     // double binPurity_err     = max(binPurity_errL, binPurity_errU);  //for now, just take larger of asymmetric errors
-    double binkFactor_ht_err = h_kFactor_ht ->GetBinError(1);
-    double binkFactor_mt_err = h_kFactor_mt ->GetBinError(ibin);
+    double bink_ht_err       = ( bink_ht != 0) ? h_k_ht ->GetBinError(1) / bink_ht : 0;
+    double bink_mt_err       = ( bink_mt != 0) ? h_k_mt ->GetBinError(ibin) / bink_mt : 0;
     
     //calculate pred = N(CR, data) * Ratio(SR/CR, mc) * Purity * k_ht * k_mt
     double binPred = -1;
-    if (doHTsum) binPred = binDataCR * binRatio * binPurity * binkFactor_ht * binkFactor_mt;
-    else binPred = binDataCR * binRatio * binPurity * binkFactor_mt;
+    if (doHTsum) binPred = binDataCR * binRatio * binPurity * bink_ht * bink_mt;
+    else binPred = binDataCR * binRatio * binPurity * bink_mt;
     
     //calculate total error in quadrature
-    double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkFactor_ht_err * binkFactor_ht_err + binkFactor_mt_err * binkFactor_mt_err;
+    double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + bink_ht_err * bink_ht_err + bink_mt_err * bink_mt_err;
 
     //set bin content/error
     h_pred->SetBinContent(ibin, binPred);
@@ -196,8 +196,8 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
   h_crDataInt       ->Write();
   h_ratioInt        ->Write();
   h_purityInt       ->Write();
-  h_kFactor_ht      ->Write();
-  h_kFactor_mt      ->Write();
+  h_k_ht            ->Write();
+  h_k_mt            ->Write();
   h_pred            ->Write();
 
   return 0;
@@ -205,10 +205,10 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
 }
 
 //_______________________________________________________________________________
-void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output", string dataname = "data"){
+void makeCR2Lestimate(string input_dirSR = "../../SoftLepLooper/output/softLepSR", string dataname = "data"){
 
 
-  string output_name = input_dir+"/pred_CR2L.root";
+  string output_name = input_dirSR+"/pred_CR2L.root";
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -221,8 +221,8 @@ void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output", string da
   TString datanamestring(dataname);
 
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) isData = true;
-  TFile* f_dataSR = new TFile(Form("%s/softLepSR/%s.root",input_dir.c_str(),dataname.c_str())); //data or dummy-data file
-  TFile* f_mcSR   = new TFile(Form("%s/softLepSR/allBkg.root",input_dir.c_str()));
+  TFile* f_dataSR = new TFile(Form("%s/%s.root",input_dirSR.c_str(),dataname.c_str())); //data or dummy-data file
+  TFile* f_mcSR   = new TFile(Form("%s/allBkg.root",input_dirSR.c_str()));
 
 
   if(f_dataSR->IsZombie() || f_mcSR->IsZombie()) {
