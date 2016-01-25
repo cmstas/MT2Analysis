@@ -31,7 +31,7 @@ inline TH1D* sameBin(TH1D* h_in, std::string name)
 }
 
 //_______________________________________________________________________________
-void makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut ,  std::string dir_name ) {
+int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut ,  std::string dir_name ) {
 
   fOut->cd();
 
@@ -39,52 +39,27 @@ void makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut
   TString srName = dir_name;
   srName.ReplaceAll("srLep","");
 
-  //get other HT region
-  TString srName2 = srName;
-  // if (srName.Contains("L")) srName2.ReplaceAll("L","M");
-  // else if (srName.Contains("M")) srName2.ReplaceAll("M","L");
-  // else srName2 = "none";
-  srName2 = "none";
+  TDirectory * dirData = fData_CR ->GetDirectory("cr1L"+srName);
+  TDirectory * dirMC   = fMC_CR   ->GetDirectory("cr1L"+srName);
+  TDirectory * dirMC2  = fMC_SR   ->GetDirectory("cr1L"+srName);
+
+  if (!dirData || !dirMC || !dirMC2) {
+    cerr << "ERROR: Directory doesn't exist! Skipping..." << endl;
+    return 1;
+  }
   
   //get relevant histograms
-  TH1D* h_crMC        = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbins");          h_crMC->SetName("h_crMC");
-  TH1D* h_crMCfake    = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbinsFake");      h_crMCfake->SetName("h_crMCfake");
-  TH1D* h_crMConelep  = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbinsOnelep");    h_crMConelep->SetName("h_crMConelep");
-  TH1D* h_srMConelep  = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_mtbinsOnelep");   h_srMConelep->SetName("h_srMConelep"); 
-  TH1D* h_crData      = (TH1D*) fData_CR->Get("cr1L"+srName+"/h_mtbins");        h_crData->SetName("h_crData");
+  TH1D* h_crMC           = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbins");            h_crMC->SetName("h_crMC");
+  TH1D* h_crMCfake       = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbinsFake");        h_crMCfake->SetName("h_crMCfake");
+  TH1D* h_crMConelep     = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbinsOnelep");      h_crMConelep->SetName("h_crMConelep");
+  TH1D* h_srMConelep     = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_mtbinsOnelep");     h_srMConelep->SetName("h_srMConelep"); 
+  TH1D* h_crData         = (TH1D*) fData_CR->Get("cr1L"+srName+"/h_mtbins");          h_crData->SetName("h_crData");
   //integrated
   TH1D* h_crMCInt        = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_Events_w");          h_crMCInt->SetName("h_crMCInt");
   TH1D* h_crMCfakeInt    = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_Events_wFake");      h_crMCfakeInt->SetName("h_crMCfakeInt");
   TH1D* h_crMConelepInt  = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_Events_wOnelep");    h_crMConelepInt->SetName("h_crMConelepInt");
   TH1D* h_srMConelepInt  = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_Events_wOnelep");   h_srMConelepInt->SetName("h_srMConelepInt"); 
   TH1D* h_crDataInt      = (TH1D*) fData_CR->Get("cr1L"+srName+"/h_Events_w");        h_crDataInt->SetName("h_crDataInt");
-
-  //this should never happen for CR1L
-  //if second HT region exists, add hists
-  if (srName2 != "none") {
-    TH1D* h_crMC2        = (TH1D*) fMC_CR->Get("cr1L"+srName2+"/h_mtbins");          h_crMC2->SetName("h_crMC2");
-    TH1D* h_crMCfake2    = (TH1D*) fMC_CR->Get("cr1L"+srName2+"/h_mtbinsFake");      h_crMCfake2->SetName("h_crMCfake2");
-    TH1D* h_crMConelep2  = (TH1D*) fMC_CR->Get("cr1L"+srName2+"/h_mtbinsOnelep");    h_crMConelep2->SetName("h_crMConelep2");
-    TH1D* h_srMConelep2  = (TH1D*) fMC_SR->Get("srLep"+srName2+"/h_mtbinsOnelep");   h_srMConelep2->SetName("h_srMConelep2"); 
-    TH1D* h_crData2      = (TH1D*) fData_CR->Get("cr1L"+srName2+"/h_mtbins");        h_crData2->SetName("h_crData2");
-    //integrated
-    TH1D* h_crMCInt2        = (TH1D*) fMC_CR->Get("cr1L"+srName2+"/h_Events_w");          h_crMCInt2->SetName("h_crMCInt2");
-    TH1D* h_crMCfakeInt2    = (TH1D*) fMC_CR->Get("cr1L"+srName2+"/h_Events_wFake");      h_crMCfakeInt2->SetName("h_crMCfakeInt2");
-    TH1D* h_crMConelepInt2  = (TH1D*) fMC_CR->Get("cr1L"+srName2+"/h_Events_wOnelep");    h_crMConelepInt2->SetName("h_crMConelepInt2");
-    TH1D* h_srMConelepInt2  = (TH1D*) fMC_SR->Get("srLep"+srName2+"/h_Events_wOnelep");   h_srMConelepInt2->SetName("h_srMConelepInt2"); 
-    TH1D* h_crDataInt2      = (TH1D*) fData_CR->Get("cr1L"+srName2+"/h_Events_w");        h_crDataInt2->SetName("h_crDataInt2");
-
-    h_crMC->Add(h_crMC2);
-    h_crMCfake->Add(h_crMCfake2);
-    h_crMConelep->Add(h_crMConelep2);
-    h_srMConelep->Add(h_srMConelep2);
-    h_crData->Add(h_crData2);
-    h_crMCInt->Add(h_crMCInt2);
-    h_crMCfakeInt->Add(h_crMCfakeInt2);
-    h_crMConelepInt->Add(h_crMConelepInt2);
-    h_srMConelepInt->Add(h_srMConelepInt2);
-    h_crDataInt->Add(h_crDataInt2);
-  }
   
   //calculate the ratio histogram, N(SR/CR) in MC
   TH1D* h_ratio = sameBin(h_crMC, "h_ratio");
@@ -116,7 +91,7 @@ void makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut
     double binRatio          = h_ratioInt   ->GetBinContent(1);
     double binPurity         = h_purityInt  ->GetBinContent(1);
     //double binPurity         = h_purity  ->GetEfficiency(ibin);
-    double binkFactor        = h_kFactor  ->GetBinContent(ibin);
+    double binkFactor        = h_kFactor    ->GetBinContent(ibin);
 
     //get bin errors
     double binDataCR_err     = h_crDataInt  ->GetBinError(1);
@@ -144,22 +119,22 @@ void makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut
   fOut->cd();
   TDirectory* dir = fOut->mkdir(dir_name.c_str());
   dir->cd();
-  h_crMC->Write();
-  h_crMConelep->Write();
-  h_srMConelep->Write();
-  h_crData->Write();
-  h_ratio->Write();
-  h_purity->Write();
-  h_crMCInt->Write();
-  h_crMConelepInt->Write();
-  h_srMConelepInt->Write();
-  h_crDataInt->Write();
-  h_ratioInt->Write();
-  h_purityInt->Write();
-  h_kFactor->Write();
-  h_pred->Write();
+  h_crMC          ->Write();
+  h_crMConelep    ->Write();
+  h_srMConelep    ->Write();
+  h_crData        ->Write();
+  h_ratio         ->Write();
+  h_purity        ->Write();
+  h_crMCInt       ->Write();
+  h_crMConelepInt ->Write();
+  h_srMConelepInt ->Write();
+  h_crDataInt     ->Write();
+  h_ratioInt      ->Write();
+  h_purityInt     ->Write();
+  h_kFactor       ->Write();
+  h_pred          ->Write();
 
-  return;
+  return 0;
   
 }
 
