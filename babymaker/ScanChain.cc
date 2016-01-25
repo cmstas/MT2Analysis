@@ -486,7 +486,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
         }
 	// T2 models
-        else if (evt_id >= 1100 && evt_id < 1200) {
+        else if (evt_id >= 1100 && evt_id < 1300) {
           for (unsigned int i=0; i<sparm_values().size(); ++i) {
             if (sparm_names().at(i).Contains("mStop")) GenSusyMScan1 = sparm_values().at(i);
             if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
