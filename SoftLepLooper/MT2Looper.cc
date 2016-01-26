@@ -89,7 +89,7 @@ bool doHFJetVeto = false;
 // get signal scan nevents from file
 bool doScanWeights = true;
 // doesn't plot data for MT2 > 200 in signal regions
-bool doBlindData = false;
+bool doBlindData = true;
 // make variation histograms for tau efficiency
 bool doGenTauVars = true;
 // make variation histograms for e+mu efficiency
@@ -331,6 +331,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos))) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
+    else if (sample.find("T2-4bd") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
@@ -493,9 +494,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //const float lumi = 4;
 
       if (isSignal_ 
-          && !(t.GenSusyMScan1 == 400 && t.GenSusyMScan2 == 325)
-          && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 200)
-	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 975)
+          // && !(t.GenSusyMScan1 == 400 && t.GenSusyMScan2 == 325)
+          // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 200)
+	  // && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 975)
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335)
           //&& !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 700)
 	  //&& !(t.GenSusyMScan1 == 900 && t.GenSusyMScan2 == 875 && sample == "T1bbbb_mGluino-875-900-925")
           ) continue;
@@ -509,7 +511,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
-	  evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
+	  if (t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235) evtweight_ = lumi * 13.3 *1000./nevents; // assumes xsec is already filled correctly
+	  else if (t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335) evtweight_ = lumi * 2.6 *1000./nevents; // assumes xsec is already filled correctly
+	  else evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
@@ -595,76 +599,34 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       softlepphi_ = -1;
       softlepM_ = -1;
       softlepId_ = -1;
-      softlepElId_ = false;
       softlepmt_ = -1;
-      softlepmt2_ = -1;
-      softlepDPhiMin_ = 999;
 
-      //loop over isotracks to count PFleptons between 5-10GeV
-      int nPFlepLowPt = 0;
-      for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	float pt = t.isoTrack_pt[itrk];
-	if (pt < 5. || pt > 10.) continue;
-	int pdgId = t.isoTrack_pdgId[itrk];
-	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
-	if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
-	//if (t.isoTrack_relIsoAn04[itrk] > 0.4) continue;
-
-	//overlap removal with reco leps
-	bool overlap = false;
-	for(int ilep = 0; ilep < t.nlep; ilep++){
-	  float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
-	  if (thisDR < 0.01) {
-	    overlap = true;
-	    break;
-	  }
-	} // loop over reco leps
-	if (overlap) continue;
-
-	nPFlepLowPt++;
-      }
-
-      //loop over leps to find isolated leps with pt > 10 GeV
-      int nIsoLep = 0;
-      for (int ilep = 0; ilep < t.nlep; ilep++){
-	int pdgId = t.lep_pdgId[ilep];
-	if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
-	float pt = t.lep_pt[ilep];
-	if (pt < 10) continue;
-	//if (t.lep_relIsoAn04[ilep]>0.4) continue;
-	nIsoLep++;
-      }
-      
-      nUniqueLep_ = nIsoLep + nPFlepLowPt;
-
-      //counter to find isolated tracks
-      nVetoTracks_ = 0;
+      //counter to find highest pT isolated track
       int idxTrk = -1;
       float maxTrkPt = 0;
       for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	float pt = t.isoTrack_pt[itrk];
-	if (pt < 10.) continue;
-	int pdgId = t.isoTrack_pdgId[itrk];
-	if (abs(pdgId) != 211) continue;
-	if (t.isoTrack_absIso[itrk]/pt > 0.1) continue;
+      	float pt = t.isoTrack_pt[itrk];
+      	if (pt < 10.) continue;
+      	int pdgId = t.isoTrack_pdgId[itrk];
+      	if (abs(pdgId) != 211) continue;
+      	if (t.isoTrack_absIso[itrk]/pt > 0.1) continue;
 
-	//overlap removal with reco leps
-	bool overlap = false;
-	for(int ilep = 0; ilep < t.nlep; ilep++){
-	  float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
-	  if (thisDR < 0.01) {
-	    overlap = true;
-	    break;
-	  }
-	} // loop over reco leps
-	if (overlap) continue;
+      	//overlap removal with reco leps
+      	bool overlap = false;
+      	for(int ilep = 0; ilep < t.nlep; ilep++){
+      	  float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
+      	  if (thisDR < 0.01) {
+      	    overlap = true;
+      	    break;
+      	  }
+      	} // loop over reco leps
+      	if (overlap) continue;
 
-	if (pt > maxTrkPt){
-	  maxTrkPt = pt;
-	  idxTrk = itrk;
-	}
+      	if (pt > maxTrkPt){
+      	  maxTrkPt = pt;
+      	  idxTrk = itrk;
+      	}
 	
-	nVetoTracks_++;
       }
       
       //---------------------------------//
@@ -672,81 +634,45 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------------------//
 
       //if nleps==1, find soft lepton
-      if (nUniqueLep_ == 1) {
+      if (t.nlepIso == 1) {
 	// find unique lepton to plot pt,MT and get flavor
 	bool foundlep = false;
+	bool softlepElId = false;
 
-	// if reco leps, check those
-	if (t.nlep > 0) {
-      	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+	for (int ilep = 0; ilep < t.nlep; ++ilep) {
+	  
+	  //iso requirements
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]>0.2) continue;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]>0.1) continue;
+	  //if (t.lep_relIsoAn04[ilep]>0.4) continue;
 
-	    if (t.lep_relIsoAn04[ilep]>0.4) continue;
-
-      	    float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
-
-	    // good candidate: save
-	    softleppt_ = t.lep_pt[ilep];
-	    softlepeta_ = t.lep_eta[ilep];
-	    softlepphi_ = t.lep_phi[ilep];
-	    softlepM_ = t.lep_mass[ilep];
-	    softlepId_ = t.lep_pdgId[ilep];
-	    if ( t.lep_relIso03[ilep]<0.1 // tighter selection for electrons
-		 && t.lep_relIso03[ilep]*t.lep_pt[ilep]<5 // tighter selection for electrons
-		 && t.lep_tightId[ilep]>2
-		 ) 
-	      softlepElId_ = true;
-	    else softlepElId_ = false;
-	    softlepmt_ = mt;
-	    foundlep = true;
-	    break;
-	  }
-	} // t.nlep > 0
-
-	// otherwise check PF leps that don't overlap with a reco lepton
-	if (!foundlep /*&& t.nPFLep5LowMT > 0*/) {
-      	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	    float pt = t.isoTrack_pt[itrk];
-	    if (pt < 5. || pt > 10.) continue;
-      	    int pdgId = t.isoTrack_pdgId[itrk];
-	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
-      	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
-	    if (t.isoTrack_relIsoAn04[itrk]>0.4) continue;
-	    if (abs(pdgId) == 11 && abs(t.isoTrack_eta[itrk] > 1.5)) continue; //exclude low-pt endcap electrons
-	    float eta = t.isoTrack_eta[itrk];
-	    float phi = t.isoTrack_phi[itrk];
-	    float mass = t.isoTrack_mass[itrk];
-      	    float mt = sqrt( 2 * t.met_pt * pt * ( 1 - cos( t.met_phi - t.isoTrack_phi[itrk]) ) );
-
-	    // check overlap with reco leptons
-	    bool overlap = false;
-	    for(int ilep = 0; ilep < t.nlep; ilep++){
-	      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
-	      if (thisDR < 0.01) {
-		overlap = true;
-		break;
-	      }
-	    } // loop over reco leps
-	    if (overlap) continue;
-
-	    
-	    // good candidate: save
-	    softleppt_ = pt;
-	    softlepeta_ = eta;
-	    softlepphi_ = phi;
-	    softlepM_ = mass;
-	    softlepId_ = pdgId;
-	    softlepElId_ = false;
-	    softlepmt_ = mt;
-	    foundlep = true;
-	    break;
-	  } // loop on isotracks
-	} //!foundlep
-
+	  //reject low-pt endcap electrons
+	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+	  
+	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
+	  
+	  // good candidate: save
+	  softleppt_ = t.lep_pt[ilep];
+	  softlepeta_ = t.lep_eta[ilep];
+	  softlepphi_ = t.lep_phi[ilep];
+	  softlepM_ = t.lep_mass[ilep];
+	  softlepId_ = t.lep_pdgId[ilep];
+	  if ( t.lep_relIso03[ilep]<0.1 // tighter selection for electrons
+	       && t.lep_relIso03[ilep]*t.lep_pt[ilep]<5 // tighter selection for electrons
+	       && t.lep_tightId[ilep]>2
+	       ) 
+	    softlepElId = true;
+	  else softlepElId = false;
+	  softlepmt_ = mt;
+	  foundlep = true;
+	  break;
+	}
+	
 	if (!foundlep) continue;
 	
 	if (softleppt_ < 20 && softleppt_ > 5) {
 	  doSoftLepSRplots = true;
-	  if (abs(softlepId_) == 13)doSoftLepMuSRplots = true;
+	  if (abs(softlepId_) == 13) doSoftLepMuSRplots = true;
 	  if (abs(softlepId_) == 11) doSoftLepElSRplots = true;
 	}
 
@@ -755,56 +681,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //additional cuts for 1-lep CR  
 	  if (!t.HLT_SingleMu && !t.HLT_SingleEl) continue;
 	  //if (t.met_pt > 60) continue;
-	  if (abs(softlepId_) == 11 && !softlepElId_) continue;
+	  if (abs(softlepId_) == 11 && !softlepElId) continue;
 	  
 	  doSoftLepCRplots = true;
-	  if (abs(softlepId_) == 13)doSoftLepMuCRplots = true;
+	  if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
 	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
 	}
 	
-      } //nUniqueLep_==1
+      } //nlepIso==1
     
-      //-----------------------------------------------------//
-      //-------recompute some soft lep event variables-------//
-      //-----------------------------------------------------//
-
+      //-------------------------------------//
+      //-----dR matching for soft lepton-----//
+      //-------------------------------------//
       
-      //recompute dPhiMin for SR/CR
-      for(int ijet = 0; ijet < t.njet; ijet++){
-	//deltaPhiMin of 4 leading jet objects
-	if (ijet < 4) softlepDPhiMin_ = min(softlepDPhiMin_, DeltaPhi( softlepphi_ , t.jet_phi[ijet] ));
-      }
-
-      
-      //recompute mt2 for softlep CR
-      if (doSoftLepCRplots == true && softleppt_ > 200){
-
-	//first make list of jets for hemispheres
-	vector<LorentzVector> p4sForHems;
-	for(int ijet = 0; ijet < t.njet; ijet++){
-
-	  if (t.jet_pt[ijet] < 30 || fabs(t.jet_eta[ijet]) > 2.5) continue;
-
-	  TLorentzVector jetp4(0,0,0,0);
-	  jetp4.SetPtEtaPhiM(t.jet_pt[ijet],t.jet_eta[ijet],t.jet_phi[ijet],t.jet_mass[ijet]);
-
-	  LorentzVector jetp4LV(jetp4.Px(),jetp4.Py(),jetp4.Pz(),jetp4.E());
-	  
-	  p4sForHems.push_back(jetp4LV);
-	}
-
-	//sort list
-	std::sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
-
-	//recalculate mt2 using lep pt as met
-	vector<LorentzVector> hemJets;
-	if (p4sForHems.size() > 1) {
-	  hemJets = getHemJets(p4sForHems);
-	  softlepmt2_ = HemMT2(softleppt_, softlepphi_, hemJets.at(0), hemJets.at(1));
-	}
-      }//softlep recompute MT2
-
-      //dR matching for soft-lepton
       bool softlepMatched = false;
       if (doSoftLepSRplots || doSoftLepCRplots){
 	double minDR = 999;
@@ -853,91 +742,47 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       lep2phi_ = -1;
       lep2M_ = -1;
       dilepmll_ = -1;
-      if (nUniqueLep_ == 2) {
-	// find unique lepton to plot pt,MT and get flavor
+      if (t.nlepIso == 2) {
+
 	int nfoundlep = 0;
 	int cand1_pdgId = 0;
 	int cand2_pdgId = 0;
 	
 	// if reco leps, check those
-	if (t.nlep > 0) {
-      	  for (int ilep = 0; ilep < t.nlep; ++ilep) {
+	for (int ilep = 0; ilep < t.nlep; ++ilep) {
+	  
+	  //iso requirements
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]>0.2) continue;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]>0.1) continue;
+	  //if (t.lep_relIsoAn04[ilep]>0.4) continue;
 
-	    if (t.lep_relIsoAn04[ilep]>0.4) continue;
-
-	    // good candidate: save
-	    if (nfoundlep == 0){
-	      lep1pt_ = t.lep_pt[ilep];
-	      lep1eta_ = t.lep_eta[ilep];
-	      lep1phi_ = t.lep_phi[ilep];
-	      lep1M_ = t.lep_mass[ilep];
-	      cand1_pdgId = t.lep_pdgId[ilep];
-	      nfoundlep++;
-	      continue;
-	    }
-	    if (nfoundlep == 1){
-	      lep2pt_ = t.lep_pt[ilep];
-	      lep2eta_ = t.lep_eta[ilep];
-	      lep2phi_ = t.lep_phi[ilep];
-	      lep2M_ = t.lep_mass[ilep];
-	      cand2_pdgId = t.lep_pdgId[ilep];
-	      nfoundlep++;
-	      break;
-	    }
+	  //reject low-pt endcap electrons
+	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+	  
+	  // good candidate: save
+	  if (nfoundlep == 0){
+	    lep1pt_ = t.lep_pt[ilep];
+	    lep1eta_ = t.lep_eta[ilep];
+	    lep1phi_ = t.lep_phi[ilep];
+	    lep1M_ = t.lep_mass[ilep];
+	    cand1_pdgId = t.lep_pdgId[ilep];
+	    nfoundlep++;
+	    continue;
 	  }
-	} // t.nlep > 0
-
-	// otherwise check PF leps that don't overlap with a reco lepton
-	if (nfoundlep < 2) {
-	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
-	    float pt = t.isoTrack_pt[itrk];
-	    if (pt < 5. || pt > 10.) continue;
-      	    int pdgId = t.isoTrack_pdgId[itrk];
-	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
-      	    if (t.isoTrack_absIso[itrk]/pt > 0.2) continue;
-	    if (t.isoTrack_relIsoAn04[itrk]>0.4) continue;
-	    if (abs(pdgId) == 11 && abs(t.isoTrack_eta[itrk] > 1.5)) continue; //exclude low-pt endcap electrons
-	    float eta = t.isoTrack_eta[itrk];
-	    float phi = t.isoTrack_phi[itrk];
-	    float mass = t.isoTrack_mass[itrk];
-
-	    // check overlap with reco leptons
-	    bool overlap = false;
-	    for(int ilep = 0; ilep < t.nlep; ilep++){
-	      float thisDR = DeltaR(t.isoTrack_eta[itrk], t.lep_eta[ilep], t.isoTrack_phi[itrk], t.lep_phi[ilep]);
-	      if (thisDR < 0.01) {
-		overlap = true;
-		break;
-	      }
-	    } // loop over reco leps
-	    if (overlap) continue;
-
-	    
-	    // good candidate: save
-	    if (nfoundlep == 0){
-	      lep1pt_ = pt;
-	      lep1eta_ = eta;
-	      lep1phi_ = phi;
-	      lep1M_ = mass;
-	      cand1_pdgId = pdgId;
-	      nfoundlep++;
-	      continue;
-	    }
-	    if (nfoundlep == 1){
-	      lep2pt_ = pt;
-	      lep2eta_ = eta;
-	      lep2phi_ = phi;
-	      lep2M_ = mass;
-	      cand2_pdgId = pdgId;
-	      nfoundlep++;
-	      break;
-	    }
-	  } // loop on isotracks	  
-	} //nfoundlep < 
+	  if (nfoundlep == 1){
+	    lep2pt_ = t.lep_pt[ilep];
+	    lep2eta_ = t.lep_eta[ilep];
+	    lep2phi_ = t.lep_phi[ilep];
+	    lep2M_ = t.lep_mass[ilep];
+	    cand2_pdgId = t.lep_pdgId[ilep];
+	    nfoundlep++;
+	    break;
+	  }
+	}
+	
 	if (nfoundlep != 2) continue; 
 	
 	//at least one soft lepton
-	//if (lep1pt_ > 20 && lep2pt_ > 20) { continue; }
 	if (lep1pt_ < 20 || lep2pt_ < 20) { hasSoftLepton = true; }
 	
 	//opposite sign
@@ -969,14 +814,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	softlepmt_ = cr2Lmt_;
 	//if you get to here, fill in CR
 	doDoubleLepCRplots = true;
-
-	if (nfoundlep != 2) {
-	  std::cout << "MT2Looper::Loop: WARNING! didn't find 2 leptons when expected: evt: " << t.evt
-		    << ", nMuons10: " << t.nMuons10 << ", nElectrons10: " << t.nElectrons10 
-		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
-	}
 	
-      }//nUniqueLep_==2
+      }//nlepIso==2
       
       
       //-------------------------------------//
@@ -1112,7 +951,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       //compute invariant mass between softlep and highest pT isolated (veto) track
       dilepmllTrack_ = -1;
-      if (doSoftLepSRplots && nVetoTracks_ > 0){
+      if (doSoftLepSRplots && t.nPFHad10 > 0){
 	TLorentzVector track_p4(0,0,0,0);
 	TLorentzVector softlep_p4(0,0,0,0);
 	track_p4.SetPtEtaPhiM(t.isoTrack_pt[idxTrk],t.isoTrack_eta[idxTrk],t.isoTrack_phi[idxTrk],t.isoTrack_mass[idxTrk]);
@@ -1138,7 +977,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// fillHistosInclusive();
       }
 
-      if (doSoftLepSRplots) {
+      if (doSoftLepSRplots && !(t.isData && doBlindData) ) {
         saveSoftLplots = true;	
         fillHistosLepSignalRegions("srLep");
 	if (softlepMatched) {
@@ -1482,13 +1321,14 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
 
   std::map<std::string, float> values;
-  values["deltaPhiMin"] = softlepDPhiMin_;
+  values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = nUniqueLep_+nVetoTracks_;
+  values["nlep"]        = t.nlepIso+t.nPFHad10;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
-  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
-  values["ht"]          = t.ht-softleppt_;
+  //  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
+  values["mt2"]         = 201; // hack to relax mt2 requirement
+  values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
 
@@ -1505,13 +1345,13 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
 void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suffix) {
  
   std::map<std::string, float> values;
-  values["deltaPhiMin"] = softlepDPhiMin_;
+  values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = 0; //dummy variable for 1L CR
-  values["nlep"]        = nUniqueLep_+nVetoTracks_;
+  values["nlep"]        = t.nlepIso+t.nPFHad10;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
-  values["mt2"]         = t.nJet30 > 1 ? softlepmt2_ : softleppt_; // require large MT2 for multijet events //replace met with lepton pT in cr1L
-  values["ht"]          = t.ht-softleppt_; //corrected ht in this CR
+  values["mt2"]         = t.nJet30 > 1 ? t.sl_mt2 : softleppt_; // require large MT2 for multijet events //replace met with lepton pT in cr1L
+  values["ht"]          = t.ht; //corrected ht in this CR
   values["met"]         = softleppt_; //replace met with lepton pT in cr1L
   values["mt"]          = softlepmt_;
 
@@ -1549,13 +1389,13 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
 
   std::map<std::string, float> values;
-  values["deltaPhiMin"] = softlepDPhiMin_;
+  values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = 1; //dummy variable for double lepton CR
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
   values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
-  values["ht"]          = t.ht-lep1pt_-lep2pt_;
+  values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
 
@@ -1755,10 +1595,10 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_lepeta"+s,      softlepeta_,   evtweight_, h_1d, "eta",  60, -3, 3);
   plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
   plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
-  plot1D("h_softlepmt2"+s,    softlepmt2_,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_softlepmt2"+s,    t.sl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
   plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
-  plot1D("h_softlepht"+s,       t.ht-softleppt_,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
-  plot1D("h_rlht"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+  //plot1D("h_rlht"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
 
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
@@ -1909,7 +1749,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_lep2ptshort"+s,      lep2pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lep2phi"+s,      lep2phi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lep2eta"+s,      lep2eta_,   evtweight_, h_1d, "eta",  60, -3, 3);
-  plot1D("h_softlepht"+s,       t.ht-lep1pt_-lep2pt_,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
 
   plot1D("h_dilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
   

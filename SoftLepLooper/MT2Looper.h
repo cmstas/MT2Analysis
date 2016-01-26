@@ -67,19 +67,14 @@ class MT2Looper {
   float evtweight_lepEffUp_;
   float evtweight_lepEffDn_;
   int nlepveto_;
-  int nVetoTracks_;
     
   //soft lep variables
-  int nUniqueLep_;
   float softleppt_;
   float softlepeta_;
   float softlepphi_;
   float softlepM_;
   int softlepId_;
-  bool softlepElId_;
   float softlepmt_;
-  float softlepmt2_;
-  float softlepDPhiMin_;
 
   bool foundMissingTau_;
   int missIdx_;
