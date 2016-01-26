@@ -403,6 +403,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
+	//hack to recover fastsim events with broken raw MET
+	if (isFastsim && (cms3.evt_pfmet_raw() > 5000)) {
+	  met_pt  = cms3.evt_pfmet();
+	  met_phi = cms3.evt_pfmetPhi();
+	}
 	// hack for fastsim v1
 	if (isFastsim) { 
 	  met_rawPt  = cms3.evt_pfmet_raw();
@@ -494,7 +499,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         }
 
 	// use sparm values to look up xsec
-	if (evt_id >= 1000 && evt_id < 1200) evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
+	if (evt_id >= 1000 && evt_id < 1300) evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
 
         if (verbose) cout << "before gen particles" << endl;
 
