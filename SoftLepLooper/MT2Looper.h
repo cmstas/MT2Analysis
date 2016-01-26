@@ -79,6 +79,9 @@ class MT2Looper {
   bool foundMissingTau_;
   int missIdx_;
   float missPt_;
+  float bjetPt_;
+  int nSoftB_;
+  int nHardB_;
 
   //2-lep softLep CR variables
   float lep1pt_;

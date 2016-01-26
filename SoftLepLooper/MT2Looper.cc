@@ -121,7 +121,7 @@ void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVecLep =  getSignalRegionsLep3(); 
+  SRVecLep =  getSignalRegionsLep4(); 
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
@@ -494,10 +494,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //const float lumi = 4;
 
       if (isSignal_ 
-          // && !(t.GenSusyMScan1 == 400 && t.GenSusyMScan2 == 325)
-          // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 200)
-	  // && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 975)
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335)
+	  //&& !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235)
           //&& !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 700)
 	  //&& !(t.GenSusyMScan1 == 900 && t.GenSusyMScan2 == 875 && sample == "T1bbbb_mGluino-875-900-925")
           ) continue;
@@ -960,6 +958,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	dilepmllTrack_ = dilep_p4.M();
       }
 
+      //find the highest-pT b-jet and count soft/hard b-jets
+      bjetPt_ = -1;
+      nSoftB_ = 0;
+      nHardB_ = 0;
+      for(int ijet = 0; ijet < t.njet; ijet++){
+	if (!(t.jet_btagCSV[ijet] >= 0.89)) continue;
+
+	if (t.jet_pt[ijet] > 60) nHardB_++;
+	else nSoftB_++;
+	    
+	if (t.jet_pt[ijet] > bjetPt_) bjetPt_ = t.jet_pt[ijet];
+      }
+      
       ////////////////////////////////////
       /// done with overall selection  /// 
       ////////////////////////////////////
@@ -1326,8 +1337,8 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   values["nlep"]        = t.nlepIso+t.nPFHad10;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
-  //  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
-  values["mt2"]         = 201; // hack to relax mt2 requirement
+  values["nbjetshard"]  = nHardB_;
+  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
@@ -1350,6 +1361,7 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values["nlep"]        = t.nlepIso+t.nPFHad10;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
+  values["nbjetshard"]  = nHardB_;
   values["mt2"]         = t.nJet30 > 1 ? t.sl_mt2 : softleppt_; // require large MT2 for multijet events //replace met with lepton pT in cr1L
   values["ht"]          = t.ht; //corrected ht in this CR
   values["met"]         = softleppt_; //replace met with lepton pT in cr1L
@@ -1394,6 +1406,7 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   values["nlep"]        = 1; //dummy variable for double lepton CR
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
+  values["nbjetshard"]  = nHardB_;
   values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
@@ -1428,9 +1441,9 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
   plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
   //if (!doMinimalPlots) {
-    plot1D("h_mt2"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
-    plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
-    plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+    plot1D("h_mt2"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 100, 0, 1000);
+    plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+    plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 80, 0, 2000);
     plot1D("h_nJet30"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nJet30Eta3"+s,       nJet30Eta3_,   evtweight_, h_1d, ";N(jets, |#eta| > 3.0)", 10, 0, 10);
     plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
@@ -1441,6 +1454,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+    plot1D("h_BJetpt"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 150, 0, 1500);
     //}
 
   TString directoryname(dirname);
@@ -1593,12 +1607,11 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_lepptshort"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lepphi"+s,      softlepphi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lepeta"+s,      softlepeta_,   evtweight_, h_1d, "eta",  60, -3, 3);
-  plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
+  plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
-  plot1D("h_softlepmt2"+s,    t.sl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
-  plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
-  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
-  //plot1D("h_rlht"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+  plot1D("h_softlepmt2"+s,    t.sl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 1000, 0, 1000);
+  plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 80, 0, 2000);
 
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
@@ -1749,7 +1762,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_lep2ptshort"+s,      lep2pt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lep2phi"+s,      lep2phi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lep2eta"+s,      lep2eta_,   evtweight_, h_1d, "eta",  60, -3, 3);
-  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 80, 0, 2000);
 
   plot1D("h_dilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
   
@@ -1769,7 +1782,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   }
   float mt = sqrt( 2 * t.met_pt * lowpt * ( 1 - cos( t.met_phi - lowphi) ) );
 
-  plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 500, 0, 500);
+  plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      lowpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_highleppt"+s,      highpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
