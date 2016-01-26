@@ -444,7 +444,7 @@ std::vector<SR> getSignalRegionsLep3(){
   
 
   //define baseline selections commmon to all signal regions 
-  baseSR.SetVar("mt2", 0, -1);
+  baseSR.SetVar("mt2", 100, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVar("nlep", 1, 2);
@@ -643,7 +643,7 @@ std::vector<SR> getSignalRegionsLep4(){
   
 
   //define baseline selections commmon to all signal regions 
-  baseSR.SetVar("mt2", 100, -1);
+  baseSR.SetVar("mt2", 0, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
   baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVar("nlep", 1, 2);
