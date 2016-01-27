@@ -12,9 +12,12 @@ std::string getLegendName(const std::string& sample);
 std::string getTableName(const std::string& sample);
 
 std::string getJetBJetPlotLabel(TFile* f, std::string dir_str);
+std::string getJetBJetPlotLabel2(TFile* f, std::string dir_str);
 std::string getHTPlotLabel(TFile* f, std::string dir_str);
 std::string getHTTableLabel(TFile* f, std::string dir_str);
 std::string getMETTableLabel(TFile* f, std::string dir_str);
 std::string getMT2PlotLabel(TFile* f, std::string dir_str);
+std::string getMTPlotLabel(TFile* f, std::string dir_str);
+std::string getMETPlotLabel(TFile* f, std::string dir_str);
 std::string getJetBJetTableLabel(TFile* f, std::string dir_str);
 std::string getJetBJetTableLabel2(TFile* f, std::string dir_str);

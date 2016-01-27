@@ -270,6 +270,74 @@ string getJetBJetPlotLabel(TFile* f, std::string dir_str) {
 }
 
 //_______________________________________________________________________________
+string getJetBJetPlotLabel2(TFile* f, std::string dir_str) {
+
+  TString dir= TString(dir_str);
+
+  TH1D* h_njets_LOW = (TH1D*) f->Get(dir+"/h_njets_LOW");
+  TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
+  int njets_LOW;
+  int njets_HI;
+  if(h_njets_LOW && h_njets_HI){
+    njets_LOW = h_njets_LOW->GetBinContent(1);
+    njets_HI = h_njets_HI->GetBinContent(1);
+  }
+  else{
+    njets_LOW = 0;
+    njets_HI = -1;
+  }
+
+  TH1D* h_nbjets_LOW = (TH1D*) f->Get(dir+"/h_nbjets_LOW");
+  TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
+  int nbjets_LOW;
+  int nbjets_HI;
+  if(h_nbjets_LOW && h_nbjets_HI){
+    nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+    nbjets_HI = h_nbjets_HI->GetBinContent(1);
+  }
+  else{
+    nbjets_LOW = 0;
+    nbjets_HI = -1;
+  }
+  
+  TH1D* h_nbjetshard_LOW = (TH1D*) f->Get(dir+"/h_nbjetshard_LOW");
+  TH1D* h_nbjetshard_HI = (TH1D*) f->Get(dir+"/h_nbjetshard_HI");
+  int nbjetshard_LOW;
+  int nbjetshard_HI;
+  if(h_nbjetshard_LOW && h_nbjetshard_HI){
+    nbjetshard_LOW = h_nbjetshard_LOW->GetBinContent(1);
+    nbjetshard_HI = h_nbjetshard_HI->GetBinContent(1);
+  }
+  else{
+    nbjetshard_LOW = 0;
+    nbjetshard_HI = -1;
+  }
+
+  if(njets_HI != -1) njets_HI--;
+  if(nbjets_HI != -1) nbjets_HI--;
+  if(nbjetshard_HI != -1) nbjetshard_HI--;
+
+  std::string jet_string; 
+  std::string bjet_string; 
+  std::string bjethard_string; 
+
+  if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
+  else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
+  else jet_string = "#geq " + toString(njets_LOW) + "j";
+
+  if( (nbjets_HI - nbjets_LOW) == 0) bjet_string = toString(nbjets_LOW) + "b";
+  else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
+  else bjet_string = "#geq " + toString(nbjets_LOW) + "b";
+
+  if( (nbjetshard_HI - nbjetshard_LOW) == 0) bjethard_string = toString(nbjetshard_LOW) + "b_{Hard}";
+  else if( nbjetshard_HI != -1) bjethard_string = toString(nbjetshard_LOW) + "-" + toString(nbjetshard_HI) + "b_{Hard}";
+  else bjethard_string = "#geq " + toString(nbjetshard_LOW) + "b_{Hard}";
+
+  return jet_string + ", " + bjet_string + " (" + bjethard_string + ")";
+
+}
+
+//_______________________________________________________________________________
 string getHTPlotLabel(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
@@ -286,6 +354,46 @@ string getHTPlotLabel(TFile* f, std::string dir_str) {
 
   if(ht_HI != -1) return toString(ht_LOW) + " < H_{T} < " + toString(ht_HI) + " GeV"; 
   else  return "H_{T} > " + toString(ht_LOW) + " GeV";
+
+}
+
+//_______________________________________________________________________________
+string getMTPlotLabel(TFile* f, std::string dir_str) {
+
+  TString dir= TString(dir_str);
+
+  TH1D* h_mt_LOW = (TH1D*) f->Get(dir+"/h_mt_LOW");
+  TH1D* h_mt_HI = (TH1D*) f->Get(dir+"/h_mt_HI");
+  int mt_LOW;
+  int mt_HI;
+  if(h_mt_LOW && h_mt_HI){
+    mt_LOW = h_mt_LOW->GetBinContent(1);
+    mt_HI = h_mt_HI->GetBinContent(1);
+  }
+  else return "H_{T} > 200 GeV";
+
+  if(mt_HI != -1) return toString(mt_LOW) + " < M_{T} < " + toString(mt_HI) + " GeV"; 
+  else  return "M_{T} > " + toString(mt_LOW) + " GeV";
+
+}
+
+//_______________________________________________________________________________
+string getMETPlotLabel(TFile* f, std::string dir_str) {
+
+  TString dir= TString(dir_str);
+
+  TH1D* h_met_LOW = (TH1D*) f->Get(dir+"/h_met_LOW");
+  TH1D* h_met_HI = (TH1D*) f->Get(dir+"/h_met_HI");
+  int met_LOW;
+  int met_HI;
+  if(h_met_LOW && h_met_HI){
+    met_LOW = h_met_LOW->GetBinContent(1);
+    met_HI = h_met_HI->GetBinContent(1);
+  }
+  else return "E_{T}^{miss} > 200 GeV";
+
+  if(met_HI != -1) return toString(met_LOW) + " < E_{T}^{miss} < " + toString(met_HI) + " GeV"; 
+  else  return "E_{T}^{miss} > " + toString(met_LOW) + " GeV";
 
 }
 

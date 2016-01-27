@@ -306,97 +306,14 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   
   //TString ht_label = getHTPlotLabel(histdir);
   TString ht_label = getHTPlotLabel(samples.at(0), histdir);
-  TString region_label = getJetBJetPlotLabel(samples.at(0), histdir);
-  TString region_label_line2 = getMT2PlotLabel(samples.at(0), histdir);
-  //label.DrawLatex(0.2,0.85,ht_label);
+  TString region_label = getMETPlotLabel(samples.at(0), histdir);
+  TString region_label_line2 = getJetBJetPlotLabel2(samples.at(0), histdir);
+  TString region_label_line3 = getMTPlotLabel(samples.at(0), histdir);
 
-  // ------- some hardcoded labels..
-  // base region plots all have at least 2 jets
-  if ((histdir.find("base") != std::string::npos)) region_label = "#geq 2j";
-  if ((histdir.find("baseJ") != std::string::npos)) {
-    region_label = "1j";
-    region_label_line2 = "";
-  }
-  if ((histdir.find("nocut") != std::string::npos)) {
-    ht_label = "HT #geq 0";
-    region_label = "#geq 0j";
-    region_label_line2 = "";
-  }
-
-  
-  // bkg control regions
-  if ((histdir.find("crslwjets") != std::string::npos)) region_label = "#geq 2j, 0b";
-  if ((histdir.find("crslttbar") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
-  // minMT plot always requires at least 2 bjets
-  if ((histdir.find("srbase") != std::string::npos) && (histname.find("minMTBMet") != std::string::npos)) region_label = "#geq 2j, #geq 2b";
-  // lostlepton CR
-  if ((histdir.find("crsl") != std::string::npos)) {
-    ht_label = "";
-    if (histdir.find("J") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 200 GeV";
-    if (histdir.find("met50") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 50 GeV";
-    else if (histdir.find("met80") != std::string::npos) region_label_line2 = "E_{T}^{miss} > 80 GeV";
-    if (histdir.find("mt30") != std::string::npos) region_label_line2 += ", M_{T} > 30 GeV";
-    if (histdir.find("J") != std::string::npos) region_label = "exactly 1j";
-    else if (histdir.find("VL") != std::string::npos) {region_label = "#geq 2j"; ht_label = "200 < H_{T} < 450 GeV";}
-    else if (histdir.find("L") != std::string::npos) {region_label = "#geq 2j"; ht_label = "450 < H_{T} < 575 GeV";}
-    else if (histdir.find("M") != std::string::npos) {region_label = "#geq 2j"; ht_label = "575 < H_{T} < 1000 GeV";}
-    else if (histdir.find("UH") != std::string::npos) {region_label = "#geq 2j"; ht_label = "H_{T} > 1500 GeV";}
-    else if (histdir.find("H") != std::string::npos) {region_label = "#geq 2j"; ht_label = "1000 < H_{T} < 1500 GeV";}
-    if (histdir.find("nj2") != std::string::npos) region_label = "#geq 2j";
-    if (histdir.find("nb0") != std::string::npos) region_label += ", 0b";
-    else if (histdir.find("nb2") != std::string::npos) region_label += ", #geq 2b";
-  }
-  if ((histdir.find("crslel") != std::string::npos)) region_label += ", 1 electron";
-  else if ((histdir.find("crslmu") != std::string::npos)) region_label += ", 1 muon";
-  else if ((histdir.find("crsl") != std::string::npos)) region_label += ", 1 lepton";
-
-  // zll mt CR
-  if (histdir.find("crmt") != std::string::npos) {
-    if (histdir.find("base") != std::string::npos) region_label = "";
-    else region_label = "#geq 2j, ";
-    if ((histdir.find("base") != std::string::npos) || (histdir.find("nj2nb0") != std::string::npos)) ht_label = "";
-    else if (histdir.find("ht200") != std::string::npos) ht_label = "H_{T} > 200 GeV";
-    else if (histdir.find("ht450") != std::string::npos) ht_label = "H_{T} > 450 GeV";
-    if (histdir.find("crmtel") != std::string::npos) region_label += "Z(ee) w/ removed lepton";
-    else if (histdir.find("crmtmu") != std::string::npos) region_label += "Z(#mu#mu) w/ removed lepton";
-    else region_label += "Z(ll) w/ removed lepton";
-    if (histname.find("mt2gt50") != std::string::npos) region_label_line2 = "M_{T2} > 50 GeV";
-    else if (histname.find("mt2gt100") != std::string::npos) region_label_line2 = "M_{T2} > 100 GeV";
-    else if (histname.find("mt2gt150") != std::string::npos) region_label_line2 = "M_{T2} > 150 GeV";
-    else if (histname.find("mt2gt200") != std::string::npos) region_label_line2 = "M_{T2} > 200 GeV";
-    else region_label_line2 = "";
-  }
-
-  //soft lepton regions
-  if (histdir.find("srLep") != std::string::npos) {
-    if (histdir.find("base") != std::string::npos){
-      ht_label = "H_{T} > 200 GeV";
-      region_label = "#geq 2j, E_{T}^{miss} > 200";
-      region_label_line2 = "M_{T} > 20 GeV";
-      if (histdir.find("softlmu") != std::string::npos){
-      region_label = "Single Muon";
-      }
-      if (histdir.find("softlel") != std::string::npos){
-      region_label = "Single Electron";
-      }
-    }
-    if (histdir.find("baseJ") != std::string::npos){
-      ht_label = "H_{T} > 200 GeV";
-      region_label = "1j, E_{T}^{miss} > 200";
-      region_label_line2 = "M_{T} > 20 GeV";
-    }
-  }
-  if (histdir.find("doublel") != std::string::npos) {
-    if (histdir.find("base") != std::string::npos){
-      ht_label = "";
-      region_label = "";
-      region_label_line2 = "";
-    }
-  }
-  
   if (ht_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start,ht_label);
   if (region_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start - label_y_spacing,region_label);
   if (region_label_line2.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 2 * label_y_spacing,region_label_line2);
+  if (region_label_line3.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 3 * label_y_spacing,region_label_line3);
 
   if (scaleBGtoData && data_hist) {
     TString scale_label = Form("MC scaled by %.2f #pm %.2f",bg_sf,bg_sf_err);
@@ -1523,7 +1440,7 @@ void plotMakerSoft(){
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
   //plotMakerSoftLepSRMissingLep(); return;
-  //plotMakerSoftLepSR(); return;
+  plotMakerSoftLepSR(); return;
   //plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
   
