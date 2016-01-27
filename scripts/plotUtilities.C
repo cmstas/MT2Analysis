@@ -212,6 +212,9 @@ string getTableName(const string& sample) {
   if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
+  
+  if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
+  if (sample.find("T2-4bd_375_335") != string::npos) return "T2-4bd 375, 335";
 
   cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;

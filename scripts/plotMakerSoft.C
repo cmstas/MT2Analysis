@@ -823,9 +823,9 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
   // header
   for (int ibin = 1; ibin < n_mt2bins; ++ibin) {
-    cout << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ mT $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
+    cout << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ $M_{T}$ $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
   }
-  cout << " & mT $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
+  cout << " & $M_{T}$ $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
   cout << " \\\\" << endl
     << "\\hline\\hline" << endl;
 
@@ -927,7 +927,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
 
   std::cout << "\\hline" << std::endl;
-  std::cout << "\\end{tabular}}" << std::endl;
+  std::cout << "\\end{tabular}" << std::endl;
   std::cout << "\\end{table}" << std::endl;
   //std::cout << "\\pagebreak" << std::endl;
   std::cout << std::endl;
@@ -1224,6 +1224,7 @@ void plotMakerSoftLepSR(){
 	  makePlot( samples , names , dir_name , "h_BJetpt"+suffix , "p_{T}(bjet1) [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_categoryB"+suffix , "B-Category" , "Events" , 0 , 4 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_mt"+suffix , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_mtbins"+suffix , "M_{T} [GeV]" , "Events / bin" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Wpt"+suffix , "W p_{T} [GeV]" , "Events / 20 GeV" , 0 , 800 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  //makePlot( samples , names , dir_name , "h_missingdilepmll"+suffix , "m_{ll} [GeV]" , "Events" , 0 , 150 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1522,7 +1523,7 @@ void plotMakerSoft(){
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
   //plotMakerSoftLepSRMissingLep(); return;
-  plotMakerSoftLepSR(); return;
+  //plotMakerSoftLepSR(); return;
   //plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
   
@@ -1572,10 +1573,14 @@ void plotMakerSoft(){
   // samples.push_back(f_dy); names.push_back("dyjets");
   // samples.push_back(f_tt2l); names.push_back("tt+2l");
 
-  TFile* f_bkg = new TFile(Form("%s/../allSRbkg.root",input_dir.c_str()));
-   samples.push_back(f_bkg); names.push_back("onelep");
-   samples.push_back(f_bkg); names.push_back("dilep");
-   samples.push_back(f_bkg); names.push_back("fake");
+  TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
+  TFile* f_T2_4bd_275 = new TFile(Form("%s/T2-4bd_275.root",input_dir.c_str())); 
+  TFile* f_T2_4bd_375 = new TFile(Form("%s/T2-4bd_375.root",input_dir.c_str())); 
+  samples.push_back(f_bkg); names.push_back("onelep");
+  samples.push_back(f_bkg); names.push_back("dilep");
+  samples.push_back(f_bkg); names.push_back("fake");
+  samples.push_back(f_T2_4bd_275); names.push_back("T2-4bd_275_235 sig");
+  samples.push_back(f_T2_4bd_375); names.push_back("T2-4bd_375_335 sig");
   
   
   //samples.push_back(f_data); names.push_back("data");
@@ -1631,34 +1636,33 @@ void plotMakerSoft(){
   std::cout << "\\begin{document}" << std::endl;
   
   vector<string> dirs;
-  dirs.push_back("srLep1L");
-  dirs.push_back("srLep2L");
-  dirs.push_back("srLep3L");
-  dirs.push_back("srLep4L");
-  dirs.push_back("srLep5L");
-  dirs.push_back("srLep6L");
-  dirs.push_back("srLep1M");
-  dirs.push_back("srLep2M");
-  dirs.push_back("srLep3M");
-  dirs.push_back("srLep4M");
-  dirs.push_back("srLep5M");
-  dirs.push_back("srLep6M");
-  dirs.push_back("srLep1H");
-  dirs.push_back("srLep2H");
-  dirs.push_back("srLep3H");
-  dirs.push_back("srLep4H");
-  dirs.push_back("srLep5H");
-  dirs.push_back("srLep6H");
+  // dirs.push_back("srLep1L");
+  // dirs.push_back("srLep2L");
+  // dirs.push_back("srLep3L");
+  // dirs.push_back("srLep4L");
+  // dirs.push_back("srLep5L");
+  // dirs.push_back("srLep6L");
+  // dirs.push_back("srLep1M");
+  // dirs.push_back("srLep2M");
+  // dirs.push_back("srLep3M");
+  // dirs.push_back("srLep4M");
+  // dirs.push_back("srLep5M");
+  // dirs.push_back("srLep6M");
+  // dirs.push_back("srLepB3");
+  // dirs.push_back("srLepMET");
+  // dirs.push_back("srLepHT");
+  // dirs.push_back("srLepJ1L");
+  // dirs.push_back("srLepJ1M");
+  // dirs.push_back("srLepJ2L");
+  // dirs.push_back("srLepJ3L");
+  // dirs.push_back("srLepbaseJ");
+  // dirs.push_back("srLepbaseJ1");
+  dirs.push_back("srLepbase");
   
-  
-  //  dirs.push_back("srLepJ1");
-  //  dirs.push_back("srLepJ2");
-
-  
-  // for(unsigned int i=0; i<dirs.size(); i++){
-  //   printDetailedTable(samples, names, dirs.at(i));
-  //   if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
-  // }
+  for(unsigned int i=0; i<dirs.size(); i++){
+    printDetailedTable(samples, names, dirs.at(i));
+    if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+  }
   
   
   vector<string> dirsH;
@@ -1683,22 +1687,7 @@ void plotMakerSoft(){
   // dirsH.clear();
 
   
-  // dirsH.push_back("srLep1H");
-  // dirsH.push_back("srLep2H");
-  // dirsH.push_back("srLep3H");
-  // dirsH.push_back("srLep4H");
-  // dirsH.push_back("srLep5H");
-  // dirsH.push_back("srLep6H");
-  // printTable(samples, names, dirsH, -1);
-  // dirsH.clear();
-
-  
-  // dirsH.push_back("srLepJ1");
-  // dirsH.push_back("srLepJ2");
-  // printTable(samples, names, dirsH, -1);
-  // dirsH.clear();
-  
-  dirsH.push_back("cr2Lbase");
+  // dirsH.push_back("cr2Lbase");
   // dirsH.push_back("cr2L1L");
   // dirsH.push_back("cr2L2L");
   // dirsH.push_back("cr2L3L");
@@ -1711,12 +1700,6 @@ void plotMakerSoft(){
   // dirsH.push_back("cr2L4M");
   // dirsH.push_back("cr2L5M");
   // dirsH.push_back("cr2L6M");
-  dirsH.push_back("cr2L1H");
-  dirsH.push_back("cr2L2H");
-  dirsH.push_back("cr2L3H");
-  dirsH.push_back("cr2L4H");
-  dirsH.push_back("cr2L5H");
-  dirsH.push_back("cr2L6H");
   //printTable(samples, names, dirsH, -1);
 
   for(unsigned int i=0; i<dirsH.size(); i++){
