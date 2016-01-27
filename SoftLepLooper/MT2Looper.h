@@ -82,6 +82,7 @@ class MT2Looper {
   float bjetPt_;
   int nSoftB_;
   int nHardB_;
+  int categoryB_;
 
   //2-lep softLep CR variables
   float lep1pt_;

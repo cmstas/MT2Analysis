@@ -968,6 +968,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    
 	if (t.jet_pt[ijet] > bjetPt_) bjetPt_ = t.jet_pt[ijet];
       }
+      // define b-category
+      categoryB_ = -1;
+      if (nSoftB_ + nHardB_ > 2) categoryB_ = 3;
+      else if (nHardB_ > 0) categoryB_ = 2;
+      else if (nSoftB_ > 0) categoryB_ = 1;
+      else categoryB_ = 0;
       
       ////////////////////////////////////
       /// done with overall selection  /// 
@@ -1450,9 +1456,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
-    plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
-    plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
-    plot1D("h_BJetpt"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 150, 0, 1500);
+    plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 100, 0, 1000);
+    plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 100, 0, 1000);
+    plot1D("h_BJetpt"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
+    plot1D("h_categoryB"+s,  categoryB_,   evtweight_, h_1d, ";b-category", 4, 0, 4);
     //}
 
   TString directoryname(dirname);
