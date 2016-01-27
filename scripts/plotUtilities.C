@@ -46,6 +46,9 @@ int getColor(const string& sample) {
   if (sample.find("top dilep") != string::npos) return 855-3;
   if (sample.find("fakeLep") != string::npos) return kMagenta+2;
   
+  if (sample.find("T2-4bd_375_335") != string::npos) return kOrange+8;
+  if (sample.find("T2-4bd_275_235") != string::npos) return kYellow;
+  
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
   if (sample.find("top") != string::npos) return 855;
@@ -150,6 +153,8 @@ string getLegendName(const string& sample) {
   if (sample.find("wz") != string::npos) return "WZ";
   if (sample.find("zz") != string::npos) return "ZZ";
   if (sample.find("diboson") != string::npos) return "Diboson";
+  if (sample.find("T2-4bd_375_335") != string::npos) return "T2-4bd 375, 335";
+  if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
