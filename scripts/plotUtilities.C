@@ -393,67 +393,58 @@ string getJetBJetTableLabel(TFile* f, std::string dir_str) {
 
 }
 
+//_______________________________________________________________________________
 string getJetBJetTableLabel2(TFile* f, std::string dir_str) {
 
   TString dir= TString(dir_str);
 
-  TH1D* h_njets = (TH1D*) f->Get(dir+"/h_nJet30");
+  TH1D* h_njets_LOW = (TH1D*) f->Get(dir+"/h_njets_LOW");
   TH1D* h_njets_HI = (TH1D*) f->Get(dir+"/h_njets_HI");
-  
-  int njets_LOW = 0;
-  int njets_HI = -1;
-  if(h_njets){
-    //loop to find first non-empty bin
-    for (int i = 0; i < h_njets->GetSize(); ++i){
-      if (h_njets->GetBinContent(i) > 0) {
-	njets_LOW = h_njets->GetBinLowEdge(i);
-	break;
-      }
-    }
-    //reverse loop to find max non-empty bin
-    for (int i = h_njets->GetSize(); i > 0; i--){
-      if (h_njets->GetBinContent(i) > 0) {
-	njets_HI = h_njets->GetBinLowEdge(i);
-	break;
-      }
-    }
+  int njets_LOW;
+  int njets_HI;
+  if(h_njets_LOW && h_njets_HI){
+    njets_LOW = h_njets_LOW->GetBinContent(1);
+    njets_HI = h_njets_HI->GetBinContent(1);
   }
   else{
     njets_LOW = 0;
     njets_HI = -1;
   }
 
-  if (h_njets_HI->GetBinContent(1) < 0) njets_HI = -1;
-  
-  TH1D* h_nbjets = (TH1D*) f->Get(dir+"/h_nBJet20");
+  TH1D* h_nbjets_LOW = (TH1D*) f->Get(dir+"/h_nbjets_LOW");
   TH1D* h_nbjets_HI = (TH1D*) f->Get(dir+"/h_nbjets_HI");
-  int nbjets_LOW = 0;
-  int nbjets_HI = -1;
-  if(h_nbjets){
-    //loop to find first non-empty bin
-    for (int i = 0; i < h_nbjets->GetSize(); i++){
-      if (h_nbjets->GetBinContent(i) > 0) {
-	nbjets_LOW = h_nbjets->GetBinLowEdge(i);
-	break;
-      }
-    }
-    //reverse loop to find max non-empty bin
-    for (int i = h_nbjets->GetSize(); i > 0; i--){
-      if (h_nbjets->GetBinContent(i) > 0) {
-	nbjets_HI = h_nbjets->GetBinLowEdge(i);
-	break;
-      }
-    }
+  int nbjets_LOW;
+  int nbjets_HI;
+  if(h_nbjets_LOW && h_nbjets_HI){
+    nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+    nbjets_HI = h_nbjets_HI->GetBinContent(1);
   }
   else{
     nbjets_LOW = 0;
     nbjets_HI = -1;
   }
 
-  if (h_nbjets_HI->GetBinContent(1) < 0) nbjets_HI = -1;
   
+  TH1D* h_nbjetshard_LOW = (TH1D*) f->Get(dir+"/h_nbjetshard_LOW");
+  TH1D* h_nbjetshard_HI = (TH1D*) f->Get(dir+"/h_nbjetshard_HI");
+  int nbjetshard_LOW;
+  int nbjetshard_HI;
+  if(h_nbjetshard_LOW && h_nbjetshard_HI){
+    nbjetshard_LOW = h_nbjetshard_LOW->GetBinContent(1);
+    nbjetshard_HI = h_nbjetshard_HI->GetBinContent(1);
+  }
+  else{
+    nbjetshard_LOW = 0;
+    nbjetshard_HI = -1;
+  }
+
+  if(njets_HI != -1) njets_HI--;
+  if(nbjetshard_HI != -1) nbjetshard_HI--;
+  if(nbjets_HI != -1) nbjets_HI--;
+
   std::string jet_string; 
   std::string bjet_string; 
+  std::string bjethard_string; 
 
   if( (njets_HI - njets_LOW) == 0) jet_string = toString(njets_LOW) + "j";
   else if( njets_HI != -1) jet_string = toString(njets_LOW) + "-" + toString(njets_HI) + "j";
@@ -463,6 +454,10 @@ string getJetBJetTableLabel2(TFile* f, std::string dir_str) {
   else if( nbjets_HI != -1) bjet_string = toString(nbjets_LOW) + "-" + toString(nbjets_HI) + "b";
   else bjet_string = "$\\geq$" + toString(nbjets_LOW) + "b";
 
-  return jet_string + ", " + bjet_string;
+  if( (nbjetshard_HI - nbjetshard_LOW) == 0) bjethard_string = toString(nbjetshard_LOW) + "$\\text{b}_{Hard}$";
+  else if( nbjetshard_HI != -1) bjethard_string = toString(nbjetshard_LOW) + "-" + toString(nbjetshard_HI) + "$\\text{b}_{Hard}$";
+  else bjethard_string = "$\\geq$" + toString(nbjetshard_LOW) + "$\\text{b}_{Hard}$";
+
+  return jet_string + ", " + bjet_string + ", " + bjethard_string;
 
 }

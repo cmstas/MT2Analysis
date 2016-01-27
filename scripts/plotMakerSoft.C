@@ -815,7 +815,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   std::cout << "\\multicolumn{" << n_mt2bins+1 << "}{c}{";
   std::cout << getHTTableLabel(samples.at(0), dir) << ", ";
   std::cout << getMETTableLabel(samples.at(0), dir) << ", ";
-  std::cout << getJetBJetTableLabel(samples.at(0), dir);
+  std::cout << getJetBJetTableLabel2(samples.at(0), dir);
   std::cout << "} \\\\" << std::endl;
   std::cout << "\\hline" << std::endl;
   std::cout << "\\hline" << endl
@@ -1636,19 +1636,19 @@ void plotMakerSoft(){
   std::cout << "\\begin{document}" << std::endl;
   
   vector<string> dirs;
-  // dirs.push_back("srLep1L");
+  dirs.push_back("srLep1L");
   // dirs.push_back("srLep2L");
   // dirs.push_back("srLep3L");
   // dirs.push_back("srLep4L");
   // dirs.push_back("srLep5L");
   // dirs.push_back("srLep6L");
   // dirs.push_back("srLep1M");
-  // dirs.push_back("srLep2M");
+  dirs.push_back("srLep2M");
   // dirs.push_back("srLep3M");
   // dirs.push_back("srLep4M");
   // dirs.push_back("srLep5M");
   // dirs.push_back("srLep6M");
-  // dirs.push_back("srLepB3");
+   dirs.push_back("srLepB3");
   // dirs.push_back("srLepMET");
   // dirs.push_back("srLepHT");
   // dirs.push_back("srLepJ1L");
