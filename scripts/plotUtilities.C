@@ -423,13 +423,17 @@ string getMETTableLabel(TFile* f, std::string dir_str) {
   TString dir= TString(dir_str);
 
   TH1D* h_met_LOW = (TH1D*) f->Get(dir+"/h_met_LOW");
-  int met_LOW(0);
-  if(h_met_LOW){
+  TH1D* h_met_HI = (TH1D*) f->Get(dir+"/h_met_HI");
+  int met_LOW;
+  int met_HI;
+  if(h_met_LOW && h_met_HI){
     met_LOW = h_met_LOW->GetBinContent(1);
+    met_HI = h_met_HI->GetBinContent(1);
   }
+  else return "$E_{T}^{miss} > 200$~GeV";
 
-//  return "$\\MET > " + toString(met_LOW) + " $~GeV ";
-  return "MET $> " + toString(met_LOW) + " $~GeV ";
+  if(met_HI != -1) return "$" + toString(met_LOW) + " < E_{T}^{miss} < " + toString(met_HI) + "$~GeV"; 
+  else  return "$E_{T}^{miss} > " + toString(met_LOW) + "$~GeV";
 
 }
 
