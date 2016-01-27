@@ -142,7 +142,7 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
   h_k_mt->Scale(1/h_k_mt->Integral(0,-1));
   
   //initialize pred histogram
-  TH1D* h_pred = sameBin(h_crMC, "h_pred");
+  TH1D* h_pred = sameBin(h_crMC, "h_mtbins");
 
   //calculate the prediction in each bin
   for (int ibin = 0; ibin <= h_crData->GetSize(); ibin++) {
@@ -175,7 +175,7 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
 
     //set bin content/error
     h_pred->SetBinContent(ibin, binPred);
-    h_pred->SetBinError(ibin, sqrt(binErrSq));     
+    h_pred->SetBinError(ibin, binPred*sqrt(binErrSq));     
 
   }//loop over bins
 

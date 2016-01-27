@@ -81,7 +81,7 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
   h_kMT->Scale(1/h_kMT->Integral(0,-1));
   
   //initialize pred histogram
-  TH1D* h_pred = sameBin(h_crMC, "h_pred");
+  TH1D* h_pred = sameBin(h_crMC, "h_mtbins");
 
   //calculate the prediction in each bin
   for (int ibin = 0; ibin <= h_crData->GetSize(); ibin++) {
@@ -110,7 +110,7 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
 
     //set bin content/error
     h_pred->SetBinContent(ibin, binPred);
-    h_pred->SetBinError(ibin, sqrt(binErrSq));     
+    h_pred->SetBinError(ibin, binPred*sqrt(binErrSq));     
 
   }//loop over bins
 
