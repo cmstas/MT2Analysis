@@ -927,7 +927,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
 
   std::cout << "\\hline" << std::endl;
-  std::cout << "\\end{tabular}" << std::endl;
+  std::cout << "\\end{tabular}}" << std::endl;
   std::cout << "\\end{table}" << std::endl;
   //std::cout << "\\pagebreak" << std::endl;
   std::cout << std::endl;
