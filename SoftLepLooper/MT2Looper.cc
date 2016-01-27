@@ -509,9 +509,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
-	  if (t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235) evtweight_ = lumi * 13.3 *1000./nevents; // assumes xsec is already filled correctly
-	  else if (t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335) evtweight_ = lumi * 2.6 *1000./nevents; // assumes xsec is already filled correctly
-	  else evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
+	  evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
@@ -1893,10 +1891,18 @@ void MT2Looper::fillMissLepSF(int igenlep, bool isFastsim, float & lostSF, float
   float sfdn = sf_struct.dn;
   float vetoeff = getLepVetoEffFromFile_fullsim(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
   if (isFastsim) vetoeff = getLepVetoEffFromFile_fastsim(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
+
+  if (isnan(sf) || isnan(sfup) || isnan(sfdn)) {
+    cerr << "WARNING: some lep scale factors are NAN in evt " << t.evt << ". Setting to one..." << endl;
+    sf = 1;
+    sfup = 1;
+    sfdn = 1;
+  }
+  
   lostSF = (1 - vetoeff * sf) / (1 - vetoeff);
   lostSFup = (1 - vetoeff * sfup) / (1 - vetoeff);
   lostSFdn = (1 - vetoeff * sfdn) / (1 - vetoeff);
-  
+
   return;
 }
 
