@@ -493,13 +493,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       const float lumi = 2.26;
       //const float lumi = 4;
 
+      //only keep single mass point in scans
       if (isSignal_ 
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335)
-	  //&& !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235)
-          //&& !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 700)
-	  //&& !(t.GenSusyMScan1 == 900 && t.GenSusyMScan2 == 875 && sample == "T1bbbb_mGluino-875-900-925")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
           ) continue;
-
 
       evtweight_ = 1.;
 
@@ -961,6 +959,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       nSoftB_ = 0;
       nHardB_ = 0;
       for(int ijet = 0; ijet < t.njet; ijet++){
+	if (!(fabs(t.jet_eta[ijet]) < 2.5)) continue;
 	if (!(t.jet_btagCSV[ijet] >= 0.89)) continue;
 
 	if (t.jet_pt[ijet] > 60) nHardB_++;
@@ -970,10 +969,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       // define b-category
       categoryB_ = -1;
-      if (nSoftB_ + nHardB_ > 2) categoryB_ = 3;
-      else if (nHardB_ > 0) categoryB_ = 2;
-      else if (nSoftB_ > 0) categoryB_ = 1;
-      else categoryB_ = 0;
+      if (nSoftB_ + nHardB_ > 2) categoryB_ = 3.5;
+      else if (nHardB_ > 0) categoryB_ = 2.5;
+      else if (nSoftB_ > 0) categoryB_ = 1.5;
+      else categoryB_ = 0.5;
       
       ////////////////////////////////////
       /// done with overall selection  /// 
