@@ -689,7 +689,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //-------------------------------------//
       
       bool softlepMatched = false;
-      if (doSoftLepSRplots || doSoftLepCRplots){
+      if (!t.isData && (doSoftLepSRplots || doSoftLepCRplots)){
 	double minDR = 999;
 	for(int ilep = 0; ilep < t.ngenLep; ilep++){
 	  if (t.genLep_pdgId[ilep] != softlepId_) continue;
@@ -822,7 +822,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       missPt_ = -1;
       int decayMode = -1;
       
-      if (doSoftLepSRplots || doSoftLepCRplots) {
+      if (!t.isData && (doSoftLepSRplots || doSoftLepCRplots)) {
 
 	for(int ilep = 0; ilep < t.ngenLep; ilep++){
 	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
@@ -885,7 +885,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }//doSoftLepSRplots || doSoftLepCRplots
 
       //same but for the 2-lep CR
-      if (doDoubleLepCRplots) {
+      if (!t.isData && doDoubleLepCRplots) {
 
 	for(int ilep = 0; ilep < t.ngenLep; ilep++){
 	  float thisDR = DeltaR(t.genLep_eta[ilep], hardlep_eta, t.genLep_phi[ilep], hardlep_phi);
