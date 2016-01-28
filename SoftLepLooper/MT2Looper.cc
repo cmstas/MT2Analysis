@@ -928,7 +928,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 
       // Scale factors (and uncertainties) for SR events with a lost lepton
-      if ( (foundMissingLep || foundMissingLepFromTau) && ( applyLeptonSFfastsim || applyLeptonSF ) && doSoftLepSRplots) {
+      if ( !t.isData && (foundMissingLep || foundMissingLepFromTau) && ( applyLeptonSFfastsim || applyLeptonSF ) && doSoftLepSRplots) {
 	  bool fastsim = isSignal_ && applyLeptonSFfastsim;
 	  float lostsf = 1.;
 	  float lostsf_up = 1.;
