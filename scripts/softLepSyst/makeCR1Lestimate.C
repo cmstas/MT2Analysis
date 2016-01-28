@@ -31,7 +31,7 @@ inline TH1D* sameBin(TH1D* h_in, std::string name)
 }
 
 //_______________________________________________________________________________
-int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut ,  std::string dir_name ) {
+int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_name ) {
 
   fOut->cd();
 
@@ -39,27 +39,26 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
   TString srName = dir_name;
   srName.ReplaceAll("srLep","");
 
-  TDirectory * dirData = fData_CR ->GetDirectory("cr1L"+srName);
-  TDirectory * dirMC   = fMC_CR   ->GetDirectory("cr1L"+srName);
-  TDirectory * dirMC2  = fMC_SR   ->GetDirectory("cr1L"+srName);
+  TDirectory * dirData = fData ->GetDirectory("cr1L"+srName);
+  TDirectory * dirMC   = fMC   ->GetDirectory("cr1L"+srName);
 
-  if (!dirData || !dirMC || !dirMC2) {
+  if (!dirData || !dirMC ) {
     cerr << "ERROR: Directory doesn't exist! Skipping..." << endl;
     return 1;
   }
   
   //get relevant histograms
-  TH1D* h_crMC           = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbins");            h_crMC->SetName("h_crMC");
-  TH1D* h_crMCfake       = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbinsFake");        h_crMCfake->SetName("h_crMCfake");
-  TH1D* h_crMConelep     = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_mtbinsOnelep");      h_crMConelep->SetName("h_crMConelep");
-  TH1D* h_srMConelep     = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_mtbinsOnelep");     h_srMConelep->SetName("h_srMConelep"); 
-  TH1D* h_crData         = (TH1D*) fData_CR->Get("cr1L"+srName+"/h_mtbins");          h_crData->SetName("h_crData");
+  TH1D* h_crMC           = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins");            h_crMC->SetName("h_crMC");
+  TH1D* h_crMCfake       = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsFake");        h_crMCfake->SetName("h_crMCfake");
+  TH1D* h_crMConelep     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");      h_crMConelep->SetName("h_crMConelep");
+  TH1D* h_srMConelep     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");     h_srMConelep->SetName("h_srMConelep"); 
+  TH1D* h_crData         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");          h_crData->SetName("h_crData");
   //integrated
-  TH1D* h_crMCInt        = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_Events_w");          h_crMCInt->SetName("h_crMCInt");
-  TH1D* h_crMCfakeInt    = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_Events_wFake");      h_crMCfakeInt->SetName("h_crMCfakeInt");
-  TH1D* h_crMConelepInt  = (TH1D*) fMC_CR->Get("cr1L"+srName+"/h_Events_wOnelep");    h_crMConelepInt->SetName("h_crMConelepInt");
-  TH1D* h_srMConelepInt  = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_Events_wOnelep");   h_srMConelepInt->SetName("h_srMConelepInt"); 
-  TH1D* h_crDataInt      = (TH1D*) fData_CR->Get("cr1L"+srName+"/h_Events_w");        h_crDataInt->SetName("h_crDataInt");
+  TH1D* h_crMCInt        = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_w");          h_crMCInt->SetName("h_crMCInt");
+  TH1D* h_crMCfakeInt    = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wFake");      h_crMCfakeInt->SetName("h_crMCfakeInt");
+  TH1D* h_crMConelepInt  = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wOnelep");    h_crMConelepInt->SetName("h_crMConelepInt");
+  TH1D* h_srMConelepInt  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wOnelep");   h_srMConelepInt->SetName("h_srMConelepInt"); 
+  TH1D* h_crDataInt      = (TH1D*) fData->Get("cr1L"+srName+"/h_Events_w");        h_crDataInt->SetName("h_crDataInt");
   
   //calculate the ratio histogram, N(SR/CR) in MC
   TH1D* h_ratio = sameBin(h_crMC, "h_ratio");
@@ -139,10 +138,10 @@ int makeCR1Lpred( TFile* fData_CR , TFile* fMC_CR , TFile* fMC_SR , TFile* fOut 
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dirSR = "../../SoftLepLooper/output/softLepSR/", string input_dirCR = "../../SoftLepLooper/output/softLepCR/", string dataname = "data"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep/", string dataname = "data"){
 
 
-  string output_name = input_dirSR+"/pred_CR1L.root";
+  string output_name = input_dir+"/pred_CR1L.root";
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -155,23 +154,22 @@ void makeCR1Lestimate(string input_dirSR = "../../SoftLepLooper/output/softLepSR
   TString datanamestring(dataname);
 
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) isData = true;
-  TFile* f_dataCR = new TFile(Form("%s/%s.root",input_dirCR.c_str(),dataname.c_str())); //data or dummy-data file
-  TFile* f_mcCR   = new TFile(Form("%s/allBkg.root",input_dirCR.c_str()));
-  TFile* f_mcSR   = new TFile(Form("%s/allBkg.root",input_dirSR.c_str()));
+  TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or dummy-data file
+  TFile* f_mc   = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
 
 
-  if(f_dataCR->IsZombie() || f_mcCR->IsZombie() || f_mcSR->IsZombie()) {
+  if(f_data->IsZombie() || f_mc->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
 
-  TIter it(f_dataCR->GetListOfKeys());
+  TIter it(f_data->GetListOfKeys());
   TKey* k;
   while ((k = (TKey *)it())) {
     std::string dir_name = k->GetTitle();
     if(dir_name.find("srLep")==std::string::npos) continue; //to do only signal regions
     cout << "Calculating prediction for " << dir_name << "..." << endl;
-    makeCR1Lpred( f_dataCR , f_mcCR , f_mcSR , f_out , dir_name );
+    makeCR1Lpred( f_data , f_mc , f_out , dir_name );
   }
 
   return;

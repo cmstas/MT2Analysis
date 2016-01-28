@@ -31,7 +31,7 @@ inline TH1D* sameBin(TH1D* h_in, std::string name)
 }
 
 //_______________________________________________________________________________
-int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string dir_name ) {
+int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_name ) {
 
   fOut->cd();
 
@@ -47,34 +47,66 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
   bool doHTsum = srName2 != "";
   if (doHTsum)  cout << "Summing over additional HT regions: Adding " << srName2 << " to " << srName << "..." << endl;
 
-  TDirectory * dirData = fData_SR ->GetDirectory("cr2L"+srName);
-  TDirectory * dirMC   = fMC_SR   ->GetDirectory("cr2L"+srName);
+  TDirectory * dirData = fData ->GetDirectory("cr2L"+srName);
+  TDirectory * dirMC   = fMC   ->GetDirectory("cr2L"+srName);
 
   if (!dirData || !dirMC ) {
     cerr << "ERROR: Directory doesn't exist! Skipping..." << endl;
     return 1;
   }
-    
-  //get relevant histograms
-  TH1D* h_crMC             = (TH1D*) fMC_SR->Get("cr2L"+srName+"/h_mtbins");              h_crMC->SetName("h_crMC");
-  TH1D* h_crMCfake         = (TH1D*) fMC_SR->Get("cr2L"+srName+"/h_mtbinsFake");          h_crMCfake->SetName("h_crMCfake");
-  TH1D* h_crMCDilepton     = (TH1D*) fMC_SR->Get("cr2L"+srName+"/h_mtbinsDilepton");      h_crMCDilepton->SetName("h_crMCDilepton");
-  TH1D* h_srMCDilepton     = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_mtbinsDilepton");     h_srMCDilepton->SetName("h_srMCDilepton"); 
-  TH1D* h_crData           = (TH1D*) fData_SR->Get("cr2L"+srName+"/h_mtbins");            h_crData->SetName("h_crData");
-  //integrated
-  TH1D* h_crMCInt          = (TH1D*) fMC_SR->Get("cr2L"+srName+"/h_Events_w");            h_crMCInt->SetName("h_crMCInt");
-  TH1D* h_crMCfakeInt      = (TH1D*) fMC_SR->Get("cr2L"+srName+"/h_Events_wFake");        h_crMCfakeInt->SetName("h_crMCfakeInt");
-  TH1D* h_crMCDileptonInt  = (TH1D*) fMC_SR->Get("cr2L"+srName+"/h_Events_wDilepton");    h_crMCDileptonInt->SetName("h_crMCDileptonInt");
-  TH1D* h_srMCDileptonInt  = (TH1D*) fMC_SR->Get("srLep"+srName+"/h_Events_wDilepton");   h_srMCDileptonInt->SetName("h_srMCDileptonInt"); 
-  TH1D* h_crDataInt        = (TH1D*) fData_SR->Get("cr2L"+srName+"/h_Events_w");          h_crDataInt->SetName("h_crDataInt");
 
-  //if second HT region exists, add hists
+  //initialize
+  TH1D* h_crMC = 0;
+  TH1D* h_crMCfake = 0;
+  TH1D* h_crMCDilepton = 0;
+  TH1D* h_srMCDilepton = 0;
+  TH1D* h_crData = 0;
+  TH1D* h_crMCInt = 0;
+  TH1D* h_crMCfakeInt = 0;
+  TH1D* h_crMCDileptonInt = 0;
+  TH1D* h_srMCDileptonInt = 0;
+  TH1D* h_crDataInt = 0;
+  
+  h_crMC             = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins");              
+  h_crMCfake         = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsFake");          
+  h_crMCDilepton     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsDilepton");      
+  h_srMCDilepton     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsDilepton");     
+  h_crData           = (TH1D*) fData->Get("cr2L"+srName+"/h_mtbins");            
+  //integrated
+  h_crMCInt          = (TH1D*) fMC->Get("cr2L"+srName+"/h_Events_w");           
+  h_crMCfakeInt      = (TH1D*) fMC->Get("cr2L"+srName+"/h_Events_wFake");       
+  h_crMCDileptonInt  = (TH1D*) fMC->Get("cr2L"+srName+"/h_Events_wDilepton");   
+  h_srMCDileptonInt  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wDilepton");   
+  h_crDataInt        = (TH1D*) fData->Get("cr2L"+srName+"/h_Events_w");         
+
+  //check for MC hist. should always exist
+  if (!h_crMC) {
+    cerr << "ERROR: MC hist does not exist in region " << srName << "! Skipping..." << endl;
+    return 1;
+  }
+  
+  //reset the data histogram if it doesn't exist (i.e. region is empty). 
+  if (!h_crData) h_crData = sameBin(h_crMC, "h_crData");
+  if (!h_crDataInt) h_crDataInt = sameBin(h_crMCInt, "h_crDataInt");
+
+  //names
+  h_crMC->SetName("h_crMC");
+  h_crMCfake->SetName("h_crMCfake");
+  h_crMCDilepton->SetName("h_crMCDilepton");
+  h_srMCDilepton->SetName("h_srMCDilepton");
+  h_crData->SetName("h_crData");
+  h_crMCInt->SetName("h_crMCInt");
+  h_crMCfakeInt->SetName("h_crMCfakeInt");
+  h_crMCDileptonInt->SetName("h_crMCDileptonInt");
+  h_srMCDileptonInt->SetName("h_srMCDileptonInt");
+  h_crDataInt->SetName("h_crDataInt");
+      
+  //initialize
   TH1D* h_crMC2 = 0;
   TH1D* h_crMCfake2 = 0;
   TH1D* h_crMCDilepton2 = 0;
   TH1D* h_srMCDilepton2 = 0;
   TH1D* h_crData2 = 0;
-  //integrated
   TH1D* h_crMCInt2 = 0;
   TH1D* h_crMCfakeInt2 = 0;
   TH1D* h_crMCDileptonInt2 = 0;
@@ -82,35 +114,39 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
   TH1D* h_crDataInt2 = 0;
 
   //safety checks to make sure other directories exist
-  TDirectory * dirData2 = fData_SR ->GetDirectory("cr2L"+srName2);
-  TDirectory * dirMC2   = fMC_SR   ->GetDirectory("cr2L"+srName2);
-  
-  if (doHTsum && dirData2 && dirMC2) {
-    h_crMC2          = (TH1D*) fMC_SR->Get("cr2L"+srName2+"/h_mtbins");            h_crMC2->SetName("h_crMC2");
-    h_crMCfake2      = (TH1D*) fMC_SR->Get("cr2L"+srName2+"/h_mtbinsFake");        h_crMCfake2->SetName("h_crMCfake2");
-    h_crMCDilepton2  = (TH1D*) fMC_SR->Get("cr2L"+srName2+"/h_mtbinsDilepton");    h_crMCDilepton2->SetName("h_crMCDilepton2");
-    h_srMCDilepton2  = (TH1D*) fMC_SR->Get("srLep"+srName2+"/h_mtbinsDilepton");   h_srMCDilepton2->SetName("h_srMCDilepton2"); 
-    h_crData2        = (TH1D*) fData_SR->Get("cr2L"+srName2+"/h_mtbins");          h_crData2->SetName("h_crData2");
-    //integrated
-    h_crMCInt2          = (TH1D*) fMC_SR->Get("cr2L"+srName2+"/h_Events_w");            h_crMCInt2->SetName("h_crMCInt2");
-    h_crMCfakeInt2      = (TH1D*) fMC_SR->Get("cr2L"+srName2+"/h_Events_wFake");        h_crMCfakeInt2->SetName("h_crMCfakeInt2");
-    h_crMCDileptonInt2  = (TH1D*) fMC_SR->Get("cr2L"+srName2+"/h_Events_wDilepton");    h_crMCDileptonInt2->SetName("h_crMCDileptonInt2");
-    h_srMCDileptonInt2  = (TH1D*) fMC_SR->Get("srLep"+srName2+"/h_Events_wDilepton");   h_srMCDileptonInt2->SetName("h_srMCDileptonInt2"); 
-    h_crDataInt2        = (TH1D*) fData_SR->Get("cr2L"+srName2+"/h_Events_w");          h_crDataInt2->SetName("h_crDataInt2");
+  TDirectory * dirData2 = fData ->GetDirectory("cr2L"+srName2);
+  TDirectory * dirMC2   = fMC   ->GetDirectory("cr2L"+srName2);
 
-    h_crMC->Add(h_crMC2);
-    h_crMCfake->Add(h_crMCfake2);
-    h_crMCDilepton->Add(h_crMCDilepton2);
-    h_srMCDilepton->Add(h_srMCDilepton2);
-    h_crData->Add(h_crData2);
-    h_crMCInt->Add(h_crMCInt2);
-    h_crMCfakeInt->Add(h_crMCfakeInt2);
-    h_crMCDileptonInt->Add(h_crMCDileptonInt2);
-    h_srMCDileptonInt->Add(h_srMCDileptonInt2);
-    h_crDataInt->Add(h_crDataInt2);
+  //if second HT region exists, add hists
+  if (doHTsum && dirData2 && dirMC2) {
+    h_crMC2          = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins");          
+    h_crMCfake2      = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsFake");
+    h_crMCDilepton2  = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsDilepton");   
+    h_srMCDilepton2  = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbinsDilepton");
+    h_crData2        = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins");
+    //integrated
+    h_crMCInt2          = (TH1D*) fMC->Get("cr2L"+srName2+"/h_Events_w");          
+    h_crMCfakeInt2      = (TH1D*) fMC->Get("cr2L"+srName2+"/h_Events_wFake");       
+    h_crMCDileptonInt2  = (TH1D*) fMC->Get("cr2L"+srName2+"/h_Events_wDilepton");  
+    h_srMCDileptonInt2  = (TH1D*) fMC->Get("srLep"+srName2+"/h_Events_wDilepton");  
+    h_crDataInt2        = (TH1D*) fData->Get("cr2L"+srName2+"/h_Events_w");
+  
+    if (!h_crData2) h_crData = sameBin(h_crMC2, "h_crData2");
+    if (!h_crDataInt2) h_crDataInt = sameBin(h_crMCInt2, "h_crDataInt2");
+    
+    if (h_crMC2) h_crMC->Add(h_crMC2);
+    if (h_crMCfake2) h_crMCfake->Add(h_crMCfake2);
+    if (h_crMCDilepton2) h_crMCDilepton->Add(h_crMCDilepton2);
+    if (h_srMCDilepton2) h_srMCDilepton->Add(h_srMCDilepton2);
+    if (h_crData2) h_crData->Add(h_crData2);
+    if (h_crMCInt2) h_crMCInt->Add(h_crMCInt2);
+    if (h_crMCfakeInt2) h_crMCfakeInt->Add(h_crMCfakeInt2);
+    if (h_crMCDileptonInt2) h_crMCDileptonInt->Add(h_crMCDileptonInt2);
+    if (h_srMCDileptonInt2) h_srMCDileptonInt->Add(h_srMCDileptonInt2);
+    if (h_crDataInt2) h_crDataInt->Add(h_crDataInt2);
   }
   else if (doHTsum && (!dirData2 || !dirMC2)) {
-    cerr << "WARNING: Additional HT directory does not exist! Make sure this is expected..." << endl;
+    cerr << "WARNING: Additional HT directory " << srName2 << " does not exist! Make sure this is expected..." << endl;
     doHTsum = false;
   }
   
@@ -205,10 +241,10 @@ int makeCR2Lpred( TFile* fData_SR , TFile* fMC_SR , TFile* fOut ,  std::string d
 }
 
 //_______________________________________________________________________________
-void makeCR2Lestimate(string input_dirSR = "../../SoftLepLooper/output/softLepSR", string dataname = "data"){
+void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep", string dataname = "data"){
 
 
-  string output_name = input_dirSR+"/pred_CR2L.root";
+  string output_name = input_dir+"/pred_CR2L.root";
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -221,22 +257,22 @@ void makeCR2Lestimate(string input_dirSR = "../../SoftLepLooper/output/softLepSR
   TString datanamestring(dataname);
 
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) isData = true;
-  TFile* f_dataSR = new TFile(Form("%s/%s.root",input_dirSR.c_str(),dataname.c_str())); //data or dummy-data file
-  TFile* f_mcSR   = new TFile(Form("%s/allBkg.root",input_dirSR.c_str()));
+  TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or dummy-data file
+  TFile* f_mc   = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
 
 
-  if(f_dataSR->IsZombie() || f_mcSR->IsZombie()) {
+  if(f_data->IsZombie() || f_mc->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
 
-  TIter it(f_dataSR->GetListOfKeys());
+  TIter it(f_data->GetListOfKeys());
   TKey* k;
   while ((k = (TKey *)it())) {
     std::string dir_name = k->GetTitle();
     if(dir_name.find("srLep")==std::string::npos) continue; //to do only signal regions
     cout << "----- Calculating prediction for " << dir_name << " -----" << endl;
-    makeCR2Lpred( f_dataSR , f_mcSR , f_out , dir_name );
+    makeCR2Lpred( f_data , f_mc , f_out , dir_name );
   }
 
   return;

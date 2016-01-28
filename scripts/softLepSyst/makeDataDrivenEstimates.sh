@@ -10,8 +10,8 @@ if [ ! -d "$INDIR" ]; then
 fi
 
 cd $INDIR
-echo "hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root"
-hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root >> dataDrivenEstimates.log
+echo "hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D*.root"
+hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D*.root >> dataDrivenEstimates.log
 cd $THISDIR
 
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/data.root,2)"
@@ -52,9 +52,11 @@ cd $THISDIR
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg.root,3)"
 root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg.root\",3)" >> dataDrivenEstimates.log
 
-# Now run the 1 lepton and 2 lepton estimate makers: makeCR1Lestimate.C
-# echo "root -b -q makeCR1Lestimate.C+(${INDIRSR},${INDIRCR},${DATAFILE})"
-# root -b -q "makeCR1Lestimate.C+(\"${INDIRSR}\",\"${INDIRCR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
+# Now run the 1 lepton and 2 lepton estimate makers: makeCR1Lestimate.C, makeCR2Lestimate.C
+echo "root -b -q makeCR1Lestimate.C+(${INDIR},${DATAFILE})"
+root -b -q "makeCR1Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
+echo "root -b -q makeCR2Lestimate.C+(${INDIR},${DATAFILE})"
+root -b -q "makeCR2Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
 
 
 echo "done"
