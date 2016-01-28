@@ -10,8 +10,8 @@ if [ ! -d "$INDIR" ]; then
 fi
 
 cd $INDIR
-echo "hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D*.root"
-hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D*.root >> dataDrivenEstimates.log
+echo "hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root"
+hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root >> dataDrivenEstimates.log
 cd $THISDIR
 
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/data.root,2)"
