@@ -1018,7 +1018,7 @@ void plotMakerSoftLepSR(){
   TFile* f_bkg2 = new TFile(Form("%s/allBkg_noDiboson.root",input_dir.c_str())); 
   TFile* f_T2_4bd_275 = new TFile(Form("%s/T2-4bd_275.root",input_dir.c_str())); 
   TFile* f_T2_4bd_375 = new TFile(Form("%s/T2-4bd_375.root",input_dir.c_str())); 
-  //TFile* f_data = new TFile(Form("%s/data.root",input_dir.c_str())); 
+  //TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -1161,7 +1161,7 @@ void plotMakerSoftLepCR(){
   writeExtraText = false;
   lumi_13TeV = "2.26 fb^{-1}";
 
-  string suffix = "HighMET";
+  string suffix = "";
   bool doOnlyTrue = false;
   bool doData = true;
   string input_dir = "../SoftLepLooper/output/softLep";
@@ -1185,7 +1185,7 @@ void plotMakerSoftLepCR(){
   TFile* f_diboson = new TFile(Form("%s/diboson.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
   TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str())); 
-  TFile* f_data = new TFile(Form("%s/data.root",input_dir.c_str())); 
+  TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -1312,7 +1312,7 @@ void plotMakerDoubleLepCR(){
   TFile* f_diboson = new TFile(Form("%s/diboson.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
   TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str())); 
-  TFile* f_data = new TFile(Form("%s/data.root",input_dir.c_str())); 
+  TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
   vector<string>  names;
@@ -1440,8 +1440,8 @@ void plotMakerSoft(){
   //plotMakerRemovedLep(); return;
   //plotMakerCRSL(); return;
   //plotMakerSoftLepSRMissingLep(); return;
-  plotMakerSoftLepSR(); return;
-  //plotMakerSoftLepCR(); return;
+  //plotMakerSoftLepSR(); return;
+  plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
   
   cmsText = "CMS Preliminary";
@@ -1554,26 +1554,26 @@ void plotMakerSoft(){
   
   vector<string> dirs;
   dirs.push_back("srLep1L");
-  // dirs.push_back("srLep2L");
-  // dirs.push_back("srLep3L");
-  // dirs.push_back("srLep4L");
-  // dirs.push_back("srLep5L");
-  // dirs.push_back("srLep6L");
-  // dirs.push_back("srLep1M");
+  dirs.push_back("srLep2L");
+  dirs.push_back("srLep3L");
+  dirs.push_back("srLep4L");
+  dirs.push_back("srLep5L");
+  dirs.push_back("srLep6L");
+  dirs.push_back("srLep1M");
   dirs.push_back("srLep2M");
-  // dirs.push_back("srLep3M");
-  // dirs.push_back("srLep4M");
-  // dirs.push_back("srLep5M");
-  // dirs.push_back("srLep6M");
-   dirs.push_back("srLepB3");
-  // dirs.push_back("srLepMET");
-  // dirs.push_back("srLepHT");
-  // dirs.push_back("srLepJ1L");
-  // dirs.push_back("srLepJ1M");
-  // dirs.push_back("srLepJ2L");
-  // dirs.push_back("srLepJ3L");
-  // dirs.push_back("srLepbaseJ");
-  // dirs.push_back("srLepbaseJ1");
+  dirs.push_back("srLep3M");
+  dirs.push_back("srLep4M");
+  dirs.push_back("srLep5M");
+  dirs.push_back("srLep6M");
+  dirs.push_back("srLepB3");
+  dirs.push_back("srLepMET");
+  dirs.push_back("srLepHT");
+  dirs.push_back("srLepJ1L");
+  dirs.push_back("srLepJ1M");
+  dirs.push_back("srLepJ2L");
+  dirs.push_back("srLepJ3L");
+  dirs.push_back("srLepbaseJ");
+  dirs.push_back("srLepbaseJ1");
   dirs.push_back("srLepbase");
   
   for(unsigned int i=0; i<dirs.size(); i++){
