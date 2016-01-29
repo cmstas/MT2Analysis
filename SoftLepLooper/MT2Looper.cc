@@ -95,7 +95,7 @@ bool doGenTauVars = true;
 // make variation histograms for e+mu efficiency
 bool doLepEffVars = true;
 // make only minimal hists needed for results
-bool doMinimalPlots = true;
+bool doMinimalPlots = false;
 // make fake-rate hists
 bool doFakeRates = false;
 
@@ -384,6 +384,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   // These will be set to true if any SoftLep, CR1L, or CR2L plots are produced
   bool saveSoftLplots = false;
+  bool saveSoftLMuplots = false;
+  bool saveSoftLElplots = false;
   bool save1Lplots = false;
   bool save1Lmuplots = false;
   bool save1Lelplots = false;
@@ -590,6 +592,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doSoftLepCRplots = false;
       bool doSoftLepMuCRplots = false;
       bool doSoftLepElCRplots = false;
+      lepIdx_ = -1;
       softleppt_ = -1;
       softlepeta_ = -1;
       softlepphi_ = -1;
@@ -643,14 +646,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //if (t.lep_relIsoAn04[ilep]>0.4) continue;
 
 	  //reject low-pt endcap electrons
-	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+	  //if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
 
+	  //reject all low-pt endcap leptons
+	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+	  
 	  //only keep loose-ID electrons
 	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
 	  
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 	  
 	  // good candidate: save
+	  lepIdx_ = ilep;
 	  softleppt_ = t.lep_pt[ilep];
 	  softlepeta_ = t.lep_eta[ilep];
 	  softlepphi_ = t.lep_phi[ilep];
@@ -756,7 +763,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //if (t.lep_relIsoAn04[ilep]>0.4) continue;
 
 	  //reject low-pt endcap electrons
-	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+	  //if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+
+	  //reject all low-pt endcap leptons
+	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
 	  
 	  //only keep loose-ID electrons
 	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
@@ -826,7 +836,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //--------loop for fake leptons--------//
       //-------------------------------------//
       bool passFRTrig = false;
-      lepIdx_ = -1;
 
       // trigger requirement on data
       if (doFakeRates) {
@@ -1132,15 +1141,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// }
 	
       }
-      if (doSoftLepMuSRplots && !doMinimalPlots) {
-        //saveSoftLplots = true;
-        // if (softlepMatched) fillHistosCR1L("srsoftlmu");
-	// else  fillHistosCR1L("srsoftlmu", "Fake");
+      if (doSoftLepMuSRplots && !(t.isData && doBlindData) && !doMinimalPlots) {
+        saveSoftLMuplots = true;
+	fillHistosLepSignalRegions("srLepMu");
+	if (softlepMatched) {
+	  if (isDilepton) fillHistosLepSignalRegions("srLepMu", "Dilepton");
+	  else fillHistosLepSignalRegions("srLepMu", "Onelep");
+	}
+	else fillHistosLepSignalRegions("srLepMu", "Fake");
       }
-      if (doSoftLepElSRplots && !doMinimalPlots) {
-        //saveSoftLplots = true;
-        // if (softlepMatched) fillHistosCR1L("srsoftlel");
-	// else fillHistosCR1L("srsoftlel", "Fake");
+      if (doSoftLepElSRplots && !(t.isData && doBlindData) && !doMinimalPlots) {
+        saveSoftLElplots = true;
+	fillHistosLepSignalRegions("srLepEl");
+	if (softlepMatched) {
+	  if (isDilepton) fillHistosLepSignalRegions("srLepEl", "Dilepton");
+	  else fillHistosLepSignalRegions("srLepEl", "Onelep");
+	}
+	else fillHistosLepSignalRegions("srLepEl", "Fake");
       }
       if (doSoftLepCRplots) {
         save1Lplots = true;
@@ -1260,6 +1277,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if(!SRVecLep.at(srN).srHistMap.empty()){
 	cout<<"Saving srLep"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).srHistMap, outfile_, ("srLep"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveSoftLMuplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).srMuHistMap.empty()){
+	cout<<"Saving srLepMu"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).srMuHistMap, outfile_, ("srLepMu"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveSoftLElplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).srElHistMap.empty()){
+	cout<<"Saving srLepEl"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).srElHistMap, outfile_, ("srLepEl"+SRVecLep.at(srN).GetName()).c_str());
       }
     }
   }
@@ -1452,7 +1485,9 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
-      fillHistosSingleSoftLepton(SRVecLep.at(srN).srHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      if (prefix=="srLep") fillHistosSingleSoftLepton(SRVecLep.at(srN).srHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      else if (prefix=="srLepMu") fillHistosSingleSoftLepton(SRVecLep.at(srN).srMuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      else if (prefix=="srLepEl") fillHistosSingleSoftLepton(SRVecLep.at(srN).srElHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       //break;//signal regions are orthogonal, event cannot be in more than one
     }
   }
@@ -1562,6 +1597,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 100, 0, 1000);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 100, 0, 1000);
     plot1D("h_BJetpt"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
+    plot1D("h_BJetptshort"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 100);
     plot1D("h_categoryB"+s,  categoryB_,   evtweight_, h_1d, ";b-category", 4, 0, 4);
     //}
 
@@ -1720,6 +1756,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_softlepmt2"+s,    t.sl_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 1000, 0, 1000);
   plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
   plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 80, 0, 2000);
+  plot1D("h_lepTightId"+s,       t.lep_tightId[lepIdx_],   evtweight_, h_1d, ";lep_tightId", 4, 0, 4);
 
   //isolation  
   plot1D("h_miniRelIso"+s,  t.lep_miniRelIso[lepIdx_],   evtweight_, h_1d, "miniRelIso [GeV]", 100, 0, 2);
@@ -2009,7 +2046,13 @@ void MT2Looper::fillMissLepSF(int igenlep, bool isFastsim, float & lostSF, float
   if (isFastsim) vetoeff = getLepVetoEffFromFile_fastsim(t.genLep_pt[igenlep], t.genLep_eta[igenlep], t.genLep_pdgId[igenlep]);
 
   if (isnan(sf) || isnan(sfup) || isnan(sfdn)) {
-    cerr << "WARNING: some lep scale factors are NAN in evt " << t.evt << ". Setting to one..." << endl;
+    cerr << "WARNING: some lep scale factors are NAN in evt " << t.evt << ". Setting SF to one..." << endl;
+    sf = 1;
+    sfup = 1;
+    sfdn = 1;
+  }
+  else if (abs(t.genLep_pdgId[igenlep]) == 13 && fabs(t.genLep_eta[igenlep]) > 2.4 ) {
+    cerr << "WARNING: muon outside acceptance in evt " << t.evt << ". Setting SF to one..." << endl;
     sf = 1;
     sfup = 1;
     sfdn = 1;
