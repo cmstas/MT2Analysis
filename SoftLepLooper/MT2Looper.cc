@@ -644,6 +644,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	  //reject low-pt endcap electrons
 	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+
+	  //only keep loose-ID electrons
+	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
 	  
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 	  
@@ -755,6 +758,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //reject low-pt endcap electrons
 	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
 	  
+	  //only keep loose-ID electrons
+	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
+
 	  // good candidate: save
 	  if (nfoundlep == 0){
 	    lep1pt_ = t.lep_pt[ilep];
