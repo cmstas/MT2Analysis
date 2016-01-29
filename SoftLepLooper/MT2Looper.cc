@@ -857,14 +857,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //only keep soft leps
 	  if (t.lep_pt[ilep] < 5 || t.lep_pt[ilep] > 20 ) continue;
 	  //reject all low-pt endcap leptons
-	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
-	  //only keep loose-ID electrons
-	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
+	  if (abs(t.lep_eta[ilep])>1.479 ) continue;
   
 	  //check if isolated
 	  bool isIso = false;
 	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) isIso = true;
-	  else if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1) isIso = true;
+	  else if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && !(t.lep_tightId[ilep] > 0)) isIso = true;
 
 	  lepIdx_ = ilep;
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
