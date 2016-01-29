@@ -58,9 +58,6 @@ root -b -q "makeCR1Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEsti
 echo "root -b -q makeCR2Lestimate.C+(${INDIR},${DATAFILE})"
 root -b -q "makeCR2Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
 
-echo "root -b -q makeCR2Lestimate.C+(${INDIRSR},${DATAFILE})"
-root -b -q "makeCR2Lestimate.C+(\"${INDIRSR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
-
 echo "done"
 
 
