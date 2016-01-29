@@ -850,7 +850,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	else if (t.HLT_PFHT200_Prescale && t.ht > 300) {evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
       }
       
-      if (t.nlep >=1 && doFakeRates && passFRTrig) {
+      if (t.nlep >=1 && doFakeRates && passFRTrig && t.met_pt < 200) {
 
 	for (int ilep = 0; ilep < t.nlep; ilep++){
 
