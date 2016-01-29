@@ -780,6 +780,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
 	//at least one soft lepton
 	if (lep1pt_ < 20 || lep2pt_ < 20) { hasSoftLepton = true; }
+
+	//min pT requirement on second lepton
+	if (!(lep1pt_ > 25 || lep2pt_ > 25)) continue;
 	
 	//opposite sign
 	if (((cand1_pdgId < 0) && (cand2_pdgId < 0)) || ((cand1_pdgId > 0) && (cand2_pdgId > 0)) ){ continue; }
