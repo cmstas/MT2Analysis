@@ -11,7 +11,7 @@ fi
 
 cd $INDIR
 echo "hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root"
-hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root >> dataDrivenEstimates.log
+hadd -f data_Run2015CD.root data_Run2015C.root data_Run2015D.root > dataDrivenEstimates.log
 cd $THISDIR
 
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/data.root,2)"
@@ -58,6 +58,8 @@ root -b -q "makeCR1Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEsti
 echo "root -b -q makeCR2Lestimate.C+(${INDIR},${DATAFILE})"
 root -b -q "makeCR2Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
 
+echo "root -b -q makeCR2Lestimate.C+(${INDIRSR},${DATAFILE})"
+root -b -q "makeCR2Lestimate.C+(\"${INDIRSR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
 
 echo "done"
 
