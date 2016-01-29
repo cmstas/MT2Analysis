@@ -76,6 +76,7 @@ class MT2Looper {
   int softlepId_;
   float softlepmt_;
 
+  int lepIdx_;
   bool foundMissingTau_;
   int missIdx_;
   float missPt_;

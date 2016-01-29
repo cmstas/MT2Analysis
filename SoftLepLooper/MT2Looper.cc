@@ -96,6 +96,8 @@ bool doGenTauVars = true;
 bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
+// make fake-rate hists
+bool doFakeRates = false;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -627,7 +629,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //-------Soft SR/CR1L Region-------//
       //---------------------------------//
 
-      //if nleps==1, find soft lepton
+      //if nlepIso==1, find soft lepton
       if (t.nlepIso == 1) {
 	// find unique lepton to plot pt,MT and get flavor
 	bool foundlep = false;
@@ -663,6 +665,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	
 	if (!foundlep) continue;
+
 	
 	if (softleppt_ < 20 && softleppt_ > 5) {
 	  doSoftLepSRplots = true;
@@ -671,12 +674,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 
 	if (softleppt_ > 30) {
-	  
 	  //additional cuts for 1-lep CR  
 	  if (!t.HLT_SingleMu && !t.HLT_SingleEl) continue;
 	  //if (t.met_pt > 60) continue;
 	  if (abs(softlepId_) == 11 && !softlepElId) continue;
-	  
+
 	  doSoftLepCRplots = true;
 	  if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
 	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
@@ -811,6 +813,99 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
       }//nlepIso==2
       
+      //-------------------------------------//
+      //--------loop for fake leptons--------//
+      //-------------------------------------//
+      bool passFRTrig = false;
+      lepIdx_ = -1;
+
+      // trigger requirement on data
+      if (doFakeRates) {
+	if (!t.isData) { if (t.HLT_PFHT800 || t.HLT_PFHT600_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT200_Prescale) passFRTrig = true;}
+	else if (t.HLT_PFHT800) {passFRTrig = true;}
+	else if (t.HLT_PFHT600_Prescale) {evtweight_ *= t.HLT_PFHT600_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT475_Prescale) {evtweight_ *= t.HLT_PFHT475_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT350_Prescale) {evtweight_ *= t.HLT_PFHT350_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT200_Prescale) {evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
+      }
+      
+      if (t.nlep >=1 && doFakeRates && passFRTrig) {
+
+	for (int ilep = 0; ilep < t.nlep; ilep++){
+
+	  //only keep soft leps
+	  if (t.lep_pt[ilep] < 5 || t.lep_pt[ilep] > 20 ) continue;
+	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+
+	  //check if isolated
+	  bool isIso = false;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) isIso = true;
+	  else if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1) isIso = true;
+
+	  lepIdx_ = ilep;
+	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
+	  
+	  // good candidate: save
+	  softleppt_ = t.lep_pt[ilep];
+	  softlepeta_ = t.lep_eta[ilep];
+	  softlepphi_ = t.lep_phi[ilep];
+	  softlepM_ = t.lep_mass[ilep];
+	  softlepId_ = t.lep_pdgId[ilep];
+	  softlepmt_ = mt;
+	  
+	  TString suffix = "";
+	  
+	  if (t.HLT_PFHT800) {suffix += "HT800";}
+	  else if (t.HLT_PFHT600_Prescale) {suffix += "HT600";}
+	  else if (t.HLT_PFHT475_Prescale) {suffix += "HT475";}
+	  else if (t.HLT_PFHT350_Prescale) {suffix += "HT350";}
+	  else if (t.HLT_PFHT200_Prescale) {suffix += "HT200";}
+	  
+	  if (abs(t.lep_pdgId[ilep]) == 13) suffix += "Mu";
+	  if (abs(t.lep_pdgId[ilep]) == 11) suffix += "El";
+	  
+	  suffix += "Loose";
+
+	  //truth matching
+	  softlepMatched = false;
+	  float minDR = 999;
+	  if (!t.isData) {
+	    for(int igen = 0; igen < t.ngenLep; igen++){
+	      if (t.genLep_pdgId[igen] != softlepId_ ) continue;
+	      if (t.genLep_pt[igen] / softleppt_ < 0.5 || t.genLep_pt[igen] / softleppt_ > 2) continue; 
+	      float thisDR = DeltaR(t.genLep_eta[igen], softlepeta_, t.genLep_phi[igen], softlepphi_);
+	      if (thisDR < minDR) minDR = thisDR;
+	    }
+	    for(int igen = 0; igen < t.ngenLepFromTau; igen++){
+	      if (t.genLepFromTau_pdgId[igen] != softlepId_ ) continue;
+	      if (t.genLepFromTau_pt[igen] / softleppt_ < 0.5 || t.genLepFromTau_pt[igen] / softleppt_ > 2) continue; 
+	      float thisDR = DeltaR(t.genLepFromTau_eta[igen], softlepeta_, t.genLepFromTau_phi[igen], softlepphi_);
+	      if (thisDR < minDR) minDR = thisDR;
+	    }
+	    if (minDR < 0.1) softlepMatched = true;
+	  
+	    if (!softlepMatched) suffix += "Fake";
+	  }
+
+	  string suffixString = suffix.Data();
+
+	  fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	  
+	  if (isIso) {
+	    suffix.ReplaceAll("Loose","Tight");
+	    suffixString = suffix.Data();
+	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	  }
+	  else {
+	    suffix.ReplaceAll("Loose","LooseNotTight");
+	    suffixString = suffix.Data();
+	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	  }
+	  
+	}	
+      }//nlep >= 1
+
+
       
       //-------------------------------------//
       //-------find lost lepton for 2-lep----//
@@ -1617,6 +1712,12 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_softlepmet"+s,       softleppt_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
   plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 80, 0, 2000);
 
+  //isolation  
+  plot1D("h_miniRelIso"+s,  t.lep_miniRelIso[lepIdx_],   evtweight_, h_1d, "miniRelIso [GeV]", 100, 0, 2);
+  plot1D("h_relIso03"+s,  t.lep_relIso03[lepIdx_],   evtweight_, h_1d, ";relIso03 [GeV]", 100, 0, 2);
+  plot1D("h_relIso04"+s,  t.lep_relIso04[lepIdx_],   evtweight_, h_1d, ";relIso04 [GeV]", 100, 0, 2);
+  plot1D("h_relIsoAn04"+s,  t.lep_relIsoAn04[lepIdx_],   evtweight_, h_1d, ";relIsoAn04 [GeV]", 100, 0, 10);
+  
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   plot1D("h_missingdilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
