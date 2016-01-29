@@ -842,12 +842,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // trigger requirement on data
       if (doFakeRates) {
-	if (!t.isData) { if (t.HLT_PFHT800 || t.HLT_PFHT600_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT200_Prescale) passFRTrig = true;}
-	else if (t.HLT_PFHT800) {passFRTrig = true;}
-	else if (t.HLT_PFHT600_Prescale) {evtweight_ *= t.HLT_PFHT600_Prescale;passFRTrig = true;}
-	else if (t.HLT_PFHT475_Prescale) {evtweight_ *= t.HLT_PFHT475_Prescale;passFRTrig = true;}
-	else if (t.HLT_PFHT350_Prescale) {evtweight_ *= t.HLT_PFHT350_Prescale;passFRTrig = true;}
-	else if (t.HLT_PFHT200_Prescale) {evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
+	if (!t.isData) { if (t.HLT_PFHT900 || t.HLT_PFHT800 || t.HLT_PFHT600_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT200_Prescale) passFRTrig = true;}
+	else if (t.HLT_PFHT800 && t.ht > 1000) {passFRTrig = true;}
+	else if (t.HLT_PFHT600_Prescale && t.ht > 700) {evtweight_ *= t.HLT_PFHT600_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT475_Prescale && t.ht > 575) {evtweight_ *= t.HLT_PFHT475_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT350_Prescale && t.ht > 450) {evtweight_ *= t.HLT_PFHT350_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT200_Prescale && t.ht > 300) {evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
       }
       
       if (t.nlep >=1 && doFakeRates && passFRTrig) {
@@ -856,8 +856,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	  //only keep soft leps
 	  if (t.lep_pt[ilep] < 5 || t.lep_pt[ilep] > 20 ) continue;
-	  if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
-
+	  //reject all low-pt endcap leptons
+	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+	  //only keep loose-ID electrons
+	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
+  
 	  //check if isolated
 	  bool isIso = false;
 	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) isIso = true;
@@ -876,11 +879,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  
 	  TString suffix = "";
 	  
-	  if ((t.isData && t.HLT_PFHT800) || (!t.isData && t.HLT_PFHT900)) {suffix += "HT800";}
-	  else if (t.HLT_PFHT600_Prescale) {suffix += "HT600";}
-	  else if (t.HLT_PFHT475_Prescale) {suffix += "HT475";}
-	  else if (t.HLT_PFHT350_Prescale) {suffix += "HT350";}
-	  else if (t.HLT_PFHT200_Prescale) {suffix += "HT200";}
+	  if (((t.isData && t.HLT_PFHT800) || (!t.isData && t.HLT_PFHT900))  && t.ht > 1000 ) {suffix += "HT800";}
+	  else if (t.HLT_PFHT600_Prescale && t.ht > 700) {suffix += "HT600";}
+	  else if (t.HLT_PFHT475_Prescale && t.ht > 575) {suffix += "HT475";}
+	  else if (t.HLT_PFHT350_Prescale && t.ht > 450) {suffix += "HT350";}
+	  else if (t.HLT_PFHT200_Prescale && t.ht > 300) {suffix += "HT200";}
 	  
 	  if (abs(t.lep_pdgId[ilep]) == 13) suffix += "Mu";
 	  if (abs(t.lep_pdgId[ilep]) == 11) suffix += "El";
