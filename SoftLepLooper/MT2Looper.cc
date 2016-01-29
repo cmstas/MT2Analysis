@@ -873,7 +873,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  
 	  TString suffix = "";
 	  
-	  if (t.HLT_PFHT800) {suffix += "HT800";}
+	  if ((t.isData && t.HLT_PFHT800) || (!t.isData && t.HLT_PFHT900)) {suffix += "HT800";}
 	  else if (t.HLT_PFHT600_Prescale) {suffix += "HT600";}
 	  else if (t.HLT_PFHT475_Prescale) {suffix += "HT475";}
 	  else if (t.HLT_PFHT350_Prescale) {suffix += "HT350";}
