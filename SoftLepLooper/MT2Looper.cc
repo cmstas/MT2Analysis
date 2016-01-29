@@ -95,7 +95,7 @@ bool doGenTauVars = true;
 // make variation histograms for e+mu efficiency
 bool doLepEffVars = true;
 // make only minimal hists needed for results
-bool doMinimalPlots = false;
+bool doMinimalPlots = true;
 // make fake-rate hists
 bool doFakeRates = false;
 
@@ -1075,7 +1075,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (!(fabs(t.jet_eta[ijet]) < 2.5)) continue;
 	if (!(t.jet_btagCSV[ijet] >= 0.89)) continue;
 
-	if (t.jet_pt[ijet] > 60) nHardB_++;
+	if (t.jet_pt[ijet] > 50) nHardB_++;
 	else nSoftB_++;
 	    
 	if (t.jet_pt[ijet] > bjetPt_) bjetPt_ = t.jet_pt[ijet];
