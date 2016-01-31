@@ -7,19 +7,22 @@ do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
    voms-proxy-init -hours 168 -voms cms 
 done
 
-MODEL=$(echo "$SAMPLE"|awk -F- 'split($1,a,"_")&&$0=a[1]')
+#MODEL=$(echo "$SAMPLE"|awk -F- 'split($1,a,"_")&&$0=a[1]')
+MODEL=$(echo "$SAMPLE"|awk -F_ 'split($1,a,"_")&&$0=a[1]')
+
+echo $MODEL $SAMPLE
 
 INPUT="job_input.tar.gz, cards_$MODEL/cards_$SAMPLE.tar.gz"
 SITE="T2_US_UCSD"
 PROXY=$(voms-proxy-info -path)
 SUBMITLOGDIR="${PWD}/submit_logs_$MODEL"
-JOBLOGDIR="/data/tmp/jgran/job_logs/limits_for_paper_$MODEL"
+JOBLOGDIR="/data/tmp/$USER/job_logs/softLimits_$MODEL"
 JOBCFGDIR="${PWD}/job_cfg_$MODEL"
 LOG="${SUBMITLOGDIR}/condor_submit.log"
 OUT="${JOBLOGDIR}/1e.\$(Cluster).\$(Process).out"
 ERR="${JOBLOGDIR}/1e.\$(Cluster).\$(Process).err"
 
-OUTPUTDIR=/hadoop/cms/store/user/$USER/combine/limits_for_paper/$MODEL
+OUTPUTDIR=/hadoop/cms/store/user/$USER/combine/softLimits/$MODEL
 
 if [ ! -d "${SUBMITLOGDIR}" ]; then
     mkdir -p ${SUBMITLOGDIR}
@@ -52,4 +55,6 @@ arguments=$SAMPLE $OUTPUTDIR
 queue
 " > ${JOBCFGDIR}/condor_$SAMPLE.cmd
 
+echo "condor_submit ${JOBCFGDIR}/condor_$SAMPLE.cmd"
 condor_submit ${JOBCFGDIR}/condor_$SAMPLE.cmd
+

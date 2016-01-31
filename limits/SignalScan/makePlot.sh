@@ -4,7 +4,8 @@
 #MODEL=T1bbbb
 #MODEL=T1qqqq
 #MODEL=T2tt
-MODEL=T2bb
+#MODEL=T2bb
+MODEL=T2-4bd
 
 cp "r-values_$MODEL.root" PlotsSMS/config/mt2/${MODEL}_results.root
 cd PlotsSMS
