@@ -66,7 +66,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (verbose) cout<<"Looking at region "<<dir_str<<", mt bin "<<mt2bin<<endl;
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mtbins";
-  TString fullhistnamePred = dir + "/h_pred";
+  TString fullhistnamePred = dir + "/h_mtbins";
   TString fullhistnameScan  = fullhistname+"_sigscan";
   TString fullhistnameScanBtagsfHeavy  = fullhistname+"_sigscan_btagsf_heavy_UP";
   TString fullhistnameScanBtagsfLight  = fullhistname+"_sigscan_btagsf_light_UP";
@@ -162,6 +162,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
   int nbjets_HI = h_nbjets_HI->GetBinContent(1);
   
+  TH1D* h_nbjetshard_LOW = (TH1D*) f_sig->Get(dir+"/h_nbjetshard_LOW");
+  TH1D* h_nbjetshard_HI = (TH1D*) f_sig->Get(dir+"/h_nbjetshard_HI");
+  int nbjetshard_LOW = h_nbjetshard_LOW->GetBinContent(1);
+  int nbjetshard_HI = h_nbjetshard_HI->GetBinContent(1);
+  
   TH1D* h_njets_LOW = (TH1D*) f_sig->Get(dir+"/h_njets_LOW");
   TH1D* h_njets_HI = (TH1D*) f_sig->Get(dir+"/h_njets_HI");
   int njets_LOW = h_njets_LOW->GetBinContent(1);
@@ -170,17 +175,20 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int mt2_LOW = h_sig->GetBinLowEdge(mt2bin);
   int mt2_HI = mt2_LOW + h_sig->GetBinWidth(mt2bin);
   // hardcode the current edge of our highest bin..
-  if (mt2_HI == 120) mt2_HI = -1;
+  if (mt2_HI == 300) mt2_HI = -1;
 
   int nbjets_HI_mod = nbjets_HI;
+  int nbjetshard_HI_mod = nbjetshard_HI;
   int njets_HI_mod = njets_HI;
   if(nbjets_HI != -1) nbjets_HI_mod--;
+  if(nbjetshard_HI != -1) nbjetshard_HI_mod--;
   if(njets_HI != -1) njets_HI_mod--;
 
   std::string ht_str = "HT" + to_string(ht_LOW) + "to" + to_string(ht_HI);
   std::string met_str = "MET" + to_string(met_LOW) + "to" + to_string(met_HI);
   std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + to_string(njets_LOW) : "j" + to_string(njets_LOW) + "to" + to_string(njets_HI_mod);
   std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + to_string(nbjets_LOW) : "b" + to_string(nbjets_LOW) + "to" + to_string(nbjets_HI_mod);
+  std::string bjethard_str = (nbjetshard_HI_mod == nbjetshard_LOW) ? "Hb" + to_string(nbjetshard_LOW) : "Hb" + to_string(nbjetshard_LOW) + "to" + to_string(nbjetshard_HI_mod);
   std::string mt2_str = "m" + to_string(mt2_LOW) + "to" + to_string(mt2_HI);
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
@@ -188,10 +196,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ReplaceString(met_str, "-1", "Inf");
   ReplaceString(jet_str, "-1", "Inf");
   ReplaceString(bjet_str, "-1", "Inf");
+  ReplaceString(bjethard_str, "-1", "Inf");
   ReplaceString(mt2_str, "-1", "Inf");
 
-  std::string channel = ht_str + "_" + met_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str;
-  std::string topologicalR = ht_str + "_" + met_str + "_" + jet_str + "_" + bjet_str;
+  std::string channel = ht_str + "_" + met_str + "_" + jet_str + "_" + bjet_str + "_" + bjethard_str + "_" + mt2_str;
+  std::string topologicalR = ht_str + "_" + met_str + "_" + jet_str + "_" + bjet_str + "_" + bjethard_str;
   TString perChannel(channel.c_str());
   TString perTopoRegion(topologicalR.c_str());
   
@@ -269,16 +278,16 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_alpha  = 1; // transfer factor
   double onelep_mcstat = 1. + err_onelep_mcstat; // transfer factor stat uncertainty
   double onelep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double onelep_lepeff = 1.30;
+  double onelep_lepeff = 1.50;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_onelep_shape = Form("onelep_shape_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_onelep_shape = Form("onelep_shape_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_mcstat = Form("onelep_MCstat_%s", channel.c_str());
-  TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  TString name_onelep_lepeff = Form("onelep_lepeff_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_lepeff = Form("onelep_lepeff_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
 
   if (n_onelep_cr > 0.) {
     onelep_alpha = n_onelep / n_onelep_cr > 0 ? n_onelep / n_onelep_cr : last_onelep_transfer;
@@ -304,23 +313,24 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       onelep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
     n_syst++;  // onelep_shape
   }
-  
+  n_onelep = n_onelep_cr * onelep_alpha; // don't use onelep prediction as central value any more, since it has to be consistent with CR*alpha
+
   
   // ----- lost lepton bkg uncertainties
   double dilep_shape = 1.0;
   double dilep_alpha  = 1; // transfer factor
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double dilep_lepeff = 1.30;
+  double dilep_lepeff = 1.50;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_dilep_shape = Form("dilep_shape_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_dilep_shape = Form("dilep_shape_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
-  TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  TString name_dilep_lepeff = Form("dilep_lepeff_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  TString name_dilep_bTag = Form("dilep_bTag_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_lepeff = Form("dilep_lepeff_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_bTag = Form("dilep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   
   if (n_dilep_cr > 0.) {
     dilep_alpha = n_dilep / n_dilep_cr > 0 ? n_dilep / n_dilep_cr : last_dilep_transfer;
@@ -346,12 +356,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       dilep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
     n_syst++;  // dilep_shape
   }
+  n_dilep = n_dilep_cr * dilep_alpha; // don't use dilep prediction as central value any more, since it has to be consistent with CR*alpha
 
 
   
   
   TString name_fake_syst = Form("fake_syst_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  double fake_syst = 1.50;
+  double fake_syst = 1.99;
   n_syst++; //fake_syst
 
   // ----- sig uncertainties
@@ -387,7 +398,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   ofile <<  "imax 1  number of channels"                                                    << endl;
   ofile <<  "jmax 3  number of backgrounds"                                                 << endl;
-  ofile <<  Form("kmax %d  number of nuisance parameters",n_syst)                           << endl;
+  ofile <<  "kmax *"                                                                        << endl;
   ofile <<  "------------"                                                                  << endl;
   ofile <<  Form("bin         %s",channel.c_str())                                          << endl;
   ofile <<  Form("observation %.0f",n_data)                                                 << endl;
@@ -486,8 +497,8 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
-	  for (int im1 = 400; im1 <= 2000; im1 += 25) {
-	    for (int im2 = 0; im2 <= 1600; im2 += 25) {
+	  for (int im1 = 100; im1 <= 1000; im1 += 25) {
+	    for (int im2 = 0; im2 <= 1000; im2 += 5) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop
