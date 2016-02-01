@@ -98,7 +98,7 @@ bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
 // make fake-rate hists
-bool doFakeRates = false;
+bool doFakeRates = true;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -879,9 +879,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  
 	  if (((t.isData && t.HLT_PFHT800) || (!t.isData && t.HLT_PFHT900))  && t.ht > 1000 ) {suffix += "HT800";}
 	  else if (t.HLT_PFHT600_Prescale && t.ht > 700) {suffix += "HT600";}
-	  else if (t.HLT_PFHT475_Prescale && t.ht > 575) {suffix += "HT475";}
-	  else if (t.HLT_PFHT350_Prescale && t.ht > 450) {suffix += "HT350";}
-	  else if (t.HLT_PFHT200_Prescale && t.ht > 300) {suffix += "HT200";}
+	  else if (((t.isData && t.HLT_PFHT475_Prescale) || !t.isData) && t.ht > 575) {suffix += "HT475";}
+	  else if (((t.isData && t.HLT_PFHT350_Prescale) || !t.isData) && t.ht > 450) {suffix += "HT350";}
+	  else if (((t.isData && t.HLT_PFHT200_Prescale) || !t.isData) && t.ht > 300) {suffix += "HT200";}
 	  
 	  if (abs(t.lep_pdgId[ilep]) == 13) suffix += "Mu";
 	  if (abs(t.lep_pdgId[ilep]) == 11) suffix += "El";
