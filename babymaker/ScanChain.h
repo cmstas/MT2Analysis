@@ -211,6 +211,12 @@ class babyMaker {
   Int_t           lep_lostHits[max_nlep];   //[nlep]
   Int_t           lep_convVeto[max_nlep];   //[nlep]
   Int_t           lep_tightCharge[max_nlep];   //[nlep]
+  Float_t         lep_mva[max_nlep];   //[nlep]
+  Float_t         lep_ptRatio[max_nlep];   //[nlep]
+  Float_t         lep_ptRel[max_nlep];   //[nlep]
+  /* Int_t           lep_passSStight[max_nlep];   //[nlep] */
+  /* Int_t           lep_passSStightNoIso[max_nlep];   //[nlep] */
+  Int_t           lep_tightIdNoIso[max_nlep];   //[nlep]
 
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;

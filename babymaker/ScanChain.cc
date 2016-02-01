@@ -250,7 +250,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
   // get susy xsec file
   TH1F* h_sig_xsec(0);
-  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos)) {
+  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos) || (baby_name.find("T5") != std::string::npos) ) {
     // determine which susy particle is being produced
     TString sparticle = "";
     if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T5") != std::string::npos)) sparticle = "gluino";
@@ -405,11 +405,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
-	//hack to recover fastsim events with broken raw MET
-	if (isFastsim && (cms3.evt_pfmet_raw() > 5000)) {
-	  met_pt  = cms3.evt_pfmet();
-	  met_phi = cms3.evt_pfmetPhi();
-	}
 	// hack for fastsim v1
 	if (isFastsim) { 
 	  met_rawPt  = cms3.evt_pfmet_raw();
@@ -793,6 +788,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<int>  vec_lep_lostHits;
       vector<int>  vec_lep_convVeto;
       vector<int>  vec_lep_tightCharge;
+      vector<float>vec_lep_mva;
+      vector<float>vec_lep_ptRatio;
+      vector<float>vec_lep_ptRel;
+      vector<int>  vec_lep_passSStight;
+      vector<int>  vec_lep_passSStightNoIso;
+      vector<int>  vec_lep_tightIdNoIso;
 
       vector<LorentzVector> p4sUniqueLeptons;
 
@@ -810,6 +811,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<LorentzVector> p4sForDphiRl;
 
       if (verbose) cout << "before electrons" << endl;
+
+      //Create and init MVA
+      createAndInitMVA("CORE");
 
       //ELECTRONS
       nlep = 0;
@@ -849,7 +853,28 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_lostHits.push_back ( cms3.els_exp_innerlayers().at(iEl)); //cms3.els_lost_pixelhits().at(iEl);
         vec_lep_convVeto.push_back ( !cms3.els_conv_vtx_flag().at(iEl));
         vec_lep_tightCharge.push_back ( tightChargeEle(iEl));
-
+	//additional isolation and id variables
+	LorentzVector close_jet_v5 = closestJet(cms3.els_p4().at(iEl), 0.4, 3.0, 2);  
+	float ptrel_v5 = ptRel(cms3.els_p4().at(iEl), close_jet_v5, true);
+	float ptratio_v5 = close_jet_v5.pt() > 0 ? cms3.els_p4().at(iEl).pt()/close_jet_v5.pt() : 1;
+	readMVA* v25nsMVAreader = new readMVA();
+	v25nsMVAreader->InitMVA("CORE",true);
+	float mva_25ns = v25nsMVAreader->MVA(iEl);
+        vec_lep_mva.push_back ( mva_25ns );
+        // elID::unsetCache();
+        // elID::setCache(iEl,mva_25ns,elMiniRelIsoCMS3_EA(iEl,1),ptratio_v5,ptrel_v5);
+        vec_lep_ptRatio.push_back ( ptratio_v5 );
+        vec_lep_ptRel.push_back ( ptrel_v5 );
+        // vec_lep_passSStight.push_back ( electronID(iEl, id_level_t::SS_medium_v5) );
+        // vec_lep_passSStightNoIso.push_back ( electronID(iEl, id_level_t::SS_medium_noiso_v5) );
+	int idNoIso = -1;
+	if (electronID(iEl, HAD_tight_noiso_v4)) idNoIso = 3;
+	if (electronID(iEl, HAD_medium_noiso_v4)) idNoIso = 2;
+	if (electronID(iEl, HAD_loose_noiso_v4)) idNoIso = 1;
+	if (electronID(iEl, HAD_veto_noiso_v4)) idNoIso = 0;
+        vec_lep_tightIdNoIso.push_back ( idNoIso );
+	delete v25nsMVAreader;
+	
         nlep++;
 
         // only use isolated leptons for counters, overlaps, etc
@@ -916,6 +941,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_lep_lostHits.push_back ( cms3.mus_exp_innerlayers().at(iMu) ); // use defaults as if "good electron"
         vec_lep_convVeto.push_back ( 1);// use defaults as if "good electron"
         vec_lep_tightCharge.push_back ( tightChargeMuon(iMu) );
+	//additional isolation and id variables
+	LorentzVector close_jet_v5 = closestJet(cms3.mus_p4().at(iMu), 0.4, 3.0, 2);  
+	float ptrel_v5 = ptRel(cms3.mus_p4().at(iMu), close_jet_v5, true);
+	float ptratio_v5 = close_jet_v5.pt() > 0 ? cms3.mus_p4().at(iMu).pt()/close_jet_v5.pt() : 1;
+        vec_lep_mva.push_back ( -999 );
+        // muID::unsetCache();
+        // muID::setCache(iMu, muMiniRelIsoCMS3_EA(iMu,1),ptratio_v5,ptrel_v5);
+        vec_lep_ptRatio.push_back ( ptratio_v5 );
+        vec_lep_ptRel.push_back ( ptrel_v5 );
+        // vec_lep_passSStight.push_back ( muonID(iMu, SS_tight_v5) );
+        // vec_lep_passSStightNoIso.push_back ( muonID(iMu, SS_tight_noiso_v5) );
+	int idNoIso = -1;
+	if (muonID(iMu, HAD_tight_noiso_v4)) idNoIso = 1;
+	if (muonID(iMu, HAD_loose_noiso_v4)) idNoIso = 0;
+	vec_lep_tightIdNoIso.push_back ( idNoIso );
+
 
         nlep++;
 
@@ -975,6 +1016,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         lep_lostHits[i]    = vec_lep_lostHits.at(it->first);
         lep_convVeto[i]    = vec_lep_convVeto.at(it->first);
         lep_tightCharge[i] = vec_lep_tightCharge.at(it->first);
+        lep_mva[i]         = vec_lep_mva.at(it->first);
+        lep_ptRatio[i]     = vec_lep_ptRatio.at(it->first);
+        lep_ptRel[i]       = vec_lep_ptRel.at(it->first);
+        // lep_passSStight[i] = vec_lep_passSStight.at(it->first);
+        // lep_passSStightNoIso[i] = vec_lep_passSStightNoIso.at(it->first);
+        lep_tightIdNoIso[i]     = vec_lep_tightIdNoIso.at(it->first);
         i++;
       }
 
@@ -2165,6 +2212,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
     BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
     BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
+    BabyTree_->Branch("lep_mva", lep_mva, "lep_mva[nlep]/F" );
+    BabyTree_->Branch("lep_ptRatio", lep_ptRatio, "lep_ptRatio[nlep]/F" );
+    BabyTree_->Branch("lep_ptRel", lep_ptRel, "lep_ptRel[nlep]/F" );
+    // BabyTree_->Branch("lep_passSStight", lep_passSStight, "lep_passSStight[nlep]/I" );
+    // BabyTree_->Branch("lep_passSStightNoIso", lep_passSStightNoIso, "lep_passSStightNoIso[nlep]/I" );
+    BabyTree_->Branch("lep_tightIdNoIso", lep_tightIdNoIso, "lep_tightIdNoIso[nlep]/I" );
     BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
     BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
@@ -2580,6 +2633,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       lep_lostHits[i] = -999;
       lep_convVeto[i] = -999;
       lep_tightCharge[i] = -999;
+      lep_mva[i] = -999;
+      lep_ptRatio[i] = -999;
+      lep_ptRel[i] = -999;
+      // lep_passSStight[i] = -999;
+      // lep_passSStightNoIso[i] = -999;
+      lep_tightIdNoIso[i] = -999;
     }
 
     for(int i=0; i < max_nisoTrack; i++){
