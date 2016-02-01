@@ -987,11 +987,26 @@ void plotMakerSoftLepFR(){
   writeExtraText = false;
   lumi_13TeV = "2.26 fb^{-1}";
 
-  string suffix = "HT350MuTight";
-  //bool doOnlyTrue = false;
+ //bool doOnlyTrue = false;
   bool doData = true;
+  bool doAll = false;
   string input_dir = "../SoftLepLooper/output/softLepFake";
-  
+
+  vector<string> suffixes;
+  if (doAll) {
+    suffixes.push_back("HT800ElTight");
+    suffixes.push_back("HT600ElTight");
+    suffixes.push_back("HT475ElTight");
+    suffixes.push_back("HT350ElTight");
+    suffixes.push_back("HT200ElTight");
+    suffixes.push_back("HT800MuTight");
+    suffixes.push_back("HT600MuTight");
+    suffixes.push_back("HT475MuTight");
+    suffixes.push_back("HT350MuTight");
+    suffixes.push_back("HT200MuTight");
+  }
+  else suffixes.push_back("HT800ElTight");
+ 
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -1058,26 +1073,20 @@ void plotMakerSoftLepFR(){
       if(dir_name != "nocut") continue; //to do only this dir
 
       //loop once for log, once for no log
-      for (unsigned int ilog = 0; ilog < 2; ilog++) {
-	bool doLog = ilog==0;
-	makePlot( samples , names , dir_name , "h_lepptshort"+suffix , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 25 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_softlepht"+suffix  , "H_{T} [GeV]" , "Events / 100 GeV" , 0 , 2000 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_mt2"+suffix , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_met"+suffix  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_nJet30"+suffix , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_nBJet20"+suffix , "N(b jets)" , "Events" , 0 , 6 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_J0pt"+suffix , "p_{T}(jet1) [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_J1pt"+suffix , "p_{T}(jet2) [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_BJetpt"+suffix , "p_{T}(bjet1) [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_BJetptshort"+suffix , "p_{T}(bjet1) [GeV]" , "Events / 1 GeV" , 0 , 100 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_categoryB"+suffix , "B-Category" , "Events" , 0 , 4 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_mt"+suffix , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_mtbins"+suffix , "M_{T} [GeV]" , "Events / bin" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_Wpt"+suffix , "W p_{T} [GeV]" , "Events / 20 GeV" , 0 , 800 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	makePlot( samples , names , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	//makePlot( samples , names , dir_name , "h_missingdilepmll"+suffix , "m_{ll} [GeV]" , "Events" , 0 , 150 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-      }    
- 
+      for (unsigned int isuf = 0; isuf < suffixes.size(); isuf++) {
+	for (unsigned int ilog = 0; ilog < 2; ilog++) {
+	  bool doLog = ilog==0;
+	  makePlot( samples , names , dir_name , "h_lepptshort"+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 7 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_softlepht"+suffixes[isuf]  , "H_{T} [GeV]" , "Events / 100 GeV" , 0 , 2000 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_met"+suffixes[isuf]  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 200 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_nJet30"+suffixes[isuf] , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_nBJet20"+suffixes[isuf] , "N(b jets)" , "Events" , 0 , 6 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_categoryB"+suffixes[isuf] , "B-Category" , "Events" , 0 , 4 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_mt"+suffixes[isuf] , "M_{T} [GeV]" , "Events / 5 GeV" , 0 , 200 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_Events_w"+suffixes[isuf] , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_Events"+suffixes[isuf] , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	}    
+      }
     }
   }
 }
