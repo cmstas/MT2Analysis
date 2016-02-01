@@ -310,6 +310,14 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   TString region_label_line2 = getJetBJetPlotLabel2(samples.at(0), histdir);
   TString region_label_line3 = getMTPlotLabel(samples.at(0), histdir);
 
+  //hardcode nocut fakeRate labels
+  if (histdir.find("nocut") != std::string::npos) {
+    ht_label = "";
+    region_label = "E_{T}^{miss} < 200";
+    region_label_line2 = "#geq 0j, #geq 0b";
+    region_label_line3 = "";
+  }
+    
   if (ht_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start,ht_label);
   if (region_label.Length() > 0) label.DrawLatex(label_x_start,label_y_start - label_y_spacing,region_label);
   if (region_label_line2.Length() > 0) label.DrawLatex(label_x_start,label_y_start - 2 * label_y_spacing,region_label_line2);
@@ -989,7 +997,7 @@ void plotMakerSoftLepFR(){
 
  //bool doOnlyTrue = false;
   bool doData = true;
-  bool doAll = false;
+  bool doAll = true;
   string input_dir = "../SoftLepLooper/output/softLepFake";
 
   vector<string> suffixes;
@@ -1041,8 +1049,8 @@ void plotMakerSoftLepFR(){
   }
 
   else {   
-    samples.push_back(f_qcd); names.push_back("qcd");
-    samples.push_back(f_zinv); names.push_back("zinv");
+    // samples.push_back(f_qcd); names.push_back("qcd");
+    // samples.push_back(f_zinv); names.push_back("zinv");
     samples.push_back(f_diboson); names.push_back("diboson");
     samples.push_back(f_dy); names.push_back("dyjets");
     samples.push_back(f_top); names.push_back("top");
@@ -1076,7 +1084,7 @@ void plotMakerSoftLepFR(){
       for (unsigned int isuf = 0; isuf < suffixes.size(); isuf++) {
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
-	  makePlot( samples , names , dir_name , "h_lepptshort"+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 7 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_lepptshort"+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 3 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_softlepht"+suffixes[isuf]  , "H_{T} [GeV]" , "Events / 100 GeV" , 0 , 2000 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_met"+suffixes[isuf]  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 200 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  // makePlot( samples , names , dir_name , "h_nJet30"+suffixes[isuf] , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );

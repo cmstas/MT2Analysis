@@ -98,7 +98,7 @@ bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
 // make fake-rate hists
-bool doFakeRates = true;
+bool doFakeRates = false;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -482,7 +482,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.evt_id >= 100 && t.evt_id < 109) continue;
       // remove low HT QCD samples 
       if (t.evt_id >= 120 && t.evt_id < 123) continue;
-      if (t.evt_id >= 151 && t.evt_id < 154) continue;
+      if (t.evt_id >= 151 && t.evt_id < 154 && !doFakeRates) continue;
 
       // flag signal samples
       if (t.evt_id >= 1000) isSignal_ = true;
