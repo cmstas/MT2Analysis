@@ -8,6 +8,7 @@ class sms():
         if modelname.find("T1qqqq") != -1: self.T1qqqq()
         if modelname.find("T2tt") != -1: self.T2tt()
         if modelname.find("T2bb") != -1: self.T2bb()
+        if modelname.find("T2-4bd") != -1: self.T24bd()
         if modelname.find("Axial1p0") != -1: self.Axial1p0()
         if modelname.find("Axial0p25") != -1: self.Axial0p25()
         if modelname.find("Vector1p0") != -1: self.Vector1p0()
@@ -104,6 +105,25 @@ class sms():
         self.Zmax = 2.
         # produce sparticle
         self.sParticle = "m_{#tilde{b}} [GeV]"
+        # LSP
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        # turn off diagonal lines
+        self.diagOn = False
+
+    def T24bd(self):
+        # model name
+        self.modelname = "T2-4bd"
+        # decay chain
+        self.label= "pp #rightarrow #tilde{t} #tilde{t}, #tilde{t} #rightarrow b f f' #tilde{#chi}^{0}_{1}";
+        # plot boundary. The top 1/4 of the y axis is taken by the legend
+        self.Xmin = 100.
+        self.Xmax = 1000.
+        self.Ymin = 0.
+        self.Ymax = 800.
+        self.Zmin = 0.001
+        self.Zmax = 2.
+        # produce sparticle
+        self.sParticle = "m_{#tilde{t}} [GeV]"
         # LSP
         self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
         # turn off diagonal lines
