@@ -38,7 +38,7 @@ SOURCES = $(wildcard *.cc)
 OBJECTS = $(SOURCES:.cc=.o)
 LIB = libMT2Looper.so
 
-CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
+CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc) $(wildcard ../CORE/*.cc)
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libMT2LooperCORE.so
 

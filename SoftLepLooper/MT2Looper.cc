@@ -23,6 +23,7 @@
 #include "../CORE/Tools/badEventFilter.h"
 #include "../CORE/Tools/hemJet.h" 
 #include "../CORE/Tools/MT2/MT2.h"
+#include "../CORE/MCSelections.h"
 
 // header
 #include "MT2Looper.h"
@@ -602,6 +603,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       softlepM_ = -1;
       softlepId_ = -1;
       softlepmt_ = -1;
+      bool passIsoId = false;
 
       //counter to find highest pT isolated track
       int idxTrk = -1;
@@ -636,26 +638,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------------------//
 
       //if nlepIso==1, find soft lepton
-      if (t.nlepIso == 1) {
+      if (t.nlepIso == 1 || doFakeRates) {
 	// find unique lepton to plot pt,MT and get flavor
 	bool foundlep = false;
 	bool softlepElId = false;
 
 	for (int ilep = 0; ilep < t.nlep; ++ilep) {
-	  
-	  //iso requirements
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]>0.2) continue;
-	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]>0.1) continue;
-	  //if (t.lep_relIsoAn04[ilep]>0.4) continue;
-
-	  //reject low-pt endcap electrons
-	  //if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
 
 	  //reject all low-pt endcap leptons
 	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
-	  
-	  //only keep loose-ID electrons
-	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
+
+	  //iso/id requirements
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) passIsoId = true;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_tightId[ilep] > 0) passIsoId = true;
 	  
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 	  
@@ -679,23 +674,33 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
 	if (!foundlep) continue;
 
-	
-	if (softleppt_ < 20 && softleppt_ > 5) {
-	  doSoftLepSRplots = true;
-	  if (abs(softlepId_) == 13) doSoftLepMuSRplots = true;
-	  if (abs(softlepId_) == 11) doSoftLepElSRplots = true;
-	}
+	//if calculating fake rates, do SoftLepSRplots with the first found lepton 
+	if (doFakeRates) {
+	  if (softleppt_ < 20 && softleppt_ > 5) {
+	    doSoftLepSRplots = true;
+	    if (abs(softlepId_) == 13) doSoftLepMuSRplots = true;
+	    if (abs(softlepId_) == 11) doSoftLepElSRplots = true;
+	  }
+	}//doFakeRate
 
-	if (softleppt_ > 30) {
-	  //additional cuts for 1-lep CR  
-	  if (!t.HLT_SingleMu && !t.HLT_SingleEl) continue;
-	  //if (t.met_pt > 60) continue;
-	  if (abs(softlepId_) == 11 && !softlepElId) continue;
-
-	  doSoftLepCRplots = true;
-	  if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
-	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
-	}
+	else if (passIsoId) {
+	  if (softleppt_ < 20 && softleppt_ > 5) {
+	    doSoftLepSRplots = true;
+	    if (abs(softlepId_) == 13) doSoftLepMuSRplots = true;
+	    if (abs(softlepId_) == 11) doSoftLepElSRplots = true;
+	  }
+	  
+	  if (softleppt_ > 30) {
+	    //additional cuts for 1-lep CR  
+	    if (!t.HLT_SingleMu && !t.HLT_SingleEl) continue;
+	    //if (t.met_pt > 60) continue;
+	    if (abs(softlepId_) == 11 && !softlepElId) continue;
+	    
+	    doSoftLepCRplots = true;
+	    if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
+	    if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
+	  }
+	}//isIso
 	
       } //nlepIso==1
     
@@ -850,7 +855,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	else if (t.HLT_PFHT200_Prescale && t.ht > 300) {evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
       }
       
-      if (t.nlep >=1 && doFakeRates && passFRTrig && t.met_pt < 200) {
+      if (t.nlep >=1 && doFakeRates && passFRTrig) {
 
 	for (int ilep = 0; ilep < t.nlep; ilep++){
 
@@ -889,7 +894,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  suffix += "Loose";
 
 	  //truth matching
-	  softlepMatched = false;
+	  bool isMatched = false;
 	  float minDR = 999;
 	  if (!t.isData) {
 	    for(int igen = 0; igen < t.ngenLep; igen++){
@@ -904,24 +909,25 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      float thisDR = DeltaR(t.genLepFromTau_eta[igen], softlepeta_, t.genLepFromTau_phi[igen], softlepphi_);
 	      if (thisDR < minDR) minDR = thisDR;
 	    }
-	    if (minDR < 0.1) softlepMatched = true;
+	    if (minDR < 0.1) isMatched = true;
 	  
-	    if (!softlepMatched) suffix += "Fake";
+	    if (!isMatched) suffix += "Fake";
 	  }
 
 	  string suffixString = suffix.Data();
-
-	  fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
-	  
-	  if (isIso) {
-	    suffix.ReplaceAll("Loose","Tight");
-	    suffixString = suffix.Data();
+	       
+	  if (t.met_pt < 200) {
 	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
-	  }
-	  else {
-	    suffix.ReplaceAll("Loose","LooseNotTight");
-	    suffixString = suffix.Data();
-	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	    if (isIso) {
+	      suffix.ReplaceAll("Loose","Tight");
+	      suffixString = suffix.Data();
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	    }
+	    else {
+	      suffix.ReplaceAll("Loose","LooseNotTight");
+	      suffixString = suffix.Data();
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	    }
 	  }
 	  
 	}	
@@ -1109,7 +1115,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
 
       if (doSoftLepSRplots && !(t.isData && doBlindData) ) {
-        saveSoftLplots = true;	
+        saveSoftLplots = true;
         fillHistosLepSignalRegions("srLep");
 	if (softlepMatched) {
 	  if (isDilepton) fillHistosLepSignalRegions("srLep", "Dilepton");
@@ -1117,6 +1123,37 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	else fillHistosLepSignalRegions("srLep", "Fake");
 
+	if (doFakeRates) {
+	  string s = "";
+	  if (doSoftLepElSRplots) s += "El";
+	  else if (doSoftLepMuSRplots) s += "Mu";
+
+	  //first fill, for Loose
+	  if (softlepMatched) {
+	    if (isDilepton) fillHistosLepSignalRegions("srLep", s+"LooseDilepton");
+	    else fillHistosLepSignalRegions("srLep", s+"LooseOnelep");
+	  }
+	  else fillHistosLepSignalRegions("srLep", s+"LooseFake");
+
+	  //if passed iso and id req, fill for tight
+	  if (passIsoId) {
+	    if (softlepMatched) {
+	      if (isDilepton) fillHistosLepSignalRegions("srLep", s+"TightDilepton");
+	      else fillHistosLepSignalRegions("srLep", s+"TightOnelep");
+	    }
+	    else fillHistosLepSignalRegions("srLep", s+"TightFake");
+	  }
+	  //else, fill LooseNotTight
+	  else {
+	    if (softlepMatched) {
+	      if (isDilepton) fillHistosLepSignalRegions("srLep", s+"LooseNotTightDilepton");
+	      else fillHistosLepSignalRegions("srLep", s+"LooseNotTightOnelep");
+	    }
+	    else fillHistosLepSignalRegions("srLep", s+"LooseNotTightFake");
+	  }
+	  
+	}
+	
 	// if (!doMinimalPlots) {
 	//   if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
 	//   if (foundMissingTau) {
@@ -1478,7 +1515,7 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = t.nlepIso+t.nPFHad10;
+  values["nlep"]        = doFakeRates ? 1 : t.nlepIso+t.nPFHad10; //if calculating fake rates, set dummy var
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
   values["nbjetshard"]  = nHardB_;
@@ -1751,7 +1788,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   } 
   dir->cd();
 
-  plot1D("h_leppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+  plot1D("h_leppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
   plot1D("h_lepptshort"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lepphi"+s,      softlepphi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lepeta"+s,      softlepeta_,   evtweight_, h_1d, "eta",  60, -3, 3);
@@ -1767,6 +1804,27 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_relIso03"+s,  t.lep_relIso03[lepIdx_],   evtweight_, h_1d, ";relIso03 [GeV]", 100, 0, 2);
   plot1D("h_relIso04"+s,  t.lep_relIso04[lepIdx_],   evtweight_, h_1d, ";relIso04 [GeV]", 100, 0, 2);
   plot1D("h_relIsoAn04"+s,  t.lep_relIsoAn04[lepIdx_],   evtweight_, h_1d, ";relIsoAn04 [GeV]", 100, 0, 10);
+
+  //cone-correction for isolation
+  float isoCut = -1;
+  if (abs(softlepId_) == 13) isoCut = 0.2;
+  else if (abs(softlepId_) == 11) isoCut = 0.1;
+  Float_t floor = 0; //so compiler doesn't complain about typecasting
+  float correction = TMath::Max( floor , t.lep_miniRelIso[lepIdx_]-isoCut );
+  float ptCorr = softleppt_ * (1 + correction);
+  plot1D("h_lepptCorr"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+  plot1D("h_lepptCorrshort"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+  
+  //mother origin
+  if (!t.isData) {
+    int mom = abs(t.lep_mcMatchId[lepIdx_]);
+    int flavorType = -1;
+    if (mom == 15) flavorType = 0;
+    else if (idIsCharm(mom)) flavorType = 2;
+    else if (idIsBeauty(mom)) flavorType = 3;
+    else flavorType = 1;    
+    plot1D("h_motherFlavor"+s,  flavorType,   evtweight_, h_1d, ";parton mother flavor", 4, 0, 4);    
+  }
   
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
