@@ -265,6 +265,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     h_sig_xsec = (TH1F*) h_sig_xsec_temp->Clone("h_sig_xsec");
     f_xsec->Close();
   }
+
+  //Create and init electron MVA
+  createAndInitMVA("CORE");
+  readMVA* v25nsMVAreader = new readMVA();
+  v25nsMVAreader->InitMVA("CORE",true);
   
   // File Loop
   int nDuplicates = 0;
@@ -812,9 +817,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       if (verbose) cout << "before electrons" << endl;
 
-      //Create and init MVA
-      createAndInitMVA("CORE");
-
       //ELECTRONS
       nlep = 0;
       nlepIso = 0;
@@ -857,8 +859,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	LorentzVector close_jet_v5 = closestJet(cms3.els_p4().at(iEl), 0.4, 3.0, 2);  
 	float ptrel_v5 = ptRel(cms3.els_p4().at(iEl), close_jet_v5, true);
 	float ptratio_v5 = close_jet_v5.pt() > 0 ? cms3.els_p4().at(iEl).pt()/close_jet_v5.pt() : 1;
-	readMVA* v25nsMVAreader = new readMVA();
-	v25nsMVAreader->InitMVA("CORE",true);
 	float mva_25ns = v25nsMVAreader->MVA(iEl);
         vec_lep_mva.push_back ( mva_25ns );
         // elID::unsetCache();
@@ -869,11 +869,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // vec_lep_passSStightNoIso.push_back ( electronID(iEl, id_level_t::SS_medium_noiso_v5) );
 	int idNoIso = -1;
 	if (electronID(iEl, HAD_tight_noiso_v4)) idNoIso = 3;
-	if (electronID(iEl, HAD_medium_noiso_v4)) idNoIso = 2;
-	if (electronID(iEl, HAD_loose_noiso_v4)) idNoIso = 1;
-	if (electronID(iEl, HAD_veto_noiso_v4)) idNoIso = 0;
+	else if (electronID(iEl, HAD_medium_noiso_v4)) idNoIso = 2;
+	else if (electronID(iEl, HAD_loose_noiso_v4)) idNoIso = 1;
+	else if (electronID(iEl, HAD_veto_noiso_v4)) idNoIso = 0;
         vec_lep_tightIdNoIso.push_back ( idNoIso );
-	delete v25nsMVAreader;
 	
         nlep++;
 
@@ -954,7 +953,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // vec_lep_passSStightNoIso.push_back ( muonID(iMu, SS_tight_noiso_v5) );
 	int idNoIso = -1;
 	if (muonID(iMu, HAD_tight_noiso_v4)) idNoIso = 1;
-	if (muonID(iMu, HAD_loose_noiso_v4)) idNoIso = 0;
+	else if (muonID(iMu, HAD_loose_noiso_v4)) idNoIso = 0;
 	vec_lep_tightIdNoIso.push_back ( idNoIso );
 
 
