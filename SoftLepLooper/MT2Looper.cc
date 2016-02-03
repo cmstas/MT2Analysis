@@ -503,8 +503,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       //only keep single mass point in scans
       if (isSignal_ 
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
           ) continue;
 
       evtweight_ = 1.;
@@ -1662,7 +1665,9 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 100, 0, 1000);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 100, 0, 1000);
     plot1D("h_BJetpt"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
-    plot1D("h_BJetptshort"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 100);
+    plot1D("h_BJetptshort"+s,  bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 100);
+    if (t.jet_btagCSV[0]>0.89) plot1D("h_BJetptLead"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
+    else plot1D("h_BJetptNotLead"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
     plot1D("h_categoryB"+s,  categoryB_,   evtweight_, h_1d, ";b-category", 4, 0, 4);
     //}
 
