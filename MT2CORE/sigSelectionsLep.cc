@@ -554,7 +554,7 @@ std::vector<SR> getSignalRegionsLep4(){
     fullSR.SetName(fullSR.GetName() + "L");
     fullSR.SetVar("met", 200, 300);
     fullSR.SetVar("ht", 200, 1000);
-    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 100, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 
@@ -563,14 +563,14 @@ std::vector<SR> getSignalRegionsLep4(){
     fullSR.SetName(fullSR.GetName() + "M");
     fullSR.SetVar("met", 300, 500);
     fullSR.SetVar("ht", 200, 1000);
-    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 100, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 //  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
 //    SR fullSR = temp_SR_vec.at(iSR);  
 //    fullSR.SetName(fullSR.GetName() + "H");
 //    fullSR.SetVar("ht", 600, 1000);
-//    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+//    float mtbins[4] = {20, 100, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
 //    SRVec.push_back(fullSR);
 //  }
 
@@ -581,7 +581,7 @@ std::vector<SR> getSignalRegionsLep4(){
   sr3B.SetVar("nbjetshard", 0, -1);
   sr3B.SetVar("met", 200, -1);
   sr3B.SetVar("ht", 200, -1);
-  float mtbins[4] = {20, 90, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
+  float mtbins[4] = {20, 100, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
   SRVec.push_back(sr3B);
 
   SR srMET;
@@ -668,7 +668,7 @@ std::vector<SR> getSignalRegionsLep4(){
   inclusivebase.SetVar("ht", 200, -1);
   inclusivebase.SetVar("met", 200, -1);
   inclusivebase.SetVar("mt", 20, -1);
-  float mtbinsBase[4] = {20, 90, 120, 300};      
+  float mtbinsBase[4] = {20, 100, 120, 300};      
   inclusivebase.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebase);
 
