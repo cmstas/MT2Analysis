@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -46,60 +47,70 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     cerr << "ERROR: Directory doesn't exist! Skipping..." << endl;
     return 1;
   }
-  
-  //get relevant histograms
-  TH1D* h_crMC           = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins");            h_crMC->SetName("h_crMC");
-  TH1D* h_crMCfake       = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsFake");        h_crMCfake->SetName("h_crMCfake");
-  TH1D* h_crMConelep     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");      h_crMConelep->SetName("h_crMConelep");
-  TH1D* h_srMConelep     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");     h_srMConelep->SetName("h_srMConelep"); 
-  TH1D* h_crData         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");          h_crData->SetName("h_crData");
+
+  //initialize map of histograms
+  std::map<string, TH1D*> histMap;
+  histMap["h_crMC"]           = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins");           
+  histMap["h_crMCfake"]       = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsFake");     
+  histMap["h_crMConelep"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");    
+  histMap["h_srMConelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");  
+  histMap["h_crData"]         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");      
   //integrated
-  TH1D* h_crMCInt        = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_w");          h_crMCInt->SetName("h_crMCInt");
-  TH1D* h_crMCfakeInt    = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wFake");      h_crMCfakeInt->SetName("h_crMCfakeInt");
-  TH1D* h_crMConelepInt  = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wOnelep");    h_crMConelepInt->SetName("h_crMConelepInt");
-  TH1D* h_srMConelepInt  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wOnelep");   h_srMConelepInt->SetName("h_srMConelepInt"); 
-  TH1D* h_crDataInt      = (TH1D*) fData->Get("cr1L"+srName+"/h_Events_w");        h_crDataInt->SetName("h_crDataInt");
-  
+  histMap["h_crMCInt"]        = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_w");         
+  histMap["h_crMCfakeInt"]    = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wFake");    
+  histMap["h_crMConelepInt"]  = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wOnelep");   
+  histMap["h_srMConelepInt"]  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wOnelep"); 
+  histMap["h_crDataInt"]      = (TH1D*) fData->Get("cr1L"+srName+"/h_Events_w");  
+
+  //check for empty hists, set names
+  for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
+    if (!(iter->second)){
+      cerr << "WARNING: hist " << iter->first << " does not exist in region " << srName << "! Setting to 0..." << endl;
+      iter->second = sameBin(histMap["h_crMC"], "h");
+    }
+    iter->second->SetName(iter->first.c_str());
+  }
+		  
   //calculate the ratio histogram, N(SR/CR) in MC
-  TH1D* h_ratio = sameBin(h_crMC, "h_ratio");
-  h_ratio->Divide(h_srMConelep, h_crMConelep);
-  TH1D* h_ratioInt = sameBin(h_crMCInt, "h_ratioInt");
-  h_ratioInt->Divide(h_srMConelepInt, h_crMConelepInt);
+  histMap["h_ratio"] = sameBin(histMap["h_crMC"], "h_ratio");
+  histMap["h_ratio"]->Divide(histMap["h_srMConelep"], histMap["h_crMConelep"]);
+  histMap["h_ratioInt"] = sameBin(histMap["h_crMCInt"], "h_ratioInt");
+  histMap["h_ratioInt"]->Divide(histMap["h_srMConelepInt"], histMap["h_crMConelepInt"]);
 
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
-  TH1D* h_purity = sameBin(h_crMC, "h_purity");
-  h_purity->Divide(h_crMConelep,h_crMC);
-  TH1D* h_purityInt = sameBin(h_crMCInt, "h_purityInt");
-  h_purityInt->Divide(h_crMConelepInt,h_crMCInt);   
+  histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
+  histMap["h_purity"]->Divide(histMap["h_crMConelep"],histMap["h_crMC"]);
+  histMap["h_purityInt"] = sameBin(histMap["h_crMCInt"], "h_purityInt");
+  histMap["h_purityInt"]->Divide(histMap["h_crMConelepInt"],histMap["h_crMCInt"]);   
   // TEfficiency* h_purity = new TEfficiency( *h_crMConelep,  *h_crMC);
   // h_purity->SetName("h_purity");
 
   //normalized histogram to extrapolate in MT
-  TH1D* h_kMT = sameBin(h_crMC, "h_kMT");
-  h_kMT->Add(h_srMConelep);
-  h_kMT->Scale(1/h_kMT->Integral(0,-1));
+  histMap["h_kMT"] = sameBin(histMap["h_crMC"], "h_kMT");
+  histMap["h_kMT"]->Add(histMap["h_srMConelep"]);
+  histMap["h_kMT"]->Scale(1/histMap["h_kMT"]->Integral(0,-1));
   
   //initialize pred histogram
-  TH1D* h_pred = sameBin(h_crMC, "h_mtbins");
+  histMap["h_pred"] = sameBin(histMap["h_crMC"], "h_mtbins");
 
   //calculate the prediction in each bin
-  for (int ibin = 0; ibin <= h_crData->GetSize(); ibin++) {
+  for (int ibin = 0; ibin <= histMap["h_crData"]->GetSize(); ibin++) {
 
     //get bin contents
-    double binDataCR         = h_crDataInt  ->GetBinContent(1);
-    double binRatio          = h_ratioInt   ->GetBinContent(1);
-    double binPurity         = h_purityInt  ->GetBinContent(1);
+    double binDataCR         = histMap["h_crDataInt"]  ->GetBinContent(1);
+    double binRatio          = histMap["h_ratioInt"]   ->GetBinContent(1);
+    double binPurity         = histMap["h_purityInt"]  ->GetBinContent(1);
     //double binPurity         = h_purity  ->GetEfficiency(ibin);
-    double binkMT            = h_kMT    ->GetBinContent(ibin);
+    double binkMT            = histMap["h_kMT"]    ->GetBinContent(ibin);
 
     //get bin errors
-    double binDataCR_err     = (binDataCR != 0) ? h_crDataInt  ->GetBinError(1) / binDataCR : 0;
-    double binRatio_err      = (binRatio != 0)  ? h_ratioInt   ->GetBinError(1) / binRatio : 0;
-    double binPurity_err     = (binPurity != 0) ? h_purityInt  ->GetBinError(1) / binPurity : 0;
+    double binDataCR_err     = (binDataCR != 0) ? histMap["h_crDataInt"]  ->GetBinError(1) / binDataCR : 0;
+    double binRatio_err      = (binRatio != 0)  ? histMap["h_ratioInt"]   ->GetBinError(1) / binRatio : 0;
+    double binPurity_err     = (binPurity != 0) ? histMap["h_purityInt"]  ->GetBinError(1) / binPurity : 0;
     // double binPurity_errL    = h_purity  ->GetEfficiencyErrorLow(ibin); binPurity_errL = (binPurity_errL > 0) ? binPurity_errL : 0;
     // double binPurity_errU    = h_purity  ->GetEfficiencyErrorUp(ibin); binPurity_errU = (binPurity_errU > 0) ? binPurity_errU : 0;
     // double binPurity_err     = max(binPurity_errL, binPurity_errU);  //for now, just take larger of asymmetric errors
-    double binkMT_err        = (binkMT != 0)    ? h_kMT        ->GetBinError(ibin) / binkMT : 0;
+    double binkMT_err        = (binkMT != 0)    ? histMap["h_kMT"]        ->GetBinError(ibin) / binkMT : 0;
     
     //calculate pred = N(CR, data) * Ratio(SR/CR, mc) * Purity * k(MT)
     double binPred = binDataCR * binRatio * binPurity * binkMT;
@@ -108,8 +119,8 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkMT_err * binkMT_err;
 
     //set bin content/error
-    h_pred->SetBinContent(ibin, binPred);
-    h_pred->SetBinError(ibin, binPred*sqrt(binErrSq));     
+    histMap["h_pred"]->SetBinContent(ibin, binPred);
+    histMap["h_pred"]->SetBinError(ibin, binPred*sqrt(binErrSq));     
 
   }//loop over bins
 
@@ -118,21 +129,12 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   fOut->cd();
   TDirectory* dir = fOut->mkdir(dir_name.c_str());
   dir->cd();
-  h_crMC          ->Write();
-  h_crMConelep    ->Write();
-  h_srMConelep    ->Write();
-  h_crData        ->Write();
-  h_ratio         ->Write();
-  h_purity        ->Write();
-  h_crMCInt       ->Write();
-  h_crMConelepInt ->Write();
-  h_srMConelepInt ->Write();
-  h_crDataInt     ->Write();
-  h_ratioInt      ->Write();
-  h_purityInt     ->Write();
-  h_kMT           ->Write();
-  h_pred          ->Write();
+  for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
+    if (iter->second) iter->second->Write();
+    delete iter->second;
+  }
 
+  
   return 0;
   
 }
