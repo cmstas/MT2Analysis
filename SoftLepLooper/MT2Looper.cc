@@ -632,6 +632,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       	}
 	
       }
+
+      //counter for isolated leptons above 20GeV
+      int nIsoLep20 = 0;
+      if (doFakeRates) {
+	for (int ilep = 0; ilep < t.nlep; ilep++) {
+	  if (t.lep_pt[ilep]<20) continue;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) nIsoLep20++;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1) nIsoLep20++;
+	}
+      }
       
       //---------------------------------//
       //-------Soft SR/CR1L Region-------//
@@ -647,6 +657,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	  //reject all low-pt endcap leptons
 	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
+
+	  //fake rate cuts
+	  if (doFakeRates) {
+	    if (t.lep_pt[ilep] > 20) continue;
+	    if (nIsoLep20 != 0) continue;
+	  }
 
 	  //iso/id requirements
 	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) passIsoId = true;
@@ -712,24 +728,29 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (!t.isData && (doSoftLepSRplots || doSoftLepCRplots)){
 	double minDR = 999;
 	for(int ilep = 0; ilep < t.ngenLep; ilep++){
-	  if (t.genLep_pdgId[ilep] != softlepId_) continue;
-	  if (t.genLep_pt[ilep] / softleppt_ < 0.5 || t.genLep_pt[ilep] / softleppt_ > 2) continue; 
+	  if (abs(t.genLep_pdgId[ilep]) != abs(softlepId_)) continue;
+	  //if (t.genLep_pt[ilep] / softleppt_ < 0.5 || t.genLep_pt[ilep] / softleppt_ > 2) continue; 
 	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
 	  if (thisDR < minDR) minDR = thisDR;
 	}
-	if (minDR < 0.1) softlepMatched = true;
+	if (minDR < 0.5) softlepMatched = true;
 
 	//if still not matched, check genLepFromTau
 	if (!softlepMatched){
 	  minDR = 999;
 	  for(int ilep = 0; ilep < t.ngenLepFromTau; ilep++){
-	    if (t.genLepFromTau_pdgId[ilep] != softlepId_) continue;
-	    if (t.genLepFromTau_pt[ilep] / softleppt_ < 0.5 || t.genLepFromTau_pt[ilep] / softleppt_ > 2) continue; 
+	    if (abs(t.genLepFromTau_pdgId[ilep]) != abs(softlepId_)) continue;
+	    //if (t.genLepFromTau_pt[ilep] / softleppt_ < 0.5 || t.genLepFromTau_pt[ilep] / softleppt_ > 2) continue; 
 	    float thisDR = DeltaR(t.genLepFromTau_eta[ilep], softlepeta_, t.genLepFromTau_phi[ilep], softlepphi_);
 	    if (thisDR < minDR) minDR = thisDR;
 	  }
-	  if (minDR < 0.1) softlepMatched = true;
+	  if (minDR < 0.5) softlepMatched = true;
 	}
+
+	if(!softlepMatched){
+	  if (abs(t.lep_mcMatchId[lepIdx_]) == 24) softlepMatched = true;
+	}
+	
       }//if doSoftLep SR || CR1L plots
 
       //-------------------------------------//
@@ -898,19 +919,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float minDR = 999;
 	  if (!t.isData) {
 	    for(int igen = 0; igen < t.ngenLep; igen++){
-	      if (t.genLep_pdgId[igen] != softlepId_ ) continue;
-	      if (t.genLep_pt[igen] / softleppt_ < 0.5 || t.genLep_pt[igen] / softleppt_ > 2) continue; 
+	      if (abs(t.genLep_pdgId[igen]) != abs(softlepId_) ) continue;
+	      //if (t.genLep_pt[igen] / softleppt_ < 0.5 || t.genLep_pt[igen] / softleppt_ > 2) continue; 
 	      float thisDR = DeltaR(t.genLep_eta[igen], softlepeta_, t.genLep_phi[igen], softlepphi_);
 	      if (thisDR < minDR) minDR = thisDR;
 	    }
 	    for(int igen = 0; igen < t.ngenLepFromTau; igen++){
-	      if (t.genLepFromTau_pdgId[igen] != softlepId_ ) continue;
-	      if (t.genLepFromTau_pt[igen] / softleppt_ < 0.5 || t.genLepFromTau_pt[igen] / softleppt_ > 2) continue; 
+	      if (abs(t.genLepFromTau_pdgId[igen]) != abs(softlepId_) ) continue;
+	      //if (t.genLepFromTau_pt[igen] / softleppt_ < 0.5 || t.genLepFromTau_pt[igen] / softleppt_ > 2) continue; 
 	      float thisDR = DeltaR(t.genLepFromTau_eta[igen], softlepeta_, t.genLepFromTau_phi[igen], softlepphi_);
 	      if (thisDR < minDR) minDR = thisDR;
 	    }
-	    if (minDR < 0.1) isMatched = true;
-	  
+	    if (minDR < 0.5) isMatched = true;
+	    if(!isMatched){
+	      if (abs(t.lep_mcMatchId[lepIdx_]) == 24) isMatched = true;
+	    }
+	
 	    if (!isMatched) suffix += "Fake";
 	  }
 
@@ -1515,7 +1539,7 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = doFakeRates ? 1 : t.nlepIso+t.nPFHad10; //if calculating fake rates, set dummy var
+  values["nlep"]        = doFakeRates ? 1+t.nPFHad10 : t.nlepIso+t.nPFHad10; //if calculating fake rates, set dummy var
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
   values["nbjetshard"]  = nHardB_;
