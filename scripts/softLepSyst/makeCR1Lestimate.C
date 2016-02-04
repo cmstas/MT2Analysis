@@ -62,11 +62,18 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_srMConelepInt"]  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wOnelep"); 
   histMap["h_crDataInt"]      = (TH1D*) fData->Get("cr1L"+srName+"/h_Events_w");  
 
+  //check for MC hist. should always exist
+  if (!histMap["h_crMC"] || !histMap["h_crMCInt"]) {
+    cerr << "ERROR: MC hist does not exist in region " << srName << "! Skipping..." << endl;
+    return 1;
+  }
+  
   //check for empty hists, set names
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
     if (!(iter->second)){
       cerr << "WARNING: hist " << iter->first << " does not exist in region " << srName << "! Setting to 0..." << endl;
-      iter->second = sameBin(histMap["h_crMC"], "h");
+      if (iter->first.find("Int") != std::string::npos) iter->second = sameBin(histMap["h_crMCInt"], "h");
+      else iter->second = sameBin(histMap["h_crMC"], "h");
     }
     iter->second->SetName(iter->first.c_str());
   }
