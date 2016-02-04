@@ -648,8 +648,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doFakeRates) {
 	for (int ilep = 0; ilep < t.nlep; ilep++) {
 	  if (t.lep_pt[ilep]<20) continue;
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) nIsoLep20++;
-	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1) nIsoLep20++;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
 	}
       }
       
@@ -675,8 +675,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 
 	  //iso/id requirements
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) passIsoId = true;
-	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_tightId[ilep] > 0) passIsoId = true;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2 && t.lep_relIso03[ilep]<0.2) passIsoId = true;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightId[ilep] > 0) passIsoId = true;
 	  
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 	  
@@ -799,7 +799,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //iso requirements
 	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]>0.2) continue;
 	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]>0.1) continue;
-	  //if (t.lep_relIsoAn04[ilep]>0.4) continue;
+	  if (t.lep_relIso03[ilep]>0.2) continue;
 
 	  //reject low-pt endcap electrons
 	  //if (abs(t.lep_pdgId[ilep]) == 11 &&  t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
@@ -897,8 +897,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   
 	  //check if isolated
 	  bool isIso = false;
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) isIso = true;
-	  else if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_tightId[ilep] > 0) isIso = true;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2 && t.lep_relIso03[ilep]<0.2) isIso = true;
+	  else if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightId[ilep] > 0) isIso = true;
 
 	  lepIdx_ = ilep;
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
