@@ -44,10 +44,21 @@ int getColor(const string& sample) {
   if (sample.find("zz dilep") != string::npos) return kRed-1+3;
   if (sample.find("diboson dilep") != string::npos) return kOrange-3+3;
   if (sample.find("top dilep") != string::npos) return 855-3;
-  if (sample.find("fakeLep") != string::npos) return kMagenta+2;
-  
+ 
+  if (sample.find("T2-4bd_375_295") != string::npos) return kAzure+8;
   if (sample.find("T2-4bd_375_335") != string::npos) return kOrange+8;
-  if (sample.find("T2-4bd_275_235") != string::npos) return kYellow;
+  if (sample.find("T2-4bd_375_355") != string::npos) return kTeal+8;
+  if (sample.find("T2-4bd_375_365") != string::npos) return kSpring+8;
+  if (sample.find("T2-4bd_275_195") != string::npos) return kAzure+8;
+  if (sample.find("T2-4bd_275_235") != string::npos) return kOrange+8;
+  if (sample.find("T2-4bd_275_255") != string::npos) return kTeal+8;
+  if (sample.find("T2-4bd_275_265") != string::npos) return kSpring+8;
+
+  
+  if (sample.find("T5qqqqWW_1025_775") != string::npos) return kYellow+1;
+  if (sample.find("T5qqqqWW_1300_600") != string::npos) return kRed+1;
+  if (sample.find("T5qqqqWW_1500_100") != string::npos) return kBlue+1;
+  
   
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
@@ -72,6 +83,8 @@ int getColor(const string& sample) {
   if (sample.find("wz") != string::npos) return kAzure-5;
   if (sample.find("zz") != string::npos) return kRed-1;
   if (sample.find("diboson") != string::npos) return kOrange-3;
+  if (sample.find("fakeLep") != string::npos) return kMagenta+2;
+ 
 
   cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
   return kBlack;
@@ -153,8 +166,18 @@ string getLegendName(const string& sample) {
   if (sample.find("wz") != string::npos) return "WZ";
   if (sample.find("zz") != string::npos) return "ZZ";
   if (sample.find("diboson") != string::npos) return "Diboson";
+  if (sample.find("T2-4bd_375_295") != string::npos) return "T2-4bd 375, 295";
   if (sample.find("T2-4bd_375_335") != string::npos) return "T2-4bd 375, 335";
+  if (sample.find("T2-4bd_375_355") != string::npos) return "T2-4bd 375, 355";
+  if (sample.find("T2-4bd_375_365") != string::npos) return "T2-4bd 375, 365";
+  if (sample.find("T2-4bd_275_195") != string::npos) return "T2-4bd 275, 195";
   if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
+  if (sample.find("T2-4bd_275_255") != string::npos) return "T2-4bd 275, 255";
+  if (sample.find("T2-4bd_275_265") != string::npos) return "T2-4bd 275, 265";
+  
+  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1300_600") != string::npos) return "T5qqqqWW 1300, 600";
+  if (sample.find("T5qqqqWW_1500_100") != string::npos) return "T5qqqqWW 1500, 100";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
@@ -213,8 +236,18 @@ string getTableName(const string& sample) {
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
   
-  if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
+  if (sample.find("T2-4bd_375_295") != string::npos) return "T2-4bd 375, 295";
   if (sample.find("T2-4bd_375_335") != string::npos) return "T2-4bd 375, 335";
+  if (sample.find("T2-4bd_375_355") != string::npos) return "T2-4bd 375, 355";
+  if (sample.find("T2-4bd_375_365") != string::npos) return "T2-4bd 375, 365";
+  if (sample.find("T2-4bd_375_195") != string::npos) return "T2-4bd 275, 195";
+  if (sample.find("T2-4bd_375_235") != string::npos) return "T2-4bd 275, 235";
+  if (sample.find("T2-4bd_375_255") != string::npos) return "T2-4bd 275, 255";
+  if (sample.find("T2-4bd_375_265") != string::npos) return "T2-4bd 275, 265";
+  
+  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1300_600") != string::npos) return "T5qqqqWW 1300, 600";
+  if (sample.find("T5qqqqWW_1500_100") != string::npos) return "T5qqqqWW 1500, 100";
 
   cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
