@@ -278,7 +278,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_alpha  = 1; // transfer factor
   double onelep_mcstat = 1. + err_onelep_mcstat; // transfer factor stat uncertainty
   double onelep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double onelep_lepeff = 1.50;
+  double onelep_lepeff = 1.30;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
@@ -321,7 +321,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_alpha  = 1; // transfer factor
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double dilep_lepeff = 1.50;
+  double dilep_lepeff = 1.30;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
@@ -362,11 +362,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   
   
   TString name_fake_syst = Form("fake_syst_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  double fake_syst = 1.99;
+  double fake_syst = 1.50;
   n_syst++; //fake_syst
 
   // ----- sig uncertainties
-  double sig_syst         = 1.10; // dummy 10% from early MC studies
+  double sig_syst         = 1.20; // dummy 10% from early MC studies
   double sig_lumi         = 1.046; // 4.6% lumi uncertainty, end of 2015
   double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat/n_sig,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
@@ -497,8 +497,14 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       int n_mt2bins = h_n_mt2bins->GetBinContent(1);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
 	if (isScan) {
-	  for (int im1 = 100; im1 <= 1000; im1 += 25) {
-	    for (int im2 = 0; im2 <= 1000; im2 += 5) {
+	  int y_binwidth = 25;
+	  int y_max = 1600;
+	  if (signal.find("T2cc") != std::string::npos || signal.find("T2-4bd") != std::string::npos) {
+	    y_binwidth = 5;
+	    y_max = 800;
+	  }
+	  for (int im1 = 0; im1 <= 2000; im1 += 25) {
+	    for (int im2 = 0; im2 <= y_max; im2 += y_binwidth) {
 	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop
