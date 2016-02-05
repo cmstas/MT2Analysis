@@ -21,7 +21,7 @@ void make_nsig_weight_hists(TString dir, TString sample) {
 
   // for T2cc: 25 GeV in x, 10 GeV in y binning, m1 from 0-2000, m2 from 0-1000
   if (sample.Contains("T2cc") || sample.Contains("T2-4bd") ) {
-    y_nbins = 101;
+    y_nbins = 202;
     y_min = -5.;
     y_max = 1005.;
   }
