@@ -21,18 +21,17 @@ void make_rValues(std::string indir, std::string model, int m1, int m2){
   //setup file to hold r-values if it doesn't already exist
   TFile *f_temp = new TFile(Form("r-values_%s.root", model.c_str()), "NEW");
   if(f_temp){
-//   int nbinsx = 80;
-//   int nbinsy = 64;
-//   int xlow = 000;
-//   int xhigh = 2000;
-//   int ylow = 0;
-//   int yhigh = 1600;
-    int nbinsx = 40;
-    int nbinsy = 100;
-    int xlow = 0;
-    int xhigh = 1000;
+    int nbinsx = 80;
+    int nbinsy = 64;
+    int xlow = 000;
+    int xhigh = 2000;
     int ylow = 0;
-    int yhigh = 1000;
+    int yhigh = 1600;
+    if ( model.find("T2-4bd") != std::string::npos ) {
+      nbinsy = 160;
+      ylow = 0;
+      yhigh = 800;
+    }
     
     TH2F *hExp   = new TH2F("hExp",   "hExp"  , nbinsx, xlow, xhigh, nbinsy, ylow, yhigh);
     TH2F *hObs   = new TH2F("hObs",   "hObs"  , nbinsx, xlow, xhigh, nbinsy, ylow, yhigh);

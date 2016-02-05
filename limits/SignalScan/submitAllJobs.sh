@@ -6,6 +6,7 @@
 #MODEL="T2tt"
 #MODEL="T2bb"
 MODEL="T2-4bd"
+#MODEL="T5qqqqWW"
 INDIR="/home/users/gzevi/MT2/MT2AnalysisSoft2016/MT2Analysis/scripts/softLepSyst/cards_$MODEL"
 
 

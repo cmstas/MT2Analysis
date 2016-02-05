@@ -30,7 +30,8 @@ void smooth(std::string model){
 
   TFile *f_xsec = new TFile("xsec_susy_13tev.root", "READ");
   TH1F *h_xsec = (TH1F*)f_xsec->Get("h_xsec_gluino");//FIXME for Gluino models
-  //TH1F *h_xsec = (TH1F*)f_xsec->Get("h_xsec_stop");// for stop/sbottom models
+  if ( model.find("T2-4bd") != string::npos || model.find("T2tt") != string::npos )
+    h_xsec = (TH1F*)f_xsec->Get("h_xsec_stop");// for stop/sbottom models
 
   TFile *f = new TFile(Form("r-values_%s.root", model.c_str()), "UPDATE");
   f->cd();
