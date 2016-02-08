@@ -99,7 +99,7 @@ bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
 // make fake-rate hists
-bool doFakeRates = false;
+bool doFakeRates = true;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -710,6 +710,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}//doFakeRate
 
 	else if (passIsoId) {
+
+	  //inclusive plot of lepton pt
+	  if (t.met_pt > 200) plot1D("h_leppt",       softleppt_,       evtweight_, h_1d_global, ";p_{T} [GeV]", 500, 0, 500);
+	  
 	  if (softleppt_ < 20 && softleppt_ > 5) {
 	    doSoftLepSRplots = true;
 	    if (abs(softlepId_) == 13) doSoftLepMuSRplots = true;
