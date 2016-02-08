@@ -1862,7 +1862,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
 
   //cone-correction for isolation
   float isoCut = -1;
-  if (abs(softlepId_) == 13) isoCut = 0.2;
+  if (abs(softlepId_) == 13) isoCut = 0.1;
   else if (abs(softlepId_) == 11) isoCut = 0.1;
   Float_t floor = 0; //so compiler doesn't complain about typecasting
   float correction = TMath::Max( floor , t.lep_miniRelIso[lepIdx_]-isoCut );
