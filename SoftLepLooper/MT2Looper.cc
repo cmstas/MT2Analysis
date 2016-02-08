@@ -99,7 +99,7 @@ bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
 // make fake-rate hists
-bool doFakeRates = true;
+bool doFakeRates = false;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -675,6 +675,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (doFakeRates) {
 	    if (t.lep_pt[ilep] > 20) continue;
 	    if (nIsoLep20 != 0) continue;
+	    if (t.lep_miniRelIso[ilep] > 0.5) continue;
 	  }
 
 	  //iso/id requirements
@@ -714,8 +715,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	else if (passIsoId) {
 
-	  //inclusive plot of lepton pt
-	  if (t.met_pt > 200) plot1D("h_leppt",       softleppt_,       evtweight_, h_1d_global, ";p_{T} [GeV]", 500, 0, 500);
+	  //inclusive plots
+	  bool passBaseline = (t.met_pt > 200 && t.ht > 200 && t.deltaPhiMin > 0.3 && t.diffMetMht/t.met_pt < 0.5 && t.nlepIso+t.nPFHad10 == 1);
+	  if (passBaseline) plot1D("h_leppt",       softleppt_,       evtweight_, h_1d_global, ";p_{T} [GeV]", 500, 0, 500);
+	  if (passBaseline && softleppt_ < 20)   plot1D("h_mt",    softlepmt_,   evtweight_, h_1d_global, ";M_{T} [GeV]", 250, 0, 250);
 	  
 	  if (softleppt_ < 20 && softleppt_ > 5) {
 	    doSoftLepSRplots = true;
