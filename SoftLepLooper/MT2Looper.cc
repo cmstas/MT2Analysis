@@ -648,7 +648,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doFakeRates) {
 	for (int ilep = 0; ilep < t.nlep; ilep++) {
 	  if (t.lep_pt[ilep]<20) continue;
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
 	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
 	}
       }
@@ -668,6 +668,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  //reject all low-pt endcap leptons
 	  if ( t.lep_pt[ilep] < 20 &&  t.lep_pt[ilep] > 5 && abs(t.lep_eta[ilep])>1.479 ) continue;
 
+	  //define loose-isolation sideband
+	  if (t.lep_miniRelIso[ilep]>1) continue;
+	  
 	  //fake rate cuts
 	  if (doFakeRates) {
 	    if (t.lep_pt[ilep] > 20) continue;
@@ -675,7 +678,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 
 	  //iso/id requirements
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2 && t.lep_relIso03[ilep]<0.2) passIsoId = true;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02) passIsoId = true;
 	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightId[ilep] > 0) passIsoId = true;
 	  
 	  float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
@@ -801,7 +804,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	for (int ilep = 0; ilep < t.nlep; ++ilep) {
 	  
 	  //iso requirements
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]>0.2) continue;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]>0.1) continue;
 	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]>0.1) continue;
 	  if (t.lep_relIso03[ilep]>0.2) continue;
 
@@ -813,6 +816,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  
 	  //only keep loose-ID electrons
 	  if (abs(t.lep_pdgId[ilep]) == 11 && !(t.lep_tightId[ilep] > 0)) continue;
+
+	  //only keep muons which pass impact parameter cuts
+	  if (abs(t.lep_pdgId[ilep]) == 13 && !(abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02)) continue;
 
 	  // good candidate: save
 	  if (nfoundlep == 0){
@@ -898,10 +904,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (t.lep_pt[ilep] < 5 || t.lep_pt[ilep] > 20 ) continue;
 	  //reject all low-pt endcap leptons
 	  if (abs(t.lep_eta[ilep])>1.479 ) continue;
+
+	  //define loose-isolation sideband
+	  if (t.lep_miniRelIso[ilep]>0.5) continue;
   
 	  //check if isolated
 	  bool isIso = false;
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2 && t.lep_relIso03[ilep]<0.2) isIso = true;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02) isIso = true;
 	  else if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightId[ilep] > 0) isIso = true;
 
 	  lepIdx_ = ilep;
@@ -956,15 +965,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	       
 	  if (t.met_pt < 200) {
 	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	    if (t.met_pt < 60 && softlepmt_ < 30) fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
 	    if (isIso) {
 	      suffix.ReplaceAll("Loose","Tight");
 	      suffixString = suffix.Data();
 	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	      if (t.met_pt < 60 && softlepmt_ < 30) fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
 	    }
 	    else {
 	      suffix.ReplaceAll("Loose","LooseNotTight");
 	      suffixString = suffix.Data();
 	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
+	      if (t.met_pt < 60 && softlepmt_ < 30) fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
 	    }
 	  }
 	  
