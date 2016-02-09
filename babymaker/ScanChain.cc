@@ -821,6 +821,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       //ELECTRONS
       nlep = 0;
       nlepIso = 0;
+      nlepIso20 = 0;
       nElectrons10 = 0;
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 5.0) continue;
@@ -832,6 +833,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         //if(applyLeptonIso && !pass_iso) continue;
         if(applyLeptonIso && !pass_isoLoose) continue;
         if(pass_iso) nlepIso++;
+        if(pass_iso && cms3.els_p4().at(iEl).pt() > 20.0) nlepIso20++;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
@@ -918,6 +920,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         bool pass_isoLoose = muMiniRelIsoCMS3_EA(iMu,1) < 2;
         //if (applyLeptonIso && !pass_iso) continue;
         if (pass_iso) nlepIso++;
+        if (pass_iso && cms3.mus_p4().at(iMu).pt() > 20.0) nlepIso20++;
         if(applyLeptonIso && !pass_isoLoose) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.mus_p4().at(iMu).pt()) );
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
@@ -2197,6 +2200,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
     BabyTree_->Branch("nlep", &nlep, "nlep/I" );
     BabyTree_->Branch("nlepIso", &nlepIso, "nlepIso/I" );
+    BabyTree_->Branch("nlepIso20", &nlepIso20, "nlepIso20/I" );
     BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
     BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
     BabyTree_->Branch("lep_phi", lep_phi, "lep_phi[nlep]/F" );
@@ -2526,6 +2530,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_DiCentralPFJet55_PFMET110 = -999;
     nlep = -999;
     nlepIso = -999;
+    nlepIso20 = -999;
     nisoTrack = -999;
     nPFLep5LowMT = -999;
     nPFHad10LowMT = -999;

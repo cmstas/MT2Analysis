@@ -193,6 +193,7 @@ class babyMaker {
   static const int max_nlep = 50;
   Int_t           nlep;
   Int_t           nlepIso;
+  Int_t           nlepIso20;
   Float_t         lep_pt[max_nlep];   //[nlep]
   Float_t         lep_eta[max_nlep];   //[nlep]
   Float_t         lep_phi[max_nlep];   //[nlep]
