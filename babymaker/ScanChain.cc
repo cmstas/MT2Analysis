@@ -256,6 +256,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T5") != std::string::npos)) sparticle = "gluino";
     else if ((baby_name.find("T2tt") != std::string::npos) || (baby_name.find("T2bb") != std::string::npos) || (baby_name.find("T2cc") != std::string::npos)) sparticle = "stop";
     else if (baby_name.find("T2-4bd") != std::string::npos) sparticle = "stop";
+    else if (baby_name.find("T2tb") != std::string::npos) sparticle = "stop";
     else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
     
