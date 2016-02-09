@@ -637,11 +637,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               // don't save
             }
             // leptons from taus
-            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 15)) {
+            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 15 || grandmotherId > 1000000) ) {
               goodLepFromTau = true;
             } 
             // leptons from W/Z/H
-            else if (motherId == 25 || motherId == 24 || motherId == 23) {
+            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId > 1000000) {
               goodLep = true;
             } 
           } // status 1 e or mu
@@ -653,7 +653,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               // don't save
             }
             // leptons from W/Z/H
-            else if (motherId == 25 || motherId == 24 || motherId == 23) {
+            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId > 1000000) {
               goodTau = true;
             }
 	    
