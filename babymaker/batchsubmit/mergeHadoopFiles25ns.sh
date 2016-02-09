@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=softLep-v2_V00-01-10_25ns_miniaodv2
+TAG=softLep-v3_V00-01-10_25ns_miniaodv2
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -68,6 +68,7 @@ run ttdl_mg_lo
 #
 
 # #run wjets_mg_lo
+
 run wjets_ht100to200
 run wjets_ht200to400
 run wjets_ht400to600
@@ -150,18 +151,7 @@ run tth_bb_amcatnlo
 # QCD
 #
 
-# run qcd_pt120to170
-# run qcd_pt170to300
-# run qcd_pt300to470
-# run qcd_pt470to600
-# run qcd_pt600to800
-# run qcd_pt800to1000
-# run qcd_pt1000to1400
-# run qcd_pt1400to1800
-# run qcd_pt1800to2400
-# run qcd_pt2400to3200
-# run qcd_pt3200toInf
-
+run qcd_ht100to200
 run qcd_ht200to300
 run qcd_ht300to500
 run qcd_ht500to700
@@ -174,21 +164,19 @@ run qcd_ht2000toInf
 # SIGNAL
 #
 
-# run T1tttt_1500_100
-# run T1tttt_1200_800
-# run T1bbbb_1500_100
-# run T1bbbb_1000_900
-# run T1qqqq_1400_100
-# run T1qqqq_1000_800
-
-# fastsim v1
-run T2-4bd_375_295to365
+run T2-4bd_200_120to190
+run T2-4bd_225_145to225
 run T2-4bd_275_195to265
-
-# fastsim v2
 run T2-4bd_300_220to290
 run T2-4bd_325_245to315
+run T2-4bd_350_270to340
+run T2-4bd_375_295to365
 run T2-4bd_400_320to390
+run T2-4bd_550to600_470to590
+
+run T5qqqqWW_600to800_0to725
+run T5qqqqWW_825to1000_0to925
 run T5qqqqWW_1025to1200_0to1175
 run T5qqqqWW_1225to1400_0to1175
 run T5qqqqWW_1425to1600_0to1175
+run T5qqqqWW_1650to1700_0to1150
