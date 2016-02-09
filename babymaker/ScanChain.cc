@@ -799,6 +799,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<int>  vec_lep_passSStight;
       vector<int>  vec_lep_passSStightNoIso;
       vector<int>  vec_lep_tightIdNoIso;
+      vector<float>vec_lep_sip3d;
 
       vector<LorentzVector> p4sUniqueLeptons;
 
@@ -873,6 +874,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else if (electronID(iEl, HAD_loose_noiso_v4)) idNoIso = 1;
 	else if (electronID(iEl, HAD_veto_noiso_v4)) idNoIso = 0;
         vec_lep_tightIdNoIso.push_back ( idNoIso );
+        vec_lep_sip3d.push_back ( -1 );
 	
         nlep++;
 
@@ -955,6 +957,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	if (muonID(iMu, HAD_tight_noiso_v4)) idNoIso = 1;
 	else if (muonID(iMu, HAD_loose_noiso_v4)) idNoIso = 0;
 	vec_lep_tightIdNoIso.push_back ( idNoIso );
+	vec_lep_sip3d.push_back ( fabs(cms3.mus_ip3d().at(iMu)) / cms3.mus_ip3derr().at(iMu) );
 
 
         nlep++;
@@ -1021,6 +1024,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // lep_passSStight[i] = vec_lep_passSStight.at(it->first);
         // lep_passSStightNoIso[i] = vec_lep_passSStightNoIso.at(it->first);
         lep_tightIdNoIso[i]     = vec_lep_tightIdNoIso.at(it->first);
+        lep_sip3d[i]       = vec_lep_sip3d.at(it->first);
         i++;
       }
 
@@ -2217,6 +2221,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     // BabyTree_->Branch("lep_passSStight", lep_passSStight, "lep_passSStight[nlep]/I" );
     // BabyTree_->Branch("lep_passSStightNoIso", lep_passSStightNoIso, "lep_passSStightNoIso[nlep]/I" );
     BabyTree_->Branch("lep_tightIdNoIso", lep_tightIdNoIso, "lep_tightIdNoIso[nlep]/I" );
+    BabyTree_->Branch("lep_sip3d", lep_sip3d, "lep_sip3d[nlep]/F" );
     BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
     BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
@@ -2638,6 +2643,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // lep_passSStight[i] = -999;
       // lep_passSStightNoIso[i] = -999;
       lep_tightIdNoIso[i] = -999;
+      lep_sip3d[i] = -999;
     }
 
     for(int i=0; i < max_nisoTrack; i++){

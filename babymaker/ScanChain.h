@@ -217,6 +217,7 @@ class babyMaker {
   /* Int_t           lep_passSStight[max_nlep];   //[nlep] */
   /* Int_t           lep_passSStightNoIso[max_nlep];   //[nlep] */
   Int_t           lep_tightIdNoIso[max_nlep];   //[nlep]
+  Float_t         lep_sip3d[max_nlep];   //[nlep]
 
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;
