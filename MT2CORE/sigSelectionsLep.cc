@@ -546,7 +546,6 @@ std::vector<SR> getSignalRegionsLep4(){
   sr.SetVar("nbjetshard", 1, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
-  
  
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
@@ -554,7 +553,7 @@ std::vector<SR> getSignalRegionsLep4(){
     fullSR.SetName(fullSR.GetName() + "L");
     fullSR.SetVar("met", 200, 300);
     fullSR.SetVar("ht", 200, 1000);
-    float mtbins[4] = {20, 100, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 
@@ -563,14 +562,14 @@ std::vector<SR> getSignalRegionsLep4(){
     fullSR.SetName(fullSR.GetName() + "M");
     fullSR.SetVar("met", 300, 500);
     fullSR.SetVar("ht", 200, 1000);
-    float mtbins[4] = {20, 100, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(fullSR);
   }
 //  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
 //    SR fullSR = temp_SR_vec.at(iSR);  
 //    fullSR.SetName(fullSR.GetName() + "H");
 //    fullSR.SetVar("ht", 600, 1000);
-//    float mtbins[4] = {20, 100, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+//    float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
 //    SRVec.push_back(fullSR);
 //  }
 
@@ -581,7 +580,7 @@ std::vector<SR> getSignalRegionsLep4(){
   sr3B.SetVar("nbjetshard", 0, -1);
   sr3B.SetVar("met", 200, -1);
   sr3B.SetVar("ht", 200, -1);
-  float mtbins[4] = {20, 100, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
+  float mtbins[4] = {20, 90, 120, 300};      sr3B.SetMT2Bins(3, mtbins);
   SRVec.push_back(sr3B);
 
   SR srMET;
@@ -657,7 +656,20 @@ std::vector<SR> getSignalRegionsLep4(){
     }
   }
 
-
+  //inclusive regions for njet/nbjet topological bins
+  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+    SR topologicalSR = temp_SR_vec.at(iSR);  
+    topologicalSR.SetName("base"+topologicalSR.GetName());
+    topologicalSR.SetVar("mt2", 0, -1);
+    topologicalSR.SetVar("deltaPhiMin", 0.3, -1);
+    topologicalSR.SetVar("diffMetMhtOverMet", 0, 0.5);
+    topologicalSR.SetVar("nlep", 1, 2);
+    topologicalSR.SetVar("ht", 200, -1);
+    topologicalSR.SetVar("met", 200, -1);
+    topologicalSR.SetVar("mt", 20, -1);
+    float mtbins[4] = {20, 90, 120, 300};      topologicalSR.SetMT2Bins(3, mtbins);
+    SRVec.push_back(topologicalSR);
+  }
 
   // Also put in the inclusive region2
   SR inclusivebase = baseSR;  
@@ -668,11 +680,22 @@ std::vector<SR> getSignalRegionsLep4(){
   inclusivebase.SetVar("ht", 200, -1);
   inclusivebase.SetVar("met", 200, -1);
   inclusivebase.SetVar("mt", 20, -1);
-  float mtbinsBase[4] = {20, 100, 120, 300};      
+  float mtbinsBase[4] = {20, 90, 120, 300};      
   inclusivebase.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebase);
 
 
+  SR inclusivebaseAll = baseSR;  
+  inclusivebaseAll.SetName("baseAll");
+  inclusivebaseAll.SetVar("njets", 1, -1);
+  inclusivebaseAll.SetVar("nbjets", 0, -1);
+  inclusivebaseAll.SetVar("nbjetshard", 0, -1);
+  inclusivebaseAll.SetVar("ht", 200, -1);
+  inclusivebaseAll.SetVar("met", 200, -1);
+  inclusivebaseAll.SetVar("mt", 20, -1);
+  inclusivebaseAll.SetMT2Bins(3, mtbinsBase);
+  SRVec.push_back(inclusivebaseAll);
+  
   SR inclusivebaseJ = baseSR;  
   inclusivebaseJ.SetName("baseJ");
   inclusivebaseJ.SetVar("njets", 1, 2);
