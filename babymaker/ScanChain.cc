@@ -829,7 +829,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // first check ID then iso
         if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
         bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4); 
-        bool pass_isoLoose = elMiniRelIsoCMS3_EA(iEl,1) < 2; 
+        bool pass_isoLoose = elMiniRelIsoCMS3_EA(iEl,1) < 0.5; 
         //if(applyLeptonIso && !pass_iso) continue;
         if(applyLeptonIso && !pass_isoLoose) continue;
         if(pass_iso) nlepIso++;
@@ -917,7 +917,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // first check ID then iso
         if(!muonID(iMu,id_level_t::HAD_loose_noiso_v4)) continue;
         bool pass_iso = muonID(iMu,id_level_t::HAD_loose_v4);
-        bool pass_isoLoose = muMiniRelIsoCMS3_EA(iMu,1) < 2;
+        bool pass_isoLoose = muMiniRelIsoCMS3_EA(iMu,1) < 0.5;
         //if (applyLeptonIso && !pass_iso) continue;
         if (pass_iso) nlepIso++;
         if (pass_iso && cms3.mus_p4().at(iMu).pt() > 20.0) nlepIso20++;
