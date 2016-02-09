@@ -1,0 +1,4 @@
+# requires local copy of CORE to find MVA weights
+# no need to compile, just need the directory structure
+# will fix later
+git clone git@github.com:cmstas/CORE.git
