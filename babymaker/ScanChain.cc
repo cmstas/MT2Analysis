@@ -877,7 +877,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else if (electronID(iEl, HAD_loose_noiso_v4)) idNoIso = 1;
 	else if (electronID(iEl, HAD_veto_noiso_v4)) idNoIso = 0;
         vec_lep_tightIdNoIso.push_back ( idNoIso );
-        vec_lep_sip3d.push_back ( -1 );
+        vec_lep_sip3d.push_back ( fabs(cms3.els_ip3d().at(iEl)) / cms3.els_ip3derr().at(iEl) );
 	
         nlep++;
 
