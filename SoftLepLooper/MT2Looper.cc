@@ -100,6 +100,8 @@ bool doLepEffVars = true;
 bool doMinimalPlots = true;
 // make fake-rate hists
 bool doFakeRates = false;
+// do pre-scale reweighting (for fake rates)
+bool doPrescaleWeight = false;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -648,8 +650,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doFakeRates) {
 	for (int ilep = 0; ilep < t.nlep; ilep++) {
 	  if (t.lep_pt[ilep]<20) continue;
-	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
-	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2) nIsoLep20++;
+	  if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.2) nIsoLep20++;
+	  if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1) nIsoLep20++;
 	}
       }
       
@@ -893,13 +895,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doFakeRates) {
 	if (!t.isData) { if (t.HLT_PFHT900 || t.HLT_PFHT800 || t.HLT_PFHT600_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT200_Prescale) passFRTrig = true;}
 	else if (t.HLT_PFHT800 && t.ht > 1000) {passFRTrig = true;}
-	else if (t.HLT_PFHT600_Prescale && t.ht > 700) {evtweight_ *= t.HLT_PFHT600_Prescale;passFRTrig = true;}
-	else if (t.HLT_PFHT475_Prescale && t.ht > 575) {evtweight_ *= t.HLT_PFHT475_Prescale;passFRTrig = true;}
-	else if (t.HLT_PFHT350_Prescale && t.ht > 450) {evtweight_ *= t.HLT_PFHT350_Prescale;passFRTrig = true;}
-	else if (t.HLT_PFHT200_Prescale && t.ht > 300) {evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT600_Prescale && t.ht > 700) {if (doPrescaleWeight) evtweight_ *= t.HLT_PFHT600_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT475_Prescale && t.ht > 575) {if (doPrescaleWeight) evtweight_ *= t.HLT_PFHT475_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT350_Prescale && t.ht > 450) {if (doPrescaleWeight) evtweight_ *= t.HLT_PFHT350_Prescale;passFRTrig = true;}
+	else if (t.HLT_PFHT200_Prescale && t.ht > 300) {if (doPrescaleWeight) evtweight_ *= t.HLT_PFHT200_Prescale;passFRTrig = true;}
       }
       
-      if (t.nlep >=1 && doFakeRates && passFRTrig) {
+      if (t.nlep >=1 && doFakeRates && passFRTrig && t.ht > 300) {
 
 	for (int ilep = 0; ilep < t.nlep; ilep++){
 
@@ -928,12 +930,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  softlepmt_ = mt;
 	  
 	  TString suffix = "";
+	  TString HTsuffix = "";
 	  
-	  if (((t.isData && t.HLT_PFHT800) || (!t.isData && t.HLT_PFHT900))  && t.ht > 1000 ) {suffix += "HT800";}
-	  else if (t.HLT_PFHT600_Prescale && t.ht > 700) {suffix += "HT600";}
-	  else if (((t.isData && t.HLT_PFHT475_Prescale) || !t.isData) && t.ht > 575) {suffix += "HT475";}
-	  else if (((t.isData && t.HLT_PFHT350_Prescale) || !t.isData) && t.ht > 450) {suffix += "HT350";}
-	  else if (((t.isData && t.HLT_PFHT200_Prescale) || !t.isData) && t.ht > 300) {suffix += "HT200";}
+	  if (((t.isData && t.HLT_PFHT800) || (!t.isData && t.HLT_PFHT900))  && t.ht > 1000 ) {HTsuffix += "HT800";}
+	  else if (t.HLT_PFHT600_Prescale && t.ht > 700) {HTsuffix += "HT600";}
+	  else if (((t.isData && t.HLT_PFHT475_Prescale) || !t.isData) && t.ht > 575) {HTsuffix += "HT475";}
+	  else if (((t.isData && t.HLT_PFHT350_Prescale) || !t.isData) && t.ht > 450) {HTsuffix += "HT350";}
+	  else if (((t.isData && t.HLT_PFHT200_Prescale) || !t.isData) && t.ht > 300) {HTsuffix += "HT200";}
 	  
 	  if (abs(t.lep_pdgId[ilep]) == 13) suffix += "Mu";
 	  if (abs(t.lep_pdgId[ilep]) == 11) suffix += "El";
@@ -965,24 +968,39 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 
 	  string suffixString = suffix.Data();
-	       
+	  string HTsuffixString = HTsuffix.Data();
+
+	  
 	  if (t.met_pt < 200) {
+	    
+	    //fill plots in HT bins
+	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), HTsuffixString+suffixString);
 	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
-	    if (t.met_pt < 60 && softlepmt_ < 30) fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	    if (t.met_pt < 60 && softlepmt_ < 30) {
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+HTsuffixString+suffixString);
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	    }
 	    if (isIso) {
 	      suffix.ReplaceAll("Loose","Tight");
 	      suffixString = suffix.Data();
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), HTsuffixString+suffixString);
 	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
-	      if (t.met_pt < 60 && softlepmt_ < 30) fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	      if (t.met_pt < 60 && softlepmt_ < 30) {
+		fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+HTsuffixString+suffixString);
+		fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	      }
 	    }
 	    else {
 	      suffix.ReplaceAll("Loose","LooseNotTight");
 	      suffixString = suffix.Data();
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), HTsuffixString+suffixString);
 	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
-	      if (t.met_pt < 60 && softlepmt_ < 30) fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
-	    }
-	  }
-	  
+	      if (t.met_pt < 60 && softlepmt_ < 30) {
+		fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+HTsuffixString+suffixString);
+		fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	      }
+	    }	    
+	  }//met < 200
 	}	
       }//nlep >= 1
 
@@ -1845,6 +1863,9 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
 
   plot1D("h_leppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
   plot1D("h_lepptshort"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+  plot1D("h_lepptshort_w1"+s,      softleppt_,   1, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+  plot1D("h_lepptshortBins"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
+  plot1D("h_lepptshortBins_w1"+s,      softleppt_,   1, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
   plot1D("h_lepphi"+s,      softlepphi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lepeta"+s,      softlepeta_,   evtweight_, h_1d, "eta",  60, -3, 3);
   plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
