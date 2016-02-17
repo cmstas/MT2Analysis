@@ -1621,18 +1621,42 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values["met"]         = softleppt_; //replace met with lepton pT in cr1L
   values["mt"]          = softlepmt_;
 
-  //inclusive MET region
+  //second value map for mt validation region
+  std::map<std::string, float> values2;
+  values2["deltaPhiMin"] = t.deltaPhiMin;
+  values2["diffMetMhtOverMet"]  = 0; //dummy variable for 1L CR
+  values2["nlep"]        = t.nlepIso+t.nPFHad10;
+  values2["njets"]       = t.nJet30;
+  values2["nbjets"]      = t.nBJet20;
+  values2["nbjetshard"]  = nHardB_;
+  values2["mt2"]         = t.nJet30 > 1 ? t.sl_mt2 : softleppt_; // require large MT2 for multijet events //replace met with lepton pT in cr1L
+  values2["ht"]          = t.ht; //corrected ht in this CR
+  values2["met"]         = 201; //dummy variable for validation region
+  values2["mt"]          = softlepmt_;
+
   if (!doMinimalPlots) {
+    //inclusive MET region
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
       if(SRVecLep.at(srN).PassesSelection(values)){
 	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-	//break;//signal regions are orthogonal, event cannot be in more than one
       }
     }
   }
 
+  //validation region
+  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+    if(SRVecLep.at(srN).PassesSelection(values2) && softleppt_ > 25 && softleppt_ < 40 && t.met_pt > 180){
+
+      if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
+      
+      if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+      else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+      else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+    }
+  }
+  
   //maximum MET cut for CR1L
   if (t.met_pt > 60) return;
 
@@ -1641,7 +1665,6 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
       if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
-      //break;//signal regions are orthogonal, event cannot be in more than one
     }
   }
  
