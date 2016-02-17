@@ -1647,13 +1647,19 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 
   //validation region
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
-    if(SRVecLep.at(srN).PassesSelection(values2) && softleppt_ > 25 && softleppt_ < 40 && t.met_pt > 180){
-
+    if(SRVecLep.at(srN).PassesSelection(values2)){
       if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
-      
-      if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
-      else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
-      else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+      if (softleppt_ > 25 && softleppt_ < 40 && t.met_pt > 180) {
+	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+      }
+      else if (softleppt_ > 40 && softleppt_ < 55 && t.met_pt > 180) {
+	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
+	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
+	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
+      }
+
     }
   }
   
@@ -2085,6 +2091,10 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   float highpt = -1;
   float higheta = -1;
   float highphi = -1;
+  TLorentzVector lowp4;
+  TLorentzVector highp4;
+  TLorentzVector dilepp4;
+  
   if (lep1pt_ < lep2pt_) {
     lowpt = lep1pt_;
     loweta = lep1eta_;
@@ -2092,6 +2102,9 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
     highpt = lep2pt_;
     higheta = lep2eta_;
     highphi = lep2phi_;
+
+    lowp4.SetPtEtaPhiM(lep1pt_, lep1eta_, lep1phi_, lep1M_);
+    highp4.SetPtEtaPhiM(lep2pt_, lep2eta_, lep2phi_, lep2M_);
   }
   else {
     lowpt = lep2pt_;
@@ -2100,7 +2113,12 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
     highpt = lep1pt_;
     higheta = lep1eta_;
     highphi = lep1phi_;
+    
+    lowp4.SetPtEtaPhiM(lep2pt_, lep2eta_, lep2phi_, lep2M_);
+    highp4.SetPtEtaPhiM(lep1pt_, lep1eta_, lep1phi_, lep1M_);
   }
+
+  dilepp4 = lowp4 + highp4;
   
   //compute additional mT shapes
   float metX = t.met_pt * cos(t.met_phi);
@@ -2112,11 +2130,12 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   newMet->SetY(metY+lepY);
 
   float mt = sqrt( 2 * t.met_pt * lowpt * ( 1 - cos( t.met_phi - lowphi) ) );
+  float mt_hard = sqrt( 2 * t.met_pt * highpt * ( 1 - cos( t.met_phi - highphi) ) );
   float mt_alt = sqrt( 2 * newMet->Mod() * lowpt * ( 1 - cos( newMet->Phi() - lowphi) ) );
 
-  delete newMet;
-  
+
   plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_mtHard"+s,            mt_hard,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtAlt"+s,            mt_alt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      lowpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
@@ -2124,6 +2143,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_deltaEtaLep"+s,       higheta-loweta, evtweight_, h_1d, ";deltaEta", 80, -4, 4);
   plot1D("h_deltaPhiLep"+s,       highphi-lowphi, evtweight_, h_1d, ";deltaPhi", 140, -7, 7);
   plot1D("h_deltaPtLep"+s,       highpt-lowpt, evtweight_, h_1d, ";deltaPt", 200, 0, 200);
+  plot1D("h_dilepPt"+s,       dilepp4.Pt(), evtweight_, h_1d, ";Pt", 200, 0, 200);
 
   //save type
   int type = -1;
@@ -2132,6 +2152,7 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   else if (highpt>5 && highpt<10) type = 0;
   plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 3, 0, 3);
 
+  delete newMet;
   
   outfile_->cd();
 
