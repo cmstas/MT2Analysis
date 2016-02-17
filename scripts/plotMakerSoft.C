@@ -1181,6 +1181,7 @@ void plotMakerSoftLepSR(){
   TFile* f_T2_4bd_275_235 = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str())); 
   TFile* f_T2_4bd_275_255 = new TFile(Form("%s/T2-4bd_275_255.root",input_dir.c_str())); 
   TFile* f_T2_4bd_275_265 = new TFile(Form("%s/T2-4bd_275_265.root",input_dir.c_str())); 
+  TFile* f_T5qqqqWW_1025_775_test = new TFile(Form("%s/../test/T5qqqqWW_1025_775.root",input_dir.c_str())); 
   TFile* f_T5qqqqWW_1025_775 = new TFile(Form("%s/T5qqqqWW_1025_775.root",input_dir.c_str())); 
   TFile* f_T5qqqqWW_1300_600 = new TFile(Form("%s/T5qqqqWW_1300_600.root",input_dir.c_str())); 
   TFile* f_T5qqqqWW_1500_100 = new TFile(Form("%s/T5qqqqWW_1500_100.root",input_dir.c_str())); 
@@ -1199,6 +1200,7 @@ void plotMakerSoftLepSR(){
   samples2.push_back(f_wjets);                  names2.push_back("wjets");
   samples2.push_back(f_T2_4bd_275_235);         names2.push_back("T2-4bd_275_235 sig");
   samples2.push_back(f_T5qqqqWW_1025_775);      names2.push_back("T5qqqqWW_1025_775 sig");
+  samples2.push_back(f_T5qqqqWW_1025_775_test); names2.push_back("T5qqqqWW_1025_775_fixed sig");
 
   if (doFake){
     // samples.push_back(f_tt2l); names.push_back("tt+2l fakeLep");
@@ -1283,10 +1285,11 @@ void plotMakerSoftLepSR(){
     
     // samples.push_back(f_T2_4bd_275); names.push_back("T2-4bd_275_235 sig");
     // samples.push_back(f_T2_4bd_275_195); names.push_back("T2-4bd_275_195 sig");
-    samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
+    // samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
     // samples.push_back(f_T2_4bd_275_255); names.push_back("T2-4bd_275_255 sig");
     // samples.push_back(f_T2_4bd_275_265); names.push_back("T2-4bd_275_265 sig");
     samples.push_back(f_T5qqqqWW_1025_775); names.push_back("T5qqqqWW_1025_775 sig");
+    samples.push_back(f_T5qqqqWW_1025_775_test); names.push_back("T5qqqqWW_1025_775_fixed sig");
     // samples.push_back(f_T5qqqqWW_1300_600); names.push_back("T5qqqqWW_1300_600 sig");
     // samples.push_back(f_T5qqqqWW_1500_100); names.push_back("T5qqqqWW_1500_100 sig");
   }
@@ -1302,10 +1305,10 @@ void plotMakerSoftLepSR(){
   bool scaleBGtoData = false;
 
   //inclusive lepton pt plot
-  makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
-  makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
-  makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
-  makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
+  // makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
+  // makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
+  // makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
+  // makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
 
   
   if(printplots){

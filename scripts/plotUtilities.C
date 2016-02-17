@@ -55,6 +55,7 @@ int getColor(const string& sample) {
   if (sample.find("T2-4bd_275_265") != string::npos) return kSpring+8;
 
   
+  if (sample.find("T5qqqqWW_1025_775_fixed") != string::npos) return kRed;
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return kYellow+1;
   if (sample.find("T5qqqqWW_1300_600") != string::npos) return kRed+1;
   if (sample.find("T5qqqqWW_1500_100") != string::npos) return kBlue+1;
@@ -175,7 +176,8 @@ string getLegendName(const string& sample) {
   if (sample.find("T2-4bd_275_255") != string::npos) return "T2-4bd 275, 255";
   if (sample.find("T2-4bd_275_265") != string::npos) return "T2-4bd 275, 265";
   
-  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1025_775_fixed") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqql#nul#nu 1025, 775";
   if (sample.find("T5qqqqWW_1300_600") != string::npos) return "T5qqqqWW 1300, 600";
   if (sample.find("T5qqqqWW_1500_100") != string::npos) return "T5qqqqWW 1500, 100";
 
