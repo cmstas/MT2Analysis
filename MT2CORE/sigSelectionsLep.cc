@@ -684,7 +684,28 @@ std::vector<SR> getSignalRegionsLep4(){
   inclusivebase.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebase);
 
+  SR inclusivebaseZeroB = baseSR;  
+  inclusivebaseZeroB.SetName("baseZeroB");
+  inclusivebaseZeroB.SetVar("njets", 2, -1);
+  inclusivebaseZeroB.SetVar("nbjets", 0, 1);
+  inclusivebaseZeroB.SetVar("nbjetshard", 0, 1);
+  inclusivebaseZeroB.SetVar("ht", 200, -1);
+  inclusivebaseZeroB.SetVar("met", 200, -1);
+  inclusivebaseZeroB.SetVar("mt", 20, -1);
+  inclusivebaseZeroB.SetMT2Bins(3, mtbinsBase);
+  SRVec.push_back(inclusivebaseZeroB);
 
+  SR inclusivebaseWithB = baseSR;  
+  inclusivebaseWithB.SetName("baseWithB");
+  inclusivebaseWithB.SetVar("njets", 2, -1);
+  inclusivebaseWithB.SetVar("nbjets", 1, -1);
+  inclusivebaseWithB.SetVar("nbjetshard", 0, -1);
+  inclusivebaseWithB.SetVar("ht", 200, -1);
+  inclusivebaseWithB.SetVar("met", 200, -1);
+  inclusivebaseWithB.SetVar("mt", 20, -1);
+  inclusivebaseWithB.SetMT2Bins(3, mtbinsBase);
+  SRVec.push_back(inclusivebaseWithB);
+  
   SR inclusivebaseAll = baseSR;  
   inclusivebaseAll.SetName("baseAll");
   inclusivebaseAll.SetVar("njets", 1, -1);
