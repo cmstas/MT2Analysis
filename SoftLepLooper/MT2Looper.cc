@@ -728,7 +728,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    if (abs(softlepId_) == 11) doSoftLepElSRplots = true;
 	  }
 	  
-	  if (softleppt_ > 30) {
+	  if (softleppt_ > 25) {
 	    //additional cuts for 1-lep CR  
 	    if (!t.HLT_SingleMu && !t.HLT_SingleEl) continue;
 	    //if (t.met_pt > 60) continue;
@@ -1624,7 +1624,7 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   //second value map for mt validation region
   std::map<std::string, float> values2;
   values2["deltaPhiMin"] = t.deltaPhiMin;
-  values2["diffMetMhtOverMet"]  = 0; //dummy variable for 1L CR
+  values2["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values2["nlep"]        = t.nlepIso+t.nPFHad10;
   values2["njets"]       = t.nJet30;
   values2["nbjets"]      = t.nBJet20;
