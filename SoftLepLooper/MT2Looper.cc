@@ -2057,24 +2057,50 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   
   //compute mt with softest lepton for soft lep
   float lowpt = -1;
+  float loweta = -1;
   float lowphi = -1;
   float highpt = -1;
+  float higheta = -1;
+  float highphi = -1;
   if (lep1pt_ < lep2pt_) {
     lowpt = lep1pt_;
+    loweta = lep1eta_;
     lowphi = lep1phi_;
     highpt = lep2pt_;
+    higheta = lep2eta_;
+    highphi = lep2phi_;
   }
   else {
     lowpt = lep2pt_;
+    loweta = lep2eta_;
     lowphi = lep2phi_; 
     highpt = lep1pt_;
+    higheta = lep1eta_;
+    highphi = lep1phi_;
   }
-  float mt = sqrt( 2 * t.met_pt * lowpt * ( 1 - cos( t.met_phi - lowphi) ) );
+  
+  //compute additional mT shapes
+  float metX = t.met_pt * cos(t.met_phi);
+  float metY = t.met_pt * sin(t.met_phi);
+  float lepX = highpt * cos(highphi);
+  float lepY = highpt * sin(highphi);
+  TVector2* newMet = new TVector2;
+  newMet->SetX(metX+lepX);
+  newMet->SetY(metY+lepY);
 
+  float mt = sqrt( 2 * t.met_pt * lowpt * ( 1 - cos( t.met_phi - lowphi) ) );
+  float mt_alt = sqrt( 2 * newMet->Mod() * lowpt * ( 1 - cos( newMet->Phi() - lowphi) ) );
+
+  delete newMet;
+  
   plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_mtAlt"+s,            mt_alt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      lowpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_highleppt"+s,      highpt,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+  plot1D("h_deltaEtaLep"+s,       higheta-loweta, evtweight_, h_1d, ";deltaEta", 80, -4, 4);
+  plot1D("h_deltaPhiLep"+s,       highphi-lowphi, evtweight_, h_1d, ";deltaPhi", 140, -7, 7);
+  plot1D("h_deltaPtLep"+s,       highpt-lowpt, evtweight_, h_1d, ";deltaPt", 200, 0, 200);
 
   //save type
   int type = -1;
