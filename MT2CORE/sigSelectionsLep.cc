@@ -527,7 +527,7 @@ std::vector<SR> getSignalRegionsLep4(){
   sr.Clear();
   
   sr.SetName("4");
-  sr.SetVar("njets", 4, -1);
+  sr.SetVar("njets", 4, 6);
   sr.SetVar("nbjets", 0, 1);
   sr.SetVar("nbjetshard", 0, 1);
   temp_SR_vec.push_back(sr);
@@ -544,6 +544,13 @@ std::vector<SR> getSignalRegionsLep4(){
   sr.SetVar("njets", 4, -1);
   sr.SetVar("nbjets", 1, 3);
   sr.SetVar("nbjetshard", 1, 3);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("7");
+  sr.SetVar("njets", 6, -1);
+  sr.SetVar("nbjets", 0, 1);
+  sr.SetVar("nbjetshard", 0, 1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
  
