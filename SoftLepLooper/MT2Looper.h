@@ -56,7 +56,7 @@ class MT2Looper {
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillLepUncSR();
   void fillLepCorSRfastsim();
-  void fillMissLepSF(int igenlep, bool isFastsim, float & lostSF, float & lostSFup, float & lostSFdn);
+  void fillMissLepSF(int igenlep, bool isFromTau, bool isFastsim, float & lostSF, float & lostSFup, float & lostSFdn);
 
   
  private:
@@ -75,27 +75,40 @@ class MT2Looper {
   float softlepM_;
   int softlepId_;
   float softlepmt_;
+  int softlepIdx_;
+  int softlepCharge_;
 
-  int lepIdx_;
+  float hardleppt_;
+  float hardlepeta_;
+  float hardlepphi_;
+  float hardlepM_;
+  int hardlepId_;
+  float hardlepmt_;
+  int hardlepIdx_;
+  int hardlepCharge_;
+
+  float hardlep2pt_;
+  float hardlep2eta_;
+  float hardlep2phi_;
+  float hardlep2M_;
+  int hardlep2Id_;
+  float hardlep2mt_;
+  int hardlep2Idx_;
+  int hardlep2Charge_;
+
   bool foundMissingTau_;
   int missIdx_;
   float missPt_;
+  float missEta_;
   float bjetPt_;
   int nSoftB_;
   int nHardB_;
   int categoryB_;
 
+  bool onlyMakeFRplots_;
+
   //2-lep softLep CR variables
-  float lep1pt_;
-  float lep1eta_;
-  float lep1phi_;
-  float lep1M_;
-  float lep2pt_;
-  float lep2eta_;
-  float lep2phi_;
-  float lep2M_;
   float dilepmll_;
-  float cr2Lmt_;
   
   float dilepmllTrack_;
   
