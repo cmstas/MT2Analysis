@@ -506,20 +506,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //const float lumi = 4;
 
       //only keep single mass point in scans
-//      if (isSignal_ 
-//	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
-//	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && sample  == "T5qqqqWW_1025_775")
-//	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
-//	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
-//          ) continue;
+     if (isSignal_ 
+	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
+	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && sample  == "T5qqqqWW_1025_775")
+	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1100_500")
+	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
+	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
+         ) continue;
 
       evtweight_ = 1.;
 
@@ -746,41 +747,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       //Can select an additonal hard lepton for a 2-hard lepton CR here
 
-
-
-
-
-      //-------------------------------------//
-      //-----dR matching for soft lepton-----//
-      //-------------------------------------//
-      
-      bool softlepMatched = false;
-      if (!t.isData && foundsoftlep){
-	double minDR = 999;
-	for(int ilep = 0; ilep < t.ngenLep; ilep++){
-	  if (abs(t.genLep_pdgId[ilep]) != abs(softlepId_)) continue;
-	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
-	  if (thisDR < minDR) minDR = thisDR;
-	}
-	if (minDR < 0.5) softlepMatched = true;
-
-	//if still not matched, check genLepFromTau
-	if (!softlepMatched){
-	  minDR = 999;
-	  for(int ilep = 0; ilep < t.ngenLepFromTau; ilep++){
-	    if (abs(t.genLepFromTau_pdgId[ilep]) != abs(softlepId_)) continue;
-	    float thisDR = DeltaR(t.genLepFromTau_eta[ilep], softlepeta_, t.genLepFromTau_phi[ilep], softlepphi_);
-	    if (thisDR < minDR) minDR = thisDR;
-	  }
-	  if (minDR < 0.5) softlepMatched = true;
-	}
-
-	if(!softlepMatched){
-	  if (abs(t.lep_mcMatchId[softlepIdx_]) == 24) softlepMatched = true;
-	}
-	
-      }//if !t.isData && foundsoftlep
-
       //-------------------------------------//
       //-------find lost lepton--------------//
       //-------------------------------------//
@@ -945,6 +911,37 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}// additional cuts for CR2L
       }// HardDileptonCR
 
+      //-------------------------------------//
+      //-----dR matching for soft lepton-----//
+      //-------------------------------------//
+      
+      bool softlepMatched = false;
+      if (!t.isData && (foundsoftlep || foundhardlep)){
+	double minDR = 999;
+	for(int ilep = 0; ilep < t.ngenLep; ilep++){
+	  if (abs(t.genLep_pdgId[ilep]) != abs(softlepId_)) continue;
+	  float thisDR = DeltaR(t.genLep_eta[ilep], softlepeta_, t.genLep_phi[ilep], softlepphi_);
+	  if (thisDR < minDR) minDR = thisDR;
+	}
+	if (minDR < 0.5) softlepMatched = true;
+
+	//if still not matched, check genLepFromTau
+	if (!softlepMatched){
+	  minDR = 999;
+	  for(int ilep = 0; ilep < t.ngenLepFromTau; ilep++){
+	    if (abs(t.genLepFromTau_pdgId[ilep]) != abs(softlepId_)) continue;
+	    float thisDR = DeltaR(t.genLepFromTau_eta[ilep], softlepeta_, t.genLepFromTau_phi[ilep], softlepphi_);
+	    if (thisDR < minDR) minDR = thisDR;
+	  }
+	  if (minDR < 0.5) softlepMatched = true;
+	}
+
+	if(!softlepMatched){
+	  if (abs(t.lep_mcMatchId[softlepIdx_]) == 24) softlepMatched = true;
+	}
+	
+      }//if !t.isData && foundsoftlep
+      
       // Inclusive plots
       bool passBaseline = (t.met_pt > 200 && t.ht > 200 && t.deltaPhiMin > 0.3 && t.diffMetMht/t.met_pt < 0.5 && t.nlepIso+t.nPFHad10 == 1);
       if (passBaseline && foundsoftlep) {
