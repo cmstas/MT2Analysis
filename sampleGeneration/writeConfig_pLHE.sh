@@ -83,11 +83,11 @@ x509userproxy=${PROXY}
     # for each job
     # 
 
-    for FILE in `ls ${DATADIR}/*.lhe`; do
+    for FILE in `ls ${DATADIR}/*.xz`; do
         echo "
 executable=${EXE}
 transfer_executable=True
-arguments=`echo ${FILE##*/} | sed 's/\.lhe//g'` ${FILE} ${COPYDIR}
+arguments=`echo ${FILE##*/} | sed 's/\.xz//g'` ${FILE} ${COPYDIR}
 queue
 " >> condor_${COPYDIRBASE##*/}.cmd
     done
