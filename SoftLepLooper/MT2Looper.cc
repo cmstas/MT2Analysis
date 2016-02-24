@@ -99,6 +99,8 @@ bool doGenTauVars = true;
 bool doLepEffVars = true;
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
+// if true, only make plots with both el,mu
+bool doCombineElMu = true;
 // make fake-rate hists
 bool calculateFakeRates = false;
 bool applyFakeRates = true;
@@ -855,10 +857,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       else if ( !foundsoftlep && foundhardlep && t.nlep == 1) { // CR1L
 	//additional cuts for 1-lep CR  
 	if (t.HLT_SingleMu || t.HLT_SingleEl) {
-	  doSoftLepCRplots = true;
-	  if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
-	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
-	  
+
 	  // to draw all the usual plots, fill the soft lepton variables with the hardlepton values
 	  // this only makes sense in CR1L, where there is NO soft lepton
 	  softlepIdx_   = hardlepIdx_    ;
@@ -869,6 +868,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  softlepCharge_= hardlepCharge_ ;
 	  softlepId_    = hardlepId_     ;
 	  softlepmt_    = hardlepmt_     ;
+
+	  doSoftLepCRplots = true;
+	  if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
+	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
 	  
 	}// additional cuts for CR1L 
       }// CR1L
@@ -1157,7 +1160,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// }
 	
       }
-      if (doSoftLepMuSRplots && !(t.isData && doBlindData) && !doMinimalPlots) {
+      if (doSoftLepMuSRplots && !(t.isData && doBlindData) && !doCombineElMu) {
         saveSoftLMuplots = true;
 	fillHistosLepSignalRegions("srLepMu"); 
 	if (!t.isData) {
@@ -1166,7 +1169,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  else fillHistosLepSignalRegions("srLepMu", "Fake");
 	}
       }
-      if (doSoftLepElSRplots && !(t.isData && doBlindData) && !doMinimalPlots) {
+      if (doSoftLepElSRplots && !(t.isData && doBlindData) && !doCombineElMu) {
         saveSoftLElplots = true;
 	fillHistosLepSignalRegions("srLepEl"); 
 	if (!t.isData) {
@@ -1194,7 +1197,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	//   else if (foundMissingLep) fillHistosCR1L("cr1L", "MissingLep");
 	// }
       }
-      if (doSoftLepMuCRplots && !doMinimalPlots) {
+      if (doSoftLepMuCRplots && !doCombineElMu) {
         save1Lmuplots = true;
 	fillHistosCR1L("cr1Lmu");
 	if (!t.isData) {
@@ -1202,7 +1205,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  else fillHistosCR1L("cr1Lmu","Fake");
 	}
       }
-      if (doSoftLepElCRplots && !doMinimalPlots) {
+      if (doSoftLepElCRplots && !doCombineElMu) {
 	save1Lelplots = true;
 	fillHistosCR1L("cr1Lel");
 	if (!t.isData) {
@@ -1221,7 +1224,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    else fillHistosDoubleL("cr2L","Fake");
 	  }
 	  
-	  if (!doMinimalPlots){
+	  if (!doCombineElMu){
 	    if (isEE){
 	      fillHistosDoubleL("cr2L","EE");
 	      if (!t.isData) {
