@@ -55,10 +55,11 @@ int getColor(const string& sample) {
   if (sample.find("T2-4bd_275_265") != string::npos) return kSpring+8;
 
   
-  if (sample.find("T5qqqqWW_1025_775_fixed") != string::npos) return kRed;
+  if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return kGreen+1;
+  if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return kBlue+1;
+  
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return kYellow+1;
-  if (sample.find("T5qqqqWW_1300_600") != string::npos) return kRed+1;
-  if (sample.find("T5qqqqWW_1500_100") != string::npos) return kBlue+1;
+  if (sample.find("T5qqqqWW_1100_500") != string::npos) return kRed+1;
   
   
   if (sample.find("data") != string::npos) return kBlack;
@@ -176,10 +177,10 @@ string getLegendName(const string& sample) {
   if (sample.find("T2-4bd_275_255") != string::npos) return "T2-4bd 275, 255";
   if (sample.find("T2-4bd_275_265") != string::npos) return "T2-4bd 275, 265";
   
-  if (sample.find("T5qqqqWW_1025_775_fixed") != string::npos) return "T5qqqqWW 1025, 775";
-  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqql#nul#nu 1025, 775";
-  if (sample.find("T5qqqqWW_1300_600") != string::npos) return "T5qqqqWW 1300, 600";
-  if (sample.find("T5qqqqWW_1500_100") != string::npos) return "T5qqqqWW 1500, 100";
+  if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return "T5qqqql#nul#nu 1025, 775";
+  if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return "T5qqqql#nul#nu 1100, 500";
+  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
@@ -247,9 +248,10 @@ string getTableName(const string& sample) {
   if (sample.find("T2-4bd_375_255") != string::npos) return "T2-4bd 275, 255";
   if (sample.find("T2-4bd_375_265") != string::npos) return "T2-4bd 275, 265";
   
+  if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return "T5qqqql#nul#nu 1025, 775";
+  if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return "T5qqqql#nul#nu 1100, 500";
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
-  if (sample.find("T5qqqqWW_1300_600") != string::npos) return "T5qqqqWW 1300, 600";
-  if (sample.find("T5qqqqWW_1500_100") != string::npos) return "T5qqqqWW 1500, 100";
+  if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
 
   cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
