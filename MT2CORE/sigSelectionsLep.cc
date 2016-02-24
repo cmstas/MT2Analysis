@@ -702,6 +702,17 @@ std::vector<SR> getSignalRegionsLep4(){
   inclusivebaseHighHT.SetMT2Bins(3, mtbinsBase);
   SRVec.push_back(inclusivebaseHighHT);
 
+  SR inclusivebaseMedHT = baseSR;  
+  inclusivebaseMedHT.SetName("baseMedHT");
+  inclusivebaseMedHT.SetVar("njets", 2, -1);
+  inclusivebaseMedHT.SetVar("nbjets", 0, -1);
+  inclusivebaseMedHT.SetVar("nbjetshard", 0, -1);
+  inclusivebaseMedHT.SetVar("ht", 300, -1);
+  inclusivebaseMedHT.SetVar("met", 200, -1);
+  inclusivebaseMedHT.SetVar("mt", 20, -1);  
+  inclusivebaseMedHT.SetMT2Bins(3, mtbinsBase);
+  SRVec.push_back(inclusivebaseMedHT);
+
   SR inclusivebaseZeroB = baseSR;  
   inclusivebaseZeroB.SetName("baseZeroB");
   inclusivebaseZeroB.SetVar("njets", 2, -1);
