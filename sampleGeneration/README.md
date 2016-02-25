@@ -2,13 +2,13 @@
 
 This repo contains all the scripts you need to make custom SMS samples using condor, starting with decayed LHE files and ending with MiniAOD.
 
-###Instructions:
+##Instructions:
 There are 3 sets of scripts used for each step:
 - pLHE
 - AOD
 - MiniAOD
 
-##pLHE
+###pLHE
 The `writeAllConfig_pLHE.sh` script will generate condor cfgs for each decayed LHE files in the target directories. There is an option to set a tag at the beginning of the file if desired. The syntax is
 ```
 ./writeConfig_pLHE.sh <directory of LHE files> <name of sample>
