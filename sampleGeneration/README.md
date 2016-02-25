@@ -7,7 +7,10 @@ There are 3 sets of scripts used for each step:
 - AOD
 - MiniAOD
 
-Each step has the same workflow, assuming the previous step is complete: make all the condor configs, submit all your jobs, check for missing files (due to job failures), and resubmit until all your jobs have finished.
+Each step has the same workflow, assuming the previous step is complete: make all the condor configs, submit all your jobs, check for missing files (due to job failures), and resubmit until all your jobs have finished. The output will be written to hadoop:
+```
+/hadoop/cms/store/<user>/mcProduction/<tag>_<sample>/<step>/
+```
 
 ###pLHE
 The `writeAllConfig_pLHE.sh` script will generate condor cfgs for each decayed LHE files in the target directories. **NOTE**: this assumes your LHE files are zipped in the .xz format! There is an option to set a tag at the beginning of the file if desired. The syntax for each line is
@@ -57,3 +60,4 @@ Rinse and repeat until all your jobs are complete.
 - add scripts for banner injections
 - intelligently lookup qcuts for different processes and mass points
 - add the MiniAOD step
+- incorporate scripts to change decay tables (in pLHE step)
