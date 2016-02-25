@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+DATADIR=$1
+COPYDIRBASE=$2
+
 while  ! voms-proxy-info -exist
 do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
    voms-proxy-init -hours 168 -voms cms
@@ -45,9 +49,7 @@ fi
 # cd ${DIR}
 
 
-DATADIR=$1
-COPYDIRBASE=$2
-COPYDIR=/hadoop/cms/store/user/${USERNAME}/mcProduction/${COPYDIRBASE}
+COPYDIR=/hadoop/cms/store/user/${USERNAME}/mcProduction/${COPYDIRBASE}/LHE
 echo "[writeConfig] running on dataset ${DATADIR}"
 echo "[writeConfig] copying output to ${COPYDIR}"
 

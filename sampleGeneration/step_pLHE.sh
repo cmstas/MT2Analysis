@@ -21,9 +21,9 @@ export X509_USER_PROXY=$HOME/private/personal/voms_proxy.cert
 
 scram b
 cd ../../
-cmsDriver.py step1 --filein file:$FILEIN --filetype LHE --fileout file:$FILEOUT.root --mc --eventcontent LHE --datatier LHE --conditions MCRUN2_71_V1::All --step NONE --python_filename cfg_step1_pLHE.py --customise Configuration/DataProcessing/Utils.addMonitoring -n 1000 
+cmsDriver.py step1 --filein file:$FILEIN --filetype LHE --fileout file:$FILEOUT.root --mc --eventcontent LHE --datatier LHE --conditions MCRUN2_71_V1::All --step NONE --python_filename cfg_step1_pLHE.py --customise Configuration/DataProcessing/Utils.addMonitoring -n 100000 
 #cmsRun -e -j cfg_step1_pLHE.py
-echo 1000 events were ran 
+echo 100000 events were ran 
 grep "TotalEvents" cfg_step1_pLHE.xml 
 grep "Timing-tstoragefile-write-totalMegabytes" cfg_step1_pLHE.xml 
 grep "PeakValueRss" cfg_step1_pLHE.xml 
