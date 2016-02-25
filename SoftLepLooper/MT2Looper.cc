@@ -1835,6 +1835,18 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       return;
   }
 
+  if ( calculateFakeRates ) {
+    plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_lepptshortBins"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
+    plot1D("h_lepptshortBins_w1"+s,      softleppt_,   1, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
+    plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+    plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+    return;
+  }
+
+
   plot1D("h_leppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
   plot1D("h_lepptshort"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lepptshort_w1"+s,      softleppt_,   1, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
