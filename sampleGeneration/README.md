@@ -23,7 +23,7 @@ Rinse and repeat until all your jobs are complete.
 
 **NOTE**: There are a couple assumptions built into these scripts!
 
-1. The LHE files are assumed to be zipped in the .xz format. If this isn't the case, you will need to edit `wrapper.sh`
+1. The LHE files are assumed to be zipped in the .xz format. If this isn't the case, you will need to edit `writeConfig.sh`
 2. The assumed number of events per LHE file is 100,000. You can edit the number of events generated at each step inside `step_<step>.sh`.
 
 ###writeAllConfig.sh
