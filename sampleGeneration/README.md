@@ -24,14 +24,14 @@ Rinse and repeat until all your jobs are complete.
 **NOTE**: There are a couple assumptions built into these scripts!
 
 1. The LHE files are assumed to be zipped in the .xz format. If this isn't the case, you will need to edit `writeConfig.sh`
-2. The assumed number of events per LHE file is 100,000. You can edit the number of events generated at each step inside `step_<step>.sh`.
+2. The number of events in the LHE file should be at least N(Jobs)*N(Events per Job)
 
 ###writeAllConfig.sh
-The `writeAllConfig.sh` script will generate condor cfgs for each (decayed) LHE file in the target directories. There is an option to set a tag at the beginning of the file if desired. The syntax for each line is
+The `writeAllConfig.sh` script will generate condor cfgs for each (decayed) LHE file in the target directories. There is an option to set a tag at the beginning of the file if desired. In addition, you should set the number of jobs to split each mass point into, and the number of events per job. The syntax for each line is then
 ```
-./writeConfig.sh <directory of LHE files> <name of sample> <python fragment>
+./writeConfig.sh ${EVENTS} ${JOBS} <directory of LHE files> <name of sample> <python fragment>
 ```
-which will generate a .cmd file for every LHE file in the corresponding directory. It will also generate a `submitAll.sh` script to submit condor jobs for each of your config files. Once all your jobs are complete, you can use
+which will generate a config file for every LHE file in the corresponding directory. It will also generate a `submitAll.sh` script to submit condor jobs for each of your config files. Once all your jobs are complete, you can use
 ```
 ./checkAllConfig.sh <config directory>
 ```
