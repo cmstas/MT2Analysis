@@ -1,18 +1,22 @@
 #!/bin/bash
 
 #
-# script for submitting pLHE jobs
+# script to make .cmd files for submitting jobs
 #
 
-TAG="softLep"
-
+#optional tag
+TAG="test"
+#events per job
+EVENTS=10000
+#jobs per mass point
+JOBS=10
 
 #
 # LHE directories and mass points
 #
 
-#./writeConfig.sh /hadoop/cms/store/user/mderdzinski/mcProduction/test/ ${TAG}_T5qqqqWWmodified fragmentTemplate.py
-./writeConfig.sh /hadoop/cms/store/user/gzevi/LHE/T5qqqqWWmodified/T5qqqqWWmodifiedA/ ${TAG}_T5qqqqWWmodifiedA fragmentTemplate.py
+./writeConfig.sh ${EVENTS} ${JOBS} /hadoop/cms/store/user/mderdzinski/mcProduction/test/ ${TAG}_T5qqqqWWmodified fragmentTemplate.py
+#./writeConfig.sh ${EVENTS} ${JOBS} /hadoop/cms/store/user/gzevi/LHE/T5qqqqWWmodified/T5qqqqWWmodifiedA/ ${TAG}_T5qqqqWWmodifiedA fragmentTemplate.py
 
 # --- write submit script ---
 mkdir -p configs_${TAG}

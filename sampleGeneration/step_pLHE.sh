@@ -6,6 +6,7 @@
 
 FILEID=$1
 FILEIN=$2
+TOTAL=$3
 
 ################
 ## pLHE  step ##
@@ -25,9 +26,8 @@ export X509_USER_PROXY=$HOME/private/personal/voms_proxy.cert
 
 scram b
 cd ../../
-cmsDriver.py step1 --filein file:$FILEIN --filetype LHE --fileout file:${FILEID}_pLHE.root --mc --eventcontent LHE --datatier LHE --conditions MCRUN2_71_V1::All --step NONE --python_filename cfg_step1_pLHE.py --customise Configuration/DataProcessing/Utils.addMonitoring -n 100000 
-
-echo 100000 pLHE events were ran 
+cmsDriver.py step1 --filein file:$FILEIN --filetype LHE --fileout file:${FILEID}_pLHE.root --mc --eventcontent LHE --datatier LHE --conditions MCRUN2_71_V1::All --step NONE --python_filename cfg_step1_pLHE.py --customise Configuration/DataProcessing/Utils.addMonitoring -n ${TOTAL} 
+echo ${TOTAL} pLHE events were ran 
 
 for job in `jobs -p` ; do
     wait $job || exit $? ;

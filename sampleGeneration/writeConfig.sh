@@ -1,9 +1,14 @@
 #!/bin/bash
 
 
-DATADIR=$1
-COPYDIRBASE=$2
-FRAGMENT=$3
+EVENTS=$1
+JOBS=$2
+DATADIR=$3
+COPYDIRBASE=$4
+FRAGMENT=$5
+
+#total events per mass point
+TOTAL=$((${EVENTS} * ${JOBS}))
 
 while  ! voms-proxy-info -exist
 do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
@@ -13,7 +18,7 @@ done
 UNIVERSE="grid"
 #UNIVERSE="vanilla"
 EXE="wrapper.sh"
-INPUT="wrapper.sh, step_pLHE.sh, step_AOD.sh,  step_MiniAOD.sh, ${FRAGMENT}"
+INPUT="wrapper.sh, step_pLHE.sh, step_AOD.sh,  step_MiniAOD.sh, insertSkipEvents.py, ${FRAGMENT}"
 # can add other US sites here if desired
 SITE="T2_US_UCSD"
 SUBMITLOGDIR="${PWD}/submit_logs"
@@ -85,13 +90,17 @@ x509userproxy=${PROXY}
     # for each job
     # 
 
-    for FILE in `ls ${DATADIR}/*.xz`; do
-        echo "
+for FILE in `ls ${DATADIR}/*.xz`; do
+    JOBNUMBER=0
+    while [ $JOBNUMBER -lt ${JOBS} ]; do
+	echo "
 executable=${EXE}
 transfer_executable=True
-arguments=`echo ${FILE##*/} | sed 's/\.lhe\.xz//g'` ${FILE} ${COPYDIR} ${FRAGMENT}
+arguments=`echo ${FILE##*/} | sed 's/\.lhe\.xz//g'` ${FILE} ${COPYDIR} ${FRAGMENT} ${EVENTS} ${JOBNUMBER} ${TOTAL}
 queue
 " >> condor_${COPYDIRBASE##*/}.cmd
-    done
+	let JOBNUMBER=JOBNUMBER+1
+    done;
+done
 
 echo "[writeConfig] wrote condor_${COPYDIRBASE##*/}.cmd" 

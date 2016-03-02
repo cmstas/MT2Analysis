@@ -8,10 +8,17 @@ FILEID=$1
 FILE=$2
 COPYDIR=$3
 FRAGMENT=$4
+EVENTS=$5
+JOBNUMBER=$6
+TOTAL=$7
 
 echo "[wrapper] FILEID    = " ${FILEID}
 echo "[wrapper] FILE      = " ${FILE}
 echo "[wrapper] COPYDIR   = " ${COPYDIR}
+echo "[wrapper] FRAGMENT  = " ${FRAGMENT}
+echo "[wrapper] EVENTS    = " ${EVENTS}
+echo "[wrapper] JOBNUMBER = " ${JOBNUMBER}
+echo "[wrapper] TOTAL     = " ${TOTAL}
 
 echo "[wrapper] printing env"
 printenv
@@ -20,14 +27,14 @@ printenv
 # run the steps
 #
 
-echo "[wrapper] running: ./step_pLHE.sh ${FILEID} ${FILE}"
-./step_pLHE.sh ${FILEID} ${FILE}
+echo "[wrapper] running: ./step_pLHE.sh ${FILEID} ${FILE} ${TOTAL}"
+./step_pLHE.sh ${FILEID} ${FILE} ${TOTAL}
 
-echo "[wrapper] running: ./step_AOD.sh ${FILEID} ${FRAGMENT}"
-./step_AOD.sh ${FILEID} ${FRAGMENT}
+echo "[wrapper] running: ./step_AOD.sh ${FILEID} ${FRAGMENT} ${EVENTS} ${JOBNUMBER}"
+./step_AOD.sh ${FILEID} ${FRAGMENT} ${EVENTS} ${JOBNUMBER}
 
-echo "[wrapper] running: ./step_MiniAOD.sh ${FILEID}"
-./step_MiniAOD.sh ${FILEID}
+echo "[wrapper] running: ./step_MiniAOD.sh ${FILEID} ${EVENTS} ${JOBNUMBER}"
+./step_MiniAOD.sh ${FILEID} ${EVENTS} ${JOBNUMBER}
 
 #
 # do something with output
@@ -40,11 +47,11 @@ ls
 # clean up
 #
 
-echo "[wrapper] dumping config file"
-cat cfg_step2_AOD.py
+# echo "[wrapper] dumping config file"
+# cat cfg_step2_AOD.py
 
 echo "[wrapper] copying MiniAOD file"
-OUTPUT=`ls | grep ${FILEID}_MiniAOD-v2.root`
+OUTPUT=`ls | grep ${FILEID}_MiniAOD-v2`
 echo "[wrapper] OUTPUT = " ${OUTPUT}
 
 if [ ! -d "${COPYDIR}" ]; then
