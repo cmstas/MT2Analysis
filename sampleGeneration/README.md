@@ -53,4 +53,4 @@ If you want to process multiple samples in parallel with different qcuts, copy `
 - add scripts for banner injections
 - intelligently lookup qcuts for different processes and mass points
 - incorporate scripts to change decay tables (in pLHE step)
-- split each mass point into smaller jobs to run in parallel
+- "post-processing" to merge each mass point into single file
