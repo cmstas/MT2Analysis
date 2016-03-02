@@ -40,6 +40,9 @@ ls
 # clean up
 #
 
+echo "[wrapper] dumping config file"
+cat cfg_step2_AOD.py
+
 echo "[wrapper] copying MiniAOD file"
 OUTPUT=`ls | grep ${FILEID}_MiniAOD-v2.root`
 echo "[wrapper] OUTPUT = " ${OUTPUT}
