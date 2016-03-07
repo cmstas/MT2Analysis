@@ -50,7 +50,8 @@ for (( i=0; i < $num_args; i++ ));
 do
         echo $i " / "$num_args
 	input_file=$(echo ${arg_list[$i]} | awk '{print $1}' | cut -d= -f2)
-	file=$(basename ${input_file})
+	jobNumber=$(echo ${arg_list[$i]} | awk '{print $6}')
+	file=$(basename ${input_file}_MiniAOD-v2_job${jobNumber})
 	if [ ! $(find ${output_path} -type f -regex .*${file}.root$) ]; then
 	        echo "missing file"
 		index_of_missing_files=(${index_of_missing_files[@]} $i)
