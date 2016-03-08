@@ -39,8 +39,76 @@ bool found_data = false;
 std::vector<TH1F*> outputKht;
 std::vector<TH1F*> outputBinnedSR;
 std::vector<TH1F*> outputBinnedNormSR;
+std::vector<TH1F*> outputHighMTSR;
 
 
+void setRegions(std::vector<TString> &regions) {
+  
+  regions.push_back("srLep1L");
+  regions.push_back("srLep2L");
+  regions.push_back("srLep3L");
+  regions.push_back("srLep4L");
+  regions.push_back("srLep5L");
+  regions.push_back("srLep6L");
+  regions.push_back("srLep7L");
+  regions.push_back("srLep1M");
+  regions.push_back("srLep2M");
+  regions.push_back("srLep3M");
+  regions.push_back("srLep4M");
+  regions.push_back("srLep5M");
+  regions.push_back("srLep6M");
+  regions.push_back("srLep7M");
+  regions.push_back("srLepJ1L");
+  regions.push_back("srLepJ1M");
+  regions.push_back("srLepJ2L");
+  regions.push_back("srLepJ3L");
+  regions.push_back("srLepB3");
+  regions.push_back("srLepMET");
+  regions.push_back("srLepHT");
+  
+  
+}
+std::string getFullLabel(TString region) {
+  if (region == "srLep1L") return "MET>200, 2-3j, 0b";
+  if (region == "srLep2L") return "MET>200, 2-3j, #geq 1b";
+  if (region == "srLep3L") return "MET>200, 2-3j, #geq 1B";
+  if (region == "srLep4L") return "MET>200, 4-5j, 0b";
+  if (region == "srLep5L") return "MET>200, 4-5j, #geq 1b";
+  if (region == "srLep6L") return "MET>200, 4-5j, #geq 1B";
+  if (region == "srLep7L") return "MET>200, 6+j, 0-2B";
+  if (region == "srLep1M") return "MET>300, 2-3j, 0b";
+  if (region == "srLep2M") return "MET>300, 2-3j, #geq 1b";
+  if (region == "srLep3M") return "MET>300, 2-3j, #geq 1B";
+  if (region == "srLep4M") return "MET>300, 4-5j, 0b";
+  if (region == "srLep5M") return "MET>300, 4-5j, #geq 1b";
+  if (region == "srLep6M") return "MET>300, 4-5j, #geq 1B";
+  if (region == "srLep7M") return "MET>300, 6+j, 0-2B";
+  if (region == "srLepJ1L") return "MET>200, 1j, 0b";
+  if (region == "srLepJ1M") return "MET>300, 1j, 0b";
+  if (region == "srLepJ2L") return "MET>200, 1j, #geq 1b";
+  if (region == "srLepJ3L") return "MET>200, 1j, #geq 1B";
+  if (region == "srLepB3") return "MET>200, #geq 3B";
+  if (region == "srLepMET") return "MET>500, #geq 2j, 0-2B";
+  if (region == "srLepHT") return "H_{T}>1000, #geq 2j, 0-2B";
+  else return "";
+}
+
+
+void setRegionsDilep(std::vector<TString> &regions) {
+  
+  regions.push_back("srLep1L"); // +M
+  regions.push_back("srLep2L"); // +M
+  regions.push_back("srLep3L"); // +M
+  regions.push_back("srLep4L"); // +M
+  regions.push_back("srLep5L"); // +M
+  regions.push_back("srLep6L"); // +M
+  regions.push_back("srLepJ1L"); // +M
+  regions.push_back("srLepJ2L"); // +M will not work
+  regions.push_back("srLepB3");
+  regions.push_back("srLepMET");
+  regions.push_back("srLepHT");
+  
+}
 
 
 //_______________________________________________________________________________
@@ -111,7 +179,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   if (doRatio) {
     bool foundData = false;
     for( unsigned int i = 0 ; i < n ; ++i ) {
-      if( TString(names.at(i)).Contains("default")  ) {
+      if( TString(names.at(i)).Contains("default")   || TString(names.at(i)).Contains("Data")) {
         foundData = true;
         break;
       }
@@ -160,7 +228,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     if( logplot ) plotpad->SetLogy();
   }
   
-  TLegend* leg = new TLegend(0.55,0.67,0.85,0.87);
+  TLegend* leg = new TLegend(0.55,0.75,0.85,0.87);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
@@ -170,7 +238,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   TH1D* data_hist(0);
   string data_name;
   for( unsigned int i = 0 ; i < n ; ++i ) {
-    if( !TString(names.at(i)).Contains("default")  ) continue;
+    if( !TString(names.at(i)).Contains("default")   && !TString(names.at(i)).Contains("Data")) continue;
     data_hist = (TH1D*) histos.at(i)->Clone(names.at(i));
     data_name = names.at(i);
     data_hist->SetLineColor(kBlack);
@@ -191,7 +259,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   
   // signal hists - all samples must have "sig" in the name
   for( unsigned int i = 0 ; i < n ; ++i ){
-    if( TString(names.at(i)).Contains("default") ) continue;
+    if( TString(names.at(i)).Contains("default")  || TString(names.at(i)).Contains("Data")) continue;
     TH1D* h = (TH1D*) histos.at(i)->Clone(histname.c_str());
     h->SetLineColor(2+i);
     h->SetLineWidth(2);
@@ -327,6 +395,11 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
 //    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
     h_axis_ratio->GetYaxis()->SetTitle("Var/Central");
+    if (TString(histname).Contains("Closure")) {
+      h_axis_ratio->GetYaxis()->SetTitle("/ MC (Truth)");
+      h_axis_ratio->GetYaxis()->SetRangeUser(0.1,9.99);
+      ratiopad->SetLogy();
+    }
     h_axis_ratio->GetXaxis()->SetTickLength(0.07);
     h_axis_ratio->GetXaxis()->SetTitleSize(0.);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.);
@@ -348,15 +421,20 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
 //    g_ratio->SetMarkerStyle(20);
 //    g_ratio->Draw("p same");
     
-    for (unsigned int i=0; i<sig_hists.size(); ++i) {
-      TH1D* h_ratio1 = (TH1D*) data_hist->Clone(Form("h_ratio_%s",sig_names.at(i).Data()));
-      h_ratio1->Divide(sig_hists.at(i));
-      h_ratio1->SetMarkerColor(3+i);
-      h_ratio1->SetLineColor(3+i);
-      h_ratio1->SetStats(0);
-      h_ratio1->SetMarkerStyle(20);
-      h_ratio1->SetMarkerSize(1.2);
-      h_ratio1->Draw("hist same");
+    if (TString(histname).Contains("Closure")) {
+      h_ratio->Draw("E1,same");
+    }
+    else {
+      for (unsigned int i=0; i<sig_hists.size(); ++i) {
+        TH1D* h_ratio1 = (TH1D*) data_hist->Clone(Form("h_ratio_%s",sig_names.at(i).Data()));
+        h_ratio1->Divide(sig_hists.at(i));
+        h_ratio1->SetMarkerColor(3+i);
+        h_ratio1->SetLineColor(3+i);
+        h_ratio1->SetStats(0);
+        h_ratio1->SetMarkerStyle(20);
+        h_ratio1->SetMarkerSize(1.2);
+        h_ratio1->Draw("hist same");
+      }
     }
     
     gPad->RedrawAxis();
@@ -521,6 +599,92 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
   
   return output;
 }
+
+std::vector<TH1F*> makeYieldsHistos(std::vector<TFile*> filesSR, std::vector<TString> regions, std::vector<TString> legendNames, std::vector<TString> histoNames, bool integratedYield ) {
+  
+  
+  std::vector<TH1F*> output;
+  
+  std::vector<std::string> labels;
+  
+  binMultiplier = 3;
+  
+  for(unsigned int i = 0; i < filesSR.size(); i++) {
+    TH1F* h_sr_yields = new TH1F("h_sr_yields", "h_sr_yields", regions.size(), 0, regions.size());
+    TH1F* h_sr_yields_binned = new TH1F("h_sr_yields_binned", "h_sr_yields_binned", regions.size()*binMultiplier, 0, regions.size()*binMultiplier);
+    TH1F* h_sr_yields_binned_norm = new TH1F("h_sr_yields_binned_norm", "h_sr_yields_binned_norm", regions.size()*binMultiplier, 0, regions.size()*binMultiplier);
+    TH1F* h_highmt_sr_yields = new TH1F("h_highmt_sr_yields", "h_highmt_sr_yields", regions.size(), 0, regions.size()); // fill with last MT bin only
+    for(unsigned int j = 0; j < regions.size(); j++) {
+      cout<<"looking at region "<<regions.at(j)<<endl;
+      TString fullhistname = Form("%s/%s", regions.at(j).Data(), histoNames.at(i).Data());
+      TString fullhistnameCR = fullhistname;
+      TH1F* hSR = (TH1F*) filesSR.at(i)->Get(fullhistname);
+      TH1F* hSRhighmt;
+      if (hSR) hSRhighmt = (TH1F*) filesSR.at(i)->Get(fullhistname)->Clone("highmt");
+      
+      double yield = 0.;
+      double err = 0.;
+      if (!hSR) yield = 0.0;
+      else yield = hSR->IntegralAndError(0,-1,err);
+      h_sr_yields->SetBinContent(j+1, yield);
+      h_sr_yields->SetBinError(j+1, err);
+      
+      if (!hSRhighmt) { yield = 0.0; err = 0.0; }
+      else yield = hSRhighmt->IntegralAndError(3,-1,err);
+      h_highmt_sr_yields->SetBinContent(j+1, yield);
+      h_highmt_sr_yields->SetBinError(j+1, err);
+      
+      std::string fullLabel = getFullLabel(regions.at(j));
+      h_sr_yields->GetXaxis()->SetBinLabel(j+1, fullLabel.c_str());
+      std::string fullLabelHighMT = fullLabel + ", 3";
+      h_highmt_sr_yields->GetXaxis()->SetBinLabel(j+1, fullLabelHighMT.c_str());
+      
+      
+      // fill binned histograms, useful for k_MT
+      // make it normalized as well as not-normalized
+      for(unsigned int k = 0; k < 3; k++) {
+        if (hSR) {
+          yield = hSR->IntegralAndError(0,-1,err);
+          if (yield > 0) {
+            h_sr_yields_binned_norm->SetBinContent(3*j+1+k, hSR->GetBinContent(k+1)/yield);
+            h_sr_yields_binned_norm->SetBinError(3*j+1+k, hSR->GetBinError(k+1)/yield);
+          }
+          else h_sr_yields_binned_norm->SetBinContent(3*j+1+k, 0);
+          h_sr_yields_binned->SetBinContent(3*j+1+k, hSR->GetBinContent(k+1));
+          h_sr_yields_binned->SetBinError(3*j+1+k, hSR->GetBinError(k+1));
+        }
+        else {
+          h_sr_yields_binned->SetBinContent( 3*j+1+k, 0.);
+          h_sr_yields_binned_norm->SetBinContent( 3*j+1+k, 0.);
+        }
+        
+        std::string fullLabel = getFullLabel(regions.at(j))+ ", " + toString(k+1);;
+        h_sr_yields_binned->GetXaxis()->SetBinLabel(3*j+1+k, fullLabel.c_str());
+        h_sr_yields_binned_norm->GetXaxis()->SetBinLabel(3*j+1+k, fullLabel.c_str());
+      }
+      
+      
+      delete hSR;
+      
+    }// end of loop over regions
+    
+    
+    h_sr_yields->SetDirectory(0);
+    h_sr_yields->SetName(legendNames.at(i));
+    //h_R_sr_cr->Print("all");
+    output.push_back(h_sr_yields);
+    //h_R_sr_cr->Draw();
+    outputBinnedSR.push_back(h_sr_yields_binned);
+    outputBinnedNormSR.push_back(h_sr_yields_binned_norm);
+    outputHighMTSR.push_back(h_highmt_sr_yields);
+    
+  }//end of loop over samples
+  
+  return output;
+}
+
+
+
 /*
 std::vector<TH1F*> makeTFHistosMTbins(std::vector<TFile*> filesSR, std::vector<TFile*> filesCR, std::vector<TString> regions, std::vector<TString> legendNames, std::vector<TString> histoNames) {
   
@@ -589,48 +753,9 @@ std::vector<TH1F*> makeTFHistosMTbins(std::vector<TFile*> filesSR, std::vector<T
 }
 */
 
-void setRegions(std::vector<TString> &regions) {
-
-  regions.push_back("srLep1L");
-  regions.push_back("srLep2L");
-  regions.push_back("srLep3L");
-  regions.push_back("srLep4L");
-  regions.push_back("srLep5L");
-  regions.push_back("srLep6L");
-  regions.push_back("srLep1M");
-  regions.push_back("srLep2M");
-  regions.push_back("srLep3M");
-  regions.push_back("srLep4M");
-  regions.push_back("srLep5M");
-  regions.push_back("srLep6M");
-  regions.push_back("srLepJ1L");
-  regions.push_back("srLepJ1M");
-  regions.push_back("srLepJ2L");
-  regions.push_back("srLepB3");
-  regions.push_back("srLepMET");
-  regions.push_back("srLepHT");
 
 
-}
-
-void setRegionsDilep(std::vector<TString> &regions) {
-  
-  regions.push_back("srLep1L"); // +M
-  regions.push_back("srLep2L"); // +M
-  regions.push_back("srLep3L"); // +M
-  regions.push_back("srLep4L"); // +M
-  regions.push_back("srLep5L"); // +M
-  regions.push_back("srLep6L"); // +M
-  regions.push_back("srLepJ1L"); // +M
-  regions.push_back("srLepJ2L"); // +M will not work
-  regions.push_back("srLepB3");
-  regions.push_back("srLepMET");
-  regions.push_back("srLepHT");
-  
-}
-
-
-void compareSoftLeptons(){
+void compareSoftLeptons1L2L(){
   
   cmsText = "CMS Simulation";
   cmsTextSize = 0.5;
@@ -699,6 +824,49 @@ void compareSoftLeptons(){
   
   
   
+  return;
+}
+
+void compareSoftLeptonsFake(){
+  cmsText = "CMS Preliminary";
+  cmsTextSize = 0.5;
+  lumiTextSize = 0.4;
+  writeExtraText = false;
+  lumi_13TeV = "2.3 fb^{-1}";
+  
+  std::vector<TString> regions;
+  std::vector<TString> regionsDilep;
+  std::vector<TString> legendNames;
+  std::vector<TString> histoNames;
+  std::vector<TFile*> filesSR;
+  
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
+  
+  TFile* sr1 = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
+  filesSR.push_back(sr1);  legendNames.push_back("MC (treat as Data)"); histoNames.push_back("h_predMCClosure");
+  filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC");
+  setRegions(regions);
+
+  outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
+  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  makePlot( outputBinnedSR , legendNames ,  "FakeClosureMC" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputHighMTSR , legendNames ,  "FakeClosureMCHighMT" ,  "" ,  "Entries" ,  true ,  true  );
+
+
+  filesSR.clear();  legendNames.clear(); histoNames.clear();
+  filesSR.push_back(sr1);  legendNames.push_back("Data (FR method)"); histoNames.push_back("h_pred");
+  filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC");
+  outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
+  histos2       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  makePlot( outputBinnedSR , legendNames ,  "FakeClosureData" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputHighMTSR , legendNames ,  "FakeClosureDataHighMT" ,  "" ,  "Entries" ,  true ,  true  );
+
+  return;
+}
+
+void compareSoftLeptons(){
+
+  compareSoftLeptonsFake();
   return;
 }
 
