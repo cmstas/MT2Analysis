@@ -1010,7 +1010,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), suffixString);
 	    if (t.met_pt < 60 && softlepmt_ < 30) {
 	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+HTsuffixString+suffixString);
-		fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "EWKcuts"+suffixString);
+	    }
+	    else if (t.met_pt > 40) { // needed to normalize the EWK contribution
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "MET40"+HTsuffixString+suffixString);
+	      fillHistosSingleSoftLepton(SRNoCut.srHistMap , SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "MET40"+suffixString);
 	    }
 	  }
 	  else {
@@ -1066,6 +1070,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       ///   time to fill histograms    /// 
       ////////////////////////////////////
       onlyMakeFRplots_ = false;
+
+//      doSoftLepSRplots = false;
+//      doDoubleLepCRplots = false;
 
       if (!passJetID) continue;
       
@@ -1160,6 +1167,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// }
 	
       }
+
+      if (doSoftLepSRplots && t.isData && doBlindData && applyFakeRates && !passIsoId) { // if blind, only look at LooseNotTight
+	saveSoftLplots = true;
+	onlyMakeFRplots_ = true; // we just need the MTvsLepPt plot, in each SR.
+	string s = "";
+	if (doSoftLepElSRplots) s += "El";
+	else if (doSoftLepMuSRplots) s += "Mu";
+	fillHistosLepSignalRegions("srLep", s+"LooseNotTight");
+	onlyMakeFRplots_ = false; 
+      }
+
       if (doSoftLepMuSRplots && !(t.isData && doBlindData) && !doCombineElMu) {
         saveSoftLMuplots = true;
 	fillHistosLepSignalRegions("srLepMu"); 
@@ -1830,6 +1848,8 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   // If you are not in srLepBase region, just plot the lepton pT (and whatever else is needed) and exit
   TString directoryname(dirname);
   if ( onlyMakeFRplots_ ) {
+    plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_lepptshortBins"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
       plot2D("h_mtbins_leppt"+s, softlepmt_, softleppt_, evtweight_, h_1d, ";M_{T} [GeV];p_{T}(lep) [GeV]", n_mt2bins, mt2bins, n_ptsoftbins, ptsoftbins);
       // We might have to add other plots, for Fake estimates in CR2L as a function of NJ, NB, etc
       return;
