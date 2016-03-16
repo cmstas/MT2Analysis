@@ -140,6 +140,7 @@ public :
    Float_t         lep_dxy[50];   //[nlep]
    Float_t         lep_dz[50];   //[nlep]
    Int_t           lep_tightId[50];   //[nlep]
+   Int_t           lep_tightIdNoIso[50];   //[nlep]
    Int_t           lep_heepId[50];   //[nlep]
    Float_t         lep_relIso03[50];   //[nlep]
    Float_t         lep_relIso04[50];   //[nlep]
@@ -457,6 +458,7 @@ public :
    TBranch        *b_lep_dxy;   //!
    TBranch        *b_lep_dz;   //!
    TBranch        *b_lep_tightId;   //!
+   TBranch        *b_lep_tightIdNoIso;   //!
    TBranch        *b_lep_heepId;   //!
    TBranch        *b_lep_relIso03;   //!
    TBranch        *b_lep_relIso04;   //!
@@ -833,6 +835,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_dxy", lep_dxy, &b_lep_dxy);
    fChain->SetBranchAddress("lep_dz", lep_dz, &b_lep_dz);
    fChain->SetBranchAddress("lep_tightId", lep_tightId, &b_lep_tightId);
+   fChain->SetBranchAddress("lep_tightIdNoIso", lep_tightIdNoIso, &b_lep_tightIdNoIso);
    fChain->SetBranchAddress("lep_heepId", lep_heepId, &b_lep_heepId);
    fChain->SetBranchAddress("lep_relIso03", lep_relIso03, &b_lep_relIso03);
    fChain->SetBranchAddress("lep_relIso04", lep_relIso04, &b_lep_relIso04);
