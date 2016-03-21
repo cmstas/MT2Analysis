@@ -16,6 +16,7 @@ All you have to do is **set your input LHE files** in `writeAllConfig.sh`, and *
 ./writeAllConfig.sh
 ./submitAll.sh
 <wait for your jobs to finish>
+<sweeproot the output and delete any bad files>
 ./checkAllConfig.sh <config directory>
 condor_submit <config directory>/<resubmit file>.cmd
 ```
@@ -31,7 +32,18 @@ The `writeAllConfig.sh` script will generate condor cfgs for each (decayed) LHE 
 ```
 ./writeConfig.sh ${EVENTS} ${JOBS} <directory of LHE files> <name of sample> <python fragment>
 ```
-which will generate a config file for every LHE file in the corresponding directory. It will also generate a `submitAll.sh` script to submit condor jobs for each of your config files. Once all your jobs are complete, you can use
+which will generate a config file for every LHE file in the
+corresponding directory. It will also generate a `submitAll.sh` script
+to submit condor jobs for each of your config files.
+
+To verify that jobs ran and produced all the output files, run sweepRoot to check all output root files:
+```
+git clone git@github.com:cmstas/NtupleTools.git
+cd NtupleTools/condorMergingTools/libC
+make
+./sweepRoot -b -o "Events" /hadoop/cms/store/user/${USER}/mcProduction/<BABYDIRS>/*.root
+```
+Delete any files reported as bad, then run checkAllConfig to see which output files are missing:
 ```
 ./checkAllConfig.sh <config directory>
 ```
