@@ -640,6 +640,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       hardlep2Id_ = -1;
       hardlep2mt_ = -1;
       bool passIsoId = false;
+      bool passHardIsoId = false;
       // some variables relevant for CR2L
       bool isDilepton = false;
       if (t.ngenLep + t.ngenTau >= 2) isDilepton = true;      
@@ -689,7 +690,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if ( abs(t.lep_eta[ilep])>1.479 ) continue;
 	//iso/id requirements
 	if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02) passIsoId = true;
-	if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightId[ilep] > 0) passIsoId = true;
+	if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightIdNoIso[ilep] > 0) passIsoId = true;
 	float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 
 	softlepIdx_ = ilep;
@@ -711,8 +712,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if ( t.lep_pt[ilep] < 25 ) continue;
 	if ( abs(t.lep_eta[ilep])>1.479 ) continue; 
 	//iso/id requirements
-	if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || abs(t.lep_dxy[ilep])> 0.02 || abs(t.lep_dz[ilep]) > 0.02)) continue;
-	if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.1 || t.lep_tightId[ilep] < 2 ||  t.lep_relIso03[ilep]*t.lep_pt[ilep]>5)) continue;
+	if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02)) passHardIsoId = true;
+	if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.1 && t.lep_tightIdNoIso[ilep] >= 2 && t.lep_relIso03[ilep]*t.lep_pt[ilep]<5)) passHardIsoId = true;
 	float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 	hardlepIdx_ = ilep;
 	hardleppt_ = t.lep_pt[ilep];
@@ -734,7 +735,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if ( abs(t.lep_eta[ilep])>1.479 ) continue; 
 	//iso/id requirements
 	if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || abs(t.lep_dxy[ilep])> 0.02 || abs(t.lep_dz[ilep]) > 0.02)) continue;
-	if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.1 || t.lep_tightId[ilep] < 2 ||  t.lep_relIso03[ilep]*t.lep_pt[ilep]>5)) continue;
+	if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.1 || t.lep_tightIdNoIso[ilep] < 2 ||  t.lep_relIso03[ilep]*t.lep_pt[ilep]>5)) continue;
 	float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
 	hardlep2Idx_ = ilep;
 	hardlep2pt_ = t.lep_pt[ilep];
@@ -1139,33 +1140,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
  
 	}
 	
-	// if (!doMinimalPlots) {
-	//   if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "Missing");
-	//   if (foundMissingTau) {
-	//     fillHistosLepSignalRegions("srLep", "MissingTau");
-	//     if (decayMode == 1) fillHistosLepSignalRegions("srLep", "MissingTauDecay1");
-	//     else if (decayMode == 3) fillHistosLepSignalRegions("srLep", "MissingTauDecay3");	    
-	//   }
-	//   else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MissingLepFromTau");
-	//   else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MissingLep");
-	// }
-	// if (!doMinimalPlots && isDilepton) {
-	//   if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissing");
-	//   if (foundMissingTau) fillHistosLepSignalRegions("srLep", "DileptonMissingTau");
-	//   else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "DileptonMissingLepFromTau");
-	//   else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "DileptonMissingLep");
-	// }
-	// if (softlepMatched && !doMinimalPlots) {
-	//   if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosLepSignalRegions("srLep", "MatchedMissing");
-	//   if (foundMissingTau) {
-	//     fillHistosLepSignalRegions("srLep", "MatchedMissingTau");
-	//     if (decayMode == 1) fillHistosLepSignalRegions("srLep", "MatchedMissingTauDecay1");
-	//     else if (decayMode == 3) fillHistosLepSignalRegions("srLep", "MatchedMissingTauDecay3");	    
-	//   }
-	//   else if (foundMissingLepFromTau) fillHistosLepSignalRegions("srLep", "MatchedMissingLepFromTau");
-	//   else if (foundMissingLep) fillHistosLepSignalRegions("srLep", "MatchedMissingLep");
-	// }
-	
       }
 
       if (doSoftLepSRplots && t.isData && doBlindData && applyFakeRates && !passIsoId) { // if blind, only look at LooseNotTight
@@ -1196,43 +1170,63 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  else fillHistosLepSignalRegions("srLepEl", "Fake");
 	}
       }
-      if (doSoftLepCRplots) {
-        save1Lplots = true;
-        fillHistosCR1L("cr1L");
+
+      //loose, inclusive CR1L plots
+      if (doSoftLepCRplots && !doMinimalPlots) {
+      	save1Lplots = true;
+	fillHistosCR1L("cr1L","Loose");
 	if (!t.isData) {
-	  if (softlepMatched) fillHistosCR1L("cr1L","Onelep");
-	  else fillHistosCR1L("cr1L","Fake");
-	}
-	
-	// if (!doMinimalPlots) {
-	//   if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosCR1L("cr1L", "Missing");
-	//   if (foundMissingTau) {
-	//     fillHistosLepSignalRegions("cr1L", "MissingTau");
-	//     if (decayMode == 1) fillHistosLepSignalRegions("cr1L", "MissingTauDecay1");
-	//     else if (decayMode == 3) fillHistosLepSignalRegions("cr1L", "MissingTauDecay3");	    
-	//   }
-	//   else if (foundMissingLepFromTau) fillHistosCR1L("cr1L", "MissingLepFromTau");
-	//   else if (foundMissingLep) fillHistosCR1L("cr1L", "MissingLep");
-	// }
+	  if (softlepMatched) fillHistosCR1L("cr1L","LooseOnelep");
+	  else fillHistosCR1L("cr1L","LooseFake");
+	}	
       }
-      if (doSoftLepMuCRplots && !doCombineElMu) {
-        save1Lmuplots = true;
-	fillHistosCR1L("cr1Lmu");
+      if (doSoftLepMuCRplots && !doMinimalPlots && !doCombineElMu) {
+     	save1Lmuplots = true;
+	fillHistosCR1L("cr1Lmu","Loose");
 	if (!t.isData) {
-	  if (softlepMatched) fillHistosCR1L("cr1Lmu","Onelep"); 
-	  else fillHistosCR1L("cr1Lmu","Fake");
+	  if (softlepMatched) fillHistosCR1L("cr1Lmu","LooseOnelep"); 
+	  else fillHistosCR1L("cr1Lmu","LooseFake");
 	}
       }
-      if (doSoftLepElCRplots && !doCombineElMu) {
-	save1Lelplots = true;
-	fillHistosCR1L("cr1Lel");
+      if (doSoftLepElCRplots && !doMinimalPlots && !doCombineElMu) {
+     	save1Lelplots = true;
+	fillHistosCR1L("cr1Lel","Loose");
 	if (!t.isData) {
-	  if (softlepMatched) fillHistosCR1L("cr1Lel","Onelep");
-	  else fillHistosCR1L("cr1Lel","Fake");
+	  if (softlepMatched) fillHistosCR1L("cr1Lel","LooseOnelep");
+	  else fillHistosCR1L("cr1Lel","LooseFake");
 	}
       }
 
-      if (doDoubleLepCRplots) {
+      //tight CR1L plots
+      if (passHardIsoId) {
+	if (doSoftLepCRplots) {
+	  save1Lplots = true;
+	  fillHistosCR1L("cr1L");
+	  if (!t.isData) {
+	    if (softlepMatched) fillHistosCR1L("cr1L","Onelep");
+	    else fillHistosCR1L("cr1L","Fake");
+	  }
+	}
+	if (doSoftLepMuCRplots && !doCombineElMu) {
+	  save1Lmuplots = true;
+	  fillHistosCR1L("cr1Lmu");
+	  if (!t.isData) {
+	    if (softlepMatched) fillHistosCR1L("cr1Lmu","Onelep"); 
+	    else fillHistosCR1L("cr1Lmu","Fake");
+	  }
+	}
+	if (doSoftLepElCRplots && !doCombineElMu) {
+	  save1Lelplots = true;
+	  fillHistosCR1L("cr1Lel");
+	  if (!t.isData) {
+	    if (softlepMatched) fillHistosCR1L("cr1Lel","Onelep");
+	    else fillHistosCR1L("cr1Lel","Fake");
+	  }
+	}
+      }//passHardIsoId
+
+      //tight CR2L plots
+      if (doDoubleLepCRplots && passHardIsoId) {
         save2Lplots = true;	
 
 	if (passIsoId) {
@@ -1267,21 +1261,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 	}
 	
-	// if (isDilepton && !doMinimalPlots){
-	//   if (foundMissingTau || foundMissingLepFromTau || foundMissingLep) fillHistosDoubleL("cr2L", "Missing");	  
-	//   if (foundMissingTau) {
-	//     fillHistosLepSignalRegions("cr2L", "MissingTau");
-	//     if (decayMode == 1) fillHistosLepSignalRegions("cr2L", "MissingTauDecay1");
-	//     else if (decayMode == 3) fillHistosLepSignalRegions("cr2L", "MissingTauDecay3");	    
-	//   }
-	//   else if (foundMissingLepFromTau) fillHistosDoubleL("cr2L", "MissingLepFromTau");
-	//   else if (foundMissingLep) fillHistosDoubleL("cr2L", "MissingLep");
-	// }
-	
       } //doDoubleLepCRplots
-      
-	
-      if (doHardDoubleLepCRplots && !doMinimalPlots) {
+      	
+      if (doHardDoubleLepCRplots && passHardIsoId && !doMinimalPlots) {
 	fillHistosDoubleL("cr2L","Hard");
 	if (!t.isData) {
 	  if (isDilepton) fillHistosDoubleL("cr2L","HardDilepton");
@@ -1578,18 +1560,7 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values2["met"]         = 201; //dummy variable for validation region
   values2["mt"]          = softlepmt_;
 
-  if (!doMinimalPlots) {
-    //inclusive MET region
-    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
-      if(SRVecLep.at(srN).PassesSelection(values)){
-	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-      }
-    }
-  }
-
-  //validation region
+  //validation regions
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values2)){
       if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
@@ -1617,17 +1588,42 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
       }
     }
   }
-  
-  //maximum and min MET cut for CR1L
-  if (t.met_pt < 60 && t.met_pt > 30) {
+
+  //extra regions for testing, only if !doMinimalPlots
+  if (!doMinimalPlots) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
       if(SRVecLep.at(srN).PassesSelection(values)){
-	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
-	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
-	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
-      }
-    }
-  }
+
+	//inclusive MET region (no cut required) 
+	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
+	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
+	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
+
+	//mt2 cut region
+	if (t.met_pt < 60 && t.sl_mt2 > 100) {
+      	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	}
+
+	//maximum and min MET cut for CR1L
+	if (t.met_pt < 60 && t.met_pt > 30) {
+	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
+	}
+
+	//alternate MET region
+	if (t.met_pt < 100 && t.met_pt > 60) {
+  	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	}
+	
+      }//passesSelection
+    }// SR loop    
+  }//!doMinimalPlots
+
  
   return;
 } //soft lepton
@@ -1635,8 +1631,6 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 
 void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& suffix) {
 
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1650,10 +1644,33 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
 
+  //alternate valueMap for lepton-triggered CR
+  std::map<std::string, float> values2;
+  values2["deltaPhiMin"] = t.deltaPhiMin;
+  values2["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values2["nlep"]        = 1; //dummy variable for double lepton CR
+  values2["njets"]       = t.nJet30;
+  values2["nbjets"]      = t.nBJet20;
+  values2["nbjetshard"]  = nHardB_;
+  values2["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
+  values2["ht"]          = t.ht;
+  values2["met"]         = 201; //dummy value for alt double lepton CR
+  values2["mt"]          = softlepmt_;
+
+  //lepton triggered dilepCR
+  bool passAltSelection = (t.HLT_SingleMu || t.HLT_SingleEl) && t.met_pt > 150;
+  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+    if(SRVecLep.at(srN).PassesSelection(values2) && passAltSelection){
+      if (prefix=="cr2L") fillHistosDoubleLepton(SRVecLep.at(srN).cr2LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Alt"+suffix);
+    }
+  }
+
+  
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
       if (prefix=="cr2L") fillHistosDoubleLepton(SRVecLep.at(srN).cr2LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
-      //break;//signal regions are orthogonal, event cannot be in more than one
     }
   }
   
@@ -1882,7 +1899,8 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_lepTightId"+s,       t.lep_tightId[softlepIdx_],   evtweight_, h_1d, ";lep_tightId", 4, 0, 4);
 
   //isolation  
-  plot1D("h_miniRelIso"+s,  t.lep_miniRelIso[softlepIdx_],   evtweight_, h_1d, "miniRelIso [GeV]", 100, 0, 2);
+  plot1D("h_miniRelIso"+s,  t.lep_miniRelIso[softlepIdx_],   evtweight_, h_1d, "miniRelIso [GeV]", 100, 0, 0.5);
+  plot1D("h_absIso"+s,  t.lep_relIso03[softlepIdx_]*t.lep_pt[softlepIdx_],   evtweight_, h_1d, "absIso [GeV]", 80, 0, 40);
   plot1D("h_relIso03"+s,  t.lep_relIso03[softlepIdx_],   evtweight_, h_1d, ";relIso03 [GeV]", 100, 0, 2);
   plot1D("h_relIso04"+s,  t.lep_relIso04[softlepIdx_],   evtweight_, h_1d, ";relIso04 [GeV]", 100, 0, 2);
   plot1D("h_relIsoAn04"+s,  t.lep_relIsoAn04[softlepIdx_],   evtweight_, h_1d, ";relIsoAn04 [GeV]", 100, 0, 10);
