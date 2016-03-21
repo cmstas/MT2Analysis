@@ -203,6 +203,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     h->SetFillColor(getColor(names.at(i)));
     h->SetLineColor(kBlack);
+    //if (TString(names.at(i)).Contains("fakeLep") ) { h->Scale(3.5); } //HACK to scale fakes up by ~3.5
     addOverflow(h); // Add Overflow
     if (rebin > 1) h->Rebin(rebin);
     if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
@@ -316,6 +317,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     region_label = "E_{T}^{miss} < 200 GeV";
     region_label_line2 = "#geq 0j, #geq 0b";
     region_label_line3 = "";
+  }
+  else if (histname.find("Validate") != std::string::npos) {
+    region_label = "E_{T}^{miss} > 200 GeV";
   }
   else if (histdir.find("cr1L") != std::string::npos) {
     region_label = "E_{T}^{miss} < 60 GeV";
@@ -1361,7 +1365,7 @@ void plotMakerSoftLepCR(){
   bool doData = true;
 
   bool doValidate = false;
-  if (doValidate) suffix = "Validate2";
+  if (doValidate) suffix = "Validate";
   
   string input_dir = "../SoftLepLooper/output/softLep";
   
@@ -1385,7 +1389,7 @@ void plotMakerSoftLepCR(){
   TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
   TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str())); 
   TFile* f_T2_4bd_275_235 = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str())); 
-  TFile* f_T5qqqqWW_1025_775_test = new TFile(Form("%s/../test/T5qqqqWW_1025_775.root",input_dir.c_str())); 
+  TFile* f_T5qqqqWW_1025_775 = new TFile(Form("%s/T5qqqqWW_1025_775.root",input_dir.c_str())); 
   TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
@@ -1434,7 +1438,7 @@ void plotMakerSoftLepCR(){
     samples.push_back(f_tt1l); names.push_back("tt+1l");
     samples.push_back(f_wjets); names.push_back("wjets");
     samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
-    //samples.push_back(f_T5qqqqWW_1025_775_test); names.push_back("T5qqqqWW_1025_775_fixed sig");
+    //samples.push_back(f_T5qqqqWW_1025_775); names.push_back("T5qqqqWW_1025_775 sig");
     samples.push_back(f_data); names.push_back("data");    
   }
   
@@ -1450,7 +1454,7 @@ void plotMakerSoftLepCR(){
     // samples.push_back(f_tt1l); names.push_back("tt+1l onelep");
     samples.push_back(f_wjets); names.push_back("wjets onelep");
     samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
-    //samples.push_back(f_T5qqqqWW_1025_775_test); names.push_back("T5qqqqWW_1025_775_fixed sig");
+    //samples.push_back(f_T5qqqqWW_1025_775); names.push_back("T5qqqqWW_1025_775 sig");
     samples.push_back(f_data); names.push_back("data");
   }
   
@@ -1477,7 +1481,7 @@ void plotMakerSoftLepCR(){
       //if(dir_name != "cr1Lmubase" && dir_name != "cr1Lelbase") continue; //to do only this dir
 
       //loop once for log, once for no log
-      if (dir_name == "cr1LbaseZeroB" && doValidate) {
+      if ( (dir_name == "cr1LelbaseZeroB" || dir_name == "cr1LmubaseZeroB") && doValidate) {
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
 	  makePlot( samples , names , dir_name , "h_leppt"+suffix , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 20 , 45 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1498,7 +1502,8 @@ void plotMakerSoftLepCR(){
 	}
       }
 
-      else if (!doValidate && (dir_name == "cr1Lbase" || dir_name == "cr1LbaseZeroB" || dir_name == "cr1LbaseWithB")) {
+      
+      else if (!doValidate && (dir_name == "cr1Lelbase" || dir_name == "cr1Lmubase")) {
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
 	  makePlot( samples , names , dir_name , "h_leppt"+suffix , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 200 , 1000 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1517,6 +1522,10 @@ void plotMakerSoftLepCR(){
 	  //makePlot( samples , names , dir_name , "h_softlepmt2"+suffix , "M_{T2} [GeV]" , "Events / 50 GeV" , 100 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Wpt"+suffix , "W p_{T} [GeV]" , "Events / 20 GeV" , 0 , 800 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
+
+	  makePlot( samples , names , dir_name , "h_miniRelIso"+suffix , "miniRelIso" , "Events / 0.005" , 0 , 0.5 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_relIso03"+suffix , "relIso03" , "Events / 0.02" , 0 , 2 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_absIso"+suffix , "absIso [GeV]" , "Events / 0.5 GeV" , 0 , 40 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	}
       }
  
@@ -1700,10 +1709,10 @@ void plotMakerSoft(){
   //plotMakerSoftLepSRMissingLep(); return;
   //plotMakerSoftLepFR(); return;
   //plotMakerSoftLepSR(); return;
-  plotMakerSoftLepCR(); return;
+  //plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
-  //plotMakerSoftLepSR(); plotMakerSoftLepCR(); plotMakerDoubleLepCR(); return;
-  
+  plotMakerSoftLepSR(); plotMakerSoftLepCR(); plotMakerDoubleLepCR(); return;
+
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
@@ -1891,3 +1900,4 @@ void plotMakerSoft(){
   std::cout << "\\end{document}" << std::endl;
 
 }
+          

@@ -79,7 +79,7 @@ int getColor(const string& sample) {
   if (sample.find("T2tt") != string::npos) return kCyan;
   if (sample.find("T2bb") != string::npos) return kMagenta+3;
   if (sample.find("tt+1l") != string::npos) return kAzure+2;
-  if (sample.find("tt+2l") != string::npos) return kOrange-1;
+  if (sample.find("tt+2l") != string::npos) return 855-3;
   if (sample.find("st") != string::npos) return kViolet;
   if (sample.find("ww") != string::npos) return kSpring+3;
   if (sample.find("wz") != string::npos) return kAzure-5;
