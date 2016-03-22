@@ -71,6 +71,7 @@ class SR {
     std::map<std::string, TH1*> cr1LmuHistMap;
     std::map<std::string, TH1*> cr1LelHistMap;
     std::map<std::string, TH1*> cr2LHistMap;
+    std::map<std::string, TH1*> crZllHistMap;
 
  private:
 

@@ -48,6 +48,7 @@ class MT2Looper {
   void fillHistosLepSignalRegions(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCR1L(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosDoubleL(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosZll(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = "");
   void fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
@@ -96,6 +97,10 @@ class MT2Looper {
   int hardlep2Idx_;
   int hardlep2Charge_;
 
+  int removedzllLep_;
+  float zllmt_;
+  float zllmet_;
+  
   bool foundMissingTau_;
   int missIdx_;
   float missPt_;

@@ -400,6 +400,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   bool save1Lmuplots = false;
   bool save1Lelplots = false;
   bool save2Lplots = false;
+  bool saveZllplots = false;
 
   // File Loop
   int nDuplicates = 0;
@@ -615,6 +616,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doSoftLepElCRplots = false;
       bool doDoubleLepCRplots = false;
       bool doHardDoubleLepCRplots = false;
+      bool doZllCRplots = false;
       softlepIdx_ = -1;
       softleppt_ = -1;
       softlepeta_ = -1;
@@ -646,6 +648,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.ngenLep + t.ngenTau >= 2) isDilepton = true;      
       bool isEE = false;
       bool isMuMu = false;
+      removedzllLep_ = 0;
+      zllmt_ = -1;
+      zllmet_ = -1;
 
       //counter to find highest pT isolated track
       int idxTrk = -1;
@@ -888,7 +893,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  lep2_p4.SetPtEtaPhiM(hardleppt_,hardlepeta_,hardlepphi_,hardlepM_);
 	  TLorentzVector dilep_p4 = lep1_p4 + lep2_p4;
 	  dilepmll_ = dilep_p4.M();
-	  doDoubleLepCRplots = true;  
+	  doDoubleLepCRplots = true;
 	}// additional cuts for CR2L
       }// CR2L
       else if ( !foundsoftlep && foundhardlep && foundhardlep2 && t.nlep == 2) { // HardDileptonCR
@@ -918,6 +923,38 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}// additional cuts for CR2L
       }// HardDileptonCR
 
+      if ( doDoubleLepCRplots || doHardDoubleLepCRplots ) { //ZllCR, overlapping with CR2Ls
+	//OSSF & mll
+	if ( dilepmll_ > 75 && dilepmll_ < 105 && (isEE || isMuMu) ) {
+	  //initialize MET variables
+	  float metX = t.met_pt * cos(t.met_phi);
+	  float metY = t.met_pt * sin(t.met_phi);
+	  TVector2* newMet = new TVector2;
+	  
+	  //remove random lepton, depending on event number
+	  if (t.evt % 2) {
+	    removedzllLep_ = 1; 
+	    float lepX = hardleppt_ * cos(hardlepphi_);
+	    float lepY = hardleppt_ * sin(hardlepphi_);
+	    newMet->SetX(metX+lepX);
+	    newMet->SetY(metY+lepY);
+	  }
+	  else {
+	    removedzllLep_ = 2;
+	    float lepX = softleppt_ * cos(softlepphi_);
+	    float lepY = softleppt_ * sin(softlepphi_);
+	    newMet->SetX(metX+lepX);
+	    newMet->SetY(metY+lepY);
+	  }
+	  
+	  zllmet_ = newMet->Mod(); //alternate MET
+	  if (removedzllLep_ == 1) zllmt_ = sqrt( 2 * newMet->Mod() * softleppt_ * ( 1 - cos( newMet->Phi() - softlepphi_) ) ); //recalculated MT
+	  else if (removedzllLep_ == 2) zllmt_ = sqrt( 2 * newMet->Mod() * hardleppt_ * ( 1 - cos( newMet->Phi() - hardlepphi_) ) ); //recalculated MT
+   
+	  doZllCRplots = true;
+	}// additional cuts for ZllCR
+      }// ZllCR
+      
       //-------------------------------------//
       //-----dR matching for soft lepton-----//
       //-------------------------------------//
@@ -1287,6 +1324,36 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// }
 	
       } //doHardDoubleLepCRplots
+
+        //tight CR2L plots
+      if (doZllCRplots && passHardIsoId) {
+        saveZllplots = true;	
+	if (passIsoId) {
+	  fillHistosZll("crZll");
+	  if (!t.isData) {
+	    if (isDilepton) fillHistosZll("crZll","Dilepton");
+	    else fillHistosZll("crZll","Fake");
+	  }
+	  
+	  if (!doCombineElMu){
+	    if (isEE){
+	      fillHistosZll("crZll","EE");
+	      if (!t.isData) {
+		if (isDilepton) fillHistosZll("crZll","EEDilepton");
+		else fillHistosZll("crZll","EEFake");
+	      }
+	    }
+	    else if (isMuMu){
+	      fillHistosZll("crZll","MuMu");
+	      if (!t.isData) {
+		if (isDilepton) fillHistosZll("crZll","MuMuDilepton");
+		else fillHistosZll("crZll","MuMuFake");
+	      }
+	    }
+	  }//!doCombineElMu
+	}//passIsoId
+	
+      } //doZllCRplots
       
    }//end loop on events in a file
   
@@ -1363,6 +1430,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if(!SRVecLep.at(srN).cr2LHistMap.empty()){
 	cout<<"Saving cr2L"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).cr2LHistMap, outfile_, ("cr2L"+SRVecLep.at(srN).GetName()).c_str());
+      }
+    }
+  }
+  if (saveZllplots) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(!SRVecLep.at(srN).crZllHistMap.empty()){
+	cout<<"Saving crZll"<< SRVecLep.at(srN).GetName() <<endl;
+        savePlotsDir(SRVecLep.at(srN).crZllHistMap, outfile_, ("crZll"+SRVecLep.at(srN).GetName()).c_str());
       }
     }
   }
@@ -1537,7 +1612,7 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
  
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
-  values["diffMetMhtOverMet"]  = 0; //dummy variable for 1L CR
+  values["diffMetMhtOverMet"]  = 0; //dummy variable, inefficient at low MET
   values["nlep"]        = t.nlep+t.nPFHad10;
   values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
@@ -1676,6 +1751,33 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   
   return;
 } //double lep
+
+void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suffix) {
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = 0; //dummy variable, inefficient at low MET
+  values["nlep"]        = 1; //dummy variable for double lepton CR
+  values["njets"]       = t.nJet30;
+  values["nbjets"]      = t.nBJet20;
+  values["nbjetshard"]  = nHardB_;
+  values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
+  values["ht"]          = t.ht;
+  values["met"]         = zllmet_; //use recalculated MET
+  values["mt"]          = zllmt_; //use recalculated MT
+  
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_SingleEl || t.HLT_SingleMu)) return;
+  
+  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+    if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
+    if(SRVecLep.at(srN).PassesSelection(values)){
+      if (prefix=="crZll") fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+    }
+  }
+  
+  return;
+} //Zll
 
 void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
@@ -2121,6 +2223,10 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   else if (hardleppt_>5 && hardleppt_<10) type = 0;
   plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 3, 0, 3);
 
+  //zllCR specific plots
+  plot1D("h_zllmt"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_zllmet"+s,       zllmet_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+  
   delete newMet;
   
   outfile_->cd();
