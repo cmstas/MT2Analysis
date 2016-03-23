@@ -1755,7 +1755,7 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
 void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suffix) {
 
   std::map<std::string, float> values;
-  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["deltaPhiMin"] = 0.5; //dummy variable
   values["diffMetMhtOverMet"]  = 0; //dummy variable, inefficient at low MET
   values["nlep"]        = 1; //dummy variable for double lepton CR
   values["njets"]       = t.nJet30;
@@ -1763,7 +1763,7 @@ void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suff
   values["nbjetshard"]  = nHardB_;
   values["mt2"]         = t.nJet30 > 1 ? t.mt2 : t.met_pt; // require large MT2 for multijet events
   values["ht"]          = t.ht;
-  values["met"]         = zllmet_; //use recalculated MET
+  values["met"]         = 201; //dummy value
   values["mt"]          = zllmt_; //use recalculated MT
   
   // trigger requirement on data
@@ -1772,7 +1772,9 @@ void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suff
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
     if(SRVecLep.at(srN).PassesSelection(values)){
-      if (prefix=="crZll") fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      if (prefix=="crZll" && zllmet_ > 200) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET200"+suffix);
+      if (prefix=="crZll" && zllmet_ > 150) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET150"+suffix);
+      if (prefix=="crZll" && zllmet_ > 100) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET100"+suffix);
     }
   }
   
