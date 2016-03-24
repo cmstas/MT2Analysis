@@ -919,11 +919,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  lep2_p4.SetPtEtaPhiM(hardleppt_,hardlepeta_,hardlepphi_,hardlepM_);
 	  TLorentzVector dilep_p4 = lep1_p4 + lep2_p4;
 	  dilepmll_ = dilep_p4.M();
-	  doHardDoubleLepCRplots = true;  
+	  doHardDoubleLepCRplots = true;
 	}// additional cuts for CR2L
       }// HardDileptonCR
 
-      if ( doDoubleLepCRplots || doHardDoubleLepCRplots ) { //ZllCR, overlapping with CR2Ls
+      if ( ((doDoubleLepCRplots && passIsoId) || doHardDoubleLepCRplots) && passHardIsoId ) { //ZllCR, overlapping with CR2Ls
 	//OSSF & mll
 	if ( dilepmll_ > 75 && dilepmll_ < 105 && (isEE || isMuMu) ) {
 	  //initialize MET variables
@@ -932,7 +932,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  TVector2* newMet = new TVector2;
 	  
 	  //remove random lepton, depending on event number
-	  if (t.evt % 2) {
+	  if (t.evt % 2 == 1) {
 	    removedzllLep_ = 1; 
 	    float lepX = hardleppt_ * cos(hardlepphi_);
 	    float lepY = hardleppt_ * sin(hardlepphi_);
@@ -1326,33 +1326,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       } //doHardDoubleLepCRplots
 
         //tight CR2L plots
-      if (doZllCRplots && passHardIsoId) {
+      if (doZllCRplots) {
         saveZllplots = true;	
-	if (passIsoId) {
-	  fillHistosZll("crZll");
-	  if (!t.isData) {
-	    if (isDilepton) fillHistosZll("crZll","Dilepton");
-	    else fillHistosZll("crZll","Fake");
-	  }
-	  
-	  if (!doCombineElMu){
-	    if (isEE){
-	      fillHistosZll("crZll","EE");
-	      if (!t.isData) {
-		if (isDilepton) fillHistosZll("crZll","EEDilepton");
-		else fillHistosZll("crZll","EEFake");
-	      }
-	    }
-	    else if (isMuMu){
-	      fillHistosZll("crZll","MuMu");
-	      if (!t.isData) {
-		if (isDilepton) fillHistosZll("crZll","MuMuDilepton");
-		else fillHistosZll("crZll","MuMuFake");
-	      }
-	    }
-	  }//!doCombineElMu
-	}//passIsoId
+	fillHistosZll("crZll");
+	if (!t.isData) {
+	  if (isDilepton) fillHistosZll("crZll","Dilepton");
+	  else fillHistosZll("crZll","Fake");
+	}
 	
+	if (!doCombineElMu){
+	  if (isEE){
+	    fillHistosZll("crZll","EE");
+	    if (!t.isData) {
+	      if (isDilepton) fillHistosZll("crZll","EEDilepton");
+	      else fillHistosZll("crZll","EEFake");
+	    }
+	  }
+	  else if (isMuMu){
+	    fillHistosZll("crZll","MuMu");
+	    if (!t.isData) {
+	      if (isDilepton) fillHistosZll("crZll","MuMuDilepton");
+	      else fillHistosZll("crZll","MuMuFake");
+	    }
+	  }
+	}//!doCombineElMu	
       } //doZllCRplots
       
    }//end loop on events in a file
@@ -1775,6 +1772,7 @@ void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suff
       if (prefix=="crZll" && zllmet_ > 200) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET200"+suffix);
       if (prefix=="crZll" && zllmet_ > 150) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET150"+suffix);
       if (prefix=="crZll" && zllmet_ > 100) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET100"+suffix);
+      if (prefix=="crZll" && zllmet_ > 50) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET50"+suffix);
     }
   }
   
@@ -2227,7 +2225,12 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
 
   //zllCR specific plots
   plot1D("h_zllmt"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_zllmtbins"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_zllmet"+s,       zllmet_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+  
+  plot1D("h_removedZlllep"+s,       removedzllLep_,   evtweight_, h_1d, "removedLep", 3, 0, 3);
+  if (removedzllLep_ == 1) plot1D("h_removedZllleppt"+s,      hardleppt_,   evtweight_, h_1d, ";rem p_{T}(lep) [GeV]", 200, 0, 1000);
+  else if (removedzllLep_ == 2) plot1D("h_removedZllleppt"+s,      softleppt_,   evtweight_, h_1d, ";rem p_{T}(lep) [GeV]", 200, 0, 1000);
   
   delete newMet;
   
