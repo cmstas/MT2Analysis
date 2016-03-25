@@ -62,6 +62,8 @@ echo "root -b -q makeCR1Lestimate.C+(${INDIR},${DATAFILE})"
 root -b -q "makeCR1Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
 echo "root -b -q makeCR2Lestimate.C+(${INDIR},${DATAFILE})"
 root -b -q "makeCR2Lestimate.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
+echo "root -b -q makeCR2LestimateALT.C+(${INDIR},${DATAFILE})"
+root -b -q "makeCR2LestimateALT.C+(\"${INDIR}\",\"${DATAFILE}\")" >> dataDrivenEstimates.log
 
 
 cd $INDIRfake
