@@ -148,13 +148,15 @@ int main(int argc, char **argv) {
   else if (infile.Contains("SMS-T1ttbb"))                            sample = Form("T1ttbb_%s",          outfileid.Data());
   else if (infile.Contains("SMS-T5qqqqVV"))                          sample = Form("T5qqqqVV_%s",        outfileid.Data());
   else if (infile.Contains("SMS-T5qqqqWW"))                          sample = Form("T5qqqqWW_%s",        outfileid.Data());
+  else if (infile.Contains("T5qqqqWW"))                              sample = Form("T5qqqqWW_%s",        outfileid.Data());
   else if (infile.Contains("SMS-T2tt"))                              sample = Form("T2tt_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2bb"))                              sample = Form("T2bb_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2qq"))                              sample = Form("T2qq_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2bw"))                              sample = Form("T2bw_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2cc"))                              sample = Form("T2cc_%s",            outfileid.Data());
   else if (infile.Contains("SMS-T2-4bd"))                            sample = Form("T2-4bd_%s",          outfileid.Data());
-  else if (infile.Contains("SMS-T2tb"))                              sample = Form("T2tb_%s",          outfileid.Data());
+  else if (infile.Contains("SMS-T2tb"))                              sample = Form("T2tb_%s",            outfileid.Data());
+  else if (infile.Contains("SMS-TChiWZ"))                            sample = Form("TChiWZ_%s",          outfileid.Data());
   //Data
   else if (infile.Contains("Run2015B") && infile.Contains("PromptReco"))     sample = Form("data_Run2015B_PromptReco_%s",  outfileid.Data());
   else if (infile.Contains("Run2015B") && infile.Contains("17Jul2015"))      sample = Form("data_Run2015B_17Jul2015_%s",  outfileid.Data());
@@ -217,8 +219,10 @@ int main(int argc, char **argv) {
   else if (infile.Contains("50ns")) bx = 50;
   else if (infile.Contains("25ns")) bx = 25;
   else if (infile.Contains("FSPremix")) bx = 25;
+  else if (infile.Contains("TChi")) bx = 25;
+  else if (infile.Contains("condor")) bx = 25;
 
-  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns"));
+  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("TChi") || infile.Contains("condor"));
 
   bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
   
