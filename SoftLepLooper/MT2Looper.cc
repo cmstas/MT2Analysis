@@ -1349,7 +1349,33 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      else fillHistosZll("crZll","MuMuFake");
 	    }
 	  }
-	}//!doCombineElMu	
+	}//!doCombineElMu
+
+	//require soft lepton
+	if (softleppt_<20) {
+	  fillHistosZll("crZll","Soft");
+	  if (!t.isData) {
+	    if (isDilepton) fillHistosZll("crZll","SoftDilepton");
+	    else fillHistosZll("crZll","SoftFake");
+	  }
+	  
+	  if (!doCombineElMu){
+	    if (isEE){
+	      fillHistosZll("crZll","SoftEE");
+	      if (!t.isData) {
+		if (isDilepton) fillHistosZll("crZll","SoftEEDilepton");
+		else fillHistosZll("crZll","SoftEEFake");
+	      }
+	    }
+	    else if (isMuMu){
+	      fillHistosZll("crZll","SoftMuMu");
+	      if (!t.isData) {
+		if (isDilepton) fillHistosZll("crZll","SoftMuMuDilepton");
+		else fillHistosZll("crZll","SoftMuMuFake");
+	      }
+	    }
+	  }//!doCombineElMu
+	}//softleppt < 20
       } //doZllCRplots
       
    }//end loop on events in a file
