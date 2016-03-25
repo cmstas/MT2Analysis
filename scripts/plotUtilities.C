@@ -188,6 +188,11 @@ string getLegendName(const string& sample) {
 
 //_______________________________________________________________________________
 string getTableName(const string& sample) {
+
+  if (sample.find("diboson dilep") != string::npos) return "Diboson (2L)";
+  if (sample.find("top dilep") != string::npos) return "Top (2L)";
+  if (sample.find("dyjets dilep") != string::npos) return "Z $\\rightarrow$ ll";
+  
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "ttbar";

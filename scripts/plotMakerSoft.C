@@ -451,9 +451,10 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
       // if (names.at(i)=="gjets" || names.at(i)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
       // if (names.at(i)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
       // if (names.at(i)=="wjets") fullhistname.ReplaceAll("sr","crrl");
+      if (dirs.at(idir).find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllmtbinsMET200");
       if (names.at(i)=="onelep") fullhistname += "Onelep";
-      if (names.at(i)=="dilep") fullhistname += "Dilepton";
-      if (names.at(i)=="fake") fullhistname += "Fake";
+      if (names.at(i).find("dilep") != std::string::npos ) fullhistname += "Dilepton";
+      if (names.at(i).find("fake") != std::string::npos ) fullhistname += "Fake";
       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -513,6 +514,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
       cout << getTableName(names.at(i));
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
 	TString fullhistname = Form("%s/h_mtbins",dirs.at(idir).c_str());
+	if (dirs.at(idir).find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllmtbinsMET200");
 	TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
 	double yield = 0.;
 	if (h) {
@@ -721,6 +723,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
 
   TString binshistname = Form("%s/h_mtbins",dir.c_str());
+  if (dir.find("crZll") != std::string::npos ) binshistname.ReplaceAll("mtbins","zllmtbinsMET200");
   TH1D* h_mt2bins(0);
   for(unsigned int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
     h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
@@ -768,11 +771,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     cout << getTableName(names.at(isamp));
     for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mtbins",dir.c_str());
-      if (names.at(isamp)=="gjets" || names.at(isamp)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
-      if (names.at(isamp)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
+      // if (names.at(isamp)=="gjets" || names.at(isamp)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
+      // if (names.at(isamp)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
+      if (dir.find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllmtbinsMET200");
       if (names.at(isamp)=="onelep") fullhistname += "Onelep";
-      if (names.at(isamp)=="dilep") fullhistname += "Dilepton";
-      if (names.at(isamp)=="fake") fullhistname += "Fake";
+      if (names.at(isamp).find("dilep") != std::string::npos ) fullhistname += "Dilepton";
+      if (names.at(isamp).find("fake") != std::string::npos ) fullhistname += "Fake";
       TH1D* h = (TH1D*) samples.at(isamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -824,10 +828,11 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   cout << "\\hline" << endl;
 
   for( unsigned int jsamp = 0 ; jsamp < n ; jsamp++ ){
-    if( !TString(names.at(jsamp)).Contains("sig") ) continue;
+    if( !(TString(names.at(jsamp)).Contains("sig") || TString(names.at(jsamp)).Contains("data") )) continue;
     cout << getTableName(names.at(jsamp));
     for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mtbins",dir.c_str());
+      if (dir.find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllmtbinsMET200");
       TH1D* h = (TH1D*) samples.at(jsamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -1707,7 +1712,7 @@ void plotMakerZllCR(){
   writeExtraText = false;
   lumi_13TeV = "2.26 fb^{-1}";
 
-  string suffix = "";
+  string suffix = "MET50";
   bool doOnlyTrue = false;
   bool doData = true;
   string input_dir = "../SoftLepLooper/output/softLep";
@@ -1812,19 +1817,24 @@ void plotMakerZllCR(){
       //if(dir_name != "srLepbase") continue; //to do only this dir
       //if(dir_name != "cr2Lbase") continue; //to do only this dir
       
-      if(dir_name == "crZllbase"){
+      if(dir_name == "crZllbaseZeroB"){
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
 	  makePlot( samples , names , dir_name , "h_lowleppt"+suffix , "Soft Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_highleppt"+suffix , "Hard Lepton p_{T} [GeV]" , "Events / 25 GeV" , 0 , 500 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_removedZllleppt"+suffix , "Hard Lepton p_{T} [GeV]" , "Events / 25 GeV" , 0 , 500 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_lep1pt"+suffix , "Lepton 1 p_{T} [GeV]" , "Events / 25 GeV" , 0 , 500 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_lep2pt"+suffix , "Lepton 2 p_{T} [GeV]" , "Events / 25 GeV" , 0 , 500 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_zllmet"+suffix  , "modified E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_zllmt"+suffix , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_zllmtbins"+suffix , "M_{T} [GeV]" , "Events" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_dilepmll"+suffix , "m_{ll} [GeV]" , "Events / 5 GeV" , 0 , 150 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_deltaEtaLep"+suffix , "#Delta#eta(lep1-lep2)" , "Events / 0.5" , -4 , 4 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_deltaPhiLep"+suffix , "#Delta#phi(lep1-lep2)" , "Events / 1.0" , -7 , 7 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_deltaPtLep"+suffix , "#Deltap_{T}(lep1-lep2)" , "Events / 10 GeV" , 0 , 200 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_dilepPt"+suffix , "p_{T}^{ll}" , "Events / 10 GeV" , 0 , 200 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_dilepmll"+suffix , "m_{ll} [GeV]" , "Events / 5 GeV" , 0 , 150 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_deltaEtaLep"+suffix , "#Delta#eta(lep1-lep2)" , "Events / 0.5" , -4 , 4 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_deltaPhiLep"+suffix , "#Delta#phi(lep1-lep2)" , "Events / 1.0" , -7 , 7 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_deltaPtLep"+suffix , "#Deltap_{T}(lep1-lep2)" , "Events / 10 GeV" , 0 , 200 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  // makePlot( samples , names , dir_name , "h_dilepPt"+suffix , "p_{T}^{ll}" , "Events / 10 GeV" , 0 , 200 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_removedZlllep"+suffix , "removed lepton" , "Events" , 0 , 3 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	}
       }
       
@@ -1845,7 +1855,7 @@ void plotMakerSoft(){
   //plotMakerSoftLepSR(); return;
   //plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
-  plotMakerZllCR(); return;
+  //plotMakerZllCR(); return;
   //plotMakerSoftLepSR(); plotMakerSoftLepCR(); plotMakerDoubleLepCR(); return;
 
   cmsText = "CMS Preliminary";
@@ -1868,7 +1878,7 @@ void plotMakerSoft(){
   // TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
   // TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
   // TFile* f_zjets = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  //TFile* f_data = new TFile(Form("%s/data_Run2015C.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
 
   
   // TFile* f_tt1l = new TFile(Form("%s/ttsl.root",input_dir.c_str()));
@@ -1876,9 +1886,11 @@ void plotMakerSoft(){
   // TFile* f_st = new TFile(Form("%s/singletop.root",input_dir.c_str())); 
   // TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
   // TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  // TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
+  TFile* f_dy = new TFile(Form("%s/dyjetsll.root",input_dir.c_str()));
   // TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
   // TFile* f_ww = new TFile(Form("%s/ww.root",input_dir.c_str()));
+  TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
+  TFile* f_diboson = new TFile(Form("%s/diboson.root",input_dir.c_str()));
   
   vector<TFile*> samples;
   vector<string>  names;
@@ -1895,16 +1907,20 @@ void plotMakerSoft(){
   // samples.push_back(f_tt2l); names.push_back("tt+2l");
 
   TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
-  TFile* f_T2_4bd_275 = new TFile(Form("%s/T2-4bd_275.root",input_dir.c_str())); 
-  TFile* f_T2_4bd_375 = new TFile(Form("%s/T2-4bd_375.root",input_dir.c_str())); 
-  samples.push_back(f_bkg); names.push_back("onelep");
-  samples.push_back(f_bkg); names.push_back("dilep");
-  samples.push_back(f_bkg); names.push_back("fake");
-  samples.push_back(f_T2_4bd_275); names.push_back("T2-4bd_275_235 sig");
-  samples.push_back(f_T2_4bd_375); names.push_back("T2-4bd_375_335 sig");
+  // TFile* f_T2_4bd_275 = new TFile(Form("%s/T2-4bd_275.root",input_dir.c_str())); 
+  // TFile* f_T2_4bd_375 = new TFile(Form("%s/T2-4bd_375.root",input_dir.c_str())); 
+  // samples.push_back(f_bkg); names.push_back("onelep");
+  // samples.push_back(f_bkg); names.push_back("dilep");
+  // samples.push_back(f_bkg); names.push_back("fake");
+  // samples.push_back(f_T2_4bd_275); names.push_back("T2-4bd_275_235 sig");
+  // samples.push_back(f_T2_4bd_375); names.push_back("T2-4bd_375_335 sig");
   
   
-  //samples.push_back(f_data); names.push_back("data");
+  samples.push_back(f_bkg); names.push_back("fakeLep");
+  samples.push_back(f_dy); names.push_back("dyjets dilep");
+  samples.push_back(f_diboson); names.push_back("diboson dilep");
+  samples.push_back(f_top); names.push_back("top dilep");
+  samples.push_back(f_data); names.push_back("data");
   
   
   //  TFile* f_T2tt_400_325 = new TFile(Form("%s/T2tt_mStop-400to475_mLSP-1to400.root",input_dir.c_str()));
@@ -1980,10 +1996,10 @@ void plotMakerSoft(){
   dirs.push_back("srLepbaseJ1");
   dirs.push_back("srLepbase");
   
-  for(unsigned int i=0; i<dirs.size(); i++){
-    printDetailedTable(samples, names, dirs.at(i));
-    if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
-  }
+  // for(unsigned int i=0; i<dirs.size(); i++){
+  //   printDetailedTable(samples, names, dirs.at(i));
+  //   if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+  // }
   
   
   vector<string> dirsH;
@@ -2023,9 +2039,13 @@ void plotMakerSoft(){
   // dirsH.push_back("cr2L6M");
   //printTable(samples, names, dirsH, -1);
 
+  // dirsH.push_back("crZllbase");
+  dirsH.push_back("crZllbaseZeroB");
+  printTable(samples, names, dirsH, -1);
+
   for(unsigned int i=0; i<dirsH.size(); i++){
     printDetailedTable(samples, names, dirsH.at(i));
-    //if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+    if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   }
 
   
