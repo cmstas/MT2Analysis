@@ -30,14 +30,13 @@ cd $THISDIR
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/top.root,7)"
 root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/top.root\",7)" >> dataDrivenEstimates.log
 
-#FIXME: right now diboson is only ww, will add wz, zz once new babies are complete
 cd $INDIR
-echo " hadd -f diboson.root ww.root "
-hadd -f diboson.root ww.root >> dataDrivenEstimates.log
+echo " hadd -f diboson.root ww.root wz.root zz.root "
+hadd -f diboson.root ww.root wz.root zz.root >> dataDrivenEstimates.log
 cd $THISDIR
 
-echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/diboson.root,1)"
-root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/diboson.root\",1)" >> dataDrivenEstimates.log
+echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/diboson.root,3)"
+root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/diboson.root\",3)" >> dataDrivenEstimates.log
 
 #all backgrounds except diboson and dyjets
 cd $INDIR
@@ -82,14 +81,13 @@ cd $THISDIR
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIRfake}/top.root,7)"
 root -b -q "../rescaleBoundaryHists.C+(\"${INDIRfake}/top.root\",7)" >> dataDrivenEstimates.log
 
-#FIXME: right now diboson is only ww, will add wz, zz once new babies are complete
 cd $INDIRfake
-echo " hadd -f diboson.root ww.root "
-hadd -f diboson.root ww.root >> dataDrivenEstimates.log
+echo " hadd -f diboson.root ww.root wz.root zz.root "
+hadd -f diboson.root ww.root wz.root zz.root >> dataDrivenEstimates.log
 cd $THISDIR
 
-echo "root -b -q ../rescaleBoundaryHists.C+(${INDIRfake}/diboson.root,1)"
-root -b -q "../rescaleBoundaryHists.C+(\"${INDIRfake}/diboson.root\",1)" >> dataDrivenEstimates.log
+echo "root -b -q ../rescaleBoundaryHists.C+(${INDIRfake}/diboson.root,3)"
+root -b -q "../rescaleBoundaryHists.C+(\"${INDIRfake}/diboson.root\",3)" >> dataDrivenEstimates.log
 
 #all backgrounds except diboson and dyjets
 cd $INDIRfake
