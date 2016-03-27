@@ -67,7 +67,7 @@ run ttdl_mg_lo
 # W+JETS
 #
 
-# #run wjets_mg_lo
+#run wjets_mg_lo
 
 run wjets_ht100to200
 run wjets_ht200to400
@@ -102,10 +102,10 @@ run dyjetsll_ht600toInf
 # GAMMA + JETS
 #
 
-# run gjet_ht100to200
-# run gjet_ht200to400
-# run gjet_ht400to600
-# run gjet_ht600toInf
+run gjet_ht100to200
+run gjet_ht200to400
+run gjet_ht400to600
+run gjet_ht600toInf
 
 #
 # Z INVISIBLE
@@ -180,3 +180,16 @@ run T5qqqqWW_1025to1200_0to1175
 run T5qqqqWW_1225to1400_0to1175
 run T5qqqqWW_1425to1600_0to1175
 run T5qqqqWW_1650to1700_0to1150
+
+run T2tb_200to325_0to150
+run T2tb_200to625_50to475
+run T2tb_350to400_0to225
+run T2tb_425to600_0to425
+run T2tb_625to850_0to450
+run T2tb_875to1125_0to475
+
+run T5qqqqWW_modified_600to800_0to725
+run T5qqqqWW_modified_825to1000_0to925
+run T5qqqqWW_modified_1025to1200_0to1175
+run T5qqqqWW_modified_1225to1400_0to1175
+run T5qqqqWW_modified_1425to1600_0to1175
