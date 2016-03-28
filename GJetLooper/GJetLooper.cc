@@ -313,7 +313,7 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
   plot1D("h_smearMet"+s,       smearMet->Mod(),   evtweight_, h_1d, "; smearedMET", 100, 0, 1000);
   plot1D("h_gammaMetOverGamma"+s,       gammaMet->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
-  plot1D("h_diffRecometGenmetOverGenmet"+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
+  if (!t.isData) plot1D("h_diffRecometGenmetOverGenmet"+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
 
   //gamma pT bins
   std::string ptSuf = "";
@@ -327,7 +327,7 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   plot1D("h_met"+ptSuf+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
   plot1D("h_smearMet"+ptSuf+s,       smearMet->Mod(),   evtweight_, h_1d, "; smearedMET", 100, 0, 1000);
   plot1D("h_gammaMetOverGamma"+ptSuf+s,       gammaMet->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
-  plot1D("h_diffRecometGenmetOverGenmet"+ptSuf+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
+  if (!t.isData) plot1D("h_diffRecometGenmetOverGenmet"+ptSuf+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
   
   
   outfile_->cd();
