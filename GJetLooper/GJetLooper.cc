@@ -184,7 +184,8 @@ void GJetLooper::loop(TChain* chain, std::string sample, std::string output_dir)
       // basic photon selection, triggers, etc.
       if (t.nVert == 0) continue;
       if (t.ngamma == 0) continue;
-      if (!t.HLT_Photon120) continue;
+
+      if (!t.HLT_Photon165_HE10) continue;
       
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
@@ -197,7 +198,7 @@ void GJetLooper::loop(TChain* chain, std::string sample, std::string output_dir)
       //      const float lumi = 0.042;
       const float lumi = 2.26;
       evtweight_ = 1.;
-
+      
       // apply relevant weights to MC
       if (!t.isData) {
 	evtweight_ = t.evt_scale1fb * lumi;
@@ -214,14 +215,59 @@ void GJetLooper::loop(TChain* chain, std::string sample, std::string output_dir)
 
 
       // require good photon and baseline selection
-      bool pass_photon = (t.gamma_pt[0] > 150 && t.ht > 200);
+      bool pass_photon = (t.gamma_pt[0] > 200 && t.gamma_idCutBased[0] && t.gamma_chHadIso[0] < 2.5);
+      bool pass_selection = (t.nlep == 0 && t.nJet30FailId == 0 && t.ht > 200 && t.nJet30 > 1);
+      if (!pass_photon || !pass_selection) continue;
+
       
-      if (!pass_photon) continue;
+      //calculate additional MET variables
+      float metX = t.met_pt * cos(t.met_phi);
+      float metY = t.met_pt * sin(t.met_phi);
+      TVector2* recoMet = new TVector2;
+      recoMet->SetX(metX); recoMet->SetY(metY);
+      float mhtX = t.mht_pt * cos(t.mht_phi);
+      float mhtY = t.mht_pt * sin(t.mht_phi);
+      TVector2* recoMht = new TVector2;
+      recoMht->SetX(mhtX); recoMht->SetY(mhtY);
+      //add photon to MET
+      TVector2* gammaMet = new TVector2;
+      float gammaX = t.gamma_pt[0] * cos(t.gamma_phi[0]);
+      float gammaY = t.gamma_pt[0] * sin(t.gamma_phi[0]);
+      gammaMet->SetX(metX+gammaX); gammaMet->SetY(metY+gammaY);
+      //add to mht
+      TVector2* gammaMht = new TVector2;
+      gammaMht->SetX(mhtX-gammaX); gammaMht->SetY(mhtY-gammaY);
+      //met cleaning
+      if (fabs(gammaMht->Mod()-gammaMet->Mod())/gammaMet->Mod() > 0.5) continue;
 
+      
+  
       fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase");
+      if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","EB");
+      else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","EE");
 
-      //FIXME: add additional SRs for topological selection?
+      if (t.gamma_pt[0] > 200 && t.gamma_pt[0] < 350) {
+	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT200");
+	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT200EB");
+	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT200EE");
+      }
+      if (t.gamma_pt[0] > 350 && t.gamma_pt[0] < 500) {
+	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT350");
+	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT350EB");
+	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT350EE");
+      }
+       if (t.gamma_pt[0] > 500) {
+	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT500");
+	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT500EB");
+	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT500EE");
+      }
 
+      // if (gammaMet->Mod() > 200) {
+      // 	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","MinMET");
+      // 	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","MinMETEB");
+      // 	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","MinMETEE");
+      // }
+      
     }//end loop on events in a file
   
     delete tree;
@@ -307,27 +353,38 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   plot1D("h_nBJet20"+s,    t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
 
   //photon specific plots
+  plot1D("h_gammaEta"+s,       t.gamma_eta[0],   evtweight_, h_1d, ";gamma #eta [GeV]", 50, -2.5, 2.5);
+  plot1D("h_iso"+s,      t.gamma_phIso[0]+t.gamma_chHadIso[0],   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
+  plot1D("h_chiso"+s,      t.gamma_chHadIso[0],   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
+  plot1D("h_phiso"+s,      t.gamma_phIso[0],   evtweight_, h_1d, ";iso [GeV]", 100, 0, 50);
+  plot1D("h_sieie"+s,        t.gamma_sigmaIetaIeta[0],   evtweight_, h_1d, ";gamma #sigma_{i#etai#eta}", 100, 0, 0.025);
+  if (fabs(t.gamma_eta[0]) < 1.479) plot1D("h_EBsieie"+s,        t.gamma_sigmaIetaIeta[0],   evtweight_, h_1d, ";gamma #sigma_{i#etai#eta}", 100, 0, 0.015);
+  else if (fabs(t.gamma_eta[0]) > 1.479) plot1D("h_EEsieie"+s,        t.gamma_sigmaIetaIeta[0],   evtweight_, h_1d, ";gamma #sigma_{i#etai#eta}", 100, 0, 0.025);
+  
   plot1D("h_gammaPt"+s,   t.gamma_pt[0] ,   evtweight_, h_1d, ";#gamma p_{T} [GeV]", 100, 0, 500);
-  plot1D("h_deltaPhiGammaMet"+s,  t.gamma_phi[0]-gammaMet->Phi() ,   evtweight_, h_1d, ";deltaPhiGammaMet", 128, -3.2, 3.2);
+  plot1D("h_deltaPhiGammaMet"+s,  t.gamma_phi[0]-gammaMet->Phi() ,   evtweight_, h_1d, ";deltaPhiGammaMet", 100, -1, 1);
   plot1D("h_gammaMet"+s,       gammaMet->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
   plot1D("h_smearMet"+s,       smearMet->Mod(),   evtweight_, h_1d, "; smearedMET", 100, 0, 1000);
   plot1D("h_gammaMetOverGamma"+s,       gammaMet->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
-  if (!t.isData) plot1D("h_diffRecometGenmetOverGenmet"+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
-
+  if (!t.isData) {
+    plot1D("h_diffRecometGenmetOverGenmet"+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 500, -50, 50);
+    plot1D("h_diffRecometGenmetOverGenmet2"+s,       (t.met_pt - t.met_genPt)/t.met_pt,   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 500, -50, 50);
+  }
+  
   //gamma pT bins
-  std::string ptSuf = "";
-  if (t.gamma_pt[0] > 200 && t.gamma_pt[0] < 350) ptSuf = "PT200";
-  else if (t.gamma_pt[0] > 350 && t.gamma_pt[0] < 500) ptSuf = "PT350";
-  else if (t.gamma_pt[0] > 500) ptSuf = "PT500";
-  else ptSuf = "PTother";
-  plot1D("h_gammaPt"+ptSuf+s,   t.gamma_pt[0] ,   evtweight_, h_1d, ";#gamma p_{T} [GeV]", 100, 0, 500);
-  plot1D("h_deltaPhiGammaMet"+ptSuf+s,  t.gamma_phi[0]-gammaMet->Phi() ,   evtweight_, h_1d, ";deltaPhiGammaMet", 128, -3.2, 3.2);
-  plot1D("h_gammaMet"+ptSuf+s,       gammaMet->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);
-  plot1D("h_met"+ptSuf+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
-  plot1D("h_smearMet"+ptSuf+s,       smearMet->Mod(),   evtweight_, h_1d, "; smearedMET", 100, 0, 1000);
-  plot1D("h_gammaMetOverGamma"+ptSuf+s,       gammaMet->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
-  if (!t.isData) plot1D("h_diffRecometGenmetOverGenmet"+ptSuf+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
+  // std::string ptSuf = "";
+  // if (t.gamma_pt[0] > 200 && t.gamma_pt[0] < 350) ptSuf = "PT200";
+  // else if (t.gamma_pt[0] > 350 && t.gamma_pt[0] < 500) ptSuf = "PT350";
+  // else if (t.gamma_pt[0] > 500) ptSuf = "PT500";
+  // else ptSuf = "PTother";
+  // plot1D("h_gammaPt"+ptSuf+s,   t.gamma_pt[0] ,   evtweight_, h_1d, ";#gamma p_{T} [GeV]", 100, 0, 500);
+  // plot1D("h_deltaPhiGammaMet"+ptSuf+s,  t.gamma_phi[0]-gammaMet->Phi() ,   evtweight_, h_1d, ";deltaPhiGammaMet", 128, -3.2, 3.2);
+  // plot1D("h_gammaMet"+ptSuf+s,       gammaMet->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);
+  // plot1D("h_met"+ptSuf+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
+  // plot1D("h_smearMet"+ptSuf+s,       smearMet->Mod(),   evtweight_, h_1d, "; smearedMET", 100, 0, 1000);
+  // plot1D("h_gammaMetOverGamma"+ptSuf+s,       gammaMet->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
+  // if (!t.isData) plot1D("h_diffRecometGenmetOverGenmet"+ptSuf+s,       (recoMet->Mod()-genMet->Mod())/genMet->Mod(),   evtweight_, h_1d, ";diffRecometGenmetOverGenmet", 100, 0, 10);
   
   
   outfile_->cd();
