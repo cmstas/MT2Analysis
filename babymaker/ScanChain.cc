@@ -273,6 +273,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
+  unsigned int nHiggsEvents = 0;
+  unsigned int nNoHiggsEvents = 0;
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
@@ -1549,6 +1551,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       float btagprob_err_light_DN = 0.;
       float btagprob_mc = 1.;
 
+      // -- MT2-Higgs -- define bjets' vector
+      std::vector<LorentzVector> p4sBJets;
+
       if (verbose) cout << "before main jet loop" << endl;
 
       //now fill variables for jets that pass baseline selections and don't overlap with a lepton
@@ -1628,25 +1633,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
           // use pt20 for bjet counting, pt30 for everything else
           if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
-            if (jet_pt[njet] > 30.0) {
-              // store leading/subleading central jet pt.
-              //  jets should be pt-ordered before entering this loop
-              if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
-              else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
-              p4sForHems.push_back(p4sCorrJets.at(iJet));
-              p4sForDphi.push_back(p4sCorrJets.at(iJet));
-              p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
-              p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
-              p4sForHemsZllMT.push_back(p4sCorrJets.at(iJet));
-              p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
-              p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
-              p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
-              nJet30++;
-              if (jet_pt[njet] > 40.) nJet40++;
-            } // pt40
             //CSVv2IVFM
+            bool bJet = false;
             if(jet_btagCSV[njet] >= 0.890) {
-              nBJet20++; 
+              bJet = true;
+              nBJet20++;
+              p4sBJets.push_back(p4sCorrJets.at(iJet));
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -1734,6 +1726,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
               }
             } // fail med btag
+            if (jet_pt[njet] > 30.0) {
+              // store leading/subleading central jet pt.
+              //  jets should be pt-ordered before entering this loop
+              if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
+              else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
+              if(!bJet) p4sForHems.push_back(p4sCorrJets.at(iJet));
+              p4sForDphi.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
+              p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsZllMT.push_back(p4sCorrJets.at(iJet));
+              p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
+              p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
+              nJet30++;
+              if (jet_pt[njet] > 40.) nJet40++;
+            } // pt40
           } // pt 20 eta 2.5
           // accept jets out to eta 4.7 for dphi
           else if ( (jet_pt[njet] > 30.0) && (fabs(jet_eta[njet]) < 4.7) ) {
@@ -1782,9 +1790,46 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             }
           }
 
-
           njet++;
         } // pt 20 eta 4.7
+      }
+
+      // --- MT2-Higgs ---
+      // Select >= 2 bjets and find higgs candidate
+      if (nBJet20 < 2) continue;
+      int nhiggs_cand = 0;
+      float higgsM_div = 26;
+      int hcand1 = -1;          // higgs candidate bJets index
+      int hcand2 = -1;
+      for (int ibj1=0; ibj1<(nBJet20-1); ibj1++){
+        for (int ibj2=ibj1+1; ibj2<nBJet20; ibj2++){
+          float invM = (p4sBJets.at(ibj1) + p4sBJets.at(ibj2)).M();
+          if(invM > 100 && invM < 150){
+            nhiggs_cand++;
+            float M_div = fabs(invM-125.1);
+            if( M_div < higgsM_div){
+              higgsM_div = M_div;
+              hcand1 = ibj1;
+              hcand2 = ibj2;
+            }
+          } 
+        }
+      }
+      if (nhiggs_cand > 0){
+        LorentzVector p4_higgs = p4sBJets.at(hcand1) + p4sBJets.at(hcand2);
+        p4sForHems.push_back(p4_higgs);
+        for(int ibj=0; ibj<nBJet20; ibj++){
+          if(ibj != hcand1 && ibj != hcand2 && p4sBJets.at(ibj).pt() > 30)
+            p4sForHems.push_back(p4sBJets.at(ibj));
+        }
+        ++nHiggsEvents;
+      }
+      else {
+        for(int ibj=0; ibj<nBJet20; ibj++){
+          if( p4sBJets.at(ibj).pt() > 30 )
+            p4sForHems.push_back(p4sBJets.at(ibj));
+        }
+        ++nNoHiggsEvents;
       }
 
       // compute event level btag weights
@@ -2100,6 +2145,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     bmark->Stop("benchmark");
     cout << endl;
     cout << nEventsTotal << " Events Processed" << endl;
+    cout << nHiggsEvents << " Higgs Events Found, while " << nNoHiggsEvents << " Events with no Higgs candidates.\n"
+         << "The portion of higgs cand events is: " << setprecision(3) << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%." << endl;
     cout << "------------------------------" << endl;
     cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
     cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;

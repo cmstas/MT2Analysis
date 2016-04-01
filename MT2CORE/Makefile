@@ -12,7 +12,7 @@ $(LIB): $(OBJECTS)
 %.o:  %.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-all: $(LIB) 
+all: $(LIB)
 clean:
 	rm -f *.o \
 	rm -f *.d \
