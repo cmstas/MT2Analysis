@@ -11,6 +11,7 @@
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
 #include "TH2.h"
+#include "TH1.h"
 
 // CORE
 #include "../CORE/CMS3.h"
@@ -301,6 +302,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
+    // for( unsigned int event = 0; event < nEventsTree && event < 1000; ++event) { // !! debugging !!
       //for( unsigned int event = 0; event < 1000; ++event) {
 
       // Get Event Content
@@ -889,6 +891,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<LorentzVector> p4sUniqueLeptons;
 
       vector<LorentzVector> p4sForHems;
+      vector<LorentzVector> p4sForHemsHcand;
       vector<LorentzVector> p4sForHemsGamma;
       vector<LorentzVector> p4sForHemsZll;
       vector<LorentzVector> p4sForHemsZllMT;
@@ -1644,8 +1647,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             //CSVv2IVFM
             bool bJet = false;
             if(jet_btagCSV[njet] >= 0.890) {
-              bJet = true;
               nBJet20++;
+              bJet = true;
               p4sBJets.push_back(p4sCorrJets.at(iJet));
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
@@ -1739,8 +1742,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               //  jets should be pt-ordered before entering this loop
               if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
               else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
-              if(!bJet) p4sForHems.push_back(p4sCorrJets.at(iJet));
+              p4sForHems.push_back(p4sCorrJets.at(iJet));
               p4sForDphi.push_back(p4sCorrJets.at(iJet));
+              if(!bJet) p4sForHemsHcand.push_back(p4sCorrJets.at(iJet));
               p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
               p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
               p4sForHemsZllMT.push_back(p4sCorrJets.at(iJet));
@@ -1806,50 +1810,47 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // Select >= 2 bjets and find higgs candidate
       if (nBJet20 < 2) {nLessThanTwoBJets++; continue;}
       if (nBJet20 > 2) nMoreThanTwoBJets++;
-      int nhiggs_cand = 0;
       float higgsM_div = 26;
       LorentzVector p4_higgs;
-      int hcand1 = -1;          // higgs candidate bJets index
-      int hcand2 = -1;
+      int ibj_hcand1 = -1;          // higgs candidate bJets index
+      int ibj_hcand2 = -1;
       for (int ibj1=0; ibj1<(nBJet20-1); ibj1++){
         for (int ibj2=ibj1+1; ibj2<nBJet20; ibj2++){
           LorentzVector p4combined = p4sBJets.at(ibj1) + p4sBJets.at(ibj2);
           float invM = p4combined.M();
           h_invM_bjets->Fill(invM);
           if(invM > 100 && invM < 150){
-            nhiggs_cand++;
+            nHiggs_cand++;
             float M_div = fabs(invM-125.1);
             if( M_div < higgsM_div){
               p4_higgs = p4combined;
               higgsM_div = M_div;
-              hcand1 = ibj1;
-              hcand2 = ibj2;
+              ibj_hcand1 = ibj1;
+              ibj_hcand2 = ibj2;
             }
           }
         }
       }
 
-      for(int ibj=0; ibj<nBJet20; ibj++){
-        if( p4sBJets.at(ibj).pt() > 30 )
-          p4sForHems.push_back(p4sBJets.at(ibj));
-      }
-
-      if (nhiggs_cand > 0){
-        p4sForHems.push_back(p4_higgs);
-        // for(int ibj=0; ibj<nBJet20; ibj++){
-        //   if(ibj != hcand1 && ibj != hcand2 && p4sBJets.at(ibj).pt() > 30)
-        //     p4sForHems.push_back(p4sBJets.at(ibj));
-        // }
-        // cout <<  p4sBJets.at(hcand1).pt() << "   " <<  p4sBJets.at(hcand2).pt() << "   " << p4_higgs.M() << endl;
-        if(p4sBJets.at(hcand1).pt() < 30 || p4sBJets.at(hcand2).pt() < 30) nHcandWithBJetsLess30++;
-        else if(! AreJetsInSameHems(p4sForHems, p4sBJets.at(hcand1), p4sBJets.at(hcand2))) ++nImproved;
+      if (nHiggs_cand > 0){
+        p4sForHemsHcand.push_back(p4_higgs);
+        for(int ibj=0; ibj<nBJet20; ibj++){
+          if(ibj != ibj_hcand1 && ibj != ibj_hcand2 && p4sBJets.at(ibj).pt() > 30)
+            p4sForHemsHcand.push_back(p4sBJets.at(ibj));
+        }
+        // cout <<  p4sBJets.at(ibj_hcand1).pt() << "   " <<  p4sBJets.at(ibj_hcand2).pt() << "   " << p4_higgs.M() << endl;
+        if(p4sBJets.at(ibj_hcand1).pt() < 30 || p4sBJets.at(ibj_hcand2).pt() < 30) nHcandWithBJetsLess30++;
+        else if(! AreJetsInSameHems(p4sForHems, p4sBJets.at(ibj_hcand1), p4sBJets.at(ibj_hcand2))){
+          bInDiffHemjet = true;
+          ++nImproved;
+        }
         ++nHiggsEvents;
       }
       else {
-        // for(int ibj=0; ibj<nBJet20; ibj++){
-        //   if( p4sBJets.at(ibj).pt() > 30 )
-        //     p4sForHems.push_back(p4sBJets.at(ibj));
-        // }
+        for(int ibj=0; ibj<nBJet20; ibj++){
+          if( p4sBJets.at(ibj).pt() > 30 )
+            p4sForHemsHcand.push_back(p4sBJets.at(ibj));
+        }
         ++nNoHiggsEvents;
       }
 
@@ -1869,6 +1870,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // sort vectors by pt for hemisphere calculation
       sort(p4sForHems.begin(), p4sForHems.end(), sortByPt);
       sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
+      sort(p4sForHemsHcand.begin(), p4sForHemsHcand.end(), sortByPt);
       sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), sortByPt);
       sort(p4sForDphiGamma.begin(), p4sForDphiGamma.end(), sortByPt);
       sort(p4sForHemsZll.begin(), p4sForHemsZll.end(), sortByPt);
@@ -1926,6 +1928,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       TVector2 mhtVector = TVector2(mht_pt*cos(mht_phi), mht_pt*sin(mht_phi));
       TVector2 metVector = TVector2(met_pt*cos(met_phi), met_pt*sin(met_phi));
       diffMetMht = (mhtVector - metVector).Mod();
+
+      // -- mt2higgs --
+      vector<LorentzVector> hemJetsHcand;
+      // if(p4sForHems.size() > 1 && p4sForHemsHcand.size() <2 )
+      //   cout << "nHiggs_cand: " << nHiggs_cand << "  p4sForHemsHcand.size(): " << p4sForHemsHcand.size() << "  p4sForHems.size(): " << p4sForHems.size()
+      //        << "  p4sForHemsZll.size(): " << p4sForHemsZll.size() << "  ibj_hcand1: " << ibj_hcand1 << "  ibj_hcand2: " << ibj_hcand2 << endl;
+      if(p4sForHemsHcand.size() > 1){
+        //Hemispheres used in MT2 calculation
+        hemJetsHcand = getHemJets(p4sForHemsHcand);
+        hcand_mt2 = HemMT2(met_pt, met_phi, hemJetsHcand.at(0), hemJetsHcand.at(1));
+      }
 
       // HT, MT2 and MHT for photon+jets regions
       //  note that leptons are NOT included in this MT2 calculation
@@ -2165,11 +2178,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
   if (!isDataFromFileName && applyJECfromFile && applyJECunc != 0) delete jetcorr_uncertainty;
 
-  // TFile* f1 = new TFile("h_test.root", "RECREATE");
-  // h_invM_bjets->Write();
-  // f1->Close();
 
   bmark->Stop("benchmark");
+  TFile* fout = new TFile("h_test.root", "RECREATE");
+  h_invM_bjets->Write();
+  fout->Close();
+
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
   cout << "Events has less than 2 bjets: " << nLessThanTwoBJets << ", events with more than 2 bjets: " << nMoreThanTwoBJets << endl;
@@ -2177,6 +2191,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
        << "The portion of higgs cand events is: " << setprecision(3) << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%.\n"
        << "Amoung which, " << nImproved << " events that are \"improved\", which is " << ((float) nImproved)/nHiggsEvents*100 
        << "% of the Higgs events.\nat the same time, " << nHcandWithBJetsLess30 << " \"higgs\" events has bjet pt less than 30 GeV" << endl;
+  cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
   cout << "------------------------------" << endl;
   cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
   cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
@@ -2229,6 +2244,10 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
   BabyTree_->Branch("mt2_gen", &mt2_gen );
+  BabyTree_->Branch("hcand_invM", &hcand_invM );
+  BabyTree_->Branch("hcand_mt2", &hcand_mt2 );
+  BabyTree_->Branch("bInDiffHemjet", &bInDiffHemjet );
+  BabyTree_->Branch("nHiggs_cand", &nHiggs_cand );
   BabyTree_->Branch("jet1_pt", &jet1_pt );
   BabyTree_->Branch("jet2_pt", &jet2_pt );
   BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
@@ -2551,6 +2570,10 @@ void babyMaker::InitBabyNtuple () {
   ht = -999.0;
   mt2 = -999.0;
   mt2_gen = -999.0;
+  hcand_invM = -999.0;
+  hcand_mt2 = -999.0;
+  bInDiffHemjet = 0;
+  nHiggs_cand = 0;
   jet1_pt = 0.0;
   jet2_pt = 0.0;
   gamma_jet1_pt = 0.0;

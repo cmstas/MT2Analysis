@@ -213,19 +213,19 @@ class babyMaker {
 
 //----- ISOLATED TRACK
   static const int max_nisoTrack = 50;
-  Int_t             nisoTrack;
-  Float_t           isoTrack_pt[max_nisoTrack];
-  Float_t           isoTrack_eta[max_nisoTrack];
-  Float_t           isoTrack_phi[max_nisoTrack];
-  Float_t           isoTrack_mass[max_nisoTrack];
-  Float_t           isoTrack_absIso[max_nisoTrack];
-  Float_t           isoTrack_relIsoAn04[max_nisoTrack];
-  Float_t           isoTrack_dz[max_nisoTrack];
-  Int_t             isoTrack_pdgId[max_nisoTrack];
-  Int_t             isoTrack_mcMatchId[max_nisoTrack];
+  Int_t           nisoTrack;
+  Float_t         isoTrack_pt[max_nisoTrack];
+  Float_t         isoTrack_eta[max_nisoTrack];
+  Float_t         isoTrack_phi[max_nisoTrack];
+  Float_t         isoTrack_mass[max_nisoTrack];
+  Float_t         isoTrack_absIso[max_nisoTrack];
+  Float_t         isoTrack_relIsoAn04[max_nisoTrack];
+  Float_t         isoTrack_dz[max_nisoTrack];
+  Int_t           isoTrack_pdgId[max_nisoTrack];
+  Int_t           isoTrack_mcMatchId[max_nisoTrack];
 
-  Int_t             nPFLep5LowMT;
-  Int_t             nPFHad10LowMT;
+  Int_t           nPFLep5LowMT;
+  Int_t           nPFHad10LowMT;
 
 //----- TAUS
   static const int max_ntau = 50;
@@ -406,6 +406,12 @@ class babyMaker {
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
+
+//----- MT2-Higgs
+  Int_t           nHiggs_cand;
+  Float_t         hcand_invM;
+  Float_t         hcand_mt2;
+  Bool_t          bInDiffHemjet;
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;
