@@ -179,7 +179,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   if (doRatio) {
     bool foundData = false;
     for( unsigned int i = 0 ; i < n ; ++i ) {
-      if( TString(names.at(i)).Contains("default")   || TString(names.at(i)).Contains("Data")) {
+      if( TString(names.at(i)).Contains("default")   || TString(names.at(i)).Contains("Data") || TString(names.at(i)).Contains("Truth")) {
         foundData = true;
         break;
       }
@@ -238,7 +238,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   TH1D* data_hist(0);
   string data_name;
   for( unsigned int i = 0 ; i < n ; ++i ) {
-    if( !TString(names.at(i)).Contains("default")   && !TString(names.at(i)).Contains("Data")) continue;
+    if( !TString(names.at(i)).Contains("default")   && !TString(names.at(i)).Contains("Data")   && !TString(names.at(i)).Contains("Truth")) continue;
     data_hist = (TH1D*) histos.at(i)->Clone(names.at(i));
     data_name = names.at(i);
     data_hist->SetLineColor(kBlack);
@@ -259,7 +259,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   
   // signal hists - all samples must have "sig" in the name
   for( unsigned int i = 0 ; i < n ; ++i ){
-    if( TString(names.at(i)).Contains("default")  || TString(names.at(i)).Contains("Data")) continue;
+    if( TString(names.at(i)).Contains("default")  || TString(names.at(i)).Contains("Data") || TString(names.at(i)).Contains("Truth")) continue;
     TH1D* h = (TH1D*) histos.at(i)->Clone(histname.c_str());
     h->SetLineColor(2+i);
     h->SetLineWidth(2);
@@ -395,7 +395,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
 //    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
     h_axis_ratio->GetYaxis()->SetTitle("Var/Central");
-    if (TString(histname).Contains("Closure")) {
+    if (TString(histname).Contains("Closure") || TString(histname).Contains("cr2Lpreds") ) {
       h_axis_ratio->GetYaxis()->SetTitle("/ MC (Truth)");
       h_axis_ratio->GetYaxis()->SetRangeUser(0.1,9.99);
       ratiopad->SetLogy();
@@ -433,7 +433,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
         h_ratio1->SetStats(0);
         h_ratio1->SetMarkerStyle(20);
         h_ratio1->SetMarkerSize(1.2);
-        h_ratio1->Draw("hist same");
+        h_ratio1->Draw("E1,same");
       }
     }
     
@@ -466,7 +466,7 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
  
   std::vector<std::string> labels;
 
-  binMultiplier = 3;
+  int binMultiplier = 3;
   
   for(unsigned int i = 0; i < filesSR.size(); i++) {
     TH1F* h_sr_yields = new TH1F("h_sr_yields", "h_sr_yields", regions.size(), 0, regions.size());
@@ -607,7 +607,7 @@ std::vector<TH1F*> makeYieldsHistos(std::vector<TFile*> filesSR, std::vector<TSt
   
   std::vector<std::string> labels;
   
-  binMultiplier = 3;
+  int binMultiplier = 3;
   
   for(unsigned int i = 0; i < filesSR.size(); i++) {
     TH1F* h_sr_yields = new TH1F("h_sr_yields", "h_sr_yields", regions.size(), 0, regions.size());
@@ -840,28 +840,53 @@ void compareSoftLeptonsFake(){
   std::vector<TString> histoNames;
   std::vector<TFile*> filesSR;
   
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
+  //string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
+  string input_dir = "../../SoftLepLooper/output/softLep/";
   
-  TFile* sr1 = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
-  filesSR.push_back(sr1);  legendNames.push_back("MC (treat as Data)"); histoNames.push_back("h_predMCClosure");
-  filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC");
+  // TFile* sr1 = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
+  // filesSR.push_back(sr1);  legendNames.push_back("MC (treat as Data)"); histoNames.push_back("h_predMCClosure");
+  // filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC");
+
+  TFile* bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
+  TFile* pred2L = new TFile(Form("%s/pred_CR2L.root",input_dir.c_str()));
+  TFile* pred2LAlt = new TFile(Form("%s/pred_CR2LALT.root",input_dir.c_str()));
+  TFile* pred1L = new TFile(Form("%s/pred_CR1L.root",input_dir.c_str()));
   setRegions(regions);
 
+  filesSR.clear(); legendNames.clear(); histoNames.clear();
+  filesSR.push_back(bkg);  legendNames.push_back("MC Truth"); histoNames.push_back("h_mtbinsDilepton");
+  filesSR.push_back(pred2L);  legendNames.push_back("Dilepton Prediction"); histoNames.push_back("h_mtbins");
+  outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
+  std::vector<TH1F*>  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  makePlot( outputBinnedSR , legendNames ,  "cr2Lpred" ,  "" ,  "Entries" ,  true ,  true  );
+
+  filesSR.clear(); legendNames.clear(); histoNames.clear();
+  filesSR.push_back(bkg);  legendNames.push_back("MC Truth"); histoNames.push_back("h_mtbinsDilepton");
+  filesSR.push_back(pred2L);  legendNames.push_back("Dilepton Prediction"); histoNames.push_back("h_mtbins");
+  filesSR.push_back(pred2LAlt);  legendNames.push_back("Alt. Dilepton Prediction"); histoNames.push_back("h_mtbins");
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames ,  "FakeClosureMC" ,  "" ,  "Entries" ,  true ,  true  );
-  makePlot( outputHighMTSR , legendNames ,  "FakeClosureMCHighMT" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputBinnedSR , legendNames ,  "cr2LpredAlt" ,  "" ,  "Entries" ,  true ,  true  );
 
-
-  filesSR.clear();  legendNames.clear(); histoNames.clear();
-  filesSR.push_back(sr1);  legendNames.push_back("Data (FR method)"); histoNames.push_back("h_pred");
-  filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC");
+  filesSR.clear(); legendNames.clear(); histoNames.clear();
+  filesSR.push_back(bkg);  legendNames.push_back("MC Truth"); histoNames.push_back("h_mtbinsOnelep");
+  filesSR.push_back(pred1L);  legendNames.push_back("Single Lepton Predicton"); histoNames.push_back("h_mtbins");
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
-  histos2       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames ,  "FakeClosureData" ,  "" ,  "Entries" ,  true ,  true  );
-  makePlot( outputHighMTSR , legendNames ,  "FakeClosureDataHighMT" ,  "" ,  "Entries" ,  true ,  true  );
+  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  makePlot( outputBinnedSR , legendNames ,  "cr1Lpred" ,  "" ,  "Entries" ,  true ,  true  );
 
+  
   return;
+  
+  // filesSR.clear();  legendNames.clear(); histoNames.clear();
+  // filesSR.push_back(sr1);  legendNames.push_back("Data (FR method)"); histoNames.push_back("h_pred");
+  // filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC");
+  // outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
+  // histos2       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  // makePlot( outputBinnedSR , legendNames ,  "FakeClosureData" ,  "" ,  "Entries" ,  true ,  true  );
+  // makePlot( outputHighMTSR , legendNames ,  "FakeClosureDataHighMT" ,  "" ,  "Entries" ,  true ,  true  );
+
+  // return;
 }
 
 void compareSoftLeptons(){
