@@ -141,6 +141,8 @@ int sampleID (const string& name) {
   }
   
   else if (name.find("T5qqqqWW") != string::npos) return 1050;
+  else if (name.find("TChiChi") != string::npos) return 1250;
+  else if (name.find("TChiNeu") != string::npos) return 1251;
 
   cout << "sampleID: WARNING: sample not recognized!  " << name << endl;
   return -1;

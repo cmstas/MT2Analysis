@@ -258,8 +258,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     else if (baby_name.find("T2-4bd") != std::string::npos) sparticle = "stop";
     else if (baby_name.find("T2tb") != std::string::npos) sparticle = "stop";
     else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
+    //else if (baby_name.find("TChi") != std::string::npos) sparticle = "chargino";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
-    
+
     TFile* f_xsec = new TFile("data/xsec_susy_13tev.root");
     TH1F* h_sig_xsec_temp = (TH1F*) f_xsec->Get(Form("h_xsec_%s",sparticle.Data()));
     BabyFile_->cd();
@@ -359,7 +360,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
             || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
-
+      
       run  = cms3.evt_run();
       lumi = cms3.evt_lumiBlock();
       evt  = cms3.evt_event();
@@ -494,16 +495,25 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
         }
 	// T2 models
-        else if (evt_id >= 1100 && evt_id < 1300) {
+        else if (evt_id >= 1100 && evt_id < 1250) {
           for (unsigned int i=0; i<sparm_values().size(); ++i) {
             if (sparm_names().at(i).Contains("mStop")) GenSusyMScan1 = sparm_values().at(i);
             if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
           }
         }
+	else if (evt_id == 1250) {
+          for (unsigned int i=0; i<sparm_values().size(); ++i) {
+            GenSusyMScan1 = 100;
+            GenSusyMScan2 = 90;
+          }
+        }
 
 	// use sparm values to look up xsec
-	if (evt_id >= 1000 && evt_id < 1300) evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
-
+	if (evt_id >= 1000 && evt_id < 1300) {
+	  if (baby_name.find("TChi") != std::string::npos) evt_xsec = 22670.1;
+	  else evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
+	}
+	
         if (verbose) cout << "before gen particles" << endl;
 
         //GEN PARTICLES
