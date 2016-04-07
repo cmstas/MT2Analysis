@@ -132,8 +132,15 @@ string getLegendName(const string& sample) {
   if (sample.find("wz dilep") != string::npos) return "WZ (2L)";
   if (sample.find("zz dilep") != string::npos) return "ZZ (2L)";
   if (sample.find("diboson dilep") != string::npos) return "Diboson (2L)";
-  if (sample.find("top dilep") != string::npos) return "Top (2L)";
-
+  if (sample.find("top dilep") != string::npos) return "Top (2L)";  
+  
+  if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return "T5qqqql#nul#nu 1025, 775";
+  if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return "T5qqqql#nul#nu 1100, 500";
+  if (sample.find("T5qqqqWW_1025_775_custom") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1100_500_custom") != string::npos) return "T5qqqqWW 1100, 500";
+  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
+  if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
+  
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "ttbar";
@@ -176,11 +183,6 @@ string getLegendName(const string& sample) {
   if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
   if (sample.find("T2-4bd_275_255") != string::npos) return "T2-4bd 275, 255";
   if (sample.find("T2-4bd_275_265") != string::npos) return "T2-4bd 275, 265";
-  
-  if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return "T5qqqql#nul#nu 1025, 775";
-  if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return "T5qqqql#nul#nu 1100, 500";
-  if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
-  if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;

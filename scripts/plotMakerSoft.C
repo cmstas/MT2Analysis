@@ -280,6 +280,15 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   h_axes->GetYaxis()->SetLabelSize(0.04);
   h_axes->GetYaxis()->SetTitleOffset(0.95);
   h_axes->GetYaxis()->SetTitleSize(0.05);
+  //custom axis labels for b-categories plot
+  if (histname.find("categoryB") !=  std::string::npos) {
+    h_axes->GetXaxis()->CenterLabels();
+    h_axes->GetXaxis()->SetBinLabel(125, "Zero B");
+    h_axes->GetXaxis()->SetBinLabel(375, "1-2 Soft B");
+    h_axes->GetXaxis()->SetBinLabel(625, "1-2 Hard B");
+    h_axes->GetXaxis()->SetBinLabel(875, "3+ B");
+    h_axes->GetXaxis()->LabelsOption("h");
+  }
   h_axes->Draw();
 
   t->Draw("hist same");
@@ -321,6 +330,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
   else if (histname.find("Validate") != std::string::npos) {
     region_label = "E_{T}^{miss} > 200 GeV";
+  }
+  else if (histname.find("Alt") != std::string::npos && histdir.find("cr2L") != std::string::npos) {
+    region_label = "E_{T}^{miss} > 150 GeV";
   }
   else if (histdir.find("cr1L") != std::string::npos) {
     region_label = "E_{T}^{miss} < 60 GeV";
@@ -464,7 +476,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
       // if (names.at(i)=="gjets" || names.at(i)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
       // if (names.at(i)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
       // if (names.at(i)=="wjets") fullhistname.ReplaceAll("sr","crrl");
-      if (dirs.at(idir).find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllmtbinsMET200");
+      if (dirs.at(idir).find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllAltmtbinsMET200");
       if (names.at(i)=="onelep") fullhistname += "Onelep";
       if (names.at(i).find("dilep") != std::string::npos ) fullhistname += "Dilepton";
       if (names.at(i).find("fake") != std::string::npos ) fullhistname += "Fake";
@@ -527,7 +539,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
       cout << getTableName(names.at(i));
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
 	TString fullhistname = Form("%s/h_mtbins",dirs.at(idir).c_str());
-	if (dirs.at(idir).find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllmtbinsMET200");
+	if (dirs.at(idir).find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllAltmtbinsMET200");
 	TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
 	double yield = 0.;
 	if (h) {
@@ -736,7 +748,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
 
 
   TString binshistname = Form("%s/h_mtbins",dir.c_str());
-  if (dir.find("crZll") != std::string::npos ) binshistname.ReplaceAll("mtbins","zllmtbinsMET200");
+  if (dir.find("crZll") != std::string::npos ) binshistname.ReplaceAll("mtbins","zllAltmtbinsMET200");
   TH1D* h_mt2bins(0);
   for(unsigned int i=0; i<samples.size(); i++){//need to find a sample that has this hist filled
     h_mt2bins = (TH1D*) samples.at(i)->Get(binshistname);
@@ -765,7 +777,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   if (dir.find("crZll") != std::string::npos) {
     std::cout << "\\multicolumn{" << n_mt2bins+1 << "}{c}{";
     std::cout << " $H_{T} >$ 200 GeV, ";
-    std::cout << "modified $E_{T}^{miss} >$ 100 GeV, ";
+    std::cout << "modified $E_{T}^{miss} >$ 200 GeV, ";
     std::cout << "$\\geq$ 2j, 0b";
     std::cout << "} \\\\" << std::endl;
   }
@@ -798,7 +810,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
       TString fullhistname = Form("%s/h_mtbins",dir.c_str());
       // if (names.at(isamp)=="gjets" || names.at(isamp)=="gjetsqcd") fullhistname.ReplaceAll("sr","crgj");
       // if (names.at(isamp)=="dyjets") fullhistname.ReplaceAll("sr","crdy");
-      if (dir.find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllAltmtbinsMET100");
+      if (dir.find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllAltmtbinsMET200");
       if (names.at(isamp)=="onelep") fullhistname += "Onelep";
       if (names.at(isamp).find("dilep") != std::string::npos ) fullhistname += "Dilepton";
       if (names.at(isamp).find("fake") != std::string::npos ) fullhistname += "Fake";
@@ -857,7 +869,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
     cout << getTableName(names.at(jsamp));
     for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
       TString fullhistname = Form("%s/h_mtbins",dir.c_str());
-      if (dir.find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllAltmtbinsMET100");
+      if (dir.find("crZll") != std::string::npos ) fullhistname.ReplaceAll("mtbins","zllAltmtbinsMET200");
       TH1D* h = (TH1D*) samples.at(jsamp)->Get(fullhistname);
       double yield = 0.;
       double err = 0.;
@@ -1181,11 +1193,11 @@ void plotMakerSoftLepSR(){
   lumi_13TeV = "2.26 fb^{-1}";
 
   string suffix = "";
-  bool doFake = false;
+  bool doFake = true;
   bool doOnelep = false;
   bool doDilep = false;
   bool doSamples = false;
-  bool doTotal = true;
+  bool doTotal = false;
   string input_dir = "../SoftLepLooper/output/softLep";
   
   // ----------------------------------------
@@ -1193,7 +1205,6 @@ void plotMakerSoftLepSR(){
   // ----------------------------------------
 
   // get input files
-
  
   TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
   // TFile* f_tt1l = new TFile(Form("%s/ttsl.root",input_dir.c_str()));
@@ -1210,10 +1221,8 @@ void plotMakerSoftLepSR(){
   TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str())); 
   TFile* f_bkg2 = new TFile(Form("%s/allBkg_noDiboson.root",input_dir.c_str())); 
   TFile* f_T2_4bd_275_235 = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str())); 
-  TFile* f_T5qqqqWW_1025_775_old = new TFile(Form("%s/T5qqqqWW_1025_775_old.root",input_dir.c_str())); 
-  TFile* f_T5qqqqWW_1100_500_old = new TFile(Form("%s/T5qqqqWW_1100_500_old.root",input_dir.c_str())); 
-  TFile* f_T5qqqqWW_1025_775 = new TFile(Form("%s/T5qqqqWW_1025_775.root",input_dir.c_str())); 
-  TFile* f_T5qqqqWW_1100_500 = new TFile(Form("%s/T5qqqqWW_1100_500.root",input_dir.c_str())); 
+  TFile* f_T5qqqqWW_1025_775_custom = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str())); 
+  TFile* f_T5qqqqWW_1100_500_custom = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str())); 
   //TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
@@ -1228,10 +1237,8 @@ void plotMakerSoftLepSR(){
   samples2.push_back(f_top);                    names2.push_back("top");
   samples2.push_back(f_wjets);                  names2.push_back("wjets");
   samples2.push_back(f_T2_4bd_275_235);         names2.push_back("T2-4bd_275_235 sig");
-  samples2.push_back(f_T5qqqqWW_1025_775);      names2.push_back("T5qqqqWW_1025_775 sig");
-  samples2.push_back(f_T5qqqqWW_1100_500);      names2.push_back("T5qqqqWW_1100_500 sig");
-  samples2.push_back(f_T5qqqqWW_1025_775_old);  names2.push_back("T5qqqqWW_1025_775_old sig");
-  samples2.push_back(f_T5qqqqWW_1100_500_old);  names2.push_back("T5qqqqWW_1100_500_old sig");
+  samples2.push_back(f_T5qqqqWW_1025_775_custom);  names2.push_back("T5qqqqWW_1025_775_custom sig");
+  samples2.push_back(f_T5qqqqWW_1100_500_custom);  names2.push_back("T5qqqqWW_1100_500_custom sig");
 
   if (doFake){
     // samples.push_back(f_tt2l); names.push_back("tt+2l fakeLep");
@@ -1292,7 +1299,7 @@ void plotMakerSoftLepSR(){
     samples.push_back(f_top); names.push_back("top");
     samples.push_back(f_wjets); names.push_back("wjets");
     samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
-    samples.push_back(f_T5qqqqWW_1025_775); names.push_back("T5qqqqWW_1025_775 sig");
+    samples.push_back(f_T5qqqqWW_1025_775_custom); names.push_back("T5qqqqWW_1025_775_custom sig");
   }
 
   if (doTotal){
@@ -1314,11 +1321,9 @@ void plotMakerSoftLepSR(){
     samples.push_back(f_wjets); names.push_back("wjets onelep"); //empty
     samples.push_back(f_wjets); names.push_back("wjets dilep");
     
-    //samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
-    samples.push_back(f_T5qqqqWW_1025_775_old); names.push_back("T5qqqqWW_1025_775_old sig");
-    samples.push_back(f_T5qqqqWW_1100_500_old); names.push_back("T5qqqqWW_1100_500_old sig");
-    samples.push_back(f_T5qqqqWW_1025_775); names.push_back("T5qqqqWW_1025_775 sig");
-    samples.push_back(f_T5qqqqWW_1100_500); names.push_back("T5qqqqWW_1100_500 sig");
+    samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
+    samples.push_back(f_T5qqqqWW_1025_775_custom); names.push_back("T5qqqqWW_1025_775_custom sig");
+    samples.push_back(f_T5qqqqWW_1100_500_custom); names.push_back("T5qqqqWW_1100_500_custom sig");
   }
     
   // ----------------------------------------
@@ -1347,7 +1352,7 @@ void plotMakerSoftLepSR(){
       //if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      if(dir_name != "srLepbase") continue; //to do only this dir
+      if(dir_name != "srLepbase" && dir_name != "srLepbaseAll" ) continue; //to do only this dir
       //if(dir_name.find("srLep") == std::string::npos) continue; //to do only this dir
       //if(dir_name != "srLepbase" && dir_name != "srLepbaseJ" && dir_name != "srLepbaseJ1") continue; //to do only this dir
       //if(dir_name != "srLep1M" && dir_name != "srLep2M" && dir_name != "srLepMET" && dir_name != "srLepHT") continue; //to do only this dir
@@ -1372,7 +1377,7 @@ void plotMakerSoftLepSR(){
 	  makePlot( samples , names , dir_name , "h_mt"+suffix , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_mtbins"+suffix , "M_{T} [GeV]" , "Events / bin" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Wpt"+suffix , "W p_{T} [GeV]" , "Events / 20 GeV" , 0 , 800 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples2 , names2 , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
+	  makePlot( samples , names , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
 	  //makePlot( samples , names , dir_name , "h_missingdilepmll"+suffix , "m_{ll} [GeV]" , "Events" , 0 , 150 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
       }
       
@@ -1493,7 +1498,7 @@ void plotMakerSoftLepCR(){
   // ----------------------------------------
 
   float scalesig = -1.;
-  //float scalesig = 50.;
+  //float scalesig = 10.;
   bool printplots = true;
   bool doRatio = true;
   bool scaleBGtoData = true;
@@ -1533,7 +1538,7 @@ void plotMakerSoftLepCR(){
       }
 
       
-      else if (!doValidate && (dir_name == "cr1Lelbase" || dir_name == "cr1Lmubase")) {
+      else if (!doValidate && (dir_name == "cr1LbaseAll")) {
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
 	  makePlot( samples , names , dir_name , "h_leppt"+suffix , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 200 , 1000 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1652,7 +1657,7 @@ void plotMakerDoubleLepCR(){
     // samples.push_back(f_zz); names.push_back("zz dilep");
     samples.push_back(f_diboson); names.push_back("diboson dilep");
     samples.push_back(f_top); names.push_back("top dilep");
-    samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
+    //samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
     samples.push_back(f_data); names.push_back("data");
   }
   
@@ -1676,9 +1681,9 @@ void plotMakerDoubleLepCR(){
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       //if(dir_name != "srLepbase") continue; //to do only this dir
-      if(dir_name != "cr2Lbase" && dir_name != "srLepbase") continue; //to do only this dir
+      //if(dir_name != "cr2Lbase" && dir_name != "srLepbase") continue; //to do only this dir
       
-      if(dir_name == "cr2Lbase"){
+      if(dir_name == "cr2LbaseAll"){
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
 	  makePlot( samples , names , dir_name , "h_lowleppt"+suffix , "Soft Lepton p_{T} [GeV]" , "Events / 1 GeV" , 0 , 30 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1754,7 +1759,6 @@ void plotMakerZllCR(){
   //  samples definition
   // ----------------------------------------
 
-  
   // get input files
 
   TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop
@@ -1862,7 +1866,7 @@ void plotMakerZllCR(){
 	    makePlot( samples , names , dir_name , "h_zllmet"+suffix[isuf]  , "modified E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_zllmt"+suffix[isuf] , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_zllmtbins"+suffix[isuf] , "M_{T} [GeV]" , "Events" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	    makePlot( samples , names , dir_name , "h_zllAltmtbins"+suffix[isuf] , "M_{T} [GeV]" , "Events" , 0 , 1000 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_zllAltmtbins"+suffix[isuf] , "M_{T} [GeV]" , "Events" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_Events_w"+suffix[isuf] , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
 	    // makePlot( samples , names , dir_name , "h_dilepmll"+suffix[isuf] , "m_{ll} [GeV]" , "Events / 5 GeV" , 0 , 150 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	    // makePlot( samples , names , dir_name , "h_deltaEtaLep"+suffix[isuf] , "#Delta#eta(lep1-lep2)" , "Events / 0.5" , -4 , 4 , 5 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1954,8 +1958,13 @@ void plotMakerGJetCR(){
 	    makePlot( samples , names , dir_name , "h_deltaPhiGammaMet"+suffix[isuf] , "#Delta#phi(#gamma,#gamma+E_{T}^{miss})" , "Events / 0.02" , -1 , 1 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );	  
 	    makePlot( samples , names , dir_name , "h_met"+suffix[isuf]  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_gammaMet"+suffix[isuf]  , "#gamma+E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	    makePlot( samples , names , dir_name , "h_smearMet"+suffix[isuf]  , "#smeared E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_smearMet"+suffix[isuf]  , "smeared E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaSmearMet"+suffix[isuf]  , "#gamma + smeared E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_gammaMetOverGamma"+suffix[isuf]  , "(#gamma+E_{T}^{miss}) / #gamma p_{T}" , "Events / 0.04" , 0 , 2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaMetParOverGamma"+suffix[isuf]  , "(#gamma+E_{T}^{miss}) / #gamma p_{T} (Parallel)" , "Events / 0.04" , 0 , 2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaMetPerpOverGamma"+suffix[isuf]  , "(#gamma+E_{T}^{miss}) / #gamma p_{T} (Perpendicular)" , "Events / 0.04" , 0 , 2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaMetParOverGammaPar"+suffix[isuf]  , "(#gamma+E_{T}^{miss}) / #gamma p_{T} (Parallel)" , "Events / 0.04" , 0 , 2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaMetPerpOverGammaPerp"+suffix[isuf]  , "(#gamma+E_{T}^{miss}) / #gamma p_{T} (Perpendicular)" , "Events / 0.04" , 0 , 2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_nJet30"+suffix[isuf] , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_nBJet20"+suffix[isuf] , "N(b jets)" , "Events" , 0 , 6 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_Events_w"+suffix[isuf] , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
