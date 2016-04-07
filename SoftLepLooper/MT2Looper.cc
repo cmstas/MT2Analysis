@@ -2249,9 +2249,13 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   else if (hardleppt_>5 && hardleppt_<10) type = 0;
   plot1D("h_type"+s,      type,   evtweight_, h_1d, ";type", 3, 0, 3);
 
+  //zll mt bins
+  float zllmtbins[4] = {20., 100., 130., 300.};
+  
   //zllCR specific plots
   plot1D("h_zllmt"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_zllmtbins"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_zllAltmtbins"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 3, zllmtbins);
   plot1D("h_zllmet"+s,       zllmet_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
   
   plot1D("h_removedZlllep"+s,       removedzllLep_,   evtweight_, h_1d, "removedLep", 3, 0, 3);
