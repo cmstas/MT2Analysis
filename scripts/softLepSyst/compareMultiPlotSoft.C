@@ -23,18 +23,28 @@ TString outname = "prova.root";
 
 /////////////////////////
 
-
-void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TString> nplots , TString saveas, const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = false, float scalesig = -1., bool doRatio = false ) {
+void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TString> nplots , TString saveas, const string& xtitle , const string& ytitle , float xmin , float xmax , int rebin = 1 , bool logplot = false, float norm = -1., bool doRatio = false ) {
   
   cout << "-- plotting hist: " << nplots[0] << " etc "<<endl;
   
+  bool mconly = true;
+  for( unsigned int i = 0 ; i < labels.size() ; ++i ){
+    if (labels[i].Contains("data") || labels[i].Contains("Data")) mconly = false;
+  }
   cmsText = "CMS Preliminary";
+  //extraText = "arXiv:1603.04053"; writeExtraText=true;
   lumi_13TeV = "2.3 fb^{-1}";
+  if (mconly) {
+    cmsText = "CMS Preliminary";
+    //extraText = "arXiv:1603.04053"; writeExtraText=true;
+    lumi_13TeV = "2.3 fb^{-1}";
+  }
+  
   
   gStyle->SetOptStat("");
   gStyle->SetCanvasColor(0);
   gStyle->SetPadGridX(0);
-  gStyle->SetPadGridY(0);
+  //gStyle->SetPadGridY(0);
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
   gStyle->SetFrameBorderMode(0);
@@ -61,6 +71,12 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     gStyle->SetPadBottomMargin(0.12);
     gStyle->SetPadLeftMargin(0.15);
     gStyle->SetPadRightMargin(0.05);
+  }
+  else {
+    gStyle->SetPadTopMargin();
+    gStyle->SetPadBottomMargin();
+    gStyle->SetPadLeftMargin();
+    gStyle->SetPadRightMargin();
   }
   
   TString canvas_name = saveas;
@@ -93,11 +109,20 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   }
   
   //TLegend* leg = new TLegend(0.55,0.6,0.85,0.92);
-  TLegend* leg = new TLegend(0.5,0.75,0.85,0.90);
+  TLegend* leg = new TLegend(0.55,0.70,0.85,0.90);
+  if (saveas.Contains("urity")) leg = new TLegend(0.55,0.25,0.85,0.40);
+  
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
   if (doRatio) leg->SetTextSize(0.05);
+  if (saveas.Contains("purity")) {
+    leg->SetX1(0.4);
+    leg->SetY1(0.4);
+    leg->SetY2(0.55);
+    leg->SetTextSize(0.042);
+    
+  }
   
   TH1D* data_hist(0);
   //  string data_name;
@@ -165,7 +190,14 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   //  }
   //
   // signal hists - all samples must have "sig" in the name
+  float intFirstSample = 0;
+  int icolor = 0;
   for( unsigned int i = 0 ; i < files.size() ; ++i ){
+    
+    if (files[i]=="") {
+      leg->SetHeader(labels[i]);
+      continue;
+    }
     
     TFile f1( files[i], "READ");
     if(!f1.IsOpen()){
@@ -184,32 +216,61 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     TH1D* h = (TH1D*) h_temp->Clone("h1");
     h->SetDirectory(0);
     //    h->Sumw2();
-    h->SetLineColor(1+i);
-    h->SetMarkerColor(1+i);
-    if (1+i==3) {
+    h->SetLineColor(1+icolor);
+    h->SetMarkerColor(1+icolor);
+    if (1+icolor==3) {
       h->SetLineColor(kGreen+1);
       h->SetMarkerColor(kGreen+1);
     }
-    h->SetMarkerStyle(21+i);
+    h->SetMarkerStyle(21+icolor);
     h->SetMarkerSize(1);
     h->SetLineWidth(2);
+    h->GetXaxis()->SetTitle(xtitle.c_str());
+    
+    
     if (rebin > 1) h->Rebin(rebin);
-    if (scalesig > 0.) h->Scale(scalesig);
+    if (norm) {
+      h->Scale(1/h->Integral(0, -1));
+    }
     sig_hists.push_back(h);
     sig_names.push_back(labels[i]);
+    icolor++;
+  }
+  
+  // Error bars on Zinv MC shape
+  bool drawBand = false;
+  if (sig_names.at(0).Contains("Zinv MC") || sig_names.at(0).Contains("Z #rightarrow #nu#bar{#nu}")) drawBand = true;
+  if (drawBand) {
+    int lastNonZeroBin = 1;
+    for (int ibin=1; ibin <= sig_hists.at(0)->GetNbinsX(); ++ibin)
+      if ( sig_hists.at(0)->GetBinContent(ibin) > 0) lastNonZeroBin = ibin;
+    float firstBinUnc = 0;
+    for (int ibin=1; ibin <= sig_hists.at(0)->GetNbinsX(); ++ibin) {
+      float cont = sig_hists.at(0)->GetBinContent(ibin);
+      float percenterr = 0.4 / (lastNonZeroBin - 1) * (ibin -1);
+      if (ibin>1) {
+        sig_hists.at(0)->SetBinError(ibin, cont*percenterr);
+        firstBinUnc += cont*percenterr;
+      }
+    }
+    if (firstBinUnc > sig_hists.at(0)->GetBinContent(1)) firstBinUnc = sig_hists.at(0)->GetBinContent(1); // max to 100%
+    sig_hists.at(0)->SetBinError( 1,  firstBinUnc);
   }
   
   float ymax = 0;
+  float ymin = 0.11;
   //if(h_bgtot) ymax = h_bgtot->GetMaximum();
   // also check signals for max val
   for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
     if (sig_hists.at(isig)->GetMaximum() > ymax) ymax = sig_hists.at(isig)->GetMaximum();
+    if (sig_hists.at(isig)->GetMinimum() < ymin) ymin = sig_hists.at(isig)->GetMinimum();
   }
-//  if( logplot ) ymax*=30;
+  //  if( logplot ) ymax*=30;
   if( logplot ) ymax*=2;
   else          ymax*=1.5;
-  float ymin = 0.;
-  
+  if (norm) ymin = 0;
+  if (saveas.Contains("urity")) { ymin = 0.7; ymax = 1;}
+  if (norm && logplot ) ymin = 0.000011;
   
   if ( xmin==0 ) xmin = sig_hists.at(0)->GetXaxis()->GetXmin();
   if ( xmax==0 ) xmax = sig_hists.at(0)->GetXaxis()->GetXmax();
@@ -221,13 +282,29 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   h_axes->GetXaxis()->SetTitleSize(0.05);
   h_axes->GetYaxis()->SetTitle(ytitle.c_str());
   h_axes->GetYaxis()->SetLabelSize(0.04);
-  h_axes->GetYaxis()->SetTitleOffset(1.5);
-//  h_axes->GetYaxis()->SetTitleOffset(1);
+  //  h_axes->GetYaxis()->SetTitleOffset(1.5);
+  h_axes->GetYaxis()->SetTitleOffset(1);
   h_axes->GetYaxis()->SetTitleSize(0.05);
   if (doRatio) {
     h_axes->GetXaxis()->SetLabelSize(0.);
     h_axes->GetXaxis()->SetTitleSize(0.);
   }
+  
+  
+  if (nplots[0].Contains("dijetflav")) {
+    h_axes->GetXaxis()->SetBinLabel(100, "jj");
+    h_axes->GetXaxis()->SetBinLabel(250, "cj");
+    h_axes->GetXaxis()->SetBinLabel(420, "bj");
+    h_axes->GetXaxis()->SetBinLabel(590, "cc");
+    h_axes->GetXaxis()->SetBinLabel(760, "bc");
+    h_axes->GetXaxis()->SetBinLabel(900, "bb");
+    h_axes->GetXaxis()->SetLabelSize(0.05);
+    h_axes->GetXaxis()->LabelsOption("h");
+    
+    //h1->GetXaxis()->SetLabelOffset(0.02);
+    
+  }
+  
   h_axes->Draw();
   
   //t->Draw("hist same");
@@ -251,6 +328,23 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     label_y_start = 0.84;
     label_y_spacing = 0.04;
   }
+  
+//  TLatex labelA;
+//  labelA.SetNDC();
+//  labelA.SetTextSize(0.039);
+//  labelA.SetTextFont(42);
+//  labelA.DrawLatex(0.5, 0.96, "arXiv:1603.04053");
+  
+  
+  //  TPaveText* arxiv = new TPaveText( 0.18, 0.9-0.05, 0.55, 0.9, "brNDC" );
+  //  arxiv->SetFillColor(0);
+  //  arxiv->SetTextAlign(11);
+  //  arxiv->SetTextFont(42);
+  //  //    arxiv->SetTextSize(0.035);
+  //  arxiv->AddText( "arXiv:1603.04053" );
+  //  //arxiv->AddText( " " );
+  //    gPad->cd();
+  //  arxiv->Draw("same");
   
   //  //TString ht_label = getHTPlotLabel(histdir);
   //  TString ht_label = getHTPlotLabel(samples.at(0), histdir);
@@ -301,46 +395,70 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   if (doRatio) {
     // draw ratio pad
     fullpad->cd();
+    //plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
+    //plotpad->SetTopMargin(0.05);
+    //plotpad->SetRightMargin(0.05);
+    //plotpad->SetBottomMargin(0.05);
     TPad* ratiopad = new TPad("ratiopad","ratiopad",0.,0.,1,0.23);
-    ratiopad->SetLeftMargin(0.15);
+    ratiopad->SetLeftMargin(0.1);//(0.16);
     ratiopad->SetRightMargin(0.05);
-    ratiopad->SetTopMargin(0.08);
+    ratiopad->SetTopMargin(0.04);
     ratiopad->SetBottomMargin(0.44);
     ratiopad->SetGridy();
     ratiopad->Draw();
     ratiopad->cd();
     
-//    TH1D* h_ratio = (TH1D*) data_hist->Clone(Form("ratio_%s",data_hist->GetName()));
-    TH1D* h_ratio = (TH1D*) sig_hists[0]->Clone(Form("ratio_%s",sig_hists[0]->GetName()));
-    h_ratio->Sumw2();
-    //sig_hists[1]->Sumw2();
-    h_ratio->Divide(sig_hists[1]);
     
     // draw axis only
-    TH1F* h_axis_ratio = new TH1F(Form("%s_axes",h_ratio->GetName()),"",100,xmin,xmax);
-    h_axis_ratio->GetYaxis()->SetTitleOffset(0.3);
+    TH1F* h_axis_ratio = new TH1F(Form("%s_axes",sig_hists[0]->GetName()),"",100,xmin,xmax);
+    h_axis_ratio->GetYaxis()->SetTitleOffset(0.25);
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-    //h_axis_ratio->GetYaxis()->SetRangeUser(0.,1.5);
-    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,1.);
-    h_axis_ratio->GetYaxis()->SetTitle("Z / #gamma");
+    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2);
+    //h_axis_ratio->GetYaxis()->SetRangeUser(0.001,1.);
+    h_axis_ratio->GetYaxis()->SetTitle("Ratio");
     h_axis_ratio->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
     h_axis_ratio->GetXaxis()->SetTitleSize(0.17);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.17);
-    h_axis_ratio->GetXaxis()->SetTitleOffset(1.0);
+    h_axis_ratio->GetXaxis()->SetTitleOffset(1);
     h_axis_ratio->GetXaxis()->SetTickLength(0.07);
     h_axis_ratio->Draw("axis");
     
-    TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
-    g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
-    for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
-      g_ratio->SetPointError(ibin, h_ratio->GetBinWidth(ibin+1)/2., h_ratio->GetBinError(ibin+1));
+    if (drawBand) {
+      TH1D* h_band = (TH1D*) sig_hists[0]->Clone("band");
+      for (int ibin=1; ibin <= h_band->GetNbinsX(); ++ibin) {
+        if (h_band->GetBinContent(ibin)>0.) h_band->SetBinError(ibin, h_band->GetBinError(ibin)/h_band->GetBinContent(ibin));
+        h_band->SetBinContent(ibin, 1.);
+      }
+      h_band->SetMarkerSize(0);
+      h_band->SetFillColor (kGray+2);
+      h_band->SetFillStyle (3344);
+      h_band->Draw("E2,same");
     }
-    g_ratio->SetLineColor(kBlack);
-    g_ratio->SetMarkerColor(kBlack);
-    g_ratio->SetMarkerStyle(20);
-    g_ratio->Draw("p0same");
+    
+    for (unsigned int isig = 1; isig < sig_hists.size(); ++isig) {
+      //    TH1D* h_ratio = (TH1D*) data_hist->Clone(Form("ratio_%s",data_hist->GetName()));
+      TH1D* h_ratio = (TH1D*) sig_hists[isig]->Clone(Form("ratio_%s",sig_hists[isig]->GetName()));
+      h_ratio->Sumw2();
+      //sig_hists[1]->Sumw2();
+      if (drawBand) { // don't put uncertainty in ratio, since we'll have the band
+        TH1D* h_tmp = (TH1D*) sig_hists[0]->Clone("tmp");
+        for (int ibin=1; ibin <= h_ratio->GetNbinsX(); ++ibin)  h_tmp->SetBinError(ibin, 0.);
+        h_ratio->Divide(h_tmp);
+      }
+      else h_ratio->Divide(sig_hists[0]);
+      
+      TGraphErrors* g_ratio = new TGraphErrors(h_ratio);
+      g_ratio->SetName(Form("%s_graph",h_ratio->GetName()));
+      for (int ibin=0; ibin < h_ratio->GetNbinsX(); ++ibin) {
+        g_ratio->SetPointError(ibin, h_ratio->GetBinWidth(ibin+1)/2., h_ratio->GetBinError(ibin+1));
+      }
+      //g_ratio->SetLineColor(kBlack);
+      //g_ratio->SetMarkerColor(kBlack);
+      //g_ratio->SetMarkerStyle(20);
+      g_ratio->Draw("p0same");
+    }
     
   } // if (doRatio)
   
@@ -351,6 +469,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   
   return;
 }
+
 
 
 
@@ -943,37 +1062,133 @@ void compareMultiPlotSoft()
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El Data (EWK subtracted)");                 nplots.push_back("FREWKcutsHT800El_Data_EwkSubtr");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El Data");                                  nplots.push_back("FREWKcutsHT800El_Data");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El MC");                                  nplots.push_back("FREWKcutsHT800El_MC");
-  makeCMSPlot(  files, labels, nplots, "FR_el", /*xtitle*/ "p_{T}^{lep} [GeV]" , /*ytitle*/ "FR" , /*xmin*/ 0, /*xmax*/20 , /*rebin*/ 1 , /*logplot*/ 0, /*scalesig*/ -1., /*doRatio*/ 0 );
+  makeCMSPlot(  files, labels, nplots, "FR_el", /*xtitle*/ "p_{T}^{lep} [GeV]" , /*ytitle*/ "FR" , /*xmin*/ 0, /*xmax*/20 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
   
   
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu Data (EWK subtracted)");                 nplots.push_back("FREWKcutsHT800Mu_Data_EwkSubtr");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu Data");                                  nplots.push_back("FREWKcutsHT800Mu_Data");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu MC");                                    nplots.push_back("FREWKcutsHT800Mu_MC");
-  makeCMSPlot(  files, labels, nplots, "FR_mu", /*xtitle*/ "p_{T}^{lep} [GeV]" , /*ytitle*/ "FR" , /*xmin*/ 0, /*xmax*/20 , /*rebin*/ 1 , /*logplot*/ 0, /*scalesig*/ -1., /*doRatio*/ 0 );
+  makeCMSPlot(  files, labels, nplots, "FR_mu", /*xtitle*/ "p_{T}^{lep} [GeV]" , /*ytitle*/ "FR" , /*xmin*/ 0, /*xmax*/20 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
   
   files.clear(); labels.clear(); nplots.clear();
 //  files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu Data");                 nplots.push_back("srLepbase/h_mtbins_MuPromptFraction");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu MC");                   nplots.push_back("srLepbase/h_mtbins_MuPromptFractionMCClosure");
-  makeCMSPlot(  files, labels, nplots, "PromptContMu", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Prompt fraction in sideband" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 0, /*scalesig*/ -1., /*doRatio*/ 0 );
+  makeCMSPlot(  files, labels, nplots, "PromptContMu", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Prompt fraction in sideband" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
 
   files.clear(); labels.clear(); nplots.clear();
 //  files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El Data");                 nplots.push_back("srLepbase/h_mtbins_ElPromptFraction");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El MC");                   nplots.push_back("srLepbase/h_mtbins_ElPromptFractionMCClosure");
-  makeCMSPlot(  files, labels, nplots, "PromptContEl", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Prompt fraction in sideband" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 0, /*scalesig*/ -1., /*doRatio*/ 0 );
+  makeCMSPlot(  files, labels, nplots, "PromptContEl", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Prompt fraction in sideband" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 0, /*norm*/ 0, /*doRatio*/ 0 );
 
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu Data (FR method)");                 nplots.push_back("srLepbase/h_predMu");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu MC (FR method)");                 nplots.push_back("srLepbase/h_predMCClosureMu");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("Mu MC (Truth)");                     nplots.push_back("srLepbase/h_predMuMC");
-  makeCMSPlot(  files, labels, nplots, "MCClosure_mu", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 0 );
+  makeCMSPlot(  files, labels, nplots, "MCClosure_mu", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 0 );
 
   files.clear(); labels.clear(); nplots.clear();
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El Data (FR method)");                 nplots.push_back("srLepbase/h_predEl");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El MC (FR method)");                 nplots.push_back("srLepbase/h_predMCClosureEl");
   files.push_back( dir+"pred_FakeRate.root");            labels.push_back("El MC (Truth)");                     nplots.push_back("srLepbase/h_predElMC");
-  makeCMSPlot(  files, labels, nplots, "MCClosure_El", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*scalesig*/ -1., /*doRatio*/ 0 );
+  makeCMSPlot(  files, labels, nplots, "MCClosure_El", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 0 );
 
+  TString dirJECup = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLepJECup22Mar16/";
+  TString dirJECdw = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLepJECdown22Mar16/";
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dirJECup+"wjets_ht.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dirJECdw+"wjets_ht.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_mtbins");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mtbins", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mtbins_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "ttsl.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dirJECup+"ttsl.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dirJECdw+"ttsl.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_mtbins");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mtbins_ttsl", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mtbins_ttsl_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "ttsl.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mt");
+  files.push_back( dirJECup+"ttsl.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_mt");
+  files.push_back( dirJECdw+"ttsl.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_mt");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mt_ttsl", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mt_ttsl_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mt");
+  files.push_back( dirJECup+"wjets_ht.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_mt");
+  files.push_back( dirJECdw+"wjets_ht.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_mt");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mt", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_mt_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("W");                 nplots.push_back("srLepbase/h_mt");
+  files.push_back( dir+     "ttsl.root");                labels.push_back("Top");                 nplots.push_back("srLepbase/h_mt");
+  makeCMSPlot(  files, labels, nplots, "WvsTop_mt_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("W");                 nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dir+     "ttsl.root");                labels.push_back("Top");                 nplots.push_back("srLepbase/h_mtbins");
+  makeCMSPlot(  files, labels, nplots, "WvsTop_mtbins_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_ht");
+  files.push_back( dirJECup+"wjets_ht.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_ht");
+  files.push_back( dirJECdw+"wjets_ht.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_ht");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_ht", /*xtitle*/ "H_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_ht_shape", /*xtitle*/ "H_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_met");
+  files.push_back( dirJECup+"wjets_ht.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_met");
+  files.push_back( dirJECdw+"wjets_ht.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_met");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_met", /*xtitle*/ "MET [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_met_shape", /*xtitle*/ "MET [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_nJet30");
+  files.push_back( dirJECup+"wjets_ht.root");            labels.push_back("JEC up");                  nplots.push_back("srLepbase/h_nJet30");
+  files.push_back( dirJECdw+"wjets_ht.root");            labels.push_back("JEC down");                nplots.push_back("srLepbase/h_nJet30");
+  makeCMSPlot(  files, labels, nplots, "JECvariations_nJet30", /*xtitle*/ "N(jets)" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "JECvariations_nJet30_shape", /*xtitle*/ "N(jets)" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  
+  TString dirSmear = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep22Mar16_smearMET/";
+
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dirSmear+"wjets_ht.root");            labels.push_back("MET*Gaus(0.24)");                  nplots.push_back("srLepbase/h_mtbins");
+  makeCMSPlot(  files, labels, nplots, "METsmear_mtbins", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "METsmear_mtbins_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "ttsl.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mtbins");
+  files.push_back( dirSmear+"ttsl.root");            labels.push_back("MET*Gaus(0.24)");                  nplots.push_back("srLepbase/h_mtbins");
+  makeCMSPlot(  files, labels, nplots, "METsmear_mtbins_ttsl", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "METsmear_mtbins_ttsl_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "ttsl.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mt");
+  files.push_back( dirSmear+"ttsl.root");            labels.push_back("MET*Gaus(0.24)");                  nplots.push_back("srLepbase/h_mt");
+  makeCMSPlot(  files, labels, nplots, "METsmear_mt_ttsl", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "METsmear_mt_ttsl_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dir+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("srLepbase/h_mt");
+  files.push_back( dirSmear+"wjets_ht.root");            labels.push_back("MET*Gaus(0.24)");                  nplots.push_back("srLepbase/h_mt");
+  makeCMSPlot(  files, labels, nplots, "METsmear_mt", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Entries" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 0, /*doRatio*/ 1 );
+  makeCMSPlot(  files, labels, nplots, "METsmear_mt_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+
+  
+  
   
   
   return;
