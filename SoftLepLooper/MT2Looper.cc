@@ -511,6 +511,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //only keep single mass point in scans
      if (isSignal_ 
 	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
@@ -1996,7 +1997,30 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
     plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_lepptshortBins"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
       plot2D("h_mtbins_leppt"+s, softlepmt_, softleppt_, evtweight_, h_1d, ";M_{T} [GeV];p_{T}(lep) [GeV]", n_mt2bins, mt2bins, n_ptsoftbins, ptsoftbins);
+
       // We might have to add other plots, for Fake estimates in CR2L as a function of NJ, NB, etc
+      
+      //cone-correction for isolation
+      float isoCut = -1;
+      if (abs(softlepId_) == 13) isoCut = 0.1;
+      else if (abs(softlepId_) == 11) isoCut = 0.1;
+      Float_t floor = 0; //so compiler doesn't complain about typecasting
+      float correction = TMath::Max( floor , t.lep_miniRelIso[softlepIdx_]-isoCut );
+      float ptCorr = softleppt_ * (1 + correction);
+      plot1D("h_lepptCorr"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+      plot1D("h_lepptCorrshort"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+
+      //mother origin
+      if (!t.isData) {
+	int mom = abs(t.lep_mcMatchId[softlepIdx_]);
+	int flavorType = -1;
+	if (mom == 15) flavorType = 0;
+	else if (idIsCharm(mom)) flavorType = 2;
+	else if (idIsBeauty(mom)) flavorType = 3;
+	else flavorType = 1;    
+	plot1D("h_motherFlavor"+s,  flavorType,   evtweight_, h_1d, ";parton mother flavor", 4, 0, 4);    
+      }
+      
       return;
   }
 
@@ -2032,27 +2056,6 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   plot1D("h_relIso03"+s,  t.lep_relIso03[softlepIdx_],   evtweight_, h_1d, ";relIso03 [GeV]", 100, 0, 2);
   plot1D("h_relIso04"+s,  t.lep_relIso04[softlepIdx_],   evtweight_, h_1d, ";relIso04 [GeV]", 100, 0, 2);
   plot1D("h_relIsoAn04"+s,  t.lep_relIsoAn04[softlepIdx_],   evtweight_, h_1d, ";relIsoAn04 [GeV]", 100, 0, 10);
-
-  //cone-correction for isolation
-  float isoCut = -1;
-  if (abs(softlepId_) == 13) isoCut = 0.1;
-  else if (abs(softlepId_) == 11) isoCut = 0.1;
-  Float_t floor = 0; //so compiler doesn't complain about typecasting
-  float correction = TMath::Max( floor , t.lep_miniRelIso[softlepIdx_]-isoCut );
-  float ptCorr = softleppt_ * (1 + correction);
-  plot1D("h_lepptCorr"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
-  plot1D("h_lepptCorrshort"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
-  
-  //mother origin
-  if (!t.isData) {
-    int mom = abs(t.lep_mcMatchId[softlepIdx_]);
-    int flavorType = -1;
-    if (mom == 15) flavorType = 0;
-    else if (idIsCharm(mom)) flavorType = 2;
-    else if (idIsBeauty(mom)) flavorType = 3;
-    else flavorType = 1;    
-    plot1D("h_motherFlavor"+s,  flavorType,   evtweight_, h_1d, ";parton mother flavor", 4, 0, 4);    
-  }
   
   //missing lep
   plot1D("h_missingleppt"+s,      missPt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
