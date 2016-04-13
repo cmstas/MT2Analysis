@@ -31,6 +31,8 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
 //_______________________________________________________________________________
 int getColor(const string& sample) {
 
+
+  
   //softLep fakes
   if (sample.find("wjets dilep") != string::npos) return 417+3;
   if (sample.find("zinv dilep") != string::npos) return 419+3;
@@ -68,11 +70,13 @@ int getColor(const string& sample) {
   if (sample.find("wjets") != string::npos) return 417;
   if (sample.find("zinv") != string::npos) return 419;
   if (sample.find("qcd") != string::npos) return kYellow+3;
+  if (sample.find("multijet") != string::npos) return 402;
   if (sample.find("gjet") != string::npos) return 18;
   if (sample.find("fakephoton") != string::npos) return 46;
   if (sample.find("fragphoton") != string::npos) return 38;
   if (sample.find("dyjets") != string::npos) return 430;
   if (sample.find("zjets") != string::npos) return 430;
+  if (sample.find("lostl") != string::npos) return 430;
   if (sample.find("T1tttt") != string::npos) return kRed;
   if (sample.find("T1bbbb") != string::npos) return kMagenta;
   if (sample.find("T1qqqq") != string::npos) return kOrange;
@@ -86,6 +90,8 @@ int getColor(const string& sample) {
   if (sample.find("zz") != string::npos) return kRed-1;
   if (sample.find("diboson") != string::npos) return kOrange-3;
   if (sample.find("fakeLep") != string::npos) return kMagenta+2;
+  if (sample.find("oneLep") != string::npos) return 417;
+  if (sample.find("diLep") != string::npos) return 855-3;
  
 
   cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
@@ -95,6 +101,9 @@ int getColor(const string& sample) {
 //_______________________________________________________________________________
 string getLegendName(const string& sample) {
 
+  if (sample.find("oneLep") != string::npos) return "1L";
+  if (sample.find("diLep") != string::npos) return "2L";
+  
   //softLep fakes
   if (sample.find("wjets fakeLep") != string::npos) return "Fake W+jets";
   if (sample.find("st fakeLep") != string::npos) return "Fake singletop";
@@ -146,14 +155,16 @@ string getLegendName(const string& sample) {
   if (sample.find("ttbar") != string::npos) return "ttbar";
   if (sample.find("top") != string::npos) return "Top";
   if (sample.find("wjets") != string::npos) return "W+jets";
-  if (sample.find("zinv") != string::npos) return "Z #rightarrow #nu#nu";
+  if (sample.find("zinv") != string::npos) return "Z #rightarrow #nu#bar{#nu}";
   if (sample.find("gjet") != string::npos) return "Prompt #gamma";
   if (sample.find("fakephotonMC") != string::npos) return "Fake #gamma";
   if (sample.find("fakephotonData") != string::npos) return "Fake #gamma (data)";
   if (sample.find("fragphoton") != string::npos) return "Frag. #gamma";
   if (sample.find("qcd") != string::npos) return "QCD";
+  if (sample.find("multijet") != string::npos) return "Multijet";
   if (sample.find("dyjets") != string::npos) return "Z+jets";
   if (sample.find("zjets") != string::npos) return "Z+jets";
+  if (sample.find("lostl") != string::npos) return "Lost Lepton";
   if (sample.find("T1tttt_1500_100") != string::npos) return "T1tttt 1500, 100";
   if (sample.find("T1tttt_1200_800") != string::npos) return "T1tttt 1200, 800";
   if (sample.find("T1bbbb_1000_900") != string::npos) return "T1bbbb 1000, 900";
