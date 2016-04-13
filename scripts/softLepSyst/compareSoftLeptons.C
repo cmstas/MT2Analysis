@@ -272,8 +272,10 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h->SetFillColor(getColor(names.at(i).Data()));
     h->SetLineColor(kBlack);
     //addOverflow(h); // Add Overflow
-    if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone("bgtot");
-    else h_bgtot->Add(h);
+    if (!TString(purpose.at(i)).Contains("signal")) {
+      if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone("bgtot");
+      else h_bgtot->Add(h);
+    }
     bg_hists.push_back(h);
     bg_names.push_back(names.at(i).Data());
   }
@@ -332,6 +334,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   float ymin = 0.1;
   if( logplot ) ymin*=0.01;
   if ( logplot && TString(histname).Contains("TopVsW")) ymin=0.0001;
+  if ( logplot && TString(histname).Contains("DataVs")) ymin=0.01;
 
 
   
@@ -1029,16 +1032,23 @@ void compareSoftLeptonsEstimatesToData(){
   TFile* onelep = new TFile(Form("%s/pred_CR1L.root",input_dir.c_str()));
   TFile* dilep = new TFile(Form("%s/pred_CR2L.root",input_dir.c_str()));
   TFile* all = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
+  TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
+//  TFile* T5qqqqWW = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str()));
+//  TFile* T5qqqqWW2 = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str()));
+  
   filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
   filesSR.push_back(all);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_mtbinsFake"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("stack");
+  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
+//  filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW_1025_775"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
+//  filesSR.push_back(T5qqqqWW2);  legendNames.push_back("T5qqqqWW_1100_500"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 
   setRegions(regions);
   
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC_T24bd" ,  "" ,  "Entries" ,  true ,  true  );
   
   filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
   filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
