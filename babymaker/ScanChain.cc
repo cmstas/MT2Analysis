@@ -269,6 +269,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
   // -- mt2higgs -- define hist for testing
   TH1F* h_invM_bjets = new TH1F("h_invM_bjets", "InvMass for any 2 bjets", 80, 0, 300);
+  TH1F* h_mttwo_old = new TH1F("h_mttwo_old", "mt2 before hcand", 80, 0, 300);
+  TH1F* h_mttwo_new = new TH1F("h_mttwo_new", "mt2 after hcand",  80, 0, 300);
+  TH1F* h_mttwo_test = new TH1F("h_mttwo_test", "mt2 before hcand", 80, 0, 300);
 
   // File Loop
   int nDuplicates = 0;
@@ -1904,6 +1907,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
 
+        h_mttwo_old->Fill(mt2); // mt2higgs testing
+
         // order hemispheres by pt for saving
         int idx_lead = 0;
         int idx_subl = 1;
@@ -1940,6 +1945,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         hcand_mt2 = HemMT2(met_pt, met_phi, hemJetsHcand.at(0), hemJetsHcand.at(1));
       }
 
+      if (hcand_mt2 >= 0)
+        h_mttwo_new->Fill(hcand_mt2);
+      else if (mt2 >= 0)
+        h_mttwo_new->Fill(mt2);
+
+      if (mt2 >= 0) h_mttwo_test->Fill(mt2);
+      
       // HT, MT2 and MHT for photon+jets regions
       //  note that leptons are NOT included in this MT2 calculation
       //  would need to do lepton/photon overlap to include them
@@ -2182,6 +2194,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   bmark->Stop("benchmark");
   TFile* fout = new TFile("h_test.root", "RECREATE");
   h_invM_bjets->Write();
+  h_mttwo_old->Write();
+  h_mttwo_new->Write();
+  h_mttwo_test->Write();
   fout->Close();
 
   cout << endl;
@@ -2191,7 +2206,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
        << "The portion of higgs cand events is: " << setprecision(3) << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%.\n"
        << "Amoung which, " << nImproved << " events that are \"improved\", which is " << ((float) nImproved)/nHiggsEvents*100 
        << "% of the Higgs events.\nat the same time, " << nHcandWithBJetsLess30 << " \"higgs\" events has bjet pt less than 30 GeV" << endl;
-  cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
+  // cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
   cout << "------------------------------" << endl;
   cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
   cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
