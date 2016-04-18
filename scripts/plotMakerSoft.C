@@ -1055,15 +1055,15 @@ void plotMakerSoftLepFR(){
   vector<string> suffixes;
   if (!doSRMC && doAll) {
     suffixes.push_back("HT800ElTight");
-    suffixes.push_back("HT600ElTight");
-    suffixes.push_back("HT475ElTight");
-    suffixes.push_back("HT350ElTight");
-    suffixes.push_back("HT200ElTight");
+    // suffixes.push_back("HT600ElTight");
+    // suffixes.push_back("HT475ElTight");
+    // suffixes.push_back("HT350ElTight");
+    // suffixes.push_back("HT200ElTight");
     suffixes.push_back("HT800MuTight");
-    suffixes.push_back("HT600MuTight");
-    suffixes.push_back("HT475MuTight");
-    suffixes.push_back("HT350MuTight");
-    suffixes.push_back("HT200MuTight");
+    // suffixes.push_back("HT600MuTight");
+    // suffixes.push_back("HT475MuTight");
+    // suffixes.push_back("HT350MuTight");
+    // suffixes.push_back("HT200MuTight");
   }
   else if (doSRMC) {
     suffixes.push_back("ElTightFake");
@@ -1150,8 +1150,8 @@ void plotMakerSoftLepFR(){
 	for (unsigned int isuf = 0; isuf < suffixes.size(); isuf++) {
 	  for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	    bool doLog = ilog==0;
-	    makePlot( samples , names , dir_name , "h_lepptshort"+prefix+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 3 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
-	    makePlot( samples , names , dir_name , "h_softlepht"+prefix+suffixes[isuf]  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_lepptshortBins"+prefix+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 3 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	    //makePlot( samples , names , dir_name , "h_softlepht"+prefix+suffixes[isuf]  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_met"+prefix+suffixes[isuf]  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 200 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    // makePlot( samples , names , dir_name , "h_nJet30"+prefix+suffixes[isuf] , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    // makePlot( samples , names , dir_name , "h_nBJet20"+prefix+suffixes[isuf] , "N(b jets)" , "Events" , 0 , 6 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
@@ -1167,7 +1167,7 @@ void plotMakerSoftLepFR(){
 	for (unsigned int isuf = 0; isuf < suffixes.size(); isuf++) {
 	  for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	    bool doLog = ilog==0;
-	    makePlot( samples , names , dir_name , "h_lepptshort"+prefix+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 3 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_lepptshortBins"+prefix+suffixes[isuf] , "Lepton p_{T} [GeV]" , "Events / 1 GeV" , 3 , 22 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_softlepht"+prefix+suffixes[isuf]  , "H_{T} [GeV]" , "Events / 25 GeV" , 0 , 2000 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_met"+prefix+suffixes[isuf]  , "E_{T}^{miss} [GeV]" , "Events / 10 GeV" , 0 , 1000 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    // makePlot( samples , names , dir_name , "h_nJet30"+prefix+suffixes[isuf] , "N(jets)" , "Events" , 0 , 15 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
@@ -1223,6 +1223,7 @@ void plotMakerSoftLepSR(){
   TFile* f_T2_4bd_275_235 = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str())); 
   TFile* f_T5qqqqWW_1025_775_custom = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str())); 
   TFile* f_T5qqqqWW_1100_500_custom = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str())); 
+  TFile* f_TChiNeu = new TFile(Form("%s/TChiNeu.root",input_dir.c_str())); 
   //TFile* f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str())); 
 
   vector<TFile*> samples;
@@ -1238,7 +1239,8 @@ void plotMakerSoftLepSR(){
   samples2.push_back(f_wjets);                  names2.push_back("wjets");
   samples2.push_back(f_T2_4bd_275_235);         names2.push_back("T2-4bd_275_235 sig");
   samples2.push_back(f_T5qqqqWW_1025_775_custom);  names2.push_back("T5qqqqWW_1025_775_custom sig");
-  samples2.push_back(f_T5qqqqWW_1100_500_custom);  names2.push_back("T5qqqqWW_1100_500_custom sig");
+  //samples2.push_back(f_T5qqqqWW_1100_500_custom);  names2.push_back("T5qqqqWW_1100_500_custom sig");
+  //samples2.push_back(f_TChiNeu);  names2.push_back("TChiNeu sig");
 
   if (doFake){
     // samples.push_back(f_tt2l); names.push_back("tt+2l fakeLep");
@@ -1323,13 +1325,15 @@ void plotMakerSoftLepSR(){
     
     samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
     samples.push_back(f_T5qqqqWW_1025_775_custom); names.push_back("T5qqqqWW_1025_775_custom sig");
-    samples.push_back(f_T5qqqqWW_1100_500_custom); names.push_back("T5qqqqWW_1100_500_custom sig");
+    //samples.push_back(f_T5qqqqWW_1100_500_custom); names.push_back("T5qqqqWW_1100_500_custom sig");
+    //samples.push_back(f_TChiNeu); names.push_back("TChiNeu sig");
   }
-    
+
   // ----------------------------------------
   //  plots definitions
   // ----------------------------------------
 
+  
   float scalesig = -1.;
   //float scalesig = 50.;
   bool printplots = true;
@@ -1337,10 +1341,10 @@ void plotMakerSoftLepSR(){
   bool scaleBGtoData = false;
 
   //inclusive lepton pt plot
-  // makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
-  // makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
-  // makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
-  // makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
+  makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
+  makePlot( samples2 , names2 , "" , "h_leppt" , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 0 , 500 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
+  makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , false , printplots, scalesig, doRatio, scaleBGtoData );
+  makePlot( samples2 , names2 , "" , "h_mt"    , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , true , printplots, scalesig, doRatio, scaleBGtoData );
 
   
   if(printplots){
@@ -1377,7 +1381,7 @@ void plotMakerSoftLepSR(){
 	  makePlot( samples , names , dir_name , "h_mt"+suffix , "M_{T} [GeV]" , "Events / 10 GeV" , 0 , 250 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_mtbins"+suffix , "M_{T} [GeV]" , "Events / bin" , 0 , 250 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_Wpt"+suffix , "W p_{T} [GeV]" , "Events / 20 GeV" , 0 , 800 , 4 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	  makePlot( samples , names , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
+	  makePlot( samples2 , names2 , dir_name , "h_Events_w"+suffix , "Events" , "Events" , 0 , 2 , 1 , doLog , printplots, scalesig, false, scaleBGtoData );
 	  //makePlot( samples , names , dir_name , "h_missingdilepmll"+suffix , "m_{ll} [GeV]" , "Events" , 0 , 150 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
       }
       
@@ -1395,14 +1399,14 @@ void plotMakerSoftLepCR(){
   writeExtraText = false;
   lumi_13TeV = "2.26 fb^{-1}";
 
-  string suffix = "";
+  string suffix = "IncW";
   bool doOnlyTrue = false;
   bool doData = true;
 
   bool doValidate = false;
   if (doValidate) suffix = "Validate";
   
-  string input_dir = "../SoftLepLooper/output/softLep";
+  string input_dir = "../SoftLepLooper/output/softLep_apr13";
   
   // ----------------------------------------
   //  samples definition
@@ -1537,8 +1541,7 @@ void plotMakerSoftLepCR(){
 	}
       }
 
-      
-      else if (!doValidate && (dir_name == "cr1LbaseAll")) {
+      else if (!doValidate && (dir_name == "cr1LbaseAll" || dir_name == "cr1LmubaseAll")) {
 	for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	  bool doLog = ilog==0;
 	  makePlot( samples , names , dir_name , "h_leppt"+suffix , "Lepton p_{T} [GeV]" , "Events / 10 GeV" , 200 , 1000 , 10 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
@@ -1561,6 +1564,16 @@ void plotMakerSoftLepCR(){
 	  makePlot( samples , names , dir_name , "h_miniRelIso"+suffix , "miniRelIso" , "Events / 0.005" , 0 , 0.5 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_relIso03"+suffix , "relIso03" , "Events / 0.02" , 0 , 2 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
 	  makePlot( samples , names , dir_name , "h_absIso"+suffix , "absIso [GeV]" , "Events / 0.5 GeV" , 0 , 40 , 1 , doLog , printplots, scalesig, doRatio, scaleBGtoData );
+
+	  if (suffix == "IncW") {
+	    makePlot( samples , names , dir_name , "h_deltaPhiWminusLep"+suffix , "#Delta#phi_{W-Lep}" , "Events" , -3.2 , 3.2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_deltaPhiMETminusLep"+suffix , "#Delta#phi_{MET-Lep}" , "Events" , -3.2 , 3.2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_cmsPol"+suffix , "L_{P}" , "Events" , 0 , 1.3 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_cmsPolMinus"+suffix , "L_{P} (l^{-})" , "Events" , 0 , 1.3 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_cmsPolPlus"+suffix , "L_{P} (L^{+})" , "Events" , 0 , 1.3 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_cmsPol2"+suffix , "CMS POL" , "Events" , -1.3 , 1.3 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_atlasPol"+suffix , "CMS POL" , "Events" , -1 , 1 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	  }
 	}
       }
  
@@ -1904,7 +1917,7 @@ void plotMakerGJetCR(){
   suffix.push_back("PT500");
   suffix.push_back("PT500EB");
   suffix.push_back("PT500EE");
-  string input_dir = "../GJetLooper/output/noskim/";
+  string input_dir = "../GJetLooper/output/noskim_apr14/";
   
   // ----------------------------------------
   //  samples definition
@@ -1948,16 +1961,18 @@ void plotMakerGJetCR(){
 	for (unsigned int isuf = 0; isuf < suffix.size(); isuf++) {
 	  for (unsigned int ilog = 0; ilog < 2; ilog++) {
 	    bool doLog = ilog==0;
-	    makePlot( samples , names , dir_name , "h_gammaEta"+suffix[isuf] , "#gamma #eta" , "Events / 0.1" , -2.5 , 2.5 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	    makePlot( samples , names , dir_name , "h_iso"+suffix[isuf] , "iso" , "Events / 0.5 GeV" , 0 , 50 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	    makePlot( samples , names , dir_name , "h_chiso"+suffix[isuf] , "chiso" , "Events / 0.5 GeV" , 0 , 50 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
-	    makePlot( samples , names , dir_name , "h_phiso"+suffix[isuf] , "phiso" , "Events / 0.5 GeV" , 0 , 50 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    //makePlot( samples , names , dir_name , "h_gammaEta"+suffix[isuf] , "#gamma #eta" , "Events / 0.1" , -2.5 , 2.5 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    //makePlot( samples , names , dir_name , "h_iso"+suffix[isuf] , "iso" , "Events / 0.5 GeV" , 0 , 50 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    //makePlot( samples , names , dir_name , "h_chiso"+suffix[isuf] , "chiso" , "Events / 0.5 GeV" , 0 , 50 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    //makePlot( samples , names , dir_name , "h_phiso"+suffix[isuf] , "phiso" , "Events / 0.5 GeV" , 0 , 50 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    //makePlot( samples , names , dir_name , "h_EBsieie"+suffix[isuf] , "#sigma_{i#etai#eta}" , "Events / 0.001" , 0 , 0.015 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    //makePlot( samples , names , dir_name , "h_EEsieie"+suffix[isuf] , "#sigma_{i#etai#eta}" , "Events / 0.001" , 0 , 0.025 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_gammaPt"+suffix[isuf] , "#gamma p_{T} [GeV]" , "Events / 5 GeV" , 200 , 500 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_deltaPhiGammaMet"+suffix[isuf] , "#Delta#phi(#gamma,#gamma+E_{T}^{miss})" , "Events / 0.02" , -1 , 1 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );	  
 	    makePlot( samples , names , dir_name , "h_met"+suffix[isuf]  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_gammaMet"+suffix[isuf]  , "#gamma+E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaMet_par"+suffix[isuf]  , "#gamma+E_{T}^{miss} (Parallel) [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
+	    makePlot( samples , names , dir_name , "h_gammaMet_perp"+suffix[isuf]  , "#gamma+E_{T}^{miss} (Perpendicular) [GeV]" , "Events / 50 GeV" , 0 , 300 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_smearMet"+suffix[isuf]  , "smeared E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_gammaSmearMet"+suffix[isuf]  , "#gamma + smeared E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
 	    makePlot( samples , names , dir_name , "h_gammaMetOverGamma"+suffix[isuf]  , "(#gamma+E_{T}^{miss}) / #gamma p_{T}" , "Events / 0.04" , 0 , 2 , 1 , doLog, printplots, scalesig, doRatio, scaleBGtoData );
@@ -1988,10 +2003,10 @@ void plotMakerSoft(){
   //plotMakerSoftLepSRMissingLep(); return;
   //plotMakerSoftLepFR(); return;
   //plotMakerSoftLepSR(); return;
-  //plotMakerSoftLepCR(); return;
+  plotMakerSoftLepCR(); return;
   //plotMakerDoubleLepCR(); return;
   //plotMakerZllCR(); return;
-  plotMakerGJetCR(); return;
+  //plotMakerGJetCR(); return;
   //plotMakerSoftLepSR(); plotMakerSoftLepCR(); plotMakerDoubleLepCR(); return;
 
   cmsText = "CMS Preliminary";
@@ -2043,20 +2058,21 @@ void plotMakerSoft(){
   // samples.push_back(f_tt2l); names.push_back("tt+2l");
 
   TFile* f_bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
-  // TFile* f_T2_4bd_275 = new TFile(Form("%s/T2-4bd_275.root",input_dir.c_str())); 
-  // TFile* f_T2_4bd_375 = new TFile(Form("%s/T2-4bd_375.root",input_dir.c_str())); 
-  // samples.push_back(f_bkg); names.push_back("onelep");
-  // samples.push_back(f_bkg); names.push_back("dilep");
-  // samples.push_back(f_bkg); names.push_back("fake");
-  // samples.push_back(f_T2_4bd_275); names.push_back("T2-4bd_275_235 sig");
-  // samples.push_back(f_T2_4bd_375); names.push_back("T2-4bd_375_335 sig");
+  TFile* f_T2_4bd_275_235 = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str())); 
+  TFile* f_T5qqqqWW_1025_775_custom = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str())); 
+  TFile* f_T5qqqqWW_1100_500_custom = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str())); 
+  samples.push_back(f_bkg); names.push_back("onelep");
+  samples.push_back(f_bkg); names.push_back("dilep");
+  samples.push_back(f_bkg); names.push_back("fake");
+  samples.push_back(f_T2_4bd_275_235); names.push_back("T2-4bd_275_235 sig");
+  samples.push_back(f_T5qqqqWW_1025_775_custom); names.push_back("T5qqqqWW_1025_775_custom sig");
   
   
-  samples.push_back(f_bkg); names.push_back("fakeLep");
-  samples.push_back(f_dy); names.push_back("dyjets dilep");
-  samples.push_back(f_diboson); names.push_back("diboson dilep");
-  samples.push_back(f_top); names.push_back("top dilep");
-  samples.push_back(f_data); names.push_back("data");
+  // samples.push_back(f_bkg); names.push_back("fakeLep");
+  // samples.push_back(f_dy); names.push_back("dyjets dilep");
+  // samples.push_back(f_diboson); names.push_back("diboson dilep");
+  // samples.push_back(f_top); names.push_back("top dilep");
+  // samples.push_back(f_data); names.push_back("data");
   
   
   //  TFile* f_T2tt_400_325 = new TFile(Form("%s/T2tt_mStop-400to475_mLSP-1to400.root",input_dir.c_str()));
@@ -2087,7 +2103,7 @@ void plotMakerSoft(){
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
       //if(dir_name != "srbase") continue; //to do only this dir
-      if(dir_name != "srLepbase") continue; //for testing
+      if(dir_name != "srLepbaseAll") continue; //for testing
       //      if(! TString(dir_name).Contains("srLep")) continue; //for testing
       
       makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -2109,6 +2125,7 @@ void plotMakerSoft(){
   std::cout << "\\begin{document}" << std::endl;
   
   vector<string> dirs;
+  dirs.push_back("srLepbaseAll");
   dirs.push_back("srLep1L");
   dirs.push_back("srLep2L");
   dirs.push_back("srLep3L");
@@ -2128,14 +2145,14 @@ void plotMakerSoft(){
   dirs.push_back("srLepJ1M");
   dirs.push_back("srLepJ2L");
   dirs.push_back("srLepJ3L");
-  dirs.push_back("srLepbaseJ");
-  dirs.push_back("srLepbaseJ1");
-  dirs.push_back("srLepbase");
+  // dirs.push_back("srLepbaseJ");
+  // dirs.push_back("srLepbaseJ1");
+  // dirs.push_back("srLepbase");
   
-  // for(unsigned int i=0; i<dirs.size(); i++){
-  //   printDetailedTable(samples, names, dirs.at(i));
-  //   if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
-  // }
+  for(unsigned int i=0; i<dirs.size(); i++){
+    printDetailedTable(samples, names, dirs.at(i));
+    if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+  }
   
   
   vector<string> dirsH;
@@ -2175,17 +2192,17 @@ void plotMakerSoft(){
   // dirsH.push_back("cr2L6M");
   //printTable(samples, names, dirsH, -1);
 
-  // dirsH.push_back("crZllbase");
-  dirsH.push_back("crZllbaseZeroB");
-  printTable(samples, names, dirsH, -1);
+  // // dirsH.push_back("crZllbase");
+  // dirsH.push_back("crZllbaseZeroB");
+  // printTable(samples, names, dirsH, -1);
 
-  for(unsigned int i=0; i<dirsH.size(); i++){
-    printDetailedTable(samples, names, dirsH.at(i));
-    if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
-  }
+  // for(unsigned int i=0; i<dirsH.size(); i++){
+  //   printDetailedTable(samples, names, dirsH.at(i));
+  //   if(i % 3 == 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
+  // }
 
   
-  dirsH.clear();
+  // dirsH.clear();
 
     
   std::cout << "\\end{document}" << std::endl;
