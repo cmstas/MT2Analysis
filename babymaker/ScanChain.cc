@@ -58,7 +58,7 @@ const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
 const bool applyBtagSFs = false;
 // turn on to recompute type1 MET using JECs from file (default true)
-const bool recomputeT1MET = false;
+const bool recomputeT1MET = true;
 // turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
@@ -406,21 +406,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
-	// hack for fastsim v1
-	if (isFastsim) { 
-	  met_rawPt  = cms3.evt_pfmet_raw();
-	  met_rawPhi = cms3.evt_pfmetPhi_raw();
-	}
-	else {
-	  met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
-	  met_rawPhi = cms3.evt_METToolbox_pfmetPhi_raw();
-	}
       } else {
 	met_pt  = cms3.evt_pfmet();
 	met_phi = cms3.evt_pfmetPhi();
-	met_rawPt  = cms3.evt_pfmet_raw();
-	met_rawPhi = cms3.evt_pfmetPhi_raw();
       }
+      met_rawPt  = cms3.evt_pfmet_raw();
+      met_rawPhi = cms3.evt_pfmetPhi_raw();
+
       if (!isData) {
         met_genPt  = cms3.gen_met();
         met_genPhi = cms3.gen_metPhi();
