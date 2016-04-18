@@ -251,10 +251,10 @@ void GJetLooper::loop(TChain* chain, std::string sample, std::string output_dir)
 	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT200EB");
 	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT200EE");
       }
-      if (t.gamma_pt[0] > 350 && t.gamma_pt[0] < 500) {
-	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT350");
-	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT350EB");
-	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT350EE");
+      if (t.gamma_pt[0] > 300 && t.gamma_pt[0] < 500) {
+	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT300");
+	if (fabs(t.gamma_eta[0]) < 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT300EB");
+	else if (fabs(t.gamma_eta[0]) > 1.479) fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT300EE");
       }
        if (t.gamma_pt[0] > 500) {
 	fillHistosGJet(CRGJetBase.crslHistMap,"crgjetbase","PT500");
@@ -360,12 +360,17 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   gamma_perp->Set(recoMet->Norm(*gammaXY));
   TVector2* gammaMet_par = new TVector2;
   TVector2* gammaSmearMet_par = new TVector2;
-  gammaMet_par->Set(recoMet->Proj(*gammaMet));
-  gammaSmearMet_par->Set(recoMet->Proj(*gammaSmearMet));
+  gammaMet_par->Set(gammaMet->Proj(*gammaXY));
+  gammaSmearMet_par->Set(gammaSmearMet->Proj(*smearMet));
   TVector2* gammaMet_perp = new TVector2;
   TVector2* gammaSmearMet_perp = new TVector2;
-  gammaMet_perp->Set(recoMet->Norm(*gammaMet));
-  gammaSmearMet_perp->Set(recoMet->Norm(*gammaSmearMet));
+  gammaMet_perp->Set(gammaMet->Norm(*gammaXY));
+  gammaSmearMet_perp->Set(gammaSmearMet->Norm(*smearMet));
+  // TVector2* met_par = new TVector2;
+  // TVector2* met_perp = new TVector2;
+  // met_par->Set(gammaXY->Proj(*recoMet));
+  // met_perp->Set(gammaXY->Norm(*recoMet));
+  
   
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
@@ -385,7 +390,14 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   plot1D("h_gammaPt"+s,   t.gamma_pt[0] ,   evtweight_, h_1d, ";#gamma p_{T} [GeV]", 100, 0, 500);
   plot1D("h_deltaPhiGammaMet"+s,  t.gamma_phi[0]-gammaMet->Phi() ,   evtweight_, h_1d, ";deltaPhiGammaMet", 100, -1, 1);
   plot1D("h_gammaMet"+s,       gammaMet->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);
+  plot1D("h_gamma_par"+s,       gamma_par->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);
+  plot1D("h_gamma_perp"+s,       gamma_perp->Mod(),   evtweight_, h_1d, ";gamma+MET", 300, 0, 300);
+  plot1D("h_gammaMet_par"+s,       gammaMet_par->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 3);
+  plot1D("h_gammaMet_perp"+s,       gammaMet_perp->Mod(),   evtweight_, h_1d, ";gamma+MET", 300, 0, 300);
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
+  plot1D("h_met2"+s,       recoMet->Mod(),   evtweight_, h_1d, ";MET", 100, 0, 1000);
+  // plot1D("h_met_par"+s,       met_par->Mod(),   evtweight_, h_1d, ";MET", 100, 0, 1000);
+  // plot1D("h_met_perp"+s,       met_par->Mod(),   evtweight_, h_1d, ";MET", 100, 0, 1000);
   plot1D("h_smearMet"+s,       smearMet->Mod(),   evtweight_, h_1d, "; smearedMET", 100, 0, 1000);
   plot1D("h_gammaSmearMet"+s,       gammaSmearMet->Mod(),   evtweight_, h_1d, "; gammaSmearedMET", 100, 0, 1000);
   
@@ -395,6 +407,13 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   plot1D("h_gammaSmearMetParOverGamma"+s,       gammaSmearMet_par->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+smearMET", 50, 0, 2);
   plot1D("h_gammaMetPerpOverGamma"+s,       gammaMet_perp->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
   plot1D("h_gammaSmearMetPerpOverGamma"+s,       gammaSmearMet_perp->Mod()/t.gamma_pt[0],   evtweight_, h_1d, ";gamma+smearMET", 50, 0, 2);
+
+  plot1D("h_gammaMetOverGamma2"+s,       gammaMet->Mod()/gammaXY->Mod(),   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
+  plot1D("h_gammaSmearMetOverGamma2"+s,       gammaSmearMet->Mod()/gammaXY->Mod(),   evtweight_, h_1d, ";gamma+smearMET", 50, 0, 2);
+  plot1D("h_gammaMetParOverGamma2"+s,       gammaMet_par->Mod()/gammaXY->Mod(),   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
+  plot1D("h_gammaSmearMetParOverGamma2"+s,       gammaSmearMet_par->Mod()/gammaXY->Mod(),   evtweight_, h_1d, ";gamma+smearMET", 50, 0, 2);
+  plot1D("h_gammaMetPerpOverGamma2"+s,       gammaMet_perp->Mod()/gammaXY->Mod(),   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
+  plot1D("h_gammaSmearMetPerpOverGamma2"+s,       gammaSmearMet_perp->Mod()/gammaXY->Mod(),   evtweight_, h_1d, ";gamma+smearMET", 50, 0, 2);
   
   plot1D("h_gammaMetParOverGammaPar"+s,       gammaMet_par->Mod()/gamma_par->Mod(),   evtweight_, h_1d, ";gamma+MET", 50, 0, 2);
   plot1D("h_gammaSmearMetParOverGammaPar"+s,       gammaSmearMet_par->Mod()/gamma_par->Mod(),   evtweight_, h_1d, ";gamma+smearMET", 50, 0, 2);
