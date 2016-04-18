@@ -330,7 +330,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_light_DN_ = 0;
   h_sig_avgweight_isr_ = 0;
   if ((doScanWeights || applyBtagSF) && 
-      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos))) {
+      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChi") != std::string::npos) )) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2-4bd") != std::string::npos) scan_name = sample.substr(0,6);
@@ -464,7 +464,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------
       // basic event selection and cleaning
       //---------------------
-
+      
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
       
       if (t.nVert == 0) continue;
@@ -507,7 +507,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       outfile_->cd();
       const float lumi = 2.26;
       //const float lumi = 4;
-
+      
       //only keep single mass point in scans
      if (isSignal_ 
 	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
@@ -527,10 +527,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
          ) continue;
 
       evtweight_ = 1.;
-
+      
       // apply relevant weights to MC
       if (!t.isData) {
-	if (isSignal_ && doScanWeights) {
+	if (isSignal_ && doScanWeights && sample  == "TChiNeu") {
+	  //	  evtweight_ = lumi * 386.936 / nEvents; // assumes xsec is already filled correctly for mChargino = 300
+	  evtweight_ = lumi * 22670.1 / nEvents; // assumes xsec is already filled correctly for mChargino = 100
+	}
+	else if (isSignal_ && doScanWeights) {
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
@@ -538,7 +542,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
-	if (applyBtagSF) {
+	if (applyBtagSF && sample  != "TChiNeu") {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
 	  evtweight_ *= t.weight_btagsf;
@@ -557,7 +561,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
-
 //MT2	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
 //MT2	  fillLepCorSRfastsim();
 //MT2	  evtweight_ *= (1. + cor_lepeff_sr_);
@@ -1698,12 +1701,20 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 
-	//mt2 cut region
-	if (t.met_pt < 60 && t.sl_mt2 > 100) {
-      	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
-	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
-	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	//inclusive WJets region for polarization checks
+	bool passInclusiveW = softlepmt_ < 100 && t.met_pt > 50 && softleppt_ > 30; 
+	if (passInclusiveW) {
+	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
 	}
+	
+	// //mt2 cut region
+	// if (t.met_pt < 60 && t.sl_mt2 > 100) {
+      	//   if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	//   else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	//   else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
+	// }
 
 	//maximum and min MET cut for CR1L
 	if (t.met_pt < 60 && t.met_pt > 30) {
@@ -1712,12 +1723,12 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
 	}
 
-	//alternate MET region
-	if (t.met_pt < 100 && t.met_pt > 60) {
-  	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	}
+	// //alternate MET region
+	// if (t.met_pt < 100 && t.met_pt > 60) {
+  	//   if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	//   else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	//   else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	// }
 	
       }//passesSelection
     }// SR loop    
@@ -1996,32 +2007,32 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   if ( onlyMakeFRplots_ ) {
     plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_lepptshortBins"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 3, 5, 20);
-      plot2D("h_mtbins_leppt"+s, softlepmt_, softleppt_, evtweight_, h_1d, ";M_{T} [GeV];p_{T}(lep) [GeV]", n_mt2bins, mt2bins, n_ptsoftbins, ptsoftbins);
+    plot2D("h_mtbins_leppt"+s, softlepmt_, softleppt_, evtweight_, h_1d, ";M_{T} [GeV];p_{T}(lep) [GeV]", n_mt2bins, mt2bins, n_ptsoftbins, ptsoftbins);
 
       // We might have to add other plots, for Fake estimates in CR2L as a function of NJ, NB, etc
-      
-      //cone-correction for isolation
-      float isoCut = -1;
-      if (abs(softlepId_) == 13) isoCut = 0.1;
-      else if (abs(softlepId_) == 11) isoCut = 0.1;
-      Float_t floor = 0; //so compiler doesn't complain about typecasting
-      float correction = TMath::Max( floor , t.lep_miniRelIso[softlepIdx_]-isoCut );
-      float ptCorr = softleppt_ * (1 + correction);
-      plot1D("h_lepptCorr"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
-      plot1D("h_lepptCorrshort"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
 
-      //mother origin
-      if (!t.isData) {
-	int mom = abs(t.lep_mcMatchId[softlepIdx_]);
-	int flavorType = -1;
-	if (mom == 15) flavorType = 0;
-	else if (idIsCharm(mom)) flavorType = 2;
-	else if (idIsBeauty(mom)) flavorType = 3;
-	else flavorType = 1;    
-	plot1D("h_motherFlavor"+s,  flavorType,   evtweight_, h_1d, ";parton mother flavor", 4, 0, 4);    
-      }
-      
-      return;
+    //cone-correction for isolation
+    float isoCut = -1;
+    if (abs(softlepId_) == 13) isoCut = 0.1;
+    else if (abs(softlepId_) == 11) isoCut = 0.1;
+    Float_t floor = 0; //so compiler doesn't complain about typecasting
+    float correction = TMath::Max( floor , t.lep_miniRelIso[softlepIdx_]-isoCut );
+    float ptCorr = softleppt_ * (1 + correction);
+    plot1D("h_lepptCorr"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+    plot1D("h_lepptCorrshort"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+    
+    //mother origin
+    if (!t.isData) {
+      int mom = abs(t.lep_mcMatchId[softlepIdx_]);
+      int flavorType = -1;
+      if (mom == 15) flavorType = 0;
+      else if (idIsCharm(mom)) flavorType = 2;
+      else if (idIsBeauty(mom)) flavorType = 3;
+      else flavorType = 1;    
+      plot1D("h_motherFlavor"+s,  flavorType,   evtweight_, h_1d, ";parton mother flavor", 4, 0, 4);    
+    }
+    
+    return;
   }
 
   if ( calculateFakeRates ) {
@@ -2032,6 +2043,28 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
     plot1D("h_mtbins"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
     plot1D("h_mt"+s,            softlepmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+
+    //cone-correction for isolation
+    float isoCut = -1;
+    if (abs(softlepId_) == 13) isoCut = 0.1;
+    else if (abs(softlepId_) == 11) isoCut = 0.1;
+    Float_t floor = 0; //so compiler doesn't complain about typecasting
+    float correction = TMath::Max( floor , t.lep_miniRelIso[softlepIdx_]-isoCut );
+    float ptCorr = softleppt_ * (1 + correction);
+    plot1D("h_lepptCorr"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+    plot1D("h_lepptCorrshort"+s,      ptCorr,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
+    
+    //mother origin
+    if (!t.isData) {
+      int mom = abs(t.lep_mcMatchId[softlepIdx_]);
+      int flavorType = -1;
+      if (mom == 15) flavorType = 0;
+      else if (idIsCharm(mom)) flavorType = 2;
+      else if (idIsBeauty(mom)) flavorType = 3;
+      else flavorType = 1;    
+      plot1D("h_motherFlavor"+s,  flavorType,   evtweight_, h_1d, ";parton mother flavor", 4, 0, 4);    
+    }
+    
     return;
   }
 
