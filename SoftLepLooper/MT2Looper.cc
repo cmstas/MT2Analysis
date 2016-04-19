@@ -511,7 +511,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //only keep single mass point in scans
      if (isSignal_ 
 	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
-	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu")
+	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
@@ -1217,7 +1217,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       	save1Lplots = true;
 	fillHistosCR1L("cr1L","Loose");
 	if (!t.isData) {
-	  if (softlepMatched) fillHistosCR1L("cr1L","LooseOnelep");
+	  if (softlepMatched && isDilepton) fillHistosCR1L("cr1L", "LooseDilepton");
+	  else if (softlepMatched) fillHistosCR1L("cr1L","LooseOnelep");
 	  else fillHistosCR1L("cr1L","LooseFake");
 	}	
       }
@@ -1225,7 +1226,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
      	save1Lmuplots = true;
 	fillHistosCR1L("cr1Lmu","Loose");
 	if (!t.isData) {
-	  if (softlepMatched) fillHistosCR1L("cr1Lmu","LooseOnelep"); 
+	  if (softlepMatched && isDilepton) fillHistosCR1L("cr1Lmu", "LooseDilepton");
+	  else if (softlepMatched) fillHistosCR1L("cr1Lmu","LooseOnelep"); 
 	  else fillHistosCR1L("cr1Lmu","LooseFake");
 	}
       }
@@ -1233,7 +1235,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
      	save1Lelplots = true;
 	fillHistosCR1L("cr1Lel","Loose");
 	if (!t.isData) {
-	  if (softlepMatched) fillHistosCR1L("cr1Lel","LooseOnelep");
+	  if (softlepMatched && isDilepton) fillHistosCR1L("cr1Lel", "LooseDilepton");
+	  else if (softlepMatched) fillHistosCR1L("cr1Lel","LooseOnelep");
 	  else fillHistosCR1L("cr1Lel","LooseFake");
 	}
       }
@@ -1244,7 +1247,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  save1Lplots = true;
 	  fillHistosCR1L("cr1L");
 	  if (!t.isData) {
-	    if (softlepMatched) fillHistosCR1L("cr1L","Onelep");
+	    if (softlepMatched && isDilepton) fillHistosCR1L("cr1L", "Dilepton");
+	    else if (softlepMatched) fillHistosCR1L("cr1L","Onelep");
 	    else fillHistosCR1L("cr1L","Fake");
 	  }
 	}
@@ -1252,7 +1256,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  save1Lmuplots = true;
 	  fillHistosCR1L("cr1Lmu");
 	  if (!t.isData) {
-	    if (softlepMatched) fillHistosCR1L("cr1Lmu","Onelep"); 
+	    if (softlepMatched && isDilepton) fillHistosCR1L("cr1Lmu", "Dilepton");
+	    else if (softlepMatched) fillHistosCR1L("cr1Lmu","Onelep"); 
 	    else fillHistosCR1L("cr1Lmu","Fake");
 	  }
 	}
@@ -1260,7 +1265,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  save1Lelplots = true;
 	  fillHistosCR1L("cr1Lel");
 	  if (!t.isData) {
-	    if (softlepMatched) fillHistosCR1L("cr1Lel","Onelep");
+	    if (softlepMatched && isDilepton) fillHistosCR1L("cr1Lmu", "Dilepton");
+	    else if (softlepMatched) fillHistosCR1L("cr1Lel","Onelep");
 	    else fillHistosCR1L("cr1Lel","Fake");
 	  }
 	}
@@ -1723,12 +1729,12 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
 	}
 
-	// //alternate MET region
-	// if (t.met_pt < 100 && t.met_pt > 60) {
-  	//   if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	//   else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	//   else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	// }
+	//alternate MET region
+	if (t.met_pt < 100 && t.met_pt > 60) {
+  	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	}
 	
       }//passesSelection
     }// SR loop    
@@ -2188,13 +2194,24 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       }
     }
     
-    // if (t.met_pt < 90 || softleppt_ < 20)  plot1D("h_Wpt90"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
-    // if (t.met_pt < 80 || softleppt_ < 20)  plot1D("h_Wpt80"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
-    // if (t.met_pt < 70 || softleppt_ < 20)  plot1D("h_Wpt70"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
-    // if (t.met_pt < 60 || softleppt_ < 20)  plot1D("h_Wpt60"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
-    // if (t.met_pt < 50 || softleppt_ < 20)  plot1D("h_Wpt50"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    if (t.met_pt < 90 || softleppt_ < 20)  plot1D("h_Wpt90"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    if (t.met_pt < 80 || softleppt_ < 20)  plot1D("h_Wpt80"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    if (t.met_pt < 70 || softleppt_ < 20)  plot1D("h_Wpt70"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    if (t.met_pt < 60 || softleppt_ < 20)  plot1D("h_Wpt60"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+    if (t.met_pt < 50 || softleppt_ < 20)  plot1D("h_Wpt50"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
+
     plot1D("h_deltaPhiMETminusLep"+s, t.met_phi - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{MET-Lep}", 64, -3.2, 3.2);
     plot1D("h_deltaPhiWminusLep"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
+
+    //true W-pt for MC only
+    if (!t.isData) {
+      float trueWpt = -1;
+      //loop over gen part to find W
+      for (int igen = 0; igen < t.ngenStat23; ++igen) {
+	if (abs(t.genStat23_pdgId[igen]) == 24) {trueWpt = t.genStat23_pt[igen]; break;}
+      }
+      plot1D("h_trueWpt"+s,   trueWpt ,   evtweight_, h_1d, ";W p_{T} [GeV]", 500, 0, 500);
+    }
     
     //dPhi for diff Wpt cuts
     if (wPt < 100 && wPt > 50) plot1D("h_deltaPhiWminusLep_W50t100"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
@@ -2216,7 +2233,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       if (wPt < 300 && wPt > 200) plot1D("h_deltaPhiWminusLepPlus_W200t300"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
       if (wPt < 500 && wPt > 300) plot1D("h_deltaPhiWminusLepPlus_W300t500"+s, TMath::ATan(wY/wX) - softlepphi_ ,   evtweight_, h_1d, ";#Delta#phi_{W-Lep}", 64, -3.2, 3.2);
     }
-  }
+  }//doMinimal
   
   outfile_->cd();
 
@@ -2266,13 +2283,15 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   float mt_hard = sqrt( 2 * t.met_pt * hardleppt_ * ( 1 - cos( t.met_phi - hardlepphi_) ) );
   float mt_alt = sqrt( 2 * newMet->Mod() * softleppt_ * ( 1 - cos( newMet->Phi() - softlepphi_) ) );
 
+  float lepDR = DeltaR(softlepeta_, hardlepeta_, softlepphi_, hardlepphi_);
 
   plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtHard"+s,            mt_hard,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
-  plot1D("h_mtAlt"+s,            mt_alt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_mtAlternate"+s,            mt_alt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_highleppt"+s,      hardleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+  plot1D("h_deltaRLep"+s,       lepDR, evtweight_, h_1d, ";deltaR", 200, 0, 2);
   plot1D("h_deltaEtaLep"+s,       hardlepeta_-softlepeta_, evtweight_, h_1d, ";deltaEta", 80, -4, 4);
   plot1D("h_deltaPhiLep"+s,       hardlepphi_-softlepphi_, evtweight_, h_1d, ";deltaPhi", 140, -7, 7);
   plot1D("h_deltaPtLep"+s,       hardleppt_-softleppt_, evtweight_, h_1d, ";deltaPt", 200, 0, 200);
