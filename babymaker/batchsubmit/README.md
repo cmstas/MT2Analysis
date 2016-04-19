@@ -1,6 +1,5 @@
---------------------------------------------------
---- RUNNING ALL HADRONIC MT2 LOOPER IN BATCH MODE ---
---------------------------------------------------
+
+# RUNNING ALL HADRONIC MT2 LOOPER IN BATCH MODE ---
 
 ## Instructions
 0) environment setup: see MT2Analysis/README.txt.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
@@ -69,12 +68,11 @@ where <BABYDIRS> is something like V00-00-01_*
 
 Delete the files reported as bad, then run checkAllConfig to see which output files are missing:
 ``` bash
-> ./checkAllConfig.sh <CONFIGDIR>
+./checkAllConfig.sh <CONFIGDIR>
 ```
-where <CONFIGDIR> is something like configs_V00-00-01/
+where <CONFIGDIR> is something like `configs_V00-00-01/`
 
-This creates resubmit configs for just the missing jobs, with names *_resubmit.cmd, in <CONFIGDIR>.  
-
+This creates resubmit configs for just the missing jobs, with names `*_resubmit.cmd`, in <CONFIGDIR>.
 To create the resubmit file for a single config:
 ``` bash
 ./resubmitConfig.sh <CMDFILE>
@@ -95,4 +93,6 @@ everything at once
 ```
 You can also specify the output directory in the script. Typically the babies are
 stored under:
-`/nfs-6/userdata/mt2/<VERSION>/`
+``` bash
+/nfs-6/userdata/mt2/<VERSION>/
+```

@@ -335,6 +335,15 @@ public :
    Int_t           nLHEweight;
    Float_t         LHEweight_wgt[500];   //[nLHEweight]
    Int_t           genProd_pdgId;
+   //----- MT2-Higgs
+   Int_t           nHiggs_cand;
+   Float_t         hcand_invM;
+   Float_t         hcand_deltaPhi;
+   Float_t         bMET_deltaPhiMin;
+   Float_t         bMET_MTmin;
+   Float_t         bMET_MTclose;
+   Float_t         hcand_mt2;
+   Bool_t          bInDiffHemjet;
 
    // List of branches
    TBranch        *b_run;   //!
@@ -650,6 +659,15 @@ public :
    TBranch        *b_nLHEweight;   //!
    TBranch        *b_LHEweight_wgt;   //!
    TBranch        *b_genProd_pdgId;   //!
+   //----- MT2-Higgs
+   TBranch        *b_nHiggs_cand;
+   TBranch        *b_hcand_invM;
+   TBranch        *b_hcand_deltaPhi;
+   TBranch        *b_bMET_deltaPhiMin;
+   TBranch        *b_bMET_MTmin;
+   TBranch        *b_bMET_MTclose;
+   TBranch        *b_hcand_mt2;
+   TBranch        *b_bInDiffHemjet;
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -1024,6 +1042,15 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nLHEweight", &nLHEweight, &b_nLHEweight);
    fChain->SetBranchAddress("LHEweight_wgt", &LHEweight_wgt, &b_LHEweight_wgt);
    fChain->SetBranchAddress("genProd_pdgId", &genProd_pdgId, &b_genProd_pdgId);
+   // -- mt2-higgs
+   fChain->SetBranchAddress("nHiggs_cand", &nHiggs_cand, &nHiggs_cand);
+   fChain->SetBranchAddress("hcand_invM", &hcand_invM, &hcand_invM);
+   fChain->SetBranchAddress("hcand_deltaPhi", &hcand_deltaPhi, &hcand_deltaPhi);
+   fChain->SetBranchAddress("bMET_deltaPhiMin", &bMET_deltaPhiMin, &bMET_deltaPhiMin);
+   fChain->SetBranchAddress("bMET_MTmin", &bMET_MTmin, &bMET_MTmin);
+   fChain->SetBranchAddress("bMET_MTclose", &bMET_MTclose, &bMET_MTclose);
+   fChain->SetBranchAddress("hcand_mt2", &hcand_mt2, &hcand_mt2);
+   fChain->SetBranchAddress("bInDiffHemjet", &bInDiffHemjet, &bInDiffHemjet);
    Notify();
 }
 

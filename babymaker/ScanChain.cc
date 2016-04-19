@@ -1855,6 +1855,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           if(ibj != ibj_hcand1 && ibj != ibj_hcand2 && p4sBJets.at(ibj).pt() > 30)
             p4sForHemsHcand.push_back(p4sBJets.at(ibj));
         }
+        hcand_invM = p4_higgs.pt();
         hcand_deltaPhi = DeltaPhi( met_phi, p4_higgs.phi() );
 
         // cout <<  p4sBJets.at(ibj_hcand1).pt() << "   " <<  p4sBJets.at(ibj_hcand2).pt() << "   " << p4_higgs.M() << endl;
