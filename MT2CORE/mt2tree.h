@@ -1043,14 +1043,14 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("LHEweight_wgt", &LHEweight_wgt, &b_LHEweight_wgt);
    fChain->SetBranchAddress("genProd_pdgId", &genProd_pdgId, &b_genProd_pdgId);
    // -- mt2-higgs
-   fChain->SetBranchAddress("nHiggs_cand", &nHiggs_cand, &nHiggs_cand);
-   fChain->SetBranchAddress("hcand_invM", &hcand_invM, &hcand_invM);
-   fChain->SetBranchAddress("hcand_deltaPhi", &hcand_deltaPhi, &hcand_deltaPhi);
-   fChain->SetBranchAddress("bMET_deltaPhiMin", &bMET_deltaPhiMin, &bMET_deltaPhiMin);
-   fChain->SetBranchAddress("bMET_MTmin", &bMET_MTmin, &bMET_MTmin);
-   fChain->SetBranchAddress("bMET_MTclose", &bMET_MTclose, &bMET_MTclose);
-   fChain->SetBranchAddress("hcand_mt2", &hcand_mt2, &hcand_mt2);
-   fChain->SetBranchAddress("bInDiffHemjet", &bInDiffHemjet, &bInDiffHemjet);
+   fChain->SetBranchAddress("nHiggs_cand", &nHiggs_cand, &b_nHiggs_cand);
+   fChain->SetBranchAddress("hcand_invM", &hcand_invM, &b_hcand_invM);
+   fChain->SetBranchAddress("hcand_deltaPhi", &hcand_deltaPhi, &b_hcand_deltaPhi);
+   fChain->SetBranchAddress("bMET_deltaPhiMin", &bMET_deltaPhiMin, &b_bMET_deltaPhiMin);
+   fChain->SetBranchAddress("bMET_MTmin", &bMET_MTmin, &b_bMET_MTmin);
+   fChain->SetBranchAddress("bMET_MTclose", &bMET_MTclose, &b_bMET_MTclose);
+   fChain->SetBranchAddress("hcand_mt2", &hcand_mt2, &b_hcand_mt2);
+   fChain->SetBranchAddress("bInDiffHemjet", &bInDiffHemjet, &b_bInDiffHemjet);
    Notify();
 }
 
