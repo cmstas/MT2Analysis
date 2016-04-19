@@ -410,6 +410,10 @@ class babyMaker {
 //----- MT2-Higgs
   Int_t           nHiggs_cand;
   Float_t         hcand_invM;
+  Float_t         hcand_deltaPhi;
+  Float_t         bMET_deltaPhiMin;
+  Float_t         bMET_MTmin;
+  Float_t         bMET_MTclose;
   Float_t         hcand_mt2;
   Bool_t          bInDiffHemjet;
 

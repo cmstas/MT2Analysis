@@ -267,11 +267,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     f_xsec->Close();
   }
 
-  // -- mt2higgs -- define hist for testing
-  TH1F* h_invM_bjets = new TH1F("h_invM_bjets", "InvMass for any 2 bjets", 80, 0, 300);
-  TH1F* h_mttwo_old = new TH1F("h_mttwo_old", "mt2 before hcand", 80, 0, 300);
-  TH1F* h_mttwo_new = new TH1F("h_mttwo_new", "mt2 after hcand",  80, 0, 300);
-  TH1F* h_mttwo_test = new TH1F("h_mttwo_test", "mt2 before hcand", 80, 0, 300);
+  // // -- mt2higgs -- define hist for testing
+  // TH1F* h_invM_bjets = new TH1F("h_invM_bjets", "InvMass for any 2 bjets", 80, 0, 300);
+  // TH1F* h_mttwo_old = new TH1F("h_mttwo_old", "mt2 before hcand", 80, 0, 300);
+  // TH1F* h_mttwo_new = new TH1F("h_mttwo_new", "mt2 after hcand",  80, 0, 300);
+  // TH1F* h_mttwo_test = new TH1F("h_mttwo_test", "mt2 before hcand", 80, 0, 300);
 
   // File Loop
   int nDuplicates = 0;
@@ -1812,16 +1812,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       // --- MT2-Higgs ---
       // Select >= 2 bjets and find higgs candidate
       if (nBJet20 < 2) {nLessThanTwoBJets++; continue;}
+      // if (nBJet20 < 2) nLessThanTwoBJets++;
       if (nBJet20 > 2) nMoreThanTwoBJets++;
       float higgsM_div = 26;
       LorentzVector p4_higgs;
       int ibj_hcand1 = -1;          // higgs candidate bJets index
       int ibj_hcand2 = -1;
-      for (int ibj1=0; ibj1<(nBJet20-1); ibj1++){
+      for (int ibj1=0; ibj1<nBJet20; ibj1++){
         for (int ibj2=ibj1+1; ibj2<nBJet20; ibj2++){
           LorentzVector p4combined = p4sBJets.at(ibj1) + p4sBJets.at(ibj2);
           float invM = p4combined.M();
-          h_invM_bjets->Fill(invM);
+          // h_invM_bjets->Fill(invM);
           if(invM > 100 && invM < 150){
             nHiggs_cand++;
             float M_div = fabs(invM-125.1);
@@ -1833,6 +1834,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             }
           }
         }
+        if(ibj1 == 0){
+          bMET_MTmin = MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() );
+          bMET_deltaPhiMin = DeltaPhi( met_phi, p4sBJets.at(ibj1).phi() );
+        }
+        else{
+          bMET_MTmin = min( bMET_MTmin, MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() ));
+          bMET_deltaPhiMin = min(bMET_deltaPhiMin, DeltaPhi( met_phi, p4sBJets.at(ibj1).phi() ));
+        }
       }
 
       if (nHiggs_cand > 0){
@@ -1841,6 +1850,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           if(ibj != ibj_hcand1 && ibj != ibj_hcand2 && p4sBJets.at(ibj).pt() > 30)
             p4sForHemsHcand.push_back(p4sBJets.at(ibj));
         }
+        hcand_deltaPhi = DeltaPhi( met_phi, p4_higgs.phi() );
+
         // cout <<  p4sBJets.at(ibj_hcand1).pt() << "   " <<  p4sBJets.at(ibj_hcand2).pt() << "   " << p4_higgs.M() << endl;
         if(p4sBJets.at(ibj_hcand1).pt() < 30 || p4sBJets.at(ibj_hcand2).pt() < 30) nHcandWithBJetsLess30++;
         else if(! AreJetsInSameHems(p4sForHems, p4sBJets.at(ibj_hcand1), p4sBJets.at(ibj_hcand2))){
@@ -1907,7 +1918,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
 
-        h_mttwo_old->Fill(mt2); // mt2higgs testing
+        // h_mttwo_old->Fill(mt2); // mt2higgs testing
 
         // order hemispheres by pt for saving
         int idx_lead = 0;
@@ -1945,12 +1956,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         hcand_mt2 = HemMT2(met_pt, met_phi, hemJetsHcand.at(0), hemJetsHcand.at(1));
       }
 
-      if (hcand_mt2 >= 0)
-        h_mttwo_new->Fill(hcand_mt2);
-      else if (mt2 >= 0)
-        h_mttwo_new->Fill(mt2);
-
-      if (mt2 >= 0) h_mttwo_test->Fill(mt2);
+      // // mt2-higgs testing
+      // if (hcand_mt2 >= 0)
+      //   h_mttwo_new->Fill(hcand_mt2);
+      // else if (mt2 >= 0)
+      //   h_mttwo_new->Fill(mt2);
+      // if (mt2 >= 0) h_mttwo_test->Fill(mt2);
       
       // HT, MT2 and MHT for photon+jets regions
       //  note that leptons are NOT included in this MT2 calculation
@@ -2192,12 +2203,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
 
   bmark->Stop("benchmark");
-  TFile* fout = new TFile("h_test.root", "RECREATE");
-  h_invM_bjets->Write();
-  h_mttwo_old->Write();
-  h_mttwo_new->Write();
-  h_mttwo_test->Write();
-  fout->Close();
+
+  // TFile* fout = new TFile("h_test.root", "RECREATE");
+  // h_invM_bjets->Write();
+  // h_mttwo_old->Write();
+  // h_mttwo_new->Write();
+  // h_mttwo_test->Write();
+  // fout->Close();
 
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
@@ -2259,10 +2271,14 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("ht", &ht );
   BabyTree_->Branch("mt2", &mt2 );
   BabyTree_->Branch("mt2_gen", &mt2_gen );
+  BabyTree_->Branch("nHiggs_cand", &nHiggs_cand );
   BabyTree_->Branch("hcand_invM", &hcand_invM );
+  BabyTree_->Branch("hcand_deltaPhi", &hcand_deltaPhi );
+  BabyTree_->Branch("bMET_deltaPhiMin", &bMET_deltaPhiMin );
+  BabyTree_->Branch("bMET_MTmin", &bMET_MTmin );
+  BabyTree_->Branch("bMET_MTclose", &bMET_MTclose );
   BabyTree_->Branch("hcand_mt2", &hcand_mt2 );
   BabyTree_->Branch("bInDiffHemjet", &bInDiffHemjet );
-  BabyTree_->Branch("nHiggs_cand", &nHiggs_cand );
   BabyTree_->Branch("jet1_pt", &jet1_pt );
   BabyTree_->Branch("jet2_pt", &jet2_pt );
   BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
@@ -2586,6 +2602,10 @@ void babyMaker::InitBabyNtuple () {
   mt2 = -999.0;
   mt2_gen = -999.0;
   hcand_invM = -999.0;
+  hcand_deltaPhi = -999.0;
+  bMET_deltaPhiMin = -999.0;
+  bMET_MTmin = -999.0;
+  bMET_MTclose = -999.0;
   hcand_mt2 = -999.0;
   bInDiffHemjet = 0;
   nHiggs_cand = 0;
