@@ -1835,12 +1835,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
         }
         if(ibj1 == 0){
-          bMET_MTmin = MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() );
+          bMET_MTmin   = MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() );
+          bMET_MTclose = MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() );
           bMET_deltaPhiMin = DeltaPhi( met_phi, p4sBJets.at(ibj1).phi() );
         }
         else{
           bMET_MTmin = min( bMET_MTmin, MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() ));
-          bMET_deltaPhiMin = min(bMET_deltaPhiMin, DeltaPhi( met_phi, p4sBJets.at(ibj1).phi() ));
+          float temp_dphi = DeltaPhi( met_phi, p4sBJets.at(ibj1).phi() ); 
+          if( temp_dphi < bMET_deltaPhiMin ){
+            bMET_deltaPhiMin = temp_dphi;
+            bMET_MTclose = MT(met_pt, met_phi, p4sBJets.at(ibj1).pt(), p4sBJets.at(ibj1).phi() );
+          }
         }
       }
 
