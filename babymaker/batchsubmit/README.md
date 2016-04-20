@@ -1,12 +1,11 @@
 
-# RUNNING ALL HADRONIC MT2 LOOPER IN BATCH MODE ---
+# Running All Hadronic MT2 Looper In Batch Mode 
 
 ## Instructions
-0) environment setup: see MT2Analysis/README.txt.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
+0) environment setup: see `MT2Analysis/README.txt`.  This setup sends the compiled libraries with the job so assumes that you're using a particular CMSSW/root version.
 
 1) copy files to run looper into job_input directory
 for example, from the babymaker directory
-
 ``` bash
 cp -r *.so jetCorrections jsons btagsf lepsf data processBaby batchsubmit/job_input/
 ```
@@ -93,6 +92,6 @@ everything at once
 ```
 You can also specify the output directory in the script. Typically the babies are
 stored under:
-``` bash
+``
 /nfs-6/userdata/mt2/<VERSION>/
-```
+``

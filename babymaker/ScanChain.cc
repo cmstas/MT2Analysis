@@ -1814,7 +1814,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       if (nBJet20 < 2) {nLessThanTwoBJets++; continue;}
       // if (nBJet20 < 2) nLessThanTwoBJets++;
       if (nBJet20 > 2) nMoreThanTwoBJets++;
-      float higgsM_div = 26;
+      float divMin = 999;
       LorentzVector p4_higgs;
       int ibj_hcand1 = -1;          // higgs candidate bJets index
       int ibj_hcand2 = -1;
@@ -1822,16 +1822,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         for (int ibj2=ibj1+1; ibj2<nBJet20; ibj2++){
           LorentzVector p4combined = p4sBJets.at(ibj1) + p4sBJets.at(ibj2);
           float invM = p4combined.M();
+          float M_div = fabs(invM-125.1);
           // h_invM_bjets->Fill(invM);
-          if(invM > 100 && invM < 150){
-            nHiggs_cand++;
-            float M_div = fabs(invM-125.1);
-            if( M_div < higgsM_div){
-              p4_higgs = p4combined;
-              higgsM_div = M_div;
-              ibj_hcand1 = ibj1;
-              ibj_hcand2 = ibj2;
-            }
+          // if(invM > 100 && invM < 150){
+          if( M_div < 25 ) nHiggs_cand++;
+          if( M_div < divMin){
+            p4_higgs   = p4combined;
+            hcand_M    = invM;
+            divMin     = M_div;
+            ibj_hcand1 = ibj1;
+            ibj_hcand2 = ibj2;
           }
         }
         if(ibj1 == 0){
@@ -1855,7 +1855,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           if(ibj != ibj_hcand1 && ibj != ibj_hcand2 && p4sBJets.at(ibj).pt() > 30)
             p4sForHemsHcand.push_back(p4sBJets.at(ibj));
         }
-        hcand_invM = p4_higgs.pt();
+        // hcand_M   = p4_higgs.M();
+        hcand_pt  = p4_higgs.pt();
+        hcand_phi = p4_higgs.phi();
         hcand_deltaPhi = DeltaPhi( met_phi, p4_higgs.phi() );
 
         // cout <<  p4sBJets.at(ibj_hcand1).pt() << "   " <<  p4sBJets.at(ibj_hcand2).pt() << "   " << p4_higgs.M() << endl;
@@ -2278,7 +2280,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("mt2", &mt2 );
   BabyTree_->Branch("mt2_gen", &mt2_gen );
   BabyTree_->Branch("nHiggs_cand", &nHiggs_cand );
-  BabyTree_->Branch("hcand_invM", &hcand_invM );
+  BabyTree_->Branch("hcand_M", &hcand_M );
+  BabyTree_->Branch("hcand_pt", &hcand_pt );
+  BabyTree_->Branch("hcand_phi", &hcand_phi );
   BabyTree_->Branch("hcand_deltaPhi", &hcand_deltaPhi );
   BabyTree_->Branch("bMET_deltaPhiMin", &bMET_deltaPhiMin );
   BabyTree_->Branch("bMET_MTmin", &bMET_MTmin );
@@ -2607,7 +2611,9 @@ void babyMaker::InitBabyNtuple () {
   ht = -999.0;
   mt2 = -999.0;
   mt2_gen = -999.0;
-  hcand_invM = -999.0;
+  hcand_M = -999.0;
+  hcand_pt = -999.0;
+  hcand_phi = -999.0;
   hcand_deltaPhi = -999.0;
   bMET_deltaPhiMin = -999.0;
   bMET_MTmin = -999.0;
