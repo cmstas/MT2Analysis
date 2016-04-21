@@ -61,7 +61,8 @@ int getColor(const string& sample) {
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return kYellow+1;
   if (sample.find("T5qqqqWW_1100_500") != string::npos) return kRed+1;
   
-  if (sample.find("TChiNeu") != string::npos) return kCyan+1;
+  if (sample.find("TChiNeu_100_90") != string::npos) return kCyan+1;
+  if (sample.find("TChiNeu_300_285") != string::npos) return kRed+1;
   
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
@@ -142,7 +143,8 @@ string getLegendName(const string& sample) {
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
   if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
   
-  if (sample.find("TChiNeu") != string::npos) return "TChiNeu 300, 285 (x60)";
+  if (sample.find("TChiNeu_300_285") != string::npos) return "TChiNeu 300, 285 (x50)";
+  if (sample.find("TChiNeu_100_90") != string::npos) return "TChiNeu 100, 90";
   
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
@@ -200,7 +202,8 @@ string getTableName(const string& sample) {
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
   if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
   
-  if (sample.find("TChiNeu") != string::npos) return "TChiNeu 300, 285 (x60)";
+  if (sample.find("TChiNeu_300_285") != string::npos) return "TChiNeu 300, 285 (x50)";
+  if (sample.find("TChiNeu_100_90") != string::npos) return "TChiNeu 100, 90";
   
   if (sample.find("diboson dilep") != string::npos) return "Diboson (2L)";
   if (sample.find("top dilep") != string::npos) return "Top (2L)";
