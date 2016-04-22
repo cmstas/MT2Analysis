@@ -32,6 +32,7 @@ class ZllLooper {
   void SetSignalRegions();
   void loop(TChain* chain, std::string sample, std::string output_dir);
   void fillHistosZll(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+  void fillHistosW(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
 
  private:
 
@@ -40,11 +41,12 @@ class ZllLooper {
   float evtweight_;
   std::map<std::string, TH1*> h_1d_global;
   SR CRZllBase;
+  SR CRWBase;
   TH1D* h_nvtx_weights_;
 
   int removedzllLep_;
-  float zllmt_;
-  float zllmet_;
+  float modifiedmt_;
+  float modifiedmet_;
   float bosonScale_;
   float metScale_;
   

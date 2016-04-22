@@ -53,8 +53,8 @@ void ZllLooper::SetSignalRegions(){
 
   // CRZll base: just good photon
   CRZllBase.SetName("crZllbaseZeroB");
+  CRWBase.SetName("crWbaseZeroB");
 
-  //FIXME: define additonal SRs here
 
 }
 
@@ -191,11 +191,9 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // basic selection, triggers, etc.
       if (t.nVert == 0) continue;
-      if (t.nlepIso != 2) continue;
-      if (t.nlep != 2) continue;
       
       // trigger requirement on data
-      if (t.isData && !(t.HLT_SingleEl || t.HLT_SingleMu)) continue;
+      if (!(t.HLT_SingleEl || t.HLT_SingleMu)) continue;
         
       // remove low pt QCD samples 
       if (t.evt_id >= 100 && t.evt_id < 108) continue;
@@ -224,18 +222,33 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       } // !isData
 
       //-----------SELECTION BELOW------------
-      
+
+      //initialize bools for Z and W selections
+      bool passZ = true;
+      bool passW = true;
+
       //reinitialize global vars
       removedzllLep_ = -1;
-      zllmt_ = -1;
-      zllmet_ = -1;
+      modifiedmt_ = -1;
+      modifiedmet_ = -1;
       bosonScale_ = -1;
       metScale_ = -1;
       
       // require baseline selection
       bool pass_selection = (t.ht > 200 && t.nJet30 > 1 && t.nBJet20 == 0);
-      if (!pass_selection) continue;   
+      if (!pass_selection) continue;
 
+      //W specific selection
+      if (t.nlepIso != 1) passW = false;
+      if (t.nlep != 1) passW = false;
+      if (t.lep_pt[0] < 30 || t.met_pt < 200) passW = false;
+
+      //Z specific selection
+      if (t.nlepIso != 2) passZ = false;
+      if (t.nlep != 2) passZ = false;
+      if (t.nlepIso == 2 && !(t.lep_pdgId[0] == -1 * t.lep_pdgId[1])) passZ = false;
+      
+      //isolation requirements
       bool failIsoId = false;
       //require lepton Iso/ID
       for (int ilep = 0; ilep < t.nlep; ilep++) {
@@ -256,69 +269,111 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (failIsoId) continue;
 
-      //calculate dilepMll
-      TLorentzVector lep1_p4(0,0,0,0);
-      TLorentzVector lep2_p4(0,0,0,0);
-      lep1_p4.SetPtEtaPhiM(t.lep_pt[0],t.lep_eta[0],t.lep_phi[0],t.lep_mass[0]);
-      lep2_p4.SetPtEtaPhiM(t.lep_pt[1],t.lep_eta[1],t.lep_phi[1],t.lep_mass[1]);
-      TLorentzVector dilep_p4 = lep1_p4 + lep2_p4;
-      float dilepmll = dilep_p4.M();
-
-      if (dilepmll < 75 || dilepmll > 105) continue;
-
       //calculate mt by removing random lepton
       //initialize MET variables
       float metX = t.met_pt * cos(t.met_phi);
       float metY = t.met_pt * sin(t.met_phi);
       TVector2* newMet = new TVector2;
+
+      TVector2* BosonPlusMet = new TVector2;
+      float bosonPt = -1;
       
-      float lep1X = t.lep_pt[0] * cos(t.lep_phi[0]);
-      float lep1Y = t.lep_pt[0] * sin(t.lep_phi[0]);
-      float lep2X = t.lep_pt[1] * cos(t.lep_phi[1]);
-      float lep2Y = t.lep_pt[1] * sin(t.lep_phi[1]);
+      if (passZ) {
+	//calculate dilepMll
+	TLorentzVector lep1_p4(0,0,0,0);
+	TLorentzVector lep2_p4(0,0,0,0);
+	lep1_p4.SetPtEtaPhiM(t.lep_pt[0],t.lep_eta[0],t.lep_phi[0],t.lep_mass[0]);
+	lep2_p4.SetPtEtaPhiM(t.lep_pt[1],t.lep_eta[1],t.lep_phi[1],t.lep_mass[1]);
+	TLorentzVector dilep_p4 = lep1_p4 + lep2_p4;
+	float dilepmll = dilep_p4.M();
+	if (dilepmll < 75 || dilepmll > 105) passZ = false;
+	
       
-      //remove random lepton, depending on event number
-      if (t.evt % 2 == 1) {
-	removedzllLep_ = 1; 
-	newMet->SetX(metX+lep1X);
-	newMet->SetY(metY+lep1Y);
+	float lep1X = t.lep_pt[0] * cos(t.lep_phi[0]);
+	float lep1Y = t.lep_pt[0] * sin(t.lep_phi[0]);
+	float lep2X = t.lep_pt[1] * cos(t.lep_phi[1]);
+	float lep2Y = t.lep_pt[1] * sin(t.lep_phi[1]);
+	
+	//remove random lepton, depending on event number
+	if (t.evt % 2 == 1) {
+	  removedzllLep_ = 1; 
+	  newMet->SetX(metX+lep1X);
+	  newMet->SetY(metY+lep1Y);
+	}
+	else {
+	  removedzllLep_ = 2;
+	  newMet->SetX(metX+lep2X);
+	  newMet->SetY(metY+lep2Y);
+	}
+	
+	modifiedmet_ = newMet->Mod(); //alternate MET
+	if (removedzllLep_ == 1) modifiedmt_ = sqrt( 2 * newMet->Mod() * t.lep_pt[1] * ( 1 - cos( newMet->Phi() - t.lep_phi[1]) ) ); //recalculated MT
+	else if (removedzllLep_ == 2) modifiedmt_ = sqrt( 2 * newMet->Mod() * t.lep_pt[0] * ( 1 - cos( newMet->Phi() - t.lep_phi[0]) ) ); //recalculated MT
+	
+	float ZX = dilep_p4.Pt() * cos(dilep_p4.Phi());
+	float ZY = dilep_p4.Pt() * sin(dilep_p4.Phi());
+	BosonPlusMet->SetX(metX+ZX);
+	BosonPlusMet->SetY(metY+ZY);
+	bosonPt = dilep_p4.Pt();
       }
-      else {
-	removedzllLep_ = 2;
-	newMet->SetX(metX+lep2X);
-	newMet->SetY(metY+lep2Y);
+      else if (passW) {
+	float lepX = t.lep_pt[0] * cos(t.lep_phi[0]);
+	float lepY = t.lep_pt[0] * sin(t.lep_phi[0]);
+	BosonPlusMet->SetX(metX+lepX);
+	BosonPlusMet->SetY(metY+lepY);
+	modifiedmt_ = sqrt( 2 * t.met_pt * t.lep_pt[0] * ( 1 - cos( t.met_phi - t.lep_phi[0]) ) ); //recalculated MT
       }
       
-      zllmet_ = newMet->Mod(); //alternate MET
-      if (removedzllLep_ == 1) zllmt_ = sqrt( 2 * newMet->Mod() * t.lep_pt[1] * ( 1 - cos( newMet->Phi() - t.lep_phi[1]) ) ); //recalculated MT
-      else if (removedzllLep_ == 2) zllmt_ = sqrt( 2 * newMet->Mod() * t.lep_pt[0] * ( 1 - cos( newMet->Phi() - t.lep_phi[0]) ) ); //recalculated MT
+      bosonScale_ = BosonPlusMet->Mod() / bosonPt; 
 
       //min MT
-      if (zllmt_ < 20) continue;
-
+      if (modifiedmt_ < 20) passZ = false;
+      //if (modifiedmt_ > 100) passW = false;
+      
       //classify
       bool isDilepton = false;
       if (t.ngenLep + t.ngenTau >= 2) isDilepton = true;      
 
-      // ---- re-weighting based on GJets studies ----
+      // ---- END SELECTION ----
+      if (!passW && !passZ) continue;
 
-      //first get boson+MET bin
-      TVector2* ZPlusMet = new TVector2;
-      float ZX = dilep_p4.Pt() * cos(dilep_p4.Phi());
-      float ZY = dilep_p4.Pt() * sin(dilep_p4.Phi());
-      ZPlusMet->SetX(metX+ZX);
-      ZPlusMet->SetY(metY+ZY);
-      bosonScale_ = ZPlusMet->Mod() / dilep_p4.Pt(); 
+      //truth matching for W
+      bool softlepMatched = false;
+      if (!t.isData){
+	double minDR = 999;
+	for(int ilep = 0; ilep < t.ngenLep; ilep++){
+	  if (abs(t.genLep_pdgId[ilep]) != abs(t.lep_pdgId[0])) continue;
+	  float thisDR = DeltaR(t.genLep_eta[ilep], t.lep_eta[0], t.genLep_phi[ilep], t.lep_phi[0]);
+	  if (thisDR < minDR) minDR = thisDR;
+	}
+	if (minDR < 0.5) softlepMatched = true;
+
+	//if still not matched, check genLepFromTau
+	if (!softlepMatched){
+	  minDR = 999;
+	  for(int ilep = 0; ilep < t.ngenLepFromTau; ilep++){
+	    if (abs(t.genLepFromTau_pdgId[ilep]) != abs(t.lep_pdgId[0])) continue;
+	    float thisDR = DeltaR(t.genLepFromTau_eta[ilep], t.lep_eta[0], t.genLepFromTau_phi[ilep], t.lep_phi[0]);
+	    if (thisDR < minDR) minDR = thisDR;
+	  }
+	  if (minDR < 0.5) softlepMatched = true;
+	}
+
+	if(!softlepMatched){
+	  if (abs(t.lep_mcMatchId[0]) == 24) softlepMatched = true;
+	}
+      }
+	
       
       //load GJets file with reweighting
       if (!t.isData) {
-	if (zllmet_ > 200 && zllmet_ < 300) {
+	if (modifiedmet_ > 200 && modifiedmet_ < 300) {
 	  metScale_ = h_weightMET200->GetBinContent(h_weightMET200->FindBin(bosonScale_));
 	}
-	else if (zllmet_ > 300 && zllmet_ < 500) {
+	else if (modifiedmet_ > 300 && modifiedmet_ < 500) {
 	  metScale_ = h_weightMET300->GetBinContent(h_weightMET300->FindBin(bosonScale_));
 	}
-	else if (zllmet_ > 500) {
+	else if (modifiedmet_ > 500) {
 	  metScale_ = h_weightMET500->GetBinContent(h_weightMET500->FindBin(bosonScale_));
 	}
       }
@@ -326,18 +381,34 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       //plot
       string suf = "";
 
-      if (zllmet_ > 200) fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET200"+suf);
-      if (zllmet_ > 150) fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET150"+suf);
-      if (zllmet_ > 100) fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET100"+suf);
-      if (zllmet_ > 50)  fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET50"+suf);
-
-      if (isDilepton) suf += "Dilepton";
-      else suf += "Fake";
-      
-      if (zllmet_ > 200) fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET200"+suf);
-      if (zllmet_ > 150) fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET150"+suf);
-      if (zllmet_ > 100) fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET100"+suf);
-      if (zllmet_ > 50)  fillHistosZll(CRZllBase.crslHistMap,"crZllbaseZeroB", "MET50"+suf);
+      if (passZ) {
+	if (modifiedmet_ > 200) fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET200"+suf);
+	if (modifiedmet_ > 150) fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET150"+suf);
+	if (modifiedmet_ > 100) fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET100"+suf);
+	if (modifiedmet_ > 50)  fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET50"+suf);
+	
+	if (isDilepton) suf += "Dilepton";
+	else suf += "Fake";
+	
+	if (modifiedmet_ > 200) fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET200"+suf);
+	if (modifiedmet_ > 150) fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET150"+suf);
+	if (modifiedmet_ > 100) fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET100"+suf);
+	if (modifiedmet_ > 50)  fillHistosZll(CRZllBase.crdyHistMap,"crZllbaseZeroB", "MET50"+suf);
+      }
+      else if (passW) {
+	if (t.met_pt > 200) fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET200"+suf);
+	if (t.met_pt > 150) fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET150"+suf);
+	if (t.met_pt > 100) fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET100"+suf);
+	if (t.met_pt > 50)  fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET50"+suf);
+	
+	if (softlepMatched) suf += "Onelep";
+	else suf += "Fake";
+	
+	if (t.met_pt > 200) fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET200"+suf);
+	if (t.met_pt > 150) fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET150"+suf);
+	if (t.met_pt > 100) fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET100"+suf);
+	if (t.met_pt > 50)  fillHistosW(CRWBase.crslHistMap,"crWbaseZeroB", "MET50"+suf);	
+      }
       
     }//end loop on events in a file
   
@@ -358,7 +429,8 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
-  savePlotsDir(CRZllBase.crslHistMap,outfile_,"crZllbaseZeroB");
+  savePlotsDir(CRZllBase.crdyHistMap,outfile_,"crZllbaseZeroB");
+  savePlotsDir(CRWBase.crslHistMap,outfile_,"crWbaseZeroB");
 
   //---------------------
   // Write and Close file
@@ -399,21 +471,51 @@ void ZllLooper::fillHistosZll(std::map<std::string, TH1*>& h_1d, const std::stri
   float zllmtbins[4] = {20., 100., 130., 300.};
   
   //zllCR specific plots
-  plot1D("h_zllmt"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
-  plot1D("h_zllmtbins"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 3, mtbins);
-  plot1D("h_zllAltmtbins"+s,            zllmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 3, zllmtbins);
-  plot1D("h_zllmet"+s,       zllmet_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+  plot1D("h_zllmt"+s,            modifiedmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_zllmtbins"+s,            modifiedmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 3, mtbins);
+  plot1D("h_zllAltmtbins"+s,            modifiedmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 3, zllmtbins);
+  plot1D("h_zllmet"+s,       modifiedmet_,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
 
   if (metScale_ != -1) {
-    plot1D("h_zllmtScaled"+s,            zllmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
-    plot1D("h_zllmtbinsScaled"+s,            zllmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 3, mtbins);
-    plot1D("h_zllAltmtbinsScaled"+s,            zllmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 3, zllmtbins);
-    plot1D("h_zllmetScaled"+s,       zllmet_,   evtweight_*metScale_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+    plot1D("h_zllmtScaled"+s,            modifiedmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+    plot1D("h_zllmtbinsScaled"+s,            modifiedmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 3, mtbins);
+    plot1D("h_zllAltmtbinsScaled"+s,            modifiedmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 3, zllmtbins);
+    plot1D("h_zllmetScaled"+s,       modifiedmet_,   evtweight_*metScale_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
   }
   
   plot1D("h_removedZlllep"+s,       removedzllLep_,   evtweight_, h_1d, "removedLep", 3, 0, 3);
   if (removedzllLep_ == 1) plot1D("h_removedZllleppt"+s,      t.lep_pt[0],   evtweight_, h_1d, ";rem p_{T}(lep) [GeV]", 200, 0, 1000);
   else if (removedzllLep_ == 2) plot1D("h_removedZllleppt"+s,      t.lep_pt[1],   evtweight_, h_1d, ";rem p_{T}(lep) [GeV]", 200, 0, 1000);
+  
+  outfile_->cd();
+  return;
+}
+
+void ZllLooper::fillHistosW(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s) {
+
+  if (dirname.size()) {
+    TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(dirname.c_str());
+    } 
+    dir->cd();
+  } else {
+    outfile_->cd();
+  }
+
+  //mt bins
+  float mtbins[4] = {20., 90., 120., 300.};
+  
+  //WCR specific plots
+  plot1D("h_Wmt"+s,            modifiedmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  plot1D("h_Wmtbins"+s,            modifiedmt_,   evtweight_, h_1d, ";M_{T} [GeV]", 3, mtbins);
+  plot1D("h_Wmet"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+
+  if (metScale_ != -1) {
+    plot1D("h_WmtScaled"+s,            modifiedmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+    plot1D("h_WmtbinsScaled"+s,            modifiedmt_,   evtweight_*metScale_, h_1d, ";M_{T} [GeV]", 3, mtbins);
+    plot1D("h_WmetScaled"+s,       t.met_pt,   evtweight_*metScale_, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+  }
   
   outfile_->cd();
   return;
