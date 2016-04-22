@@ -330,12 +330,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_light_DN_ = 0;
   h_sig_avgweight_isr_ = 0;
   if ((doScanWeights || applyBtagSF) && 
-      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChi") != std::string::npos) )) {
+      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2-4bd") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
+    else if (sample.find("TChiNeu") != std::string::npos) scan_name = sample.substr(0,7);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -511,7 +512,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //only keep single mass point in scans
      if (isSignal_ 
 	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
-	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu")
+	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
+	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
@@ -530,9 +532,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       
       // apply relevant weights to MC
       if (!t.isData) {
-	if (isSignal_ && doScanWeights && sample  == "TChiNeu") {
-	  //	  evtweight_ = lumi * 386.936 / nEvents; // assumes xsec is already filled correctly for mChargino = 300
+	if (isSignal_ && doScanWeights && sample  == "TChiNeu_100_90") {
 	  evtweight_ = lumi * 22670.1 / nEvents; // assumes xsec is already filled correctly for mChargino = 100
+	}
+	else if (isSignal_ && doScanWeights && sample  == "TChiNeu_300_285") {
+	  evtweight_ = lumi * 386.936 * 50 / nEvents; // assumes xsec is already filled correctly for mChargino = 300, scales up by 50x
 	}
 	else if (isSignal_ && doScanWeights) {
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
@@ -542,7 +546,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
-	if (applyBtagSF && sample  != "TChiNeu") {
+	if (applyBtagSF && (sample.find("TChi") == std::string::npos)) {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
 	  evtweight_ *= t.weight_btagsf;
@@ -879,10 +883,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  softlepId_    = hardlepId_     ;
 	  softlepmt_    = hardlepmt_     ;
 
-	  doSoftLepCRplots = true;
 	  if (abs(softlepId_) == 13) doSoftLepMuCRplots = true;
 	  if (abs(softlepId_) == 11) doSoftLepElCRplots = true;
-	  
+
+	  //add muon only requirement to CR1L
+	  if (abs(softlepId_) == 13) doSoftLepCRplots = true;
+
 	}// additional cuts for CR1L 
       }// CR1L
       else if ( foundsoftlep && foundhardlep && t.nlep == 2) { // CR2L
@@ -1265,7 +1271,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  save1Lelplots = true;
 	  fillHistosCR1L("cr1Lel");
 	  if (!t.isData) {
-	    if (softlepMatched && isDilepton) fillHistosCR1L("cr1Lmu", "Dilepton");
+	    if (softlepMatched && isDilepton) fillHistosCR1L("cr1Lel", "Dilepton");
 	    else if (softlepMatched) fillHistosCR1L("cr1Lel","Onelep");
 	    else fillHistosCR1L("cr1Lel","Fake");
 	  }
@@ -2210,7 +2216,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       for (int igen = 0; igen < t.ngenStat23; ++igen) {
 	if (abs(t.genStat23_pdgId[igen]) == 24) {trueWpt = t.genStat23_pt[igen]; break;}
       }
-      plot1D("h_trueWpt"+s,   trueWpt ,   evtweight_, h_1d, ";W p_{T} [GeV]", 500, 0, 500);
+      plot1D("h_trueWpt"+s,   trueWpt ,   evtweight_, h_1d, ";W p_{T} [GeV]", 200, 0, 1000);
     }
     
     //dPhi for diff Wpt cuts
@@ -2285,13 +2291,13 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
 
   float lepDR = DeltaR(softlepeta_, hardlepeta_, softlepphi_, hardlepphi_);
 
-  plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
+  //plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250); //filled in fillHistosSingleSoftLepton
   plot1D("h_mtHard"+s,            mt_hard,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtAlternate"+s,            mt_alt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_highleppt"+s,      hardleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
-  plot1D("h_deltaRLep"+s,       lepDR, evtweight_, h_1d, ";deltaR", 200, 0, 2);
+  plot1D("h_deltaRLep"+s,       lepDR, evtweight_, h_1d, ";deltaR", 1000, 0, 10);
   plot1D("h_deltaEtaLep"+s,       hardlepeta_-softlepeta_, evtweight_, h_1d, ";deltaEta", 80, -4, 4);
   plot1D("h_deltaPhiLep"+s,       hardlepphi_-softlepphi_, evtweight_, h_1d, ";deltaPhi", 140, -7, 7);
   plot1D("h_deltaPtLep"+s,       hardleppt_-softleppt_, evtweight_, h_1d, ";deltaPt", 200, 0, 200);
