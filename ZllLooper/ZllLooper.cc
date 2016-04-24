@@ -235,13 +235,15 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       metScale_ = -1;
       
       // require baseline selection
-      bool pass_selection = (t.ht > 200 && t.nJet30 > 1 && t.nBJet20 == 0);
+      //      bool pass_selection = (t.ht > 200 && t.nJet30 > 1 && t.nBJet20 == 0);
+      bool pass_selection = (t.ht > 200 && t.nJet30 > 1);
+
       if (!pass_selection) continue;
 
       //W specific selection
       if (t.nlepIso != 1) passW = false;
       if (t.nlep != 1) passW = false;
-      if (t.lep_pt[0] < 30 || t.met_pt < 200) passW = false;
+      if (t.lep_pt[0] > 20 || t.met_pt < 200) passW = false;
 
       //Z specific selection
       if (t.nlepIso != 2) passZ = false;
@@ -322,13 +324,19 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 	BosonPlusMet->SetX(metX+lepX);
 	BosonPlusMet->SetY(metY+lepY);
 	modifiedmt_ = sqrt( 2 * t.met_pt * t.lep_pt[0] * ( 1 - cos( t.met_phi - t.lep_phi[0]) ) ); //recalculated MT
+	modifiedmet_ = BosonPlusMet->Mod();
+	for (int igen = 0; igen < t.ngenStat23; ++igen) {
+	  if (abs(t.genStat23_pdgId[igen]) == 24) {bosonPt = t.genStat23_pt[igen]; break;}
+	}
+
       }
-      
-      bosonScale_ = BosonPlusMet->Mod() / bosonPt; 
+      if (bosonPt > 0)
+	bosonScale_ = BosonPlusMet->Mod() / bosonPt; 
+      else bosonScale_ = 1;
 
       //min MT
       if (modifiedmt_ < 20) passZ = false;
-      //if (modifiedmt_ > 100) passW = false;
+      if (modifiedmt_ < 20) passW = false;
       
       //classify
       bool isDilepton = false;
