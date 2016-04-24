@@ -200,6 +200,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
 
   }//loop over bins
 
+  histMap["h_predMCshape"] = sameBin(histMap["h_crMC"], "h_mtbinsMCshape");
+  for (int ibin = 0; ibin <= histMap["h_crData"]->GetSize(); ibin++) {
+    histMap["h_predMCshape"]->SetBinContent(ibin, histMap["h_srMCDilepton"]->GetBinContent(ibin));
+    histMap["h_predMCshape"]->SetBinError(ibin, histMap["h_srMCDilepton"]->GetBinError(ibin));
+  }
+  histMap["h_predMCshape"]->Scale(histMap["h_pred"]->Integral()/histMap["h_srMCDilepton"]->Integral());
+  
   //write hists to output file
   cout << "Saving hists for " << dir_name << "..." << endl;
   fOut->cd();
