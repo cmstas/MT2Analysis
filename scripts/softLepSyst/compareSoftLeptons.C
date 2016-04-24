@@ -460,11 +460,16 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
       h_axis_ratio->GetYaxis()->SetRangeUser(0.1,9.99);
       ratiopad->SetLogy();
     }
-    if (TString(histname).Contains("DataVs")) h_axis_ratio->GetYaxis()->SetTitle("Data/Pred");
-    if (TString(histname).Contains("TopVsW")) {
-      h_axis_ratio->GetYaxis()->SetRangeUser(0.1,9.99);
-      ratiopad->SetLogy();
+    if (TString(histname).Contains("cr2LpredAlt")  ) {
+      h_axis_ratio->GetYaxis()->SetTitle("Int/Bin");
+      h_axis_ratio->GetYaxis()->SetRangeUser(0.1,1.99);
+      //ratiopad->SetLogy();
     }
+    if (TString(histname).Contains("DataVs")) h_axis_ratio->GetYaxis()->SetTitle("Data/Pred");
+//    if (TString(histname).Contains("TopVsW")) {
+//      h_axis_ratio->GetYaxis()->SetRangeUser(0.1,9.99);
+//      ratiopad->SetLogy();
+//    }
     h_axis_ratio->GetXaxis()->SetTickLength(0.07);
     h_axis_ratio->GetXaxis()->SetTitleSize(0.);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.);
@@ -535,12 +540,16 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
   binMultiplier = 3;
   if (mtbin != -1) binMultiplier = 1;
   
+  
   for(unsigned int i = 0; i < filesSR.size(); i++) {
     TH1F* h_sr_yields = new TH1F("h_sr_yields", "h_sr_yields", regions.size(), 0, regions.size());
     TH1F* h_sr_yields_binned = new TH1F("h_sr_yields_binned", "h_sr_yields_binned", regions.size()*binMultiplier, 0, regions.size()*binMultiplier);
     TH1F* h_sr_yields_binned_norm = new TH1F("h_sr_yields_binned_norm", "h_sr_yields_binned_norm", regions.size()*binMultiplier, 0, regions.size()*binMultiplier);
     TH1F* h_single_sr_yields = new TH1F("h_single_sr_yields", "h_single_sr_yields", regions.size(), 0, regions.size()); // needed for k_HT
     TH1F* h_cr_yields = new TH1F("h_cr_yields", "h_cr_yields", regions.size(), 0, regions.size());
+
+    float renormalizeCRafterModifying = 0;
+
     for(unsigned int j = 0; j < regions.size(); j++) {
       cout<<"looking at region "<<regions.at(j)<<endl;
       TString fullhistname = Form("%s/%s", regions.at(j).Data(), histoNames.at(i).Data());
@@ -552,7 +561,11 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
       TH1F* hSRsingle;
       if (hSR) hSRsingle = (TH1F*) filesSR.at(i)->Get(fullhistname)->Clone("single");
       TH1F* hCR = (TH1F*) filesCR.at(i)->Get(fullhistnameCR);
-      
+      if (legendNames.at(i).Contains("x2")) {
+        TH1F* hCRrenormalize = (TH1F*) filesSR.at(i)->Get(fullhistnameCR);
+        if (hCRrenormalize) renormalizeCRafterModifying += hCRrenormalize->Integral();
+      }
+
       if (CRdir == "cr2L") { // special treatment for 2L control regions: combine "L" and "M"
         // Add regions
         TString fullhistnameCRadded = fullhistnameCR;
@@ -644,14 +657,21 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
         
     }// end of loop over regions
     
-    
     TH1F* h_R_sr_cr = (TH1F*) h_sr_yields->Clone("h_R_sr_cr");
+    h_R_sr_cr->Print("all");
+    h_cr_yields->Print("all");
+    if (renormalizeCRafterModifying != 0) {
+      cout<<"Renormalizing CR by a factor of "<< renormalizeCRafterModifying / h_cr_yields->Integral() << endl;
+      h_cr_yields->Scale(renormalizeCRafterModifying / h_cr_yields->Integral());
+    }
+    h_cr_yields->Print("all");
     h_R_sr_cr->Divide(h_cr_yields);
+    h_R_sr_cr->Print("all");
     h_R_sr_cr->SetDirectory(0);
     h_R_sr_cr->SetName(legendNames.at(i));
-    //h_R_sr_cr->Print("all");
+    h_R_sr_cr->Print("all");
     output.push_back(h_R_sr_cr);
-    //h_R_sr_cr->Draw();
+    h_R_sr_cr->Draw();
     if (CRdir == "cr2L") {
       TH1F* h_K_srsingle_sr = (TH1F*) h_single_sr_yields->Clone("h_K_srsingle_sr");
       h_K_srsingle_sr->Divide(h_sr_yields);
@@ -845,13 +865,20 @@ void compareSoftLeptons1L2L(){
   
   
   string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
-  string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
+  string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
 
   TFile* sr1 = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
   TFile* cr1 = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
   TFile* wfile = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
+  TFile* wPolfile = new TFile(Form("%s/WTopSL.root",input_dir2.c_str()));
   TFile* dibfile = new TFile(Form("%s/diboson.root",input_dir.c_str()));
   TFile* tfile = new TFile(Form("%s/top.root",input_dir.c_str()));
+  TFile* twfile = new TFile(Form("%s/tslWjets.root",input_dir.c_str()));
+  TFile* ttwfile = new TFile(Form("%s/topTopWjets.root",input_dir.c_str()));
+  TFile* twwfile = new TFile(Form("%s/topWjetsWjets.root",input_dir.c_str()));
+  TFile* ttwwfile = new TFile(Form("%s/topTopWjetsWjets.root",input_dir.c_str()));
+  TFile* ttwwwfile = new TFile(Form("%s/tslTslWjetsWjetsWjets.root",input_dir.c_str()));
+  TFile* tttwwfile = new TFile(Form("%s/tslTslTslWjetsWjets.root",input_dir.c_str()));
   filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("default"); histoNames.push_back("h_mtbins_tau3p_DNDilepton"); purpose.push_back("black point"); //h_mtbinsDilepton"); // something is broken here
 //  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("LepEff Up"); histoNames.push_back("h_mtbins_lepeff_UPDilepton"); purpose.push_back("colored point");
 //  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("LepEff Dn"); histoNames.push_back("h_mtbins_lepeff_DNDilepton"); purpose.push_back("colored point");
@@ -868,7 +895,7 @@ void compareSoftLeptons1L2L(){
   
   setRegions(regions);
   setRegionsDilep(regionsDilep);
-  // Possibilities: LepEff, TauEff, TopVsW,
+  // Possibilities: LepEff, TauEff, TopVsW, Wpol
   std::string syst = "TopVsW";
   // make histograms with few regions to get R and k_MET
   outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
@@ -884,23 +911,39 @@ void compareSoftLeptons1L2L(){
 
   
   
-  TFile* cr2 = new TFile(Form("%s/allBkg.root",input_dir2.c_str()));
   filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
-  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("LepEff Up"); histoNames.push_back("h_mtbins_lepeff_UPOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("LepEff Dn"); histoNames.push_back("h_mtbins_lepeff_DNOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Tau1prong Up"); histoNames.push_back("h_mtbins_tau1p_UPOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Tau1prong Dn"); histoNames.push_back("h_mtbins_tau1p_DNOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Tau3prong Up"); histoNames.push_back("h_mtbins_tau3p_UPOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Tau3prong Dn"); histoNames.push_back("h_mtbins_tau3p_DNOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Btag HF Up"); histoNames.push_back("h_mtbins__btagsf_heavy_UPOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Btag HF Dn"); histoNames.push_back("h_mtbins__btagsf_heavy_DNOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Btag LF Up"); histoNames.push_back("h_mtbins__btagsf_light_UPOnelep"); purpose.push_back("colored point");
-//  filesSR.push_back(sr1);  filesCR.push_back(cr2); legendNames.push_back("Btag LF Dn"); histoNames.push_back("h_mtbins__btagsf_light_DNOnelep"); purpose.push_back("colored point");
-  filesSR.push_back(tfile);  filesCR.push_back(cr2); legendNames.push_back("100% Top"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
-  filesSR.push_back(wfile);  filesCR.push_back(cr2); legendNames.push_back("100% W+jets"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("LepEff Up"); histoNames.push_back("h_mtbins_lepeff_UPOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("LepEff Dn"); histoNames.push_back("h_mtbins_lepeff_DNOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Tau1prong Up"); histoNames.push_back("h_mtbins_tau1p_UPOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Tau1prong Dn"); histoNames.push_back("h_mtbins_tau1p_DNOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Tau3prong Up"); histoNames.push_back("h_mtbins_tau3p_UPOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Tau3prong Dn"); histoNames.push_back("h_mtbins_tau3p_DNOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Btag HF Up"); histoNames.push_back("h_mtbins__btagsf_heavy_UPOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Btag HF Dn"); histoNames.push_back("h_mtbins__btagsf_heavy_DNOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Btag LF Up"); histoNames.push_back("h_mtbins__btagsf_light_UPOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("Btag LF Dn"); histoNames.push_back("h_mtbins__btagsf_light_DNOnelep"); purpose.push_back("colored point");
 
-  
+  filesSR.push_back(twfile);  filesCR.push_back(twfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  //filesSR.push_back(sr1);  filesCR.push_back(cr1); legendNames.push_back("really default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+
+  //filesSR.push_back(twfile);  filesCR.push_back(tfile); legendNames.push_back("100% Top x2"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(twfile);  filesCR.push_back(wfile); legendNames.push_back("100% W+jets x2"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(ttwfile);  filesCR.push_back(twfile); legendNames.push_back("Top x2"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(ttwfile);  filesCR.push_back(twfile); legendNames.push_back("Top x2"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  ///filesSR.push_back(twfile);  filesCR.push_back(ttwfile); legendNames.push_back("Top x3"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(twwfile);  filesCR.push_back(twfile); legendNames.push_back("W+jets x2"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(ttwwwfile);  filesCR.push_back(ttwwwfile); legendNames.push_back("W+jets +50%"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(tttwwfile);  filesCR.push_back(tttwwfile); legendNames.push_back("Top +50%"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(twfile);  filesCR.push_back(twwfile); legendNames.push_back("W+jets x3"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(twfile);  filesCR.push_back(ttwwfile); legendNames.push_back("All x2"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+//  filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("PolW Up"); histoNames.push_back("h_mtbins_polW_UPOnelep"); purpose.push_back("colored point");
+//  filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("PolW Dn"); histoNames.push_back("h_mtbins_polW_DNOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("PolW+ Up"); histoNames.push_back("h_mtbins_polWp_UPOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("PolW+ Dn"); histoNames.push_back("h_mtbins_polWp_DNOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("PolW- Up"); histoNames.push_back("h_mtbins_polWm_UPOnelep"); purpose.push_back("colored point");
+  //filesSR.push_back(wPolfile);  filesCR.push_back(wPolfile); legendNames.push_back("PolW- Dn"); histoNames.push_back("h_mtbins_polWm_DNOnelep"); purpose.push_back("colored point");
   outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   std::vector<TH1F*> histosCR1       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true);
   makePlot( histosCR1 , legendNames , purpose,   "OnelepTFs_"+syst ,  "" ,  "Transfer Factor" ,  false ,  true  );
@@ -938,7 +981,8 @@ void compareSoftLeptonsClosure1L2L(){
 
   
   //string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
-  string input_dir = "../../SoftLepLooper/output/softLep/";
+  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLepMark15Apr16/";
+  //string input_dir = "../../SoftLepLooper/output/softLep/";
   
 
   TFile* bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
@@ -956,9 +1000,10 @@ void compareSoftLeptonsClosure1L2L(){
   makePlot( outputBinnedSR , legendNames , purpose,   "cr2Lpred" ,  "" ,  "Entries" ,  true ,  true  );
 
   filesSR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
-  filesSR.push_back(bkg);  legendNames.push_back("MC Truth"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
-  filesSR.push_back(pred2L);  legendNames.push_back("Dilepton Prediction"); histoNames.push_back("h_mtbins");  purpose.push_back("colored line");
-  filesSR.push_back(pred2LAlt);  legendNames.push_back("Alt. Dilepton Prediction"); histoNames.push_back("h_mtbins");  purpose.push_back("colored line");
+//  filesSR.push_back(bkg);  legendNames.push_back("MC Truth"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+//  filesSR.push_back(pred2L);  legendNames.push_back("Dilepton Prediction"); histoNames.push_back("h_mtbins");  purpose.push_back("black point");
+  filesSR.push_back(pred2LAlt);  legendNames.push_back("Integrate over MT"); histoNames.push_back("h_mtbinsMCshape");  purpose.push_back("black point");
+  filesSR.push_back(pred2LAlt);  legendNames.push_back("Bin in MT"); histoNames.push_back("h_mtbins");  purpose.push_back("colored point");
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
   makePlot( outputBinnedSR , legendNames , purpose,   "cr2LpredAlt" ,  "" ,  "Entries" ,  true ,  true  );
@@ -1027,20 +1072,24 @@ void compareSoftLeptonsEstimatesToData(){
 
   
   string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
+  string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
   
   TFile* fake = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
   TFile* onelep = new TFile(Form("%s/pred_CR1L.root",input_dir.c_str()));
   TFile* dilep = new TFile(Form("%s/pred_CR2L.root",input_dir.c_str()));
   TFile* all = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
-  TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
+//  TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
 //  TFile* T5qqqqWW = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str()));
-//  TFile* T5qqqqWW2 = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str()));
+  //  TFile* T5qqqqWW2 = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str()));
+  TFile* TChiNeu = new TFile(Form("%s/TChiNeu_100_90.root",input_dir.c_str()));
+  
   
   filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
   filesSR.push_back(all);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_mtbinsFake"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("stack");
-  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
+//  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
+  filesSR.push_back(TChiNeu);  legendNames.push_back("TChiNeu 100 90"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
 //  filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW_1025_775"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 //  filesSR.push_back(T5qqqqWW2);  legendNames.push_back("T5qqqqWW_1100_500"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 
@@ -1048,11 +1097,11 @@ void compareSoftLeptonsEstimatesToData(){
   
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC_T24bd" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC_TChiNeu" ,  "" ,  "Entries" ,  true ,  true  );
   
   filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
   filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
-  filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_pred"); purpose.push_back("stack");
+  filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
   filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
   filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
 
