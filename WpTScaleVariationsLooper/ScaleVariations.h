@@ -31,7 +31,7 @@ class ScaleVariations {
 
   void SetSignalRegions();
   void loop(TChain* chain, std::string sample, std::string output_dir);
-  void fillHistosDilepTop(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+  void fillHistosScaleVar(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
 
  private:
 
@@ -39,7 +39,7 @@ class ScaleVariations {
   mt2tree t;
   float evtweight_;
   std::map<std::string, TH1*> h_1d_global;
-  SR CRDilepTopBase;
+  SR CRScaleVarBase;
   TH1D* h_nvtx_weights_;
 };
 
