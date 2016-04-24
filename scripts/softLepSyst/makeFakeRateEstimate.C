@@ -253,6 +253,22 @@ void makeFRpred(TFile* f_data ,TFile* f_mc ,TFile* f_out , TH1D* h_FRdataEewk, T
     MCpredMu->Write();
   }
   
+  //Make prediction with MC for bins 1 and 2, and data-driven (if available) for bin 3
+  TH1D* h_predTotMC12 = (TH1D*) h_predTot->Clone("h_pred"+suffix+"MC12");
+  if (MCpred) {
+    h_predTotMC12->SetBinContent(1, MCpred->GetBinContent(1));
+    h_predTotMC12->SetBinError(1, MCpred->GetBinError(1));
+    h_predTotMC12->SetBinContent(2, MCpred->GetBinContent(2));
+    h_predTotMC12->SetBinError(2, MCpred->GetBinError(2));
+    if (h_predTot->GetBinContent(3)==0) {
+      h_predTotMC12->SetBinContent(3, MCpred->GetBinContent(3));
+      h_predTotMC12->SetBinError(3, MCpred->GetBinError(3));
+    }
+  }
+
+  
+  h_predTotMC12->Write();
+  
   return;
   
 }
