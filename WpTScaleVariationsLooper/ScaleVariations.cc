@@ -231,20 +231,14 @@ void ScaleVariations::loop(TChain* chain, std::string sample, std::string output
 	  { foundEl++; charge *= t.lep_charge[ilep];}
       }
 
-      bool pass_charge = (charge < 0);
-      bool pass_emu = (foundMu==1) && (foundEl==1);
-      bool pass_ee  = (foundEl==2) && (t.zll_mass < 75 || t.zll_mass > 105);
-      bool pass_mm  = (foundMu==2) && (t.zll_mass < 75 || t.zll_mass > 105);
-      bool pass_met = (t.met_pt > 100);
 
-      if (!pass_charge || !pass_met || t.nBJet20<1) continue;
-
+      if ( !(foundMu || foundEl) || t.met_pt < 30) continue; // basic W selection
       
   
-      fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase");
-      if ( pass_emu) fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase","EM");
-      else if ( pass_ee ) fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase","EE");
-      else if ( pass_mm ) fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase","MM");
+      fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crwbase");
+//      if ( pass_emu) fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase","EM");
+//      else if ( pass_ee ) fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase","EE");
+//      else if ( pass_mm ) fillHistosScaleVar(CRScaleVarBase.crslHistMap,"crttdlbase","MM");
       
     }//end loop on events in a file
   
@@ -265,7 +259,7 @@ void ScaleVariations::loop(TChain* chain, std::string sample, std::string output
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
-  savePlotsDir(CRScaleVarBase.crslHistMap,outfile_,"crttdlbase");
+  savePlotsDir(CRScaleVarBase.crslHistMap,outfile_,"crwbase");
 
   //---------------------
   // Write and Close file
@@ -306,7 +300,18 @@ void ScaleVariations::fillHistosScaleVar(std::map<std::string, TH1*>& h_1d, cons
   plot1D("h_nJet30"+s,     t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
   plot1D("h_nBJet20"+s,    t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
   plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";MET", 100, 0, 1000);
+  plot1D("h_leppt"+s,       t.lep_pt[0],   evtweight_, h_1d, ";lepton p_{T}", 100, 0, 1000);
   
+  for ( int i = 0; i < t.ngenStat23; i++) {
+    int ID = fabs(t.genStat23_pdgId[i]);
+    if (ID!=24) continue;
+    plot1D("h_WpT"+s,       t.genStat23_pt[i],   evtweight_, h_1d, ";W p_{T}", 60, 0, 600);
+    plot1D("h_WpT_ScaleCT"+s,       t.genStat23_pt[i],   evtweight_ * t.LHEweight_wgt[0], h_1d, ";W p_{T}", 50, 100, 600);
+    plot1D("h_WpT_ScaleUP"+s,       t.genStat23_pt[i],   evtweight_ * t.LHEweight_wgt[4], h_1d, ";W p_{T}", 50, 100, 600);
+    plot1D("h_WpT_ScaleDN"+s,       t.genStat23_pt[i],   evtweight_ * t.LHEweight_wgt[8], h_1d, ";W p_{T}", 50, 100, 600);
+
+  }
+
   outfile_->cd();
   return;
 }

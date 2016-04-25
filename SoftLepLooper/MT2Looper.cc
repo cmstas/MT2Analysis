@@ -15,6 +15,7 @@
 #include "TBenchmark.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include "TRandom3.h"
 
 // Tools
 #include "../CORE/Tools/utils.h"
@@ -77,8 +78,8 @@ bool applyWeights = false;
 bool applyBtagSF = true;
 // turn on to apply lepton sf to central value
 bool applyLeptonSF = true;
-// turn on to apply reweighting to ttbar based on top pt
-bool applyTopPtReweight = true;
+// turn on to apply reweighting to ttbar based on top pt --> should be used as uncertainty, not correction
+bool applyTopPtReweight = false;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
 bool applyLeptonSFfastsim = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -103,9 +104,11 @@ bool doMinimalPlots = true;
 bool doCombineElMu = true;
 // make fake-rate hists
 bool calculateFakeRates = false;
-bool applyFakeRates = true;
+bool applyFakeRates = false;
 // do pre-scale reweighting (for fake rates)
 bool doPrescaleWeight = false;
+// turn on to apply W polarization systematic uncertainty
+bool doWpolarizationReweight = true;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -586,6 +589,58 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  evtweight_ *= t.weight_toppt;
 	}
 
+	if ( doWpolarizationReweight && !isSignal_ && (t.ngenLep + t.ngenTau == 1)) { // only for 1 W boson
+	  // Determine cosThetaStar	  
+	  //4vectors in transverse plane
+	  //sum gives "transverse W" vector
+	  bool foundTop = false;
+	  int lepCharge = 0;
+	  TLorentzVector Lvec(0,0,0,0);
+	  TLorentzVector Nvec(0,0,0,0);
+	  TLorentzVector Wvec(0,0,0,0); 
+	  TVector3 Wrf(0,0,0); //3vector to boost to W rest frame
+	  TLorentzVector Lrf(0,0,0,0); //4vector of lepton boosted to W rest frame
+	  int found = 0;
+	  float costhetastar = 0;
+	  for ( int i = 0; i < t.ngenStat23; i++) {
+	    int ID = fabs(t.genStat23_pdgId[i]);
+	    if (t.genStat23_pt[i] > 5 && (ID==11 || ID==13 || ID==15)) {
+	      Lvec.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++; lepCharge = t.genStat23_charge[i];}
+	    if (t.genStat23_pt[i] > 5 && (ID==12 || ID==14 || ID==16)) {
+	      Nvec.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++;}
+	    if (ID==6) foundTop = true;
+	  }
+	  if (found>1) {
+	    float variation = foundTop ? 0.05 : 0.1;
+	    Wvec = Lvec+Nvec;
+	    Wrf = Wvec.BoostVector(); //boost vector to w rest frame
+	    Lrf = ROOT::Math::VectorUtil::boost(Lvec, -Wrf); // this need a minus sign because we need to invert the boost
+	    costhetastar = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
+	    float weighMultUP = 1 + variation*( 1 - costhetastar )*( 1 - costhetastar );
+	    float weighMultDW = 1 - variation*( 1 - costhetastar )*( 1 - costhetastar );
+//	    cout<<"Lepton: "; Lvec.Print();
+//	    cout<<"Neutrino: "; Nvec.Print();
+//	    cout<<"Wvec: "; Wvec.Print();
+//	    cout<<"Wrf: "; Wrf.Print();
+//	    cout<<"Lrf: "; Lrf.Print();
+//	    cout<<"costhetastar: "<< costhetastar <<endl;
+//	    cout<<"(1-cosThetaStar)^2 "<< ( 1 - costhetastar )*( 1 - costhetastar )<<endl;
+//	    cout<<"weight multiplier UP "<<weighMultUP<<", DW "<<weighMultDW<<endl;
+	    plot1D("h_costhetastar",       costhetastar,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    if (lepCharge > 0) {
+	      evtweight_polWp_UP = evtweight_ * weighMultUP;
+	      evtweight_polWp_DN = evtweight_ * weighMultDW;
+	    }
+	    if (lepCharge > 0) {
+	      evtweight_polWm_UP = evtweight_ * weighMultUP;
+	      evtweight_polWm_DN = evtweight_ * weighMultDW;
+	    }
+	      evtweight_polW_UP  = evtweight_ * weighMultUP;
+	      evtweight_polW_DN  = evtweight_ * weighMultDW;
+	  }
+
+	}
+
       } // !isData
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
@@ -705,7 +760,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	//iso/id requirements
 	if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02) passIsoId = true;
 	if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightIdNoIso[ilep] > 0) passIsoId = true;
+	// Apply Random Smearing to MET
+//	TRandom3 gRand;
+//	gRand.SetSeed( t.evt );
+//	float  smear       = gRand.Gaus(1,0.24);
+//	float mt = sqrt( 2 * t.met_pt*smear * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
+
 	float mt = sqrt( 2 * t.met_pt * t.lep_pt[ilep] * ( 1 - cos( t.met_phi - t.lep_phi[ilep]) ) );
+
 
 	softlepIdx_ = ilep;
 	softleppt_ = t.lep_pt[ilep];
@@ -936,7 +998,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if ( ((doDoubleLepCRplots && passIsoId) || doHardDoubleLepCRplots) && passHardIsoId ) { //ZllCR, overlapping with CR2Ls
 	//OSSF & mll
-	if ( dilepmll_ > 75 && dilepmll_ < 105 && (isEE || isMuMu) ) {
+	//	if ( dilepmll_ > 75 && dilepmll_ < 105 && (isEE || isMuMu) ) {
+	if ( dilepmll_ > 86 && dilepmll_ < 96 && (isEE || isMuMu) ) {
 	  //initialize MET variables
 	  float metX = t.met_pt * cos(t.met_phi);
 	  float metY = t.met_pt * sin(t.met_phi);
@@ -1122,6 +1185,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 //      doSoftLepSRplots = false;
 //      doDoubleLepCRplots = false;
+//      doSoftLepCRplots = false;
+//      doHardDoubleLepCRplots = false;
 
       if (!passJetID) continue;
       
@@ -1369,30 +1434,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}//!doCombineElMu
 
 	//require soft lepton
-	if (softleppt_<20) {
-	  fillHistosZll("crZll","Soft");
-	  if (!t.isData) {
-	    if (isDilepton) fillHistosZll("crZll","SoftDilepton");
-	    else fillHistosZll("crZll","SoftFake");
-	  }
-	  
-	  if (!doCombineElMu){
-	    if (isEE){
-	      fillHistosZll("crZll","SoftEE");
-	      if (!t.isData) {
-		if (isDilepton) fillHistosZll("crZll","SoftEEDilepton");
-		else fillHistosZll("crZll","SoftEEFake");
-	      }
-	    }
-	    else if (isMuMu){
-	      fillHistosZll("crZll","SoftMuMu");
-	      if (!t.isData) {
-		if (isDilepton) fillHistosZll("crZll","SoftMuMuDilepton");
-		else fillHistosZll("crZll","SoftMuMuFake");
-	      }
-	    }
-	  }//!doCombineElMu
-	}//softleppt < 20
+//	if (softleppt_<20) {
+//	  fillHistosZll("crZll","Soft");
+//	  if (!t.isData) {
+//	    if (isDilepton) fillHistosZll("crZll","SoftDilepton");
+//	    else fillHistosZll("crZll","SoftFake");
+//	  }
+//	  
+//	  if (!doCombineElMu){
+//	    if (isEE){
+//	      fillHistosZll("crZll","SoftEE");
+//	      if (!t.isData) {
+//		if (isDilepton) fillHistosZll("crZll","SoftEEDilepton");
+//		else fillHistosZll("crZll","SoftEEFake");
+//	      }
+//	    }
+//	    else if (isMuMu){
+//	      fillHistosZll("crZll","SoftMuMu");
+//	      if (!t.isData) {
+//		if (isDilepton) fillHistosZll("crZll","SoftMuMuDilepton");
+//		else fillHistosZll("crZll","SoftMuMuFake");
+//	      }
+//	    }
+//	  }//!doCombineElMu
+//	}//softleppt < 20
       } //doZllCRplots
       
    }//end loop on events in a file
@@ -1818,7 +1883,7 @@ void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suff
   if (t.isData && !(t.HLT_SingleEl || t.HLT_SingleMu)) return;
   
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
-    if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
+    if (SRVecLep.at(srN).GetName().find("baseZeroB") == std::string::npos) continue; //skip non baseline regions
     if(SRVecLep.at(srN).PassesSelection(values)){
       if (prefix=="crZll" && zllmet_ > 200) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET200"+suffix);
       if (prefix=="crZll" && zllmet_ > 150) fillHistosDoubleLepton(SRVecLep.at(srN).crZllHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MET150"+suffix);
@@ -2003,6 +2068,15 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
       plot3D("h_mtbins_sigscan_lepeff_DN"+s, softlepmt_, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_lepEffDn_, h_1d, ";M_{T} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }
   }
+
+  if ( !t.isData && doWpolarizationReweight && !isSignal_ && (t.ngenLep + t.ngenTau == 1)) { // only for 1 W boson
+    plot1D("h_mtbins_polWp_UP"+s,       softlepmt_,   evtweight_polWp_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_polWp_DN"+s,       softlepmt_,   evtweight_polWp_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_polWm_UP"+s,       softlepmt_,   evtweight_polWm_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
+    plot1D("h_mtbins_polWm_DN"+s,       softlepmt_,   evtweight_polWm_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
+    plot1D("h_mtbins_polW_UP"+s,       softlepmt_,   evtweight_polW_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
+    plot1D("h_mtbins_polW_DN"+s,       softlepmt_,   evtweight_polW_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
+  }
   
   outfile_->cd();
   return;
@@ -2118,7 +2192,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   float wPt  = sqrt(wX*wX + wY*wY);
   //float wPhi = (wX > 0) ? TMath::ATan(wY/wX) : (TMath::ATan(wY/wX) + TMath::Pi()/2);
   plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
-  
+ 
     //polarization stuff
   if (!doMinimalPlots) {
     //3vectors in transverse plane
@@ -2300,9 +2374,9 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_highleppt"+s,      hardleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   plot1D("h_deltaRLep"+s,       lepDR, evtweight_, h_1d, ";deltaR", 1000, 0, 10);
   plot1D("h_deltaEtaLep"+s,       hardlepeta_-softlepeta_, evtweight_, h_1d, ";deltaEta", 80, -4, 4);
-  plot1D("h_deltaPhiLep"+s,       hardlepphi_-softlepphi_, evtweight_, h_1d, ";deltaPhi", 140, -7, 7);
+  plot1D("h_deltaPhiLep"+s,       TVector2::Phi_mpi_pi(hardlepphi_-softlepphi_), evtweight_, h_1d, ";deltaPhi", 140, -7, 7);
   plot1D("h_deltaPtLep"+s,       hardleppt_-softleppt_, evtweight_, h_1d, ";deltaPt", 200, 0, 200);
-  plot1D("h_dilepPt"+s,       dilepp4.Pt(), evtweight_, h_1d, ";Pt", 200, 0, 200);
+  plot1D("h_dilepPt"+s,       dilepp4.Pt(), evtweight_, h_1d, ";Pt", 120, 0, 600);
 
   //save type
   int type = -1;

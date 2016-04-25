@@ -270,6 +270,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   else          ymax*=1.5;
   if (norm) ymin = 0;
   if (saveas.Contains("urity")) { ymin = 0.7; ymax = 1;}
+  if (saveas.Contains("PromptCont")) { ymin = 0.0; ymax = 1.26;}
   if (norm && logplot ) ymin = 0.000011;
   
   if ( xmin==0 ) xmin = sig_hists.at(0)->GetXaxis()->GetXmin();
@@ -1187,6 +1188,33 @@ void compareMultiPlotSoft()
   makeCMSPlot(  files, labels, nplots, "METsmear_mt_shape", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/200 , /*rebin*/ 5 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   
 
+  TString dirMETRes = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/TestMariaReweight/";
+
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dirMETRes+     "wjets_ht.root");            labels.push_back("Nominal");                 nplots.push_back("crWbaseZeroB/h_WmtbinsMET200");
+  files.push_back( dirMETRes+"wjets_ht.root");            labels.push_back("MET Resolution Corr.");                  nplots.push_back("crWbaseZeroB/h_WmtbinsScaledMET200");
+  makeCMSPlot(  files, labels, nplots, "METresolution_mt_shape_W", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dirMETRes+     "ttsl.root");            labels.push_back("Nominal");                 nplots.push_back("crWbaseZeroB/h_WmtbinsMET200");
+  files.push_back( dirMETRes+"ttsl.root");            labels.push_back("MET Resolution Corr.");                  nplots.push_back("crWbaseZeroB/h_WmtbinsScaledMET200");
+  makeCMSPlot(  files, labels, nplots, "METresolution_mt_shape_T", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dirMETRes+     "dyjetsll.root");            labels.push_back("Nominal");                 nplots.push_back("crZllbaseZeroB/h_zllAltmtbinsMET200");
+  files.push_back( dirMETRes+"dyjetsll.root");            labels.push_back("MET Resolution Corr.");                  nplots.push_back("crZllbaseZeroB/h_zllAltmtbinsScaledMET200");
+  makeCMSPlot(  files, labels, nplots, "METresolution_mt_shape_Z", /*xtitle*/ "m_{T} [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/300 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
+  
+  
+  TString dirScales = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/WpTScaleVariations20Apr16/";
+  
+  files.clear(); labels.clear(); nplots.clear();
+  files.push_back( dirScales+     "wjetstop.root");            labels.push_back("Nominal");                 nplots.push_back("crwbase/h_WpT_ScaleCT");
+  files.push_back( dirScales+"wjetstop.root");            labels.push_back("Ren./Fact. UP");                  nplots.push_back("crwbase/h_WpT_ScaleUP");
+  files.push_back( dirScales+"wjetstop.root");            labels.push_back("Ren./Fact. DN");                  nplots.push_back("crwbase/h_WpT_ScaleDN");
+  makeCMSPlot(  files, labels, nplots, "ScaleVariations_WpT", /*xtitle*/ "p_{T} (W) [GeV]" , /*ytitle*/ "Fraction / Bin" , /*xmin*/ 0, /*xmax*/0 , /*rebin*/ 1 , /*logplot*/ 1, /*norm*/ 1, /*doRatio*/ 1 );
   
   
   

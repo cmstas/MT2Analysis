@@ -67,6 +67,13 @@ class MT2Looper {
   float evtweight_;
   float evtweight_lepEffUp_;
   float evtweight_lepEffDn_;
+  float evtweight_polWp_UP;
+  float evtweight_polWp_DN;
+  float evtweight_polWm_UP;
+  float evtweight_polWm_DN;
+  float evtweight_polW_UP;
+  float evtweight_polW_DN;
+
   int nlepveto_;
     
   //soft lep variables
