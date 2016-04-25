@@ -335,6 +335,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2-4bd") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
+    else if (sample.find("T5qqqqWW_modified") != std::string::npos) scan_name = "T5qqqqWW_modified";
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
     else if (sample.find("TChiNeu") != std::string::npos) scan_name = sample.substr(0,7);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
@@ -522,8 +523,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
-	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "T5qqqqWW_1025_775_old"))
-   	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "T5qqqqWW_1100_500_old"))
+	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
+   	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
 	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
 	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
          ) continue;
