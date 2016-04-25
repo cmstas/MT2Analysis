@@ -501,10 +501,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
           }
         }
-	else if (evt_id == 1250) {
+	//TChi Models
+	else if (evt_id >= 1250) {
           for (unsigned int i=0; i<sparm_values().size(); ++i) {
-            GenSusyMScan1 = 100;
-            GenSusyMScan2 = 90;
+            if (sparm_names().at(i).Contains("mChargino")) GenSusyMScan1 = sparm_values().at(i);
+            if (sparm_names().at(i).Contains("mLSP")) GenSusyMScan2 = sparm_values().at(i);
           }
         }
 
