@@ -786,7 +786,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       for (int ilep = 0; ilep < t.nlep; ++ilep) {
 	if ( ilep == softlepIdx_) continue;
 	if ( t.lep_pt[ilep] < 25 ) continue;
-	if ( abs(t.lep_eta[ilep])>1.479 ) continue; 
+	if ( abs(t.lep_pdgId[ilep]) == 11 && abs(t.lep_eta[ilep])>1.479 ) continue; 
 	//iso/id requirements
 	if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02)) passHardIsoId = true;
 	if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.1 && t.lep_tightIdNoIso[ilep] >= 2 && t.lep_relIso03[ilep]*t.lep_pt[ilep]<5)) passHardIsoId = true;
@@ -808,7 +808,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       for (int ilep = 0; ilep < t.nlep; ++ilep) {
 	if ( ilep == hardlepIdx_) continue;
 	if ( t.lep_pt[ilep] < 25 ) continue;
-	if ( abs(t.lep_eta[ilep])>1.479 ) continue; 
+	if ( abs(t.lep_pdgId[ilep]) == 11 && abs(t.lep_eta[ilep])>1.479 ) continue; 
 	//iso/id requirements
 	if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || abs(t.lep_dxy[ilep])> 0.02 || abs(t.lep_dz[ilep]) > 0.02)) continue;
 	if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.1 || t.lep_tightIdNoIso[ilep] < 2 ||  t.lep_relIso03[ilep]*t.lep_pt[ilep]>5)) continue;
