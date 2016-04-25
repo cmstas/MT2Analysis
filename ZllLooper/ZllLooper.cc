@@ -236,7 +236,7 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       
       // require baseline selection
       //      bool pass_selection = (t.ht > 200 && t.nJet30 > 1 && t.nBJet20 == 0);
-      bool pass_selection = (t.ht > 200 && t.nJet30 > 1);
+      bool pass_selection = (t.ht > 200 && t.nJet30 >= 1);
 
       if (!pass_selection) continue;
 
@@ -255,9 +255,9 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       //require lepton Iso/ID
       for (int ilep = 0; ilep < t.nlep; ilep++) {
 	//barrel
-	if (fabs(t.lep_eta[ilep]) > 1.479) failIsoId = true;
+	//if (fabs(t.lep_eta[ilep]) > 1.479) failIsoId = true;
 	//pt
-	if (t.lep_pt[ilep] > 20 && t.lep_pt[ilep] < 25) failIsoId = true;
+	//if (t.lep_pt[ilep] > 20 && t.lep_pt[ilep] < 25) failIsoId = true;
 	//iso and ID
 	if (t.lep_pt[ilep] < 20) {
 	  if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || abs(t.lep_dxy[ilep])> 0.02 || abs(t.lep_dz[ilep]) > 0.02)) failIsoId = true;
