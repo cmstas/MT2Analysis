@@ -13,10 +13,10 @@ cp -r *.so jetCorrections jsons btagsf lepsf data processBaby batchsubmit/job_in
 
 2) modify writeConfig.sh script for personal setup. Variables that should be modified by the user are
 PROXY (not nedded anymore unless you have a special location for your proxy file)
-COPYDIR to point to the desired output directory in hadoop ( default to /hadoop/cms/store/user/${USERNAME}/mt2babies/) where $USERNAME is your username
+COPYDIR to point to the desired output directory in hadoop ( default to `/hadoop/cms/store/user/${USERNAME}/mt2babies/`) where $USERNAME is your username
 
 3) now execute scripts!
-to run on only one dataset for example run the writeConfig.sh script 
+to run on only one dataset for example run the `writeConfig.sh` script 
 this takes two arguments, the dataset directory on hadoop and the name
 you want to give the output babies and the output directory. 
 for example
@@ -24,7 +24,7 @@ for example
  ./writeConfig.sh /hadoop/cms/store/group/snt/csa14/MC_CMS3_V07-00-03/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/merged/ V00-00-01_TTJets
 ```
 creates a condor config file
-condor_V00-00-01_TTJets.cmd
+`condor_V00-00-01_TTJets.cmd`
 to submit one job per file in the dataset directory 
 
 Note, need to setup voms proxy since apparently this is needed to copy output files at the end of the job.
@@ -92,6 +92,6 @@ everything at once
 ```
 You can also specify the output directory in the script. Typically the babies are
 stored under:
-``
+``` bash
 /nfs-6/userdata/mt2/<VERSION>/
-``
+```
