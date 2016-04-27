@@ -161,7 +161,7 @@ string getMETPlotLabelShort(TFile* f, std::string dir_str) {
 
 
 //_______________________________________________________________________________
-TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& names , const std::vector<TString>& purpose, const string& histname , const string& xtitle , const string& ytitle , bool logplot = true, bool doRatio = false ) {
+TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& names , const std::vector<TString>& purpose, const string& histname , const string& xtitle , const string& ytitle , bool logplot = true, bool doRatio = false , bool drawBand = false) {
   
   
   cout << "-- plotting histname: " << histname << endl;
@@ -359,6 +359,14 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   
   t->Draw("hist same");
   
+  // drawband
+  if ( drawBand ) {
+    h_bgtot->SetMarkerSize(0);
+    h_bgtot->SetFillColor (kGray+2);
+    h_bgtot->SetFillStyle (3244);
+    h_bgtot->Draw("E2,same");
+  }
+  
   // add signal hists
   for (unsigned int isig = 0; isig < sig_hists.size(); ++isig) {
     if ( TString(sig_purposes.at(isig)).Contains("point") ) sig_hists.at(isig)->Draw("hist pe1 same");
@@ -442,9 +450,17 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     
     TH1D* h_ratio = (TH1D*) data_hist->Clone(Form("ratio_%s",data_hist->GetName()));
     h_ratio->Sumw2();
-    if (h_bgtot && h_bgtot->Integral()>0)    h_ratio->Divide(h_bgtot);
-    else if (sig_hists.at(0)->Integral()>0)  h_ratio->Divide(sig_hists.at(0));
-    else h_ratio->Divide(data_hist);
+    TH1D* divideByThis;
+    if (h_bgtot && h_bgtot->Integral()>0)    divideByThis = (TH1D*) h_bgtot->Clone("DivideByThis");
+    else if (sig_hists.at(0)->Integral()>0)  divideByThis = (TH1D*) sig_hists.at(0)->Clone("DivideByThis");
+    else divideByThis = (TH1D*) data_hist->Clone("DivideByThis");
+    
+    if (drawBand) { //remove uncertainties from denominator, since they will have to be drawn separately
+      for (int ibin=0; ibin < divideByThis->GetNbinsX(); ++ibin) {
+        divideByThis->SetBinError(ibin, 0.);
+      }
+    }
+    h_ratio->Divide(divideByThis);
     
     // draw axis only
     TH1F* h_axis_ratio = new TH1F(Form("%s_axes",h_ratio->GetName()),"",100,xmin,xmax);
@@ -510,7 +526,14 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     
     gPad->RedrawAxis();
 
-    
+    if ( drawBand ) { // draw the background uncertainty: just divide the histogram by the no-error version of itself
+      TH1D* h_bgtotFlat = (TH1D*) h_bgtot->Clone("bgtotFlat");
+      h_bgtotFlat->Divide(divideByThis);
+      h_bgtotFlat->SetMarkerSize(0);
+      h_bgtotFlat->SetFillColor (kGray+2);
+      h_bgtotFlat->SetFillStyle (3244);
+      h_bgtotFlat->Draw("E2,same");
+    }
     
   } // if (doRatio)
   
@@ -1097,7 +1120,7 @@ void compareSoftLeptonsEstimatesToData(){
   
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC_TChiNeu" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC_TChiNeu" ,  "" ,  "Entries" ,  true ,  true , true );
   
   filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
   filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
@@ -1108,7 +1131,7 @@ void compareSoftLeptonsEstimatesToData(){
   
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction" ,  "" ,  "Entries" ,  true ,  true  );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction" ,  "" ,  "Entries" ,  true ,  true , true );
   
   return;
 }
