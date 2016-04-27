@@ -170,6 +170,7 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   
   //initialize pred histogram
   histMap["h_pred"] = sameBin(histMap["h_crMC"], "h_mtbins");
+  histMap["h_predAddErr"] = sameBin(histMap["h_crMC"], "h_mtbinsSyst");
 
   //calculate the prediction in each bin
   for (int ibin = 0; ibin <= histMap["h_crData"]->GetSize(); ibin++) {
@@ -199,10 +200,17 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     
     //calculate total error in quadrature
     double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + bink_ht_err * bink_ht_err + bink_mt_err * bink_mt_err;
+    float mtBinErr = 0;
+    if (ibin == 0) mtBinErr = 0;
+    else if (ibin == 1) mtBinErr = 0.1;
+    else if (ibin == 2) mtBinErr = 0.2;
+    double binErrSqAdd = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + bink_ht_err * bink_ht_err + bink_mt_err * bink_mt_err + pow(0.2,2) + pow(mtBinErr,2);
 
     //set bin content/error
     histMap["h_pred"]->SetBinContent(ibin, binPred);
     histMap["h_pred"]->SetBinError(ibin, binPred*sqrt(binErrSq));     
+    histMap["h_predAddErr"]->SetBinContent(ibin, binPred);
+    histMap["h_predAddErr"]->SetBinError(ibin, binPred*sqrt(binErrSqAdd)); //additional 20% error   
 
   }//loop over bins
 
