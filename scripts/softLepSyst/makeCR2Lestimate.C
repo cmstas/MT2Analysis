@@ -201,9 +201,9 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     //calculate total error in quadrature
     double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + bink_ht_err * bink_ht_err + bink_mt_err * bink_mt_err;
     float mtBinErr = 0;
-    if (ibin == 0) mtBinErr = 0;
-    else if (ibin == 1) mtBinErr = 0.1;
-    else if (ibin == 2) mtBinErr = 0.2;
+    if (ibin == 1) mtBinErr = 0;
+    else if (ibin == 2) mtBinErr = 0.1;
+    else if (ibin == 3) mtBinErr = 0.2;
     double binErrSqAdd = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + bink_ht_err * bink_ht_err + bink_mt_err * bink_mt_err + pow(0.2,2) + pow(mtBinErr,2);
 
     //set bin content/error
