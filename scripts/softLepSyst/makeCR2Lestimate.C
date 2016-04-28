@@ -63,12 +63,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsDilepton");  
   histMap["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName+"/h_mtbins");      
-  //integrated
-  histMap["h_crMCInt"]          = (TH1D*) fMC->Get("cr2L"+srName+"/h_Events_w");         
-  histMap["h_crMCfakeInt"]      = (TH1D*) fMC->Get("cr2L"+srName+"/h_Events_wFake");    
-  histMap["h_crMCDileptonInt"]  = (TH1D*) fMC->Get("cr2L"+srName+"/h_Events_wDilepton");   
-  histMap["h_srMCDileptonInt"]  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wDilepton"); 
-  histMap["h_crDataInt"]        = (TH1D*) fData->Get("cr2L"+srName+"/h_Events_w");  
+
+  //fill Int histograms with integrated mtbins, i.e. event count
+  for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
+    if (iter->first.find("Int") != std::string::npos) continue;
+    histMap[Form("%sInt",iter->first.c_str())] = new TH1D(Form("%sInt",iter->first.c_str()),"Events",1,0,1);
+    if (iter->second) histMap[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->Integral(0,-1));
+  }
 
   //check for MC hist. should always exist
   if (!histMap["h_crMC"] || !histMap["h_crMCInt"]) {
@@ -93,12 +94,6 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap2["h_crMCDilepton"]     = 0;    
   histMap2["h_srMCDilepton"]     = 0;  
   histMap2["h_crData"]           = 0;      
-  //integrated
-  histMap2["h_crMCInt"]          = 0;         
-  histMap2["h_crMCfakeInt"]      = 0;    
-  histMap2["h_crMCDileptonInt"]  = 0;   
-  histMap2["h_srMCDileptonInt"]  = 0; 
-  histMap2["h_crDataInt"]        = 0;  
 
   //checks to make sure other directories exist
   TDirectory * dirData2 = fData ->GetDirectory("cr2L"+srName2);
@@ -112,12 +107,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     histMap2["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsDilepton");    
     histMap2["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbinsDilepton");  
     histMap2["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins");      
-    //integrated
-    histMap2["h_crMCInt"]          = (TH1D*) fMC->Get("cr2L"+srName2+"/h_Events_w");         
-    histMap2["h_crMCfakeInt"]      = (TH1D*) fMC->Get("cr2L"+srName2+"/h_Events_wFake");    
-    histMap2["h_crMCDileptonInt"]  = (TH1D*) fMC->Get("cr2L"+srName2+"/h_Events_wDilepton");   
-    histMap2["h_srMCDileptonInt"]  = (TH1D*) fMC->Get("srLep"+srName2+"/h_Events_wDilepton"); 
-    histMap2["h_crDataInt"]        = (TH1D*) fData->Get("cr2L"+srName2+"/h_Events_w");  
+
+    //fill Int histograms with integrated mtbins, i.e. event count
+    for ( std::map<string, TH1D*>::iterator iter = histMap2.begin(); iter != histMap2.end(); ++iter ) {
+      if (iter->first.find("Int") != std::string::npos) continue;
+      histMap2[Form("%sInt",iter->first.c_str())] = new TH1D(Form("%s2Int",iter->first.c_str()),"Events",1,0,1);
+      if (iter->second) histMap2[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->Integral(0,-1));
+    }
 
     //check for MC hist. should always exist
     if (!histMap2["h_crMC"] || !histMap2["h_crMCInt"]) {
@@ -230,7 +226,7 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
 }
 
 //_______________________________________________________________________________
-void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep", string dataname = "data"){
+void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr27", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR2L.root";

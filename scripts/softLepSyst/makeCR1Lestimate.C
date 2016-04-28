@@ -55,12 +55,13 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_crMConelep"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");    
   histMap["h_srMConelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");  
   histMap["h_crData"]         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");      
-  //integrated
-  histMap["h_crMCInt"]        = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_w");         
-  histMap["h_crMCfakeInt"]    = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wFake");    
-  histMap["h_crMConelepInt"]  = (TH1D*) fMC->Get("cr1L"+srName+"/h_Events_wOnelep");   
-  histMap["h_srMConelepInt"]  = (TH1D*) fMC->Get("srLep"+srName+"/h_Events_wOnelep"); 
-  histMap["h_crDataInt"]      = (TH1D*) fData->Get("cr1L"+srName+"/h_Events_w");  
+
+  //fill Int histograms with integrated mtbins, i.e. event count
+  for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
+    if (iter->first.find("Int") != std::string::npos) continue;
+    histMap[Form("%sInt",iter->first.c_str())] = new TH1D(Form("%sInt",iter->first.c_str()),"Events",1,0,1);
+    if (iter->second) histMap[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->Integral(0,-1));
+  }
 
   //check for MC hist. should always exist
   if (!histMap["h_crMC"] || !histMap["h_crMCInt"]) {
@@ -155,7 +156,7 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep/", string dataname = "data"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr27/", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR1L.root";
