@@ -93,7 +93,7 @@ bool doHFJetVeto = false;
 // get signal scan nevents from file
 bool doScanWeights = true;
 // doesn't plot data for MT2 > 200 in signal regions
-bool doBlindData = true;
+bool doBlindData = false;
 // make variation histograms for tau efficiency
 bool doGenTauVars = true;
 // make variation histograms for e+mu efficiency
