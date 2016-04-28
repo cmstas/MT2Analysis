@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INDIR=output/skim_apr19/
+INDIR=output/skim_apr27/
 THISDIR=`pwd`
 
 if [ ! -d "$INDIR" ]; then

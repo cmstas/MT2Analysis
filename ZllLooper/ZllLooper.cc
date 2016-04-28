@@ -220,7 +220,7 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  evtweight_ *= puWeight;
 	}
       } // !isData
-
+      
       //-----------SELECTION BELOW------------
 
       //initialize bools for Z and W selections
@@ -236,7 +236,7 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       
       // require baseline selection
       //      bool pass_selection = (t.ht > 200 && t.nJet30 > 1 && t.nBJet20 == 0);
-      bool pass_selection = (t.ht > 200 && t.nJet30 >= 1);
+      bool pass_selection = (t.ht > 200 && t.nJet30 > 1);
 
       if (!pass_selection) continue;
 
@@ -248,22 +248,24 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
       //Z specific selection
       if (t.nlepIso != 2) passZ = false;
       if (t.nlep != 2) passZ = false;
+      if (t.nBJet20 != 0) passZ = false;
+      if (t.lep_pt[0] < 25) passZ = false;
       if (t.nlepIso == 2 && !(t.lep_pdgId[0] == -1 * t.lep_pdgId[1])) passZ = false;
       
       //isolation requirements
       bool failIsoId = false;
       //require lepton Iso/ID
       for (int ilep = 0; ilep < t.nlep; ilep++) {
-	//barrel
-	//if (fabs(t.lep_eta[ilep]) > 1.479) failIsoId = true;
 	//pt
-	//if (t.lep_pt[ilep] > 20 && t.lep_pt[ilep] < 25) failIsoId = true;
+	if (t.lep_pt[ilep] > 20 && t.lep_pt[ilep] < 25) failIsoId = true;
 	//iso and ID
 	if (t.lep_pt[ilep] < 20) {
+	  if (fabs(t.lep_eta[ilep]) > 1.479) failIsoId = true;
 	  if (abs(t.lep_pdgId[ilep]) == 13 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || abs(t.lep_dxy[ilep])> 0.02 || abs(t.lep_dz[ilep]) > 0.02)) failIsoId = true;
 	  if (abs(t.lep_pdgId[ilep]) == 11 && (t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || t.lep_tightIdNoIso[ilep] == 0)) failIsoId = true;
 	}
 	else {
+	  if (fabs(t.lep_eta[ilep]) > 1.479 && abs(t.lep_pdgId[ilep]) == 11) failIsoId = true;
 	  if (abs(t.lep_pdgId[ilep]) == 13 && ((t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.2 || abs(t.lep_dxy[ilep])>0.02 || abs(t.lep_dz[ilep]) > 0.02))) failIsoId = true;
 	  if (abs(t.lep_pdgId[ilep]) == 11 && ((t.lep_miniRelIso[ilep]>0.1 || t.lep_relIso03[ilep]>0.1 || t.lep_tightIdNoIso[ilep] < 2 || t.lep_relIso03[ilep]*t.lep_pt[ilep]>5))) failIsoId = true;
 	}
@@ -288,13 +290,26 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 	lep2_p4.SetPtEtaPhiM(t.lep_pt[1],t.lep_eta[1],t.lep_phi[1],t.lep_mass[1]);
 	TLorentzVector dilep_p4 = lep1_p4 + lep2_p4;
 	float dilepmll = dilep_p4.M();
-	if (dilepmll < 75 || dilepmll > 105) passZ = false;
+	if (dilepmll < 86 || dilepmll > 96) passZ = false;
 	
-      
+	float lep1pt = t.lep_pt[0];
+	float lep1phi = t.lep_phi[0];
 	float lep1X = t.lep_pt[0] * cos(t.lep_phi[0]);
 	float lep1Y = t.lep_pt[0] * sin(t.lep_phi[0]);
+	float lep2pt = t.lep_pt[1];
+	float lep2phi = t.lep_phi[1];
 	float lep2X = t.lep_pt[1] * cos(t.lep_phi[1]);
 	float lep2Y = t.lep_pt[1] * sin(t.lep_phi[1]);
+	if (t.lep_pt[1] > 25) { 
+	  lep1pt = t.lep_pt[1];
+	  lep1phi = t.lep_phi[1];
+	  lep1X = t.lep_pt[1] * cos(t.lep_phi[1]);
+	  lep1Y = t.lep_pt[1] * sin(t.lep_phi[1]);
+	  lep2pt = t.lep_pt[0];
+	  lep2phi = t.lep_phi[0];
+	  lep2X = t.lep_pt[0] * cos(t.lep_phi[0]);
+	  lep2Y = t.lep_pt[0] * sin(t.lep_phi[0]);
+	}
 	
 	//remove random lepton, depending on event number
 	if (t.evt % 2 == 1) {
@@ -309,15 +324,15 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
 	
 	modifiedmet_ = newMet->Mod(); //alternate MET
-	if (removedzllLep_ == 1) modifiedmt_ = sqrt( 2 * newMet->Mod() * t.lep_pt[1] * ( 1 - cos( newMet->Phi() - t.lep_phi[1]) ) ); //recalculated MT
-	else if (removedzllLep_ == 2) modifiedmt_ = sqrt( 2 * newMet->Mod() * t.lep_pt[0] * ( 1 - cos( newMet->Phi() - t.lep_phi[0]) ) ); //recalculated MT
+	if (removedzllLep_ == 1) modifiedmt_ = sqrt( 2 * newMet->Mod() * lep2pt * ( 1 - cos( newMet->Phi() - lep2phi) ) ); //recalculated MT
+	else if (removedzllLep_ == 2) modifiedmt_ = sqrt( 2 * newMet->Mod() * lep1pt * ( 1 - cos( newMet->Phi() - lep1phi) ) ); //recalculated MT
 	
 	float ZX = dilep_p4.Pt() * cos(dilep_p4.Phi());
 	float ZY = dilep_p4.Pt() * sin(dilep_p4.Phi());
 	BosonPlusMet->SetX(metX+ZX);
 	BosonPlusMet->SetY(metY+ZY);
 	bosonPt = dilep_p4.Pt();
-      }
+      }//passZ
       else if (passW) {
 	float lepX = t.lep_pt[0] * cos(t.lep_phi[0]);
 	float lepY = t.lep_pt[0] * sin(t.lep_phi[0]);
@@ -328,8 +343,8 @@ void ZllLooper::loop(TChain* chain, std::string sample, std::string output_dir){
 	for (int igen = 0; igen < t.ngenStat23; ++igen) {
 	  if (abs(t.genStat23_pdgId[igen]) == 24) {bosonPt = t.genStat23_pt[igen]; break;}
 	}
-
-      }
+      }//passW
+      
       if (bosonPt > 0)
 	bosonScale_ = BosonPlusMet->Mod() / bosonPt; 
       else bosonScale_ = 1;
