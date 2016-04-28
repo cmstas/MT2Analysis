@@ -1,5 +1,5 @@
-#ifndef SIGNALREGIONSHCAND_H
-#define SIGNALREGIONSHCAND_H
+#ifndef SIGNALREGIONSMT2HIGGS_H
+#define SIGNALREGIONSMT2HIGGS_H
 
 #include <string>
 #include "TTree.h"
@@ -8,7 +8,7 @@
 namespace mt2
 {
 
-  std::vector<SR> getSignalRegionsHcand();
+  std::vector<SR> getSignalRegionsMT2Higgs();
 
 } // namespace mt2
 

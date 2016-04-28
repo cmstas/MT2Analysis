@@ -1,8 +1,8 @@
-#include "sigSelectionsHcand.h"
+#include "sigSelectionsMT2Higgs.h"
 
 namespace mt2 {
 
-  std::vector<SR> getSignalRegionsLep(){
+  std::vector<SR> getSignalRegionsMT2Higgs(){
 
     std::vector<SR> temp_SR_vec;
     std::vector<SR> SRVec;
@@ -11,8 +11,8 @@ namespace mt2 {
   
     //first set binning in njet-nbjet plane
     sr.SetName("1");
-    sr.SetVar("njets", 2, 4);
-    sr.SetVar("nbjets", 0, 1);
+    sr.SetVar("njets", 3, -1);
+    sr.SetVar("nbjets", 2, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
   

@@ -1240,7 +1240,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 }
 
 // --- mt2-higgs ---
-void MT2Looper::fillHistosSRHcand(const std::string& prefix, const std::string& suffix) {
+void MT2Looper::fillHistosSRmt2Higgs(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
   if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
@@ -2013,7 +2013,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 }
 
 // --- mt2-higgs ---
-void MT2Looper::fillHistosHiggsCand(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
   TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
   if (dir == 0) {
     dir = outfile_->mkdir(dirname.c_str());

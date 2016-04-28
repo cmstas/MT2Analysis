@@ -1814,7 +1814,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       if (nBJet20 < 2) {nLessThanTwoBJets++; continue;}
       // if (nBJet20 < 2) nLessThanTwoBJets++;
       if (nBJet20 > 2) nMoreThanTwoBJets++;
-      float divMin = 999;
+      float divMin = -1;
       LorentzVector p4_higgs;
       int ibj_hcand1 = -1;          // higgs candidate bJets index
       int ibj_hcand2 = -1;
@@ -1826,7 +1826,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           // h_invM_bjets->Fill(invM);
           // if(invM > 100 && invM < 150){
           if( M_div < 25 ) nHiggs_cand++;
-          if( M_div < divMin){
+          if( M_div < divMin || divMin < 0){
             p4_higgs   = p4combined;
             hcand_M    = invM;
             divMin     = M_div;

@@ -44,7 +44,7 @@ class MT2Looper {
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosSRHcand(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosSRmt2Higgs(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
@@ -52,6 +52,8 @@ class MT2Looper {
   void fillHistosCRQCD(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = ""); 
+  void fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2bins,
+                          float* mt2bins, const std::string& dirname, const std::string& s);
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, 
