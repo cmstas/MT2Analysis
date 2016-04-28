@@ -54,7 +54,12 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_crMCfake"]       = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsFake");     
   histMap["h_crMConelep"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");    
   histMap["h_srMConelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");  
-  histMap["h_crData"]         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");      
+  histMap["h_crData"]         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");
+  //W polarization histograms
+  histMap["h_crMConelep_polW_UP"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_polW_UPOnelep");    
+  histMap["h_srMConelep_polW_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_UPOnelep");
+  histMap["h_crMConelep_polW_DN"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_polW_DNOnelep");    
+  histMap["h_srMConelep_polW_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_DNOnelep");
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -78,13 +83,29 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     }
     iter->second->SetName(iter->first.c_str());
   }
-		  
+
   //calculate the ratio histogram, N(SR/CR) in MC
   histMap["h_ratio"] = sameBin(histMap["h_crMC"], "h_ratio");
   histMap["h_ratio"]->Divide(histMap["h_srMConelep"], histMap["h_crMConelep"]);
   histMap["h_ratioInt"] = sameBin(histMap["h_crMCInt"], "h_ratioInt");
   histMap["h_ratioInt"]->Divide(histMap["h_srMConelepInt"], histMap["h_crMConelepInt"]);
-
+  //W polarization histograms
+  histMap["h_ratio_polW_UP"] = sameBin(histMap["h_crMC"], "h_ratio_polW_UP");
+  histMap["h_ratio_polW_UP"]->Divide(histMap["h_srMConelep_polW_UP"], histMap["h_crMConelep_polW_UP"]);
+  histMap["h_ratio_polW_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_polW_UPInt");
+  histMap["h_ratio_polW_UPInt"]->Divide(histMap["h_srMConelep_polW_UPInt"], histMap["h_crMConelep_polW_UPInt"]);
+  histMap["h_ratio_polW_DN"] = sameBin(histMap["h_crMC"], "h_ratio_polW_DN");
+  histMap["h_ratio_polW_DN"]->Divide(histMap["h_srMConelep_polW_DN"], histMap["h_crMConelep_polW_DN"]);
+  histMap["h_ratio_polW_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_polW_DNInt");
+  histMap["h_ratio_polW_DNInt"]->Divide(histMap["h_srMConelep_polW_DNInt"], histMap["h_crMConelep_polW_DNInt"]);
+  //W polarization systematic hist
+  histMap["h_ratioIntSyst"] = sameBin(histMap["h_crMCInt"], "h_ratioIntSyst");
+  histMap["h_ratioIntSyst"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float polW_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_polW_UPInt"]->GetBinContent(1));
+  float polW_DN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_polW_DNInt"]->GetBinContent(1));
+  float polW_err = max(polW_UP_err,polW_DN_err);
+  histMap["h_ratioIntSyst"]->SetBinError(1,polW_err); 
+  
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
   histMap["h_purity"]->Divide(histMap["h_crMConelep"],histMap["h_crMC"]);
