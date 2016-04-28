@@ -37,6 +37,8 @@ bool applyWeights = false;
 bool doNvtxReweight = true;
 // turn on to apply json file to data
 bool applyJSON = false;
+//turn on to apply gamma pt reweighting to MC
+bool doGammaPtReweight = true;
 
 //_______________________________________
 GJetLooper::GJetLooper(){
@@ -85,6 +87,15 @@ void GJetLooper::loop(TChain* chain, std::string sample, std::string output_dir)
     outfile_->cd();
     h_nvtx_weights_ = (TH1D*) h_nvtx_weights_temp->Clone("h_nvtx_weights");
     f_weights->Close();
+  }
+
+  h_gammaPt_weights_ = 0;
+  if (doGammaPtReweight) {
+    TFile* f_gamma_weights = new TFile("data/reweight.root");
+    TH1D* h_gammaPt_weights_temp = (TH1D*) f_gamma_weights->Get("h_gammaPt_ratio");
+    outfile_->cd();
+    h_gammaPt_weights_ = (TH1D*) h_gammaPt_weights_temp->Clone("h_gammaPt_weights");
+    f_gamma_weights->Close();
   }
   
   eventFilter metFilterTxt;
@@ -219,6 +230,13 @@ void GJetLooper::loop(TChain* chain, std::string sample, std::string output_dir)
       bool pass_selection = (t.nlep == 0 && t.nJet30FailId == 0 && t.ht > 200 && t.nJet30 > 1);
       if (!pass_photon || !pass_selection) continue;
 
+      //---------GJets pT reweighting---------
+      if (doGammaPtReweight && !t.isData) {
+	// get pt weight from hist
+	float pt_input = t.gamma_pt[0];
+	float ptWeight = h_gammaPt_weights_->GetBinContent(h_gammaPt_weights_->FindBin(pt_input));
+	evtweight_ *= ptWeight;	
+      }
       
       //calculate additional MET variables
       float metX = t.met_pt * cos(t.met_phi);
@@ -386,8 +404,8 @@ void GJetLooper::fillHistosGJet(std::map<std::string, TH1*>& h_1d, const std::st
   plot1D("h_sieie"+s,        t.gamma_sigmaIetaIeta[0],   evtweight_, h_1d, ";gamma #sigma_{i#etai#eta}", 100, 0, 0.025);
   if (fabs(t.gamma_eta[0]) < 1.479) plot1D("h_EBsieie"+s,        t.gamma_sigmaIetaIeta[0],   evtweight_, h_1d, ";gamma #sigma_{i#etai#eta}", 100, 0, 0.015);
   else if (fabs(t.gamma_eta[0]) > 1.479) plot1D("h_EEsieie"+s,        t.gamma_sigmaIetaIeta[0],   evtweight_, h_1d, ";gamma #sigma_{i#etai#eta}", 100, 0, 0.025);
-  
-  plot1D("h_gammaPt"+s,   t.gamma_pt[0] ,   evtweight_, h_1d, ";#gamma p_{T} [GeV]", 100, 0, 500);
+
+  plot1D("h_gammaPt"+s,   t.gamma_pt[0] ,   evtweight_, h_1d, ";#gamma p_{T} [GeV]", 100, 0, 1000);
   plot1D("h_deltaPhiGammaMet"+s,  t.gamma_phi[0]-gammaMet->Phi() ,   evtweight_, h_1d, ";deltaPhiGammaMet", 100, -1, 1);
   plot1D("h_gammaMet"+s,       gammaMet->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);
   plot1D("h_gamma_par"+s,       gamma_par->Mod(),   evtweight_, h_1d, ";gamma+MET", 100, 0, 1000);

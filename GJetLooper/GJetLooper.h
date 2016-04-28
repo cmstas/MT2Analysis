@@ -41,6 +41,7 @@ class GJetLooper {
   std::map<std::string, TH1*> h_1d_global;
   SR CRGJetBase;
   TH1D* h_nvtx_weights_;
+  TH1D* h_gammaPt_weights_;
 };
 
 #endif
