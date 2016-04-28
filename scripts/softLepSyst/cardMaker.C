@@ -76,8 +76,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   //  TString fullhistnameStat  = fullhistname+"Stat";
   TString fullhistnameMCStat  = fullhistname+"MCStat";
   TString fullhistnameCRyield  = dir + "/h_crDataInt";
-  TString fullhistnameRatio  = fullhistname+"Ratio";
-  TString fullhistnameRatioInt  = fullhistname+"RatioInt";
+  TString fullhistnameRatio  = dir + "/h_ratio";
+  TString fullhistnameRatioInt  = dir + "/h_ratioInt";
   TString fullhistnamePurity = dir + "/h_mt2binspurityFailSieieData";
   TString fullhistnamePurityInt = dir + "/h_mt2binspurityIntFailSieieData";
 
@@ -89,6 +89,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   double n_onelep(0.);
   double n_onelep_cr(0.);
+  double onelep_polW_syst(0.);
   double err_onelep_mcstat(0.);
   double n_dilep(0.);
   double n_dilep_cr(0.);
@@ -222,6 +223,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_onelep = h_1lpred->GetBinContent(mt2bin);
     n_mt2bins = h_1lpred->GetNbinsX();
   }
+  //W polarization ratio uncertainty
+  TH1D* h_1lratio_polW = (TH1D*) f_1lep->Get(fullhistnameRatioInt+"Syst");
+  if (h_1lratio_polW != 0) {
+    onelep_polW_syst = h_1lratio_polW->GetBinError(1)/h_1lratio_polW->GetBinContent(1);
+  }
   // MC STAT UNC
 //  TH1D* h_onelep_mcstat = (TH1D*) f_onelep->Get(fullhistnameMCStat);
 //  if (h_onelep_mcstat != 0 && h_onelep_mcstat->GetBinContent(mt2bin) != 0) 
@@ -279,6 +285,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_alpha  = 1; // transfer factor
   double onelep_mcstat = 1. + err_onelep_mcstat; // transfer factor stat uncertainty
   double onelep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
+  double onelep_polW = 1. + onelep_polW_syst; // transfer factor syst uncertainty
   double onelep_lepeff = 1.20;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
@@ -287,6 +294,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_mcstat = Form("onelep_MCstat_%s", channel.c_str());
   TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_polW = "onelep_polW";
   TString name_onelep_lepeff = Form("onelep_lepeff_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
 
@@ -299,7 +307,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     onelep_alpha = last_onelep_transfer;
   }
 //  n_syst += 4; // onelep_crstat, onelep_mcstat, onelep_alphaerr, onelep_lepeff
-  n_syst += 2; // onelep_crstat, onelep_lepeff
+  n_syst += 3; // onelep_crstat, onelep_polW, onelep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_onelep > 0.) {
@@ -431,7 +439,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 //   ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_mcstat.Data(),onelep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s        lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
-//  ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
+    ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
+  //ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
 
   // ---- dilep systs
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_lepeff.Data(),dilep_lepeff)  << endl;
