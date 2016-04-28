@@ -25,7 +25,7 @@ TFile* f_fake = 0;
 TFile* f_sig = 0;
 TFile* f_data = 0;
 
-const bool verbose = true;
+const bool verbose = false;
 
 const bool suppressZeroBins = false;
 
@@ -67,6 +67,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mtbins";
   TString fullhistnamePred = dir + "/h_mtbins";
+  TString fullhistnameFakes = dir + "/h_mtbinsFake";
   TString fullhistnameScan  = fullhistname+"_sigscan";
   TString fullhistnameScanBtagsfHeavy  = fullhistname+"_sigscan_btagsf_heavy_UP";
   TString fullhistnameScanBtagsfLight  = fullhistname+"_sigscan_btagsf_light_UP";
@@ -248,7 +249,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   
   
   // FAKES
-  TH1D* h_fakepred = (TH1D*) f_fake->Get(fullhistname);
+  TH1D* h_fakepred = (TH1D*) f_fake->Get(fullhistnameFakes);
   if (h_fakepred != 0) {
     n_fakes = h_fakepred->GetBinContent(mt2bin);
   }
@@ -278,7 +279,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_alpha  = 1; // transfer factor
   double onelep_mcstat = 1. + err_onelep_mcstat; // transfer factor stat uncertainty
   double onelep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double onelep_lepeff = 1.30;
+  double onelep_lepeff = 1.20;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
@@ -305,12 +306,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
       for (int ibin=1; ibin<h_1lpred->GetNbinsX(); ibin++)
-	increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_1lpred->GetBinContent(ibin);
+	increment += 0.2 / (n_mt2bins - 1) * (ibin - 1) * h_1lpred->GetBinContent(ibin);
       onelep_shape = 1. - increment/n_onelep;
       if (onelep_shape < 0) onelep_shape = 0.1; // protection against huge oscillations
     }
     else
-      onelep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
+      onelep_shape = 1. + 0.2 / (n_mt2bins - 1) * (mt2bin - 1);
     n_syst++;  // onelep_shape
   }
   n_onelep = n_onelep_cr * onelep_alpha; // don't use onelep prediction as central value any more, since it has to be consistent with CR*alpha
@@ -321,7 +322,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_alpha  = 1; // transfer factor
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double dilep_lepeff = 1.30;
+  double dilep_lepeff = 1.20;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
@@ -348,12 +349,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
       for (int ibin=1; ibin<h_1lpred->GetNbinsX(); ibin++)
-        increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_1lpred->GetBinContent(ibin);
+        increment += 0.2 / (n_mt2bins - 1) * (ibin - 1) * h_1lpred->GetBinContent(ibin);
       dilep_shape = 1. - increment/n_dilep;
       if (dilep_shape < 0) dilep_shape = 0.1; // protection against huge oscillations
     }
     else
-      dilep_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
+      dilep_shape = 1. + 0.2 / (n_mt2bins - 1) * (mt2bin - 1);
     n_syst++;  // dilep_shape
   }
   n_dilep = n_dilep_cr * dilep_alpha; // don't use dilep prediction as central value any more, since it has to be consistent with CR*alpha
@@ -464,10 +465,10 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
   // ----------------------------------------
 
   // set input files
-
   f_1lep = new TFile(Form("%s/pred_CR1L.root",input_dir.c_str()));
   f_2lep = new TFile(Form("%s/pred_CR2L.root",input_dir.c_str()));
   f_fake = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
+
   f_sig = new TFile(Form("%s/%s.root",input_dir.c_str(),signal.c_str()));
 
   if (doData) f_data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
