@@ -32,7 +32,7 @@ inline TH1D* sameBin(TH1D* h_in, std::string name)
 }
 
 //_______________________________________________________________________________
-int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_name ) {
+int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP , TFile* fOut ,  std::string dir_name ) {
 
   fOut->cd();
 
@@ -60,6 +60,12 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_srMConelep_polW_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_UPOnelep");
   histMap["h_crMConelep_polW_DN"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_polW_DNOnelep");    
   histMap["h_srMConelep_polW_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_DNOnelep");
+  //Top UP histograms
+  histMap["h_crMConelep_top_UP"]     = (TH1D*) fMC_topUP->Get("cr1L"+srName+"/h_mtbinsOnelep");    
+  histMap["h_srMConelep_top_UP"]     = (TH1D*) fMC_topUP->Get("srLep"+srName+"/h_mtbinsOnelep");
+  //W UP histograms
+  histMap["h_crMConelep_w_UP"]       = (TH1D*) fMC_wUP->Get("cr1L"+srName+"/h_mtbinsOnelep");    
+  histMap["h_srMConelep_w_UP"]       = (TH1D*) fMC_wUP->Get("srLep"+srName+"/h_mtbinsOnelep");
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -98,6 +104,16 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_ratio_polW_DN"]->Divide(histMap["h_srMConelep_polW_DN"], histMap["h_crMConelep_polW_DN"]);
   histMap["h_ratio_polW_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_polW_DNInt");
   histMap["h_ratio_polW_DNInt"]->Divide(histMap["h_srMConelep_polW_DNInt"], histMap["h_crMConelep_polW_DNInt"]);
+  //Top UP histograms
+  histMap["h_ratio_top_UP"] = sameBin(histMap["h_crMC"], "h_ratio_top_UP");
+  histMap["h_ratio_top_UP"]->Divide(histMap["h_srMConelep_top_UP"], histMap["h_crMConelep_top_UP"]);
+  histMap["h_ratio_top_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_top_UPInt");
+  histMap["h_ratio_top_UPInt"]->Divide(histMap["h_srMConelep_top_UPInt"], histMap["h_crMConelep_top_UPInt"]);
+  //W UP histograms
+  histMap["h_ratio_w_UP"] = sameBin(histMap["h_crMC"], "h_ratio_w_UP");
+  histMap["h_ratio_w_UP"]->Divide(histMap["h_srMConelep_w_UP"], histMap["h_crMConelep_w_UP"]);
+  histMap["h_ratio_w_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_w_UPInt");
+  histMap["h_ratio_w_UPInt"]->Divide(histMap["h_srMConelep_w_UPInt"], histMap["h_crMConelep_w_UPInt"]);
   //W polarization systematic hist
   histMap["h_ratioIntSyst"] = sameBin(histMap["h_crMCInt"], "h_ratioIntSyst");
   histMap["h_ratioIntSyst"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
@@ -105,6 +121,13 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   float polW_DN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_polW_DNInt"]->GetBinContent(1));
   float polW_err = max(polW_UP_err,polW_DN_err);
   histMap["h_ratioIntSyst"]->SetBinError(1,polW_err); 
+  //Top & W fraction systematic hist
+  histMap["h_ratioIntTopW"] = sameBin(histMap["h_crMCInt"], "h_ratioIntTopW");
+  histMap["h_ratioIntTopW"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float top_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_top_UPInt"]->GetBinContent(1));
+  float w_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_w_UPInt"]->GetBinContent(1));
+  float TopW_err = max(top_UP_err,w_UP_err);
+  histMap["h_ratioIntTopW"]->SetBinError(1,TopW_err); 
   
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
@@ -195,9 +218,11 @@ void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unb
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) isData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or dummy-data file
   TFile* f_mc   = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
+  TFile* f_mc_topUP   = new TFile(Form("%s/allBkg_topUP.root",input_dir.c_str()));
+  TFile* f_mc_wUP     = new TFile(Form("%s/allBkg_wjetsUP.root",input_dir.c_str()));
 
 
-  if(f_data->IsZombie() || f_mc->IsZombie()) {
+  if(f_data->IsZombie() || f_mc->IsZombie() || f_mc_topUP->IsZombie() || f_mc_wUP->IsZombie() ) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
@@ -208,7 +233,7 @@ void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unb
     std::string dir_name = k->GetTitle();
     if(dir_name.find("srLep")==std::string::npos) continue; //to do only signal regions
     cout << "Calculating prediction for " << dir_name << "..." << endl;
-    makeCR1Lpred( f_data , f_mc , f_out , dir_name );
+    makeCR1Lpred( f_data , f_mc , f_mc_topUP, f_mc_wUP, f_out , dir_name );
   }
 
   return;
