@@ -2214,17 +2214,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     cout << endl;
     cout << nEventsTotal << " Events Processed" << endl;
     cout << "------------------------------" << endl;
-    cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
-    cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
-    cout << endl;
-
     cout << "Events has less than 2 bjets: " << nLessThanTwoBJets << ", events with more than 2 bjets: " << nMoreThanTwoBJets << endl;
     cout << nHiggsEvents << " Higgs Events Found, while " << nNoHiggsEvents << " Events with no Higgs candidates.\n"
          << "The portion of higgs cand events is: " << setprecision(3) << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%.\n"
          << "Amoung which, " << nImproved << " events that are \"improved\", which is " << ((float) nImproved)/nHiggsEvents*100
          << "% of the Higgs events.\nat the same time, " << nHcandWithBJetsLess30 << " \"higgs\" events has bjet pt less than 30 GeV" << endl;
     // cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
-    cout << endl;        // -- mt2higgs
+    cout << "------------------------------" << endl;
+    cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+    cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+    cout << endl;
     delete bmark;
 
     return;
