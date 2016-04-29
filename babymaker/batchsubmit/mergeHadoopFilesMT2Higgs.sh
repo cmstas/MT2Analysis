@@ -16,9 +16,12 @@ chmod -R a+wrx $OUTPUTDIR
 
 # Signals
 run T2ttZH_800_200
-run T2ttZH_800_400
-run T5qqqqWH_1100_950
 run T5qqqqWH_1400_700
+run T5qqqqWH_1400_200
+run T5qqqqWH_1100_950
+run T2ttZH_800_400
 
 # ttbar
+run ttdl_mg_lo
 run ttsl_mg_lo_top
+run ttsl_mg_lo_tbar
