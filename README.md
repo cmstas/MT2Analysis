@@ -7,6 +7,7 @@ git clone https://github.com/cmstas/MT2Analysis.git
 and then 
 ``` bash
 cd MT2Analysis
+git checkout cmssw80x
 source setup.sh
 ```
 
@@ -33,6 +34,6 @@ make
 ## Run analysis on the baby
 Go to `MT2looper` and modify `INDIR` and `Samples` in `do.sh`, then do:
 ``` bash
-source do.sh
+. do.sh
 ```
 
