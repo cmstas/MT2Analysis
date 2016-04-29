@@ -293,17 +293,17 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
   double onelep_polW = 1. + onelep_polW_syst; // transfer factor syst uncertainty due to W polarization
   double onelep_TopW = 1. + onelep_TopW_syst; // transfer factor syst uncertainty due to Top/W composition
-  double onelep_lepeff = 1.20;
+  double onelep_lepeff = 1.10;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_onelep_shape = Form("onelep_shape_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_shape = Form("onelep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_mcstat = Form("onelep_MCstat_%s", channel.c_str());
   TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_polW = "onelep_polW";
   TString name_onelep_TopW = "onelep_TopW";
-  TString name_onelep_lepeff = Form("onelep_lepeff_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_lepeff = "onelep_lepeff";
   TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
 
   if (n_onelep_cr > 0.) {
@@ -338,15 +338,15 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_alpha  = 1; // transfer factor
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
-  double dilep_lepeff = 1.20;
+  double dilep_lepeff = 1.15;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_dilep_shape = Form("dilep_shape_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_shape = Form("dilep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
   TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
-  TString name_dilep_lepeff = Form("dilep_lepeff_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_lepeff = "dilep_lepeff";
   TString name_dilep_bTag = Form("dilep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   
   if (n_dilep_cr > 0.) {
@@ -379,7 +379,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   
   
   TString name_fake_syst = Form("fake_syst_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
-  double fake_syst = 1.50;
+  double fake_syst = 1.99;
   n_syst++; //fake_syst
 
   // ----- sig uncertainties
@@ -442,21 +442,21 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
 
   // ---- onelep systs
-  ofile <<  Form("%s       lnN    -  %.3f  -     - ",name_onelep_lepeff.Data(),onelep_lepeff)  << endl;
+  ofile <<  Form("%s   \t\t\t    lnN    -  %.3f  -     - ",name_onelep_lepeff.Data(),onelep_lepeff)  << endl;
   ofile <<  Form("%s    gmN %.0f    -  %.5f -     - ",name_onelep_crstat.Data(),n_onelep_cr,onelep_alpha)  << endl;
 //   ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_mcstat.Data(),onelep_mcstat)  << endl;
   if (n_mt2bins > 1)
-    ofile <<  Form("%s        lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
+    ofile <<  Form("%s   \t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
   //ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
 
   // ---- dilep systs
-  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_lepeff.Data(),dilep_lepeff)  << endl;
+  ofile <<  Form("%s   \t\t\t\t    lnN    -    -    %.3f    - ",name_dilep_lepeff.Data(),dilep_lepeff)  << endl;
   ofile <<  Form("%s     gmN %.0f    -    -    %.5f     - ",name_dilep_crstat.Data(),n_dilep_cr,dilep_alpha)  << endl;
   //   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_mcstat.Data(),dilep_mcstat)  << endl;
   if (n_mt2bins > 1)
-    ofile <<  Form("%s         lnN    -    -   %.3f     - ",name_dilep_shape.Data(),dilep_shape)  << endl;
+    ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape.Data(),dilep_shape)  << endl;
   //  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_alphaerr.Data(),dilep_alphaerr)  << endl;
 
 
