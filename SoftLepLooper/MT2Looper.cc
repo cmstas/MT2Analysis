@@ -79,7 +79,7 @@ bool applyBtagSF = true;
 // turn on to apply lepton sf to central value
 bool applyLeptonSF = true;
 // turn on to apply reweighting to ttbar based on top pt --> should be used as uncertainty, not correction
-bool applyTopPtReweight = false;
+bool applyTopPtReweightSyst = true;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
 bool applyLeptonSFfastsim = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
@@ -107,8 +107,10 @@ bool calculateFakeRates = false;
 bool applyFakeRates = false;
 // do pre-scale reweighting (for fake rates)
 bool doPrescaleWeight = false;
-// turn on to apply W polarization systematic uncertainty
+// turn on to make mtbins histograms with W polarization systematic uncertainty
 bool doWpolarizationReweight = true;
+// turn on to make mtbins histograms with theory scale variations
+bool doRenormFactScaleReweight = true;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -127,6 +129,7 @@ void MT2Looper::SetSignalRegions(){
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
   SRVecLep =  getSignalRegionsLep4(); 
+  //  SRVecLep =  getSignalRegionsLep5();  // 4 bins in MT, start at 0
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
@@ -373,7 +376,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
   }
   
-  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos))) {
+  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
     setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
     setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
     setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
@@ -514,23 +517,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //const float lumi = 4;
       
       //only keep single mass point in scans
-     if (isSignal_ 
-	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
-	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
-	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
-	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
-   	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
-	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
-	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
-         ) continue;
+//     if (isSignal_ 
+//	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+//	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
+//	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
+//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
+//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
+//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
+//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
+//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
+//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
+//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
+//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
+//	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
+//   	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
+//	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
+//	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
+//         ) continue;
 
       evtweight_ = 1.;
       
@@ -585,8 +588,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	}
 
-	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
-	  evtweight_ *= t.weight_toppt;
+	if (applyTopPtReweightSyst && t.evt_id >= 300 && t.evt_id < 400) {
+	  evtweight_topPt_ = evtweight_ * t.weight_toppt;
+	}
+
+	if (doRenormFactScaleReweight) {
+	  if ( t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999 ) { 
+	    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+	    evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+	  }
 	}
 
 	if ( doWpolarizationReweight && !isSignal_ && (t.ngenLep + t.ngenTau == 1)) { // only for 1 W boson
@@ -2077,7 +2087,16 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mtbins_polW_UP"+s,       softlepmt_,   evtweight_polW_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
     plot1D("h_mtbins_polW_DN"+s,       softlepmt_,   evtweight_polW_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
   }
-  
+
+  if ( !t.isData && doRenormFactScaleReweight && !isSignal_ ) { 
+    plot1D("h_mtbins_renorm_UP"+s,       softlepmt_,   evtweight_renormUp_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mtbins_renorm_DN"+s,       softlepmt_,   evtweight_renormDn_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if ( !t.isData && applyTopPtReweightSyst && !isSignal_ ) {
+    plot1D("h_mtbins_TopPt_UP"+s,       softlepmt_,   evtweight_topPt_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+  }
+
   outfile_->cd();
   return;
 }
