@@ -47,6 +47,15 @@ cd $THISDIR
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg_noDiboson.root,4)"
 root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg_noDiboson.root\",4)" >> dataDrivenEstimates.log
 
+#all backgrounds except dyjets
+cd $INDIR
+echo "hadd -f allBkg_noDY.root top.root qcd_ht.root zinv_ht.root wjets_ht.root diboson.root"
+hadd -f allBkg_noDY.root top.root qcd_ht.root zinv_ht.root wjets_ht.root diboson.root >> dataDrivenEstimates.log
+cd $THISDIR
+
+echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg_noDY.root,5)"
+root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg_noDY.root\",5)" >> dataDrivenEstimates.log
+
 #all backgrounds except top
 cd $INDIR
 echo "hadd -f allBkg_noTop.root diboson.root dyjetsll.root qcd_ht.root zinv_ht.root wjets_ht.root "
@@ -82,6 +91,24 @@ cd $THISDIR
 
 echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg_wjetsUp.root,5)"
 root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg_wjetsUP.root\",5)" >> dataDrivenEstimates.log
+
+#all backgrounds, DY scaled up by 50%
+cd $INDIR
+echo "hadd -f allBkg_dyUP.root allBkg_noDY.root allBkg_noDY.root dyjetsll.root dyjetsll.root dyjetsll.root"
+hadd -f allBkg_dyUP.root allBkg_noDY.root allBkg_noDY.root dyjetsll.root dyjetsll.root dyjetsll.root >> dataDrivenEstimates.log
+cd $THISDIR
+
+echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg_dyUP.root,5)"
+root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg_dyUP.root\",5)" >> dataDrivenEstimates.log
+
+#all backgrounds, DY scaled down by 50%
+cd $INDIR
+echo "hadd -f allBkg_dyDN.root allBkg_noDY.root allBkg_noDY.root allBkg_noDY.root dyjetsll.root dyjetsll.root"
+hadd -f allBkg_dyDN.root allBkg_noDY.root allBkg_noDY.root allBkg_noDY.root dyjetsll.root dyjetsll.root >> dataDrivenEstimates.log
+cd $THISDIR
+
+echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg_dyDN.root,5)"
+root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg_dyDN.root\",5)" >> dataDrivenEstimates.log
 
 #all backgrounds
 cd $INDIR

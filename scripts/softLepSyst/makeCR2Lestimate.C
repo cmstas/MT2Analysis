@@ -32,7 +32,7 @@ inline TH1D* sameBin(TH1D* h_in, std::string name)
 }
 
 //_______________________________________________________________________________
-int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_name ) {
+int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN , TFile* fOut ,  std::string dir_name ) {
 
   fOut->cd();
 
@@ -62,7 +62,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_crMCfake"]         = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsFake");     
   histMap["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsDilepton");  
-  histMap["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName+"/h_mtbins");      
+  histMap["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName+"/h_mtbins");
+  //DY UP histogram
+  histMap["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName+"/h_mtbinsDilepton");    
+  histMap["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName+"/h_mtbinsDilepton");  
+  //DY DN histogram
+  histMap["h_crMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("cr2L"+srName+"/h_mtbinsDilepton");    
+  histMap["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName+"/h_mtbinsDilepton");  
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -93,7 +99,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap2["h_crMCfake"]         = 0;     
   histMap2["h_crMCDilepton"]     = 0;    
   histMap2["h_srMCDilepton"]     = 0;  
-  histMap2["h_crData"]           = 0;      
+  histMap2["h_crData"]           = 0;
+  //DY UP histogram
+  histMap2["h_crMCDilepton_dyUP"] = 0;    
+  histMap2["h_srMCDilepton_dyUP"] = 0;
+  //DY DN histogram
+  histMap2["h_crMCDilepton_dyDN"] = 0;    
+  histMap2["h_srMCDilepton_dyDN"] = 0;
 
   //checks to make sure other directories exist
   TDirectory * dirData2 = fData ->GetDirectory("cr2L"+srName2);
@@ -106,7 +118,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
     histMap2["h_crMCfake"]         = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsFake");     
     histMap2["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsDilepton");    
     histMap2["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbinsDilepton");  
-    histMap2["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins");      
+    histMap2["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins");  
+    //DY UP histogram
+    histMap2["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName+"/h_mtbinsDilepton");    
+    histMap2["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName+"/h_mtbinsDilepton");  
+    //DY DN histogram
+    histMap2["h_crMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("cr2L"+srName+"/h_mtbinsDilepton");    
+    histMap2["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName+"/h_mtbinsDilepton");      
 
     //fill Int histograms with integrated mtbins, i.e. event count
     for ( std::map<string, TH1D*>::iterator iter = histMap2.begin(); iter != histMap2.end(); ++iter ) {
@@ -142,6 +160,23 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fOut ,  std::string dir_nam
   histMap["h_ratio"]->Divide(histMap["h_srMCDilepton"], histMap["h_crMCDilepton"]);
   histMap["h_ratioInt"] = sameBin(histMap["h_crMCInt"], "h_ratioInt");
   histMap["h_ratioInt"]->Divide(histMap["h_srMCDileptonInt"], histMap["h_crMCDileptonInt"]);
+  //DY UP histograms
+  histMap["h_ratio_dyUP"] = sameBin(histMap["h_crMC"], "h_ratio_dyUP");
+  histMap["h_ratio_dyUP"]->Divide(histMap["h_srMCDilepton_dyUP"], histMap["h_crMCDilepton_dyUP"]);
+  histMap["h_ratio_dyUPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_dyUPInt");
+  histMap["h_ratio_dyUPInt"]->Divide(histMap["h_srMCDilepton_dyUPInt"], histMap["h_crMCDilepton_dyUPInt"]);
+  //DY DN histograms
+  histMap["h_ratio_dyDN"] = sameBin(histMap["h_crMC"], "h_ratio_dyDN");
+  histMap["h_ratio_dyDN"]->Divide(histMap["h_srMCDilepton_dyDN"], histMap["h_crMCDilepton_dyDN"]);
+  histMap["h_ratio_dyDNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_dyDNInt");
+  histMap["h_ratio_dyDNInt"]->Divide(histMap["h_srMCDilepton_dyDNInt"], histMap["h_crMCDilepton_dyDNInt"]);
+  //DY UP/DN systematic hist
+  histMap["h_ratioIntdyUPDN"] = sameBin(histMap["h_crMCInt"], "h_ratioIntdyUPDN");
+  histMap["h_ratioIntdyUPDN"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float dyUP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_dyUPInt"]->GetBinContent(1));
+  float dyDN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_dyDNInt"]->GetBinContent(1));
+  float dy_err = max(dyUP_err,dyDN_err);
+  histMap["h_ratioIntdyUPDN"]->SetBinError(1,dy_err); 
 
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
@@ -244,9 +279,11 @@ void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unb
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) isData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or dummy-data file
   TFile* f_mc   = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
+  TFile* f_mc_dyUP   = new TFile(Form("%s/allBkg_dyUP.root",input_dir.c_str()));
+  TFile* f_mc_dyDN   = new TFile(Form("%s/allBkg_dyDN.root",input_dir.c_str()));
 
 
-  if(f_data->IsZombie() || f_mc->IsZombie()) {
+  if(f_data->IsZombie() || f_mc->IsZombie() || f_mc_dyUP->IsZombie() || f_mc_dyDN->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
@@ -257,7 +294,7 @@ void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unb
     std::string dir_name = k->GetTitle();
     if(dir_name.find("srLep")==std::string::npos) continue; //to do only signal regions
     cout << "----- Calculating prediction for " << dir_name << " -----" << endl;
-    makeCR2Lpred( f_data , f_mc , f_out , dir_name );
+    makeCR2Lpred( f_data , f_mc , f_mc_dyUP , f_mc_dyDN , f_out , dir_name );
   }
 
   return;

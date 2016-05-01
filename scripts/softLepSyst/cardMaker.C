@@ -94,6 +94,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double err_onelep_mcstat(0.);
   double n_dilep(0.);
   double n_dilep_cr(0.);
+  double dilep_dyUPDN_syst(0.);
   double err_dilep_mcstat(0.);
   double n_fakes(0.);
   double n_bkg(0.);
@@ -253,7 +254,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_2lpred != 0) {
     n_dilep = h_2lpred->GetBinContent(mt2bin);
   }
-  
+  //DY UP/DN  uncertainty
+  TH1D* h_2lratio_dyUPDN = (TH1D*) f_1lep->Get(fullhistnameRatioInt+"dyUPDN");
+  if (h_2lratio_dyUPDN != 0) {
+    dilep_dyUPDN_syst = h_2lratio_dyUPDN->GetBinError(1)/h_2lratio_dyUPDN->GetBinContent(1);
+  }
   TH1D* h_2l_cryield = (TH1D*) f_2lep->Get(fullhistnameCRyield);
   n_dilep_cr = 0;
   if (h_2l_cryield != 0)
@@ -338,6 +343,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_alpha  = 1; // transfer factor
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
+  double dilep_dyUPDN = 1 + dilep_dyUPDN_syst; // transfer factor sys uncertainty due to DY UP/DN variation
   double dilep_lepeff = 1.15;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
@@ -346,6 +352,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
   TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_dyUPDN = "dilep_dyUPDN";
   TString name_dilep_lepeff = "dilep_lepeff";
   TString name_dilep_bTag = Form("dilep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   
@@ -457,6 +464,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   //   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_mcstat.Data(),dilep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape.Data(),dilep_shape)  << endl;
+  //  ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
   //  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_alphaerr.Data(),dilep_alphaerr)  << endl;
 
 
