@@ -92,11 +92,13 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_polW_syst(0.);
   double onelep_TopW_syst(0.);
   double onelep_btag_syst(0.);
+  double onelep_jec_syst(0.);
   double err_onelep_mcstat(0.);
   double n_dilep(0.);
   double n_dilep_cr(0.);
   double dilep_dyUPDN_syst(0.);
   double dilep_btag_syst(0.);
+  double dilep_jec_syst(0.);
   double err_dilep_mcstat(0.);
   double n_fakes(0.);
   double n_bkg(0.);
@@ -242,6 +244,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     onelep_btag_syst = 0.05;
   }
   else onelep_btag_syst = 0;
+  //JEC uncertainty, 10% across all regions
+  onelep_jec_syst = 0.10;
   
   // MC STAT UNC
 //  TH1D* h_onelep_mcstat = (TH1D*) f_onelep->Get(fullhistnameMCStat);
@@ -271,7 +275,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   n_dilep_cr = 0;
   if (h_2l_cryield != 0)
     n_dilep_cr = round(h_2l_cryield->Integral(0,-1));
-  
+  //JEC uncertainty, 20% in monojet & tails, 5% elsewhere
+  if (njets_LOW == 1 || nbjets_LOW == 3 || met_LOW == 500 || ht_LOW == 1000) {
+    dilep_jec_syst = 0.20;
+  }
+  else dilep_jec_syst = 0.05;
   
   // FAKES
   TH1D* h_fakepred = (TH1D*) f_fake->Get(fullhistnameFakes);
@@ -307,6 +315,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_polW = 1. + onelep_polW_syst; // transfer factor syst uncertainty due to W polarization
   double onelep_TopW = 1. + onelep_TopW_syst; // transfer factor syst uncertainty due to Top/W composition
   double onelep_btag = 1. + onelep_btag_syst; // transfer factor syst uncertainty due to btag SF
+  double onelep_jec = 1. + onelep_jec_syst; // transfer factor syst uncertainty due to JEC variations
   double onelep_lepeff = 1.10;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
@@ -318,6 +327,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_onelep_polW = "onelep_polW";
   TString name_onelep_TopW = "onelep_TopW";
   TString name_onelep_btag = "onelep_btag"; 
+  TString name_onelep_dilep_jec = "onelep_dilep_jec"; //correlated across onelep AND dilep
   TString name_onelep_lepeff = "onelep_lepeff";
   TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
 
@@ -330,7 +340,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     onelep_alpha = last_onelep_transfer;
   }
 //  n_syst += 4; // onelep_crstat, onelep_mcstat, onelep_alphaerr, onelep_lepeff
-  n_syst += 5; // onelep_crstat, onelep_polW, onelep_TopW, onelep_btag, onelep_lepeff
+  n_syst += 6; // onelep_crstat, onelep_polW, onelep_TopW, onelep_btag, onelep_dilep_jec, onelep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_onelep > 0.) {
@@ -353,6 +363,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
   double dilep_dyUPDN = 1 + dilep_dyUPDN_syst; // transfer factor sys uncertainty due to DY UP/DN variation
+  double dilep_jec = 1 + dilep_jec_syst; // transfer factor sys uncertainty due to DY UP/DN variation
   double dilep_lepeff = 1.15;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
@@ -466,6 +477,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
+    ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_jec.Data(),onelep_jec,dilep_jec)  << endl;
   //ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
 
   // ---- dilep systs
