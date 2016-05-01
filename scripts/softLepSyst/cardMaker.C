@@ -91,10 +91,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double n_onelep_cr(0.);
   double onelep_polW_syst(0.);
   double onelep_TopW_syst(0.);
+  double onelep_btag_syst(0.);
   double err_onelep_mcstat(0.);
   double n_dilep(0.);
   double n_dilep_cr(0.);
   double dilep_dyUPDN_syst(0.);
+  double dilep_btag_syst(0.);
   double err_dilep_mcstat(0.);
   double n_fakes(0.);
   double n_bkg(0.);
@@ -235,6 +237,12 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_1lratio_TopW != 0) {
     onelep_TopW_syst = h_1lratio_TopW->GetBinError(1)/h_1lratio_TopW->GetBinContent(1);
   }
+  //btag uncertainty, only in soft-b regions
+  if (nbjets_LOW != 0 && nbjetshard_HI == 1) {
+    onelep_btag_syst = 0.05;
+  }
+  else onelep_btag_syst = 0;
+  
   // MC STAT UNC
 //  TH1D* h_onelep_mcstat = (TH1D*) f_onelep->Get(fullhistnameMCStat);
 //  if (h_onelep_mcstat != 0 && h_onelep_mcstat->GetBinContent(mt2bin) != 0) 
@@ -298,6 +306,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
   double onelep_polW = 1. + onelep_polW_syst; // transfer factor syst uncertainty due to W polarization
   double onelep_TopW = 1. + onelep_TopW_syst; // transfer factor syst uncertainty due to Top/W composition
+  double onelep_btag = 1. + onelep_btag_syst; // transfer factor syst uncertainty due to btag SF
   double onelep_lepeff = 1.10;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
@@ -308,6 +317,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_polW = "onelep_polW";
   TString name_onelep_TopW = "onelep_TopW";
+  TString name_onelep_btag = "onelep_btag"; 
   TString name_onelep_lepeff = "onelep_lepeff";
   TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
 
@@ -320,7 +330,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     onelep_alpha = last_onelep_transfer;
   }
 //  n_syst += 4; // onelep_crstat, onelep_mcstat, onelep_alphaerr, onelep_lepeff
-  n_syst += 4; // onelep_crstat, onelep_polW, onelep_TopW, onelep_lepeff
+  n_syst += 5; // onelep_crstat, onelep_polW, onelep_TopW, onelep_btag, onelep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_onelep > 0.) {
@@ -336,7 +346,6 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_syst++;  // onelep_shape
   }
   n_onelep = n_onelep_cr * onelep_alpha; // don't use onelep prediction as central value any more, since it has to be consistent with CR*alpha
-
   
   // ----- lost lepton bkg uncertainties
   double dilep_shape = 1.0;
@@ -456,6 +465,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s   \t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
+    ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
   //ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
 
   // ---- dilep systs
