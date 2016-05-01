@@ -517,23 +517,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //const float lumi = 4;
       
       //only keep single mass point in scans
-//     if (isSignal_ 
-//	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
-//	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
-//	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
-//	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
-//	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
-//	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
-//   	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
-//	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
-//	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
-//         ) continue;
+    if (isSignal_ 
+	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
+	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
+	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
+	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
+	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
+  	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
+	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
+	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
+        ) continue;
 
       evtweight_ = 1.;
       
@@ -2356,7 +2356,6 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   plot1D("h_lep2ptshort"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lep2phi"+s,      softlepphi_,   evtweight_, h_1d, "phi",  64, -3.2, 3.2);
   plot1D("h_lep2eta"+s,      softlepeta_,   evtweight_, h_1d, "eta",  60, -3, 3);
-  plot1D("h_softlepht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 80, 0, 2000);
 
   plot1D("h_dilepmll"+s,     dilepmll_,  evtweight_, h_1d, "m_{ll}", 150, 0 , 150);
   
@@ -2379,16 +2378,14 @@ void MT2Looper::fillHistosDoubleLepton(std::map<std::string, TH1*>& h_1d, int n_
   newMet->SetX(metX+lepX);
   newMet->SetY(metY+lepY);
 
-  float mt = sqrt( 2 * t.met_pt * softleppt_ * ( 1 - cos( t.met_phi - softlepphi_) ) );
+  //  float mt = sqrt( 2 * t.met_pt * softleppt_ * ( 1 - cos( t.met_phi - softlepphi_) ) );
   float mt_hard = sqrt( 2 * t.met_pt * hardleppt_ * ( 1 - cos( t.met_phi - hardlepphi_) ) );
   float mt_alt = sqrt( 2 * newMet->Mod() * softleppt_ * ( 1 - cos( newMet->Phi() - softlepphi_) ) );
 
   float lepDR = DeltaR(softlepeta_, hardlepeta_, softlepphi_, hardlepphi_);
 
-  //plot1D("h_mt"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250); //filled in fillHistosSingleSoftLepton
   plot1D("h_mtHard"+s,            mt_hard,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
   plot1D("h_mtAlternate"+s,            mt_alt,   evtweight_, h_1d, ";M_{T} [GeV]", 250, 0, 250);
-  plot1D("h_mtbins"+s,            mt,   evtweight_, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
   plot1D("h_lowleppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_highleppt"+s,      hardleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
   plot1D("h_deltaRLep"+s,       lepDR, evtweight_, h_1d, ";deltaR", 1000, 0, 10);
