@@ -66,6 +66,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   //W UP histograms
   histMap["h_crMConelep_w_UP"]       = (TH1D*) fMC_wUP->Get("cr1L"+srName+"/h_mtbinsOnelep");    
   histMap["h_srMConelep_w_UP"]       = (TH1D*) fMC_wUP->Get("srLep"+srName+"/h_mtbinsOnelep");
+  //Renorm histograms
+  histMap["h_crMConelep_renorm_UP"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_renorm_UPOnelep");    
+  histMap["h_srMConelep_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_UPOnelep");
+  histMap["h_crMConelep_renorm_DN"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_renorm_DNOnelep");    
+  histMap["h_srMConelep_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_DNOnelep");
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -114,6 +119,15 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_ratio_w_UP"]->Divide(histMap["h_srMConelep_w_UP"], histMap["h_crMConelep_w_UP"]);
   histMap["h_ratio_w_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_w_UPInt");
   histMap["h_ratio_w_UPInt"]->Divide(histMap["h_srMConelep_w_UPInt"], histMap["h_crMConelep_w_UPInt"]);
+  //Renorm histograms
+  histMap["h_ratio_renorm_UP"] = sameBin(histMap["h_crMC"], "h_ratio_renorm_UP");
+  histMap["h_ratio_renorm_UP"]->Divide(histMap["h_srMConelep_renorm_UP"], histMap["h_crMConelep_renorm_UP"]);
+  histMap["h_ratio_renorm_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_renorm_UPInt");
+  histMap["h_ratio_renorm_UPInt"]->Divide(histMap["h_srMConelep_renorm_UPInt"], histMap["h_crMConelep_renorm_UPInt"]);
+  histMap["h_ratio_renorm_DN"] = sameBin(histMap["h_crMC"], "h_ratio_renorm_DN");
+  histMap["h_ratio_renorm_DN"]->Divide(histMap["h_srMConelep_renorm_DN"], histMap["h_crMConelep_renorm_DN"]);
+  histMap["h_ratio_renorm_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_renorm_DNInt");
+  histMap["h_ratio_renorm_DNInt"]->Divide(histMap["h_srMConelep_renorm_DNInt"], histMap["h_crMConelep_renorm_DNInt"]);
   //W polarization systematic hist
   histMap["h_ratioIntSyst"] = sameBin(histMap["h_crMCInt"], "h_ratioIntSyst");
   histMap["h_ratioIntSyst"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
@@ -128,6 +142,13 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   float w_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_w_UPInt"]->GetBinContent(1));
   float TopW_err = max(top_UP_err,w_UP_err);
   histMap["h_ratioIntTopW"]->SetBinError(1,TopW_err); 
+  //Renorm systematic hist
+  histMap["h_ratioIntRenorm"] = sameBin(histMap["h_crMCInt"], "h_ratioIntRenorm");
+  histMap["h_ratioIntRenorm"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float renorm_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_renorm_UPInt"]->GetBinContent(1));
+  float renorm_DN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_renorm_DNInt"]->GetBinContent(1));
+  float renorm_err = max(renorm_UP_err,renorm_DN_err);
+  histMap["h_ratioIntRenorm"]->SetBinError(1,renorm_err); 
   
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
@@ -200,7 +221,7 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr27/", string dataname = "data_Run2015CD"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr30/", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR1L.root";

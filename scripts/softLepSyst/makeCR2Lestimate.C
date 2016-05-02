@@ -69,6 +69,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   //DY DN histogram
   histMap["h_crMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName+"/h_mtbinsDilepton");  
+  //Renorm histograms
+  histMap["h_crMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_UPDilepton");    
+  histMap["h_srMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_UPDilepton");
+  histMap["h_crMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_DNDilepton");    
+  histMap["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_DNDilepton");
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -106,6 +111,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   //DY DN histogram
   histMap2["h_crMCDilepton_dyDN"] = 0;    
   histMap2["h_srMCDilepton_dyDN"] = 0;
+  //Renorm histograms
+  histMap2["h_crMCDilepton_renorm_UP"] = 0;    
+  histMap2["h_srMCDilepton_renorm_UP"] = 0;
+  histMap2["h_crMCDilepton_renorm_DN"] = 0;
+  histMap2["h_srMCDilepton_renorm_DN"] = 0;
 
   //checks to make sure other directories exist
   TDirectory * dirData2 = fData ->GetDirectory("cr2L"+srName2);
@@ -124,7 +134,12 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
     histMap2["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName+"/h_mtbinsDilepton");  
     //DY DN histogram
     histMap2["h_crMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("cr2L"+srName+"/h_mtbinsDilepton");    
-    histMap2["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName+"/h_mtbinsDilepton");      
+    histMap2["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName+"/h_mtbinsDilepton"); 
+    //Renorm histograms
+    histMap2["h_crMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_UPDilepton");    
+    histMap2["h_srMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_UPDilepton");
+    histMap2["h_crMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_DNDilepton");    
+    histMap2["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_DNDilepton");     
 
     //fill Int histograms with integrated mtbins, i.e. event count
     for ( std::map<string, TH1D*>::iterator iter = histMap2.begin(); iter != histMap2.end(); ++iter ) {
@@ -170,6 +185,15 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_ratio_dyDN"]->Divide(histMap["h_srMCDilepton_dyDN"], histMap["h_crMCDilepton_dyDN"]);
   histMap["h_ratio_dyDNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_dyDNInt");
   histMap["h_ratio_dyDNInt"]->Divide(histMap["h_srMCDilepton_dyDNInt"], histMap["h_crMCDilepton_dyDNInt"]);
+  //Renorm histograms
+  histMap["h_ratio_renorm_UP"] = sameBin(histMap["h_crMC"], "h_ratio_renorm_UP");
+  histMap["h_ratio_renorm_UP"]->Divide(histMap["h_srMCDilepton_renorm_UP"], histMap["h_crMCDilepton_renorm_UP"]);
+  histMap["h_ratio_renorm_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_renorm_UPInt");
+  histMap["h_ratio_renorm_UPInt"]->Divide(histMap["h_srMCDilepton_renorm_UPInt"], histMap["h_crMCDilepton_renorm_UPInt"]);
+  histMap["h_ratio_renorm_DN"] = sameBin(histMap["h_crMC"], "h_ratio_renorm_DN");
+  histMap["h_ratio_renorm_DN"]->Divide(histMap["h_srMCDilepton_renorm_DN"], histMap["h_crMCDilepton_renorm_DN"]);
+  histMap["h_ratio_renorm_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_renorm_DNInt");
+  histMap["h_ratio_renorm_DNInt"]->Divide(histMap["h_srMCDilepton_renorm_DNInt"], histMap["h_crMCDilepton_renorm_DNInt"]);
   //DY UP/DN systematic hist
   histMap["h_ratioIntdyUPDN"] = sameBin(histMap["h_crMCInt"], "h_ratioIntdyUPDN");
   histMap["h_ratioIntdyUPDN"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
@@ -177,6 +201,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   float dyDN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_dyDNInt"]->GetBinContent(1));
   float dy_err = max(dyUP_err,dyDN_err);
   histMap["h_ratioIntdyUPDN"]->SetBinError(1,dy_err); 
+  //Renorm systematic hist
+  histMap["h_ratioIntRenorm"] = sameBin(histMap["h_crMCInt"], "h_ratioIntRenorm");
+  histMap["h_ratioIntRenorm"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float renorm_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_renorm_UPInt"]->GetBinContent(1));
+  float renorm_DN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_renorm_DNInt"]->GetBinContent(1));
+  float renorm_err = max(renorm_UP_err,renorm_DN_err);
+  histMap["h_ratioIntRenorm"]->SetBinError(1,renorm_err); 
 
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
@@ -261,7 +292,7 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
 }
 
 //_______________________________________________________________________________
-void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr27", string dataname = "data_Run2015CD"){
+void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr30", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR2L.root";
