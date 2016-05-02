@@ -351,14 +351,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_onelep_shape = Form("onelep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_mcstat = Form("onelep_MCstat_%s", channel.c_str());
-  TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  //TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_polW = "onelep_polW";
-  TString name_onelep_TopW = "onelep_TopW";
+  TString name_onelep_TopW =  Form("onelep_TopW_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_btag = "onelep_btag"; 
   TString name_onelep_dilep_jec = "onelep_dilep_jec"; //correlated across onelep AND dilep
   TString name_onelep_dilep_renorm = "onelep_dilep_renorm"; //correlated across onelep AND dilep
   TString name_onelep_lepeff = "onelep_lepeff";
-  TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  //TString name_onelep_bTag = Form("onelep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
 
   if (n_onelep_cr > 0.) {
     onelep_alpha = n_onelep / n_onelep_cr > 0 ? n_onelep / n_onelep_cr : last_onelep_transfer;
@@ -400,7 +400,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_dilep_shape = Form("dilep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
-  TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  //TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_dyUPDN = "dilep_dyUPDN";
   TString name_dilep_lepeff = "dilep_lepeff";
   TString name_dilep_bTag = Form("dilep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
@@ -413,8 +413,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     dilep_alpha = last_dilep_transfer;
   }
-  //  n_syst += 4; // dilep_crstat, dilep_mcstat, dilep_alphaerr, dilep_lepeff
-  n_syst += 3; // dilep_crstat, dilep_mcstat, dilep_dyUPDN, dilep_lepeff
+  n_syst += 4; // dilep_crstat, dilep_mcstat, dilep_dyUPDN, dilep_lepeff
   
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_dilep > 0.) {
@@ -504,7 +503,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (n_mt2bins > 1)
     ofile <<  Form("%s   \t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
-    ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
+    ofile <<  Form("%s   \t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
     ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_jec.Data(),onelep_jec,dilep_jec)  << endl;
     ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_renorm.Data(),onelep_renorm,dilep_renorm)  << endl;
