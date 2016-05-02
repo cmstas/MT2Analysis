@@ -41,8 +41,8 @@ const bool integratedZinvEstimate = true;
 
 const bool doDummySignalSyst = true;
 
-double last_dilep_transfer = 0.5;
-double last_onelep_transfer = 2.;
+double last_dilep_transfer = 1.0;
+double last_onelep_transfer = 1.0;
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
