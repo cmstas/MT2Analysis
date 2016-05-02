@@ -29,7 +29,7 @@ const bool verbose = false;
 
 const bool suppressZeroBins = false;
 
-const bool suppressZeroTRs = true;
+const bool suppressZeroTRs = false;
 
 const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
@@ -74,7 +74,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString fullhistnameScanLepeff  = fullhistname+"_sigscan_lepeff_UP";
   TString fullhistnameScanIsr  = fullhistname+"_sigscan_isr_UP";
   //  TString fullhistnameStat  = fullhistname+"Stat";
-  TString fullhistnameMCStat  = fullhistname+"MCStat";
+  TString fullhistnameMCStat  = dir + "/h_crMCInt";
   TString fullhistnameCRyield  = dir + "/h_crDataInt";
   TString fullhistnameRatio  = dir + "/h_ratio";
   TString fullhistnameRatioInt  = dir + "/h_ratioInt";
@@ -255,9 +255,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   
   // MC STAT UNC
-//  TH1D* h_onelep_mcstat = (TH1D*) f_onelep->Get(fullhistnameMCStat);
-//  if (h_onelep_mcstat != 0 && h_onelep_mcstat->GetBinContent(mt2bin) != 0) 
-//    err_onelep_mcstat = h_onelep_mcstat->GetBinError(mt2bin)/h_onelep_mcstat->GetBinContent(mt2bin);
+  TH1D* h_onelep_mcstat = (TH1D*) f_1lep->Get(fullhistnameRatioInt);
+  if (h_onelep_mcstat != 0) {
+    err_onelep_mcstat = h_onelep_mcstat->GetBinError(1)/h_onelep_mcstat->GetBinContent(1);
+  }
+  
   // CR YIELD
   TH1D* h_1l_cryield = (TH1D*) f_1lep->Get(fullhistnameCRyield);
   n_onelep_cr = 0;
@@ -300,6 +302,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   n_dilep_cr = 0;
   if (h_2l_cryield != 0)
     n_dilep_cr = round(h_2l_cryield->Integral(0,-1));
+  // MC STAT UNC
+  TH1D* h_dilep_mcstat = (TH1D*) f_2lep->Get(fullhistnameRatioInt);
+  if (h_dilep_mcstat != 0) {
+    err_dilep_mcstat = h_dilep_mcstat->GetBinError(1)/h_dilep_mcstat->GetBinContent(1);
+  }
   
   // FAKES
   TH1D* h_fakepred = (TH1D*) f_fake->Get(fullhistnameFakes);
@@ -361,7 +368,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     onelep_alpha = last_onelep_transfer;
   }
-  n_syst += 7; // onelep_crstat, onelep_polW, onelep_TopW, onelep_btag, onelep_dilep_jec, onelep_dilep_renorm, onelep_lepeff
+  n_syst += 8; // onelep_crstat, onelep_mcstat, onelep_polW, onelep_TopW, onelep_btag, onelep_dilep_jec, onelep_dilep_renorm, onelep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_onelep > 0.) {
@@ -407,7 +414,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     dilep_alpha = last_dilep_transfer;
   }
   //  n_syst += 4; // dilep_crstat, dilep_mcstat, dilep_alphaerr, dilep_lepeff
-  n_syst += 2; // dilep_crstat, dilep_dyUPDN, dilep_lepeff
+  n_syst += 3; // dilep_crstat, dilep_mcstat, dilep_dyUPDN, dilep_lepeff
   
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_dilep > 0.) {
@@ -493,7 +500,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ---- onelep systs
   ofile <<  Form("%s   \t\t\t    lnN    -  %.3f  -     - ",name_onelep_lepeff.Data(),onelep_lepeff)  << endl;
   ofile <<  Form("%s    gmN %.0f    -  %.5f -     - ",name_onelep_crstat.Data(),n_onelep_cr,onelep_alpha)  << endl;
-//   ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_mcstat.Data(),onelep_mcstat)  << endl;
+  ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_mcstat.Data(),onelep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s   \t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
@@ -506,7 +513,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ---- dilep systs
   ofile <<  Form("%s   \t\t\t\t    lnN    -    -    %.3f    - ",name_dilep_lepeff.Data(),dilep_lepeff)  << endl;
   ofile <<  Form("%s     gmN %.0f    -    -    %.5f     - ",name_dilep_crstat.Data(),n_dilep_cr,dilep_alpha)  << endl;
-  //   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_mcstat.Data(),dilep_mcstat)  << endl;
+  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_mcstat.Data(),dilep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape.Data(),dilep_shape)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
