@@ -267,19 +267,27 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     n_dilep = h_2lpred->GetBinContent(mt2bin);
   }
   //DY UP/DN  uncertainty
-  TH1D* h_2lratio_dyUPDN = (TH1D*) f_1lep->Get(fullhistnameRatioInt+"dyUPDN");
-  if (h_2lratio_dyUPDN != 0) {
-    dilep_dyUPDN_syst = h_2lratio_dyUPDN->GetBinError(1)/h_2lratio_dyUPDN->GetBinContent(1);
+  // TH1D* h_2lratio_dyUPDN = (TH1D*) f_1lep->Get(fullhistnameRatioInt+"dyUPDN");
+  // if (h_2lratio_dyUPDN != 0) {
+  //   dilep_dyUPDN_syst = h_2lratio_dyUPDN->GetBinError(1)/h_2lratio_dyUPDN->GetBinContent(1);
+  // }
+  //5% in multijet 0b and 10% in monojet 0b/1b regions
+  if (nbjets_HI == 1 && njets_LOW != 1) {
+    dilep_dyUPDN_syst = 0.05;
   }
-  TH1D* h_2l_cryield = (TH1D*) f_2lep->Get(fullhistnameCRyield);
-  n_dilep_cr = 0;
-  if (h_2l_cryield != 0)
-    n_dilep_cr = round(h_2l_cryield->Integral(0,-1));
+  else if (njets_LOW == 1 && (nbjets_LOW == 1 || nbjets_LOW == 0)) {
+    dilep_dyUPDN_syst = 0.10;
+  }
+  else dilep_dyUPDN_syst = 0;
   //JEC uncertainty, 20% in monojet & tails, 5% elsewhere
   if (njets_LOW == 1 || nbjets_LOW == 3 || met_LOW == 500 || ht_LOW == 1000) {
     dilep_jec_syst = 0.20;
   }
   else dilep_jec_syst = 0.05;
+  TH1D* h_2l_cryield = (TH1D*) f_2lep->Get(fullhistnameCRyield);
+  n_dilep_cr = 0;
+  if (h_2l_cryield != 0)
+    n_dilep_cr = round(h_2l_cryield->Integral(0,-1));
   
   // FAKES
   TH1D* h_fakepred = (TH1D*) f_fake->Get(fullhistnameFakes);
@@ -385,7 +393,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     dilep_alpha = last_dilep_transfer;
   }
   //  n_syst += 4; // dilep_crstat, dilep_mcstat, dilep_alphaerr, dilep_lepeff
-  n_syst += 2; // dilep_crstat, dilep_lepeff
+  n_syst += 2; // dilep_crstat, dilep_dyUPDN, dilep_lepeff
   
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_dilep > 0.) {
@@ -486,7 +494,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   //   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_mcstat.Data(),dilep_mcstat)  << endl;
   if (n_mt2bins > 1)
     ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape.Data(),dilep_shape)  << endl;
-  //  ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
+    ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
   //  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_alphaerr.Data(),dilep_alphaerr)  << endl;
 
 
