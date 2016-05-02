@@ -419,8 +419,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (mt2bin == 1 && n_dilep > 0.) {
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
-      for (int ibin=1; ibin<h_1lpred->GetNbinsX(); ibin++)
-        increment += 0.2 / (n_mt2bins - 1) * (ibin - 1) * h_1lpred->GetBinContent(ibin);
+      for (int ibin=1; ibin<h_2lpred->GetNbinsX(); ibin++)
+        increment += 0.2 / (n_mt2bins - 1) * (ibin - 1) * h_2lpred->GetBinContent(ibin);
       dilep_shape = 1. - increment/n_dilep;
       if (dilep_shape < 0) dilep_shape = 0.1; // protection against huge oscillations
     }
