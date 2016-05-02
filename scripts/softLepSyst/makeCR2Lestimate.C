@@ -130,16 +130,16 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
     histMap2["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbinsDilepton");  
     histMap2["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins");  
     //DY UP histogram
-    histMap2["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName+"/h_mtbinsDilepton");    
-    histMap2["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName+"/h_mtbinsDilepton");  
+    histMap2["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName2+"/h_mtbinsDilepton");    
+    histMap2["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName2+"/h_mtbinsDilepton");  
     //DY DN histogram
-    histMap2["h_crMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("cr2L"+srName+"/h_mtbinsDilepton");    
-    histMap2["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName+"/h_mtbinsDilepton"); 
+    histMap2["h_crMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("cr2L"+srName2+"/h_mtbinsDilepton");    
+    histMap2["h_srMCDilepton_dyDN"]     = (TH1D*) fMC_dyDN->Get("srLep"+srName2+"/h_mtbinsDilepton"); 
     //Renorm histograms
-    histMap2["h_crMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_UPDilepton");    
-    histMap2["h_srMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_UPDilepton");
-    histMap2["h_crMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_DNDilepton");    
-    histMap2["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_DNDilepton");     
+    histMap2["h_crMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_renorm_UPDilepton");    
+    histMap2["h_srMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_renorm_UPDilepton");
+    histMap2["h_crMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_renorm_DNDilepton");    
+    histMap2["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_renorm_DNDilepton");     
 
     //fill Int histograms with integrated mtbins, i.e. event count
     for ( std::map<string, TH1D*>::iterator iter = histMap2.begin(); iter != histMap2.end(); ++iter ) {
