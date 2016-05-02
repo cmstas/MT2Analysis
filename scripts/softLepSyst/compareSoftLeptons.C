@@ -44,6 +44,23 @@ std::vector<TH1F*> outputHighMTSR;
 
 void setRegions(std::vector<TString> &regions) {
   
+  // regions.push_back("srLepbaseAll");
+  // regions.push_back("srLepbase");
+
+  // regions.push_back("srLepbaseJ");
+  // regions.push_back("srLepbaseZeroB");
+  // regions.push_back("srLepbaseWithB");
+
+  // regions.push_back("srLepbase1");
+  // regions.push_back("srLepbase2");
+  // regions.push_back("srLepbase3");
+  // regions.push_back("srLepbase4");
+  // regions.push_back("srLepbase5");
+  // regions.push_back("srLepbase6");
+  // regions.push_back("srLepbase7");
+  // regions.push_back("srLepB3");
+
+
   regions.push_back("srLep1L");
   regions.push_back("srLep2L");
   regions.push_back("srLep3L");
@@ -69,26 +86,41 @@ void setRegions(std::vector<TString> &regions) {
   
 }
 std::string getFullLabel(TString region) {
-  if (region == "srLep1L") return "MET>200, 2-3j, 0b";
-  if (region == "srLep2L") return "MET>200, 2-3j, #geq 1b";
-  if (region == "srLep3L") return "MET>200, 2-3j, #geq 1B";
-  if (region == "srLep4L") return "MET>200, 4-5j, 0b";
-  if (region == "srLep5L") return "MET>200, 4-5j, #geq 1b";
-  if (region == "srLep6L") return "MET>200, 4-5j, #geq 1B";
-  if (region == "srLep7L") return "MET>200, 6+j, 0-2B";
-  if (region == "srLep1M") return "MET>300, 2-3j, 0b";
-  if (region == "srLep2M") return "MET>300, 2-3j, #geq 1b";
-  if (region == "srLep3M") return "MET>300, 2-3j, #geq 1B";
-  if (region == "srLep4M") return "MET>300, 4-5j, 0b";
-  if (region == "srLep5M") return "MET>300, 4-5j, #geq 1b";
-  if (region == "srLep6M") return "MET>300, 4-5j, #geq 1B";
-  if (region == "srLep7M") return "MET>300, 6+j, 0-2B";
-  if (region == "srLepJ1L") return "MET>200, 1j, 0b";
-  if (region == "srLepJ1M") return "MET>300, 1j, 0b";
-  if (region == "srLepJ2L") return "MET>200, 1j, #geq 1b";
-  if (region == "srLepJ3L") return "MET>200, 1j, #geq 1B";
-  if (region == "srLepB3") return "MET>200, #geq 3B";
-  if (region == "srLepMET") return "MET>500, #geq 2j, 0-2B";
+
+  if (region == "srLepbaseAll") return "Total Baseline";
+  if (region == "srLepbase") return "Multijet Baseline";
+  if (region == "srLepbaseJ") return "Monojet Baseline";
+  if (region == "srLepbaseZeroB") return "Multijet, 0b";
+  if (region == "srLepbaseWithB") return "Multijet, #geq 1b";
+  if (region == "srLepbase1") return "E_{T}^{miss}>200, 2-3j, 0b";
+  if (region == "srLepbase2") return "E_{T}^{miss}>200, 2-3j, 1-2b";
+  if (region == "srLepbase3") return "E_{T}^{miss}>200, 2-3j, 1-2B";
+  if (region == "srLepbase4") return "E_{T}^{miss}>200, 4-6j, 0b";
+  if (region == "srLepbase5") return "E_{T}^{miss}>200, #geq 4j, 1-2b";
+  if (region == "srLepbase6") return "E_{T}^{miss}>200, #geq 4j, 1-2B";
+  if (region == "srLepbase7") return "E_{T}^{miss}>200, #geq 6j, 0b";
+
+  
+  if (region == "srLep1L") return "E_{T}^{miss}>200, 2-3j, 0b";
+  if (region == "srLep2L") return "E_{T}^{miss}>200, 2-3j, #geq 1b";
+  if (region == "srLep3L") return "E_{T}^{miss}>200, 2-3j, #geq 1B";
+  if (region == "srLep4L") return "E_{T}^{miss}>200, 4-5j, 0b";
+  if (region == "srLep5L") return "E_{T}^{miss}>200, 4-5j, #geq 1b";
+  if (region == "srLep6L") return "E_{T}^{miss}>200, 4-5j, #geq 1B";
+  if (region == "srLep7L") return "E_{T}^{miss}>200, 6+j, 0-2B";
+  if (region == "srLep1M") return "E_{T}^{miss}>300, 2-3j, 0b";
+  if (region == "srLep2M") return "E_{T}^{miss}>300, 2-3j, #geq 1b";
+  if (region == "srLep3M") return "E_{T}^{miss}>300, 2-3j, #geq 1B";
+  if (region == "srLep4M") return "E_{T}^{miss}>300, 4-5j, 0b";
+  if (region == "srLep5M") return "E_{T}^{miss}>300, 4-5j, #geq 1b";
+  if (region == "srLep6M") return "E_{T}^{miss}>300, 4-5j, #geq 1B";
+  if (region == "srLep7M") return "E_{T}^{miss}>300, 6+j, 0-2B";
+  if (region == "srLepJ1L") return "E_{T}^{miss}>200, 1j, 0b";
+  if (region == "srLepJ1M") return "E_{T}^{miss}>300, 1j, 0b";
+  if (region == "srLepJ2L") return "E_{T}^{miss}>200, 1j, #geq 1b";
+  if (region == "srLepJ3L") return "E_{T}^{miss}>200, 1j, #geq 1B";
+  if (region == "srLepB3") return "E_{T}^{miss}>200, #geq 3B";
+  if (region == "srLepMET") return "E_{T}^{miss}>500, #geq 2j, 0-2B";
   if (region == "srLepHT") return "H_{T}>1000, #geq 2j, 0-2B";
   else return "";
 }
@@ -104,6 +136,7 @@ void setRegionsDilep(std::vector<TString> &regions) {
   regions.push_back("srLep6L"); // +M
   regions.push_back("srLepJ1L"); // +M
   regions.push_back("srLepJ2L"); // +M will not work
+  regions.push_back("srLepJ3L"); // +M will not work
   regions.push_back("srLepB3");
   regions.push_back("srLepMET");
   regions.push_back("srLepHT");
@@ -469,6 +502,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
     h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
+    //ratiopad->SetLogy();
 //    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
     h_axis_ratio->GetYaxis()->SetTitle("Var/Central");
     if (TString(histname).Contains("Closure") || TString(histname).Contains("cr2Lpreds") ) {
@@ -560,7 +594,7 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
  
   std::vector<std::string> labels;
 
-  binMultiplier = 3;
+  int binMultiplier = 3;
   if (mtbin != -1) binMultiplier = 1;
   
   
@@ -578,8 +612,8 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
       TString fullhistname = Form("%s/%s", regions.at(j).Data(), histoNames.at(i).Data());
       TString fullhistnameCR = fullhistname;
       fullhistnameCR.ReplaceAll("srLep", CRdir);
-      fullhistnameCR.ReplaceAll("Dilepton", ""); // use the entire CR yield. TF is (dilepton events in SR) / (entire dilepton CR)
-      fullhistnameCR.ReplaceAll("Onelep", ""); // use the entire CR yield. TF is (onelepton events in SR) / (entire onelepton CR)
+      // fullhistnameCR.ReplaceAll("Dilepton", ""); // use the entire CR yield. TF is (dilepton events in SR) / (entire dilepton CR)
+      // fullhistnameCR.ReplaceAll("Onelep", ""); // use the entire CR yield. TF is (onelepton events in SR) / (entire onelepton CR)
       TH1F* hSR = (TH1F*) filesSR.at(i)->Get(fullhistname);
       TH1F* hSRsingle;
       if (hSR) hSRsingle = (TH1F*) filesSR.at(i)->Get(fullhistname)->Clone("single");
@@ -607,7 +641,19 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
           TH1F* hCRadded = (TH1F*) filesCR.at(i)->Get(fullhistnameCRadded);
           if (hCRadded && hCR) hCR->Add(hCRadded);
           else cout<<"Could not find "<<fullhistnameCRadded<<endl;
-
+        }
+	else if (fullhistnameSRadded.Contains("M") || fullhistnameCRadded.Contains("M")) {
+          fullhistnameCRadded.ReplaceAll("M", "L");
+          fullhistnameCRadded = "cr2L" + fullhistnameCRadded;
+          fullhistnameSRadded.ReplaceAll("M", "L");
+          fullhistnameSRadded = "srLep" + fullhistnameSRadded;
+          cout<<"Adding region "<<fullhistnameCRadded<<endl;
+          TH1F* hSRadded = (TH1F*) filesSR.at(i)->Get(fullhistnameSRadded);
+          if (hSRadded && hSR) hSR->Add(hSRadded);
+          else cout<<"Could not find "<<fullhistnameSRadded<<endl;
+          TH1F* hCRadded = (TH1F*) filesCR.at(i)->Get(fullhistnameCRadded);
+          if (hCRadded && hCR) hCR->Add(hCRadded);
+          else cout<<"Could not find "<<fullhistnameCRadded<<endl;
         }
         
         // Create the extra "k_HT" factor
@@ -681,18 +727,18 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
     }// end of loop over regions
     
     TH1F* h_R_sr_cr = (TH1F*) h_sr_yields->Clone("h_R_sr_cr");
-    h_R_sr_cr->Print("all");
-    h_cr_yields->Print("all");
+    // h_R_sr_cr->Print("all");
+    // h_cr_yields->Print("all");
     if (renormalizeCRafterModifying != 0) {
       cout<<"Renormalizing CR by a factor of "<< renormalizeCRafterModifying / h_cr_yields->Integral() << endl;
       h_cr_yields->Scale(renormalizeCRafterModifying / h_cr_yields->Integral());
     }
-    h_cr_yields->Print("all");
+    // h_cr_yields->Print("all");
     h_R_sr_cr->Divide(h_cr_yields);
-    h_R_sr_cr->Print("all");
+    // h_R_sr_cr->Print("all");
     h_R_sr_cr->SetDirectory(0);
     h_R_sr_cr->SetName(legendNames.at(i));
-    h_R_sr_cr->Print("all");
+    // h_R_sr_cr->Print("all");
     output.push_back(h_R_sr_cr);
     h_R_sr_cr->Draw();
     if (CRdir == "cr2L") {
@@ -700,7 +746,7 @@ std::vector<TH1F*> makeTFHistos(std::vector<TFile*> filesSR, std::vector<TFile*>
       h_K_srsingle_sr->Divide(h_sr_yields);
       h_K_srsingle_sr->SetDirectory(0);
       h_K_srsingle_sr->SetName(legendNames.at(i));
-      h_K_srsingle_sr->Print("all");
+      // h_K_srsingle_sr->Print("all");
       outputKht.push_back(h_K_srsingle_sr);
       h_K_srsingle_sr->Draw();
     }
@@ -885,7 +931,102 @@ void compareSoftLeptons1L2L(){
   std::vector<TFile*> filesCR;
   std::vector<TString> purpose;
 
+  //--------- mark's TF plots---------
+  string markDir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_apr30/";
+  string jecUPdir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_JECup_apr30/";
+  string jecDOWNdir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_JECdown_apr30/";
+  TFile* allMCfile = new TFile(Form("%s/allBkg.root",markDir.c_str()));
+  TFile* dyUPfile = new TFile(Form("%s/allBkg_dyUP.root",markDir.c_str()));
+  TFile* dyDNfile = new TFile(Form("%s/allBkg_dyDN.root",markDir.c_str()));
+  TFile* wttfile = new TFile(Form("%s/WTT.root",markDir.c_str()));
+  TFile* wttJECupfile = new TFile(Form("%s/WTT.root",jecUPdir.c_str()));
+  TFile* wttJECdownfile = new TFile(Form("%s/WTT.root",jecDOWNdir.c_str()));
+
+  setRegions(regions);
+  setRegionsDilep(regionsDilep);
+
+  //DY up/down variation in cr2l
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  filesSR.push_back(dyUPfile);  filesCR.push_back(dyUPfile); legendNames.push_back("DY +50%"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(dyDNfile);  filesCR.push_back(dyDNfile); legendNames.push_back("DY -50%"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("colored point");
+  string systVar = "dyUPDN";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  std::vector<TH1F*> histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
   
+  //JEC up/down variations for tt+wjets files ONLY (in cr2L)
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(wttfile);  filesCR.push_back(wttfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  filesSR.push_back(wttJECupfile);  filesCR.push_back(wttJECupfile); legendNames.push_back("JEC up"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(wttJECdownfile);  filesCR.push_back(wttJECdownfile); legendNames.push_back("JEC down"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("colored point");
+  systVar = "JECvar";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
+
+  //JEC up/down variations for tt+wjets files ONLY (in cr1L)
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(wttfile);  filesCR.push_back(wttfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  filesSR.push_back(wttJECupfile);  filesCR.push_back(wttJECupfile); legendNames.push_back("JEC up"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(wttJECdownfile);  filesCR.push_back(wttJECdownfile); legendNames.push_back("JEC down"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("colored point");
+  systVar = "JECvar";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true); 
+  makePlot( histos , legendNames , purpose,   "OnelepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+
+  //B-tag SF variations in cr1L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Heavy UP"); histoNames.push_back("h_mtbins_btagsf_heavy_UPOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Heavy DN"); histoNames.push_back("h_mtbins_btagsf_heavy_DNOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Light UP"); histoNames.push_back("h_mtbins_btagsf_light_UPOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Light DN"); histoNames.push_back("h_mtbins_btagsf_light_DNOnelep"); purpose.push_back("colored point");
+  systVar = "BtagSF";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true); 
+  makePlot( histos , legendNames , purpose,   "OnelepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+
+  //B-tag SF variations in cr2L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Heavy UP"); histoNames.push_back("h_mtbins_btagsf_heavy_UPDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Heavy DN"); histoNames.push_back("h_mtbins_btagsf_heavy_DNDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Light UP"); histoNames.push_back("h_mtbins_btagsf_light_UPDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("b-tag SF Light DN"); histoNames.push_back("h_mtbins_btagsf_light_DNDilepton"); purpose.push_back("colored point");
+  systVar = "BtagSF";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
+
+
+  //Renormalization variations in cr1L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("Renorm UP"); histoNames.push_back("h_mtbins_renorm_UPOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("Renorm DN"); histoNames.push_back("h_mtbins_renorm_DNOnelep"); purpose.push_back("colored point");
+  systVar = "Renorm";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true); 
+  makePlot( histos , legendNames , purpose,   "OnelepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+
+  //Renormalization variations in cr2L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("Renorm UP"); histoNames.push_back("h_mtbins_renorm_UPDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("Renorm DN"); histoNames.push_back("h_mtbins_renorm_DNDilepton"); purpose.push_back("colored point");
+  systVar = "Renorm";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
+
+  return;
+  
+  //--------- end mark's TF plots---------
   
   string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
   string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
@@ -922,7 +1063,7 @@ void compareSoftLeptons1L2L(){
   std::string syst = "TopVsW";
   // make histograms with few regions to get R and k_MET
   outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
-  std::vector<TH1F*> histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true);
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true);
   makePlot( histos , legendNames , purpose,   "DilepTFs_"+syst ,  "" ,  "Transfer Factor" ,  false ,  true  );
   makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+syst ,  "" ,  "k_{MET}" ,  false ,  true  );
 
@@ -1004,8 +1145,8 @@ void compareSoftLeptonsClosure1L2L(){
 
   
   //string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLepMark15Apr16/";
-  //string input_dir = "../../SoftLepLooper/output/softLep/";
+  //string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLepMark15Apr16/";
+  string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr27/";
   
 
   TFile* bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
@@ -1071,7 +1212,7 @@ void compareSoftLeptonsFake(){
   filesSR.push_back(sr1);  legendNames.push_back("Data (FR method)"); histoNames.push_back("h_pred"); purpose.push_back("black point");
   filesSR.push_back(sr1);  legendNames.push_back("MC (Truth)"); histoNames.push_back("h_predMC"); purpose.push_back("colored point");
    outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
-   histos2       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+   std::vector<TH1F*> histos2       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
    makePlot( outputBinnedSR , legendNames , purpose,  "FakeClosureData" ,  "" ,  "Entries" ,  true ,  true  );
    makePlot( outputHighMTSR , legendNames , purpose,  "FakeClosureDataHighMT" ,  "" ,  "Entries" ,  true ,  true  );
 
@@ -1094,54 +1235,68 @@ void compareSoftLeptonsEstimatesToData(){
   std::vector<TString> purpose;
 
   
-  string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
-  string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
+  // string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
+  // string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
+  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_apr27/";
+  string input_dir2 = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_apr27/";
   
-  TFile* fake = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
+  //TFile* fake = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
+  TFile* fake = new TFile("/home/users/gzevi/pred_FakeRate.root");
   TFile* onelep = new TFile(Form("%s/pred_CR1L.root",input_dir.c_str()));
   TFile* dilep = new TFile(Form("%s/pred_CR2L.root",input_dir.c_str()));
   TFile* all = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
-//  TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
+  TFile* data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
+  TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
 //  TFile* T5qqqqWW = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str()));
   //  TFile* T5qqqqWW2 = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str()));
   TFile* TChiNeu = new TFile(Form("%s/TChiNeu_100_90.root",input_dir.c_str()));
   
   
-  filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
+  filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
   filesSR.push_back(all);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_mtbinsFake"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("stack");
-//  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
-  filesSR.push_back(TChiNeu);  legendNames.push_back("TChiNeu 100 90"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
+  //  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
+  //filesSR.push_back(TChiNeu);  legendNames.push_back("TChiNeu 100 90"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
 //  filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW_1025_775"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 //  filesSR.push_back(T5qqqqWW2);  legendNames.push_back("T5qqqqWW_1100_500"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 
   setRegions(regions);
   
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
-  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC_TChiNeu" ,  "" ,  "Entries" ,  true ,  true , true );
+  std::vector<TH1F*>  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsMC" ,  "" ,  "Entries" ,  true ,  true , true );
   
   filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
-  filesSR.push_back(all);  legendNames.push_back("MC (shown as Data)"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
+  filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
+  filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
+  filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsSyst"); purpose.push_back("stack");
+  filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsSyst"); purpose.push_back("stack");
+
+  outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
+  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_Syst" ,  "" ,  "Entries" ,  true ,  true , true );
+
+  filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
   filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
   filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
   filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
 
-  
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction" ,  "" ,  "Entries" ,  true ,  true , true );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_StatOnly" ,  "" ,  "Entries" ,  true ,  true , true );
+
   
   return;
 }
 
 
 void compareSoftLeptons(){
-  //compareSoftLeptons1L2L();
+  compareSoftLeptons1L2L();
   //compareSoftLeptonsClosure1L2L();
   //compareSoftLeptonsFake();
-  compareSoftLeptonsEstimatesToData();
+  //compareSoftLeptonsEstimatesToData();
   return;
 }
 
