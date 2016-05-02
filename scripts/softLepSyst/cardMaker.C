@@ -398,7 +398,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
   TString name_dilep_shape = Form("dilep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
-  TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
   TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_dyUPDN = "dilep_dyUPDN";
