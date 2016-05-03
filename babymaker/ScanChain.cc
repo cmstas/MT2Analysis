@@ -279,7 +279,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   // -- mt2higgs --
   unsigned int nLessThanTwoBJets = 0;
   unsigned int nMoreThanTwoBJets = 0;
-  unsigned int nImproved = 0;
+  unsigned int nReclustered = 0;
   unsigned int nHcandWithBJetsLess30 = 0;
   unsigned int nHiggsEvents = 0;
   unsigned int nNoHiggsEvents = 0;
@@ -1825,10 +1825,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       // --- MT2-Higgs ---
       // Select >= 2 bjets and find higgs candidate
-      if (nBJet20 < 2) continue;
       if (nBJet20 < 2) nLessThanTwoBJets++;
+      if (nBJet20 < 2) continue;
       if (nBJet20 > 2) nMoreThanTwoBJets++;
-      float divMin = -1;
+      float difMin = -1;
       LorentzVector p4_higgs;
       int ibj_hcand1 = -1;          // higgs candidate bJets index
       int ibj_hcand2 = -1;
@@ -1836,14 +1836,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         for (int ibj2=ibj1+1; ibj2<nBJet20; ibj2++){
           LorentzVector p4combined = p4sBJets.at(ibj1) + p4sBJets.at(ibj2);
           float invM = p4combined.M();
-          float M_div = fabs(invM-125.1);
+          float M_dif = fabs(invM-125.1);
           // h_invM_bjets->Fill(invM);
           // if(invM > 100 && invM < 150){
-          if( M_div < 25 ) nHiggs_cand++;
-          if( M_div < divMin || divMin < 0){
+          if( M_dif < 25 ) nHiggs_cand++;
+          if( M_dif < difMin || difMin < 0){
             p4_higgs   = p4combined;
             hcand_M    = invM;
-            divMin     = M_div;
+            difMin     = M_dif;
             ibj_hcand1 = ibj1;
             ibj_hcand2 = ibj2;
           }
@@ -1878,7 +1878,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(p4sBJets.at(ibj_hcand1).pt() < 30 || p4sBJets.at(ibj_hcand2).pt() < 30) nHcandWithBJetsLess30++;
         else if(! AreJetsInSameHems(p4sForHems, p4sBJets.at(ibj_hcand1), p4sBJets.at(ibj_hcand2))){
           bInDiffHemjet = true;
-          ++nImproved;
+          ++nReclustered;
         }
         ++nHiggsEvents;
       }
@@ -2178,56 +2178,59 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
     delete tree;
     f.Close();
-    }//end loop on files
+  }//end loop on files
 
-    cout << "Processed " << nEventsTotal << " events" << endl;
-    if ( nEventsChain != nEventsTotal ) {
-      std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
-    }
-
-    cout << nDuplicates << " duplicate events were skipped." << endl;
-    cout << nFailJSON << " events were removed by JSON." << endl;
-    cout << nFailRunNumber << " events were removed due to run number." << endl;
-
-    CloseBabyNtuple();
-
-    if (applyBtagSFs) {
-      delete calib;
-      delete reader_heavy;
-      delete reader_heavy_UP;
-      delete reader_heavy_DN;
-      delete reader_light;
-      delete reader_light_UP;
-      delete reader_light_DN;
-      if (isFastsim) {
-	delete calib_fastsim;
-	delete reader_fastsim;
-	delete reader_fastsim_UP;
-	delete reader_fastsim_DN;
-      }
-    }
-
-    if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
-    if (!isDataFromFileName && applyJECfromFile && applyJECunc != 0) delete jetcorr_uncertainty;
-
-    bmark->Stop("benchmark");
-    cout << endl;
-    cout << nEventsTotal << " Events Processed" << endl;
-    cout << "------------------------------" << endl;
-    cout << "Events has less than 2 bjets: " << nLessThanTwoBJets << ", events with more than 2 bjets: " << nMoreThanTwoBJets << endl;
-    cout << nHiggsEvents << " Higgs Events Found, while " << nNoHiggsEvents << " Events with no Higgs candidates.\n"
-         << "The portion of higgs cand events is: " << setprecision(3) << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%.\n"
-         << "Amoung which, " << nImproved << " events that are \"improved\", which is " << ((float) nImproved)/nHiggsEvents*100
-         << "% of the Higgs events.\nat the same time, " << nHcandWithBJetsLess30 << " \"higgs\" events has bjet pt less than 30 GeV" << endl;
-    // cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
-    cout << "------------------------------" << endl;
-    cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
-    cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
-    cout << endl;
-    delete bmark;
-
-    return;
+  cout << "Processed " << nEventsTotal << " events" << endl;
+  if ( nEventsChain != nEventsTotal ) {
+    std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
   }
+
+  cout << nDuplicates << " duplicate events were skipped." << endl;
+  cout << nFailJSON << " events were removed by JSON." << endl;
+  cout << nFailRunNumber << " events were removed due to run number." << endl;
+
+  CloseBabyNtuple();
+
+  if (applyBtagSFs) {
+    delete calib;
+    delete reader_heavy;
+    delete reader_heavy_UP;
+    delete reader_heavy_DN;
+    delete reader_light;
+    delete reader_light_UP;
+    delete reader_light_DN;
+    if (isFastsim) {
+      delete calib_fastsim;
+      delete reader_fastsim;
+      delete reader_fastsim_UP;
+      delete reader_fastsim_DN;
+    }
+  }
+
+  if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
+  if (!isDataFromFileName && applyJECfromFile && applyJECunc != 0) delete jetcorr_uncertainty;
+
+  bmark->Stop("benchmark");
+  cout << endl;
+  cout << nEventsTotal << " Events Processed" << endl;
+  cout << "------------------------------" << endl;
+  cout << "Events has < 2 bjets: " << nLessThanTwoBJets << ", == 2 bjets: " << nEventsTotal - nLessThanTwoBJets - nMoreThanTwoBJets
+       << ", > 2 bjets: " << nMoreThanTwoBJets << ", and >= 2 bjets is: "  << nHiggsEvents+nNoHiggsEvents << " (" << setprecision(3)
+       << (nEventsTotal - nLessThanTwoBJets)/((float)nEventsTotal)*100 << "%).\n"; 
+  cout << nHiggsEvents << " Higgs Events Found, the portion of higgs cand events is: " << setprecision(3)
+       << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%.\n" 
+       << "Amoung which, " << nReclustered << " events were in different hemjets, which is " << ((float)nReclustered)/nHiggsEvents*100
+       << "% of all Higgs events.\nAt the same time, " << nHcandWithBJetsLess30 << " (" << ((float)nHcandWithBJetsLess30)/nHiggsEvents*100
+       << "%) \"higgs\" events has at least 1 bjet's pt less than 30 GeV\n";
+  // cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
+  cout << "------------------------------" << endl;
+  cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << endl;
+  delete bmark;
+
+  return;
+}
 
   void babyMaker::MakeBabyNtuple(const char *BabyFilename){
 
