@@ -106,8 +106,8 @@ bool AreJetsInSameHems(std::vector<LorentzVector>& jets, LorentzVector bjet1, Lo
   int asgn2 = -1;
   std::vector<int> hemAssoc = getHemJetsAssignment(jets);
   for(unsigned int i=0; i < jets.size(); i++){
-    if(DeltaR(jets.at(i).eta(), bjet1.eta(), jets.at(i).phi(), bjet1.phi()) < 0.01) asgn1 = i;
-    else if(DeltaR(jets.at(i).eta(), bjet2.eta(), jets.at(i).phi(), bjet2.phi()) < 0.01) asgn2 = i;
+    if(DeltaR(jets.at(i).eta(), bjet1.eta(), jets.at(i).phi(), bjet1.phi()) < 0.01) asgn1 = hemAssoc.at(i);
+    else if(DeltaR(jets.at(i).eta(), bjet2.eta(), jets.at(i).phi(), bjet2.phi()) < 0.01) asgn2 = hemAssoc.at(i);
   }
   if(asgn1 < 0 || asgn2 < 0) std::cout << "Error: bjet not found in jets vector!" << std::endl;
   
