@@ -503,7 +503,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_sig_lepeff       = "sig_lepEffSyst";
   
   if (doDummySignalSyst) {
-    // dummy: just 1 nuisance, correlated
+    // dummy: just 2 nuisances, 1 correlated and mc stat
+    ++n_syst;
     ++n_syst;
   }
   // otherwise do "real" signal systematics
@@ -531,6 +532,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // ---- sig systs
   if (doDummySignalSyst) {
     ofile <<  Form("%s                                    lnN   %.3f    -      -     - ",name_sig_syst.Data(),sig_syst)  << endl;
+    ofile <<  Form("%s     lnN    %.3f   -    -    - ",name_sig_mcstat.Data(),sig_mcstat)  << endl;
   }
   // full signal systematics
   else {
