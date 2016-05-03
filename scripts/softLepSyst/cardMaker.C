@@ -221,7 +221,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (verbose) std::cout << "Zero signal, card not printed: " << cardname << std::endl;
     return 0;
   }
- 
+
+  // -------ONELEP-------
   // get all the numbers we need from the histograms we have
   // !!!!! HACK: set zero bins to 0.01 for now to make combine happy
   // PREDICTION
@@ -269,8 +270,33 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // K_HT Extrap. Uncert
   // Purity uncertainty
   // Composition uncertainty
+
+  //classify mT shape uncertainty
+  int doOnelepShape = -1;
+  if (nbjets_HI==1 && njets_LOW!=6) doOnelepShape = 1;
+  else if (nbjetshard_LOW > 0 || nbjets_LOW >= 2) doOnelepShape = 2;
+  else doOnelepShape = 3;
+  //uncertainties on second/third MT bin
+  vector<float> shape1L;
+  shape1L.push_back(0); //first MT bin always has no uncertainty
+  if (doOnelepShape == 1) {
+    shape1L.push_back(0.15);
+    shape1L.push_back(0.05);
+  }
+  else if (doOnelepShape == 2) {
+    shape1L.push_back(0.15);
+    shape1L.push_back(0.15);
+  }
+  else if (doOnelepShape == 3) {
+    shape1L.push_back(0.15);
+    shape1L.push_back(0.30);
+  }
+  else cerr << "ERROR: Onelep MT shape not classified!" << endl;
+    
+
+
   
-  // DILEPTONS
+  // -------DILEPTONS-------
   TH1D* h_2lpred = (TH1D*) f_2lep->Get(fullhistnamePred);
   if (h_2lpred != 0) {
     n_dilep = h_2lpred->GetBinContent(mt2bin);
@@ -348,7 +374,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_onelep_shape = Form("onelep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
+  TString name_onelep_shape = Form("onelep_shape_%d", doOnelepShape);
   TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_mcstat = Form("onelep_MCstat_%s", channel.c_str());
   //TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
@@ -375,13 +401,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
       for (int ibin=1; ibin<h_1lpred->GetNbinsX(); ibin++)
-	increment += 0.2 / (n_mt2bins - 1) * (ibin - 1) * h_1lpred->GetBinContent(ibin);
+	increment += shape1L[ibin] * h_1lpred->GetBinContent(ibin);
       onelep_shape = 1. - increment/n_onelep;
       if (onelep_shape < 0) onelep_shape = 0.1; // protection against huge oscillations
     }
     else
-      onelep_shape = 1. + 0.2 / (n_mt2bins - 1) * (mt2bin - 1);
-    n_syst++;  // onelep_shape
+      onelep_shape = 1. + shape1L[mt2bin] * (mt2bin - 1);
+    //add to MC stat uncertainty in category-3
+    if (doOnelepShape ==3){
+      err_onelep_mcstat = sqrt(err_onelep_mcstat*err_onelep_mcstat + (1-onelep_shape)*(1-onelep_shape));
+      onelep_mcstat = 1. + err_onelep_mcstat;
+    }
+    else
+      n_syst++;  // onelep_shape
   }
   n_onelep = n_onelep_cr * onelep_alpha; // don't use onelep prediction as central value any more, since it has to be consistent with CR*alpha
   
@@ -501,7 +533,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("%s    gmN %.0f    -  %.5f -     - ",name_onelep_crstat.Data(),n_onelep_cr,onelep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_mcstat.Data(),onelep_mcstat)  << endl;
   if (n_mt2bins > 1)
-    ofile <<  Form("%s   \t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
+    if (doOnelepShape != 3) ofile <<  Form("%s   \t\t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
     ofile <<  Form("%s   \t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
     ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
