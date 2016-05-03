@@ -79,7 +79,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
     if (iter->first.find("Int") != std::string::npos) continue;
     histMap[Form("%sInt",iter->first.c_str())] = new TH1D(Form("%sInt",iter->first.c_str()),"Events",1,0,1);
-    if (iter->second) histMap[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->Integral(0,-1));
+    if (iter->second) {
+      double err = 0;
+      histMap[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->IntegralAndError(0,-1,err));
+      histMap[Form("%sInt",iter->first.c_str())]->SetBinError(1,err);
+    }
   }
 
   //check for MC hist. should always exist
@@ -145,7 +149,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
     for ( std::map<string, TH1D*>::iterator iter = histMap2.begin(); iter != histMap2.end(); ++iter ) {
       if (iter->first.find("Int") != std::string::npos) continue;
       histMap2[Form("%sInt",iter->first.c_str())] = new TH1D(Form("%s2Int",iter->first.c_str()),"Events",1,0,1);
-      if (iter->second) histMap2[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->Integral(0,-1));
+      if (iter->second) {
+	double err = 0;
+	histMap2[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->IntegralAndError(0,-1,err));
+	histMap2[Form("%sInt",iter->first.c_str())]->SetBinError(1,err);
+      }
     }
 
     //check for MC hist. should always exist

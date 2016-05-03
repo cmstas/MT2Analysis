@@ -76,7 +76,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
     if (iter->first.find("Int") != std::string::npos) continue;
     histMap[Form("%sInt",iter->first.c_str())] = new TH1D(Form("%sInt",iter->first.c_str()),"Events",1,0,1);
-    if (iter->second) histMap[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->Integral(0,-1));
+    if (iter->second) {
+      double err = 0;
+      histMap[Form("%sInt",iter->first.c_str())]->SetBinContent(1,iter->second->IntegralAndError(0,-1,err));
+      histMap[Form("%sInt",iter->first.c_str())]->SetBinError(1,err);
+    }
   }
 
   //check for MC hist. should always exist
