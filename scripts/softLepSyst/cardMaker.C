@@ -419,17 +419,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   
   // ----- lost lepton bkg uncertainties
   double dilep_shape = 1.0;
+  double dilep_shape2 = 1.0;
   double dilep_alpha  = 1; // transfer factor
   double dilep_mcstat = 1. + err_dilep_mcstat; // transfer factor stat uncertainty
   double dilep_alphaerr = 1. + 0.05; // transfer factor syst uncertainty
   double dilep_dyUPDN = 1 + dilep_dyUPDN_syst; // transfer factor sys uncertainty due to DY UP/DN variation
   double dilep_jec = 1 + dilep_jec_syst; // transfer factor sys uncertainty due to JEC variations
   double dilep_renorm = 1 + dilep_renorm_syst; // transfer factor syst uncertainty due to renormalization/factorization scale
-  double dilep_lepeff = 1.15;
+  double dilep_lepeff = 1.05;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_dilep_shape = Form("dilep_shape_%s_%s", bjet_str.c_str(), bjethard_str.c_str());
+  TString name_dilep_shape = Form("dilep_shape_%s_%s_%s", ht_str.c_str(),  met_str.c_str(), mt2_str.c_str());
+  TString name_dilep_shape2 = Form("dilep_shape2_%s_%s_%s", ht_str.c_str(),  met_str.c_str(), mt2_str.c_str());
   TString name_dilep_crstat = Form("dilep_CRstat_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
   //TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
@@ -446,26 +448,39 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     dilep_alpha = last_dilep_transfer;
   }
   n_syst += 4; // dilep_crstat, dilep_mcstat, dilep_dyUPDN, dilep_lepeff
-  
-  if (n_mt2bins > 1) {
+
+  //shape uncertainty. 30% on second bin, 50% on third, keeping normalization fixed with first bin.
+  if (n_mt2bins > 1 && mt2bin != 3) {
     if (mt2bin == 1 && n_dilep > 0.) {
-      // first bin needs to compensate normalization from the rest
+      // first bin needs to compensate normalization from the second bin
       float increment = 0.;
-      for (int ibin=1; ibin<h_2lpred->GetNbinsX(); ibin++)
-        increment += 0.2 / (n_mt2bins - 1) * (ibin - 1) * h_2lpred->GetBinContent(ibin);
+      increment += 0.3 * h_2lpred->GetBinContent(2);
       dilep_shape = 1. - increment/n_dilep;
       if (dilep_shape < 0) dilep_shape = 0.1; // protection against huge oscillations
     }
-    else
-      dilep_shape = 1. + 0.2 / (n_mt2bins - 1) * (mt2bin - 1);
+    else if (mt2bin == 2)
+      dilep_shape = 1. + 0.3;
     n_syst++;  // dilep_shape
   }
+  if (n_mt2bins > 1 && mt2bin != 2) {
+    if (mt2bin == 1 && n_dilep > 0.) {
+      // first bin needs to compensate normalization from the second bin
+      float increment = 0.;
+      increment += 0.5 * h_2lpred->GetBinContent(3);
+      dilep_shape2 = 1. - increment/n_dilep;
+      if (dilep_shape2 < 0) dilep_shape2 = 0.1; // protection against huge oscillations
+    }
+    else if (mt2bin == 3)
+      dilep_shape2 = 1. + 0.5;
+    n_syst++;  // dilep_shape2
+  }
+  
   n_dilep = n_dilep_cr * dilep_alpha; // don't use dilep prediction as central value any more, since it has to be consistent with CR*alpha
 
 
   
   
-  TString name_fake_syst = Form("fake_syst_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str());
+  TString name_fake_syst = Form("fake_syst_%s", channel.c_str());
   double fake_syst = 1.99;
   n_syst++; //fake_syst
 
@@ -532,22 +547,24 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("%s   \t\t\t    lnN    -  %.3f  -     - ",name_onelep_lepeff.Data(),onelep_lepeff)  << endl;
   ofile <<  Form("%s    gmN %.0f    -  %.5f -     - ",name_onelep_crstat.Data(),n_onelep_cr,onelep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_mcstat.Data(),onelep_mcstat)  << endl;
-  if (n_mt2bins > 1)
-    if (doOnelepShape != 3) ofile <<  Form("%s   \t\t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
-    ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
-    ofile <<  Form("%s   \t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
-    ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
-    ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_jec.Data(),onelep_jec,dilep_jec)  << endl;
-    ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_renorm.Data(),onelep_renorm,dilep_renorm)  << endl;
+  if (n_mt2bins > 1 && doOnelepShape != 3)
+    ofile <<  Form("%s   \t\t\t     lnN    -   %.3f    -     - ",name_onelep_shape.Data(),onelep_shape)  << endl;
+  ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
+  ofile <<  Form("%s   \t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
+  ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
+  ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_jec.Data(),onelep_jec,dilep_jec)  << endl;
+  ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_renorm.Data(),onelep_renorm,dilep_renorm)  << endl;
   //ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
 
   // ---- dilep systs
   ofile <<  Form("%s   \t\t\t\t    lnN    -    -    %.3f    - ",name_dilep_lepeff.Data(),dilep_lepeff)  << endl;
   ofile <<  Form("%s     gmN %.0f    -    -    %.5f     - ",name_dilep_crstat.Data(),n_dilep_cr,dilep_alpha)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_mcstat.Data(),dilep_mcstat)  << endl;
-  if (n_mt2bins > 1)
+  if (n_mt2bins > 1 && mt2bin!=3)
     ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape.Data(),dilep_shape)  << endl;
-    ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
+  if (n_mt2bins > 1 && mt2bin!=2)
+    ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape2.Data(),dilep_shape2)  << endl;
+  ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
   //  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_alphaerr.Data(),dilep_alphaerr)  << endl;
 
 
