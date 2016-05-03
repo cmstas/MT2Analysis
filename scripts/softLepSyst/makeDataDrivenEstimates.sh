@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INDIR=../../SoftLepLooper/output/softLep_unblind_skim_apr27/
+INDIR=../../SoftLepLooper/output/softLep_unblind_skim_apr30/
 INDIRfake=../../SoftLepLooper/output/softLepFake/
 THISDIR=`pwd`
 
