@@ -14,6 +14,7 @@ void Fill2d(TH2F *&hist, double w, double x, double y){
   y = std::min(hist->GetYaxis()->GetBinCenter(hist->GetYaxis()->GetLast()) , y); 
   y = std::max(hist->GetYaxis()->GetBinCenter(hist->GetYaxis()->GetFirst()), y); 
   hist->Fill(x, y, w); 
+  cout<<"Filling "<<x<<", "<<y<<" with weight "<<w<<endl;
 }
 
 void make_rValues(std::string indir, std::string model, int m1, int m2){
@@ -47,7 +48,13 @@ void make_rValues(std::string indir, std::string model, int m1, int m2){
 
   //This file is created earlier by running combine
   TFile *limit_file = new TFile(Form("%s/limit_%s_%d_%d.root", indir.c_str(), model.c_str(), m1, m2), "READ");
+  if (limit_file->IsZombie()) {
+    cout<<"File not found, exiting: "<<Form("%s/limit_%s_%d_%d.root", indir.c_str(), model.c_str(), m1, m2)<<endl;
+    return;
+  }
   TTree *limit_tree = (TTree*)limit_file->Get("limit");
+
+
 
   //This file is created earlier by running combine
   //TFile *significance_file = new TFile(Form("significance_%s_%d_%d.root", model.c_str(), m1, m2), "READ");
