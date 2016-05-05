@@ -19,6 +19,7 @@
 //MT2
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
+#include "../MT2CORE/sigSelectionsMT2Higgs.h"
 #include "../MT2CORE/SR.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
@@ -80,7 +81,7 @@ class MT2Looper {
   bool passMonojetId_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
-  std::vector<SR> SRHcand;
+  std::vector<SR> SRVecHcand;
   std::vector<SR> SRVecMonojet;
   std::vector<SR> InclusiveRegions;
   std::vector<SR> InclusiveRegionsMonojet;

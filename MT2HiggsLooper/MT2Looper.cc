@@ -113,7 +113,7 @@ void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVecHcand =  getSignalRegionsHcand();
+  SRVecHcand =  getSignalRegionsMT2Higgs();
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
   //store histograms with cut values for all variables
@@ -2020,17 +2020,17 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   }
   dir->cd();
 
-  plot1D("h_nHcand"+s,        nHiggs_cand,      evtweight_, h_1d, ";n HiggsCand",   10, 0, 10);
-  plot1D("h_hcand_M"+s,       hcand_M,          evtweight_, h_1d, ";M (bb) [GeV]",   50, 100, 150);
-  plot1D("h_hcand_pt"+s,      hcand_pt,         evtweight_, h_1d, ";p_{T}(H) [GeV]", 50, 100, 150);
-  plot1D("h_hcand_phi"+s,     hcand_phi,        evtweight_, h_1d, ";#phi (H)" ,           60, -5, 5);
-  plot1D("h_hcand_dPhi"+s,    hcand_deltaPhi,   evtweight_, h_1d, ";#Delta#phi (H, met)", 60, -5, 5);
-  plot1D("h_bMET_dPhiMin"+s,  bMET_deltaPhiMin, evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -5, 5);
-  plot1D("h_bMET_MTmin"+s,    bMET_MTmin,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
-  plot1D("h_bMET_MTclose"+s,  bMET_MTclose,     evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
-  plot1D("h_hcand_mt2"+s,     hcand_mt2,        evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
-  plot1D("h_hcand_mt2diff"+s, hcand_mt2-mt2,    evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
-  plot1D("h_mt"+s,            hcand_,           evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  plot1D("h_nHcand"+s,        t.nHiggs_cand,       evtweight_, h_1d, ";n HiggsCand",   10, 0, 10);
+  plot1D("h_hcand_M"+s,       t.hcand_M,           evtweight_, h_1d, ";M (bb) [GeV]",   50, 100, 150);
+  plot1D("h_hcand_pt"+s,      t.hcand_pt,          evtweight_, h_1d, ";p_{T}(H) [GeV]", 50, 100, 150);
+  plot1D("h_hcand_phi"+s,     t.hcand_phi,         evtweight_, h_1d, ";#phi (H)" ,           60, -5, 5);
+  plot1D("h_hcand_dPhi"+s,    t.hcand_deltaPhi,    evtweight_, h_1d, ";#Delta#phi (H, met)", 60, -5, 5);
+  plot1D("h_bMET_dPhiMin"+s,  t.bMET_deltaPhiMin,  evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -5, 5);
+  plot1D("h_bMET_MTmin"+s,    t.bMET_MTmin,        evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
+  plot1D("h_bMET_MTclose"+s,  t.bMET_MTclose,      evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
+  plot1D("h_hcand_mt2"+s,     t.hcand_mt2,         evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
+  plot1D("h_hcand_mt2diff"+s, t.hcand_mt2 - t.mt2, evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
+  // plot1D("h_mt"+s,            t.hcand_mt,          evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
 
   outfile_->cd();
 
