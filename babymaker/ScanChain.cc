@@ -282,6 +282,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   unsigned int nReclustered = 0;
   unsigned int nHcandWithBJetsLess30 = 0;
   unsigned int nHiggsEvents = 0;
+  unsigned int nPassCut1 = 0;
+  unsigned int nPassCut2 = 0;
+  unsigned int nPassCut3 = 0;
+  unsigned int nPassCut4 = 0;
   unsigned int nNoHiggsEvents = 0;
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
@@ -301,7 +305,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-      //for( unsigned int event = 0; event < 1000; ++event) {
+      if (event > 10000) break; // debug
 
       // Get Event Content
       tree->LoadTree(event);
@@ -1836,6 +1840,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         for (int ibj2=ibj1+1; ibj2<nBJet20; ibj2++){
           LorentzVector p4combined = p4sBJets.at(ibj1) + p4sBJets.at(ibj2);
           float invM = p4combined.M();
+          Mbb_max = max(Mbb_max, invM);
           float M_dif = fabs(invM-125.1);
           // h_invM_bjets->Fill(invM);
           // if(invM > 100 && invM < 150){
@@ -1862,6 +1867,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           }
         }
       }
+
+      if (Mbb_max > 300 || bMET_MTmin > 200) nPassCut1++;
+      if (Mbb_max > 400 || bMET_MTmin > 200) nPassCut2++;
+      if (Mbb_max > 300 || (bMET_MTmin > 200 && difMin < 25)) nPassCut3++;
+      if (Mbb_max > 400 || (bMET_MTmin > 200 && difMin < 25)) nPassCut4++;
 
       if (nHiggs_cand > 0){
         p4sForHemsHcand.push_back(p4_higgs);
@@ -2217,9 +2227,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   cout << "Events has < 2 bjets: " << nLessThanTwoBJets << ", == 2 bjets: " << nEventsTotal - nLessThanTwoBJets - nMoreThanTwoBJets
        << ", > 2 bjets: " << nMoreThanTwoBJets << ", and >= 2 bjets is: "  << nHiggsEvents+nNoHiggsEvents << " (" << setprecision(3)
        << (nEventsTotal - nLessThanTwoBJets)/((float)nEventsTotal)*100 << "%).\n"; 
+  cout << "PassCut1: " << nPassCut1 << " the ratio is " << (float)nPassCut1/(nEventsTotal - nLessThanTwoBJets)*100 << "%\n";
+  cout << "PassCut2: " << nPassCut2 << " the ratio is " << (float)nPassCut2/(nEventsTotal - nLessThanTwoBJets)*100 << "%\n";
+  cout << "PassCut3: " << nPassCut3 << " the ratio is " << (float)nPassCut3/(nEventsTotal - nLessThanTwoBJets)*100 << "%\n";
+  cout << "PassCut4: " << nPassCut4 << " the ratio is " << (float)nPassCut4/(nEventsTotal - nLessThanTwoBJets)*100 << "%\n";
   cout << nHiggsEvents << " Higgs Events Found, the portion of higgs cand events is: " << setprecision(3)
        << ((float) nHiggsEvents)/(nHiggsEvents+nNoHiggsEvents)*100 << "%.\n" 
-       << "Amoung which, " << nReclustered << " events were in different hemjets, which is " << ((float)nReclustered)/nHiggsEvents*100
+       << "Among which, " << nReclustered << " events were in different hemjets, which is " << ((float)nReclustered)/nHiggsEvents*100
        << "% of all Higgs events.\nAt the same time, " << nHcandWithBJetsLess30 << " (" << ((float)nHcandWithBJetsLess30)/nHiggsEvents*100
        << "%) \"higgs\" events has at least 1 bjet's pt less than 30 GeV\n";
   // cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
@@ -2286,6 +2300,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("bMET_MTmin", &bMET_MTmin );
     BabyTree_->Branch("bMET_MTclose", &bMET_MTclose );
     BabyTree_->Branch("hcand_mt2", &hcand_mt2 );
+    BabyTree_->Branch("Mbb_max", &Mbb_max );
     BabyTree_->Branch("bInDiffHemjet", &bInDiffHemjet );
     BabyTree_->Branch("jet1_pt", &jet1_pt );
     BabyTree_->Branch("jet2_pt", &jet2_pt );
@@ -2621,6 +2636,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     bMET_MTmin = -999.0;
     bMET_MTclose = -999.0;
     hcand_mt2 = -999.0;
+    Mbb_max = -999.0;
     bInDiffHemjet = 0;
     jet1_pt = 0.0;
     jet2_pt = 0.0;

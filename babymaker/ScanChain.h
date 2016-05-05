@@ -420,6 +420,7 @@ class babyMaker {
   Float_t         bMET_MTmin;
   Float_t         bMET_MTclose;
   Float_t         hcand_mt2;
+  Float_t         Mbb_max;
   Bool_t          bInDiffHemjet;
 
 //----- SUSY SIGNALS
