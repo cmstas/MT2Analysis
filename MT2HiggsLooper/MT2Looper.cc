@@ -263,6 +263,24 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
+  // -- mt2higgs --
+  SRBaseHcand = SRBase;
+  SRBaseHcand.SetName("srbaseHcand");
+  SRBaseHcand.SetVar("nbjet", 2, -1);
+  // SRBaseHcand.SetVar("nHcand", 1, -1);
+  vars = SRBaseHcand.GetListOfVariables();
+  dir = (TDirectory*)outfile_->Get((SRBaseHcand.GetName()).c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir((SRBaseHcand.GetName()).c_str());
+  }
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBound(vars.at(j)), SRBaseHcand.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBound(vars.at(j)), SRBaseHcand.srHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.srHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
   //setup inclusive regions
   SR InclusiveHT200to450 = SRBase;
   InclusiveHT200to450.SetName("srbaseVL");
@@ -1134,6 +1152,44 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   return;
 }
 
+// --- mt2-higgs ---
+void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::string& suffix) {
+
+  // trigger requirement on data
+  // if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"]        = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nlepveto_;
+  values["njets"]       = t.nJet30;
+  values["nbjets"]      = t.nBJet20;
+  values["nHcand"]      = t.nHiggs_cand;
+  values["mt2"]         = t.mt2;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
+  // values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if(SRBaseHcand.PassesSelection(values)) {
+    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), SRBaseHcand.GetName(), "");
+  }
+
+  // for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
+  //   std::map<std::string, float> values_temp = values;
+  //   std::vector<std::string> vars = SRVecHcand.at(srN).GetListOfVariables();
+  //   for(unsigned int iVar=0; iVar<vars.size(); iVar++){
+  //     if(vars.at(iVar) == "ht") values_temp["ht"] = t.ht;
+  //     else if(vars.at(iVar) == "njets") values_temp["njets"] = t.nJet30;
+  //     else if(vars.at(iVar) == "nbjets") values_temp["nbjets"] = t.nBJet20;
+  //   }
+  //   if(SRVecHcand.at(srN).PassesSelection(values_temp)){
+  //     fillHistos(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), SRVecHcand.at(srN).GetName(), "");
+  //   }
+  // }
+
+  return;
+}
+
 void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
@@ -1259,40 +1315,6 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
       }
     }
   } // monojet regions
-
-  return;
-}
-
-// --- mt2-higgs ---
-void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::string& suffix) {
-
-  // trigger requirement on data
-  // if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
-
-  std::map<std::string, float> values;
-  values["deltaPhiMin"]        = t.deltaPhiMin;
-  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
-  values["nlep"]        = nlepveto_;
-  values["njets"]       = t.nJet30;
-  values["nbjets"]      = t.nBJet20;
-  values["nHcand"]      = t.nHiggs_cand;
-  values["mt2"]         = t.mt2;
-  values["ht"]          = t.ht;
-  values["met"]         = t.met_pt;
-  // values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
-
-  for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    std::map<std::string, float> values_temp = values;
-    std::vector<std::string> vars = SRVec.at(srN).GetListOfVariables();
-    for(unsigned int iVar=0; iVar<vars.size(); iVar++){
-      if(vars.at(iVar) == "ht") values_temp["ht"] = t.ht;
-      else if(vars.at(iVar) == "njets") values_temp["njets"] = t.nJet30;
-      else if(vars.at(iVar) == "nbjets") values_temp["nbjets"] = t.nBJet20;
-    }
-    if(SRVec.at(srN).PassesSelection(values_temp)){
-      fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), SRVec.at(srN).GetName(), "");
-    }
-  }
 
   return;
 }
@@ -2057,12 +2079,10 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   plot1D("h_bMET_MTmin"+s,         t.bMET_MTmin,         evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
   plot1D("h_bMET_MTclose"+s,       t.bMET_MTclose,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
   plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
-  plot1D("h_hcand_mt2diff"+s,      t.hcand_mt2 - t.mt2,  evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
-  // plot1D("h_mt"+s,              t.hcand_mt,           evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
 
   outfile_->cd();
 
-  // fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
+  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
   return;
 }
 
