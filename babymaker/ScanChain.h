@@ -414,8 +414,13 @@ class babyMaker {
   Int_t           nHiggs_cand;
   Float_t         hcand_M;
   Float_t         hcand_pt;
+  Float_t         hcand_eta;
   Float_t         hcand_phi;
-  Float_t         hcand_deltaPhi;
+  Float_t         hcand_deltaPhiMet;
+  Float_t         hcand_difEbjetInCM;
+  Float_t         hcand_difMbjetInCM;
+  Float_t         hcand_cosTheta1;
+  Float_t         hcand_cosTheta2;
   Float_t         bMET_deltaPhiMin;
   Float_t         bMET_MTmin;
   Float_t         bMET_MTclose;

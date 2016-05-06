@@ -305,7 +305,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-      if (event > 10000) break; // debug
+      // if (event > 10000) break; // debug
 
       // Get Event Content
       tree->LoadTree(event);
@@ -1832,7 +1832,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       if (nBJet20 < 2) nLessThanTwoBJets++;
       if (nBJet20 < 2) continue;
       if (nBJet20 > 2) nMoreThanTwoBJets++;
-      float difMin = -1;
+      float difMmin = -1;
+      float difEbjetInCM = 999;
+      float difMbjetInCM = 999;
       LorentzVector p4_higgs;
       int ibj_hcand1 = -1;          // higgs candidate bJets index
       int ibj_hcand2 = -1;
@@ -1842,15 +1844,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           float invM = p4combined.M();
           Mbb_max = max(Mbb_max, invM);
           float M_dif = fabs(invM-125.1);
-          // h_invM_bjets->Fill(invM);
           // if(invM > 100 && invM < 150){
           if( M_dif < 25 ) nHiggs_cand++;
-          if( M_dif < difMin || difMin < 0){
-            p4_higgs   = p4combined;
-            hcand_M    = invM;
-            difMin     = M_dif;
-            ibj_hcand1 = ibj1;
-            ibj_hcand2 = ibj2;
+          if( M_dif < difMmin || difMmin < 0){
+            hcand_M = invM;
+            difMmin = M_dif;
+            if( M_dif < 25 ) {
+              // TVector3 betaH( -p4combined.Px()/p4combined.E(), -p4combined.Py()/p4combined.E(), -p4combined.Pz()/p4combined.E() );
+              TLorentzVector p4Higgs;
+              p4Higgs.SetPxPyPzE( p4combined.Px(), p4combined.Py(), p4combined.Pz(), p4combined.E());
+              TVector3 betaH = p4Higgs.BoostVector();
+              TLorentzVector bjeta;
+              bjeta.SetPxPyPzE( p4sBJets.at(ibj1).Px(), p4sBJets.at(ibj1).Py(), p4sBJets.at(ibj1).Pz(), p4sBJets.at(ibj1).E());
+              bjeta.Boost(-betaH);
+              TLorentzVector bjetb;
+              bjetb.SetPxPyPzE( p4sBJets.at(ibj2).Px(), p4sBJets.at(ibj2).Py(), p4sBJets.at(ibj2).Pz(), p4sBJets.at(ibj2).E());
+              bjetb.Boost(-betaH);
+
+              difEbjetInCM = fabs(bjeta.E() - bjetb.E());
+              difMbjetInCM = fabs(bjeta.M() - bjetb.M());
+
+              // if (difEbjetInCM < 20) {
+              p4_higgs   = p4combined;
+              ibj_hcand1 = ibj1;
+              ibj_hcand2 = ibj2;
+              hcand_difMbjetInCM = difMbjetInCM;
+              hcand_difEbjetInCM = difEbjetInCM;
+
+              hcand_cosTheta1 = cos(bjeta.Vect().Angle(betaH));
+              hcand_cosTheta2 = cos(bjetb.Vect().Angle(betaH));
+              // }
+            }
           }
         }
         if(ibj1 == 0){
@@ -1870,8 +1894,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
       if (Mbb_max > 300 || bMET_MTmin > 200) nPassCut1++;
       if (Mbb_max > 400 || bMET_MTmin > 200) nPassCut2++;
-      if (Mbb_max > 300 || (bMET_MTmin > 200 && difMin < 25)) nPassCut3++;
-      if (Mbb_max > 400 || (bMET_MTmin > 200 && difMin < 25)) nPassCut4++;
+      if (Mbb_max > 300 || (bMET_MTmin > 200 && difMmin < 25)) nPassCut3++;
+      if (Mbb_max > 400 || (bMET_MTmin > 200 && difMmin < 25)) nPassCut4++;
 
       if (nHiggs_cand > 0){
         p4sForHemsHcand.push_back(p4_higgs);
@@ -1882,7 +1906,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         // hcand_M   = p4_higgs.M();
         hcand_pt  = p4_higgs.pt();
         hcand_phi = p4_higgs.phi();
-        hcand_deltaPhi = DeltaPhi( met_phi, p4_higgs.phi() );
+        hcand_deltaPhiMet = DeltaPhi( met_phi, p4_higgs.phi() );
 
         // cout <<  p4sBJets.at(ibj_hcand1).pt() << "   " <<  p4sBJets.at(ibj_hcand2).pt() << "   " << p4_higgs.M() << endl;
         if(p4sBJets.at(ibj_hcand1).pt() < 30 || p4sBJets.at(ibj_hcand2).pt() < 30) nHcandWithBJetsLess30++;
@@ -2236,7 +2260,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
        << "Among which, " << nReclustered << " events were in different hemjets, which is " << ((float)nReclustered)/nHiggsEvents*100
        << "% of all Higgs events.\nAt the same time, " << nHcandWithBJetsLess30 << " (" << ((float)nHcandWithBJetsLess30)/nHiggsEvents*100
        << "%) \"higgs\" events has at least 1 bjet's pt less than 30 GeV\n";
-  // cout << "Debug: " << "h_invM_bjets->Integral(): " << h_invM_bjets->Integral() << endl;
   cout << "------------------------------" << endl;
   cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
   cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
@@ -2295,7 +2318,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("hcand_M", &hcand_M );
     BabyTree_->Branch("hcand_pt", &hcand_pt );
     BabyTree_->Branch("hcand_phi", &hcand_phi );
-    BabyTree_->Branch("hcand_deltaPhi", &hcand_deltaPhi );
+    BabyTree_->Branch("hcand_deltaPhiMet", &hcand_deltaPhiMet );
+    BabyTree_->Branch("hcand_difEbjetInCM", &hcand_difEbjetInCM );
+    BabyTree_->Branch("hcand_difMbjetInCM", &hcand_difMbjetInCM );
+    BabyTree_->Branch("hcand_cosTheta1", &hcand_cosTheta1 );
+    BabyTree_->Branch("hcand_cosTheta2", &hcand_cosTheta2 );
     BabyTree_->Branch("bMET_deltaPhiMin", &bMET_deltaPhiMin );
     BabyTree_->Branch("bMET_MTmin", &bMET_MTmin );
     BabyTree_->Branch("bMET_MTclose", &bMET_MTclose );
@@ -2631,7 +2658,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     hcand_M = -999.0;
     hcand_pt = -999.0;
     hcand_phi = -999.0;
-    hcand_deltaPhi = -999.0;
+    hcand_deltaPhiMet = -999.0;
+    hcand_difEbjetInCM = -999.0;
+    hcand_difMbjetInCM = -999.0;
+    hcand_cosTheta1 = -999.0;
+    hcand_cosTheta2 = -999.0;
     bMET_deltaPhiMin = -999.0;
     bMET_MTmin = -999.0;
     bMET_MTclose = -999.0;
@@ -2945,7 +2976,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
     if (saveLHEweights || saveLHEweightsScaleOnly) {
       for(int i=0; i < max_nLHEweight; i++){
-	LHEweight_wgt[i] = -999;
+        LHEweight_wgt[i] = -999;
       }
     }
 
