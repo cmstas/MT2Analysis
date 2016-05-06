@@ -51,7 +51,7 @@ using namespace tas;
 // turn on to add debugging statements (default false)
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = false;
+const bool applyJECfromFile = true;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
@@ -59,7 +59,7 @@ const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
 const bool applyBtagSFs = false;
 // turn on to recompute type1 MET using JECs from file (default true)
-const bool recomputeT1MET = false;
+const bool recomputeT1MET = true;
 // turn on to save prunedGenParticle collection (default false)
 const bool saveGenParticles = false;
 // turn on to apply trigger cuts to ntuples -> OR of all triggers used (default false)
@@ -229,10 +229,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L3Absolute_AK4PFchs.txt");
 	jetcorr_uncertainty_filename = "jetCorrections/MCRUN2_74_V9_Uncertainty_AK4PFchs.txt"; // not sure if these are correct..
       } else {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall15_25nsV2_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall15_25nsV2_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall15_25nsV2_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Fall15_25nsV2_MC_Uncertainty_AK4PFchs.txt";
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV1_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV1_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV1_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV1_MC_Uncertainty_AK4PFchs.txt";
       }
     }
 
@@ -418,21 +418,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	else t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3); // never apply variations to data
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
-	// hack for fastsim v1
-	if (isFastsim) {
-	  met_rawPt  = cms3.evt_pfmet_raw();
-	  met_rawPhi = cms3.evt_pfmetPhi_raw();
-	}
-	else {
-	  met_rawPt  = cms3.evt_METToolbox_pfmet_raw();
-	  met_rawPhi = cms3.evt_METToolbox_pfmetPhi_raw();
-	}
       } else {
 	met_pt  = cms3.evt_pfmet();
 	met_phi = cms3.evt_pfmetPhi();
-	met_rawPt  = cms3.evt_pfmet_raw();
-	met_rawPhi = cms3.evt_pfmetPhi_raw();
       }
+      met_rawPt  = cms3.evt_pfmet_raw();
+      met_rawPhi = cms3.evt_pfmetPhi_raw();
+
       if (!isData) {
         met_genPt  = cms3.gen_met();
         met_genPhi = cms3.gen_metPhi();
@@ -489,8 +481,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	  else if (evt_id == 504) evt_xsec = 48.9;
           // the wjets ht_600to800 and 600toInf appear to have the same evt_id... this was breaking the 600to800 xsec
 	  else if (evt_id == 505){
+            // 600toInf
             if(((string)currentFile->GetTitle()).find("600toInf") != string::npos)
               evt_xsec = 18.77;
+            //600to800
             else
               evt_xsec = 12.05;
           }
@@ -966,12 +960,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	    weight_lepsf *= weights.cent;
 	    weight_lepsf_UP *= weights.up;
 	    weight_lepsf_DN *= weights.dn;
-	    // if (isFastsim) {
-	    //   weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
-	    //   weight_lepsf *= weights_fastsim.cent;
-	    //   weight_lepsf_UP *= weights_fastsim.up;
-	    //   weight_lepsf_DN *= weights_fastsim.dn;
-	    // }
+	    if (isFastsim) {
+	      weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.els_p4().at(iEl).pt(), cms3.els_p4().at(iEl).eta(), 11);
+	      weight_lepsf *= weights_fastsim.cent;
+	      weight_lepsf_UP *= weights_fastsim.up;
+	      weight_lepsf_DN *= weights_fastsim.dn;
+	    }
 	  }
 
         } // if (pass_iso)
@@ -1031,12 +1025,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	    weight_lepsf *= weights.cent;
 	    weight_lepsf_UP *= weights.up;
 	    weight_lepsf_DN *= weights.dn;
-	    // if (isFastsim) {
-	    //   weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
-	    //   weight_lepsf *= weights_fastsim.cent;
-	    //   weight_lepsf_UP *= weights_fastsim.up;
-	    //   weight_lepsf_DN *= weights_fastsim.dn;
-	    // }
+	    if (isFastsim) {
+	      weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.mus_p4().at(iMu).pt(), cms3.mus_p4().at(iMu).eta(), 13);
+	      weight_lepsf *= weights_fastsim.cent;
+	      weight_lepsf_UP *= weights_fastsim.up;
+	      weight_lepsf_DN *= weights_fastsim.dn;
+	    }
 	  }
 
         } // if (pass_iso)
