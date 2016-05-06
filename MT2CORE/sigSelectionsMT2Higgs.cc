@@ -16,45 +16,15 @@ namespace mt2 {
     temp_SR_vec.push_back(sr);
     sr.Clear();
   
-    sr.SetName("2");
-    sr.SetVar("njets", 2, 4);
-    sr.SetVar("nbjets", 1, 2);
-    temp_SR_vec.push_back(sr);
-    sr.Clear();
-  
     sr.SetName("3");
     sr.SetVar("njets", 2, 4);
     sr.SetVar("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
   
-    sr.SetName("4");
-    sr.SetVar("njets", 4, 7);
-    sr.SetVar("nbjets", 0, 1);
-    temp_SR_vec.push_back(sr);
-    sr.Clear();
-  
-    sr.SetName("5");
-    sr.SetVar("njets", 4, 7);
-    sr.SetVar("nbjets", 1, 2);
-    temp_SR_vec.push_back(sr);
-    sr.Clear();
-
     sr.SetName("6");
     sr.SetVar("njets", 4, 7);
     sr.SetVar("nbjets", 2, 3);
-    temp_SR_vec.push_back(sr);
-    sr.Clear();
-
-    sr.SetName("7");
-    sr.SetVar("njets", 7, -1);
-    sr.SetVar("nbjets", 0, 1);
-    temp_SR_vec.push_back(sr);
-    sr.Clear();
-
-    sr.SetName("8");
-    sr.SetVar("njets", 7, -1);
-    sr.SetVar("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
@@ -119,7 +89,7 @@ namespace mt2 {
     baseSR.SetVar("mt2", 100, -1);
     baseSR.SetVar("deltaPhiMin", 0.3, -1);
     baseSR.SetVar("diffMetMhtOverMet", 0, 0.5);
-    baseSR.SetVar("nlep", 1, 2);
+    baseSR.SetVar("nlep", 0, 1);
 
     //add baseline selections to all signal regions 
     std::vector<std::string> vars = baseSR.GetListOfVariables();

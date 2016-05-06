@@ -343,11 +343,16 @@ public :
    Float_t         hcand_M;
    Float_t         hcand_pt;
    Float_t         hcand_phi;
-   Float_t         hcand_deltaPhi;
+   Float_t         hcand_deltaPhiMet;
+   Float_t         hcand_difEbjetInCM;
+   Float_t         hcand_difMbjetInCM;
+   Float_t         hcand_cosTheta1;
+   Float_t         hcand_cosTheta2;
    Float_t         bMET_deltaPhiMin;
    Float_t         bMET_MTmin;
    Float_t         bMET_MTclose;
    Float_t         hcand_mt2;
+   Float_t         Mbb_max;
    Bool_t          bInDiffHemjet;
 
    // List of branches
@@ -672,11 +677,16 @@ public :
    TBranch        *b_hcand_M;
    TBranch        *b_hcand_pt;
    TBranch        *b_hcand_phi;
-   TBranch        *b_hcand_deltaPhi;
+   TBranch        *b_hcand_deltaPhiMet;
+   TBranch        *b_hcand_difEbjetInCM;
+   TBranch        *b_hcand_difMbjetInCM;
+   TBranch        *b_hcand_cosTheta1;
+   TBranch        *b_hcand_cosTheta2;
    TBranch        *b_bMET_deltaPhiMin;
    TBranch        *b_bMET_MTmin;
    TBranch        *b_bMET_MTclose;
    TBranch        *b_hcand_mt2;
+   TBranch        *b_Mbb_max;
    TBranch        *b_bInDiffHemjet;
 
    mt2tree(TTree *tree=0);
@@ -1060,11 +1070,16 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("hcand_M", &hcand_M, &b_hcand_M);
    fChain->SetBranchAddress("hcand_pt", &hcand_pt, &b_hcand_pt);
    fChain->SetBranchAddress("hcand_phi", &hcand_phi, &b_hcand_phi);
-   fChain->SetBranchAddress("hcand_deltaPhi", &hcand_deltaPhi, &b_hcand_deltaPhi);
+   fChain->SetBranchAddress("hcand_deltaPhiMet", &hcand_deltaPhiMet, &b_hcand_deltaPhiMet);
+   fChain->SetBranchAddress("hcand_difEbjetInCM", &hcand_difEbjetInCM, &b_hcand_difEbjetInCM);
+   fChain->SetBranchAddress("hcand_difMbjetInCM", &hcand_difMbjetInCM, &b_hcand_difMbjetInCM);
+   fChain->SetBranchAddress("hcand_cosTheta1", &hcand_cosTheta1, &b_hcand_cosTheta1);
+   fChain->SetBranchAddress("hcand_cosTheta2", &hcand_cosTheta2, &b_hcand_cosTheta2);
    fChain->SetBranchAddress("bMET_deltaPhiMin", &bMET_deltaPhiMin, &b_bMET_deltaPhiMin);
    fChain->SetBranchAddress("bMET_MTmin", &bMET_MTmin, &b_bMET_MTmin);
    fChain->SetBranchAddress("bMET_MTclose", &bMET_MTclose, &b_bMET_MTclose);
    fChain->SetBranchAddress("hcand_mt2", &hcand_mt2, &b_hcand_mt2);
+   fChain->SetBranchAddress("Mbb_max", &Mbb_max, &b_Mbb_max);
    fChain->SetBranchAddress("bInDiffHemjet", &bInDiffHemjet, &b_bInDiffHemjet);
    Notify();
 }
