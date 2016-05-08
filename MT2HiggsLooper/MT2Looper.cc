@@ -773,7 +773,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
         if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
           fillLepCorSRfastsim();
-          evtweight_ *= (1. + cor_lepeff_sr_);
+          evtweight_ *= cor_lepeff_sr_;
         }
         else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
         if (applyLeptonSF) evtweight_ *= t.weight_lepsf;
@@ -782,22 +782,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
       } // !isData
 
-      plot1D("h_nvtx",      t.nVert,     evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
+      plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
-
-      // ---- MT2-Higgs ----
-      // if (t.nBJet20 < 2) continue;
-      // nGeqTwoBJets++;
-      // if (t.nBJet20 == 2) nEqTwoBJets++;
-
-      // if (t.Mbb_max > 300 || t.bMET_MTmin > 200) nPassCut1++;
-      // if (t.Mbb_max > 400 || t.bMET_MTmin > 200) nPassCut2++;
-      // if (t.Mbb_max > 300 || (t.bMET_MTmin > 200 && t.nHiggs_cand > 0)) nPassCut3++;
-      // if (t.Mbb_max > 400 || (t.bMET_MTmin > 200 && t.nHiggs_cand > 0)) nPassCut4++;
-
-      // if (t.nHiggs_cand > 0) ++nHiggsEvents;
-
-      // ---- mt2-higgs end ----
 
       // variables for single lep control region
       bool doSLplots = false;
@@ -1000,7 +986,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         saveHcandplots = true;
         fillHistosSRMT2Higgs("srHcand");
       }
-
       if (doDYplots) {
         // saveDYplots = true;
         // fillHistosCRDY("crdy");
@@ -1070,6 +1055,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       savePlotsDir(SRVec.at(srN).srHistMap, outfile_, ("sr"+SRVec.at(srN).GetName()).c_str());
     }
   }
+  if (saveHcandplots) {
+    savePlotsDir(SRBaseHcand.srHistMap,outfile_,SRBaseHcand.GetName().c_str());
+  }
   if (saveGJplots) {
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(!SRVec.at(srN).crgjHistMap.empty()){
@@ -1077,9 +1065,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         saveRooDataSetsDir(SRVec.at(srN).crgjRooDataSetMap, outfile_,  ("crgj"+SRVec.at(srN).GetName()).c_str());
       }
     }
-  }
-  if (saveHcandplots) {
-    savePlotsDir(SRBaseHcand.srHistMap,outfile_,SRBaseHcand.GetName().c_str());
   }
   if (saveDYplots) {
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
@@ -1152,19 +1137,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   bmark->Stop("benchmark");
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
-  // cout << "------------------------------" << endl;
-  // cout << "Events has >= 2 bjets: " << nGeqTwoBJets << " (" << setprecision(3) << nGeqTwoBJets/((float)nEventsTotal)*100 << "%)" << ", == 2 bjets: " << nEqTwoBJets << endl;
-  // cout << "Mbb_max > 300 || bMET_MTmin > 200: " << nPassCut1 << " the ratio is " << (float)nPassCut1/nGeqTwoBJets*100 << "%\n";
-  // cout << "Mbb_max > 400 || bMET_MTmin > 200: " << nPassCut2 << " the ratio is " << (float)nPassCut2/nGeqTwoBJets*100 << "%\n";
-  // cout << "Mbb_max > 300 || (bMET_MTmin > 200 && difMin < 25): " << nPassCut3 << " the ratio is " << (float)nPassCut3/nGeqTwoBJets*100 << "%\n";
-  // cout << "Mbb_max > 400 || (bMET_MTmin > 200 && difMin < 25): " << nPassCut4 << " the ratio is " << (float)nPassCut4/nGeqTwoBJets*100 << "%\n";
-  // cout << nHiggsEvents << " Higgs Events Found, the portion of higgs cand events is: " << setprecision(3) << ((float) nHiggsEvents)/(nGeqTwoBJets)*100 << "%.\n" ;
-  //      // << "Among which, " << nReclustered << " events were in different hemjets, which is " << ((float)nReclustered)/nHiggsEvents*100
-  //      // << "% of all Higgs events.\nAt the same time, " << nHcandWithBJetsLess30 << " (" << ((float)nHcandWithBJetsLess30)/nHiggsEvents*100
-  //      // << "%) \"higgs\" events has at least 1 bjet's pt less than 30 GeV\n";
   cout << "------------------------------" << endl;
-  cout << "CPU  Time:    " << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
-  cout << "Real Time:    " << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << "CPU  Time:       " << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:       " << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
   cout << endl;
   delete bmark;
 
@@ -1667,6 +1642,8 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   }
   if(passBase || passBaseJ) fillHistosDY(SRBaseIncl.crdyHistMap, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.GetMT2Bins(), "crdybaseIncl", suffix);
 
+
+
   if(passBase && t.zll_ht > 200.  && t.zll_ht < 450.)  fillHistosDY(InclusiveRegions.at(0).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseVL", suffix);
   if(passBase && t.zll_ht > 450.  && t.zll_ht < 575.)  fillHistosDY(InclusiveRegions.at(1).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseL", suffix);
   if(passBase && t.zll_ht > 575.  && t.zll_ht < 1000.) fillHistosDY(InclusiveRegions.at(2).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseM", suffix);
@@ -2004,13 +1981,13 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   //   if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
   //     // loop on gen e/mu
   //     for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
-  //     // check acceptance for veto: pt > 5, |eta| < 2.4
+  //        // check acceptance for veto: pt > 5, |eta| < 2.4
   //      if (t.genLep_pt[ilep] < 5.) continue;
   //      if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
   //      unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
   //     }
   //     for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
-  //     // check acceptance for veto: pt > 5
+  //        // check acceptance for veto: pt > 5
   //      if (t.genLepFromTau_pt[ilep] < 5.) continue;
   //      if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
   //      unc_lepeff += 0.20; // 12% relative uncertainty for missing lepton
@@ -2028,17 +2005,17 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
     // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
     //  need to first remove lepeff SF
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ + unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / (1. + cor_lepeff_sr_) * (1. + cor_lepeff_sr_ - unc_lepeff_sr_), h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
 
   }
 
   else if (!t.isData && doLepEffVars && directoryname.Contains("sr")) {
     // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
-    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * (1. + unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * (1. - unc_lepeff_sr_), h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
 
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
@@ -2054,13 +2031,13 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     // if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
     //   // loop on gen e/mu
     //   for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
-    //  // check acceptance for veto: pt > 5
+    //        // check acceptance for veto: pt > 5
     //    if (t.genLep_pt[ilep] < 5.) continue;
     //    if (fabs(t.genLep_eta[ilep]) > 2.4) continue;
     //    unc_lepeff += 0.03; // 3% relative uncertainty for finding lepton
     //   }
     //   for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
-    //  // check acceptance for veto: pt > 5
+    //        // check acceptance for veto: pt > 5
     //    if (t.genLepFromTau_pt[ilep] < 5.) continue;
     //    if (fabs(t.genLepFromTau_eta[ilep]) > 2.4) continue;
     //    unc_lepeff += 0.03; // 3% relative uncertainty for finding lepton
@@ -2263,7 +2240,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_nlepveto"+s,     t.nLepLowMT,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_htbins"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_htbins2"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
-    // if (t.nJet30>7) cout<<"event "<<t.evt<<" in run "<<t.run<<" has njets "<<t.nJet30<<" and ht "<<t.zll_ht<<endl;
+    if (t.nJet30>7) cout<<"event "<<t.evt<<" in run "<<t.run<<" has njets "<<t.nJet30<<" and ht "<<t.zll_ht<<endl;
     plot1D("h_njbins"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
     plot1D("h_nbjbins"+s,       t.nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 50, 0, 200);
@@ -2374,8 +2351,10 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
 void MT2Looper::fillLepUncSR() {
 
   // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
-  cor_lepeff_sr_ = 0.;
-  unc_lepeff_sr_ = 0.;
+  // for now, do NOT apply correction to central value to 0L yields in fullsim
+  cor_lepeff_sr_ = 1.;
+  unc_lepeff_sr_UP_ = 1.;
+  unc_lepeff_sr_DN_ = 1.;
   if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
     // loop on gen e/mu
     for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
@@ -2389,7 +2368,8 @@ void MT2Looper::fillLepUncSR() {
       float unc = sf_struct.up - sf;
       float vetoeff_unc_UP = vetoeff * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. - unc_UP_0l);
     }
     for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
       // check acceptance for veto: pt > 5
@@ -2401,7 +2381,8 @@ void MT2Looper::fillLepUncSR() {
       float unc = sf_struct.up - sf;
       float vetoeff_unc_UP = vetoeff * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. - unc_UP_0l);
     }
   }
 
@@ -2411,8 +2392,9 @@ void MT2Looper::fillLepUncSR() {
 void MT2Looper::fillLepCorSRfastsim() {
 
   // lepton efficiency variation in signal region for fastsim: large uncertainty on leptons NOT vetoed
-  cor_lepeff_sr_ = 0.;
-  unc_lepeff_sr_ = 0.;
+  cor_lepeff_sr_ = 1.;
+  unc_lepeff_sr_UP_ = 1.;
+  unc_lepeff_sr_DN_ = 1.;
   if (t.ngenLep > 0 || t.ngenLepFromTau > 0) {
     // loop on gen e/mu
     for (int ilep = 0; ilep < t.ngenLep; ++ilep) {
@@ -2426,11 +2408,15 @@ void MT2Looper::fillLepCorSRfastsim() {
       // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
       float vetoeff_cor = vetoeff * sf;
       float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
-      cor_lepeff_sr_ += cor_0l;
+      cor_lepeff_sr_ *= (1. + cor_0l);
       float unc = sf_struct.up - sf;
       float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + cor_0l + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. + cor_0l - unc_UP_0l);
+      // std::cout << "fastsim lep vetoeff: " << vetoeff << ", sf: " << sf << ", unc: " << unc
+      //               << ", correction for 0L central value: " << cor_0l
+      //               << ", uncertainty up 0L correction: " << unc_UP_0l << std::endl;
     }
     for (int ilep = 0; ilep < t.ngenLepFromTau; ++ilep) {
       // check acceptance for veto: pt > 5
@@ -2442,13 +2428,19 @@ void MT2Looper::fillLepCorSRfastsim() {
       // apply SF to vetoeff, then correction for 0L will be 1. - (1 - vetoeff_cor) / (1 - vetoeff)
       float vetoeff_cor = vetoeff * sf;
       float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
-      cor_lepeff_sr_ += cor_0l;
+      cor_lepeff_sr_ *= (1. + cor_0l);
       float unc = sf_struct.up - sf;
       float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
       float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
-      unc_lepeff_sr_ += unc_UP_0l;
+      unc_lepeff_sr_UP_ *= (1. + cor_0l + unc_UP_0l);
+      unc_lepeff_sr_DN_ *= (1. + cor_0l - unc_UP_0l);
+      // std::cout << "fastsim lep vetoeff: " << vetoeff << ", sf: " << sf << ", unc: " << unc
+      //           << ", correction for 0L central value: " << cor_0l
+      //           << ", uncertainty up 0L correction: " << unc_UP_0l << std::endl;
     }
   }
+  // std::cout << "fastsim lep correction for 0L: " << cor_lepeff_sr_
+  //           << ", unc up: " << unc_lepeff_sr_UP_ << ", unc dn: " << unc_lepeff_sr_DN_ << std::endl;
 
   return;
 }
