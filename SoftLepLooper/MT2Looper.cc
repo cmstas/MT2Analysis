@@ -335,6 +335,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_heavy_DN_ = 0;
   h_sig_avgweight_btagsf_light_DN_ = 0;
   h_sig_avgweight_isr_ = 0;
+  h_sig_avgweight_renorm_UP_ = 0;
+  h_sig_avgweight_renorm_DN_ = 0;
   if ((doScanWeights || applyBtagSF) && 
       ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
     std::string scan_name = sample;
@@ -352,6 +354,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     TH2D* h_sig_avgweight_btagsf_heavy_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_heavy_DN");
     TH2D* h_sig_avgweight_btagsf_light_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_light_DN");
     TH2D* h_sig_avgweight_isr_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr");
+    TH2D* h_sig_avgweight_renorm_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_UP");
+    TH2D* h_sig_avgweight_renorm_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_DN");
     h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
     h_sig_avgweight_btagsf_ = (TH2D*) h_sig_avgweight_btagsf_temp->Clone("h_sig_avgweight_btagsf");
     h_sig_avgweight_btagsf_heavy_UP_ = (TH2D*) h_sig_avgweight_btagsf_heavy_UP_temp->Clone("h_sig_avgweight_btagsf_heavy_UP");
@@ -359,6 +363,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_btagsf_heavy_DN_ = (TH2D*) h_sig_avgweight_btagsf_heavy_DN_temp->Clone("h_sig_avgweight_btagsf_heavy_DN");
     h_sig_avgweight_btagsf_light_DN_ = (TH2D*) h_sig_avgweight_btagsf_light_DN_temp->Clone("h_sig_avgweight_btagsf_light_DN");
     h_sig_avgweight_isr_ = (TH2D*) h_sig_avgweight_isr_temp->Clone("h_sig_avgweight_isr");
+    h_sig_avgweight_renorm_UP_ = (TH2D*) h_sig_avgweight_renorm_UP_temp->Clone("h_sig_avgweight_renorm_UP");
+    h_sig_avgweight_renorm_DN_ = (TH2D*) h_sig_avgweight_renorm_DN_temp->Clone("h_sig_avgweight_renorm_DN");
     h_sig_nevents_->SetDirectory(0);
     h_sig_avgweight_btagsf_->SetDirectory(0);
     h_sig_avgweight_btagsf_heavy_UP_->SetDirectory(0);
@@ -366,6 +372,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_btagsf_heavy_DN_->SetDirectory(0);
     h_sig_avgweight_btagsf_light_DN_->SetDirectory(0);
     h_sig_avgweight_isr_->SetDirectory(0);
+    h_sig_avgweight_renorm_UP_->SetDirectory(0);
+    h_sig_avgweight_renorm_DN_->SetDirectory(0);
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
@@ -592,10 +600,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  evtweight_topPt_ = evtweight_ * t.weight_toppt;
 	}
 
-	if (doRenormFactScaleReweight) {
-	  if ( t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999 ) { 
+	if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
+	  if (!isSignal_) { 
 	    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
 	    evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+	  }
+	  else {
+	    int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(t.GenSusyMScan1);
+	    int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	    float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+	    float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
+	    float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+	    float avgweight_renorm_DN = h_sig_avgweight_renorm_DN_->GetBinContent(binx,biny);
+	    
+	    evtweight_renormUp_ = weight_renorm_UP / avgweight_renorm_UP;
+	    evtweight_renormDn_ = weight_renorm_DN / avgweight_renorm_DN;
+	    
 	  }
 	}
 
@@ -2088,11 +2108,11 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mtbins_polW_DN"+s,       softlepmt_,   evtweight_polW_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
   }
 
-  if ( !t.isData && doRenormFactScaleReweight && !isSignal_ ) { 
+  if ( !t.isData && doRenormFactScaleReweight) {
     plot1D("h_mtbins_renorm_UP"+s,       softlepmt_,   evtweight_renormUp_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mtbins_renorm_DN"+s,       softlepmt_,   evtweight_renormDn_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
   }
-
+  
   if ( !t.isData && applyTopPtReweightSyst && !isSignal_ ) {
     plot1D("h_mtbins_TopPt_UP"+s,       softlepmt_,   evtweight_topPt_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
   }
