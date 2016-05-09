@@ -34,6 +34,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
   TH2D* h_avg_weight_btagsf_heavy_DN = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf_heavy_DN");
   TH2D* h_avg_weight_btagsf_light_DN = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf_light_DN");
   TH2D* h_avg_weight_isr = (TH2D*) h_nsig->Clone("h_avg_weight_isr");
+  TH2D* h_avg_weight_renorm_UP = (TH2D*) h_nsig->Clone("h_avg_weight_renorm_UP");
+  TH2D* h_avg_weight_renorm_DN = (TH2D*) h_nsig->Clone("h_avg_weight_renorm_DN");
 
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_nsig");
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_btagsf","(met_pt > -1.)*weight_btagsf" );
@@ -42,6 +44,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_btagsf_heavy_DN","(met_pt > -1.)*weight_btagsf_heavy_DN" );
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_btagsf_light_DN","(met_pt > -1.)*weight_btagsf_light_DN" );
   t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_isr","(met_pt > -1.)*weight_isr" );
+  t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_renorm_UP","(met_pt > -1.)*LHEweight_wgt[4]/LHEweight_wgt[0]" );
+  t->Draw("GenSusyMScan2:GenSusyMScan1>>h_avg_weight_renorm_DN","(met_pt > -1.)*LHEweight_wgt[8]/LHEweight_wgt[0]" );
 
   h_avg_weight_btagsf->Divide(h_nsig);
   h_avg_weight_btagsf_heavy_UP->Divide(h_nsig);
@@ -49,6 +53,8 @@ void make_nsig_weight_hists(TString dir, TString sample) {
   h_avg_weight_btagsf_heavy_DN->Divide(h_nsig);
   h_avg_weight_btagsf_light_DN->Divide(h_nsig);
   h_avg_weight_isr->Divide(h_nsig);
+  h_avg_weight_renorm_UP->Divide(h_nsig);
+  h_avg_weight_renorm_DN->Divide(h_nsig);
   
   fout->Write();
   fout->Close();
