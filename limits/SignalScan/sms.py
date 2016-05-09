@@ -21,6 +21,7 @@ class sms():
         self.modelname = "T1tttt"
         # decay chain
         self.label= "pp #rightarrow #tilde{g} #tilde{g}, #tilde{g} #rightarrow t #bar{t} #tilde{#chi}^{0}_{1}";
+        self.label2= "";
         # scan range to plot
         self.Xmin = 700.
         self.Xmax = 1950.
@@ -77,18 +78,21 @@ class sms():
         # model name
         self.modelname = "T5qqqqWW"
         # decay chain
-        self.label= "pp #rightarrow #tilde{g} #tilde{g}, #tilde{g} #rightarrow q #bar{q} f f' #tilde{#chi}^{0}_{1}";
+        lsp_s = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}"
+        chargino_s = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{#pm}}}#kern[-1.3]{#scale[0.85]{_{1}}}"
+        self.label= "pp #rightarrow #tilde{g} #tilde{g}, #tilde{g} #rightarrow q #bar{q} "+ chargino_s +", "+chargino_s+" #rightarrow f f' "+lsp_s;
+        self.label2= "m("+chargino_s+") - m("+lsp_s+") = 20 GeV";
         # plot boundary. The top 1/4 of the y axis is taken by the legend
         self.Xmin = 600.
         self.Xmax = 1950.
         self.Ymin = 0.
         self.Ymax = 1600.
-        self.Zmin = 0.001
-        self.Zmax = 2.
+        self.Zmin = 0.01
+        self.Zmax = 10.
         # produce sparticle
-        self.sParticle = "m_{#tilde{g}} [GeV]"
+        self.sParticle = "m#kern[0.1]{_{#lower[-0.12]{#tilde{g}}}} [GeV]"
         # LSP
-        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        self.LSP = "m#kern[0.1]{_{"+lsp_s+"}} [GeV]"
         # turn off diagonal lines
         self.diagOn = False
 
@@ -134,18 +138,20 @@ class sms():
         # model name
         self.modelname = "T2-4bd"
         # decay chain
-        self.label= "pp #rightarrow #tilde{t} #tilde{t}, #tilde{t} #rightarrow b f f' #tilde{#chi}^{0}_{1}";
+        lsp_s = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}"
+        self.label= "pp #rightarrow #tilde{t} #tilde{t}, #tilde{t} #rightarrow b f f' "+lsp_s;
+        self.label2= "";
         # plot boundary. The top 1/4 of the y axis is taken by the legend
         self.Xmin = 100.
-        self.Xmax = 1000.
+        self.Xmax = 600.
         self.Ymin = 0.
-        self.Ymax = 800.
-        self.Zmin = 0.001
-        self.Zmax = 2.
+        self.Ymax = 750.
+        self.Zmin = 0.5
+        self.Zmax = 100.
         # produce sparticle
-        self.sParticle = "m_{#tilde{t}} [GeV]"
+        self.sParticle = "m#kern[0.1]{_{#lower[-0.12]{#tilde{t}}}} [GeV]"
         # LSP
-        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        self.LSP = "m#kern[0.1]{_{"+lsp_s+"}} [GeV]"
         # turn off diagonal lines
         self.diagOn = False
 

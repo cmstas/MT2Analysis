@@ -1,6 +1,8 @@
 #!/bin/bash
 
 SAMPLE=$1
+DATE=$2
+MODELFOLDER=$3
 
 while  ! voms-proxy-info -exist
 do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
@@ -10,19 +12,19 @@ done
 #MODEL=$(echo "$SAMPLE"|awk -F- 'split($1,a,"_")&&$0=a[1]')
 MODEL=$(echo "$SAMPLE"|awk -F_ 'split($1,a,"_")&&$0=a[1]')
 
-echo $MODEL $SAMPLE
+echo $MODEL $SAMPLE $DATE $MODELFOLDER
 
-INPUT="job_input.tar.gz, cards_$MODEL/cards_$SAMPLE.tar.gz"
+INPUT="job_input.tar.gz, cards_${MODELFOLDER}_${DATE}/cards_$SAMPLE.tar.gz"
 SITE="T2_US_UCSD"
 PROXY=$(voms-proxy-info -path)
-SUBMITLOGDIR="${PWD}/submit_logs_$MODEL"
-JOBLOGDIR="/data/tmp/$USER/job_logs/softLimits_$MODEL"
-JOBCFGDIR="${PWD}/job_cfg_$MODEL"
+SUBMITLOGDIR="${PWD}/submit_logs_$MODELFOLDER"
+JOBLOGDIR="/data/tmp/$USER/job_logs/softLimits_$MODELFOLDER"
+JOBCFGDIR="${PWD}/job_cfg_$MODELFOLDER"
 LOG="${SUBMITLOGDIR}/condor_submit.log"
 OUT="${JOBLOGDIR}/1e.\$(Cluster).\$(Process).out"
 ERR="${JOBLOGDIR}/1e.\$(Cluster).\$(Process).err"
 
-OUTPUTDIR=/hadoop/cms/store/user/$USER/combine/softLimits/$MODEL
+OUTPUTDIR=/hadoop/cms/store/user/$USER/combine/softLimits/${MODELFOLDER}_${DATE}
 
 if [ ! -d "${SUBMITLOGDIR}" ]; then
     mkdir -p ${SUBMITLOGDIR}

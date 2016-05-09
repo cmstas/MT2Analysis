@@ -5,12 +5,16 @@
 #MODEL=T1qqqq
 #MODEL=T2tt
 #MODEL=T2bb
-MODEL=T2-4bd
-#MODEL=T5qqqqWW
-INDIR=/hadoop/cms/store/user/gzevi/combine/softLimits/$MODEL
-CARDDIR="/home/users/gzevi/MT2/MT2AnalysisSoft2016/MT2Analysis/scripts/softLepSyst/cards_$MODEL"
+#MODEL=T2-4bd_scan
+MODEL=T5qqqqWW_modified
+#DATE=24Apr16new
+#DATE=29Apr16unblind
+DATE=3May16unblind
 
-rm r-values_$MODEL.root
+INDIR=/hadoop/cms/store/user/gzevi/combine/softLimits/${MODEL}_${DATE}
+CARDDIR="/home/users/gzevi/MT2/MT2AnalysisSoft2016/MT2Analysis/scripts/softLepSyst/cards_${MODEL}_${DATE}"
+
+rm r-values_${MODEL}.root
 
 echo ".L make_rValues.C+" > temp
 while read i
@@ -18,8 +22,11 @@ do
 #  echo $i
 #  MASS1=$(echo "$i"|awk -F- 'split($1,a,"_")&&$0=a[2]')
 #  MASS2=$(echo "$i"|awk -F- 'split($1,a,"_")&&$0=a[3]')
-  MASS1=$(echo "$i"|awk -F- 'split($0,a,"_")&&$0=a[2]')
-  MASS2=$(echo "$i"|awk -F- 'split($0,a,"_")&&$0=a[3]')
+#  MASS1=$(echo "$i"|awk -F- 'split($0,a,"_")&&$0=a[2]')
+#  MASS2=$(echo "$i"|awk -F- 'split($0,a,"_")&&$0=a[3]')
+#moved by one to include "_scan"
+  MASS1=$(echo "$i"|awk -F- 'split($0,a,"_")&&$0=a[3]')
+  MASS2=$(echo "$i"|awk -F- 'split($0,a,"_")&&$0=a[4]')
   if [ "$MASS2" == "" ]
   then
     MASS2="0"
@@ -32,7 +39,7 @@ do
 done < $CARDDIR/points_$MODEL.txt
 echo ".q" >> temp
 
-cat temp | root -b  &> logMakePlotInputFast.txt 
+cat temp | root -b  &> logMakePlotInput.txt 
 
 rm temp
 
