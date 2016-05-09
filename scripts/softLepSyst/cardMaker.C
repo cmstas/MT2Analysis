@@ -39,7 +39,7 @@ const bool fourNuisancesPerBinZGratio = true;
 
 const bool integratedZinvEstimate = true;
 
-const bool doDummySignalSyst = true;
+const bool doDummySignalSyst = false;
 
 double last_dilep_transfer = 1.0;
 double last_onelep_transfer = 1.0;
@@ -485,13 +485,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   n_syst++; //fake_syst
 
   // ----- sig uncertainties
-  double sig_syst         = 1.20; // dummy 10% from early MC studies
+  double sig_syst         = 1.20; // dummy 20% from early MC studies
   double sig_lumi         = 1.046; // 4.6% lumi uncertainty, end of 2015
-  double sig_mcstat       = (n_sig > 0.) ? 1. + sqrt(pow(err_sig_mcstat/n_sig,2) + 0.005) : 1.071; // MC stat err +  quadrature sum of 5% for JES, 5% for renorm/fact scales
+  double sig_mcstat       = (n_sig > 0.) ? 1. + err_sig_mcstat : 1.00; // MC stat err 
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
   double sig_btagsf_light = (n_sig > 0.) ? n_sig_btagsf_light_UP/n_sig : 1.00; // btagsf light, eff UP
-  double sig_lepeff       = (n_sig > 0.) ? n_sig_lepeff_UP/n_sig : 1.00; // lepton eff UP
+  // double sig_lepeff       = (n_sig > 0.) ? n_sig_lepeff_UP/n_sig : 1.00; // lepton eff UP
   double sig_isr          = (n_sig > 0.) ? n_sig_isr_UP/n_sig : 1.00; // isr weight UP
+  double sig_lepEff_renorm_jec = (n_sig > 0.) ? 1 + sqrt(0.05*0.05 + 0.05*0.05 + 0.05*0.05) : 1.00; //lepton eff, renorm/fact, and JEC variations all 5% in quadrature
 
   // fully correlated for lumi, btagsf, lepeff, isr.  Fully uncorrelated for stats and other systs
   TString name_sig_syst         = "sig_syst";
@@ -500,7 +501,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_sig_isr          = "sig_isrSyst";
   TString name_sig_btagsf_heavy = "sig_bTagHeavySyst";
   TString name_sig_btagsf_light = "sig_bTagLightSyst";
-  TString name_sig_lepeff       = "sig_lepEffSyst";
+  // TString name_sig_lepeff       = "sig_lepEffSyst";
+  TString name_sig_lepEff_renorm_jec = "sig_lepEff_renorm_jec";
   
   if (doDummySignalSyst) {
     // dummy: just 2 nuisances, 1 correlated and mc stat
@@ -509,8 +511,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   // otherwise do "real" signal systematics
   else {
-    n_syst += 5; // mcstat (including gen scales and JEC), lumi, btagsf_heavy, btagsf_light, isr
-    if (isSignalWithLeptons) ++n_syst; // lepeff
+    n_syst += 6; // mcstat, lumi, btagsf_heavy, btagsf_light, isr, (lep eff + renorm + jec)
+    //if (isSignalWithLeptons) ++n_syst; // lepeff
   }
 
   ofstream ofile;
@@ -541,7 +543,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     ofile <<  Form("%s                  lnN    %.3f   -    -    - ",name_sig_isr.Data(),sig_isr)  << endl;
     ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_btagsf_heavy.Data(),sig_btagsf_heavy)  << endl;
     ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_btagsf_light.Data(),sig_btagsf_light)  << endl;
-    if (isSignalWithLeptons) ofile <<  Form("%s               lnN    %.3f   -    -    - ",name_sig_lepeff.Data(),sig_lepeff)  << endl;
+    ofile <<  Form("%s            lnN    %.3f   -    -    - ",name_sig_lepEff_renorm_jec.Data(),sig_lepEff_renorm_jec)  << endl;
+    //if (isSignalWithLeptons) ofile <<  Form("%s               lnN    %.3f   -    -    - ",name_sig_lepeff.Data(),sig_lepeff)  << endl;
   }
 
 
