@@ -60,6 +60,9 @@ int getColor(const string& sample) {
   if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return kGreen+1;
   if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return kBlue+1;
   
+  if (sample.find("T5qqqqWW_1025_775_modified") != string::npos) return kGreen+1;
+  if (sample.find("T5qqqqWW_1100_500_modified") != string::npos) return kBlue+1;
+  
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return kYellow+1;
   if (sample.find("T5qqqqWW_1100_500") != string::npos) return kRed+1;
   
@@ -208,6 +211,10 @@ string getLegendName(const string& sample) {
 string getTableName(const string& sample) {
 
   
+  if (sample.find("predFake") != string::npos) return "Fake (Pred)";
+  if (sample.find("pred1L") != string::npos) return "1 Lep (Pred)";
+  if (sample.find("pred2L") != string::npos) return "2 Lep (Pred)";
+  
   if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return "T5qqqql#nul#nu 1025, 775";
   if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return "T5qqqql#nul#nu 1100, 500";
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
@@ -219,6 +226,9 @@ string getTableName(const string& sample) {
   if (sample.find("diboson dilep") != string::npos) return "Diboson (2L)";
   if (sample.find("top dilep") != string::npos) return "Top (2L)";
   if (sample.find("dyjets dilep") != string::npos) return "Z $\\rightarrow$ ll";
+
+  
+  if (sample.find("diboson") != string::npos) return "Diboson";
   
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
