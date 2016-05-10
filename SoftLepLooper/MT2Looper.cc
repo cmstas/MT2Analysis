@@ -596,10 +596,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	}
 
-	if (applyTopPtReweightSyst && t.evt_id >= 300 && t.evt_id < 400) {
-	  evtweight_topPt_ = evtweight_ * t.weight_toppt;
-	}
-
 	if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
 	  if (!isSignal_) { 
 	    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
@@ -2114,6 +2110,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   }
   
   if ( !t.isData && applyTopPtReweightSyst && !isSignal_ ) {
+    if (t.evt_id >= 300 && t.evt_id < 400) {
+      evtweight_topPt_ = evtweight_ * t.weight_toppt;
+    }
+    else evtweight_topPt_ = evtweight_;
     plot1D("h_mtbins_TopPt_UP"+s,       softlepmt_,   evtweight_topPt_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
   }
 
