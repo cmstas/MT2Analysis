@@ -71,6 +71,9 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_srMConelep_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_UPOnelep");
   histMap["h_crMConelep_renorm_DN"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_renorm_DNOnelep");    
   histMap["h_srMConelep_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_DNOnelep");
+  //Top pT reweight histograms
+  histMap["h_crMConelep_TopPt_UP"]       = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_TopPt_UPOnelep");    
+  histMap["h_srMConelep_TopPt_UP"]       = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_TopPt_UPOnelep");
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -132,6 +135,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_ratio_renorm_DN"]->Divide(histMap["h_srMConelep_renorm_DN"], histMap["h_crMConelep_renorm_DN"]);
   histMap["h_ratio_renorm_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_renorm_DNInt");
   histMap["h_ratio_renorm_DNInt"]->Divide(histMap["h_srMConelep_renorm_DNInt"], histMap["h_crMConelep_renorm_DNInt"]);
+  //Top Pt reweight histograms
+  histMap["h_ratio_TopPt_UP"] = sameBin(histMap["h_crMC"], "h_ratio_TopPt_UP");
+  histMap["h_ratio_TopPt_UP"]->Divide(histMap["h_srMConelep_TopPt_UP"], histMap["h_crMConelep_TopPt_UP"]);
+  histMap["h_ratio_TopPt_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_TopPt_UPInt");
+  histMap["h_ratio_TopPt_UPInt"]->Divide(histMap["h_srMConelep_TopPt_UPInt"], histMap["h_crMConelep_TopPt_UPInt"]);
   //W polarization systematic hist
   histMap["h_ratioIntSyst"] = sameBin(histMap["h_crMCInt"], "h_ratioIntSyst");
   histMap["h_ratioIntSyst"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));

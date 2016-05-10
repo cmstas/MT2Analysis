@@ -74,6 +74,9 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_srMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_UPDilepton");
   histMap["h_crMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_renorm_DNDilepton");    
   histMap["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_renorm_DNDilepton");
+  //Top Pt reweight histograms
+  histMap["h_crMCDilepton_TopPt_UP"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_TopPt_UPDilepton");    
+  histMap["h_srMCDilepton_TopPt_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_TopPt_UPDilepton");   
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -120,6 +123,9 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap2["h_srMCDilepton_renorm_UP"] = 0;
   histMap2["h_crMCDilepton_renorm_DN"] = 0;
   histMap2["h_srMCDilepton_renorm_DN"] = 0;
+  //Top Pt reweight histograms
+  histMap2["h_crMCDilepton_TopPt_UP"] = 0;  
+  histMap2["h_srMCDilepton_TopPt_UP"] = 0;
 
   //checks to make sure other directories exist
   TDirectory * dirData2 = fData ->GetDirectory("cr2L"+srName2);
@@ -143,7 +149,10 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
     histMap2["h_crMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_renorm_UPDilepton");    
     histMap2["h_srMCDilepton_renorm_UP"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_renorm_UPDilepton");
     histMap2["h_crMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_renorm_DNDilepton");    
-    histMap2["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_renorm_DNDilepton");     
+    histMap2["h_srMCDilepton_renorm_DN"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_renorm_DNDilepton");  
+    //Top Pt reweight histograms
+    histMap2["h_crMCDilepton_TopPt_UP"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_TopPt_UPDilepton");    
+    histMap2["h_srMCDilepton_TopPt_UP"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_TopPt_UPDilepton");   
 
     //fill Int histograms with integrated mtbins, i.e. event count
     for ( std::map<string, TH1D*>::iterator iter = histMap2.begin(); iter != histMap2.end(); ++iter ) {
@@ -202,6 +211,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_ratio_renorm_DN"]->Divide(histMap["h_srMCDilepton_renorm_DN"], histMap["h_crMCDilepton_renorm_DN"]);
   histMap["h_ratio_renorm_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_renorm_DNInt");
   histMap["h_ratio_renorm_DNInt"]->Divide(histMap["h_srMCDilepton_renorm_DNInt"], histMap["h_crMCDilepton_renorm_DNInt"]);
+  //Top Pt reweight histograms
+  histMap["h_ratio_TopPt_UP"] = sameBin(histMap["h_crMC"], "h_ratio_TopPt_UP");
+  histMap["h_ratio_TopPt_UP"]->Divide(histMap["h_srMCDilepton_TopPt_UP"], histMap["h_crMCDilepton_TopPt_UP"]);
+  histMap["h_ratio_TopPt_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_TopPt_UPInt");
+  histMap["h_ratio_TopPt_UPInt"]->Divide(histMap["h_srMCDilepton_TopPt_UPInt"], histMap["h_crMCDilepton_TopPt_UPInt"]);
   //DY UP/DN systematic hist
   histMap["h_ratioIntdyUPDN"] = sameBin(histMap["h_crMCInt"], "h_ratioIntdyUPDN");
   histMap["h_ratioIntdyUPDN"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
