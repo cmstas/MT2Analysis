@@ -101,6 +101,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_btag_syst(0.);
   double dilep_jec_syst(0.);
   double dilep_renorm_syst(0.);
+  double dilep_kmet_syst(0.);
   double err_dilep_mcstat(0.);
   double n_fakes(0.);
   double n_bkg(0.);
@@ -324,6 +325,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_2lratio_Renorm != 0) {
     dilep_renorm_syst = h_2lratio_Renorm->GetBinError(1)/h_2lratio_Renorm->GetBinContent(1);
   }
+  //kMET uncertainty due to di-top pT
+  if (met_LOW == 300) { dilep_kmet_syst = 0.10; } //10% uncertainty on kMET factor in second bin
   TH1D* h_2l_cryield = (TH1D*) f_2lep->Get(fullhistnameCRyield);
   n_dilep_cr = 0;
   if (h_2l_cryield != 0)
@@ -426,6 +429,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double dilep_dyUPDN = 1 + dilep_dyUPDN_syst; // transfer factor sys uncertainty due to DY UP/DN variation
   double dilep_jec = 1 + dilep_jec_syst; // transfer factor sys uncertainty due to JEC variations
   double dilep_renorm = 1 + dilep_renorm_syst; // transfer factor syst uncertainty due to renormalization/factorization scale
+  double dilep_kmet = 1 + dilep_kmet_syst; // kMet syst uncertainty due to di-top pT modeling
   double dilep_lepeff = 1.05;
   double dilep_bTag = 1.2; // special for 7jets with b-tags
   
@@ -436,6 +440,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_dilep_mcstat = Form("dilep_MCstat_%s", channel.c_str());
   //TString name_dilep_alphaerr = Form("dilep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_dilep_dyUPDN = "dilep_dyUPDN";
+  TString name_dilep_kmet =  Form("dilep_kmet_%s", met_str.c_str());
   TString name_dilep_lepeff = "dilep_lepeff";
   TString name_dilep_bTag = Form("dilep_bTag_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   
@@ -447,7 +452,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     dilep_alpha = last_dilep_transfer;
   }
-  n_syst += 4; // dilep_crstat, dilep_mcstat, dilep_dyUPDN, dilep_lepeff
+  n_syst += 5; // dilep_crstat, dilep_mcstat, dilep_dyUPDN, dilep_lepeff, dilep_kmet
 
   //shape uncertainty. 30% on second bin, 50% on third, keeping normalization fixed with first bin.
   if (n_mt2bins > 1 && mt2bin != 3) {
@@ -570,6 +575,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (n_mt2bins > 1 && mt2bin!=2)
     ofile <<  Form("%s    \t\t     lnN    -    -   %.3f     - ",name_dilep_shape2.Data(),dilep_shape2)  << endl;
   ofile <<  Form("%s   \t\t\t\t     lnN    -    -   %.3f     - ",name_dilep_dyUPDN.Data(),dilep_dyUPDN)  << endl;
+  ofile <<  Form("%s   \t\t     lnN    -    -   %.3f     - ",name_dilep_kmet.Data(),dilep_kmet)  << endl;
   //  ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_dilep_alphaerr.Data(),dilep_alphaerr)  << endl;
 
 
