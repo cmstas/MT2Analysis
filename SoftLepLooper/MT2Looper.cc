@@ -2236,7 +2236,11 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   float wY   = metY + lepY;
   float wPt  = sqrt(wX*wX + wY*wY);
   //float wPhi = (wX > 0) ? TMath::ATan(wY/wX) : (TMath::ATan(wY/wX) + TMath::Pi()/2);
-  plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
+  plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);  
+  plot1D("h_Wpt_polW_UP"+s,      wPt,   evtweight_polW_UP, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
+  plot1D("h_Wpt_polW_DN"+s,      wPt,   evtweight_polW_DN, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000); 
+  plot1D("h_Wpt_polW_UP2"+s,      wPt,   evtweight_polW_UP2, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
+  plot1D("h_Wpt_polW_DN2"+s,      wPt,   evtweight_polW_DN2, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
  
     //polarization stuff
   if (!doMinimalPlots) {
@@ -2374,6 +2378,15 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
 	plot1D("h_cmsPol2Plus_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
 	plot1D("h_atlasPolPlus_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
       }
+      //additional w-polarization variation plots
+      plot1D("h_met_polW_UP"+s,       t.met_pt,   evtweight_polW_UP, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+      plot1D("h_met_polW_DN"+s,       t.met_pt,   evtweight_polW_DN, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+      plot1D("h_met_polW_UP2"+s,       t.met_pt,   evtweight_polW_UP2, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+      plot1D("h_met_polW_DN2"+s,       t.met_pt,   evtweight_polW_DN2, h_1d, ";E_{T}^{miss} [GeV]", 100, 0, 1000);
+      plot1D("h_leppt_polW_UP"+s,      softleppt_,   evtweight_polW_UP, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+      plot1D("h_leppt_polW_DN"+s,      softleppt_,   evtweight_polW_DN, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+      plot1D("h_leppt_polW_UP2"+s,      softleppt_,   evtweight_polW_UP2, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+      plot1D("h_leppt_polW_DN2"+s,      softleppt_,   evtweight_polW_DN2, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
     }
     
     if (t.met_pt < 90 || softleppt_ < 20)  plot1D("h_Wpt90"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
