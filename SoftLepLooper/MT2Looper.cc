@@ -644,6 +644,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    costhetastar = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
 	    float weighMultUP = 1 + variation*( 1 - costhetastar )*( 1 - costhetastar );
 	    float weighMultDW = 1 - variation*( 1 - costhetastar )*( 1 - costhetastar );
+	    float weighMultUP2 = 1 + 2*variation*( 1 - costhetastar )*( 1 - costhetastar );
+	    float weighMultDW2 = 1 - 2*variation*( 1 - costhetastar )*( 1 - costhetastar );
 //	    cout<<"Lepton: "; Lvec.Print();
 //	    cout<<"Neutrino: "; Nvec.Print();
 //	    cout<<"Wvec: "; Wvec.Print();
@@ -663,6 +665,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    }
 	      evtweight_polW_UP  = evtweight_ * weighMultUP;
 	      evtweight_polW_DN  = evtweight_ * weighMultDW;
+	      evtweight_polW_UP2  = evtweight_ * weighMultUP2;
+	      evtweight_polW_DN2  = evtweight_ * weighMultDW2;
 	  }
 
 	}
@@ -1798,20 +1802,22 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   //extra regions for testing, only if !doMinimalPlots
   if (!doMinimalPlots) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
-      if(SRVecLep.at(srN).PassesSelection(values)){
+      if (SRVecLep.at(srN).GetName().find("baseAll") == std::string::npos) continue; //skip non baseline regions
 
+      //inclusive WJets region for polarization checks
+      bool passInclusiveW = softlepmt_ < 100 && t.met_pt > 50 && softleppt_ > 30; 
+      if (passInclusiveW) {
+	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
+	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
+	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
+      }
+      
+      //stuff beyond here must pass baseline SR selection
+      if(SRVecLep.at(srN).PassesSelection(values)){
 	//inclusive MET region (no cut required) 
 	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-
-	//inclusive WJets region for polarization checks
-	bool passInclusiveW = softlepmt_ < 100 && t.met_pt > 50 && softleppt_ > 30; 
-	if (passInclusiveW) {
-	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
-	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
-	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
-	}
 	
 	// //mt2 cut region
 	// if (t.met_pt < 60 && t.sl_mt2 > 100) {
@@ -2311,6 +2317,62 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
 	plot1D("h_cmsPolPlus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
 	plot1D("h_cmsPol2Plus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
 	plot1D("h_atlasPolPlus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
+      }
+      //W polarization UP
+      plot1D("h_cmsPol_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_UP"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_atlasPol_polW_UP"+s,      atlasPol,   evtweight_polW_UP, h_1d, "L_{P}", 20, -1, 1);
+      if (softlepId_ > 0) {
+	plot1D("h_cmsPolMinus_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Minus_polW_UP"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolMinus_polW_UP"+s,      atlasPol,   evtweight_polW_UP, h_1d, "L_{P}", 20, -1, 1);
+      }
+      if (softlepId_ < 0) {
+	plot1D("h_cmsPolPlus_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Plus_polW_UP"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolPlus_polW_UP"+s,      atlasPol,   evtweight_polW_UP, h_1d, "L_{P}", 20, -1, 1);
+      }
+      //W polarization DN
+      plot1D("h_cmsPol_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_DN"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_atlasPol_polW_DN"+s,      atlasPol,   evtweight_polW_DN, h_1d, "L_{P}", 20, -1, 1);
+      if (softlepId_ > 0) {
+	plot1D("h_cmsPolMinus_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Minus_polW_DN"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolMinus_polW_DN"+s,      atlasPol,   evtweight_polW_DN, h_1d, "L_{P}", 20, -1, 1);
+      }
+      if (softlepId_ < 0) {
+	plot1D("h_cmsPolPlus_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Plus_polW_DN"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolPlus_polW_DN"+s,      atlasPol,   evtweight_polW_DN, h_1d, "L_{P}", 20, -1, 1);
+      }
+      //W polarization UP2
+      plot1D("h_cmsPol_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_UP2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP2, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_atlasPol_polW_UP2"+s,      atlasPol,   evtweight_polW_UP2, h_1d, "L_{P}", 20, -1, 1);
+      if (softlepId_ > 0) {
+	plot1D("h_cmsPolMinus_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Minus_polW_UP2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolMinus_polW_UP2"+s,      atlasPol,   evtweight_polW_UP2, h_1d, "L_{P}", 20, -1, 1);
+      }
+      if (softlepId_ < 0) {
+	plot1D("h_cmsPolPlus_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Plus_polW_UP2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolPlus_polW_UP2"+s,      atlasPol,   evtweight_polW_UP2, h_1d, "L_{P}", 20, -1, 1);
+      }
+      //W polarization DN2
+      plot1D("h_cmsPol_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_atlasPol_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
+      if (softlepId_ > 0) {
+	plot1D("h_cmsPolMinus_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Minus_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolMinus_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
+      }
+      if (softlepId_ < 0) {
+	plot1D("h_cmsPolPlus_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPol2Plus_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_atlasPolPlus_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
       }
     }
     

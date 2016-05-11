@@ -73,6 +73,8 @@ class MT2Looper {
   float evtweight_polWm_DN;
   float evtweight_polW_UP;
   float evtweight_polW_DN;
+  float evtweight_polW_UP2;
+  float evtweight_polW_DN2;
   float evtweight_renormUp_;
   float evtweight_renormDn_;
   float evtweight_topPt_;
