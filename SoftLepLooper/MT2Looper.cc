@@ -663,10 +663,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	      evtweight_polWm_UP = evtweight_ * weighMultUP;
 	      evtweight_polWm_DN = evtweight_ * weighMultDW;
 	    }
-	      evtweight_polW_UP  = evtweight_ * weighMultUP;
-	      evtweight_polW_DN  = evtweight_ * weighMultDW;
-	      evtweight_polW_UP2  = evtweight_ * weighMultUP2;
-	      evtweight_polW_DN2  = evtweight_ * weighMultDW2;
+	    evtweight_polW_UP  = evtweight_ * weighMultUP;
+	    evtweight_polW_DN  = evtweight_ * weighMultDW;
+	    evtweight_polW_UP2  = evtweight_ * weighMultUP2;
+	    evtweight_polW_DN2  = evtweight_ * weighMultDW2;
+	    
+	    plot1D("h_costhetastar_polW_UP",       costhetastar,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_DN",       costhetastar,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_UP2",       costhetastar,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_DN2",       costhetastar,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
 	  }
 
 	}
