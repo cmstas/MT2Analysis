@@ -161,6 +161,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   float renorm_DN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_renorm_DNInt"]->GetBinContent(1));
   float renorm_err = max(renorm_UP_err,renorm_DN_err);
   histMap["h_ratioIntRenorm"]->SetBinError(1,renorm_err); 
+  //Top Pt systematic hist
+  histMap["h_ratioIntTopPt"] = sameBin(histMap["h_crMCInt"], "h_ratioIntTopPt");
+  histMap["h_ratioIntTopPt"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float TopPt_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_TopPt_UPInt"]->GetBinContent(1));
+  histMap["h_ratioIntTopPt"]->SetBinError(1,TopPt_UP_err); 
   
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
@@ -233,7 +238,7 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr30/", string dataname = "data_Run2015CD"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may10/", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR1L.root";

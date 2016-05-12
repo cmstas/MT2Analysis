@@ -94,6 +94,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_btag_syst(0.);
   double onelep_jec_syst(0.);
   double onelep_renorm_syst(0.);
+  double onelep_topPt_syst(0.);
   double err_onelep_mcstat(0.);
   double n_dilep(0.);
   double n_dilep_cr(0.);
@@ -255,6 +256,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (h_1lratio_Renorm != 0) {
     onelep_renorm_syst = h_1lratio_Renorm->GetBinError(1)/h_1lratio_Renorm->GetBinContent(1);
   }
+  //Top pT reweighting uncertainty
+  TH1D* h_1lratio_TopPt = (TH1D*) f_1lep->Get(fullhistnameRatioInt+"TopPt");
+  if (h_1lratio_TopPt != 0) {
+    onelep_topPt_syst = h_1lratio_TopPt->GetBinError(1)/h_1lratio_TopPt->GetBinContent(1);
+  }
   
   // MC STAT UNC
   TH1D* h_onelep_mcstat = (TH1D*) f_1lep->Get(fullhistnameRatioInt);
@@ -373,6 +379,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_btag = 1. + onelep_btag_syst; // transfer factor syst uncertainty due to btag SF
   double onelep_jec = 1. + onelep_jec_syst; // transfer factor syst uncertainty due to JEC variations
   double onelep_renorm = 1. + onelep_renorm_syst; // transfer factor syst uncertainty due to renormalization/factorization scale
+  double onelep_topPt = 1. + onelep_topPt_syst; // transfer factor syst uncertainty due to top pT reweighting
   double onelep_lepeff = 1.10;
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
@@ -384,6 +391,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString name_onelep_polW = "onelep_polW";
   TString name_onelep_TopW =  Form("onelep_TopW_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_btag = "onelep_btag"; 
+  TString name_onelep_topPt = "onelep_topPt";
   TString name_onelep_dilep_jec = "onelep_dilep_jec"; //correlated across onelep AND dilep
   TString name_onelep_dilep_renorm = "onelep_dilep_renorm"; //correlated across onelep AND dilep
   TString name_onelep_lepeff = "onelep_lepeff";
@@ -397,7 +405,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   else {
     onelep_alpha = last_onelep_transfer;
   }
-  n_syst += 8; // onelep_crstat, onelep_mcstat, onelep_polW, onelep_TopW, onelep_btag, onelep_dilep_jec, onelep_dilep_renorm, onelep_lepeff
+  n_syst += 9; // onelep_crstat, onelep_mcstat, onelep_polW, onelep_TopW, onelep_btag, onelep_topPt, onelep_dilep_jec, onelep_dilep_renorm, onelep_lepeff
 
   if (n_mt2bins > 1) {
     if (mt2bin == 1 && n_onelep > 0.) {
@@ -562,6 +570,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_polW.Data(),onelep_polW)  << endl;
   ofile <<  Form("%s   \t     lnN    -    %.3f    -    - ",name_onelep_TopW.Data(),onelep_TopW)  << endl;
   ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_btag.Data(),onelep_btag)  << endl;
+  ofile <<  Form("%s   \t\t\t\t     lnN    -    %.3f    -    - ",name_onelep_topPt.Data(),onelep_topPt)  << endl;
   ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_jec.Data(),onelep_jec,dilep_jec)  << endl;
   ofile <<  Form("%s   \t\t\t     lnN    -    %.3f    %.3f    - ",name_onelep_dilep_renorm.Data(),onelep_renorm,dilep_renorm)  << endl;
   //ofile <<  Form("%s        lnN    -    %.3f    -    - ",name_onelep_alphaerr.Data(),onelep_alphaerr)  << endl;
