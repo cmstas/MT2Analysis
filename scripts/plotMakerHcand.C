@@ -1667,14 +1667,15 @@ void plotMakerMacroRegions(){
 
   
 //_______________________________________________________________________________
-void plotMaker(){
+void plotMakerHcand(){
   //tableMakerZinvCR(); return;
   //plotMakerDY(); //return;
   //plotMakerZllMT(); return;
   //plotMakerGJets(); //return;
   //plotMakerRemovedLep(); //return;
   //plotMakerCRSL(); return;
-  plotMakerMacroRegions(); return;
+  // plotMakerMacroRegions(); return;
+  // plotMakerMT2Higgs(); return;
 
   //  gROOT->LoadMacro("CMS_lumi.C");
   cmsText = "CMS Preliminary";
@@ -1701,7 +1702,7 @@ void plotMaker(){
   //TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   // TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
   //TFile* f_wjets = new TFile(Form("%s/wjets_ht.root",input_dir.c_str()));
-  TFile* f_wjets = new TFile(Form("%s/wjets_amcatnlo.root",input_dir.c_str()));
+  // TFile* f_wjets = new TFile(Form("%s/wjets_amcatnlo.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   // TFile* f_tth = new TFile(Form("%s/tth.root",input_dir.c_str()));
   // TFile* f_ttw = new TFile(Form("%s/ttwjets.root",input_dir.c_str()));
@@ -1711,7 +1712,7 @@ void plotMaker(){
   //TFile* f_fakedata = new TFile(Form("%s/lostlep.root",input_dir.c_str())); //hadd'ing of ttbar, ttw, ttz, tth, singletop, wjets
   //  TFile* f_fakedata = new TFile(Form("%s/fakedata.root",input_dir.c_str())); 
   //TFile* f_data = new TFile(Form("%s/data_Run2015B.root",input_dir.c_str())); 
-  TFile* f_data = new TFile(Form("%s/data_Run2015C.root",input_dir.c_str())); 
+  // TFile* f_data = new TFile(Form("%s/data_Run2015C.root",input_dir.c_str())); 
 
   // TFile* f_T1tttt_1500_100 = new TFile(Form("%s/T1tttt_1500_100.root",input_dir.c_str()));
   // TFile* f_T1tttt_1200_800 = new TFile(Form("%s/T1tttt_1200_800.root",input_dir.c_str()));
@@ -1752,12 +1753,12 @@ void plotMaker(){
   // samples.push_back(f_ttz); names.push_back("ttz");
   // samples.push_back(f_singletop); names.push_back("singletop");
   //  samples.push_back(f_ttbar); names.push_back("ttbar");
-  samples.push_back(f_wjets); names.push_back("wjets");
+  // samples.push_back(f_wjets); names.push_back("wjets");
   samples.push_back(f_ttbar); names.push_back("ttbar");
   //samples.push_back(f_ttbar); names.push_back("top");
   //samples.push_back(f_zjets); names.push_back("zjets");
   //samples.push_back(f_dyjets); names.push_back("dyjets");
-  samples.push_back(f_data); names.push_back("data");
+  // samples.push_back(f_data); names.push_back("data");
 
   // samples.push_back(f_singletop_wrong); names.push_back("singletop_wrong");
   // samples.push_back(f_singletop); names.push_back("singletop");
