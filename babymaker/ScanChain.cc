@@ -185,9 +185,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   if (applyLeptonSFs) {
     setElSFfile("lepsf/kinematicBinSFele.root");
     setMuSFfile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+    setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  
     if (isFastsim) {
       setElSFfile_fastsim("lepsf/sf_el_vetoCB_mini01.root");
       setMuSFfile_fastsim("lepsf/sf_mu_looseID_mini02.root");
+      setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
     }
   }
 
@@ -330,21 +332,28 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       //TRIGGER - check first to enable cuts
       HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
       HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_v");
-      HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v");
-      HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v");
+      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_v"); 
+      HLT_PFHT300_PFMET100  = passHLTTriggerPattern("HLT_PFHT300_PFMET100_v"); 
+      HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); 
+      HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
+      HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
       HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");
       HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v") || passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDLoose_v");
+      HLT_PFMET100_PFMHT100         = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_v");
+      HLT_PFMET110_PFMHT110         = passHLTTriggerPattern("HLT_PFMET110_PFMHT110_IDTight_v");
+      HLT_PFMET120_PFMHT120         = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_v");
 
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
-        passHLTTriggerPattern("HLT_IsoTkMu20_v");
+        passHLTTriggerPattern("HLT_IsoTkMu20_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_v") ||
+        passHLTTriggerPattern("HLT_IsoMu24_v") || passHLTTriggerPattern("HLT_IsoTkMu24_v");
       HLT_SingleEl     = passHLTTriggerPattern("HLT_Ele23_WPLoose_Gsf_v") ||
         passHLTTriggerPattern("HLT_Ele22_eta2p1_WPLoose_Gsf_v") ||
         passHLTTriggerPattern("HLT_Ele23_WP75_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele22_eta2p1_WP75_Gsf_v");
+        passHLTTriggerPattern("HLT_Ele22_eta2p1_WP75_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
       HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");
@@ -353,18 +362,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
         passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-      HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v");
-      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v");
-      HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0;
-      HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0;
-      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v") ? HLT_prescale(triggerName("HLT_PFHT350_v")) : 0;
-      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v") ? HLT_prescale(triggerName("HLT_PFHT475_v")) : 0;
-      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v") ? HLT_prescale(triggerName("HLT_PFHT600_v")) : 0;
-      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v");
-      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v");
+        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
+	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
+        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+      HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
+      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
+      HLT_PFHT125_Prescale  = passHLTTriggerPattern("HLT_PFHT125_v") ? HLT_prescale(triggerName("HLT_PFHT125_v")) : 0; 
+      HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0; 
+      HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0; 
+      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v") ? HLT_prescale(triggerName("HLT_PFHT350_v")) : 0; 
+      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v") ? HLT_prescale(triggerName("HLT_PFHT475_v")) : 0; 
+      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v") ? HLT_prescale(triggerName("HLT_PFHT600_v")) : 0; 
+      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
+      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
 
-      if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu
+      if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
                                            || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
 
       run  = cms3.evt_run();
@@ -1238,6 +1250,64 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if (mt < 100.) ++nLepLowMT;
       }
 
+      if (verbose) cout << "before lost gen leptons" << endl;
+
+      weight_lepsf_0l = 1.;
+      weight_lepsf_0l_UP = 1.;
+      weight_lepsf_0l_DN = 1.;
+
+      // only fill these variables on MC and for events with 0 veto leptons
+      if (!isData && (nMuons10+nElectrons10+nPFLep5LowMT+nPFHad10LowMT == 0)) {
+	for (int ilep = 0; ilep < ngenLep+ngenLepFromTau; ++ilep) {
+	  float pt,eta;
+	  int pdgId;
+	  if (ilep < ngenLep) {
+	    pt = genLep_pt[ilep];
+	    eta = genLep_eta[ilep];
+	    pdgId = genLep_pdgId[ilep];
+	  } else {
+	    pt = genLepFromTau_pt[ilep-ngenLep];
+	    eta = genLepFromTau_eta[ilep-ngenLep];
+	    pdgId = genLepFromTau_pdgId[ilep-ngenLep];
+	  }
+	  // check acceptance for veto: pt > 5, |eta| < 2.4
+	  if (pt < 5.) continue;
+	  if (fabs(eta) > 2.4) continue;
+
+	  if (isFastsim) {
+	    // look up SF and vetoeff, by flavor
+	    weightStruct sf_struct_fullsim = getLepSFFromFile(pt, eta, pdgId);
+	    weightStruct sf_struct_fastsim = getLepSFFromFile_fastsim(pt, eta, pdgId);
+	    float sf = sf_struct_fullsim.cent * sf_struct_fastsim.cent;
+	    float vetoeff = getLepVetoEffFromFile_fastsim(pt, eta, pdgId);
+	    // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
+	    float vetoeff_cor = vetoeff * sf;
+	    float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+	    weight_lepsf_0l *= (1. + cor_0l);
+	    float unc = (sf_struct_fullsim.up - sf_struct_fullsim.cent) + (sf_struct_fastsim.up - sf_struct_fastsim.cent);
+	    float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+	    float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+	    weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
+	    weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
+	  } // isFastsim
+
+	  else { // fullsim
+	    // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
+	    weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
+	    float sf = sf_struct.cent;
+	    float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
+	    float unc = sf_struct.up - sf;
+	    float vetoeff_unc_UP = vetoeff * (1. + unc);
+	    float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
+	    weight_lepsf_0l_UP *= (1. + unc_UP_0l);
+	    weight_lepsf_0l_DN *= (1. - unc_UP_0l);
+	  }
+	  
+	} // loop over gen leptons
+      } // !isData && 0 veto leptons
+      
+      
+
       if (verbose) cout << "before photons" << endl;
 
       //PHOTONS
@@ -1484,7 +1554,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
           int iJet = passJets.at(passIdx).first;
 
-          if(p4sCorrJets.at(iJet).pt() < 10.0) continue;
+          if(p4sCorrJets.at(iJet).pt() < 20.0) continue;
           if(fabs(p4sCorrJets.at(iJet).eta()) > 4.7) continue;
 
           bool alreadyRemoved = false;
@@ -1765,10 +1835,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 p4sForDphiGamma.push_back(p4sCorrJets.at(iJet));
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
-              } // pt40
-              if(jet_btagMVA[iJet] >= 0.185) { // CombinedMVAv2
-                gamma_nBJet20++;
-                if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++;
+              } // pt30
+              if(jet_btagMVA[njet] >= 0.185) { // CombinedMVAv2
+                gamma_nBJet20++; 
+                if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
                   gamma_nBJet30++;
                   if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nBJet40++;
@@ -2342,12 +2412,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
     BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
     BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
+    BabyTree_->Branch("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100 );
+    BabyTree_->Branch("HLT_PFHT300_PFMET110", &HLT_PFHT300_PFMET110 );
     BabyTree_->Branch("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100 );
     BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
     BabyTree_->Branch("HLT_PFMETNoMu90_PFMHTNoMu90", &HLT_PFMETNoMu90_PFMHTNoMu90 );
     BabyTree_->Branch("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 );
     BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
     BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
+    BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
+    BabyTree_->Branch("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110 );
+    BabyTree_->Branch("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120 );
     BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
     BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
     BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
@@ -2357,6 +2432,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
     BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
     BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
+    BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
     BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
     BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
     BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
@@ -2556,6 +2632,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("weight_lepsf", &weight_lepsf );
     BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
     BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
+    BabyTree_->Branch("weight_lepsf_0l", &weight_lepsf_0l );
+    BabyTree_->Branch("weight_lepsf_0l_UP", &weight_lepsf_0l_UP );
+    BabyTree_->Branch("weight_lepsf_0l_DN", &weight_lepsf_0l_DN );
     BabyTree_->Branch("weight_btagsf", &weight_btagsf );
     BabyTree_->Branch("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP );
     BabyTree_->Branch("weight_btagsf_light_UP", &weight_btagsf_light_UP );
@@ -2682,21 +2761,27 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_PFHT800 = -999;
     HLT_PFHT900 = -999;
     HLT_PFMET170 = -999;
+    HLT_PFHT300_PFMET100 = -999;
+    HLT_PFHT300_PFMET110 = -999;
     HLT_PFHT350_PFMET100 = -999;
     HLT_PFHT350_PFMET120 = -999;
     HLT_PFMETNoMu90_PFMHTNoMu90 = -999;
     HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 = -999;
     HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
     HLT_PFMET90_PFMHT90 = -999;
-    HLT_SingleMu = -999;
-    HLT_SingleEl = -999;
-    HLT_DoubleEl = -999;
-    HLT_DoubleEl33 = -999;
-    HLT_MuX_Ele12 = -999;
-    HLT_Mu8_EleX = -999;
-    HLT_DoubleMu = -999;
-    HLT_Photon120 = -999;
-    HLT_Photon165_HE10 = -999;
+    HLT_PFMET100_PFMHT100 = -999;
+    HLT_PFMET110_PFMHT110 = -999;
+    HLT_PFMET120_PFMHT120 = -999;
+    HLT_SingleMu = -999;   
+    HLT_SingleEl = -999;   
+    HLT_DoubleEl = -999;   
+    HLT_DoubleEl33 = -999;   
+    HLT_MuX_Ele12 = -999;   
+    HLT_Mu8_EleX = -999;   
+    HLT_DoubleMu = -999;   
+    HLT_Photon120 = -999;   
+    HLT_Photon165_HE10 = -999;   
+    HLT_PFHT125_Prescale = -999;
     HLT_PFHT200_Prescale = -999;
     HLT_PFHT300_Prescale = -999;
     HLT_PFHT350_Prescale = -999;
@@ -2775,6 +2860,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     weight_lepsf = 1.;
     weight_lepsf_UP = 1.;
     weight_lepsf_DN = 1.;
+    weight_lepsf_0l = 1.;
+    weight_lepsf_0l_UP = 1.;
+    weight_lepsf_0l_DN = 1.;
     weight_btagsf = 1.;
     weight_btagsf_heavy_UP = 1.;
     weight_btagsf_light_UP = 1.;

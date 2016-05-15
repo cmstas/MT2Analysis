@@ -23,5 +23,5 @@ mkdir -p ${LOGDIR}
 
 for SAMPLE in ${Samples[@]};
   do echo ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
-  nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
+     nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
 done
