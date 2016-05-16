@@ -51,7 +51,7 @@ using namespace tas;
 // turn on to add debugging statements (default false)
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = true;
+const bool applyJECfromFile = false;
 // change to do JEC uncertainty variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyJECunc = 0;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
@@ -72,7 +72,7 @@ const bool applyLeptonSFs = false;
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
-// for merging prompt reco with reMINIAOD (default true)
+// for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
@@ -109,7 +109,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   }
 
   isPromptReco = false;
-  if (baby_name.find("data_Run2015") != std::string::npos) {
+  if (baby_name.find("data_Run201") != std::string::npos) {
     isDataFromFileName = true;
     cout << "running on DATA, based on file name" << endl;
     if (baby_name.find("PromptReco") != std::string::npos) {
@@ -127,7 +127,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_snt.txt";
+  const char* json_file = "jsons/DCSONLY_json_160516_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -353,7 +353,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         passHLTTriggerPattern("HLT_Ele22_eta2p1_WPLoose_Gsf_v") ||
         passHLTTriggerPattern("HLT_Ele23_WP75_Gsf_v") ||
         passHLTTriggerPattern("HLT_Ele22_eta2p1_WP75_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_v");
+	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_Gsf_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
       HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");
@@ -2403,6 +2403,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters );
     BabyTree_->Branch("Flag_trkPOGFilters", &Flag_trkPOGFilters );
     BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
+    BabyTree_->Branch("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter );
     BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
     BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
     BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
@@ -2753,6 +2754,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     Flag_trkPOGFilters = -999;
     Flag_trackingFailureFilter = -999;
     Flag_CSCTightHaloFilter = -999;
+    Flag_CSCTightHalo2015Filter = -999;
     Flag_HBHENoiseFilter = -999;
     Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
