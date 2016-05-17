@@ -499,7 +499,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // ----- sig uncertainties
   double sig_syst         = 1.20; // dummy 20% from early MC studies
-  double sig_lumi         = 1.046; // 4.6% lumi uncertainty, end of 2015
+  double sig_lumi         = 1.027; // 2.7% lumi uncertainty, end of 2015
   double sig_mcstat       = (n_sig > 0.) ? 1. + err_sig_mcstat : 1.00; // MC stat err 
   double sig_btagsf_heavy = (n_sig > 0.) ? n_sig_btagsf_heavy_UP/n_sig : 1.00; // btagsf heavy, eff UP
   double sig_btagsf_light = (n_sig > 0.) ? n_sig_btagsf_light_UP/n_sig : 1.00; // btagsf light, eff UP
