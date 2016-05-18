@@ -55,6 +55,10 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_crMConelep"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");    
   histMap["h_srMConelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");  
   histMap["h_crData"]         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");
+  //kinematic histograms 
+  histMap["h_nJet30Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nJet30Onelep"); 
+  histMap["h_nBJet20Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nBJet20Onelep"); 
+  histMap["h_categoryBOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_categoryBOnelep");  
   //W polarization histograms
   histMap["h_crMConelep_polW_UP"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_polW_UPOnelep");    
   histMap["h_srMConelep_polW_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_UPOnelep");
@@ -74,6 +78,9 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   //Top pT reweight histograms
   histMap["h_crMConelep_TopPt_UP"]       = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_TopPt_UPOnelep");    
   histMap["h_srMConelep_TopPt_UP"]       = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_TopPt_UPOnelep");
+  //Wpt histograms
+  histMap["h_crMConelep_scaleWpt"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_scaleWptOnelep");    
+  histMap["h_srMConelep_scaleWpt"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_scaleWptOnelep");
 
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -140,6 +147,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_ratio_TopPt_UP"]->Divide(histMap["h_srMConelep_TopPt_UP"], histMap["h_crMConelep_TopPt_UP"]);
   histMap["h_ratio_TopPt_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_TopPt_UPInt");
   histMap["h_ratio_TopPt_UPInt"]->Divide(histMap["h_srMConelep_TopPt_UPInt"], histMap["h_crMConelep_TopPt_UPInt"]);
+  //W Pt reweight histograms
+  histMap["h_ratio_scaleWpt"] = sameBin(histMap["h_crMC"], "h_ratio_scaleWpt");
+  histMap["h_ratio_scaleWpt"]->Divide(histMap["h_srMConelep_scaleWpt"], histMap["h_crMConelep_scaleWpt"]);
+  histMap["h_ratio_scaleWptInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_scaleWptInt");
+  histMap["h_ratio_scaleWptInt"]->Divide(histMap["h_srMConelep_scaleWptInt"], histMap["h_crMConelep_scaleWptInt"]);
   //W polarization systematic hist
   histMap["h_ratioIntSyst"] = sameBin(histMap["h_crMCInt"], "h_ratioIntSyst");
   histMap["h_ratioIntSyst"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
@@ -166,6 +178,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_ratioIntTopPt"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
   float TopPt_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_TopPt_UPInt"]->GetBinContent(1));
   histMap["h_ratioIntTopPt"]->SetBinError(1,TopPt_UP_err); 
+  //W Pt systematic hist
+  histMap["h_ratioIntWPt"] = sameBin(histMap["h_crMCInt"], "h_ratioIntWPt");
+  histMap["h_ratioIntWPt"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float WPt_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_scaleWptInt"]->GetBinContent(1));
+  histMap["h_ratioIntWPt"]->SetBinError(1,WPt_err); 
   
   //calculate the purity histogram, N(Fake/Total) in CR, directly from MC
   histMap["h_purity"] = sameBin(histMap["h_crMC"], "h_purity");
@@ -222,6 +239,14 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
 
   }//loop over bins
 
+  //renormalize kinematic hists to prediction yield
+  float predInt = histMap["h_pred"]->Integral(0,-1);
+  float srMCInt = histMap["h_nJet30Onelep"]->Integral(0,-1);
+  float scaleKin = predInt/srMCInt;
+  histMap["h_nJet30Onelep"]->Scale(scaleKin);
+  histMap["h_nBJet20Onelep"]->Scale(scaleKin);
+  histMap["h_categoryBOnelep"]->Scale(scaleKin);
+  
   //write hists to output file
   cout << "Saving hists for " << dir_name << "..." << endl;
   fOut->cd();
@@ -238,7 +263,7 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may10/", string dataname = "data_Run2015CD"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may18/", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR1L.root";

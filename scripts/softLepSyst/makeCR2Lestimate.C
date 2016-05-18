@@ -63,6 +63,10 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsDilepton");  
   histMap["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName+"/h_mtbins");
+  //kinematic histograms 
+  histMap["h_nJet30Dilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nJet30Dilepton"); 
+  histMap["h_nBJet20Dilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nBJet20Dilepton"); 
+  histMap["h_categoryBDilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_categoryBDilepton"); 
   //DY UP histogram
   histMap["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName+"/h_mtbinsDilepton");  
@@ -298,6 +302,14 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
 
   }//loop over bins
 
+  //renormalize kinematic hists to prediction yield
+  float predInt = histMap["h_pred"]->Integral(0,-1);
+  float srMCInt = histMap["h_nJet30Dilepton"]->Integral(0,-1);
+  float scaleKin = predInt/srMCInt;
+  histMap["h_nJet30Dilepton"]->Scale(scaleKin);
+  histMap["h_nBJet20Dilepton"]->Scale(scaleKin);
+  histMap["h_categoryBDilepton"]->Scale(scaleKin);
+  
   //write hists to output file
   cout << "Saving hists for " << dir_name << "..." << endl;
   fOut->cd();
@@ -314,7 +326,7 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
 }
 
 //_______________________________________________________________________________
-void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_apr30", string dataname = "data_Run2015CD"){
+void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may10", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR2L.root";
