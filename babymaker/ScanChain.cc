@@ -593,6 +593,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             }
             if (nHardScatter > 2) std::cout << "WARNING: found too many sbottoms in T2bb MC!" << std::endl;
           }
+	  else if (evt_id == 1200) {
+            // SMS T2-4bd - stops
+            if (isLastCopy == 1 && pdgId == 1000006) {
+              recoil += cms3.genps_p4().at(iGen);
+              ++nHardScatter;
+            }
+            if (nHardScatter > 2) std::cout << "WARNING: found too many stops in T2-4bd MC!" << std::endl;
+          }
 
           int motherId = abs(cms3.genps_id_simplemother().at(iGen));
           int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
