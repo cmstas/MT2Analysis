@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& log_merge_${TAG}_$1.txt &
 }
 
-TAG=softLep-v3_V00-01-10_25ns_miniaodv2
+TAG=softLep-v4_V00-01-10_25ns_miniaodv2
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -193,12 +193,12 @@ run T2-4bd_550to600_470to590
 # run T5qqqqWW_1425to1600_0to1175
 # run T5qqqqWW_1650to1700_0to1150
 
-run T2tb_200to325_0to150
-run T2tb_200to625_50to475
-run T2tb_350to400_0to225
-run T2tb_425to600_0to425
-run T2tb_625to850_0to450
-run T2tb_875to1125_0to475
+# run T2tb_200to325_0to150
+# run T2tb_200to625_50to475
+# run T2tb_350to400_0to225
+# run T2tb_425to600_0to425
+# run T2tb_625to850_0to450
+# run T2tb_875to1125_0to475
 
 run T5qqqqWW_modified_600to800_0to725
 run T5qqqqWW_modified_825to1000_0to925
