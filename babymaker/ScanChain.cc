@@ -1524,6 +1524,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       minMTBMet = 999999.;
       jet1_pt = 0.;
       jet2_pt = 0.;
+      jet_failFSveto = 0.;
 
       gamma_nJet30 = 0;
       gamma_nJet40 = 0;
@@ -1601,6 +1602,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_eta[njet]  = p4sCorrJets.at(iJet).eta();
           jet_phi[njet]  = p4sCorrJets.at(iJet).phi();
           jet_mass[njet] = cms3.pfjets_mass().at(iJet);
+          jet_chf[njet]  = cms3.pfjets_chargedHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4().at(iJet).energy());
           jet_btagCSV[njet] = cms3.pfjets_pfCombinedInclusiveSecondaryVertexV2BJetTag().at(iJet); 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -1626,6 +1628,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 
           jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
+	  //veto for Fastsim events with crazy unmatched jets
+	  if (isFastsim && jet_pt[njet] > 20 && fabs(jet_eta[njet]) < 2.5 && jet_chf[njet] < 0.1 && jet_mcPt[njet]==0) {
+	    jet_FSveto[njet] = 1;
+	    jet_failFSveto = 1;
+	  }
+	  else jet_FSveto[njet] = 0;
+	    	  	 
+	  
           // use pt20 for bjet counting, pt30 for everything else
           if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
             if (jet_pt[njet] > 30.0) {
@@ -2157,6 +2167,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("mt2_gen", &mt2_gen );
     BabyTree_->Branch("jet1_pt", &jet1_pt );
     BabyTree_->Branch("jet2_pt", &jet2_pt );
+    BabyTree_->Branch("jet_failFSveto", &jet_failFSveto );
     BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
     BabyTree_->Branch("gamma_jet2_pt", &gamma_jet2_pt );
     BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
@@ -2411,6 +2422,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
+    BabyTree_->Branch("jet_chf", jet_chf, "jet_chf[njet]/F" );
+    BabyTree_->Branch("jet_FSveto", jet_FSveto, "jet_FSveto[njet]/I" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
     BabyTree_->Branch("jet_hadronFlavour", jet_hadronFlavour, "jet_hadronFlavour[njet]/I" );
     BabyTree_->Branch("jet_qgl", jet_qgl, "jet_qgl[njet]/F" );
@@ -2487,6 +2500,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     mt2_gen = -999.0;
     jet1_pt = 0.0;
     jet2_pt = 0.0;
+    jet_failFSveto = 0.0;
     gamma_jet1_pt = 0.0;
     gamma_jet2_pt = 0.0;
     pseudoJet1_pt = 0.0;
@@ -2789,6 +2803,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       jet_btagCSV[i] = -999;
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
+      jet_chf[i] = -999;
+      jet_FSveto[i] = -999;
       jet_mcFlavour[i] = -999;
       jet_hadronFlavour[i] = -999;
       jet_qgl[i] = -999;

@@ -121,6 +121,7 @@ class babyMaker {
 
   Float_t         jet1_pt;
   Float_t         jet2_pt;
+  Int_t           jet_failFSveto;
   Float_t         gamma_jet1_pt;
   Float_t         gamma_jet2_pt;
 
@@ -413,6 +414,8 @@ class babyMaker {
   Float_t         jet_btagCSV[max_njet];   //[njet]
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
+  Float_t         jet_chf[max_njet];   //[njet]
+  Int_t           jet_FSveto[max_njet];   //[njet]
   Int_t           jet_mcFlavour[max_njet];   //[njet]
   Int_t           jet_hadronFlavour[max_njet];   //[njet]
   Float_t         jet_qgl[max_njet];   //[njet]
