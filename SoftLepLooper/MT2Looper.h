@@ -78,6 +78,8 @@ class MT2Looper {
   float evtweight_renormUp_;
   float evtweight_renormDn_;
   float evtweight_topPt_;
+  
+  float costhetastar_;
 
   int nlepveto_;
     

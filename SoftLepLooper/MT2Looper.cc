@@ -627,7 +627,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  TVector3 Wrf(0,0,0); //3vector to boost to W rest frame
 	  TLorentzVector Lrf(0,0,0,0); //4vector of lepton boosted to W rest frame
 	  int found = 0;
-	  float costhetastar = 0;
+	  costhetastar_ = 0;
 	  for ( int i = 0; i < t.ngenStat23; i++) {
 	    int ID = fabs(t.genStat23_pdgId[i]);
 	    if (t.genStat23_pt[i] > 5 && (ID==11 || ID==13 || ID==15)) {
@@ -641,20 +641,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    Wvec = Lvec+Nvec;
 	    Wrf = Wvec.BoostVector(); //boost vector to w rest frame
 	    Lrf = ROOT::Math::VectorUtil::boost(Lvec, -Wrf); // this need a minus sign because we need to invert the boost
-	    costhetastar = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
-	    float weighMultUP = 1 + variation*( 1 - costhetastar )*( 1 - costhetastar );
-	    float weighMultDW = 1 - variation*( 1 - costhetastar )*( 1 - costhetastar );
-	    float weighMultUP2 = 1 + 2*variation*( 1 - costhetastar )*( 1 - costhetastar );
-	    float weighMultDW2 = 1 - 2*variation*( 1 - costhetastar )*( 1 - costhetastar );
+	    costhetastar_ = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
+	    float weighMultUP = 1 + variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
+	    float weighMultDW = 1 - variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
+	    float weighMultUP2 = 1 + 2*variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
+	    float weighMultDW2 = 1 - 2*variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
 //	    cout<<"Lepton: "; Lvec.Print();
 //	    cout<<"Neutrino: "; Nvec.Print();
 //	    cout<<"Wvec: "; Wvec.Print();
 //	    cout<<"Wrf: "; Wrf.Print();
 //	    cout<<"Lrf: "; Lrf.Print();
-//	    cout<<"costhetastar: "<< costhetastar <<endl;
-//	    cout<<"(1-cosThetaStar)^2 "<< ( 1 - costhetastar )*( 1 - costhetastar )<<endl;
+//	    cout<<"costhetastar_: "<< costhetastar_ <<endl;
+//	    cout<<"(1-costhetastar_)^2 "<< ( 1 - costhetastar_ )*( 1 - costhetastar_ )<<endl;
 //	    cout<<"weight multiplier UP "<<weighMultUP<<", DW "<<weighMultDW<<endl;
-	    plot1D("h_costhetastar",       costhetastar,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
 	    if (lepCharge > 0) {
 	      evtweight_polWp_UP = evtweight_ * weighMultUP;
 	      evtweight_polWp_DN = evtweight_ * weighMultDW;
@@ -668,10 +667,25 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    evtweight_polW_UP2  = evtweight_ * weighMultUP2;
 	    evtweight_polW_DN2  = evtweight_ * weighMultDW2;
 	    
-	    plot1D("h_costhetastar_polW_UP",       costhetastar,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
-	    plot1D("h_costhetastar_polW_DN",       costhetastar,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
-	    plot1D("h_costhetastar_polW_UP2",       costhetastar,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
-	    plot1D("h_costhetastar_polW_DN2",       costhetastar,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar",       costhetastar_,       evtweight_, h_1d_global, ";Costhetastar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastar_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    if (lepCharge > 0) {
+	      plot1D("h_costhetastarPlus",       costhetastar_,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarPlus_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarPlus_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarPlus_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarPlus_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    }
+	    else if (lepCharge < 0) {
+	      plot1D("h_costhetastarMinus",       costhetastar_,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarMinus_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarMinus_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarMinus_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarMinus_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    }
 	  }
 
 	}
@@ -1218,13 +1232,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       ////////////////////////////////////
       onlyMakeFRplots_ = false;
 
-//      doSoftLepSRplots = false;
-//      doDoubleLepCRplots = false;
-//      doSoftLepCRplots = false;
-//      doHardDoubleLepCRplots = false;
-
       if (!passJetID) continue;
-      
+
+     
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	// fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
@@ -1738,6 +1748,30 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
+      //cosThetaStar plots
+      if(TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && prefix=="srLep" && !doMinimalPlots) {
+	if (costhetastar_ != 0 ) {
+	  plot1D("h_costhetastarCombined",       costhetastar_,       evtweight_, h_1d_global, ";Costhetastar", 200, -1, 1);
+	  plot1D("h_costhetastarCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarCombined_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarCombined_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	  if (softlepId_ < 0) {
+	    plot1D("h_costhetastarPlusCombined",       costhetastar_,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarPlusCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarPlusCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarPlusCombined_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarPlusCombined_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	  }
+	  else if (softlepId_ > 0) {
+	    plot1D("h_costhetastarMinusCombined",       costhetastar_,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarMinusCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarMinusCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarMinusCombined_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	    plot1D("h_costhetastarMinusCombined_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	  }
+	}
+      }
       if (prefix=="srLep") fillHistosSingleSoftLepton(SRVecLep.at(srN).srHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       else if (prefix=="srLepMu") fillHistosSingleSoftLepton(SRVecLep.at(srN).srMuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       else if (prefix=="srLepEl") fillHistosSingleSoftLepton(SRVecLep.at(srN).srElHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
@@ -1775,31 +1809,31 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values2["met"]         = 201; //dummy variable for validation region
   values2["mt"]          = softlepmt_;
 
-  //validation regions
-  for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
-    if(SRVecLep.at(srN).PassesSelection(values2)){
-      if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
-      if (softleppt_ > 25 && softleppt_ < 40 && t.met_pt > 180) {
-	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
-	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
-	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
-      }
-      else if (softleppt_ > 40 && softleppt_ < 55 && t.met_pt > 180) {
-	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
-	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
-	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
-      }
+  // //validation regions
+  // for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+  //   if(SRVecLep.at(srN).PassesSelection(values2)){
+  //     if (SRVecLep.at(srN).GetName().find("base") == std::string::npos) continue; //skip non baseline regions
+  //     if (softleppt_ > 25 && softleppt_ < 40 && t.met_pt > 180) {
+  // 	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+  // 	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+  // 	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate"+suffix);
+  //     }
+  //     else if (softleppt_ > 40 && softleppt_ < 55 && t.met_pt > 180) {
+  // 	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
+  // 	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
+  // 	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "Validate2"+suffix);
+  //     }
 
-    }
-  }
+  //   }
+  // }
   
   //maximum MET cut for CR1L
   if (t.met_pt < 60) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
       if(SRVecLep.at(srN).PassesSelection(values)){
-	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
-	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
-	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+  	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+  	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+  	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       }
     }
   }
@@ -1808,21 +1842,88 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   if (!doMinimalPlots) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
       if (SRVecLep.at(srN).GetName().find("baseAll") == std::string::npos) continue; //skip non baseline regions
-
+      
       //inclusive WJets region for polarization checks
-      bool passInclusiveW = softlepmt_ < 100 && t.met_pt > 50 && softleppt_ > 30; 
+      //compute wPt
+      float metX = t.met_pt * cos(t.met_phi);
+      float metY = t.met_pt * sin(t.met_phi);
+      float lepX = softleppt_ * cos(softlepphi_);
+      float lepY = softleppt_ * sin(softlepphi_);
+      float wX   = metX + lepX;
+      float wY   = metY + lepY;
+      float wPt  = sqrt(wX*wX + wY*wY);
+      bool passInclusiveW = softlepmt_ < 100 && softlepmt_ > 40 && softleppt_ > 30 && t.ht > 200 && wPt > 50; 
       if (passInclusiveW) {
 	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
 	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
 	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncW"+suffix);
+	
+	if (t.nBJet20 == 0) {
+	  if (prefix=="cr1L") {
+	    fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroB"+suffix);
+	  }
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroB"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroB"+suffix);
+	  if (wPt < 100) {
+	    if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt50"+suffix);
+	    else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt50"+suffix);
+	    else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt50"+suffix);
+	  }
+	  else if (wPt > 100 && wPt < 200) {
+	    if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt100"+suffix);
+	    else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt100"+suffix);
+	    else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt100"+suffix);
+	  }
+	  else if (wPt > 200) {
+	    if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt200"+suffix);
+	    else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt200"+suffix);
+	    else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWZeroBpt200"+suffix);
+	  }
+	}
+	else {
+	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWWithB"+suffix);
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWWithB"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWWithB"+suffix);
+	}
       }
       
       //stuff beyond here must pass baseline SR selection
       if(SRVecLep.at(srN).PassesSelection(values)){
+
+	      //baseline IncW plots & cosThetaStar
+	if(t.met_pt < 60){
+	  if (prefix=="cr1L") {
+	    fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWBase"+suffix);
+	    if (costhetastar_ != 0) {
+	      plot1D("h_costhetastarCombined",       costhetastar_,       evtweight_, h_1d_global, ";Costhetastar", 200, -1, 1);
+	      plot1D("h_costhetastarCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarCombined_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      plot1D("h_costhetastarCombined_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      if (softlepId_ < 0) {
+		plot1D("h_costhetastarPlusCombined",       costhetastar_,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarPlusCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarPlusCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarPlusCombined_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarPlusCombined_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      }
+	      else if (softlepId_ > 0) {
+		plot1D("h_costhetastarMinusCombined",       costhetastar_,       evtweight_, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarMinusCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarMinusCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarMinusCombined_polW_UP2",       costhetastar_,       evtweight_polW_UP2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+		plot1D("h_costhetastarMinusCombined_polW_DN2",       costhetastar_,       evtweight_polW_DN2, h_1d_global, ";CosThetaStar", 200, -1, 1);
+	      }
+	    }
+	  }
+	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWBase"+suffix);
+	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWBase"+suffix);
+	}
+      
 	//inclusive MET region (no cut required) 
-	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
-	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
+	// if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
+	// else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
+	// else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "HighMET"+suffix);
 	
 	// //mt2 cut region
 	// if (t.met_pt < 60 && t.sl_mt2 > 100) {
@@ -1831,19 +1932,19 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 	//   else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMT2"+suffix);
 	// }
 
-	//maximum and min MET cut for CR1L
-	if (t.met_pt < 60 && t.met_pt > 30) {
-	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
-	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
-	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
-	}
+	// //maximum and min MET cut for CR1L
+	// if (t.met_pt < 60 && t.met_pt > 30) {
+	//   if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
+	//   else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
+	//   else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MinMET"+suffix);
+	// }
 
-	//alternate MET region
-	if (t.met_pt < 100 && t.met_pt > 60) {
-  	  if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	  else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	  else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
-	}
+	// //alternate MET region
+	// if (t.met_pt < 100 && t.met_pt > 60) {
+  	//   if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	//   else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	//   else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "MaxMET"+suffix);
+	//	}
 	
       }//passesSelection
     }// SR loop    
@@ -2241,11 +2342,20 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
   float wY   = metY + lepY;
   float wPt  = sqrt(wX*wX + wY*wY);
   //float wPhi = (wX > 0) ? TMath::ATan(wY/wX) : (TMath::ATan(wY/wX) + TMath::Pi()/2);
+  //w pT reweighting
+  float evtweight_Wpt = evtweight_;
+  if (wPt > 250) {
+    float wPt_scale = 1.277-.001006*wPt; //function to rescale W based on fit
+    if (wPt > 700) wPt_scale = 1.277-.001006*700; //fere the Data/MC ratio at w Pt = 700 (max fit range)
+    evtweight_Wpt *= wPt_scale;
+  }
   plot1D("h_Wpt"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);  
   plot1D("h_Wpt_polW_UP"+s,      wPt,   evtweight_polW_UP, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
   plot1D("h_Wpt_polW_DN"+s,      wPt,   evtweight_polW_DN, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000); 
   plot1D("h_Wpt_polW_UP2"+s,      wPt,   evtweight_polW_UP2, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
-  plot1D("h_Wpt_polW_DN2"+s,      wPt,   evtweight_polW_DN2, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);    
+  plot1D("h_Wpt_polW_DN2"+s,      wPt,   evtweight_polW_DN2, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);  
+  plot1D("h_Wpt_scaleWpt"+s,      wPt,   evtweight_Wpt, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);  
+  plot1D("h_mtbins_scaleWpt"+s,            softlepmt_,   evtweight_Wpt, h_1d, ";M_{T} [GeV]", n_mt2bins, mt2bins);
  
     //polarization stuff
   if (!doMinimalPlots) {
@@ -2303,8 +2413,9 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       
       //polarization variables
       float cmsPol = Lp.Dot(Wp) / (wPt*wPt);
+      float cmsPol2 = Lp.Dot(Wp) / Wp.Dot(Wp);
       float atlasPol = Wp.Dot(Lrf3)/(wPt*Lrf3.Mag());
-      
+ 
       //some test plots to debug difference between cmsPol,cmsPol2
       plot1D("h_wMagDiff"+s,      wPt/Wp.Mag(),   evtweight_, h_1d, "wPt / Wp.Mag", 20, 0, 2);
       plot1D("h_wPhiDiff"+s,      TMath::ATan(wY/wX) - Wp.Phi(),   evtweight_, h_1d, "arctan(wx/wy) - Wp.Phi",  64, -3.2, 3.2);
@@ -2314,73 +2425,87 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       plot1D("h_lepPhi"+s,       softlepphi_,   evtweight_, h_1d, " lep Phi",  64, -3.2, 3.2);
       plot1D("h_metPhi"+s,       t.met_phi,   evtweight_, h_1d, "MET Phi",  64, -3.2, 3.2);
       
-      plot1D("h_cmsPol"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 26, -1.3, 1.3);
-      plot1D("h_cmsPol2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_cmsPol2"+s,      cmsPol2,   evtweight_, h_1d, "L_{P}", 52, -1.3, 1.3);
       plot1D("h_atlasPol"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
       if (softlepId_ > 0) {
-	plot1D("h_cmsPolMinus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Minus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolMinus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Minus"+s,      cmsPol2,   evtweight_, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolMinus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
       }
       if (softlepId_ < 0) {
-	plot1D("h_cmsPolPlus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Plus"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolPlus"+s,      cmsPol,   evtweight_, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Plus"+s,      cmsPol2,   evtweight_, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolPlus"+s,      atlasPol,   evtweight_, h_1d, "L_{P}", 20, -1, 1);
       }
+      //wPt reweighting
+      plot1D("h_cmsPol_scaleWpt"+s,      cmsPol,   evtweight_Wpt, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_cmsPol2_scaleWpt"+s,      cmsPol2,   evtweight_Wpt, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_atlasPol_scaleWpt"+s,      atlasPol,   evtweight_Wpt, h_1d, "L_{P}", 20, -1, 1);
+      if (softlepId_ > 0) {
+	plot1D("h_cmsPolMinus_scaleWpt"+s,      cmsPol,   evtweight_Wpt, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Minus_scaleWpt"+s,      cmsPol2,   evtweight_Wpt, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_atlasPolMinus_scaleWpt"+s,      atlasPol,   evtweight_Wpt, h_1d, "L_{P}", 20, -1, 1);
+      }
+      if (softlepId_ < 0) {
+	plot1D("h_cmsPolPlus_scaleWpt"+s,      cmsPol,   evtweight_Wpt, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Plus_scaleWpt"+s,      cmsPol2,   evtweight_Wpt, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_atlasPolPlus_scaleWpt"+s,      atlasPol,   evtweight_Wpt, h_1d, "L_{P}", 20, -1, 1);
+      }
       //W polarization UP
-      plot1D("h_cmsPol_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 26, -1.3, 1.3);
-      plot1D("h_cmsPol2_polW_UP"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_UP"+s,      cmsPol2,   evtweight_polW_UP, h_1d, "L_{P}", 52, -1.3, 1.3);
       plot1D("h_atlasPol_polW_UP"+s,      atlasPol,   evtweight_polW_UP, h_1d, "L_{P}", 20, -1, 1);
       if (softlepId_ > 0) {
-	plot1D("h_cmsPolMinus_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Minus_polW_UP"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolMinus_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Minus_polW_UP"+s,      cmsPol2,   evtweight_polW_UP, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolMinus_polW_UP"+s,      atlasPol,   evtweight_polW_UP, h_1d, "L_{P}", 20, -1, 1);
       }
       if (softlepId_ < 0) {
-	plot1D("h_cmsPolPlus_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Plus_polW_UP"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolPlus_polW_UP"+s,      cmsPol,   evtweight_polW_UP, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Plus_polW_UP"+s,      cmsPol2,   evtweight_polW_UP, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolPlus_polW_UP"+s,      atlasPol,   evtweight_polW_UP, h_1d, "L_{P}", 20, -1, 1);
       }
       //W polarization DN
-      plot1D("h_cmsPol_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 26, -1.3, 1.3);
-      plot1D("h_cmsPol2_polW_DN"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_DN"+s,      cmsPol2,   evtweight_polW_DN, h_1d, "L_{P}", 52, -1.3, 1.3);
       plot1D("h_atlasPol_polW_DN"+s,      atlasPol,   evtweight_polW_DN, h_1d, "L_{P}", 20, -1, 1);
       if (softlepId_ > 0) {
-	plot1D("h_cmsPolMinus_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Minus_polW_DN"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolMinus_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Minus_polW_DN"+s,      cmsPol2,   evtweight_polW_DN, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolMinus_polW_DN"+s,      atlasPol,   evtweight_polW_DN, h_1d, "L_{P}", 20, -1, 1);
       }
       if (softlepId_ < 0) {
-	plot1D("h_cmsPolPlus_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Plus_polW_DN"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolPlus_polW_DN"+s,      cmsPol,   evtweight_polW_DN, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Plus_polW_DN"+s,      cmsPol2,   evtweight_polW_DN, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolPlus_polW_DN"+s,      atlasPol,   evtweight_polW_DN, h_1d, "L_{P}", 20, -1, 1);
       }
       //W polarization UP2
-      plot1D("h_cmsPol_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 26, -1.3, 1.3);
-      plot1D("h_cmsPol2_polW_UP2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP2, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_UP2"+s,      cmsPol2,   evtweight_polW_UP2, h_1d, "L_{P}", 52, -1.3, 1.3);
       plot1D("h_atlasPol_polW_UP2"+s,      atlasPol,   evtweight_polW_UP2, h_1d, "L_{P}", 20, -1, 1);
       if (softlepId_ > 0) {
-	plot1D("h_cmsPolMinus_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Minus_polW_UP2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolMinus_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Minus_polW_UP2"+s,      cmsPol2,   evtweight_polW_UP2, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolMinus_polW_UP2"+s,      atlasPol,   evtweight_polW_UP2, h_1d, "L_{P}", 20, -1, 1);
       }
       if (softlepId_ < 0) {
-	plot1D("h_cmsPolPlus_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Plus_polW_UP2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_UP2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolPlus_polW_UP2"+s,      cmsPol,   evtweight_polW_UP2, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Plus_polW_UP2"+s,      cmsPol2,   evtweight_polW_UP2, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolPlus_polW_UP2"+s,      atlasPol,   evtweight_polW_UP2, h_1d, "L_{P}", 20, -1, 1);
       }
       //W polarization DN2
-      plot1D("h_cmsPol_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 26, -1.3, 1.3);
-      plot1D("h_cmsPol2_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 26, -1.3, 1.3);
+      plot1D("h_cmsPol_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 52, -1.3, 1.3);
+      plot1D("h_cmsPol2_polW_DN2"+s,      cmsPol2,   evtweight_polW_DN2, h_1d, "L_{P}", 52, -1.3, 1.3);
       plot1D("h_atlasPol_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
       if (softlepId_ > 0) {
-	plot1D("h_cmsPolMinus_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Minus_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolMinus_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Minus_polW_DN2"+s,      cmsPol2,   evtweight_polW_DN2, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolMinus_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
       }
       if (softlepId_ < 0) {
-	plot1D("h_cmsPolPlus_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
-	plot1D("h_cmsPol2Plus_polW_DN2"+s,      TMath::Cos(TMath::ATan(wY/wX) - softlepphi_) * softleppt_ / wPt,   evtweight_polW_DN2, h_1d, "L_{P}", 13, 0, 1.3);
+	plot1D("h_cmsPolPlus_polW_DN2"+s,      cmsPol,   evtweight_polW_DN2, h_1d, "L_{P}", 52, -1.3, 1.3);
+	plot1D("h_cmsPol2Plus_polW_DN2"+s,      cmsPol2,   evtweight_polW_DN2, h_1d, "L_{P}", 52, -1.3, 1.3);
 	plot1D("h_atlasPolPlus_polW_DN2"+s,      atlasPol,   evtweight_polW_DN2, h_1d, "L_{P}", 20, -1, 1);
       }
       //additional w-polarization variation plots
@@ -2392,6 +2517,31 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       plot1D("h_leppt_polW_DN"+s,      softleppt_,   evtweight_polW_DN, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
       plot1D("h_leppt_polW_UP2"+s,      softleppt_,   evtweight_polW_UP2, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
       plot1D("h_leppt_polW_DN2"+s,      softleppt_,   evtweight_polW_DN2, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
+      //cosThetaStar
+      if (costhetastar_ != 0) {
+	plot1D("h_costhetastar"+s,       costhetastar_,       evtweight_, h_1d, ";Costhetastar", 200, -1, 1);
+	plot1D("h_costhetastar_scaleWpt"+s,       costhetastar_,       evtweight_Wpt, h_1d, ";Costhetastar", 200, -1, 1);
+	plot1D("h_costhetastar_polW_UP"+s,       costhetastar_,       evtweight_polW_UP, h_1d, ";CosThetaStar", 200, -1, 1);
+	plot1D("h_costhetastar_polW_DN"+s,       costhetastar_,       evtweight_polW_DN, h_1d, ";CosThetaStar", 200, -1, 1);
+	plot1D("h_costhetastar_polW_UP2"+s,       costhetastar_,       evtweight_polW_UP2, h_1d, ";CosThetaStar", 200, -1, 1);
+	plot1D("h_costhetastar_polW_DN2"+s,       costhetastar_,       evtweight_polW_DN2, h_1d, ";CosThetaStar", 200, -1, 1);
+	if (softlepId_ < 0) {
+	  plot1D("h_costhetastarPlus"+s,       costhetastar_,       evtweight_, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarPlus_scaleWpt"+s,       costhetastar_,       evtweight_Wpt, h_1d, ";Costhetastar", 200, -1, 1);
+	  plot1D("h_costhetastarPlus_polW_UP"+s,       costhetastar_,       evtweight_polW_UP, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarPlus_polW_DN"+s,       costhetastar_,       evtweight_polW_DN, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarPlus_polW_UP2"+s,       costhetastar_,       evtweight_polW_UP2, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarPlus_polW_DN2"+s,       costhetastar_,       evtweight_polW_DN2, h_1d, ";CosThetaStar", 200, -1, 1);
+	}
+	else if (softlepId_ > 0) {
+	  plot1D("h_costhetastarMinus"+s,       costhetastar_,       evtweight_, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarMinus_scaleWpt"+s,       costhetastar_,       evtweight_Wpt, h_1d, ";Costhetastar", 200, -1, 1);
+	  plot1D("h_costhetastarMinus_polW_UP"+s,       costhetastar_,       evtweight_polW_UP, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarMinus_polW_DN"+s,       costhetastar_,       evtweight_polW_DN, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarMinus_polW_UP2"+s,       costhetastar_,       evtweight_polW_UP2, h_1d, ";CosThetaStar", 200, -1, 1);
+	  plot1D("h_costhetastarMinus_polW_DN2"+s,       costhetastar_,       evtweight_polW_DN2, h_1d, ";CosThetaStar", 200, -1, 1);
+	}
+      }
     }
     
     if (t.met_pt < 90 || softleppt_ < 20)  plot1D("h_Wpt90"+s,      wPt,   evtweight_, h_1d, ";p_{T}(l,MET) [GeV]", 200, 0, 1000);
