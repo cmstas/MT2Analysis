@@ -55,10 +55,6 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_crMConelep"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbinsOnelep");    
   histMap["h_srMConelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsOnelep");  
   histMap["h_crData"]         = (TH1D*) fData->Get("cr1L"+srName+"/h_mtbins");
-  //kinematic histograms 
-  histMap["h_nJet30Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nJet30Onelep"); 
-  histMap["h_nBJet20Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nBJet20Onelep"); 
-  histMap["h_categoryBOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_categoryBOnelep");  
   //W polarization histograms
   histMap["h_crMConelep_polW_UP"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_polW_UPOnelep");    
   histMap["h_srMConelep_polW_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_UPOnelep");
@@ -81,7 +77,13 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   //Wpt histograms
   histMap["h_crMConelep_scaleWpt"]     = (TH1D*) fMC->Get("cr1L"+srName+"/h_mtbins_scaleWptOnelep");    
   histMap["h_srMConelep_scaleWpt"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_scaleWptOnelep");
-
+  
+  //kinematic histograms 
+  std::map<string, TH1D*> histMapKin;
+  histMapKin["h_nJet30Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nJet30Onelep"); 
+  histMapKin["h_nBJet20Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nBJet20Onelep"); 
+  histMapKin["h_categoryBOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_categoryBOnelep");
+  
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
     if (iter->first.find("Int") != std::string::npos) continue;
@@ -240,12 +242,22 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   }//loop over bins
 
   //renormalize kinematic hists to prediction yield
-  float predInt = histMap["h_pred"]->Integral(0,-1);
-  float srMCInt = histMap["h_nJet30Onelep"]->Integral(0,-1);
+  double prefitErr = 0;
+  float predInt = histMap["h_predAddErr"]->IntegralAndError(0,-1,prefitErr);
+  float prefitRelErr = prefitErr/predInt;
+  float srMCInt = histMapKin["h_nJet30Onelep"]->Integral(0,-1);
   float scaleKin = predInt/srMCInt;
-  histMap["h_nJet30Onelep"]->Scale(scaleKin);
-  histMap["h_nBJet20Onelep"]->Scale(scaleKin);
-  histMap["h_categoryBOnelep"]->Scale(scaleKin);
+  histMapKin["h_nJet30Onelep"]->Scale(scaleKin);
+  histMapKin["h_nBJet20Onelep"]->Scale(scaleKin);
+  histMapKin["h_categoryBOnelep"]->Scale(scaleKin);
+  //assign errors
+  for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
+    if (!iter->second) continue;
+    for (unsigned int ibin = 0; ibin < iter->second->GetSize(); ibin++) {
+      float binError = prefitRelErr * iter->second->GetBinContent(ibin);
+      iter->second->SetBinError(ibin,binError);
+    }
+  }
   
   //write hists to output file
   cout << "Saving hists for " << dir_name << "..." << endl;
@@ -253,6 +265,10 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   TDirectory* dir = fOut->mkdir(dir_name.c_str());
   dir->cd();
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
+    if (iter->second) iter->second->Write();
+    delete iter->second;
+  }
+  for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
     if (iter->second) iter->second->Write();
     delete iter->second;
   }
