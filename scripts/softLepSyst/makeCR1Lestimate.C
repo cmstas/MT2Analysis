@@ -229,8 +229,8 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
     double binErrSq = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkMT_err * binkMT_err;
     float mtBinErr = 0;
     if (ibin == 1) mtBinErr = 0;
-    else if (ibin == 2) mtBinErr = 0.1;
-    else if (ibin == 3) mtBinErr = 0.2;
+    else if (ibin == 2) mtBinErr = 0.15;
+    else if (ibin == 3) mtBinErr = 0.30;
     double binErrSqAdd = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkMT_err * binkMT_err + pow(0.2,2) + pow(mtBinErr,2);
 
     //set bin content/error
