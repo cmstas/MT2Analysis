@@ -1526,13 +1526,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   savePlotsDir(h_1d_global,outfile_,"");
   savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
-
+  
   if (saveSoftLplots) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
       if(!SRVecLep.at(srN).srHistMap.empty()){
 	cout<<"Saving srLep"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).srHistMap, outfile_, ("srLep"+SRVecLep.at(srN).GetName()).c_str());
       }
+      // if(!SRVecLep.at(srN).ssr1HistMap.empty()) savePlotsDir(SRVecLep.at(srN).ssr1HistMap, outfile_, "srLepSSRZeroB");
+      // if(!SRVecLep.at(srN).ssr2HistMap.empty()) savePlotsDir(SRVecLep.at(srN).ssr2HistMap, outfile_, "srLepSSRWithB");
+      // if(!SRVecLep.at(srN).ssr3HistMap.empty()) savePlotsDir(SRVecLep.at(srN).ssr3HistMap, outfile_, "srLepSSRCompStop");
+      // if(!SRVecLep.at(srN).ssr4HistMap.empty()) savePlotsDir(SRVecLep.at(srN).ssr4HistMap, outfile_, "srLepSSRIsr");
     }
   }
   if (saveSoftLMuplots) {
@@ -1556,7 +1560,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if(!SRVecLep.at(srN).cr1LHistMap.empty()){
 	cout<<"Saving cr1L"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).cr1LHistMap, outfile_, ("cr1L"+SRVecLep.at(srN).GetName()).c_str());
-      }
+      }      
+      // if(!SRVecLep.at(srN).scr1L1HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr1L1HistMap, outfile_, "cr1LSSRZeroB");
+      // if(!SRVecLep.at(srN).scr1L2HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr1L2HistMap, outfile_, "cr1LSSRWithB");
+      // if(!SRVecLep.at(srN).scr1L3HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr1L3HistMap, outfile_, "cr1LSSRCompStop");
+      // if(!SRVecLep.at(srN).scr1L4HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr1L4HistMap, outfile_, "cr1LSSRIsr");
     }
   }
   if (save1Lmuplots) {
@@ -1581,6 +1589,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	cout<<"Saving cr2L"<< SRVecLep.at(srN).GetName() <<endl;
         savePlotsDir(SRVecLep.at(srN).cr2LHistMap, outfile_, ("cr2L"+SRVecLep.at(srN).GetName()).c_str());
       }
+      // if(!SRVecLep.at(srN).scr2L1HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr2L1HistMap, outfile_, "cr2LSSRZeroB");
+      // if(!SRVecLep.at(srN).scr2L2HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr2L2HistMap, outfile_, "cr2LSSRWithB");
+      // if(!SRVecLep.at(srN).scr2L3HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr2L3HistMap, outfile_, "cr2LSSRCompStop");
+      // if(!SRVecLep.at(srN).scr2L4HistMap.empty()) savePlotsDir(SRVecLep.at(srN).scr2L4HistMap, outfile_, "cr2LSSRIsr");
     }
   }
   if (saveZllplots) {
@@ -1775,6 +1787,18 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
       if (prefix=="srLep") fillHistosSingleSoftLepton(SRVecLep.at(srN).srHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       else if (prefix=="srLepMu") fillHistosSingleSoftLepton(SRVecLep.at(srN).srMuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
       else if (prefix=="srLepEl") fillHistosSingleSoftLepton(SRVecLep.at(srN).srElHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+      // //super-regions defined
+      // bool SSRZeroB = TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && t.nBJet20 == 0;
+      // bool SSRWithB = TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && t.nBJet20 > 0;
+      // bool SSRCompStop = SRVecLep.at(srN).GetName()=="1M" || SRVecLep.at(srN).GetName()=="J2L" || (SRVecLep.at(srN).GetName()=="MET" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="J1M" && softlepmt_ > 90);
+      // bool SSRIsr = (SRVecLep.at(srN).GetName()=="J1M" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="1M" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="MET" && softlepmt_ > 90);
+      // if (prefix=="srLep") {
+      // 	if (SSRZeroB) fillHistosSingleSoftLepton(SRVecLep.at(srN).ssr1HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRZeroB", suffix);
+      // 	if (SSRWithB) fillHistosSingleSoftLepton(SRVecLep.at(srN).ssr2HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRWithB", suffix);
+      // 	if (SSRCompStop) fillHistosSingleSoftLepton(SRVecLep.at(srN).ssr3HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRCompStop", suffix);
+      // 	if (SSRIsr) fillHistosSingleSoftLepton(SRVecLep.at(srN).ssr4HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRIsr", suffix);
+      // }
+      
       //break;//signal regions are orthogonal, event cannot be in more than one
     }
   }
@@ -1834,6 +1858,19 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   	if (prefix=="cr1L") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
   	else if (prefix=="cr1Lmu") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LmuHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
   	else if (prefix=="cr1Lel") fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LelHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+
+	// //super-regions defined
+	// bool SSRZeroB = TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && t.nBJet20 == 0;
+	// bool SSRWithB = TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && t.nBJet20 > 0;
+	// bool SSRCompStop = SRVecLep.at(srN).GetName()=="1M" || SRVecLep.at(srN).GetName()=="J2L" || (SRVecLep.at(srN).GetName()=="MET" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="J1M" && softlepmt_ > 90);
+	// bool SSRIsr = (SRVecLep.at(srN).GetName()=="J1M" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="1M" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="MET" && softlepmt_ > 90);
+	// if (prefix=="cr1L") {
+	//   if (SSRZeroB) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr1L1HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRZeroB", suffix);
+	//   if (SSRWithB) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr1L2HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRWithB", suffix);
+	//   if (SSRCompStop) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr1L3HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRCompStop", suffix);
+	//   if (SSRIsr) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr1L4HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRIsr", suffix);
+	// }
+      
       }
     }
   }
@@ -1997,6 +2034,19 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
       if (prefix=="cr2L") fillHistosDoubleLepton(SRVecLep.at(srN).cr2LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), suffix);
+
+      // //super-regions defined
+      // bool SSRZeroB = TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && t.nBJet20 == 0;
+      // bool SSRWithB = TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && t.nBJet20 > 0;
+      // bool SSRCompStop = SRVecLep.at(srN).GetName()=="1M" || SRVecLep.at(srN).GetName()=="J2L" || (SRVecLep.at(srN).GetName()=="MET" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="J1M" && softlepmt_ > 90);
+      // bool SSRIsr = (SRVecLep.at(srN).GetName()=="J1M" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="1M" && softlepmt_ > 90) || (SRVecLep.at(srN).GetName()=="MET" && softlepmt_ > 90);
+      // if (prefix=="cr2L") {
+      // 	if (SSRZeroB) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr2L1HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRZeroB", suffix);
+      // 	if (SSRWithB) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr2L2HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRWithB", suffix);
+      // 	if (SSRCompStop) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr2L3HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRCompStop", suffix);
+      // 	if (SSRIsr) fillHistosSingleSoftLepton(SRVecLep.at(srN).scr2L4HistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+"SSRIsr", suffix);
+      // }
+      
     }
   }
   
