@@ -704,6 +704,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // veto on forward jets
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
 
+      // veto Fastim events with crazy jets
+      if (isSignal_ && t.jet_failFSveto) continue; 
+      
       // check jet id for monojet
       passMonojetId_ = false;
       if (t.nJet30 >= 1) {
