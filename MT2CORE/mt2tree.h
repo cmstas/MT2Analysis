@@ -60,6 +60,7 @@ public :
    Float_t         mt2_gen;
    Float_t         jet1_pt;
    Float_t         jet2_pt;
+   Int_t           jet_failFSveto;
    Float_t         gamma_jet1_pt;
    Float_t         gamma_jet2_pt;
    Float_t         pseudoJet1_pt;
@@ -307,6 +308,8 @@ public :
    Float_t         jet_btagCSV[100];   //[njet]
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
+   Float_t         jet_chf[100];   //[njet]
+   Int_t           jet_FSveto[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
    Float_t         jet_qgl[100];   //[njet]
    Float_t         jet_area[100];   //[njet]
@@ -378,6 +381,7 @@ public :
    TBranch        *b_mt2_gen;   //!
    TBranch        *b_jet1_pt;   //!
    TBranch        *b_jet2_pt;   //!
+   TBranch        *b_jet_failFSveto;   //!
    TBranch        *b_gamma_jet1_pt;   //!
    TBranch        *b_gamma_jet2_pt;   //!
    TBranch        *b_pseudoJet1_pt;   //!
@@ -625,6 +629,8 @@ public :
    TBranch        *b_jet_btagCSV;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
+   TBranch        *b_jet_chf;   //!
+   TBranch        *b_jet_FSveto;   //!
    TBranch        *b_jet_mcFlavour;   //!
    TBranch        *b_jet_qgl;   //!
    TBranch        *b_jet_area;   //!
@@ -755,6 +761,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
    fChain->SetBranchAddress("jet1_pt", &jet1_pt, &b_jet1_pt);
    fChain->SetBranchAddress("jet2_pt", &jet2_pt, &b_jet2_pt);
+   fChain->SetBranchAddress("jet_failFSveto", &jet_failFSveto, &b_jet_failFSveto);
    fChain->SetBranchAddress("gamma_jet1_pt", &gamma_jet1_pt, &b_gamma_jet1_pt);
    fChain->SetBranchAddress("gamma_jet2_pt", &gamma_jet2_pt, &b_gamma_jet2_pt);
    fChain->SetBranchAddress("pseudoJet1_pt", &pseudoJet1_pt, &b_pseudoJet1_pt);
@@ -1002,6 +1009,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
+   fChain->SetBranchAddress("jet_chf", jet_chf, &b_jet_chf);
+   fChain->SetBranchAddress("jet_FSveto", jet_FSveto, &b_jet_FSveto);
    fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);
    fChain->SetBranchAddress("jet_qgl", jet_qgl, &b_jet_qgl);
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
