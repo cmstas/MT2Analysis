@@ -223,6 +223,14 @@ string getMETPlotLabelShort(TFile* f, std::string dir_str) {
 TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& names , const std::vector<TString>& purpose, const string& histname , const string& xtitle , const string& ytitle , bool logplot = true, bool doRatio = false , bool drawBand = false) {
       
   cout << "-- plotting histname: " << histname << endl;
+
+  TFile* fOut;
+  if (TString(histname).Contains("PostFitEstimates")){
+    fOut = new TFile("postFitYields.root","RECREATE");
+  }
+  else if (TString(histname).Contains("DataVsPrediction")){
+    fOut = new TFile("preFitYields.root","RECREATE");
+  }
   
   gStyle->SetOptStat("");
   gStyle->SetCanvasColor(0);
@@ -334,10 +342,16 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
       if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone("bgtot");
       else h_bgtot->Add(h);
     }
+    if (TString(histname).Contains("PostFitEstimates") || TString(histname).Contains("DataVsPrediction")){
+      fOut->cd();
+      TH1F* htemp = (TH1F*) h->Clone();
+      htemp->SetName(Form("h_bkg%d",i));
+      htemp->Write();
+    }
     bg_hists.push_back(h);
     bg_names.push_back(names.at(i).Data());
   }
-  
+      
   // loop backwards to add to legend
   for (int ibg = (int) bg_hists.size()-1; ibg >= 0; --ibg) {
     leg->AddEntry(bg_hists.at(ibg),getLegendName(bg_names.at(ibg)).c_str(),"f");
@@ -378,6 +392,16 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
 //  }
 
   
+  if (TString(histname).Contains("PostFitEstimates") || TString(histname).Contains("DataVsPrediction")){
+    fOut->cd();
+    TH1F* htempData = (TH1F*) data_hist->Clone();
+    THStack* htempStack = (THStack*) t->Clone();
+    htempData->SetName("h_data");
+    htempStack->SetName("h_total");
+    htempData->Write();
+    htempStack->Write();
+  }
+  
   float ymax = 0;
   if(h_bgtot) ymax = h_bgtot->GetMaximum();
   // also check signals for max val
@@ -414,7 +438,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   h_axes->Draw();
 
   t->Draw("hist same");
-  
+
   // drawband
   if ( drawBand ) {
     h_bgtot->SetMarkerSize(0);
@@ -532,9 +556,9 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-    h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
-    // ratiopad->SetLogy();
-//    h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
+    //h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
+    ratiopad->SetLogy();
+    h_axis_ratio->GetYaxis()->SetRangeUser(0.1,10.0);
     h_axis_ratio->GetYaxis()->SetTitle("Var/Central");
     if (TString(histname).Contains("Closure") || TString(histname).Contains("cr2Lpreds") ) {
       h_axis_ratio->GetYaxis()->SetTitle("/ MC (Truth)");
@@ -611,8 +635,13 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   gPad->Modified();
   gPad->Update();
   
-    can->Print(Form("plots/%s.pdf",canvas_name.Data()));
-    //can->Print(Form("plots/%s.eps",canvas_name.Data()));
+  can->Print(Form("plots/%s.pdf",canvas_name.Data()));
+  //can->Print(Form("plots/%s.eps",canvas_name.Data()));
+
+  if (TString(histname).Contains("PostFitEstimates") || TString(histname).Contains("DataVsPrediction")){
+    can->Write();
+    fOut->Close();
+  }
   
   return can;
 }
@@ -1389,8 +1418,8 @@ void compareSoftLeptonsEstimatesToData(){
   
   // string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
   // string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
-  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may10/";
-  string input_dir2 = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may10/";
+  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
+  string input_dir2 = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
   
   //TFile* fake = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
   TFile* fake = new TFile("/home/users/gzevi/pred_FakeRate.root");
@@ -1429,15 +1458,15 @@ void compareSoftLeptonsEstimatesToData(){
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
   makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_Syst" ,  "" ,  "Entries" ,  true ,  true , true );
 
-  filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
-  filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
-  filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
-  filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
-  filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
+  // filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
+  // filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
+  // filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
+  // filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
+  // filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbins"); purpose.push_back("stack");
 
-  outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
-  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_StatOnly" ,  "" ,  "Entries" ,  true ,  true , true );
+  // outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
+  // histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
+  // makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_StatOnly" ,  "" ,  "Entries" ,  true ,  true , true );
 
   
   return;
@@ -1461,10 +1490,10 @@ void compareSoftLeptonsPostFitEstimates(){
   std::vector<TFile*> filesSR2;
   std::vector<TString> purpose2;
 
-  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may10/";
+  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
   string input_dir_postfit = "/nfs-5/users/mderdzinski/limits/MT2Analysis/limits/SignalScan/";
   
-  TFile* postFit = new TFile(Form("%s/mlfitORDERED.root",input_dir_postfit.c_str()));
+  TFile* postFit = new TFile(Form("%s/mlfitNominal.root",input_dir_postfit.c_str()));
   TFile* data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
   
   filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
@@ -1619,11 +1648,11 @@ void compareSoftLeptonsSRVariations(){
 }
 
 void compareSoftLeptons(){
-  //compareSoftLeptonsPostFitEstimates();
-  compareSoftLeptons1L2L();
+  compareSoftLeptonsPostFitEstimates();
+  //compareSoftLeptons1L2L();
   //compareSoftLeptonsClosure1L2L();
   //compareSoftLeptonsFake();
-  //compareSoftLeptonsEstimatesToData();
+  compareSoftLeptonsEstimatesToData();
   //compareSoftLeptonsSRVariations();
   
   return;
