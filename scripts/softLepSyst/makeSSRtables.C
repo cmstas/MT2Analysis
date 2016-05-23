@@ -32,12 +32,19 @@ void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
   double onelepErr = 0;
   double totalErr = 0;
   double dataErr = 0;
+  
+  double t24bdYield = 0;
+  double t24bdErr = 0;
+  double t5qqqqwwYield = 0;
+  double t5qqqqwwErr = 0;
 
   //load histograms
   TH1F* hFakes = (TH1F*) fIn->Get("h_bkg1")->Clone();
   TH1F* hDilep = (TH1F*) fIn->Get("h_bkg2")->Clone();
   TH1F* hOnelep = (TH1F*) fIn->Get("h_bkg3")->Clone();
   TH1F* hData = (TH1F*) fIn->Get("h_data")->Clone();
+  TH1F* hT24bd = (TH1F*) fIn->Get("h_sig4")->Clone();
+  TH1F* hT5qqqqww = (TH1F*) fIn->Get("h_sig5")->Clone();
   THStack* hStack = (THStack*) fIn->Get("h_total")->Clone();
   TH1F* hTotal = (TH1F*) hStack->GetStack()->Last()->Clone();
   
@@ -57,9 +64,32 @@ void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
     onelepYield += hOnelep->GetBinContent(srVec[i]);
     onelepErr += hOnelep->GetBinError(srVec[i]);
 
+    //t24bd
+    t24bdYield += hT24bd->GetBinContent(srVec[i]);
+    if (TString(regionTitle).Contains("Comp")){
+      float thisBinErr =  hT24bd->GetBinError(srVec[i]);
+      t24bdErr += thisBinErr/2; //half error is linearly added
+      t24bdErr = sqrt(t24bdErr*t24bdErr + thisBinErr/2 * thisBinErr/2); //half error is added in quad
+    }
+    else t24bdErr += hT24bd->GetBinError(srVec[i]);
+
+    //t5qqqqww
+    t5qqqqwwYield += hT5qqqqww->GetBinContent(srVec[i]);
+    if (TString(regionTitle).Contains("Comp")){
+      float thisBinErr =  hT5qqqqww->GetBinError(srVec[i]);
+      t5qqqqwwErr += thisBinErr/2; //half error is linearly added
+      t5qqqqwwErr = sqrt(t5qqqqwwErr*t5qqqqwwErr + thisBinErr/2 * thisBinErr/2); //half error is added in quad
+    }
+    else t5qqqqwwErr += hT5qqqqww->GetBinError(srVec[i]);
+
     //total
     totalYield += hTotal->GetBinContent(srVec[i]);
-    totalErr += hTotal->GetBinError(srVec[i]);
+    if (TString(regionTitle).Contains("Comp")){
+      float thisBinErr =  hTotal->GetBinError(srVec[i]);
+      totalErr += thisBinErr/2; //half error is linearly added
+      totalErr = sqrt(totalErr*totalErr + thisBinErr/2 * thisBinErr/2); //half error is added in quad
+    }
+    else totalErr += hTotal->GetBinError(srVec[i]);
     
     //data
     dataYield += hData->GetBinContent(srVec[i]);
@@ -85,6 +115,9 @@ void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
   std::cout <<  Form("Total SM Post-Fit & %.1f $\\pm$ %.1f \\\\",totalYield,totalErr) << endl;
   std::cout << "\\hline" << endl;
   std::cout <<  Form("Data & %.f \\\\",dataYield) << endl;
+  std::cout << "\\hline" << endl;
+  std::cout <<  Form("T2-4bd 275,235 & %.f $\\pm$ %.1f \\\\",t24bdYield,t24bdErr) << endl;
+  std::cout <<  Form("T5qqqqWW 1025,775 & %.f $\\pm$ %.1f \\\\",t5qqqqwwYield,t5qqqqwwErr) << endl;
   std::cout << "\\hline" << endl;
   std::cout << "\\end{tabular}" << endl;
 

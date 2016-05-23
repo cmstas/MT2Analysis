@@ -365,6 +365,12 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h->SetLineColor(2+i);
     h->SetLineWidth(2);
     //addOverflow(h); // Add Overflow
+    if (TString(histname).Contains("PostFitEstimates") || TString(histname).Contains("DataVsPrediction")){
+      fOut->cd();
+      TH1F* htemp = (TH1F*) h->Clone();
+      htemp->SetName(Form("h_sig%d",i));
+      htemp->Write();
+    }	
     sig_hists.push_back(h);
     sig_names.push_back(names.at(i));
     sig_purposes.push_back(purpose.at(i));
@@ -1428,7 +1434,8 @@ void compareSoftLeptonsEstimatesToData(){
   TFile* all = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
   TFile* data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
   TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
-//  TFile* T5qqqqWW = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str()));
+  TFile* T5qqqqWW = new TFile(Form("%s/1025_775_T5qqqqWW_modified.root",input_dir.c_str()));
+  //  TFile* T5qqqqWW = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str()));
   //  TFile* T5qqqqWW2 = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str()));
   TFile* TChiNeu = new TFile(Form("%s/TChiNeu_100_90.root",input_dir.c_str()));
   
@@ -1439,7 +1446,7 @@ void compareSoftLeptonsEstimatesToData(){
   filesSR.push_back(all);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("stack");
   filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
   //filesSR.push_back(TChiNeu);  legendNames.push_back("TChiNeu 100 90"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
-//  filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW_1025_775"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
+  //filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW_1025_775"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 //  filesSR.push_back(T5qqqqWW2);  legendNames.push_back("T5qqqqWW_1100_500"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 
   setRegions(regions);
@@ -1453,6 +1460,8 @@ void compareSoftLeptonsEstimatesToData(){
   filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
   filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsSyst"); purpose.push_back("stack");
   filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsSyst"); purpose.push_back("stack");
+  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd 275,235"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
+  filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW 1025,775"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
 
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
@@ -1648,7 +1657,7 @@ void compareSoftLeptonsSRVariations(){
 }
 
 void compareSoftLeptons(){
-  compareSoftLeptonsPostFitEstimates();
+  //compareSoftLeptonsPostFitEstimates();
   //compareSoftLeptons1L2L();
   //compareSoftLeptonsClosure1L2L();
   //compareSoftLeptonsFake();
