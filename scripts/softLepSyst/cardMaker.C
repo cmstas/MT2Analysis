@@ -411,13 +411,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (mt2bin == 1 && n_onelep > 0.) {
       // first bin needs to compensate normalization from the rest
       float increment = 0.;
-      for (int ibin=1; ibin<h_1lpred->GetNbinsX(); ibin++)
+      
+      for (int ibin=1; ibin<h_1lpred->GetNbinsX(); ibin++) 
 	increment += shape1L[ibin] * h_1lpred->GetBinContent(ibin);
       onelep_shape = 1. - increment/n_onelep;
       if (onelep_shape < 0) onelep_shape = 0.1; // protection against huge oscillations
     }
     else
-      onelep_shape = 1. + shape1L[mt2bin] * (mt2bin - 1);
+      onelep_shape = 1. + shape1L[mt2bin-1];
     //add to MC stat uncertainty in category-3
     if (doOnelepShape ==3){
       err_onelep_mcstat = sqrt(err_onelep_mcstat*err_onelep_mcstat + (1-onelep_shape)*(1-onelep_shape));
