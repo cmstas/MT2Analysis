@@ -71,7 +71,7 @@ const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -332,7 +332,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       //TRIGGER - check first to enable cuts
       HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
       HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
-      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_v"); 
+      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
       HLT_PFHT300_PFMET100  = passHLTTriggerPattern("HLT_PFHT300_PFMET100_v"); 
       HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); 
       HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
@@ -1274,34 +1274,36 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	  if (pt < 5.) continue;
 	  if (fabs(eta) > 2.4) continue;
 
-	  if (isFastsim) {
-	    // look up SF and vetoeff, by flavor
-	    weightStruct sf_struct_fullsim = getLepSFFromFile(pt, eta, pdgId);
-	    weightStruct sf_struct_fastsim = getLepSFFromFile_fastsim(pt, eta, pdgId);
-	    float sf = sf_struct_fullsim.cent * sf_struct_fastsim.cent;
-	    float vetoeff = getLepVetoEffFromFile_fastsim(pt, eta, pdgId);
-	    // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
-	    float vetoeff_cor = vetoeff * sf;
-	    float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
-	    weight_lepsf_0l *= (1. + cor_0l);
-	    float unc = (sf_struct_fullsim.up - sf_struct_fullsim.cent) + (sf_struct_fastsim.up - sf_struct_fastsim.cent);
-	    float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
-	    float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
-	    weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
-	    weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
-	  } // isFastsim
+	  if (applyLeptonSFs) {
+	    if (isFastsim) {
+	      // look up SF and vetoeff, by flavor
+	      weightStruct sf_struct_fullsim = getLepSFFromFile(pt, eta, pdgId);
+	      weightStruct sf_struct_fastsim = getLepSFFromFile_fastsim(pt, eta, pdgId);
+	      float sf = sf_struct_fullsim.cent * sf_struct_fastsim.cent;
+	      float vetoeff = getLepVetoEffFromFile_fastsim(pt, eta, pdgId);
+	      // apply SF to vetoeff, then correction for 0L will be (1 - vetoeff_cor) / (1 - vetoeff) - 1.
+	      float vetoeff_cor = vetoeff * sf;
+	      float cor_0l = ( (1. - vetoeff_cor) / (1. - vetoeff) ) - 1.;
+	      weight_lepsf_0l *= (1. + cor_0l);
+	      float unc = (sf_struct_fullsim.up - sf_struct_fullsim.cent) + (sf_struct_fastsim.up - sf_struct_fastsim.cent);
+	      float vetoeff_cor_unc_UP = vetoeff_cor * (1. + unc);
+	      float unc_UP_0l = ( (1. - vetoeff_cor_unc_UP) / (1. - vetoeff_cor) ) - 1.;
+	      weight_lepsf_0l_UP *= (1. + cor_0l + unc_UP_0l);
+	      weight_lepsf_0l_DN *= (1. + cor_0l - unc_UP_0l);
+	    } // isFastsim
 
-	  else { // fullsim
-	    // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
-	    weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
-	    float sf = sf_struct.cent;
-	    float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
-	    float unc = sf_struct.up - sf;
-	    float vetoeff_unc_UP = vetoeff * (1. + unc);
-	    float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
-	    weight_lepsf_0l_UP *= (1. + unc_UP_0l);
-	    weight_lepsf_0l_DN *= (1. - unc_UP_0l);
-	  }
+	    else { // fullsim
+	      // don't apply correction to 0L central value for fullsim: saw that the effect was negligible
+	      weightStruct sf_struct = getLepSFFromFile(pt, eta, pdgId);
+	      float sf = sf_struct.cent;
+	      float vetoeff = getLepVetoEffFromFile_fullsim(pt, eta, pdgId);
+	      float unc = sf_struct.up - sf;
+	      float vetoeff_unc_UP = vetoeff * (1. + unc);
+	      float unc_UP_0l = ( (1. - vetoeff_unc_UP) / (1. - vetoeff) ) - 1.;
+	      weight_lepsf_0l_UP *= (1. + unc_UP_0l);
+	      weight_lepsf_0l_DN *= (1. - unc_UP_0l);
+	    }
+	  } // if applyLeptonSFs
 	  
 	} // loop over gen leptons
       } // !isData && 0 veto leptons
@@ -1584,6 +1586,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       nBJet40 = 0;
       nBJet20csv = 0;    // counters for 2 different algorithms
       nBJet20mva = 0;
+      nBJet30csv = 0;    // counters for 2 different algorithms
+      nBJet30mva = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
       minMTBMet = 999999.;
@@ -1701,6 +1705,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             //CSVv2IVFM
             if(jet_btagCSV[njet] >= 0.800) {
               nBJet20csv++;
+	      if (jet_pt[njet] > 30.0) nBJet30csv++;
             }
             bool bJet = false;
             if(jet_btagMVA[njet] >= 0.185){
@@ -1710,6 +1715,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               bJet = true;
               p4sBJets.push_back(p4sCorrJets.at(iJet));
 
+	      if (jet_pt[njet] > 30.0) nBJet30mva++;
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -2339,6 +2345,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("nBJet20mva", &nBJet20mva );
     BabyTree_->Branch("nBJet25", &nBJet25 );
     BabyTree_->Branch("nBJet30", &nBJet30 );
+    BabyTree_->Branch("nBJet30csv", &nBJet30csv );
+    BabyTree_->Branch("nBJet30mva", &nBJet30mva );
     BabyTree_->Branch("nBJet40", &nBJet40 );
     BabyTree_->Branch("nJet30FailId", &nJet30FailId );
     BabyTree_->Branch("nJet100FailId", &nJet100FailId );
@@ -2688,6 +2696,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     nBJet20mva = -999;
     nBJet25 = -999;
     nBJet30 = -999;
+    nBJet30csv = -999;
+    nBJet30mva = -999;
     nBJet40 = -999;
     nJet30FailId = -999;
     nJet100FailId = -999;
