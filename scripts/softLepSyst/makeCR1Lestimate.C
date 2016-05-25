@@ -83,6 +83,10 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMapKin["h_nJet30Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nJet30Onelep"); 
   histMapKin["h_nBJet20Onelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_nBJet20Onelep"); 
   histMapKin["h_categoryBOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_categoryBOnelep");
+  histMapKin["h_metOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_metOnelep");
+  histMapKin["h_softlephtOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_softlephtOnelep");
+  histMapKin["h_lepptshortOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_lepptshortOnelep");
+  histMapKin["h_mtOnelep"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtOnelep");
   
   //fill Int histograms with integrated mtbins, i.e. event count
   for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -244,16 +248,15 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   //renormalize kinematic hists to prediction yield
   double prefitErr = 0;
   float predInt = histMap["h_predAddErr"]->IntegralAndError(0,-1,prefitErr);
-  float prefitRelErr = prefitErr/predInt;
+  float prefitRelErr = 0;
+  if (predInt) prefitRelErr = prefitErr/predInt;
   float srMCInt = histMapKin["h_nJet30Onelep"]->Integral(0,-1);
   float scaleKin = predInt/srMCInt;
-  histMapKin["h_nJet30Onelep"]->Scale(scaleKin);
-  histMapKin["h_nBJet20Onelep"]->Scale(scaleKin);
-  histMapKin["h_categoryBOnelep"]->Scale(scaleKin);
-  //assign errors
+  //scale and assign errors
   for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
     if (!iter->second) continue;
-    for (unsigned int ibin = 0; ibin < iter->second->GetSize(); ibin++) {
+    iter->second->Scale(scaleKin);
+    for (int ibin = 0; ibin < iter->second->GetSize(); ibin++) {
       float binError = prefitRelErr * iter->second->GetBinContent(ibin);
       iter->second->SetBinError(ibin,binError);
     }
@@ -276,6 +279,50 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   
   return 0;
   
+}
+
+void sumKinematicsForBaseline(TFile* fPred){ 
+  
+  //initialize kinematic histograms 
+  std::map<string, TH1D*> histMapKin;
+  histMapKin["h_nJet30Onelep"]      = (TH1D*) fPred->Get("srLepbaseAll/h_nJet30Onelep")->Clone(); 
+  histMapKin["h_nBJet20Onelep"]     = (TH1D*) fPred->Get("srLepbaseAll/h_nBJet20Onelep")->Clone(); 
+  histMapKin["h_categoryBOnelep"]   = (TH1D*) fPred->Get("srLepbaseAll/h_categoryBOnelep")->Clone();
+  histMapKin["h_metOnelep"]         = (TH1D*) fPred->Get("srLepbaseAll/h_metOnelep")->Clone();
+  histMapKin["h_softlephtOnelep"]   = (TH1D*) fPred->Get("srLepbaseAll/h_softlephtOnelep")->Clone();
+  histMapKin["h_lepptshortOnelep"]  = (TH1D*) fPred->Get("srLepbaseAll/h_lepptshortOnelep")->Clone();
+  histMapKin["h_mtOnelep"]          = (TH1D*) fPred->Get("srLepbaseAll/h_mtOnelep")->Clone();
+  for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
+    iter->second->Reset();
+  }
+    
+  TIter it(fPred->GetListOfKeys());
+  TKey* k;
+  while ((k = (TKey *)it())) {
+    std::string dir_name = k->GetTitle();
+    if(dir_name.find("srLep")==std::string::npos) continue; //to sum only signal regions
+    if(TString(dir_name).Contains("base")) continue; //to sum only non-baseline regions
+    for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
+      TString histName = TString(dir_name)+"/"+TString(iter->first);
+      TH1D* hTemp = (TH1D*) fPred->Get(histName);
+      if (hTemp) iter->second->Add(hTemp);
+    }
+  }
+
+  TDirectory * dir = (TDirectory*)fPred->Get("srLepbaseAll");
+  // if (dir == 0) {
+  //   dir = outfile_->mkdir(dirname.c_str());
+  // } 
+  dir->cd();
+  
+  //rename hists
+  for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
+    TString histName = TString(iter->first)+"Sum";  
+    iter->second->SetName(histName);
+    iter->second->Write();
+  }
+    
+  return;
 }
 
 //_______________________________________________________________________________
@@ -314,6 +361,8 @@ void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unb
     cout << "Calculating prediction for " << dir_name << "..." << endl;
     makeCR1Lpred( f_data , f_mc , f_mc_topUP, f_mc_wUP, f_out , dir_name );
   }
+
+  sumKinematicsForBaseline(f_out);
 
   return;
   
