@@ -5,6 +5,7 @@
 #include "TFile.h"
 #include "TH1D.h"
 #include "TH2.h"
+#include "TCanvas.h"
 
 struct weightStruct {
   float cent; // central
@@ -39,5 +40,15 @@ TH2D* h_muVetoEff_fastsim = 0;
 bool setVetoEffFile_fastsim(TString filename);
 float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
 
+TH2D* h_softelSF = 0;
+TH2D* h_softmuSF = 0;
+bool setSoftElSFfile(TString filename);
+bool setSoftMuSFfile(TString filename);
+TH2D* h_softelSF_fastsim = 0;
+TH2D* h_softmuSF_fastsim = 0;
+bool setSoftElSFfile_fastsim(TString filename);
+bool setSoftMuSFfile_fastsim(TString filename);
+weightStruct getSoftSF(float pt, float eta, int pdgId);
+weightStruct getSoftSF_fastsim(float pt, float eta, int pdgId);
 
 #endif

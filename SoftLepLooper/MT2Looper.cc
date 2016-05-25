@@ -49,10 +49,10 @@ std::string toString(float in){
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
 //   assuming here: 25 GeV binning, m1 from 0-2000, m2 from 0-2000
-//   in Loop, also account for 10 GeV binning from 0-1000 in T2-4bd scan
+//   in Loop, also account for 10 GeV binning from 0-1000 in T2-4bd scan --> binning is sometimes at the 10 and sometimes at the 5, so need to double it
 const int n_m1bins = 81;
 float m1bins[n_m1bins+1];
-const int n_m2bins = 81;
+const int n_m2bins = 161;
 float m2bins[n_m2bins+1];
 
 const int n_htbins = 5;
@@ -382,12 +382,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
     setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
     setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
+    setSoftElSFfile("../babymaker/lepsf/ElSoftSF.root");
+    setSoftMuSFfile("../babymaker/lepsf/MuSoftSF.root");
   }
   
   if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
     setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
     setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
     setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
+    setSoftElSFfile_fastsim("../babymaker/lepsf/lepeff_Ele.root");
+    setSoftMuSFfile_fastsim("../babymaker/lepsf/lepeff_Mu.root");
   }
 
   // set up signal binning
@@ -580,22 +584,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
+
+	// old MT2 stuff
 //MT2	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
 //MT2	  fillLepCorSRfastsim();
 //MT2	  evtweight_ *= (1. + cor_lepeff_sr_);
 //MT2	}
 //MT2	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
 	
-	// always apply SF (need to add the Fastsim ones to babies)
-	// will have to revert later when using UP ar DN variations 
-	if (applyLeptonSF) {
-	  evtweight_ *= t.weight_lepsf;
-	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
-	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
-	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
 
-	}
-
+	
 	if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
 	  if (!isSignal_) { 
 	    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
@@ -956,7 +954,38 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	
       } // find lost lepton if (!t.isData && foundsoftlep && !foundhardlep)
 
-      // Scale factors (and uncertainties) for SR events with a lost lepton
+	// Scale Factor plan for found leptons:
+	// 1. For tight soft leptons, need to use OWN scale factors (+ own Fastsim SFs) --> This affects SR, but also CR2L (CR2L is complicated, need both central and own SFs)
+	// 2. For loose soft leptons, or hard leptons, can use central scale factors (which already include central Fastsim SFs)
+	// 3. For lost leptons, use central scale factors (which already include central central FastSim)
+      if ( !t.isData && ( applyLeptonSFfastsim || applyLeptonSF ) &&  (foundsoftlep || foundhardlep) ) {
+
+	bool fastsim = isSignal_ && applyLeptonSFfastsim;
+	if (foundsoftlep) {
+	  weightStruct weights = getSoftSF(softleppt_, softlepeta_, abs(softlepId_));
+	  evtweight_ *= weights.cent;
+	  evtweight_lepEffUp_ = evtweight_ / weights.cent * weights.up;
+	  evtweight_lepEffDn_ = evtweight_ / weights.cent * weights.dn;
+	  //cout<<"for soft with id/pt/eta "<<softlepId_<<"/"<<softleppt_<<"/"<<softlepeta_<<", lepSF is "<<weights.cent<<" +"<<weights.up<<" -"<< weights.dn<<endl;
+	  if (fastsim) {
+	    weightStruct weightsFS = getSoftSF_fastsim(softleppt_, softlepeta_, abs(softlepId_));
+	    evtweight_ *= weightsFS.cent;
+	    evtweight_lepEffUp_ = evtweight_ / weightsFS.cent * weightsFS.up;
+	    evtweight_lepEffDn_ = evtweight_ / weightsFS.cent * weightsFS.dn;
+	    //cout<<"And Fastsim lepSF is "<<weightsFS.cent<<" +"<<weightsFS.up<<" -"<< weightsFS.dn<<endl;
+	    //cout<<"Previous SF would have been "<< t.weight_lepsf<<", so we went from that to " << weightsFS.cent*weights.cent<<endl;
+	  }
+	}
+	else {
+	  evtweight_ *= t.weight_lepsf;
+	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
+	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
+	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
+	}
+      }
+
+
+      // Scale factors (and uncertainties) for SR events with a lost lepton: these use the standard variables in the babies (centrally produced)
       if ( !t.isData && (foundMissingLep || foundMissingLepFromTau) && ( applyLeptonSFfastsim || applyLeptonSF ) &&  foundsoftlep && !foundhardlep) {
 	  bool fastsim = isSignal_ && applyLeptonSFfastsim;
 	  float lostsf = 1.;
