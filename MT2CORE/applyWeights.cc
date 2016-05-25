@@ -259,6 +259,134 @@ float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId) {
   return 0.;
 }
 
+//_________________________________________________________
+bool setSoftElSFfile(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setSoftElSFfile: ERROR: Could not find scale factor file "<<filename<<std::endl;
+  TH2D* h_eff = (TH2D*)((TCanvas*) f->Get("p_sf_pt_vs_eta"))->GetPrimitive("h_sf_pt_vs_eta");
+  if (!h_eff) std::cout<<"applyWeights::setSoftElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
+  h_softelSF = (TH2D*) h_eff->Clone("h_softelSF");
+  h_softelSF->SetDirectory(0);
+  //h_elSF_fastsim->Print("all");
+  return true;
+}
+
+//_________________________________________________________
+bool setSoftMuSFfile(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) { std::cout<<"applyWeights::setSoftMuSFfile: ERROR: Could not find scale factor file "<<filename<<std::endl; return 0;}
+  TH2D* h_eff = (TH2D*)((TCanvas*) f->Get("p_sf_pt_vs_eta"))->GetPrimitive("h_sf_pt_vs_eta");
+  if (!h_eff) { std::cout<<"applyWeights::setSoftMuSFfile: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  h_softmuSF = (TH2D*) h_eff->Clone("h_softmuSF");
+  h_softmuSF->SetDirectory(0);
+  //h_muSF_fastsim->Print("all");
+  return true;
+}
+//_________________________________________________________
+bool setSoftElSFfile_fastsim(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setSoftElSFfile_fastsim: ERROR: Could not find scale factor file "<<filename<<std::endl;
+  TH2D* h_eff = (TH2D*) f->Get("EleEffPtEtaSF");
+  if (!h_eff) std::cout<<"applyWeights::setSoftElSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl;
+  h_softelSF_fastsim = (TH2D*) h_eff->Clone("h_softelSF_fastsim");
+  h_softelSF_fastsim->SetDirectory(0);
+  //h_elSF_fastsim->Print("all");
+  return true;
+}
+
+//_________________________________________________________
+bool setSoftMuSFfile_fastsim(TString filename){
+  TFile * f = new TFile(filename);
+  if (!f->IsOpen()) { std::cout<<"applyWeights::setSoftMuSFfile_fastsim: ERROR: Could not find scale factor file "<<filename<<std::endl; return 0;}
+  TH2D* h_eff = (TH2D*) f->Get("MuEffPtEtaSF");
+  if (!h_eff) { std::cout<<"applyWeights::setSoftMuSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
+  h_softmuSF_fastsim = (TH2D*) h_eff->Clone("h_softmuSF_fastsim");
+  h_softmuSF_fastsim->SetDirectory(0);
+  //h_muSF_fastsim->Print("all");
+  return true;
+}
+
+//_________________________________________________________
+weightStruct getSoftSF(float pt, float eta, int pdgId) {
+
+  weightStruct weights;
+
+  if(!h_softelSF || !h_softmuSF) {
+    std::cout << "applyWeights::getSoftSF: ERROR: missing input hists" << std::endl;
+    return weights;
+  }
+
+  float pt_cutoff = std::max(5.1,std::min(20.,double(pt)));
+
+  if (abs(pdgId) == 11) {
+    int binx = h_softelSF->GetXaxis()->FindBin(fabs(eta));
+    int biny = h_softelSF->GetYaxis()->FindBin(pt_cutoff);
+    float central = h_softelSF->GetBinContent(binx,biny);
+    float err  = 0.05; 
+    if (pt_cutoff < 10.) err = 0.20;
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.5 || central < 0.5) 
+      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+  else if (abs(pdgId) == 13) {
+    int binx = h_softmuSF->GetXaxis()->FindBin(fabs(eta));
+    int biny = h_softmuSF->GetYaxis()->FindBin(pt_cutoff);
+    float central = h_softmuSF->GetBinContent(binx,biny);
+    float err  = 0.05; 
+    if (pt_cutoff < 10.) err = 0.10; 
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.5 || central < 0.5) 
+      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+
+  return weights;
+
+}
+
+//_________________________________________________________
+weightStruct getSoftSF_fastsim(float pt, float eta, int pdgId) {
+
+  weightStruct weights;
+
+  if(!h_softelSF_fastsim || !h_softmuSF_fastsim) {
+    std::cout << "applyWeights::getSoftSF: ERROR: missing input hists" << std::endl;
+    return weights;
+  }
+
+  float pt_cutoff = std::max(5.1,std::min(20.,double(pt)));
+
+  if (abs(pdgId) == 11) {
+    int binx = h_softelSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_softelSF_fastsim->GetYaxis()->FindBin(fabs(eta));
+    float central = h_softelSF_fastsim->GetBinContent(binx,biny);
+    float err  = 0.01; 
+    if (pt_cutoff < 10.) err = 0.02;
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.3 || central < 0.3) 
+      std::cout<<"STRANGE: Electron with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+  else if (abs(pdgId) == 13) {
+    int binx = h_softmuSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
+    int biny = h_softmuSF_fastsim->GetYaxis()->FindBin(fabs(eta));
+    float central = h_softmuSF_fastsim->GetBinContent(binx,biny);
+    float err  = 0.01; 
+    if (pt_cutoff < 10.) err = 0.02; 
+    weights.cent = central;
+    weights.up = central+err;
+    weights.dn = central-err;
+    if (central > 1.3 || central < 0.3) 
+      std::cout<<"STRANGE: Muon with pT/eta of "<<pt_cutoff<<"/"<<eta<<". SF is "<<weights.cent<<" pm "<<err<<std::endl;
+  }
+
+  return weights;
+}
+
 
 //_________________________________________________________
 weightStruct getBtagSF(float pt, float, int pdgId) {
