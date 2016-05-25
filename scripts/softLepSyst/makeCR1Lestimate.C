@@ -202,6 +202,15 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
   histMap["h_kMT"] = sameBin(histMap["h_crMC"], "h_kMT");
   histMap["h_kMT"]->Add(histMap["h_srMConelep"]);
   histMap["h_kMT"]->Scale(1/histMap["h_kMT"]->Integral(0,-1));
+  //special exception for monojet w/ soft b region
+  //get kMT from monojet w/ 0 b region
+  if (srName=="J2L") {
+    histMap["h_kMT"]->Reset();
+    TH1D* hTemp = (TH1D*) fMC->Get("srLepJ1L/h_mtbinsOnelep")->Clone();  
+    histMap["h_kMT"]->Add(hTemp);
+    histMap["h_kMT"]->Scale(1/histMap["h_kMT"]->Integral(0,-1)); 
+  }
+  
   
   //initialize pred histogram
   histMap["h_pred"] = sameBin(histMap["h_crMC"], "h_mtbins");
@@ -326,7 +335,7 @@ void sumKinematicsForBaseline(TFile* fPred){
 }
 
 //_______________________________________________________________________________
-void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may18/", string dataname = "data_Run2015CD"){
+void makeCR1Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may25/", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR1L.root";

@@ -1,10 +1,11 @@
 #!/bin/bash
 
-INDIR=../../SoftLepLooper/output/softLep_unblind_skim_may10/
+INDIR=../../SoftLepLooper/output/softLep_unblind_skim_may25/
 INDIRfake=../../SoftLepLooper/output/softLepFake/
 THISDIR=`pwd`
 
 DATAFILE=data_Run2015CD
+#DATAFILE=allBkg
 
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 

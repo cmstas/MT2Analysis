@@ -389,7 +389,7 @@ void sumKinematicsForBaseline(TFile* fPred){
 }
 
 //_______________________________________________________________________________
-void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may18", string dataname = "data_Run2015CD"){
+void makeCR2Lestimate(string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may25", string dataname = "data_Run2015CD"){
 
 
   string output_name = input_dir+"/pred_CR2L.root";
