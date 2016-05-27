@@ -384,7 +384,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double onelep_bTag = 1.2; // special for 7jets with b-tags
  
   // want this to be correlated either (1) among all bins or (2) for all bins sharing the same CR bin
-  TString name_onelep_shape = Form("onelep_shape_%d", doOnelepShape);
+  TString name_onelep_shape = "";//Form("onelep_shape_%d", doOnelepShape);
+  if (doOnelepShape == 1) name_onelep_shape = "onelep_shape_W";
+  else if (doOnelepShape == 2) name_onelep_shape = "onelep_shape_Top";
   TString name_onelep_crstat = Form("onelep_CRstat_%s_%s_%s_%s_%s", ht_str.c_str(), met_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
   TString name_onelep_mcstat = Form("onelep_MCstat_%s", channel.c_str());
   //TString name_onelep_alphaerr = Form("onelep_alpha_%s_%s_%s_%s", ht_str.c_str(), jet_str.c_str(), bjet_str.c_str(), bjethard_str.c_str());
