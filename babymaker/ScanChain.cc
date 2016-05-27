@@ -71,7 +71,7 @@ const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -127,7 +127,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/DCSONLY_json_160516_snt.txt";
+  const char* json_file = "jsons/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -298,8 +298,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     evt_id = sampleID(currentFile->GetTitle());
 
     // Get File Content
-    TFile f( currentFile->GetTitle() );
-    TTree *tree = (TTree*)f.Get("Events");
+    TFile* f = TFile::Open( currentFile->GetTitle() );
+    TTree *tree = (TTree*)f->Get("Events");
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
@@ -1599,6 +1599,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       gamma_nJet30FailId = 0;
       gamma_nJet100FailId = 0;
       gamma_nBJet20 = 0;
+      gamma_nBJet20csv = 0;
+      gamma_nBJet20mva = 0;
       gamma_nBJet25 = 0;
       gamma_nBJet30 = 0;
       gamma_nBJet40 = 0;
@@ -1842,8 +1844,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt30
+              if(jet_btagCSV[njet] >= 0.800){
+                  gamma_nBJet20csv++;
+              }
               if(jet_btagMVA[njet] >= 0.185) { // CombinedMVAv2
                 gamma_nBJet20++; 
+                gamma_nBJet20mva++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
                   gamma_nBJet30++;
@@ -2259,7 +2265,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     }//end loop on events in a file
 
     delete tree;
-    f.Close();
+    f->Close();
   }//end loop on files
 
   cout << "Processed " << nEventsTotal << " events" << endl;
@@ -2512,6 +2518,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("gamma_nJet30FailId", &gamma_nJet30FailId );
     BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
     BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
+    BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
+    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
     BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
     BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
     BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
@@ -2822,6 +2830,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     gamma_nJet30FailId = -999;
     gamma_nJet100FailId = -999;
     gamma_nBJet20 = -999;
+    gamma_nBJet20csv = -999;
+    gamma_nBJet20mva = -999;
     gamma_nBJet25 = -999;
     gamma_nBJet30 = -999;
     gamma_nBJet40 = -999;

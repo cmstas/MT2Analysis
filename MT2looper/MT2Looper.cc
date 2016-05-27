@@ -72,6 +72,7 @@ const float ptVbins[n_ptVbins+1] = {100, logstep(1), logstep(2), logstep(3), log
 RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
 RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
 
+bool verbose = false;
 bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
@@ -112,9 +113,10 @@ MT2Looper::~MT2Looper(){
 void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
-  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVecHcand =  getSignalRegionsMT2Higgs();
+  //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
+  SRVec =  getSignalRegionsICHEP(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
+  SRVecHcand =  getSignalRegionsMT2Higgs();
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -541,7 +543,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     f_weights->Close();
     delete f_weights;
   }
-
+  if (verbose) cout<<__LINE__<<endl;
   h_sig_nevents_ = 0;
   h_sig_avgweight_btagsf_ = 0;
   h_sig_avgweight_btagsf_heavy_UP_ = 0;
@@ -578,6 +580,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
+  if (verbose) cout<<__LINE__<<endl;
 
   if (doLepEffVars) {
     setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
@@ -590,7 +593,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
     setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
   }
-  
+    if (verbose) cout<<__LINE__<<endl;
+
   // set up signal binning
   if (sample.find("T2cc") != std::string::npos) {
     // 5 GeV binning up to 800 GeV
@@ -649,13 +653,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     
     // Use this to speed things up when not looking at genParticles
     //tree->SetBranchStatus("genPart_*", 0); 
+  if (verbose) cout<<__LINE__<<endl;
 
     t.Init(tree);
 
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-      //for( unsigned int event = 0; event < 10000; ++event) {
+    //      for( unsigned int event = 0; event < 10000; ++event) {
       
       t.GetEntry(event);
 
@@ -675,6 +680,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  if (nEventsTotal%100000==0) cout<<endl;
 	}
       }
+      if (verbose) cout<<__LINE__<<endl;
 
       //---------------------
       // skip duplicates -- needed when running on mutiple streams in data
@@ -686,26 +692,37 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  continue;
 	}
       }
+      if (verbose) cout<<__LINE__<<endl;
 
       //---------------------
       // basic event selection and cleaning
       //---------------------
-
-      if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
       
+      if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
+      if (verbose) cout<<__LINE__<<endl;
+
       if (t.nVert == 0) continue;
+      if (verbose) cout<<__LINE__<<endl;
 
       // MET filters (data and MC)
       if (!t.Flag_goodVertices) continue;
-      //if (!t.Flag_CSCTightHaloFilter) continue; // use txt files instead
+      if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
+      if (verbose) cout<<__LINE__<<endl;
       if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
+      if (verbose) cout<<__LINE__<<endl;
       if (!t.Flag_HBHENoiseFilter) continue;
-      if (!t.Flag_HBHEIsoNoiseFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
+      if (!t.Flag_HBHENoiseIsoFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
+      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      if (verbose) cout<<__LINE__<<endl;
+
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
 	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
 	continue;
       }
+      if (verbose) cout<<__LINE__<<endl;
 
       // Jet ID Veto
       bool passJetID = true;
@@ -721,6 +738,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // flag signal samples
       if (t.evt_id >= 1000) isSignal_ = true;
       else isSignal_ = false;
+      if (verbose) cout<<__LINE__<<endl;
 
       //if (isSignal_ && (t.GenSusyMScan1 != 1600 || t.GenSusyMScan2 != 0)) continue;
       
@@ -797,9 +815,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       for (int ijet = 0; ijet < t.njet; ++ijet) {
 	if (t.jet_pt[ijet] > 30. && fabs(t.jet_eta[ijet]) > 3.0) ++nJet30Eta3_;
       }
+      if (verbose) cout<<__LINE__<<endl;
 
       // veto on forward jets
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
+      if (verbose) cout<<__LINE__<<endl;
 
       // check jet id for monojet - don't apply to signal
       //  following ETH, just check leading jet (don't check if jet is central..)
@@ -969,10 +989,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  else fillHistosCRGJ("crgj", "Fake");
 	}
       }
-      
+      if (verbose) cout<<__LINE__<<endl;
+
       if (!passJetID) continue;
-      
+      if (verbose) cout<<__LINE__<<endl;
+
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
+	if (verbose) cout<<__LINE__<<endl;
+
 	// fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
 	// fillHistosSignalRegion("sr");
@@ -989,10 +1013,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doDYplots) {
         // saveDYplots = true;
+	// if (verbose) cout<<__LINE__<<endl;
         // fillHistosCRDY("crdy");
       }
       if (doRLplots) {
         // saveRLplots = true;
+	// if (verbose) cout<<__LINE__<<endl;
         // fillHistosCRRL("crrl");
       }
       if (doRLELplots && !doMinimalPlots) {
@@ -1005,6 +1031,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (doSLplots) {
         // saveSLplots = true;
+	// if (verbose) cout<<__LINE__<<endl;
         // fillHistosCRSL("crsl");
       }
       if (doSLMUplots && !doMinimalPlots) {
@@ -1016,8 +1043,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         // fillHistosCRSL("crslel");
       }
       if (doQCDplots) {
-        // saveQCDplots = true;
-        // fillHistosCRQCD("crqcd");
+        saveQCDplots = true;
+	if (verbose) cout<<__LINE__<<endl;
+        fillHistosCRQCD("crqcd");
       }
 
 
@@ -1188,7 +1216,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
 void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1209,7 +1237,7 @@ void MT2Looper::fillHistosSRBase() {
 
   // do monojet SRs
   bool passMonojet = false;
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMETNoMu90_PFMHTNoMu90 || t.HLT_PFHT350_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1238,7 +1266,7 @@ void MT2Looper::fillHistosSRBase() {
 void MT2Looper::fillHistosInclusive() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1268,7 +1296,7 @@ void MT2Looper::fillHistosInclusive() {
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1292,7 +1320,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   }
   
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMETNoMu90_PFMHTNoMu90 || t.HLT_PFHT350_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1318,7 +1346,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
   
   // first fill base region
   std::map<std::string, float> valuesBase;
@@ -1389,7 +1417,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMETNoMu90_PFMHTNoMu90 || t.HLT_PFHT350_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
 
     // first fill base region
     std::map<std::string, float> valuesBase_monojet;
@@ -1765,7 +1793,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT350_PFMET100 || t.HLT_PFMETNoMu90_PFMHTNoMu90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
   
   // topological regions
   std::map<std::string, float> values;
@@ -1786,7 +1814,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMETNoMu90_PFMHTNoMu90 || t.HLT_PFHT350_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
 
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
