@@ -77,15 +77,15 @@ bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
 // turn on to apply btag sf to central value
-bool applyBtagSF = true;
+bool applyBtagSF = false;
 // turn on to apply lepton sf to central value
-bool applyLeptonSF = true;
+bool applyLeptonSF = false;
 // turn on to apply reweighting to ttbar based on top pt
-bool applyTopPtReweight = true;
+bool applyTopPtReweight = false;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
-bool applyLeptonSFfastsim = true;
+bool applyLeptonSFfastsim = false;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = true;
+bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
@@ -93,13 +93,13 @@ bool applyJSON = false;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // get signal scan nevents from file
-bool doScanWeights = true;
+bool doScanWeights = false;
 // doesn't plot data for MT2 > 200 in signal regions
 bool doBlindData = false;
 // make variation histograms for tau efficiency
 bool doGenTauVars = false;
 // make variation histograms for e+mu efficiency
-bool doLepEffVars = true;
+bool doLepEffVars = false;
 // make only minimal hists needed for results
 bool doMinimalPlots = false;
 
@@ -756,7 +756,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 2.26;
+      const float lumi = 0.5893;
 
       evtweight_ = 1.;
 
@@ -893,6 +893,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // Variables for gamma+jets control region
       bool doGJplots = false;
+      // hack since the gjets babies have evt_id==-1 (DR_0p4 was added to the name and broke sampleID. need to fix)
+      if(sample=="gjets_ht"){
+          t.evt_id = 200;
+      }
       if (t.ngamma > 0) {
 	if (t.isData) {
 	  doGJplots = true;
@@ -929,7 +933,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
 	     && (fabs(t.zll_mass - 90) < 10 ) 
 	     && t.lep_pt[0] > 25 && t.lep_pt[1] > 20
-	     && (t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)
+	     && (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10)
 	     ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
@@ -946,10 +950,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if ( t.nlep == 1 && !isSignal_) {
 	if ( t.lep_pt[0] > 30 && fabs(t.lep_eta[0])<2.5 && t.nBJet20 == 0) { // raise threshold to avoid Ele23 in MC
 	  if (abs(t.lep_pdgId[0])==13) { // muons
-	    if (t.HLT_SingleMu)  doRLMUplots = true;
+	    if (!t.isData || t.HLT_SingleMu)  doRLMUplots = true;
 	  }
 	  if (abs(t.lep_pdgId[0])==11) { // electrons
-	    if ( (t.HLT_SingleEl )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
+	    if ( (!t.isData || t.HLT_SingleEl )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
 		 && t.lep_relIso03[0]<0.1 // tighter selection for electrons
 		 && t.lep_relIso03[0]*t.lep_pt[0]<5 // tighter selection for electrons
 		 && t.lep_tightId[0]>2
@@ -1464,7 +1468,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (t.ngamma==0) return;
 
   // trigger requirement
-  if (!t.HLT_Photon165_HE10) return;
+  if (t.isData && !t.HLT_Photon165_HE10) return;
   
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
