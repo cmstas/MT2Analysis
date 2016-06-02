@@ -4,8 +4,8 @@ make -j12
 
 # INDIR=/nfs-6/userdata/mt2/bemarsh_76X_test_skim
 # OUTDIR=output/bemarsh_76X_test_skim
-INDIR=/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
-OUTDIR=output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
+# INDIR=/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
+# OUTDIR=output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
 INDIR=/nfs-6/userdata/mt2/mt2Higgs
 OUTDIR=output/mt2Higgs
 LOGDIR=logs/
