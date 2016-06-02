@@ -111,6 +111,8 @@ bool doPrescaleWeight = false;
 bool doWpolarizationReweight = true;
 // turn on to make mtbins histograms with theory scale variations
 bool doRenormFactScaleReweight = true;
+// turn on to (only) make full PDF variation histograms
+bool doFullPDFVariations = false;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -1266,7 +1268,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
 
-     
+      
+      if (doFullPDFVariations) {
+	doSoftLepMuSRplots = false;
+	doSoftLepElSRplots = false;
+	doSoftLepMuCRplots = false;
+	doSoftLepElCRplots = false;
+	doHardDoubleLepCRplots = false;
+	doZllCRplots = false;
+      }
+      
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	// fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
 
@@ -1790,6 +1801,22 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
 
+  if (doFullPDFVariations) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(TString(SRVecLep.at(srN).GetName()).Contains("base")) continue; //skip baseline regions
+      if(SRVecLep.at(srN).PassesSelection(values)){
+	if (prefix=="srLep") {
+	  for(unsigned int i = 0; i < 110; i++){
+	    float evtweight_pdf = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[i];
+	    plot1D(Form("h_srLep_mtbinsPDFvar%d%s",i,suffix.c_str()), srN, evtweight_pdf, h_1d_global, "SR", 21, 0, 21);   
+	  }//loop over pdf variations
+	}
+      }
+    }
+    return;
+  }//doFullPDFVariations
+
+  
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
       //cosThetaStar plots
@@ -1865,6 +1892,23 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values2["met"]         = 201; //dummy variable for validation region
   values2["mt"]          = softlepmt_;
 
+  if (doFullPDFVariations) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(TString(SRVecLep.at(srN).GetName()).Contains("base")) continue; //skip baseline regions
+      if(SRVecLep.at(srN).PassesSelection(values)){
+	if (prefix=="cr1L") {
+	  for(unsigned int i = 0; i < 110; i++){
+	    float evtweight_pdf = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[i];
+	    plot1D(Form("h_cr1L_mtbinsPDFvar%d%s",i,suffix.c_str()), srN, evtweight_pdf, h_1d_global, "SR", 21, 0, 21);   
+	  }//loop over pdf variations
+	}
+      }
+    }
+    return;
+  }//doFullPDFVariations
+
+
+    
   // //validation regions
   // for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
   //   if(SRVecLep.at(srN).PassesSelection(values2)){
@@ -2052,6 +2096,21 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   values2["met"]         = 201; //dummy value for alt double lepton CR
   values2["mt"]          = softlepmt_;
 
+  if (doFullPDFVariations) {
+    for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
+      if(TString(SRVecLep.at(srN).GetName()).Contains("base")) continue; //skip baseline regions
+      if(SRVecLep.at(srN).PassesSelection(values)){
+	if (prefix=="cr2L") {
+	  for(unsigned int i = 0; i < 110; i++){
+	    float evtweight_pdf = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[i];
+	    plot1D(Form("h_cr2L_mtbinsPDFvar%d%s",i,suffix.c_str()), srN, evtweight_pdf, h_1d_global, "SR", 21, 0, 21);   
+	  }//loop over pdf variations
+	}
+      }
+    }
+    return;
+  }//doFullPDFVariations
+    
   //lepton triggered dilepCR
   bool passAltSelection = (t.HLT_SingleMu || t.HLT_SingleEl) && t.met_pt > 150;
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
