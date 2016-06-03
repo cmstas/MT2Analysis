@@ -615,33 +615,105 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 	}
 
-	if ( doWpolarizationReweight && !isSignal_ && (t.ngenLep + t.ngenTau == 1)) { // only for 1 W boson
+	if ( doWpolarizationReweight && !isSignal_ && ((t.ngenLep + t.ngenTau == 1) || (t.ngenLep + t.ngenTau == 2)) ) { // only for 1 W boson
 	  // Determine cosThetaStar	  
 	  //4vectors in transverse plane
 	  //sum gives "transverse W" vector
 	  bool foundTop = false;
 	  int lepCharge = 0;
+	  int lepCharge1 = 0;
+	  int lepCharge2 = 0;
 	  TLorentzVector Lvec(0,0,0,0);
 	  TLorentzVector Nvec(0,0,0,0);
 	  TLorentzVector Wvec(0,0,0,0); 
+	  TLorentzVector Lvec2(0,0,0,0);
+	  TLorentzVector Nvec2(0,0,0,0);
+	  TLorentzVector Wvec2(0,0,0,0); 
 	  TVector3 Wrf(0,0,0); //3vector to boost to W rest frame
 	  TLorentzVector Lrf(0,0,0,0); //4vector of lepton boosted to W rest frame
 	  int found = 0;
-	  costhetastar_ = 0;
+	  int lep1idx = -1;
+	  int lep2idx = -1;
+	  costhetastar_ = 999;
+	  float variation = foundTop ? 0.05 : 0.1;
 	  for ( int i = 0; i < t.ngenStat23; i++) {
 	    int ID = fabs(t.genStat23_pdgId[i]);
 	    if (t.genStat23_pt[i] > 5 && (ID==11 || ID==13 || ID==15)) {
-	      Lvec.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++; lepCharge = t.genStat23_charge[i];}
+	      if (Lvec.Pt() == 0) {Lvec.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++; lepCharge1 = t.genStat23_charge[i]; lep1idx = i;}
+	      else {Lvec2.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++; lepCharge2 = t.genStat23_charge[i]; lep2idx = i;}
+	    }
 	    if (t.genStat23_pt[i] > 5 && (ID==12 || ID==14 || ID==16)) {
-	      Nvec.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++;}
+	      if (Nvec.Pt() == 0) {Nvec.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++;}
+	      else {Nvec2.SetPtEtaPhiM(t.genStat23_pt[i],t.genStat23_eta[i],t.genStat23_phi[i],t.genStat23_mass[i]); found++;}
+	    }
 	    if (ID==6) foundTop = true;
 	  }
-	  if (found>1) {
-	    float variation = foundTop ? 0.05 : 0.1;
+
+	  if (t.nlep > 2) {
+	    //event will be veto'ed, too many leps anyways
+	    //do nothing
+	  }
+	  else if (found==2 && (t.ngenLep + t.ngenTau == 1)) {
 	    Wvec = Lvec+Nvec;
 	    Wrf = Wvec.BoostVector(); //boost vector to w rest frame
 	    Lrf = ROOT::Math::VectorUtil::boost(Lvec, -Wrf); // this need a minus sign because we need to invert the boost
 	    costhetastar_ = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
+	    lepCharge = lepCharge1;
+	  }
+	  else if (found==4 && (t.ngenLep + t.ngenTau == 2)) {
+	    //matching to find which gen lep is matched to a soft lep
+	    double minDR1 = 999;
+	    double minDR2 = 999;
+	    bool firstIsSoft = false;
+	    bool secondIsSoft = false;
+	    if (t.nlep == 1) { //soft lep SR with missing lep
+	      minDR1 = DeltaR(t.genStat23_eta[lep1idx], t.lep_eta[0], t.genStat23_phi[lep1idx], t.lep_phi[0]);
+	      minDR2 = DeltaR(t.genStat23_eta[lep2idx], t.lep_eta[0], t.genStat23_phi[lep2idx], t.lep_phi[0]);
+	    }
+	    else if (t.nlep == 2) { // CR2L with missing lep
+	      minDR1 =  DeltaR(t.genStat23_eta[lep1idx], t.lep_eta[1], t.genStat23_phi[lep1idx], t.lep_phi[1]);
+	      minDR2 =  DeltaR(t.genStat23_eta[lep2idx], t.lep_eta[1], t.genStat23_phi[lep2idx], t.lep_phi[1]);
+	    }
+
+	    
+	    if (minDR1 < 0.2 && minDR1 < minDR2) firstIsSoft = true;
+	    else if (minDR2 < 0.2 && minDR2 < minDR1 ) secondIsSoft = true;
+	    
+	    if (firstIsSoft && secondIsSoft) {
+	      //should never happen
+	    }
+	    else if (!firstIsSoft && !secondIsSoft) {
+
+	      // cerr << "WARNING: No gen lep matched to soft lep!" << endl;
+	      // cerr << "--nlep: " << t.nlep << endl;
+	      // cerr << "--nGenlep: " <<  t.ngenLep + t.ngenTau << endl;
+	      // cerr << "--found: " << found << endl;
+	      // cerr << "--lep0: " << t.lep_pt[0] << " lep0id: " << t.lep_pdgId[0] << " lep0eta: " << t.lep_eta[0] << " lep0phi: " << t.lep_phi[0] << " drMin: " << minDR1 <<endl;
+	      // cerr << "--lep1: " << t.lep_pt[1] << " lep1id: " << t.lep_pdgId[1] << " lep1eta: " << t.lep_eta[1] << " lep1phi: " << t.lep_phi[1] << " drMin: " << minDR2 <<endl;
+	      // cerr << "--genLep1: " << Lvec.Pt() << " genLep1id: " << t.genStat23_pdgId[lep1idx] <<" genLep1eta: " << Lvec.Eta() << " genLep1phi: " << Lvec.Phi() << endl;
+	      // cerr << "--genLep2: " << Lvec2.Pt() << " genLep2id: " << t.genStat23_pdgId[lep2idx] << " genLep2eta: " << Lvec2.Eta() << " genLep2phi: " << Lvec2.Phi() << endl;
+	    }
+	    else if (firstIsSoft) {
+	      Wvec = Lvec2+Nvec2;
+	      Wrf = Wvec.BoostVector(); //boost vector to w rest frame
+	      Lrf = ROOT::Math::VectorUtil::boost(Lvec2, -Wrf); // this need a minus sign because we need to invert the boost
+	      costhetastar_ = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
+	      lepCharge = lepCharge2;
+	    }
+	    else if (secondIsSoft) {
+	      Wvec = Lvec+Nvec;
+	      Wrf = Wvec.BoostVector(); //boost vector to w rest frame
+	      Lrf = ROOT::Math::VectorUtil::boost(Lvec, -Wrf); // this need a minus sign because we need to invert the boost
+	      costhetastar_ = TMath::Cos(Lrf.Angle(Wrf)); // need CosTheta with respect to boost vectordevo fare costheta rispetto al boost vector to get thetastar in helicity frame
+	      lepCharge = lepCharge1;
+	    }	    
+	  }
+	  else {
+	    // cerr << "WARNING: found doesn't match n gen leps!" << endl;
+	    // cerr << "nGen:"<< t.ngenLep + t.ngenTau << " nFound" << found << endl;
+	  }
+	  
+	  if (costhetastar_ != 999) {
 	    float weighMultUP = 1 + variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
 	    float weighMultDW = 1 - variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
 	    float weighMultUP2 = 1 + 2*variation*( 1 - costhetastar_ )*( 1 - costhetastar_ );
@@ -1821,7 +1893,7 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
     if(SRVecLep.at(srN).PassesSelection(values)){
       //cosThetaStar plots
       if(TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && prefix=="srLep" && !doMinimalPlots) {
-	if (costhetastar_ != 0 ) {
+	if (costhetastar_ != 999 ) {
 	  plot1D("h_costhetastarCombined",       costhetastar_,       evtweight_, h_1d_global, ";Costhetastar", 200, -1, 1);
 	  plot1D("h_costhetastarCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
 	  plot1D("h_costhetastarCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
@@ -2007,7 +2079,7 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
 	if(t.met_pt < 60){
 	  if (prefix=="cr1L") {
 	    fillHistosSingleSoftLepton(SRVecLep.at(srN).cr1LHistMap, SRVecLep.at(srN).GetNumberOfMT2Bins(), SRVecLep.at(srN).GetMT2Bins(), prefix+SRVecLep.at(srN).GetName(), "IncWBase"+suffix);
-	    if (costhetastar_ != 0) {
+	    if (costhetastar_ != 999) {
 	      plot1D("h_costhetastarCombined",       costhetastar_,       evtweight_, h_1d_global, ";Costhetastar", 200, -1, 1);
 	      plot1D("h_costhetastarCombined_polW_UP",       costhetastar_,       evtweight_polW_UP, h_1d_global, ";CosThetaStar", 200, -1, 1);
 	      plot1D("h_costhetastarCombined_polW_DN",       costhetastar_,       evtweight_polW_DN, h_1d_global, ";CosThetaStar", 200, -1, 1);
@@ -2348,7 +2420,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     }
   }
 
-  if ( !t.isData && doWpolarizationReweight && !isSignal_ && (t.ngenLep + t.ngenTau == 1)) { // only for 1 W boson
+  if ( !t.isData && doWpolarizationReweight && !isSignal_ && ((t.ngenLep + t.ngenTau == 1) || (t.ngenLep + t.ngenTau == 2)) ) {
     plot1D("h_mtbins_polWp_UP"+s,       softlepmt_,   evtweight_polWp_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mtbins_polWp_DN"+s,       softlepmt_,   evtweight_polWp_DN, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mtbins_polWm_UP"+s,       softlepmt_,   evtweight_polWm_UP, h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins); 
@@ -2659,7 +2731,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
       plot1D("h_leppt_polW_UP2"+s,      softleppt_,   evtweight_polW_UP2, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
       plot1D("h_leppt_polW_DN2"+s,      softleppt_,   evtweight_polW_DN2, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
       //cosThetaStar
-      if (costhetastar_ != 0) {
+      if (costhetastar_ != 999) {
 	plot1D("h_costhetastar"+s,       costhetastar_,       evtweight_, h_1d, ";Costhetastar", 200, -1, 1);
 	plot1D("h_costhetastar_scaleWpt"+s,       costhetastar_,       evtweight_Wpt, h_1d, ";Costhetastar", 200, -1, 1);
 	plot1D("h_costhetastar_polW_UP"+s,       costhetastar_,       evtweight_polW_UP, h_1d, ";CosThetaStar", 200, -1, 1);
