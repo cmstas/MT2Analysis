@@ -245,7 +245,7 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
     else if (ibin == 2) mtBinErr = 0.15;
     else if (ibin == 3) mtBinErr = 0.30;
     double binErrSqAdd = binDataCR_err * binDataCR_err + binRatio_err * binRatio_err + binPurity_err * binPurity_err + binkMT_err * binkMT_err + pow(0.2,2) + pow(mtBinErr,2);
-
+  
     //set bin content/error
     histMap["h_pred"]->SetBinContent(ibin, binPred);
     histMap["h_pred"]->SetBinError(ibin, binPred*sqrt(binErrSq));   
@@ -253,12 +253,11 @@ int makeCR1Lpred( TFile* fData , TFile* fMC , TFile* fMC_topUP , TFile* fMC_wUP 
     histMap["h_predAddErr"]->SetBinError(ibin, binPred*sqrt(binErrSqAdd)); //additional 20% error     
 
   }//loop over bins
-
+  
   //renormalize kinematic hists to prediction yield
-  double prefitErr = 0;
-  float predInt = histMap["h_predAddErr"]->IntegralAndError(0,-1,prefitErr);
+  float predInt = histMap["h_pred"]->Integral(0,-1);
   float prefitRelErr = 0;
-  if (predInt) prefitRelErr = prefitErr/predInt;
+  if (predInt) prefitRelErr = histMap["h_pred"]->GetBinError(1)/histMap["h_pred"]->GetBinContent(1);
   float srMCInt = histMapKin["h_nJet30Onelep"]->Integral(0,-1);
   float scaleKin = predInt/srMCInt;
   //scale and assign errors
@@ -318,6 +317,28 @@ void sumKinematicsForBaseline(TFile* fPred){
     }
   }
 
+  // for now, do this block in plotMaker to correctly assign uncertainties AFTER rebinning
+  // //loop over bins of each histogram and assign additional "systematic" error
+  // for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
+  //   if (!iter->second) continue;
+  //   for (int ibin = 0; ibin < iter->second->GetSize(); ibin++) {
+  //     float mtErr = 0;
+  //     //special case for mT histogram, add shape uncertainty
+  //     if (TString(iter->first).Contains("h_mt")) {
+  // 	float mtBin = iter->second->GetBinLowEdge(ibin);
+  // 	if (mtBin < 90) mtErr = 0;
+  // 	else if (mtBin < 120) mtErr = 0.15;
+  // 	else mtErr = 0.30;
+  //     }
+  //     float thisBinError = 0;
+  //     if (iter->second->GetBinContent(ibin)) thisBinError = iter->second->GetBinError(ibin)/iter->second->GetBinContent(ibin);
+  //     float newBinError = sqrt(pow(thisBinError,2)  +  pow(0.2,2) + pow(mtErr,2));
+  //     float newAbsError = newBinError*iter->second->GetBinContent(ibin);
+  //     iter->second->SetBinError(ibin,newAbsError);
+  //   }
+  // }
+    
+  
   TDirectory * dir = (TDirectory*)fPred->Get("srLepbaseAll");
   // if (dir == 0) {
   //   dir = outfile_->mkdir(dirname.c_str());

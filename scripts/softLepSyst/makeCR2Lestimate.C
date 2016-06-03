@@ -63,6 +63,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbinsDilepton");  
   histMap["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName+"/h_mtbins");
+  //W polarization histograms
+  histMap["h_crMCDilepton_polW_UP"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_polW_UPDilepton");    
+  histMap["h_srMCDilepton_polW_UP"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_UPDilepton");
+  histMap["h_crMCDilepton_polW_DN"]     = (TH1D*) fMC->Get("cr2L"+srName+"/h_mtbins_polW_DNDilepton");    
+  histMap["h_srMCDilepton_polW_DN"]     = (TH1D*) fMC->Get("srLep"+srName+"/h_mtbins_polW_DNDilepton");
   //DY UP histogram
   histMap["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName+"/h_mtbinsDilepton");    
   histMap["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName+"/h_mtbinsDilepton");  
@@ -122,6 +127,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap2["h_crMCDilepton"]     = 0;    
   histMap2["h_srMCDilepton"]     = 0;  
   histMap2["h_crData"]           = 0;
+  //W polarization histograms
+  histMap2["h_crMCDilepton_polW_UP"] = 0;  
+  histMap2["h_srMCDilepton_polW_UP"] = 0;
+  histMap2["h_crMCDilepton_polW_DN"] = 0;
+  histMap2["h_srMCDilepton_polW_DN"] = 0;
   //DY UP histogram
   histMap2["h_crMCDilepton_dyUP"] = 0;    
   histMap2["h_srMCDilepton_dyUP"] = 0;
@@ -148,7 +158,12 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
     histMap2["h_crMCfake"]         = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsFake");     
     histMap2["h_crMCDilepton"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbinsDilepton");    
     histMap2["h_srMCDilepton"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbinsDilepton");  
-    histMap2["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins");  
+    histMap2["h_crData"]           = (TH1D*) fData->Get("cr2L"+srName2+"/h_mtbins"); 
+    //W polarization histograms
+    histMap2["h_crMCDilepton_polW_UP"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_polW_UPDilepton");    
+    histMap2["h_srMCDilepton_polW_UP"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_polW_UPDilepton");
+    histMap2["h_crMCDilepton_polW_DN"]     = (TH1D*) fMC->Get("cr2L"+srName2+"/h_mtbins_polW_DNDilepton");    
+    histMap2["h_srMCDilepton_polW_DN"]     = (TH1D*) fMC->Get("srLep"+srName2+"/h_mtbins_polW_DNDilepton"); 
     //DY UP histogram
     histMap2["h_crMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("cr2L"+srName2+"/h_mtbinsDilepton");    
     histMap2["h_srMCDilepton_dyUP"]     = (TH1D*) fMC_dyUP->Get("srLep"+srName2+"/h_mtbinsDilepton");  
@@ -202,6 +217,15 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_ratio"]->Divide(histMap["h_srMCDilepton"], histMap["h_crMCDilepton"]);
   histMap["h_ratioInt"] = sameBin(histMap["h_crMCInt"], "h_ratioInt");
   histMap["h_ratioInt"]->Divide(histMap["h_srMCDileptonInt"], histMap["h_crMCDileptonInt"]);
+  //W polarization histograms
+  histMap["h_ratio_polW_UP"] = sameBin(histMap["h_crMC"], "h_ratio_polW_UP");
+  histMap["h_ratio_polW_UP"]->Divide(histMap["h_srMCDilepton_polW_UP"], histMap["h_crMCDilepton_polW_UP"]);
+  histMap["h_ratio_polW_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_polW_UPInt");
+  histMap["h_ratio_polW_UPInt"]->Divide(histMap["h_srMCDilepton_polW_UPInt"], histMap["h_crMCDilepton_polW_UPInt"]);
+  histMap["h_ratio_polW_DN"] = sameBin(histMap["h_crMC"], "h_ratio_polW_DN");
+  histMap["h_ratio_polW_DN"]->Divide(histMap["h_srMCDilepton_polW_DN"], histMap["h_crMCDilepton_polW_DN"]);
+  histMap["h_ratio_polW_DNInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_polW_DNInt");
+  histMap["h_ratio_polW_DNInt"]->Divide(histMap["h_srMCDilepton_polW_DNInt"], histMap["h_crMCDilepton_polW_DNInt"]);
   //DY UP histograms
   histMap["h_ratio_dyUP"] = sameBin(histMap["h_crMC"], "h_ratio_dyUP");
   histMap["h_ratio_dyUP"]->Divide(histMap["h_srMCDilepton_dyUP"], histMap["h_crMCDilepton_dyUP"]);
@@ -226,6 +250,13 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   histMap["h_ratio_TopPt_UP"]->Divide(histMap["h_srMCDilepton_TopPt_UP"], histMap["h_crMCDilepton_TopPt_UP"]);
   histMap["h_ratio_TopPt_UPInt"] = sameBin(histMap["h_crMCInt"], "h_ratio_TopPt_UPInt");
   histMap["h_ratio_TopPt_UPInt"]->Divide(histMap["h_srMCDilepton_TopPt_UPInt"], histMap["h_crMCDilepton_TopPt_UPInt"]);
+  //W polarization systematic hist
+  histMap["h_ratioIntSyst"] = sameBin(histMap["h_crMCInt"], "h_ratioIntSyst");
+  histMap["h_ratioIntSyst"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
+  float polW_UP_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_polW_UPInt"]->GetBinContent(1));
+  float polW_DN_err =  fabs(histMap["h_ratioInt"]->GetBinContent(1) - histMap["h_ratio_polW_DNInt"]->GetBinContent(1));
+  float polW_err = max(polW_UP_err,polW_DN_err);
+  histMap["h_ratioIntSyst"]->SetBinError(1,polW_err); 
   //DY UP/DN systematic hist
   histMap["h_ratioIntdyUPDN"] = sameBin(histMap["h_crMCInt"], "h_ratioIntdyUPDN");
   histMap["h_ratioIntdyUPDN"]->SetBinContent(1, histMap["h_ratioInt"]->GetBinContent(1));
@@ -309,10 +340,11 @@ int makeCR2Lpred( TFile* fData , TFile* fMC , TFile* fMC_dyUP , TFile* fMC_dyDN 
   }//loop over bins
 
   //renormalize kinematic hists to prediction yield
-  double prefitErr = 0;
-  float predInt = histMap["h_predAddErr"]->IntegralAndError(0,-1,prefitErr);
+  float predInt = histMap["h_pred"]->Integral(0,-1);
   float prefitRelErr = 0;
-  if (predInt) prefitRelErr = prefitErr/predInt;
+  if (predInt) prefitRelErr = histMap["h_pred"]->GetBinError(1)/histMap["h_pred"]->GetBinContent(1);
+  cout << "SR: " << srName << endl;
+  cout << "REL err: " << prefitRelErr << endl;
   float srMCInt = histMapKin["h_nJet30Dilepton"]->Integral(0,-1);
   float scaleKin = predInt/srMCInt;
   //scale and assign errors
@@ -372,6 +404,27 @@ void sumKinematicsForBaseline(TFile* fPred){
     }
   }
 
+  // for now, do this block in plotMaker to correctly assign uncertainties AFTER rebinning
+  // //loop over bins of each histogram and assign additional "systematic" error
+  // for ( std::map<string, TH1D*>::iterator iter = histMapKin.begin(); iter != histMapKin.end(); ++iter ) {
+  //   if (!iter->second) continue;
+  //   for (int ibin = 0; ibin < iter->second->GetSize(); ibin++) {
+  //     float mtErr = 0;
+  //     //special case for mT histogram, add shape uncertainty
+  //     if (TString(iter->first).Contains("h_mt")) {
+  // 	float mtBin = iter->second->GetBinLowEdge(ibin);
+  // 	if (mtBin < 90) mtErr = 0;
+  // 	else if (mtBin < 120) mtErr = 0.30;
+  // 	else mtErr = 0.50;
+  //     }
+  //     float thisBinError = 0;
+  //     if (iter->second->GetBinContent(ibin)) thisBinError = iter->second->GetBinError(ibin)/iter->second->GetBinContent(ibin);
+  //     float newBinError = sqrt(pow(thisBinError,2)  +  pow(0.2,2) + pow(mtErr,2));
+  //     float newAbsError = newBinError*iter->second->GetBinContent(ibin);
+  //     iter->second->SetBinError(ibin,newAbsError);
+  //   }
+  // }
+  
   TDirectory * dir = (TDirectory*)fPred->Get("srLepbaseAll");
   // if (dir == 0) {
   //   dir = outfile_->mkdir(dirname.c_str());
