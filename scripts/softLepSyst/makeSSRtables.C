@@ -19,8 +19,14 @@
 #include "TStyle.h"
 #include "TKey.h"
 
+bool doPostfit = false;
+
 void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
 
+  //get prefit file regardless for signal yields
+  TFile * fPre = new TFile("preFitYields.root");
+
+  
   //initialize
   double fakeYield = 0;
   double dilepYield = 0;
@@ -43,8 +49,8 @@ void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
   TH1F* hDilep = (TH1F*) fIn->Get("h_bkg2")->Clone();
   TH1F* hOnelep = (TH1F*) fIn->Get("h_bkg3")->Clone();
   TH1F* hData = (TH1F*) fIn->Get("h_data")->Clone();
-  TH1F* hT24bd = (TH1F*) fIn->Get("h_sig4")->Clone();
-  TH1F* hT5qqqqww = (TH1F*) fIn->Get("h_sig5")->Clone();
+  TH1F* hT24bd = (TH1F*) fPre->Get("h_sig4")->Clone();
+  TH1F* hT5qqqqww = (TH1F*) fPre->Get("h_sig5")->Clone();
   THStack* hStack = (THStack*) fIn->Get("h_total")->Clone();
   TH1F* hTotal = (TH1F*) hStack->GetStack()->Last()->Clone();
   
@@ -112,12 +118,13 @@ void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
   // std::cout <<  Form("2 Lep (Pred) & %.1f $\\pm$ %.1f \\\\",dilepYield,dilepErr) << endl;
   // std::cout <<  Form("1 Lep (Pred) & %.1f $\\pm$ %.1f \\\\",onelepYield,onelepErr) << endl;
   std::cout << "\\hline" << endl;
-  std::cout <<  Form("Total SM Post-Fit & %.1f $\\pm$ %.1f \\\\",totalYield,totalErr) << endl;
+  if (doPostfit) std::cout <<  Form("Total SM Post-Fit & %.1f $\\pm$ %.1f \\\\",totalYield,totalErr) << endl;
+  else std::cout <<  Form("Total SM Pre-Fit & %.1f $\\pm$ %.1f \\\\",totalYield,totalErr) << endl;
   std::cout << "\\hline" << endl;
   std::cout <<  Form("Data & %.f \\\\",dataYield) << endl;
   std::cout << "\\hline" << endl;
   std::cout <<  Form("T2-4bd 275,235 & %.f $\\pm$ %.1f \\\\",t24bdYield,t24bdErr) << endl;
-  std::cout <<  Form("T5qqqqWW 1025,775 & %.f $\\pm$ %.1f \\\\",t5qqqqwwYield,t5qqqqwwErr) << endl;
+  std::cout <<  Form("T5qqqqWW 1100,500 & %.f $\\pm$ %.1f \\\\",t5qqqqwwYield,t5qqqqwwErr) << endl;
   std::cout << "\\hline" << endl;
   std::cout << "\\end{tabular}" << endl;
 
@@ -128,8 +135,9 @@ void makeTable (TFile* fIn, vector<int> srVec, string regionTitle) {
 
 void makeSSRtables() {
 
-  //TFile * fIn = new TFile("postFitYields.root");
-  TFile * fIn = new TFile("preFitYields.root");
+  TFile * fIn;
+  if (doPostfit) fIn = new TFile("postFitYields.root");
+  else fIn = new TFile("preFitYields.root");
 
   //vector of SRs which make up the SSR
   vector<int> srVec;
@@ -190,6 +198,15 @@ void makeSSRtables() {
   srVec.push_back(24);
   srVec.push_back(59);
   srVec.push_back(60);
+  makeTable(fIn, srVec, srTitle);
+  
+  //high MET and high HT region
+  srTitle = "Strong Production";
+  srVec.clear();
+  srVec.push_back(59);
+  srVec.push_back(60);
+  srVec.push_back(62);
+  srVec.push_back(63);
   makeTable(fIn, srVec, srTitle);
   
   return;
