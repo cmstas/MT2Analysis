@@ -19,7 +19,6 @@
 //MT2
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
-#include "../MT2CORE/sigSelectionsMT2Higgs.h"
 #include "../MT2CORE/SR.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
@@ -45,7 +44,6 @@ class MT2Looper {
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosSRMT2Higgs(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
@@ -53,8 +51,6 @@ class MT2Looper {
   void fillHistosCRQCD(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = ""); 
-  void fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2bins,
-                          float* mt2bins, const std::string& dirname, const std::string& s);
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, 
@@ -81,12 +77,10 @@ class MT2Looper {
   bool passMonojetId_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
-  std::vector<SR> SRVecHcand;
   std::vector<SR> SRVecMonojet;
   std::vector<SR> InclusiveRegions;
   std::vector<SR> InclusiveRegionsMonojet;
   SR SRBase;
-  SR SRBaseHcand;
   SR SRBaseIncl;
   SR SRBaseMonojet;
   SR SRBaseMonojet0B;
