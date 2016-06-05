@@ -1005,8 +1005,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // First restore the bjets
       // vector<LorentzVector> bjets;
       vector<TLorentzVector> p4sBJets;
-      for (unsigned int ijet=0; ijet < t.njet; ++ijet) {
-        if (t.jet_btagMVA[i]) {
+      for (int ijet=0; ijet < t.njet; ++ijet) {
+        if (t.jet_btagMVA[ijet]) {
           TLorentzVector bjet;
           bjet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
           p4sBJets.push_back(bjet);
@@ -1027,8 +1027,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
       }
       
-      if (!isHcand && minMTBMet < 200) continue;
-      if ( Mbb_max < 300 ) continue;
+      bool doMinMTBMet = true;
+      bool doMbbMax = false;
+      // bool doMbbMax = true;
+
+      if ( doMinMTBMet && !isHcand && t.minMTBMet < 200 ) continue;
+      if ( doMbbMax && Mbb_max < 300 ) continue;
       // -- mt2higgs ends
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
@@ -1043,11 +1047,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
 
 
-      bool doHcandPlots = true;
-      if (doHcandPlots) {
-        saveHcandplots = true;
-        fillHistosSRMT2Higgs("srHcand");
-      }
+      // bool doHcandPlots = true;
+      // if (doHcandPlots) {
+      //   saveHcandplots = true;
+      //   fillHistosSRMT2Higgs("srHcand");
+      // }
       if (doDYplots) {
         // saveDYplots = true;
 	// if (verbose) cout<<__LINE__<<endl;
