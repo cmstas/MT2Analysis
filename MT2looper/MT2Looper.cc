@@ -969,6 +969,44 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
 
+      // -- mt2Higgs looper: bmet stuff --
+      // This part is designed to run with the standard mt2baby without help from hcand branches
+      // the following cuts will reflected directly in the standard bins
+
+      // First restore the bjets
+      // vector<LorentzVector> bjets;
+      vector<TLorentzVector> p4sBJets;
+      for (int ijet=0; ijet < t.njet; ++ijet) {
+        if (t.jet_btagMVA[ijet]) {
+          TLorentzVector bjet;
+          bjet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
+          p4sBJets.push_back(bjet);
+        }
+      }
+      // calculate Mbb_hcand and Mbb_max
+      float Mbb_max = -1;
+      // float Mbb_hcand = -1;
+      bool isHcand = false;
+      for (unsigned int ibj1=0; ibj1<p4sBJets.size()-1; ++ibj1) {
+        for (unsigned int ibj2=ibj1+1; ibj2<p4sBJets.size(); ++ibj2) {
+          float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
+          Mbb_max = max(Mbb_max, mbb);
+          if (mbb > 100 && mbb < 150)
+            isHcand = true;
+            // if (fabs(mbb-125.1) < fabs(Mbb_hcand-125.1))
+            //   Mbb_hcand = mbb;
+        }
+      }
+      
+      // bool doMinMTBMet = true;
+      bool doMinMTBMet = false;
+      bool doMbbMax = true;
+      // bool doMbbMax = false;
+
+      if ( doMinMTBMet && !isHcand && t.minMTBMet < 200 ) continue;
+      if ( doMbbMax && Mbb_max < 300 ) continue;
+      // -- mt2higgs ends
+
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
 

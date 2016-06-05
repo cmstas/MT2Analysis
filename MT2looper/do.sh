@@ -3,7 +3,9 @@
 make -j12
 
 INDIR=/nfs-6/userdata/mt2/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
-OUTDIR=output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
+# OUTDIR=output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4
+# OUTDIR=output/minMTBMet
+OUTDIR=output/MbbMax
 LOGDIR=logs/
 
 #declare -a Samples=(data_Run2015C data_Run2015D)
