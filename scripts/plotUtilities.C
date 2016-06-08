@@ -116,6 +116,8 @@ string getTableName(const string& sample) {
   if (sample.find("fakedata") != string::npos) return "Fake Data";
   if (sample.find("data") != string::npos) return "Data";
   if (sample.find("ttbar") != string::npos) return "ttbar";
+  if (sample.find("ttsl") != string::npos) return "ttsl";
+  if (sample.find("ttdl") != string::npos) return "ttdl";
   if (sample.find("ttw") != string::npos) return "ttw";
   if (sample.find("ttz") != string::npos) return "ttz";
   if (sample.find("tth") != string::npos) return "tth";
