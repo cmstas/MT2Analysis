@@ -624,7 +624,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     
     // Use this to speed things up when not looking at genParticles
     //tree->SetBranchStatus("genPart_*", 0); 
-  if (verbose) cout<<__LINE__<<endl;
+    if (verbose) cout<<__LINE__<<endl;
 
     t.Init(tree);
 
@@ -675,18 +675,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (t.nVert == 0) continue;
       if (verbose) cout<<__LINE__<<endl;
 
-      // MET filters (data and MC)
-      if (!t.Flag_goodVertices) continue;
-      if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_HBHENoiseIsoFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
-      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-      if (verbose) cout<<__LINE__<<endl;
+      // // MET filters (data and MC)
+      // if (!t.Flag_goodVertices) continue;
+      // if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
+      // if (verbose) cout<<__LINE__<<endl;
+      // if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
+      // if (verbose) cout<<__LINE__<<endl;
+      // if (!t.Flag_HBHENoiseFilter) continue;
+      // if (verbose) cout<<__LINE__<<endl;
+      // if (!t.Flag_HBHENoiseIsoFilter) continue;
+      // if (verbose) cout<<__LINE__<<endl;
+      // if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      // if (verbose) cout<<__LINE__<<endl;
+      // -- sc-debug
 
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
@@ -998,13 +999,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
       }
       
-      // bool doMinMTBMet = true;
-      bool doMinMTBMet = false;
-      bool doMbbMax = true;
-      // bool doMbbMax = false;
+      bool doMT2Higgs = true;
 
-      if ( doMinMTBMet && !isHcand && t.minMTBMet < 200 ) continue;
-      if ( doMbbMax && Mbb_max < 300 ) continue;
+      // if (doMT2Higgs && p4sBJets.size() < 2) continue;
+      // if (doMT2Higgs && !isHcand && t.minMTBMet < 200) continue;
+      // if (doMT2Higgs && Mbb_max < 300) continue;
       // -- mt2higgs ends
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
