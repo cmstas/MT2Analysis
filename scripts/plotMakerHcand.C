@@ -1691,7 +1691,8 @@ void plotMakerHcand(){
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
   
   // ----------------------------------------
   //  samples definition

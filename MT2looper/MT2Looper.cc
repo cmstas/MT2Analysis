@@ -264,6 +264,45 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
+  // -- mt2higgs --
+  SRBaseHcand.SetName("srbaseHcand");
+  // SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
+  // SRBaseHcand.SetVar("diffMetMhtOverMet", 0, 0.5);
+  // SRBaseHcand.SetVar("nHcand", 1, -1);
+  SRBaseHcand.SetVar("nlep", 0, 1);
+  SRBaseHcand.SetVar("j1pt", 30, -1);
+  SRBaseHcand.SetVar("j2pt", 30, -1);
+  // SRBaseHcand.SetVar("njets", 3, -1);
+  SRBaseHcand.SetVar("nbjets", 2, -1);
+  SRBaseHcand.SetVar("mt2", 200, -1);
+  SRBaseHcand.SetVar("passesHtMet", 1, 2);
+  float SRBaseHcand_mt2bins[4] = {200, 300, 500, 1000}; 
+  SRBaseHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
+
+  vars = SRBaseHcand.GetListOfVariables();
+  dir = (TDirectory*)outfile_->Get((SRBaseHcand.GetName()).c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir((SRBaseHcand.GetName()).c_str());
+  }
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBound(vars.at(j)), SRBaseHcand.srHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBound(vars.at(j)), SRBaseHcand.srHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.srHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+  SRBaseInclHcand.SetName("srbaseInclHcand");
+  SRBaseInclHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
+  dir = (TDirectory*)outfile_->Get((SRBaseInclHcand.GetName()).c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir((SRBaseInclHcand.GetName()).c_str());
+  }
+  dir->cd();
+  plot1D("h_n_mt2bins",  1, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.srHistMap, "", 1, 0, 2);
+  outfile_->cd();
+  // -- end --
+
   //setup inclusive regions
   SR InclusiveHT200to450 = SRBase;
   InclusiveHT200to450.SetName("srbaseVL");
@@ -975,10 +1014,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // the following cuts will reflected directly in the standard bins
 
       // First restore the bjets
-      // vector<LorentzVector> bjets;
       vector<TLorentzVector> p4sBJets;
       for (int ijet=0; ijet < t.njet; ++ijet) {
-        if (t.jet_btagMVA[ijet]) {
+        if (t.jet_pt[ijet] < 20) continue;
+        if (t.jet_btagMVA[ijet] >= 0.185) {
           TLorentzVector bjet;
           bjet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
           p4sBJets.push_back(bjet);
@@ -998,12 +1037,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
             //   Mbb_hcand = mbb;
         }
       }
-      
-      bool doMT2Higgs = true;
+      mbbmax_ = Mbb_max;
 
-      // if (doMT2Higgs && p4sBJets.size() < 2) continue;
-      // if (doMT2Higgs && !isHcand && t.minMTBMet < 200) continue;
-      // if (doMT2Higgs && Mbb_max < 300) continue;
+      bool doMT2Higgs  = false;
+      bool doMinMTBMet = false;
+      bool doMbbMax    = false;
+
+      // if (doMT2Higgs && p4sBJets.size() >= 2) doMT2Higgs = true;
+      // if (doMT2Higgs && !isHcand && t.minMTBMet < 200) doMinMTBMet = true;
+      // if (doMT2Higgs && Mbb_max < 300) doMbbMax = true;
+
       // -- mt2higgs ends
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
@@ -1015,6 +1058,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 	fillHistosSRBase();
 	fillHistosInclusive();
+
+        if (doMT2Higgs)
+          fillHistosSRMT2Higgs();
+        if (doMT2Higgs && doMinMTBMet)
+          fillHistosSRMT2Higgs("minMTBMet");
+        if (doMT2Higgs && doMbbMax)
+          fillHistosSRMT2Higgs("MbbMax");
       }
 
       if (doDYplots) {
@@ -1224,6 +1274,45 @@ void MT2Looper::fillHistosSRBase() {
     fillHistos(SRBaseIncl.srHistMap, SRBaseIncl.GetNumberOfMT2Bins(), SRBaseIncl.GetMT2Bins(), SRBaseIncl.GetName(), "");
   }
 
+
+  return;
+}
+
+void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::string& suffix) {
+
+  // trigger requirement on data
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["nlep"]        = nlepveto_;
+  // values["nbjet"]       = t.nBJet20;
+  values["j1pt"]        = t.jet1_pt;
+  values["j2pt"]        = t.jet2_pt;
+  values["mt2"]         = t.mt2;
+  values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+
+  if (SRBase.PassesSelection(values)) {
+    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "SRBaseHcand", "");
+  }
+
+  // do monojet SRs
+  bool passMonojet = false;
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
+    std::map<std::string, float> values_monojet;
+    values_monojet["deltaPhiMin"] = t.deltaPhiMin;
+    values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+    values_monojet["nlep"]        = nlepveto_;
+    values_monojet["ht"]          = t.ht; // ETH uses ht instead of jet1_pt..
+    values_monojet["njets"]       = t.nJet30;
+    values_monojet["met"]         = t.met_pt;
+
+    if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
+  }
+  if ((SRBase.PassesSelection(values)) || (passMonojet)) {
+    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "SRBaseInclHcand", "");
+  }
 
   return;
 }
@@ -2045,6 +2134,37 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   }
   
   outfile_->cd();
+  return;
+}
+
+void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
+  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+  if (dir == 0) {
+    dir = outfile_->mkdir(dirname.c_str());
+  }
+  dir->cd();
+
+  // plot1D("h_nHcand"+s,             t.nHiggs_cand,        evtweight_, h_1d, ";n HiggsCand",   10, 0, 10);
+  // plot1D("h_hcand_M"+s,            t.hcand_M,            evtweight_, h_1d, ";M (bb) [GeV]",   50, 100, 150);
+  // plot1D("h_hcand_pt"+s,           t.hcand_pt,           evtweight_, h_1d, ";p_{T}(H) [GeV]", 50, 100, 150);
+  // plot1D("h_hcand_phi"+s,          t.hcand_phi,          evtweight_, h_1d, ";#phi (H)" ,           60, -3.4, 3.4);
+  // plot1D("h_hcand_deltaPhiMet"+s,  t.hcand_deltaPhiMet,  evtweight_, h_1d, ";#Delta#phi (H, met)", 60, -3.4, 3.4);
+  // plot1D("h_hcand_difEbjetInCM"+s, t.hcand_difEbjetInCM, evtweight_, h_1d, ";#Delta E(bb)", 60, 0, 20);
+  // plot1D("h_hcand_difMbjetInCM"+s, t.hcand_difMbjetInCM, evtweight_, h_1d, ";#Delta M(bb)", 60, 0, 20);
+  // plot1D("h_hcand_cosTheta1"+s,    t.hcand_cosTheta1,    evtweight_, h_1d, ";cos(#theta *)", 60, -1.1, 1.1);
+  // plot1D("h_hcand_cosTheta2"+s,    t.hcand_cosTheta2,    evtweight_, h_1d, ";cos(#theta *)", 60, -1.1, 1.1);
+  // plot1D("h_bMET_dPhiMin"+s,       t.bMET_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
+  // plot1D("h_bMET_MTmin"+s,         t.bMET_MTmin,         evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
+  // plot1D("h_bMET_MTclose"+s,       t.bMET_MTclose,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
+  // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
+
+  plot1D("h_mt"+s,            mt_,          evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  plot1D("h_minMTBMet"+s,     t.minMTBMet,  evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 200, 0, 600);
+
+  outfile_->cd();
+
+  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
   return;
 }
 

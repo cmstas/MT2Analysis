@@ -44,6 +44,7 @@ class MT2Looper {
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosSRMT2Higgs(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
@@ -51,6 +52,8 @@ class MT2Looper {
   void fillHistosCRQCD(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = ""); 
+  void fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
+                          const std::string& dir = "", const std::string& suffix = "");
   void fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			      const std::string& dir = "", const std::string& suffix = ""); 
   void fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<std::string, RooDataSet*>& datasets, int n_mt2bins, float* mt2bins, 
@@ -72,16 +75,20 @@ class MT2Looper {
   int nlepveto_;
   float leppt_;
   float mt_;
+  float mbbmax_;
   int nJet30Eta3_;
   bool isSignal_;
   bool passMonojetId_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SR> SRVec;
+  std::vector<SR> SRVecHcand;
   std::vector<SR> SRVecMonojet;
   std::vector<SR> InclusiveRegions;
   std::vector<SR> InclusiveRegionsMonojet;
   SR SRBase;
   SR SRBaseIncl;
+  SR SRBaseHcand;
+  SR SRBaseInclHcand;
   SR SRBaseMonojet;
   SR SRBaseMonojet0B;
   SR SRBaseMonojet1B;
