@@ -127,7 +127,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   // 25ns is hardcoded here, would need an option for 50ns
-  const char* json_file = "jsons/Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -1646,15 +1646,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         if(doJetLepOverlapRemoval && isOverlapJet) continue;
 
         bool isOverlapJetGamma = false;
-        if( ( p4sCorrJets.at(iJet).pt() > 20.0) && (fabs(p4sCorrJets.at(iJet).eta()) < 2.5) ) {
-          //check against list of jets that overlap with a photon
-          for(unsigned int j=0; j<removedJetsGamma.size(); j++){
-            if(iJet == removedJetsGamma.at(j)){
-              isOverlapJetGamma = true;
-              break;
-            }
-          }
-        } // pt 20 eta 2.5
+	//check against list of jets that overlap with a photon
+	for(unsigned int j=0; j<removedJetsGamma.size(); j++){
+	  if(iJet == removedJetsGamma.at(j)){
+	    isOverlapJetGamma = true;
+	    break;
+	  }
+	} 
 
         if (njet >= max_njet) {
           std::cout << "WARNING: attempted to fill more than " << max_njet << " jets" << std::endl;
@@ -1708,21 +1706,38 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
           jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
 
           // use pt20 for bjet counting, pt30 for everything else
-          if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.5) ){
-            //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.800) {
-              nBJet20csv++;
-	      if (jet_pt[njet] > 30.0) nBJet30csv++;
-            }
-            bool bJet = false;
-            if(jet_btagMVA[njet] >= 0.185){
-              nBJet20++;
+          if( (jet_pt[njet] > 20.0) && (fabs(jet_eta[njet]) < 2.5) ){ 
+            if (jet_pt[njet] > 30.0) {
+              // store leading/subleading central jet pt.
+              //  jets should be pt-ordered before entering this loop
+              if (jet1_pt < 0.1) jet1_pt = p4sCorrJets.at(iJet).pt();
+              else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
+              p4sForHems.push_back(p4sCorrJets.at(iJet));
+              p4sForDphi.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
+              p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsZllMT.push_back(p4sCorrJets.at(iJet));
+              p4sForDphiZllMT.push_back(p4sCorrJets.at(iJet));
+              p4sForHemsRl.push_back(p4sCorrJets.at(iJet));
+              p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
+              nJet30++;
+              if (jet_pt[njet] > 40.) nJet40++;
+            } // pt40
+            if(jet_btagMVA[njet] >= 0.185) {
               nBJet20mva++;
+	      if (jet_pt[njet] > 30.0) nBJet30mva++;
+            }
+
+            bool isbJet = false;
+            //CSVv2IVFM
+            if(jet_btagCSV[njet] >= 0.800){
+              nBJet20++; 
+              nBJet20csv++;
               // -- mt2higgs --
-              bJet = true;
+              isbJet = true;
               p4sBJets.push_back(p4sCorrJets.at(iJet));
 
-	      if (jet_pt[njet] > 30.0) nBJet30mva++;
+	      if (jet_pt[njet] > 30.0) nBJet30csv++;
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -1817,7 +1832,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
               else if (jet2_pt < 0.1) jet2_pt = p4sCorrJets.at(iJet).pt();
               p4sForHems.push_back(p4sCorrJets.at(iJet));
               p4sForDphi.push_back(p4sCorrJets.at(iJet));
-              if(!bJet) p4sForHemsHcand.push_back(p4sCorrJets.at(iJet));
+              if(!isbJet) p4sForHemsHcand.push_back(p4sCorrJets.at(iJet));
               p4sForHemsZll.push_back(p4sCorrJets.at(iJet));
               p4sForDphiZll.push_back(p4sCorrJets.at(iJet));
               p4sForHemsZllMT.push_back(p4sCorrJets.at(iJet));
@@ -1849,12 +1864,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt30
-              if(jet_btagCSV[njet] >= 0.800){
-                  gamma_nBJet20csv++;
+              if(jet_btagMVA[njet] >= 0.185){ // CombinedMVAv2
+                  gamma_nBJet20mva++;
               }
-              if(jet_btagMVA[njet] >= 0.185) { // CombinedMVAv2
+              if(jet_btagCSV[njet] >= 0.800) { 
                 gamma_nBJet20++; 
-                gamma_nBJet20mva++;
+                gamma_nBJet20csv++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
                   gamma_nBJet30++;
