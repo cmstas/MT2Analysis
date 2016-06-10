@@ -264,7 +264,7 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
-  // -- mt2higgs --
+  // -- mt2higgs define --
   SRBaseHcand.SetName("srbaseHcand");
   // SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
   // SRBaseHcand.SetVar("diffMetMhtOverMet", 0, 0.5);
@@ -301,7 +301,7 @@ void MT2Looper::SetSignalRegions(){
   dir->cd();
   plot1D("h_n_mt2bins",  1, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.srHistMap, "", 1, 0, 2);
   outfile_->cd();
-  // -- end --
+  // -- end of mt2higgs --
 
   //setup inclusive regions
   SR InclusiveHT200to450 = SRBase;
@@ -1027,14 +1027,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       float Mbb_max = -1;
       // float Mbb_hcand = -1;
       bool isHcand = false;
-      for (unsigned int ibj1=0; ibj1<p4sBJets.size()-1; ++ibj1) {
-        for (unsigned int ibj2=ibj1+1; ibj2<p4sBJets.size(); ++ibj2) {
-          float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
-          Mbb_max = max(Mbb_max, mbb);
-          if (mbb > 100 && mbb < 150)
-            isHcand = true;
+      if (p4sBJets.size() > 1) {
+        for (unsigned int ibj1=0; ibj1 < p4sBJets.size(); ++ibj1) {
+          for (unsigned int ibj2=ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
+            float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
+            Mbb_max = max(Mbb_max, mbb);
+            if (mbb > 100 && mbb < 150)
+              isHcand = true;
             // if (fabs(mbb-125.1) < fabs(Mbb_hcand-125.1))
             //   Mbb_hcand = mbb;
+          }
         }
       }
       mbbmax_ = Mbb_max;
@@ -1043,11 +1045,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doMinMTBMet = false;
       bool doMbbMax    = false;
 
-      // if (doMT2Higgs && p4sBJets.size() >= 2) doMT2Higgs = true;
-      // if (doMT2Higgs && !isHcand && t.minMTBMet < 200) doMinMTBMet = true;
-      // if (doMT2Higgs && Mbb_max < 300) doMbbMax = true;
+      if (p4sBJets.size() >= 2) doMT2Higgs = true;
+      if (doMT2Higgs && (isHcand || t.minMTBMet > 200)) doMinMTBMet = true;
+      if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
-      // -- mt2higgs ends
+      // -- end of mt2higgs --
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -1060,10 +1062,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
 
         if (doMT2Higgs)
-          fillHistosSRMT2Higgs();
-        if (doMT2Higgs && doMinMTBMet)
+          fillHistosSRMT2Higgs("original");
+        if (doMinMTBMet)
           fillHistosSRMT2Higgs("minMTBMet");
-        if (doMT2Higgs && doMbbMax)
+        if (doMbbMax)
           fillHistosSRMT2Higgs("MbbMax");
       }
 
@@ -1287,14 +1289,14 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  // values["nbjet"]       = t.nBJet20;
+  values["nbjet"]       = t.nBJet20;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
-  if (SRBase.PassesSelection(values)) {
-    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "SRBaseHcand", "");
+  if (SRBaseHcand.PassesSelection(values)) {
+    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), prefix+"base", prefix);
   }
 
   // do monojet SRs
@@ -1311,7 +1313,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
   }
   if ((SRBase.PassesSelection(values)) || (passMonojet)) {
-    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "SRBaseInclHcand", "");
+    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), prefix+"baseIncl", prefix);
   }
 
   return;
