@@ -266,8 +266,8 @@ void MT2Looper::SetSignalRegions(){
 
   // -- mt2higgs define --
   SRBaseHcand.SetName("srbaseHcand");
-  // SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
-  // SRBaseHcand.SetVar("diffMetMhtOverMet", 0, 0.5);
+  SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
+  SRBaseHcand.SetVar("diffMetMhtOverMet", 0, 0.5);
   // SRBaseHcand.SetVar("nHcand", 1, -1);
   SRBaseHcand.SetVar("nlep", 0, 1);
   SRBaseHcand.SetVar("j1pt", 30, -1);
@@ -1289,7 +1289,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  values["nbjet"]       = t.nBJet20;
+  values["nbjets"]      = t.nBJet20;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
@@ -1312,7 +1312,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
 
     if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
   }
-  if ((SRBase.PassesSelection(values)) || (passMonojet)) {
+  if ((SRBaseHcand.PassesSelection(values)) || (passMonojet)) {
     fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), prefix+"baseIncl", prefix);
   }
 
