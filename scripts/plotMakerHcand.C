@@ -1692,7 +1692,7 @@ void plotMakerHcand(){
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mt2higgs";
   
   // ----------------------------------------
   //  samples definition

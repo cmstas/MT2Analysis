@@ -1297,7 +1297,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBaseHcand.PassesSelection(values)) {
-    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), prefix+"base", prefix);
+    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "mt2higgs_"+prefix, "_"+prefix);
   }
 
   // do monojet SRs
@@ -1314,7 +1314,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
   }
   if ((SRBaseHcand.PassesSelection(values)) || (passMonojet)) {
-    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), prefix+"baseIncl", prefix);
+    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "mt2higgsIncl_"+prefix, "_"+prefix);
   }
 
   return;
