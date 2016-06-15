@@ -768,8 +768,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 0.5893;
-
+      const float lumi = 2.070;
+    
       evtweight_ = 1.;
 
       // apply relevant weights to MC
@@ -905,10 +905,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // Variables for gamma+jets control region
       bool doGJplots = false;
-      // hack since the gjets babies have evt_id==-1 (DR_0p4 was added to the name and broke sampleID. need to fix)
-      if(sample=="gjets_ht"){
-          t.evt_id = 200;
-      }
       if (t.ngamma > 0) {
 	if (t.isData) {
 	  doGJplots = true;
@@ -1238,7 +1234,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 void MT2Looper::fillHistosSRBase() {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1259,7 +1255,7 @@ void MT2Looper::fillHistosSRBase() {
 
   // do monojet SRs
   bool passMonojet = false;
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET100_PFMHT100 || t.HLT_PFHT300_PFMET100)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1357,7 +1353,7 @@ void MT2Looper::fillHistosInclusive() {
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
   
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1381,7 +1377,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   }
   
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET100_PFMHT100 || t.HLT_PFHT300_PFMET100)) {
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
     values_monojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
@@ -1407,7 +1403,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
   
   // first fill base region
   std::map<std::string, float> valuesBase;
@@ -1478,7 +1474,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET100_PFMHT100 || t.HLT_PFHT300_PFMET100)) {
 
     // first fill base region
     std::map<std::string, float> valuesBase_monojet;
@@ -1854,7 +1850,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
   
   // topological regions
   std::map<std::string, float> values;
@@ -1875,7 +1871,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET90_PFMHT90 || t.HLT_PFHT300_PFMET100)) {
+  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET100_PFMHT100 || t.HLT_PFHT300_PFMET100)) {
 
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
