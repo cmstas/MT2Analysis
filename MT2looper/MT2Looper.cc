@@ -1050,6 +1050,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && (isHcand || t.minMTBMet > 200)) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
+      doMT2Higgs = doMinMTBMet;
+      // doMT2Higgs = doMbbMax;
+      if (t.nBJet20 < 2 || t.ht < 1000) continue;
+
       // -- end of mt2higgs --
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
@@ -1063,11 +1067,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
 
         if (doMT2Higgs)
-          fillHistosSRMT2Higgs("original");
-        if (doMinMTBMet)
-          fillHistosSRMT2Higgs("minMTBMet");
-        if (doMbbMax)
-          fillHistosSRMT2Higgs("MbbMax");
+          fillHistosSRMT2Higgs();
+        // if (doMinMTBMet)
+        //   fillHistosSRMT2Higgs("minMTBMet");
+        // if (doMbbMax)
+        //   fillHistosSRMT2Higgs("MbbMax");
       }
 
       if (doDYplots) {
@@ -1297,7 +1301,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBaseHcand.PassesSelection(values)) {
-    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "mt2higgs_"+prefix, "_"+prefix);
+    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), SRBaseHcand.GetName(), "");
   }
 
   // do monojet SRs
@@ -1314,7 +1318,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
   }
   if ((SRBaseHcand.PassesSelection(values)) || (passMonojet)) {
-    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "mt2higgsIncl_"+prefix, "_"+prefix);
+    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), SRBaseInclHcand.GetName(), "");
   }
 
   return;

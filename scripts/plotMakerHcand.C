@@ -249,11 +249,13 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     break;
   }
 
-  TGraphAsymmErrors* graph_data = getPoissonGraph(data_hist, true);
-  graph_data->SetLineColor(kBlack);
-  graph_data->SetMarkerColor(kBlack);
-  graph_data->SetMarkerStyle(20);
-
+  TGraphAsymmErrors* graph_data{0};
+  if (data_hist) {
+    graph_data = getPoissonGraph(data_hist, true);
+    graph_data->SetLineColor(kBlack);
+    graph_data->SetMarkerColor(kBlack);
+    graph_data->SetMarkerStyle(20);
+  }
   
   if (graph_data) leg->AddEntry(graph_data,getLegendName(data_name).c_str(),"pe1");
   
@@ -656,7 +658,7 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   ofile << "\\hline" << std::endl;
 
   ofile << endl << "\\hline" << endl
-    << "Sample";
+        << "Sample";
 
   // header
   for (unsigned int idir = 0; idir < ndirs; ++idir) {
@@ -1692,7 +1694,8 @@ void plotMakerHcand(){
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mt2higgs";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMT_ht450";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
   
   // ----------------------------------------
   //  samples definition
@@ -1796,7 +1799,8 @@ void plotMakerHcand(){
   float scalesig = -1.;
   //float scalesig = 50.;
   bool printplots = false;
-  bool doRatio = true;
+  // printplots = true;
+  bool doRatio = false;
   bool scaleBGtoData = false;
 
   if(printplots){
@@ -1809,17 +1813,20 @@ void plotMakerHcand(){
       //if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
-      if(dir_name != "srbase") continue; //to do only this dir
+      if(dir_name != "srbaseHcand") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
 
       makePlot( samples , names , dir_name , "h_ht"  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 100 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_mt2" , "M_{T2} [GeV]" , "Events / 50 GeV" , 100 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_met"  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_nlepveto" , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nJet30" , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nBJet20" , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      //makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_mt2bins" , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_nJet30Eta3" , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+
+      makePlot( samples , names , dir_name , "h_minMTBMet" , "M_{T}^{bMet} [GeV]" , "Events" , 0 , 800 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_MbbMax" , "M(bb) [GeV]" , "Events" , 0 , 600 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
     }
   }
@@ -1885,6 +1892,8 @@ void plotMakerHcand(){
 
   vector<string> dirsH;
   dirsH.push_back("srbase");
+  dirsH.push_back("srbaseHcand");
+  // dirsH.push_back("srbaseInclHcand");
   printTable(samples, names, dirsH);
   dirsH.clear();
   
