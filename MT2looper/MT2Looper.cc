@@ -1014,7 +1014,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       vector<TLorentzVector> p4sBJets;
       for (int ijet=0; ijet < t.njet; ++ijet) {
         if (t.jet_pt[ijet] < 20) continue;
-        if (t.jet_btagMVA[ijet] >= 0.185) {
+        if (fabs(t.jet_eta[ijet]) > 2.5) continue;
+        if (t.jet_btagCSV[ijet] >= 0.800) {
           TLorentzVector bjet;
           bjet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
           p4sBJets.push_back(bjet);
@@ -1046,9 +1047,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && (isHcand || t.minMTBMet > 200)) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
-      doMT2Higgs = doMinMTBMet;
+      // doMT2Higgs = doMinMTBMet;
       // doMT2Higgs = doMbbMax;
-      if (t.nBJet20 < 2 || t.ht < 1000) continue;
+      if (!doMT2Higgs) continue;
 
       // -- end of mt2higgs --
 
@@ -1062,50 +1063,46 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosSRBase();
 	fillHistosInclusive();
 
-        if (doMT2Higgs)
+        // if (doMT2Higgs)
           fillHistosSRMT2Higgs();
-        // if (doMinMTBMet)
-        //   fillHistosSRMT2Higgs("minMTBMet");
-        // if (doMbbMax)
-        //   fillHistosSRMT2Higgs("MbbMax");
       }
 
-      if (doDYplots) {
-        saveDYplots = true;
-	if (verbose) cout<<__LINE__<<endl;
-        fillHistosCRDY("crdy");
-      }
-      if (doRLplots) {
-        saveRLplots = true;
-	if (verbose) cout<<__LINE__<<endl;
-        fillHistosCRRL("crrl");
-      }
-      if (doRLELplots && !doMinimalPlots) {
-        saveRLELplots = true;
-        fillHistosCRRL("crrlel");
-      }
-      if (doRLMUplots && !doMinimalPlots) {
-        saveRLMUplots = true;
-        fillHistosCRRL("crrlmu");
-      }
-      if (doSLplots) {
-        saveSLplots = true;
-	if (verbose) cout<<__LINE__<<endl;
-        fillHistosCRSL("crsl");
-      }
-      if (doSLMUplots && !doMinimalPlots) {
-        saveSLMUplots = true;
-        fillHistosCRSL("crslmu");
-      }
-      if (doSLELplots && !doMinimalPlots) {
-        saveSLELplots = true;
-        fillHistosCRSL("crslel");
-      }
-      if (doQCDplots) {
-        saveQCDplots = true;
-	if (verbose) cout<<__LINE__<<endl;
-        fillHistosCRQCD("crqcd");
-      }
+      // if (doDYplots) {
+      //   saveDYplots = true;
+      //   if (verbose) cout<<__LINE__<<endl;
+      //   fillHistosCRDY("crdy");
+      // }
+      // if (doRLplots) {
+      //   saveRLplots = true;
+      //   if (verbose) cout<<__LINE__<<endl;
+      //   fillHistosCRRL("crrl");
+      // }
+      // if (doRLELplots && !doMinimalPlots) {
+      //   saveRLELplots = true;
+      //   fillHistosCRRL("crrlel");
+      // }
+      // if (doRLMUplots && !doMinimalPlots) {
+      //   saveRLMUplots = true;
+      //   fillHistosCRRL("crrlmu");
+      // }
+      // if (doSLplots) {
+      //   saveSLplots = true;
+      //   if (verbose) cout<<__LINE__<<endl;
+      //   fillHistosCRSL("crsl");
+      // }
+      // if (doSLMUplots && !doMinimalPlots) {
+      //   saveSLMUplots = true;
+      //   fillHistosCRSL("crslmu");
+      // }
+      // if (doSLELplots && !doMinimalPlots) {
+      //   saveSLELplots = true;
+      //   fillHistosCRSL("crslel");
+      // }
+      // if (doQCDplots) {
+      //   saveQCDplots = true;
+      //   if (verbose) cout<<__LINE__<<endl;
+      //   fillHistosCRQCD("crqcd");
+      // }
 
 
    }//end loop on events in a file
