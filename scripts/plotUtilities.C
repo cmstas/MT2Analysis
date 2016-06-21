@@ -59,6 +59,8 @@ int getColor(const string& sample) {
   if (sample.find("tt+1l") != string::npos) return kAzure+2;
   if (sample.find("tt+2l") != string::npos) return kOrange-1;
   if (sample.find("st") != string::npos) return kViolet;
+  if (sample.find("ttdl") != string::npos) return kAzure+7;
+  if (sample.find("ttsl") != string::npos) return kSpring-5;
 
   cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
   return kBlack;

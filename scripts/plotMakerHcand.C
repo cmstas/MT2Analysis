@@ -1144,10 +1144,10 @@ void plotMakerHcand() {
   bool printtables = true;
 
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
 
   // ----------------------------------------
   //  samples definition
@@ -1221,68 +1221,40 @@ void plotMakerHcand() {
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr1L");
-  dirsH.push_back("sr2L");
-  dirsH.push_back("sr3L");
-  dirsH.push_back("sr4L");
-  dirsH.push_back("sr5L");
-  dirsH.push_back("sr6L");
+  dirsH.push_back("sr3VL");
+  dirsH.push_back("sr6VL");
+  dirsH.push_back("sr9VL");
+  dirsH.push_back("sr10VL");
+  dirsH.push_back("sr11VL");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr7L");
-  dirsH.push_back("sr8L");
+  dirsH.push_back("sr3L");
+  dirsH.push_back("sr6L");
   dirsH.push_back("sr9L");
   dirsH.push_back("sr10L");
   dirsH.push_back("sr11L");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr1M");
-  dirsH.push_back("sr2M");
   dirsH.push_back("sr3M");
-  dirsH.push_back("sr4M");
-  dirsH.push_back("sr5M");
   dirsH.push_back("sr6M");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("sr7M");
-  dirsH.push_back("sr8M");
   dirsH.push_back("sr9M");
   dirsH.push_back("sr10M");
   dirsH.push_back("sr11M");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr1H");
-  dirsH.push_back("sr2H");
   dirsH.push_back("sr3H");
-  dirsH.push_back("sr4H");
-  dirsH.push_back("sr5H");
   dirsH.push_back("sr6H");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("sr7H");
-  dirsH.push_back("sr8H");
   dirsH.push_back("sr9H");
   dirsH.push_back("sr10H");
   dirsH.push_back("sr11H");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr1UH");
-  dirsH.push_back("sr2UH");
   dirsH.push_back("sr3UH");
-  dirsH.push_back("sr4UH");
-  dirsH.push_back("sr5UH");
   dirsH.push_back("sr6UH");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("sr7UH");
-  dirsH.push_back("sr8UH");
   dirsH.push_back("sr9UH");
   dirsH.push_back("sr10UH");
   dirsH.push_back("sr11UH");
