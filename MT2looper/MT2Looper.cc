@@ -30,6 +30,7 @@
 //MT2
 #include "../MT2CORE/Plotting/PlotUtilities.h"
 #include "../MT2CORE/applyWeights.h"
+#include "../MT2CORE/sigSelectionsMT2Higgs.h"
 
 using namespace std;
 using namespace mt2;
@@ -116,6 +117,7 @@ void MT2Looper::SetSignalRegions(){
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
   SRVec =  getSignalRegionsICHEP(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
+  SRVecHcand = getSignalRegionsMT2Higgs();
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -301,6 +303,21 @@ void MT2Looper::SetSignalRegions(){
   dir->cd();
   plot1D("h_n_mt2bins",  1, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.srHistMap, "", 1, 0, 2);
   outfile_->cd();
+
+  for (unsigned int i = 0; i < SRVecHcand.size(); i++) {
+    std::vector<std::string> vars = SRVecHcand.at(i).GetListOfVariables();
+    TDirectory * dir = (TDirectory*)outfile_->Get((SRVecHcand.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir((SRVecHcand.at(i).GetName()).c_str());
+    } 
+    dir->cd();
+    for (unsigned int j = 0; j < vars.size(); j++) {
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecHcand.at(i).GetLowerBound(vars.at(j)), SRVecHcand.at(i).srHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).srHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).srHistMap, "", 1, 0, 2);
+  }
+
   // -- end of mt2higgs --
 
   //setup inclusive regions
@@ -1049,7 +1066,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // doMT2Higgs = doMinMTBMet;
       // doMT2Higgs = doMbbMax;
-      if (!doMT2Higgs) continue;
+      // if (!doMT2Higgs) continue;
 
       // -- end of mt2higgs --
 
@@ -1063,7 +1080,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosSRBase();
 	fillHistosInclusive();
 
-        // if (doMT2Higgs)
+        if (doMT2Higgs)
           fillHistosSRMT2Higgs();
       }
 
@@ -1134,6 +1151,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   }
   savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
   savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
+
+  savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBase.GetName().c_str());
+  for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
+    if(!SRVecHcand.at(srN).srHistMap.empty()){
+      savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, SRVecHcand.at(srN).GetName().c_str());
+    }
+  }
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(!SRVec.at(srN).srHistMap.empty()){
@@ -1281,7 +1305,7 @@ void MT2Looper::fillHistosSRBase() {
 void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET90_PFMHT90)) return;
+  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1308,10 +1332,22 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     values_monojet["njets"]       = t.nJet30;
     values_monojet["met"]         = t.met_pt;
 
-    if(SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
+    if (SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
   }
   if ((SRBaseHcand.PassesSelection(values)) || (passMonojet)) {
     fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), SRBaseInclHcand.GetName(), "");
+  }
+
+  values["njets"]       = t.nJet30;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
+  values.erase("passesHtMet");
+
+  for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
+    if (SRVecHcand.at(srN).PassesSelection(values)){
+      fillHistosMT2Higgs(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix);
+      break; //signal regions are orthogonal, event cannot be in more than one
+    }
   }
 
   return;
