@@ -1044,7 +1044,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doMbbMax    = false;
 
       if (p4sBJets.size() >= 2) doMT2Higgs = true;
-      if (doMT2Higgs && (isHcand || t.minMTBMet > 200)) doMinMTBMet = true;
+      if (doMT2Higgs && isHcand && t.minMTBMet > 200) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
       // doMT2Higgs = doMinMTBMet;
