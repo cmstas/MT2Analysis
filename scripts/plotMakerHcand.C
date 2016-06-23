@@ -639,6 +639,176 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 }
 
 //_______________________________________________________________________________
+void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int mt2bin = -1) {
+
+  // read off yields from h_mt2bins hist in each topological region
+  vector<TFile*> samples = samplesVec[0];
+
+  const unsigned int n = samples.size();
+  const unsigned int ndirs = dirs.size();
+  const unsigned int nselecs = selecs.size();
+
+  if (nselecs < 2) cout << "Use printTable instead!\n";
+
+  vector<double> bgtot(ndirs*nselecs, 0);
+  vector<double> bgerr(ndirs*nselecs, 0);
+
+  ofile << "\\begin{table}[H]" << std::endl;
+  ofile << "\\scriptsize" << std::endl;
+  ofile << "\\centering" << std::endl;
+  ofile << "\\caption{" << caption << "}" << std::endl;
+  ofile << "\\begin{tabular}{r";
+  for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
+  ofile << "}" << std::endl;
+  ofile << "\\hline\\hline" << std::endl;
+
+  // header
+  ofile << "\\multirow{2}{*}{Sample}";
+  if (ndirs % nselecs != 0) cout << "WARNING: Receive " << ndirs << " dirs for " << nselecs << " comparison!" << endl;
+  for (unsigned int idir = 0; idir < ndirs; ++idir)
+    ofile << " & \\multicolumn{" << nselecs << "}{c|}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
+  ofile << " \\\\" << endl
+        << "\\cline{2-" << ndirs+1 << "}" << endl;
+  for (unsigned int i = 0; i < ndirs; ++i)
+    for (auto it = selecs.begin(); it != selecs.end(); ++it)
+      ofile << " & " << *it;
+  ofile << " \\\\" << endl;
+  ofile << "\\hline\\hline" << endl;
+
+  // backgrounds first -- loop backwards
+  for ( int i = n-1 ; i >= 0 ; --i ){
+    if ( TString(names.at(i)).Contains("data") ) {found_data = true; continue;}
+    if ( TString(names.at(i)).Contains("sig") ) continue;
+    ofile << getTableName(names.at(i));
+    for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+      for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+        TString fullhistname = Form("%s/h_mt2bins", dirs.at(idir).c_str());
+        TH1D* h = (TH1D*) samplesVec[isel].at(i)->Get(fullhistname);
+        double yield = 0.;
+        double err = 0.;
+        int idx = idir*nselecs + isel;
+        if (h) {
+          // use all bins
+          if (mt2bin < 0) {
+            yield = h->IntegralAndError(0,-1,err);
+            bgtot.at(idx) += yield;
+            bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+          }
+          // last bin: include overflow
+          else if (mt2bin == h->GetXaxis()->GetNbins()) {
+            yield = h->IntegralAndError(mt2bin,-1,err);
+            bgtot.at(idx) += yield;
+            bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+          }
+          // single bin, not last bin
+          else {
+            yield = h->GetBinContent(mt2bin);
+            err = h->GetBinError(mt2bin);
+            bgtot.at(idx) += yield;
+            bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+          }
+        }
+        if (yield > 10.) {
+          ofile << "  &  " << Form("%.1f $\\pm$ %.1f", yield, err);
+        } else {
+          ofile << "  &  " << Form("%.2f $\\pm$ %.2f", yield, err);
+        }
+      }
+    }
+    ofile << " \\\\" << endl;
+  } // loop over samples
+
+  // print bg totals
+  ofile << "\\hline" << endl;
+  ofile << "Total SM";
+  for ( unsigned int idx = 0; idx < bgtot.size(); ++idx ) {
+    double yield = bgtot.at(idx);
+    double err = bgerr.at(idx);
+    if (yield > 10.) {
+      //  	ofile << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
+      ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+    } else {
+      //  	ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+      ofile << "  &  " << Form("%.2f $\\pm$ %.2f",yield,err);
+    }
+  }
+  ofile << " \\\\" << endl;
+  ofile << "\\hline" << endl;
+
+  // // next print data, if it exists
+  // if (found_data) {
+  //   for( unsigned int i = 0 ; i < n ; i++ ){
+  //     if( !TString(names.at(i)).Contains("data") ) continue;
+  //     ofile << getTableName(names.at(i));
+  //     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+  //       TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+  //       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+  //       double yield = 0.;
+  //       if (h) {
+  //         // use all bins
+  //         if (mt2bin < 0) {
+  //           yield = h->Integral(0,-1);
+  //         }
+  //         // last bin: include overflow
+  //         else if (mt2bin == h->GetXaxis()->GetNbins()) {
+  //           yield = h->Integral(mt2bin,-1);
+  //         }
+  //         // single bin, not last bin
+  //         else {
+  //           yield = h->GetBinContent(mt2bin);
+  //         }
+  //       }
+  //       ofile << "  &  " << Form("%d",(int)yield);
+  //     }
+  //     ofile << " \\\\" << endl;
+  //   } // loop over samples
+  //   ofile << "\\hline" << endl;
+  // } // if found_data
+
+  // // finally print signals
+  // for( unsigned int i = 0 ; i < n ; i++ ){
+  //   if( !TString(names.at(i)).Contains("sig") ) continue;
+  //   ofile << getTableName(names.at(i));
+  //   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+  //     TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+  //     TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+  //     double yield = 0.;
+  //     double err = 0.;
+  //     if (h) {
+  //       // use all bins
+  //       if (mt2bin < 0) {
+  //         yield = h->IntegralAndError(0,-1,err);
+  //       }
+  //       // last bin: include overflow
+  //       else if (mt2bin == h->GetXaxis()->GetNbins()) {
+  //         yield = h->IntegralAndError(mt2bin,-1,err);
+  //       }
+  //       // single bin, not last bin
+  //       else {
+  //         yield = h->GetBinContent(mt2bin);
+  //         err = h->GetBinError(mt2bin);
+  //       }
+  //     }
+  //     if (yield > 10.) {
+  //       //  	ofile << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
+  //       ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+  //     } else {
+  //       //  	ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+  //       ofile << "  &  " << Form("%.2f $\\pm$ %.2f",yield,err);
+  //     }
+  //   }
+  //   ofile << " \\\\" << endl;
+  // } // loop over samples
+
+  ofile << "\\hline" << std::endl;
+  ofile << "\\end{tabular}" << std::endl;
+  ofile << "\\end{table}" << std::endl;
+
+  ofile << endl;
+  return;
+}
+
+//_______________________________________________________________________________
 void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs, string caption = "", int compare = 0, int mt2bin = -1 ) {
 
   // read off yields from h_mt2bins hist in each topological region
@@ -649,9 +819,12 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   vector<double> bgtot(ndirs,0.);
   vector<double> bgerr(ndirs,0.);
 
+  if (compare == 1) caption += " (" + getJetBJetTableLabel(samples.at(0), dirs.at(0)) + ")";
+
   ofile << "\\begin{table}[H]" << std::endl;
   ofile << "\\scriptsize" << std::endl;
   ofile << "\\centering" << std::endl;
+  ofile << "\\caption{" << caption << "}" << std::endl;
   ofile << "\\begin{tabular}{r";
   for (unsigned int idir=0; idir < ndirs; ++idir) ofile << "|c";
   ofile << "}" << std::endl;
@@ -805,11 +978,8 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     ofile << " \\\\" << endl;
   } // loop over samples
 
-  // if (caption == "") caption = 
-  if (compare) caption += " (" + getJetBJetTableLabel(samples.at(0), dirs.at(0)) + ")";
   ofile << "\\hline" << std::endl;
   ofile << "\\end{tabular}" << std::endl;
-  ofile << "\\caption{" << caption << "}" << std::endl;
   ofile << "\\end{table}" << std::endl;
 
   ofile << endl;
@@ -1216,7 +1386,7 @@ void plotMakerHcand() {
   ofile << "\\usepackage{multirow}" << std::endl;
   ofile << "\\usepackage[table]{xcolor}" << std::endl;
   ofile << "\\usepackage{float}" << std::endl;
-  ofile << "\\begin{document}" << std::endl;
+  ofile << "\\begin{document}" << std::endl << std::endl;
 
   // vector<string> dirs;
   // dirs.push_back("2bVL");
@@ -1228,6 +1398,11 @@ void plotMakerHcand() {
   //   printDetailedTable(samples, names, dirs.at(i));
   //   if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   // }
+  vector<string> selecs{"original", "minMTBMet"};
+
+  vector< vector<TFile*> > samplesVec;
+  for (auto it = selecs.begin(); it != selecs.end(); ++it)
+    samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
   vector<string> dirsH;
   dirsH.push_back("srbase");
@@ -1240,106 +1415,113 @@ void plotMakerHcand() {
   dirsH.push_back("3bVL");
   dirsH.push_back("4bVL");
   dirsH.push_back("5bVL");
-  printTable(samples, names, dirsH, "VL");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450");
   dirsH.clear();
 
-  dirsH.push_back("2bL");
-  dirsH.push_back("3bL");
-  dirsH.push_back("4bL");
-  dirsH.push_back("5bL");
-  printTable(samples, names, dirsH, "L");
-  dirsH.clear();
+  // dirsH.push_back("2bVL");
+  // dirsH.push_back("3bVL");
+  // dirsH.push_back("4bVL");
+  // dirsH.push_back("5bVL");
+  // printTable(samples, names, dirsH, "VL");
+  // dirsH.clear();
 
-  dirsH.push_back("2bM");
-  dirsH.push_back("3bM");
-  dirsH.push_back("4bM");
-  dirsH.push_back("5bM");
-  printTable(samples, names, dirsH, "M");
-  dirsH.clear();
+  // dirsH.push_back("2bL");
+  // dirsH.push_back("3bL");
+  // dirsH.push_back("4bL");
+  // dirsH.push_back("5bL");
+  // printTable(samples, names, dirsH, "L");
+  // dirsH.clear();
 
-  dirsH.push_back("2bH");
-  dirsH.push_back("3bH");
-  dirsH.push_back("4bH");
-  dirsH.push_back("5bH");
-  printTable(samples, names, dirsH, "H");
-  dirsH.clear();
+  // dirsH.push_back("2bM");
+  // dirsH.push_back("3bM");
+  // dirsH.push_back("4bM");
+  // dirsH.push_back("5bM");
+  // printTable(samples, names, dirsH, "M");
+  // dirsH.clear();
 
-  dirsH.push_back("2bUH");
-  dirsH.push_back("3bUH");
-  dirsH.push_back("4bUH");
-  dirsH.push_back("5bUH");
-  printTable(samples, names, dirsH, "UH");
-  dirsH.clear();
+  // dirsH.push_back("2bH");
+  // dirsH.push_back("3bH");
+  // dirsH.push_back("4bH");
+  // dirsH.push_back("5bH");
+  // printTable(samples, names, dirsH, "H");
+  // dirsH.clear();
 
-  dirsH.push_back("2b2jVL");
-  dirsH.push_back("3b2jVL");
-  dirsH.push_back("4b2jVL");
-  dirsH.push_back("5b2jVL");
-  printTable(samples, names, dirsH, "2-5j VL");
-  dirsH.clear();
+  // dirsH.push_back("2bUH");
+  // dirsH.push_back("3bUH");
+  // dirsH.push_back("4bUH");
+  // dirsH.push_back("5bUH");
+  // printTable(samples, names, dirsH, "UH");
+  // dirsH.clear();
 
-  dirsH.push_back("2b2jL");
-  dirsH.push_back("3b2jL");
-  dirsH.push_back("4b2jL");
-  dirsH.push_back("5b2jL");
-  printTable(samples, names, dirsH, "2-5j VL");
-  dirsH.clear();
+  // dirsH.push_back("2b2jVL");
+  // dirsH.push_back("3b2jVL");
+  // dirsH.push_back("4b2jVL");
+  // dirsH.push_back("5b2jVL");
+  // printTable(samples, names, dirsH, "2-5j VL");
+  // dirsH.clear();
 
-  dirsH.push_back("2b2jM");
-  dirsH.push_back("3b2jM");
-  dirsH.push_back("4b2jM");
-  dirsH.push_back("5b2jM");
-  printTable(samples, names, dirsH, "2-5j VL");
-  dirsH.clear();
+  // dirsH.push_back("2b2jL");
+  // dirsH.push_back("3b2jL");
+  // dirsH.push_back("4b2jL");
+  // dirsH.push_back("5b2jL");
+  // printTable(samples, names, dirsH, "2-5j VL");
+  // dirsH.clear();
 
-  dirsH.push_back("2b2jH");
-  dirsH.push_back("3b2jH");
-  dirsH.push_back("4b2jH");
-  dirsH.push_back("5b2jH");
-  printTable(samples, names, dirsH, "2-5j VL");
-  dirsH.clear();
+  // dirsH.push_back("2b2jM");
+  // dirsH.push_back("3b2jM");
+  // dirsH.push_back("4b2jM");
+  // dirsH.push_back("5b2jM");
+  // printTable(samples, names, dirsH, "2-5j VL");
+  // dirsH.clear();
 
-  dirsH.push_back("2b2jUH");
-  dirsH.push_back("3b2jUH");
-  dirsH.push_back("4b2jUH");
-  dirsH.push_back("5b2jUH");
-  printTable(samples, names, dirsH, "2-5j VL");
-  dirsH.clear();
+  // dirsH.push_back("2b2jH");
+  // dirsH.push_back("3b2jH");
+  // dirsH.push_back("4b2jH");
+  // dirsH.push_back("5b2jH");
+  // printTable(samples, names, dirsH, "2-5j VL");
+  // dirsH.clear();
 
-  dirsH.push_back("2b6jVL");
-  dirsH.push_back("3b6jVL");
-  dirsH.push_back("4b6jVL");
-  dirsH.push_back("5b6jVL");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("2b2jUH");
+  // dirsH.push_back("3b2jUH");
+  // dirsH.push_back("4b2jUH");
+  // dirsH.push_back("5b2jUH");
+  // printTable(samples, names, dirsH, "2-5j VL");
+  // dirsH.clear();
 
-  dirsH.push_back("2b6jL");
-  dirsH.push_back("3b6jL");
-  dirsH.push_back("4b6jL");
-  dirsH.push_back("5b6jL");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("2b6jVL");
+  // dirsH.push_back("3b6jVL");
+  // dirsH.push_back("4b6jVL");
+  // dirsH.push_back("5b6jVL");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("2b6jM");
-  dirsH.push_back("3b6jM");
-  dirsH.push_back("4b6jM");
-  dirsH.push_back("5b6jM");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("2b6jL");
+  // dirsH.push_back("3b6jL");
+  // dirsH.push_back("4b6jL");
+  // dirsH.push_back("5b6jL");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("2b6jH");
-  dirsH.push_back("3b6jH");
-  dirsH.push_back("4b6jH");
-  dirsH.push_back("5b6jH");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("2b6jM");
+  // dirsH.push_back("3b6jM");
+  // dirsH.push_back("4b6jM");
+  // dirsH.push_back("5b6jM");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("2b6jUH");
-  dirsH.push_back("3b6jUH");
-  dirsH.push_back("4b6jUH");
-  dirsH.push_back("5b6jUH");
-  printTable(samples, names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("2b6jH");
+  // dirsH.push_back("3b6jH");
+  // dirsH.push_back("4b6jH");
+  // dirsH.push_back("5b6jH");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("2b6jUH");
+  // dirsH.push_back("3b6jUH");
+  // dirsH.push_back("4b6jUH");
+  // dirsH.push_back("5b6jUH");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
 
   // dirsH.push_back("sr3VL");
   // dirsH.push_back("sr6VL");
