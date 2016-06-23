@@ -69,7 +69,7 @@ const bool applyDummyWeights = false;
 // turn on to apply lepton SF
 const bool applyLeptonSFs = false;
 // turn on to apply json file to data (default true)
-const bool applyJSON = true;
+const bool applyJSON = false;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
@@ -226,10 +226,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L3Absolute_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_DATA_L2L3Residual_AK4PFchs.txt");
       } else if (isFastsim) {
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/MCRUN2_74_V9_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/MCRUN2_74_V9_Uncertainty_AK4PFchs.txt"; // not sure if these are correct..
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"; 
       } else {
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L1FastJet_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV3_MC_L2Relative_AK4PFchs.txt");
@@ -339,6 +339,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
       HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
+      HLT_PFMETNoMu100_PFMHTNoMu100 = passHLTTriggerPattern("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v");
+      HLT_PFMETNoMu110_PFMHTNoMu110 = passHLTTriggerPattern("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v");
       HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");
       HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v") || passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDLoose_v");
       HLT_PFMET100_PFMHT100         = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_v");
@@ -353,7 +355,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         passHLTTriggerPattern("HLT_Ele22_eta2p1_WPLoose_Gsf_v") ||
         passHLTTriggerPattern("HLT_Ele23_WP75_Gsf_v") ||
         passHLTTriggerPattern("HLT_Ele22_eta2p1_WP75_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_Gsf_v");
+	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPTight_Gsf_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
       HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");
@@ -1332,6 +1336,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       vector<float> vec_gamma_sigmaIetaIeta;
       vector<float> vec_gamma_r9;
       vector<float> vec_gamma_hOverE;
+      vector<float> vec_gamma_hOverE015;
       vector<int>   vec_gamma_idCutBased;
 
       ngamma = 0;
@@ -1362,7 +1367,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         vec_gamma_phIso.push_back ( photons_recoPhotonIso().at(iGamma) );
         vec_gamma_r9.push_back (  photons_full5x5_r9().at(iGamma) );
         vec_gamma_hOverE.push_back (  photons_full5x5_hOverEtowBC().at(iGamma) );
-        vec_gamma_idCutBased.push_back (  isTightPhoton(iGamma,analysis_t::HAD,3) ? 1 : 0 );
+        vec_gamma_hOverE015.push_back (  photons_full5x5_hOverE().at(iGamma) );
+        vec_gamma_idCutBased.push_back (  isTightPhoton(iGamma,analysis_t::HAD,3) ? 1 : 0 ); 
         if(pt > 20) nGammas20++;
 
         // Some work for truth-matching (should be integrated in CMS3 as for the leptons)
@@ -1436,6 +1442,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
         gamma_sigmaIetaIeta[i]  = vec_gamma_sigmaIetaIeta.at(it->first);
         gamma_r9[i]           = vec_gamma_r9.at(it->first);
         gamma_hOverE[i]       = vec_gamma_hOverE.at(it->first);
+        gamma_hOverE015[i]    = vec_gamma_hOverE015.at(it->first);
         gamma_idCutBased[i]   = vec_gamma_idCutBased.at(it->first);
         i++;
       }
@@ -2456,6 +2463,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
     BabyTree_->Branch("HLT_PFMETNoMu90_PFMHTNoMu90", &HLT_PFMETNoMu90_PFMHTNoMu90 );
     BabyTree_->Branch("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 );
+    BabyTree_->Branch("HLT_PFMETNoMu100_PFMHTNoMu100", &HLT_PFMETNoMu100_PFMHTNoMu100 );
+    BabyTree_->Branch("HLT_PFMETNoMu110_PFMHTNoMu110", &HLT_PFMETNoMu110_PFMHTNoMu110 );
     BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
     BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
     BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
@@ -2534,6 +2543,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
     BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
     BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
+    BabyTree_->Branch("gamma_hOverE015", gamma_hOverE015, "gamma_hOverE015[ngamma]/F" );
     BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
     BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
     BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
@@ -2813,6 +2823,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
     HLT_PFHT350_PFMET120 = -999;
     HLT_PFMETNoMu90_PFMHTNoMu90 = -999;
     HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 = -999;
+    HLT_PFMETNoMu100_PFMHTNoMu100 = -999;
+    HLT_PFMETNoMu110_PFMHTNoMu110 = -999;
     HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
     HLT_PFMET90_PFMHT90 = -999;
     HLT_PFMET100_PFMHT100 = -999;
@@ -2994,6 +3006,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       gamma_sigmaIetaIeta[i] = -999;
       gamma_r9[i] = -999;
       gamma_hOverE[i] = -999;
+      gamma_hOverE015[i] = -999;
       gamma_idCutBased[i] = -999;
     }
 

@@ -180,6 +180,8 @@ class babyMaker {
   Int_t           HLT_PFHT350_PFMET120;   
   Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
   Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_PFMETNoMu100_PFMHTNoMu100;
+  Int_t           HLT_PFMETNoMu110_PFMHTNoMu110;
   Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
   Int_t           HLT_PFMET90_PFMHT90;
   Int_t           HLT_PFMET100_PFMHT100;
@@ -271,6 +273,7 @@ class babyMaker {
   Float_t         gamma_sigmaIetaIeta[max_ngamma];   //[ngamma]
   Float_t         gamma_r9[max_ngamma];   //[ngamma]
   Float_t         gamma_hOverE[max_ngamma];   //[ngamma]
+  Float_t         gamma_hOverE015[max_ngamma];   //[ngamma]
   Int_t           gamma_idCutBased[max_ngamma];   //[ngamma]
 
   // event level vars recalculated for photon+jets control region

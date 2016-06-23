@@ -90,7 +90,7 @@ bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
-bool applyJSON = false;
+bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 // get signal scan nevents from file
@@ -419,6 +419,15 @@ void MT2Looper::SetSignalRegions(){
   SRBaseMonojet.SetVarCRSL("met", 200, -1);
   SRBaseMonojet.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBaseMonojet.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
+  SRBaseMonojet.SetVarCRQCD("ht", 200, -1);
+  SRBaseMonojet.SetVarCRQCD("j1pt", 200, -1);
+  SRBaseMonojet.SetVarCRQCD("j2pt", 30, -1);
+  SRBaseMonojet.SetVarCRQCD("nlep", 0, 1);
+  SRBaseMonojet.SetVarCRQCD("njets", 2, 3);
+  SRBaseMonojet.SetVarCRQCD("nbjets", 0, -1);
+  SRBaseMonojet.SetVarCRQCD("met", 200, -1);
+  SRBaseMonojet.SetVarCRQCD("deltaPhiMin", 0., 0.3);
+  SRBaseMonojet.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
   float SRBaseMonojet_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseMonojet.SetMT2Bins(7, SRBaseMonojet_mt2bins);
 
@@ -484,6 +493,22 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
 
+  vars = SRBaseMonojet.GetListOfVariablesCRQCD();
+  dir = (TDirectory*)outfile_->Get("crqcdbaseJ");
+  if (dir == 0) {
+    dir = outfile_->mkdir("crqcdbaseJ");
+  } 
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseMonojet.GetLowerBoundCRQCD(vars.at(j)), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseMonojet.GetUpperBoundCRQCD(vars.at(j)), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+
+  
+  // inclusive in njets (mono+multi jet regions)
   SRBaseIncl.SetName("srbaseIncl");
   float SRBaseIncl_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
   SRBaseIncl.SetMT2Bins(7, SRBaseIncl_mt2bins);
@@ -543,7 +568,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -785,7 +810,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      const float lumi = 2.070;
+      const float lumi = 3.99;
     
       evtweight_ = 1.;
 
@@ -1693,6 +1718,15 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
 	fillHistosGammaJets(SRBase.crgjHistMap, SRBase.crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
       }
     }
+
+    //inclusive in Sieie to get sieie plots
+    if(iso<isoCutLoose){
+      add = "LooseAllSieie";
+      if(passBase && passPtMT2) {
+	fillHistosGammaJets(SRBase.crgjHistMap, SRBase.crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbase", suffix+add);
+      }
+    }
+
   }
       
 
@@ -1904,7 +1938,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT800 || t.HLT_PFMET100_PFMHT100 || t.HLT_PFHT300_PFMET100)) {
+  if (passMonojetId_){
 
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = t.deltaPhiMin;
@@ -1923,6 +1957,11 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
 	//      break;//control regions are not necessarily orthogonal
       }
     }
+
+    if(SRBaseMonojet.PassesSelectionCRQCD(values_monojet)){
+        fillHistosQCD(SRBaseMonojet.crqcdHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crqcdbaseJ", suffix);
+    }
+
   } // monojet regions
   
   return;
@@ -2251,6 +2290,14 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot1D("h_chisoW1"+s,      chiso,   1, h_1d, ";ch iso [GeV]", 100, 0, 50);
 
   plotRooDataSet("rds_chIso_"+s, x_, w_, evtweight_, datasets, "");
+
+  float Sieie = t.gamma_sigmaIetaIeta[0];
+  plot1D("h_SigmaIetaIeta"+s, Sieie, evtweight_, h_1d, "; Photon #sigma_{i#eta i#eta}", 160,0,0.04);
+  if(fabs(t.gamma_eta[0]) < 1.479)
+      plot1D("h_SigmaIetaIetaEB"+s, Sieie, evtweight_, h_1d, "; Photon #sigma_{i#eta i#eta}", 160,0,0.04);
+  else
+      plot1D("h_SigmaIetaIetaEE"+s, Sieie, evtweight_, h_1d, "; Photon #sigma_{i#eta i#eta}", 160,0,0.04);
+
 
   //for FR calculation
   //if( (t.evt_id>110 && t.evt_id<120) || t.isData){ //only use qcd samples with pt>=470 to compute FR
