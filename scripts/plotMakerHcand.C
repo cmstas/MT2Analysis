@@ -639,7 +639,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 }
 
 //_______________________________________________________________________________
-void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs, int mt2bin = -1 ) {
+void printTable( vector<TFile*> samples , vector<string> names , vector<string> dirs, string caption = "", int compare = 0, int mt2bin = -1 ) {
 
   // read off yields from h_mt2bins hist in each topological region
 
@@ -649,24 +649,34 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
   vector<double> bgtot(ndirs,0.);
   vector<double> bgerr(ndirs,0.);
 
-  ofile << "\\begin{table}[!ht]" << std::endl;
+  ofile << "\\begin{table}[H]" << std::endl;
   ofile << "\\scriptsize" << std::endl;
   ofile << "\\centering" << std::endl;
   ofile << "\\begin{tabular}{r";
   for (unsigned int idir=0; idir < ndirs; ++idir) ofile << "|c";
   ofile << "}" << std::endl;
-  ofile << "\\hline" << std::endl;
-
-  ofile << endl << "\\hline" << endl
-        << "Sample";
+  ofile << "\\hline\\hline" << std::endl;
 
   // header
-  for (unsigned int idir = 0; idir < ndirs; ++idir) {
-    //ofile << " & " << getRegionName(dirs.at(idir));
-    ofile << " & " << getJetBJetTableLabel(samples.at(0), dirs.at(idir));
+  if (compare > 1) {
+    ofile << "\\multirow{2}{*}{Sample}";
+    if (ndirs % compare != 0) cout << "WARNING: Receive " << ndirs << " dirs for " << compare << " comparison!" << endl;
+    for (unsigned int idir = 0; idir < ndirs/compare; ++idir)
+      ofile << " & \\multicolumn{" << compare << "}{c|}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir*compare)) << " }";
+    ofile << " \\\\" << endl
+          << "\\cline{2-" << ndirs+1 << "}" << endl;
+    for (unsigned int idir = 0; idir < ndirs; ++idir)
+      ofile << " & " << dirs.at(idir);
+  }    
+  else {
+    ofile << "Sample";
+    for (unsigned int idir = 0; idir < ndirs; ++idir) {
+      if (compare) ofile << " & " << dirs.at(idir);
+      else ofile << " & " << getJetBJetTableLabel(samples.at(0), dirs.at(idir));
+    }
   }
-  ofile << " \\\\" << endl
-    << "\\hline\\hline" << endl;
+  ofile << " \\\\" << endl;
+  ofile << "\\hline\\hline" << endl;
 
   // backgrounds first -- loop backwards
   for( int i = n-1 ; i >= 0 ; --i ){
@@ -795,8 +805,11 @@ void printTable( vector<TFile*> samples , vector<string> names , vector<string> 
     ofile << " \\\\" << endl;
   } // loop over samples
 
+  // if (caption == "") caption = 
+  if (compare) caption += " (" + getJetBJetTableLabel(samples.at(0), dirs.at(0)) + ")";
+  ofile << "\\hline" << std::endl;
   ofile << "\\end{tabular}" << std::endl;
-  ofile << "\\caption{}" << std::endl;
+  ofile << "\\caption{" << caption << "}" << std::endl;
   ofile << "\\end{table}" << std::endl;
 
   ofile << endl;
@@ -1195,19 +1208,21 @@ void plotMakerHcand() {
   }
 
   ofile.open("tables/table.tex");
-  ofile << "\\documentclass[landscape, 10pt]{article}" << std::endl;
+  ofile << "\\documentclass[11pt]{article}" << std::endl;
   ofile << "\\usepackage{amsmath}" << std::endl;
   ofile << "\\usepackage{amssymb}" << std::endl;
   ofile << "\\usepackage{graphicx}" << std::endl;
-  ofile << "\\usepackage[left=.1in,top=1in,right=.1in,bottom=.1in,nohead]{geometry}" << std::endl;
+  ofile << "\\usepackage[left=1in,top=1in,right=1in,bottom=1in,nohead]{geometry}" << std::endl;
+  ofile << "\\usepackage{multirow}" << std::endl;
+  ofile << "\\usepackage[table]{xcolor}" << std::endl;
+  ofile << "\\usepackage{float}" << std::endl;
   ofile << "\\begin{document}" << std::endl;
 
   // vector<string> dirs;
-  // dirs.push_back("sr1L");
-  // dirs.push_back("sr2L");
-  // dirs.push_back("sr9UH");
-  // dirs.push_back("sr10UH");
-  // dirs.push_back("sr11UH");
+  // dirs.push_back("2bVL");
+  // dirs.push_back("3bVL");
+  // dirs.push_back("4bVL");
+  // dirs.push_back("5bVL");
 
   // for(unsigned int i=0; i<dirs.size(); i++){
   //   printDetailedTable(samples, names, dirs.at(i));
@@ -1221,45 +1236,150 @@ void plotMakerHcand() {
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr3VL");
-  dirsH.push_back("sr6VL");
-  dirsH.push_back("sr9VL");
-  dirsH.push_back("sr10VL");
-  dirsH.push_back("sr11VL");
+  dirsH.push_back("2bVL");
+  dirsH.push_back("3bVL");
+  dirsH.push_back("4bVL");
+  dirsH.push_back("5bVL");
+  printTable(samples, names, dirsH, "VL");
+  dirsH.clear();
+
+  dirsH.push_back("2bL");
+  dirsH.push_back("3bL");
+  dirsH.push_back("4bL");
+  dirsH.push_back("5bL");
+  printTable(samples, names, dirsH, "L");
+  dirsH.clear();
+
+  dirsH.push_back("2bM");
+  dirsH.push_back("3bM");
+  dirsH.push_back("4bM");
+  dirsH.push_back("5bM");
+  printTable(samples, names, dirsH, "M");
+  dirsH.clear();
+
+  dirsH.push_back("2bH");
+  dirsH.push_back("3bH");
+  dirsH.push_back("4bH");
+  dirsH.push_back("5bH");
+  printTable(samples, names, dirsH, "H");
+  dirsH.clear();
+
+  dirsH.push_back("2bUH");
+  dirsH.push_back("3bUH");
+  dirsH.push_back("4bUH");
+  dirsH.push_back("5bUH");
+  printTable(samples, names, dirsH, "UH");
+  dirsH.clear();
+
+  dirsH.push_back("2b2jVL");
+  dirsH.push_back("3b2jVL");
+  dirsH.push_back("4b2jVL");
+  dirsH.push_back("5b2jVL");
+  printTable(samples, names, dirsH, "2-5j VL");
+  dirsH.clear();
+
+  dirsH.push_back("2b2jL");
+  dirsH.push_back("3b2jL");
+  dirsH.push_back("4b2jL");
+  dirsH.push_back("5b2jL");
+  printTable(samples, names, dirsH, "2-5j VL");
+  dirsH.clear();
+
+  dirsH.push_back("2b2jM");
+  dirsH.push_back("3b2jM");
+  dirsH.push_back("4b2jM");
+  dirsH.push_back("5b2jM");
+  printTable(samples, names, dirsH, "2-5j VL");
+  dirsH.clear();
+
+  dirsH.push_back("2b2jH");
+  dirsH.push_back("3b2jH");
+  dirsH.push_back("4b2jH");
+  dirsH.push_back("5b2jH");
+  printTable(samples, names, dirsH, "2-5j VL");
+  dirsH.clear();
+
+  dirsH.push_back("2b2jUH");
+  dirsH.push_back("3b2jUH");
+  dirsH.push_back("4b2jUH");
+  dirsH.push_back("5b2jUH");
+  printTable(samples, names, dirsH, "2-5j VL");
+  dirsH.clear();
+
+  dirsH.push_back("2b6jVL");
+  dirsH.push_back("3b6jVL");
+  dirsH.push_back("4b6jVL");
+  dirsH.push_back("5b6jVL");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr3L");
-  dirsH.push_back("sr6L");
-  dirsH.push_back("sr9L");
-  dirsH.push_back("sr10L");
-  dirsH.push_back("sr11L");
+  dirsH.push_back("2b6jL");
+  dirsH.push_back("3b6jL");
+  dirsH.push_back("4b6jL");
+  dirsH.push_back("5b6jL");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr3M");
-  dirsH.push_back("sr6M");
-  dirsH.push_back("sr9M");
-  dirsH.push_back("sr10M");
-  dirsH.push_back("sr11M");
+  dirsH.push_back("2b6jM");
+  dirsH.push_back("3b6jM");
+  dirsH.push_back("4b6jM");
+  dirsH.push_back("5b6jM");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr3H");
-  dirsH.push_back("sr6H");
-  dirsH.push_back("sr9H");
-  dirsH.push_back("sr10H");
-  dirsH.push_back("sr11H");
+  dirsH.push_back("2b6jH");
+  dirsH.push_back("3b6jH");
+  dirsH.push_back("4b6jH");
+  dirsH.push_back("5b6jH");
   printTable(samples, names, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("sr3UH");
-  dirsH.push_back("sr6UH");
-  dirsH.push_back("sr9UH");
-  dirsH.push_back("sr10UH");
-  dirsH.push_back("sr11UH");
+  dirsH.push_back("2b6jUH");
+  dirsH.push_back("3b6jUH");
+  dirsH.push_back("4b6jUH");
+  dirsH.push_back("5b6jUH");
   printTable(samples, names, dirsH);
   dirsH.clear();
+
+  // dirsH.push_back("sr3VL");
+  // dirsH.push_back("sr6VL");
+  // dirsH.push_back("sr9VL");
+  // dirsH.push_back("sr10VL");
+  // dirsH.push_back("sr11VL");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("sr3L");
+  // dirsH.push_back("sr6L");
+  // dirsH.push_back("sr9L");
+  // dirsH.push_back("sr10L");
+  // dirsH.push_back("sr11L");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("sr3M");
+  // dirsH.push_back("sr6M");
+  // dirsH.push_back("sr9M");
+  // dirsH.push_back("sr10M");
+  // dirsH.push_back("sr11M");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("sr3H");
+  // dirsH.push_back("sr6H");
+  // dirsH.push_back("sr9H");
+  // dirsH.push_back("sr10H");
+  // dirsH.push_back("sr11H");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("sr3UH");
+  // dirsH.push_back("sr6UH");
+  // dirsH.push_back("sr9UH");
+  // dirsH.push_back("sr10UH");
+  // dirsH.push_back("sr11UH");
+  // printTable(samples, names, dirsH);
+  // dirsH.clear();
 
   ofile << "\\end{document}" << std::endl;
 

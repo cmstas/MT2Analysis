@@ -282,9 +282,9 @@ void MT2Looper::SetSignalRegions(){
   SRBaseHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
 
   vars = SRBaseHcand.GetListOfVariables();
-  dir = (TDirectory*)outfile_->Get((SRBaseHcand.GetName()).c_str());
+  dir = (TDirectory*)outfile_->Get(SRBaseHcand.GetName().c_str());
   if (dir == 0) {
-    dir = outfile_->mkdir((SRBaseHcand.GetName()).c_str());
+    dir = outfile_->mkdir(SRBaseHcand.GetName().c_str());
   }
   dir->cd();
   for(unsigned int j = 0; j < vars.size(); j++){
@@ -296,9 +296,9 @@ void MT2Looper::SetSignalRegions(){
 
   SRBaseInclHcand.SetName("srbaseInclHcand");
   SRBaseInclHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
-  dir = (TDirectory*)outfile_->Get((SRBaseInclHcand.GetName()).c_str());
+  dir = (TDirectory*)outfile_->Get(SRBaseInclHcand.GetName().c_str());
   if (dir == 0) {
-    dir = outfile_->mkdir((SRBaseInclHcand.GetName()).c_str());
+    dir = outfile_->mkdir(SRBaseInclHcand.GetName().c_str());
   }
   dir->cd();
   plot1D("h_n_mt2bins",  1, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.srHistMap, "", 1, 0, 2);
@@ -1064,7 +1064,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && isHcand && t.minMTBMet > 200) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
-      // doMT2Higgs = doMinMTBMet;
+      doMT2Higgs = doMinMTBMet;
       // doMT2Higgs = doMbbMax;
       // if (!doMT2Higgs) continue;
 
@@ -1141,18 +1141,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
-  savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
+  // savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
-  savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
-  savePlotsDir(SRBase.crrlHistMap,outfile_,"crrlbase");
-  if (!doMinimalPlots) {
-    savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
-    savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
-  }
-  savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
-  savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
+  // savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
+  // savePlotsDir(SRBase.crrlHistMap,outfile_,"crrlbase");
+  // if (!doMinimalPlots) {
+  //   savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
+  //   savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
+  // }
+  // savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
+  // savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
-  savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBase.GetName().c_str());
+  savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBaseHcand.GetName().c_str());
   for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if(!SRVecHcand.at(srN).srHistMap.empty()){
       savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, SRVecHcand.at(srN).GetName().c_str());
