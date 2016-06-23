@@ -639,7 +639,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
 }
 
 //_______________________________________________________________________________
-void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int mt2bin = -1) {
+void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int colorReduction = 0, int mt2bin = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
   vector<TFile*> samples = samplesVec[0];
@@ -652,6 +652,7 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
 
   vector<double> bgtot(ndirs*nselecs, 0);
   vector<double> bgerr(ndirs*nselecs, 0);
+  double yield_base = 0;
 
   ofile << "\\begin{table}[H]" << std::endl;
   ofile << "\\scriptsize" << std::endl;
@@ -666,9 +667,9 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
   ofile << "\\multirow{2}{*}{Sample}";
   if (ndirs % nselecs != 0) cout << "WARNING: Receive " << ndirs << " dirs for " << nselecs << " comparison!" << endl;
   for (unsigned int idir = 0; idir < ndirs; ++idir)
-    ofile << " & \\multicolumn{" << nselecs << "}{c|}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
+    ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
   ofile << " \\\\" << endl
-        << "\\cline{2-" << ndirs+1 << "}" << endl;
+        << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
   for (unsigned int i = 0; i < ndirs; ++i)
     for (auto it = selecs.begin(); it != selecs.end(); ++it)
       ofile << " & " << *it;
@@ -708,11 +709,22 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
             bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
           }
         }
-        if (yield > 10.) {
-          ofile << "  &  " << Form("%.1f $\\pm$ %.1f", yield, err);
-        } else {
-          ofile << "  &  " << Form("%.2f $\\pm$ %.2f", yield, err);
+        if (isel == 0) yield_base = yield;
+        ofile << "  &  ";
+        if (colorReduction && isel > 0 && yield_base/yield > colorReduction) {
+          int colorFactor;
+          if (yield == 0)
+            colorFactor = 0;
+          else if ((yield_base/yield)/(2*colorReduction) > 1)
+            colorFactor = 25;
+          else
+            colorFactor = 30*(1-(yield_base/yield)/(2*colorReduction));
+          ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
         }
+        if (yield > 10.)
+          ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+        else
+          ofile << Form("%.2f $\\pm$ %.2f", yield, err);
       }
     }
     ofile << " \\\\" << endl;
@@ -724,13 +736,26 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
   for ( unsigned int idx = 0; idx < bgtot.size(); ++idx ) {
     double yield = bgtot.at(idx);
     double err = bgerr.at(idx);
-    if (yield > 10.) {
-      //  	ofile << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
-      ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
-    } else {
-      //  	ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
-      ofile << "  &  " << Form("%.2f $\\pm$ %.2f",yield,err);
+    ofile << "  &  ";
+
+    if (colorReduction) {
+      if (idx%nselecs == 0)
+        yield_base = yield;
+      else if (yield_base/yield > colorReduction) {
+        int colorFactor;
+        if (yield == 0)
+          colorFactor = 0;
+        else if ((yield_base/yield)/(2*colorReduction) > 1)
+          colorFactor = 25;
+        else
+          colorFactor = 30*(1-(yield_base/yield)/(2*colorReduction));
+        ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
+      }
     }
+    if (yield > 10.)
+      ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+    else
+      ofile << Form("%.2f $\\pm$ %.2f", yield, err);
   }
   ofile << " \\\\" << endl;
   ofile << "\\hline" << endl;
@@ -1382,7 +1407,7 @@ void plotMakerHcand() {
   ofile << "\\usepackage{amsmath}" << std::endl;
   ofile << "\\usepackage{amssymb}" << std::endl;
   ofile << "\\usepackage{graphicx}" << std::endl;
-  ofile << "\\usepackage[left=1in,top=1in,right=1in,bottom=1in,nohead]{geometry}" << std::endl;
+  ofile << "\\usepackage[left=.51in,top=.7in,right=.5in,bottom=.7in,nohead]{geometry}" << std::endl;
   ofile << "\\usepackage{multirow}" << std::endl;
   ofile << "\\usepackage[table]{xcolor}" << std::endl;
   ofile << "\\usepackage{float}" << std::endl;
@@ -1415,7 +1440,21 @@ void plotMakerHcand() {
   dirsH.push_back("3bVL");
   dirsH.push_back("4bVL");
   dirsH.push_back("5bVL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2bL");
+  dirsH.push_back("3bL");
+  dirsH.push_back("4bL");
+  dirsH.push_back("5bL");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2b2jVL");
+  dirsH.push_back("3b2jVL");
+  dirsH.push_back("4b2jVL");
+  dirsH.push_back("5b2jVL");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450", 5);
   dirsH.clear();
 
   // dirsH.push_back("2bVL");
@@ -1423,144 +1462,6 @@ void plotMakerHcand() {
   // dirsH.push_back("4bVL");
   // dirsH.push_back("5bVL");
   // printTable(samples, names, dirsH, "VL");
-  // dirsH.clear();
-
-  // dirsH.push_back("2bL");
-  // dirsH.push_back("3bL");
-  // dirsH.push_back("4bL");
-  // dirsH.push_back("5bL");
-  // printTable(samples, names, dirsH, "L");
-  // dirsH.clear();
-
-  // dirsH.push_back("2bM");
-  // dirsH.push_back("3bM");
-  // dirsH.push_back("4bM");
-  // dirsH.push_back("5bM");
-  // printTable(samples, names, dirsH, "M");
-  // dirsH.clear();
-
-  // dirsH.push_back("2bH");
-  // dirsH.push_back("3bH");
-  // dirsH.push_back("4bH");
-  // dirsH.push_back("5bH");
-  // printTable(samples, names, dirsH, "H");
-  // dirsH.clear();
-
-  // dirsH.push_back("2bUH");
-  // dirsH.push_back("3bUH");
-  // dirsH.push_back("4bUH");
-  // dirsH.push_back("5bUH");
-  // printTable(samples, names, dirsH, "UH");
-  // dirsH.clear();
-
-  // dirsH.push_back("2b2jVL");
-  // dirsH.push_back("3b2jVL");
-  // dirsH.push_back("4b2jVL");
-  // dirsH.push_back("5b2jVL");
-  // printTable(samples, names, dirsH, "2-5j VL");
-  // dirsH.clear();
-
-  // dirsH.push_back("2b2jL");
-  // dirsH.push_back("3b2jL");
-  // dirsH.push_back("4b2jL");
-  // dirsH.push_back("5b2jL");
-  // printTable(samples, names, dirsH, "2-5j VL");
-  // dirsH.clear();
-
-  // dirsH.push_back("2b2jM");
-  // dirsH.push_back("3b2jM");
-  // dirsH.push_back("4b2jM");
-  // dirsH.push_back("5b2jM");
-  // printTable(samples, names, dirsH, "2-5j VL");
-  // dirsH.clear();
-
-  // dirsH.push_back("2b2jH");
-  // dirsH.push_back("3b2jH");
-  // dirsH.push_back("4b2jH");
-  // dirsH.push_back("5b2jH");
-  // printTable(samples, names, dirsH, "2-5j VL");
-  // dirsH.clear();
-
-  // dirsH.push_back("2b2jUH");
-  // dirsH.push_back("3b2jUH");
-  // dirsH.push_back("4b2jUH");
-  // dirsH.push_back("5b2jUH");
-  // printTable(samples, names, dirsH, "2-5j VL");
-  // dirsH.clear();
-
-  // dirsH.push_back("2b6jVL");
-  // dirsH.push_back("3b6jVL");
-  // dirsH.push_back("4b6jVL");
-  // dirsH.push_back("5b6jVL");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("2b6jL");
-  // dirsH.push_back("3b6jL");
-  // dirsH.push_back("4b6jL");
-  // dirsH.push_back("5b6jL");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("2b6jM");
-  // dirsH.push_back("3b6jM");
-  // dirsH.push_back("4b6jM");
-  // dirsH.push_back("5b6jM");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("2b6jH");
-  // dirsH.push_back("3b6jH");
-  // dirsH.push_back("4b6jH");
-  // dirsH.push_back("5b6jH");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("2b6jUH");
-  // dirsH.push_back("3b6jUH");
-  // dirsH.push_back("4b6jUH");
-  // dirsH.push_back("5b6jUH");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("sr3VL");
-  // dirsH.push_back("sr6VL");
-  // dirsH.push_back("sr9VL");
-  // dirsH.push_back("sr10VL");
-  // dirsH.push_back("sr11VL");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("sr3L");
-  // dirsH.push_back("sr6L");
-  // dirsH.push_back("sr9L");
-  // dirsH.push_back("sr10L");
-  // dirsH.push_back("sr11L");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("sr3M");
-  // dirsH.push_back("sr6M");
-  // dirsH.push_back("sr9M");
-  // dirsH.push_back("sr10M");
-  // dirsH.push_back("sr11M");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("sr3H");
-  // dirsH.push_back("sr6H");
-  // dirsH.push_back("sr9H");
-  // dirsH.push_back("sr10H");
-  // dirsH.push_back("sr11H");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("sr3UH");
-  // dirsH.push_back("sr6UH");
-  // dirsH.push_back("sr9UH");
-  // dirsH.push_back("sr10UH");
-  // dirsH.push_back("sr11UH");
-  // printTable(samples, names, dirsH);
   // dirsH.clear();
 
   ofile << "\\end{document}" << std::endl;
