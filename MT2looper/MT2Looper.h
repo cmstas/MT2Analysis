@@ -106,6 +106,8 @@ class MT2Looper {
   float cor_lepeff_sr_;
   float unc_lepeff_sr_UP_;
   float unc_lepeff_sr_DN_;
+
+  int ntrueBJets;
   
 };
 

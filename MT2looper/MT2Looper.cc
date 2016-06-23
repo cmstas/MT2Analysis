@@ -690,6 +690,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   unsigned int nEventsChain = nEvents;
   cout << "[MT2Looper::loop] running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
+  // -- testing
+  unsigned int nWorking = 0;
+  unsigned int nNotWorking = 0;
+  unsigned int SecondBJetCount = 0;
+  unsigned int BadPtRatioCount = 0;
+  unsigned int PossibleFakeBJetCount = 0;
+  // -* testing
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
@@ -1093,6 +1100,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // doMT2Higgs = doMbbMax;
       // if (!doMT2Higgs) continue;
 
+      // Gen matching for the bjets
+      ntrueBJets = 0;
+      vector<float> ptratios;
+
+      for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
+        bool findMatching = false;
+        bool foundBJet = false;
+        for (int igen = 0; igen < t.ngenStat23; ++igen) {
+          float thisDR = DeltaR(t.genStat23_eta[igen], p4sBJets[ibj].Eta(), t.genStat23_phi[igen], p4sBJets[ibj].Phi());
+          if (thisDR > 0.1) continue;
+          findMatching = true;
+          float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
+          if (abs(t.genStat23_pdgId[igen]) == 5) {
+            if (foundBJet) ++SecondBJetCount;
+            bool foundBJet = true;
+            if (ptratio < 0.5 || ptratio > 1.5) ++BadPtRatioCount;
+            ++ntrueBJets;
+          }
+          else if (ptratio > 0.8 && ptratio < 1.2)
+            ++PossibleFakeBJetCount;
+        }
+        if (findMatching) ++nWorking;
+        else ++nNotWorking;
+      }
       // -- end of mt2higgs --
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
@@ -1107,10 +1138,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
         if (doMT2Higgs)
           fillHistosSRMT2Higgs();
-        // if (doMinMTBMet)
-        //   fillHistosSRMT2Higgs("minMTBMet", "_2");
-        // if (doMbbMax)
-        //   fillHistosSRMT2Higgs("MbbMax", "_3");
       }
 
       // if (doDYplots) {
@@ -1271,6 +1298,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   bmark->Stop("benchmark");
   cout << endl;
+  // -- testing
+  cout << "nWorking: " << nWorking << endl
+       << "nNotWorking: " << nNotWorking << endl
+       << "SecondBJetCount: " << SecondBJetCount << endl
+       << "BadPtRatioCount: " << BadPtRatioCount << endl
+       << "PossibleFakeBJetCount: " << PossibleFakeBJetCount << endl;
+  // -* testing
   cout << nEventsTotal << " Events Processed" << endl;
   cout << "------------------------------" << endl;
   cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
