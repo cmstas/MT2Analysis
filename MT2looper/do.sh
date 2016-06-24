@@ -7,7 +7,8 @@ INDIR=/nfs-6/userdata/mt2/V00-08-01_json_Cert_271036-274421_skim_base_mt2gt200_Z
 # OUTDIR=output/original
 # OUTDIR=output/minMTBMet
 # OUTDIR=output/MbbMax
-OUTDIR=output/temp
+# OUTDIR=output/temp
+OUTDIR=output/orgtrueb
 LOGDIR=logs/
 
 #declare -a Samples=(data_Run2015C data_Run2015D)

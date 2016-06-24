@@ -665,7 +665,6 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
 
   // header
   ofile << "\\multirow{2}{*}{Sample}";
-  if (ndirs % nselecs != 0) cout << "WARNING: Receive " << ndirs << " dirs for " << nselecs << " comparison!" << endl;
   for (unsigned int idir = 0; idir < ndirs; ++idir)
     ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
   ofile << " \\\\" << endl
@@ -1352,10 +1351,10 @@ void plotMakerHcand() {
   bool printtables = true;
 
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
 
   // ----------------------------------------
   //  samples definition
@@ -1423,13 +1422,13 @@ void plotMakerHcand() {
   //   printDetailedTable(samples, names, dirs.at(i));
   //   if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   // }
-  vector<string> selecs{"original", "minMTBMet"};
+  vector<string> dirsH;
 
+  vector<string> selecs{"original", "minMTBMet"};
   vector< vector<TFile*> > samplesVec;
   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  vector<string> dirsH;
   dirsH.push_back("srbase");
   dirsH.push_back("srbaseHcand");
   // dirsH.push_back("srbaseInclHcand");
@@ -1440,22 +1439,97 @@ void plotMakerHcand() {
   dirsH.push_back("3bVL");
   dirsH.push_back("4bVL");
   dirsH.push_back("5bVL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450", 3);
+  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450, MET $>$ 200", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2b2jVL");
+  dirsH.push_back("3b3jVL");
+  dirsH.push_back("4b4jVL");
+  dirsH.push_back("5b5jVL");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "j = b with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2b3jVL");
+  dirsH.push_back("2b4jVL");
+  dirsH.push_back("2b5jVL");
+  dirsH.push_back("2bge6jVL");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "2bnj with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 3);
   dirsH.clear();
 
   dirsH.push_back("2bL");
   dirsH.push_back("3bL");
   dirsH.push_back("4bL");
   dirsH.push_back("5bL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575", 3);
+  printComparisonTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2bM");
+  dirsH.push_back("3bM");
+  dirsH.push_back("4bM");
+  dirsH.push_back("5bM");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2bH");
+  dirsH.push_back("3bH");
+  dirsH.push_back("4bH");
+  dirsH.push_back("5bH");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 3);
+  dirsH.clear();
+
+  dirsH.push_back("2bUH");
+  dirsH.push_back("3bUH");
+  dirsH.push_back("4bUH");
+  dirsH.push_back("5bUH");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 3);
+  dirsH.clear();
+
+  vector<string> selecs2{"original", "minMTBMet", "orgtrueb", "mMTtrueb"};
+  vector< vector<TFile*> > samplesVec2;
+  for (auto it = selecs2.begin(); it != selecs2.end(); ++it)
+    samplesVec2.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
+
+  dirsH.push_back("2bVL");
+  dirsH.push_back("3bVL");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
   dirsH.clear();
 
   dirsH.push_back("2b2jVL");
-  dirsH.push_back("3b2jVL");
-  dirsH.push_back("4b2jVL");
-  dirsH.push_back("5b2jVL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450", 5);
+  dirsH.push_back("3b3jVL");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
   dirsH.clear();
+
+  dirsH.push_back("2b3jVL");
+  dirsH.push_back("3b4jVL");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
+  dirsH.clear();
+
+  dirsH.push_back("2bL");
+  dirsH.push_back("3bL");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "L", 0);
+  dirsH.clear();
+
+  dirsH.push_back("2bM");
+  dirsH.push_back("3bM");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "M", 0);
+  dirsH.clear();
+
+  dirsH.push_back("2bH");
+  dirsH.push_back("3bH");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "H", 0);
+  dirsH.clear();
+
+  dirsH.push_back("2bUH");
+  dirsH.push_back("3bUH");
+  printComparisonTable(samplesVec2, names, selecs2, dirsH, "VH", 0);
+  dirsH.clear();
+
+  // dirsH.push_back("2b2jVL");
+  // dirsH.push_back("3b2jVL");
+  // dirsH.push_back("4b2jVL");
+  // dirsH.push_back("5b2jVL");
+  // printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450", 5);
+  // dirsH.clear();
 
   // dirsH.push_back("2bVL");
   // dirsH.push_back("3bVL");

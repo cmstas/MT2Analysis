@@ -1096,12 +1096,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && isHcand && t.minMTBMet > 200) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
-      doMT2Higgs = doMinMTBMet;
+      // doMT2Higgs = doMinMTBMet;
       // doMT2Higgs = doMbbMax;
       // if (!doMT2Higgs) continue;
 
       // Gen matching for the bjets
-      ntrueBJets = 0;
+      ntruebJets_ = 0;
       vector<float> ptratios;
 
       for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
@@ -1114,9 +1114,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
           if (abs(t.genStat23_pdgId[igen]) == 5) {
             if (foundBJet) ++SecondBJetCount;
-            bool foundBJet = true;
+            foundBJet = true;
             if (ptratio < 0.5 || ptratio > 1.5) ++BadPtRatioCount;
-            ++ntrueBJets;
+            ++ntruebJets_;
           }
           else if (ptratio > 0.8 && ptratio < 1.2)
             ++PossibleFakeBJetCount;
@@ -1374,7 +1374,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  values["nbjets"]      = t.nBJet20;
+  // values["nbjets"]      = t.nBJet20;
+  values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
@@ -1409,7 +1410,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if (SRVecHcand.at(srN).PassesSelection(values)){
       fillHistosMT2Higgs(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix);
-      break; //signal regions are orthogonal, event cannot be in more than one
+      // break; //signal regions are orthogonal, event cannot be in more than one
     }
   }
 
