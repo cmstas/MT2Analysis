@@ -1,3 +1,4 @@
+// -*- C++ -*-
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -644,193 +645,208 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
   // read off yields from h_mt2bins hist in each topological region
   vector<TFile*> samples = samplesVec[0];
 
-  const unsigned int n = samples.size();
-  const unsigned int ndirs = dirs.size();
-  const unsigned int nselecs = selecs.size();
+  unsigned int n = samples.size();
+  unsigned int ndirs = dirs.size();
+  unsigned int nselecs = selecs.size();
 
   if (nselecs < 2) cout << "Use printTable instead!\n";
-  // bool separateTables = false;
-  // if (ndirs*nselecs > 8) {
-  //   separateTables = true;
-  //   nidr
-  // }
 
-  vector<double> bgtot(ndirs*nselecs, 0);
-  vector<double> bgerr(ndirs*nselecs, 0);
-  double yield_base = 0;
+  // vector<string> dirs_all = dirs;
+  vector<vector<string>> dirsVec;
+  int nTabulars = ndirs*nselecs/8;
+  if ((ndirs*nselecs)%8 > 0) ++nTabulars;
+  int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
+  auto it = dirs.begin();
+  for (int i = 0; i < nTabulars; ++i) {
+    vector<string> temp_dirs;
+    for (int j = 0; j < ndir_line && it != dirs.end(); ++j, ++it) 
+      temp_dirs.push_back(*it);
+    dirsVec.push_back(temp_dirs);
+  }
 
   ofile << "\\begin{table}[H]" << std::endl;
   ofile << "\\scriptsize" << std::endl;
   ofile << "\\centering" << std::endl;
   ofile << "\\caption{" << caption << "}" << std::endl;
-  ofile << "\\begin{tabular}{r";
-  for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
-  ofile << "}" << std::endl;
-  ofile << "\\hline\\hline" << std::endl;
 
-  // header
-  ofile << "\\multirow{2}{*}{Sample}";
-  for (unsigned int idir = 0; idir < ndirs; ++idir)
-    ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
-  ofile << " \\\\" << endl
-        << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
-  for (unsigned int i = 0; i < ndirs; ++i)
-    for (auto it = selecs.begin(); it != selecs.end(); ++it)
-      ofile << " & " << *it;
-  ofile << " \\\\" << endl;
-  ofile << "\\hline\\hline" << endl;
+  for (int itab = 0; itab < nTabulars; ++itab) {
+    dirs = dirsVec[itab];
+    ndirs = dirs.size();
 
-  // backgrounds first -- loop backwards
-  for ( int i = n-1 ; i >= 0 ; --i ){
-    if ( TString(names.at(i)).Contains("data") ) {found_data = true; continue;}
-    if ( TString(names.at(i)).Contains("sig") ) continue;
-    ofile << getTableName(names.at(i));
-    for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-      for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
-        TString fullhistname = Form("%s/h_mt2bins", dirs.at(idir).c_str());
-        TH1D* h = (TH1D*) samplesVec[isel].at(i)->Get(fullhistname);
-        double yield = 0.;
-        double err = 0.;
-        int idx = idir*nselecs + isel;
-        if (h) {
-          // use all bins
-          if (mt2bin < 0) {
-            yield = h->IntegralAndError(0,-1,err);
-            bgtot.at(idx) += yield;
-            bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+    vector<double> bgtot(ndirs*nselecs, 0);
+    vector<double> bgerr(ndirs*nselecs, 0);
+    double yield_base = 0;
+
+    ofile << "\\begin{tabular}{r";
+    for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
+    ofile << "}" << std::endl;
+    if (itab == 0) ofile << "\\hline" << endl;
+    ofile << "\\hline" << endl;
+    ofile << "\\multirow{2}{*}{Sample}";
+    for (unsigned int idir = 0; idir < ndirs; ++idir)
+      ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
+    ofile << " \\\\" << endl
+          << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
+    for (unsigned int i = 0; i < ndirs; ++i)
+      for (auto it = selecs.begin(); it != selecs.end(); ++it)
+        ofile << " & " << *it;
+    ofile << " \\\\" << endl;
+    ofile << "\\hline\\hline" << endl;
+
+    // backgrounds first -- loop backwards
+    for ( int i = n-1 ; i >= 0 ; --i ){
+      if ( TString(names.at(i)).Contains("data") ) {found_data = true; continue;}
+      if ( TString(names.at(i)).Contains("sig") ) continue;
+      ofile << getTableName(names.at(i));
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2bins", dirs.at(idir).c_str());
+          TH1D* h = (TH1D*) samplesVec[isel].at(i)->Get(fullhistname);
+          double yield = 0.;
+          double err = 0.;
+          int idx = idir*nselecs + isel;
+          if (h) {
+            // use all bins
+            if (mt2bin < 0) {
+              yield = h->IntegralAndError(0,-1,err);
+              bgtot.at(idx) += yield;
+              bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+            }
+            // last bin: include overflow
+            else if (mt2bin == h->GetXaxis()->GetNbins()) {
+              yield = h->IntegralAndError(mt2bin,-1,err);
+              bgtot.at(idx) += yield;
+              bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+            }
+            // single bin, not last bin
+            else {
+              yield = h->GetBinContent(mt2bin);
+              err = h->GetBinError(mt2bin);
+              bgtot.at(idx) += yield;
+              bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+            }
           }
-          // last bin: include overflow
-          else if (mt2bin == h->GetXaxis()->GetNbins()) {
-            yield = h->IntegralAndError(mt2bin,-1,err);
-            bgtot.at(idx) += yield;
-            bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
+          if (isel == 0) yield_base = yield;
+          ofile << "  &  ";
+          if (colorReduction && isel > 0 && yield_base/yield > colorReduction) {
+            int colorFactor;
+            if (yield == 0)
+              colorFactor = 0;
+            else if ((yield_base/yield)/(2*colorReduction) > 1)
+              colorFactor = 25;
+            else
+              colorFactor = 30*(yield_base/yield)/(2*colorReduction);
+            ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
           }
-          // single bin, not last bin
-          else {
-            yield = h->GetBinContent(mt2bin);
-            err = h->GetBinError(mt2bin);
-            bgtot.at(idx) += yield;
-            bgerr.at(idx) = sqrt(pow(bgerr.at(idx),2) + pow(err,2));
-          }
+          if (yield > 10.)
+            ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+          else
+            ofile << Form("%.2f $\\pm$ %.2f", yield, err);
         }
-        if (isel == 0) yield_base = yield;
-        ofile << "  &  ";
-        if (colorReduction && isel > 0 && yield_base/yield > colorReduction) {
+      }
+      ofile << " \\\\" << endl;
+    } // loop over samples
+
+    // print bg totals
+    ofile << "\\hline" << endl;
+    ofile << "Total SM";
+    for ( unsigned int idx = 0; idx < bgtot.size(); ++idx ) {
+      double yield = bgtot.at(idx);
+      double err = bgerr.at(idx);
+      ofile << "  &  ";
+
+      if (colorReduction) {
+        if (idx%nselecs == 0)
+          yield_base = yield;
+        else if (yield_base/yield > colorReduction) {
           int colorFactor;
           if (yield == 0)
             colorFactor = 0;
           else if ((yield_base/yield)/(2*colorReduction) > 1)
             colorFactor = 25;
           else
-            colorFactor = 30*(yield_base/yield)/(2*colorReduction);
+            colorFactor = 30*(1-(yield_base/yield)/(2*colorReduction));
           ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
         }
-        if (yield > 10.)
-          ofile << Form("%.1f $\\pm$ %.1f", yield, err);
-        else
-          ofile << Form("%.2f $\\pm$ %.2f", yield, err);
       }
+      if (yield > 10.)
+        ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+      else
+        ofile << Form("%.2f $\\pm$ %.2f", yield, err);
     }
     ofile << " \\\\" << endl;
-  } // loop over samples
+    ofile << "\\hline" << endl;
 
-  // print bg totals
-  ofile << "\\hline" << endl;
-  ofile << "Total SM";
-  for ( unsigned int idx = 0; idx < bgtot.size(); ++idx ) {
-    double yield = bgtot.at(idx);
-    double err = bgerr.at(idx);
-    ofile << "  &  ";
+    // // next print data, if it exists
+    // if (found_data) {
+    //   for( unsigned int i = 0 ; i < n ; i++ ){
+    //     if( !TString(names.at(i)).Contains("data") ) continue;
+    //     ofile << getTableName(names.at(i));
+    //     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    //       TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+    //       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+    //       double yield = 0.;
+    //       if (h) {
+    //         // use all bins
+    //         if (mt2bin < 0) {
+    //           yield = h->Integral(0,-1);
+    //         }
+    //         // last bin: include overflow
+    //         else if (mt2bin == h->GetXaxis()->GetNbins()) {
+    //           yield = h->Integral(mt2bin,-1);
+    //         }
+    //         // single bin, not last bin
+    //         else {
+    //           yield = h->GetBinContent(mt2bin);
+    //         }
+    //       }
+    //       ofile << "  &  " << Form("%d",(int)yield);
+    //     }
+    //     ofile << " \\\\" << endl;
+    //   } // loop over samples
+    //   ofile << "\\hline" << endl;
+    // } // if found_data
 
-    if (colorReduction) {
-      if (idx%nselecs == 0)
-        yield_base = yield;
-      else if (yield_base/yield > colorReduction) {
-        int colorFactor;
-        if (yield == 0)
-          colorFactor = 0;
-        else if ((yield_base/yield)/(2*colorReduction) > 1)
-          colorFactor = 25;
-        else
-          colorFactor = 30*(1-(yield_base/yield)/(2*colorReduction));
-        ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
-      }
-    }
-    if (yield > 10.)
-      ofile << Form("%.1f $\\pm$ %.1f", yield, err);
-    else
-      ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+    // // finally print signals
+    // for( unsigned int i = 0 ; i < n ; i++ ){
+    //   if( !TString(names.at(i)).Contains("sig") ) continue;
+    //   ofile << getTableName(names.at(i));
+    //   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    //     TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+    //     TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+    //     double yield = 0.;
+    //     double err = 0.;
+    //     if (h) {
+    //       // use all bins
+    //       if (mt2bin < 0) {
+    //         yield = h->IntegralAndError(0,-1,err);
+    //       }
+    //       // last bin: include overflow
+    //       else if (mt2bin == h->GetXaxis()->GetNbins()) {
+    //         yield = h->IntegralAndError(mt2bin,-1,err);
+    //       }
+    //       // single bin, not last bin
+    //       else {
+    //         yield = h->GetBinContent(mt2bin);
+    //         err = h->GetBinError(mt2bin);
+    //       }
+    //     }
+    //     if (yield > 10.) {
+    //       //  	ofile << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
+    //       ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+    //     } else {
+    //       //  	ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
+    //       ofile << "  &  " << Form("%.2f $\\pm$ %.2f",yield,err);
+    //     }
+    //   }
+    //   ofile << " \\\\" << endl;
+    // } // loop over samples
+
+    if (itab == nTabulars-1) ofile << "\\hline" << std::endl;
+    else ofile << "\\multicolumn{" << ndirs*nselecs+1 << "}{c}{} \\\\" << endl;
+    ofile << "\\end{tabular}" << std::endl;
   }
-  ofile << " \\\\" << endl;
-  ofile << "\\hline" << endl;
 
-  // // next print data, if it exists
-  // if (found_data) {
-  //   for( unsigned int i = 0 ; i < n ; i++ ){
-  //     if( !TString(names.at(i)).Contains("data") ) continue;
-  //     ofile << getTableName(names.at(i));
-  //     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-  //       TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
-  //       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
-  //       double yield = 0.;
-  //       if (h) {
-  //         // use all bins
-  //         if (mt2bin < 0) {
-  //           yield = h->Integral(0,-1);
-  //         }
-  //         // last bin: include overflow
-  //         else if (mt2bin == h->GetXaxis()->GetNbins()) {
-  //           yield = h->Integral(mt2bin,-1);
-  //         }
-  //         // single bin, not last bin
-  //         else {
-  //           yield = h->GetBinContent(mt2bin);
-  //         }
-  //       }
-  //       ofile << "  &  " << Form("%d",(int)yield);
-  //     }
-  //     ofile << " \\\\" << endl;
-  //   } // loop over samples
-  //   ofile << "\\hline" << endl;
-  // } // if found_data
-
-  // // finally print signals
-  // for( unsigned int i = 0 ; i < n ; i++ ){
-  //   if( !TString(names.at(i)).Contains("sig") ) continue;
-  //   ofile << getTableName(names.at(i));
-  //   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-  //     TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
-  //     TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
-  //     double yield = 0.;
-  //     double err = 0.;
-  //     if (h) {
-  //       // use all bins
-  //       if (mt2bin < 0) {
-  //         yield = h->IntegralAndError(0,-1,err);
-  //       }
-  //       // last bin: include overflow
-  //       else if (mt2bin == h->GetXaxis()->GetNbins()) {
-  //         yield = h->IntegralAndError(mt2bin,-1,err);
-  //       }
-  //       // single bin, not last bin
-  //       else {
-  //         yield = h->GetBinContent(mt2bin);
-  //         err = h->GetBinError(mt2bin);
-  //       }
-  //     }
-  //     if (yield > 10.) {
-  //       //  	ofile << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
-  //       ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
-  //     } else {
-  //       //  	ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
-  //       ofile << "  &  " << Form("%.2f $\\pm$ %.2f",yield,err);
-  //     }
-  //   }
-  //   ofile << " \\\\" << endl;
-  // } // loop over samples
-
-  ofile << "\\hline" << std::endl;
-  ofile << "\\end{tabular}" << std::endl;
   ofile << "\\end{table}" << std::endl;
 
   ofile << endl;
