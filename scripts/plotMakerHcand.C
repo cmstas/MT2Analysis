@@ -680,8 +680,7 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
     ofile << "\\begin{tabular}{r";
     for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
     ofile << "}" << std::endl;
-    if (itab == 0) ofile << "\\hline" << endl;
-    ofile << "\\hline" << endl;
+    ofile << "\\hline\\hline" << endl;
     ofile << "\\multirow{2}{*}{Sample}";
     for (unsigned int idir = 0; idir < ndirs; ++idir)
       ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
@@ -777,70 +776,99 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
     ofile << " \\\\" << endl;
     ofile << "\\hline" << endl;
 
-    // // next print data, if it exists
-    // if (found_data) {
-    //   for( unsigned int i = 0 ; i < n ; i++ ){
-    //     if( !TString(names.at(i)).Contains("data") ) continue;
-    //     ofile << getTableName(names.at(i));
-    //     for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-    //       TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
-    //       TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
-    //       double yield = 0.;
-    //       if (h) {
-    //         // use all bins
-    //         if (mt2bin < 0) {
-    //           yield = h->Integral(0,-1);
-    //         }
-    //         // last bin: include overflow
-    //         else if (mt2bin == h->GetXaxis()->GetNbins()) {
-    //           yield = h->Integral(mt2bin,-1);
-    //         }
-    //         // single bin, not last bin
-    //         else {
-    //           yield = h->GetBinContent(mt2bin);
-    //         }
-    //       }
-    //       ofile << "  &  " << Form("%d",(int)yield);
-    //     }
-    //     ofile << " \\\\" << endl;
-    //   } // loop over samples
-    //   ofile << "\\hline" << endl;
-    // } // if found_data
+    // next print data, if it exists
+    for( unsigned int i = 0 ; i < n ; i++ ){
+      if( !TString(names.at(i)).Contains("data") ) continue;
+      found_data = true;
+      ofile << getTableName(names.at(i));
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2bins", dirs.at(idir).c_str());
+          TH1D* h = (TH1D*) samplesVec[isel].at(i)->Get(fullhistname);
+          double yield = 0.;
+          if (h) {
+            // use all bins
+            if (mt2bin < 0) {
+              yield = h->Integral(0,-1);
+            }
+            // last bin: include overflow
+            else if (mt2bin == h->GetXaxis()->GetNbins()) {
+              yield = h->Integral(mt2bin,-1);
+            }
+            // single bin, not last bin
+            else {
+              yield = h->GetBinContent(mt2bin);
+            }
+          }
+          ofile << "  &  " << Form("%d",(int)yield);
+          if (colorReduction) {
+            if (isel == 0)
+              yield_base = yield;
+            else if (yield_base/yield > colorReduction) {
+              int colorFactor;
+              if (yield == 0)
+                colorFactor = 0;
+              else if ((yield_base/yield)/(2*colorReduction) > 1)
+                colorFactor = 25;
+              else
+                colorFactor = 30*(1-(yield_base/yield)/(2*colorReduction));
+              ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
+            }
+          }
+        }
+      }
+      ofile << " \\\\" << endl;
+    } // loop over samples
+    ofile << "\\hline" << endl;
 
-    // // finally print signals
-    // for( unsigned int i = 0 ; i < n ; i++ ){
-    //   if( !TString(names.at(i)).Contains("sig") ) continue;
-    //   ofile << getTableName(names.at(i));
-    //   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-    //     TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
-    //     TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
-    //     double yield = 0.;
-    //     double err = 0.;
-    //     if (h) {
-    //       // use all bins
-    //       if (mt2bin < 0) {
-    //         yield = h->IntegralAndError(0,-1,err);
-    //       }
-    //       // last bin: include overflow
-    //       else if (mt2bin == h->GetXaxis()->GetNbins()) {
-    //         yield = h->IntegralAndError(mt2bin,-1,err);
-    //       }
-    //       // single bin, not last bin
-    //       else {
-    //         yield = h->GetBinContent(mt2bin);
-    //         err = h->GetBinError(mt2bin);
-    //       }
-    //     }
-    //     if (yield > 10.) {
-    //       //  	ofile << "  &  " << Form("%.0f $\\pm$ %.0f",yield,err);
-    //       ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
-    //     } else {
-    //       //  	ofile << "  &  " << Form("%.1f $\\pm$ %.1f",yield,err);
-    //       ofile << "  &  " << Form("%.2f $\\pm$ %.2f",yield,err);
-    //     }
-    //   }
-    //   ofile << " \\\\" << endl;
-    // } // loop over samples
+    // finally print signals
+    for( unsigned int i = 0 ; i < n ; i++ ){
+      if( !TString(names.at(i)).Contains("sig") ) continue;
+      ofile << getTableName(names.at(i));
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2bins",dirs.at(idir).c_str());
+          TH1D* h = (TH1D*) samplesVec[isel].at(i)->Get(fullhistname);
+          double yield = 0.;
+          double err = 0.;
+          if (h) {
+            // use all bins
+            if (mt2bin < 0) {
+              yield = h->IntegralAndError(0,-1,err);
+            }
+            // last bin: include overflow
+            else if (mt2bin == h->GetXaxis()->GetNbins()) {
+              yield = h->IntegralAndError(mt2bin,-1,err);
+            }
+            // single bin, not last bin
+            else {
+              yield = h->GetBinContent(mt2bin);
+              err = h->GetBinError(mt2bin);
+            }
+          }
+          ofile << "  &  ";
+          if (colorReduction) {
+            if (isel == 0)
+              yield_base = yield;
+            else if (yield_base/yield > colorReduction) {
+              int colorFactor;
+              if (yield == 0)
+                colorFactor = 0;
+              else if ((yield_base/yield)/(2*colorReduction) > 1)
+                colorFactor = 25;
+              else
+                colorFactor = 30*(1-(yield_base/yield)/(2*colorReduction));
+              ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
+            }
+          }
+          if (yield > 10.)
+            ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+          else
+            ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+        }
+      }
+      ofile << " \\\\" << endl;
+    } // loop over samples
 
     if (itab == nTabulars-1) ofile << "\\hline" << std::endl;
     else ofile << "\\multicolumn{" << ndirs*nselecs+1 << "}{c}{} \\\\" << endl;
@@ -1643,7 +1671,7 @@ void plotMakerHcand() {
   vector<string> dirsH;
 
   vector<string> selecs{"original", "minMTBMet", "MbbMax"};
-  vector< vector<TFile*> > samplesVec;
+  vector<vector<TFile*>> samplesVec;
   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
@@ -1661,20 +1689,16 @@ void plotMakerHcand() {
 
   dirsH.push_back("2bVL");
   dirsH.push_back("3bVL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
-  dirsH.clear();
   dirsH.push_back("4bVL");
   dirsH.push_back("5bVL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
+  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
   dirsH.clear();
 
   dirsH.push_back("2bL");
   dirsH.push_back("3bL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 5);
-  dirsH.clear();
   dirsH.push_back("4bL");
-  dirsH.push_back("5bL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 5);
+  // dirsH.push_back("5bL");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 5);
   dirsH.clear();
 
   dirsH.push_back("2bM");
@@ -1706,7 +1730,7 @@ void plotMakerHcand() {
 
   ofile << endl << "Tables with True bjets:" << endl;
   vector<string> selecs2{"original", "minMTBMet", "orgtrueb", "mMTtrueb"};
-  vector< vector<TFile*> > samplesVec2;
+  vector<vector<TFile*>> samplesVec2;
   for (auto it = selecs2.begin(); it != selecs2.end(); ++it)
     samplesVec2.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
