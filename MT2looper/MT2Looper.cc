@@ -1097,7 +1097,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
       // doMT2Higgs = doMinMTBMet;
-      // doMT2Higgs = doMbbMax;
+      doMT2Higgs = doMbbMax;
       // if (!doMT2Higgs) continue;
 
       // Gen matching for the bjets
@@ -1374,8 +1374,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  // values["nbjets"]      = t.nBJet20;
-  values["nbjets"]      = ntruebJets_;
+  values["nbjets"]      = t.nBJet20;
+  // values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;

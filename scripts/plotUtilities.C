@@ -153,6 +153,11 @@ string getTableName(const string& sample) {
   if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
+  if (sample.find("T5qqqqWH_1400_700") != string::npos) return "T5qqqqWH 1400, 700";
+  if (sample.find("T5qqqqWH_1400_200") != string::npos) return "T5qqqqWH 1400, 200";
+  if (sample.find("T5qqqqWH_1100_950") != string::npos) return "T5qqqqWH 1100, 950";
+  if (sample.find("T2ttZH_800_400") != string::npos) return "T2ttZH 800, 400";
+  if (sample.find("T2ttZH_800_200") != string::npos) return "T2ttZH 800, 200";
 
   cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;

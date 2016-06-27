@@ -1597,16 +1597,17 @@ void plotMakerHcand() {
   bool printtables = true;
 
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
 
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
 
-  vector<string> names{"ttsl", "ttdl"};
+  // vector<string> names{"ttsl", "ttdl"};
+  vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
   // ----------------------------------------
@@ -1670,7 +1671,8 @@ void plotMakerHcand() {
   // }
   vector<string> dirsH;
 
-  vector<string> selecs{"original", "minMTBMet", "MbbMax"};
+  // vector<string> selecs{"original", "minMTBMet", "MbbMax"};
+  vector<string> selecs{"sigorig", "sigminMT", "sigMbbMax"};
   vector<vector<TFile*>> samplesVec;
   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
@@ -1680,116 +1682,118 @@ void plotMakerHcand() {
   // // dirsH.push_back("srbaseInclHcand");
   // printTable(samples, names, dirsH);
   // dirsH.clear();
+  names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
   dirsH.push_back("srbaseHcand");
   printComparisonTable(samplesVec, names, selecs, dirsH, "srbase");
+  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
 
-  ofile << endl << "Tables with separate number of bjets:" << endl;
+  // ofile << endl << "Tables with separate number of bjets:" << endl;
 
-  dirsH.push_back("2bVL");
-  dirsH.push_back("3bVL");
-  dirsH.push_back("4bVL");
-  dirsH.push_back("5bVL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
-  dirsH.clear();
+  // dirsH.push_back("2bVL");
+  // dirsH.push_back("3bVL");
+  // dirsH.push_back("4bVL");
+  // dirsH.push_back("5bVL");
+  // printComparisonTable(samplesVec, names, selecs, dirsH, "VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
+  // dirsH.clear();
 
-  dirsH.push_back("2bL");
-  dirsH.push_back("3bL");
-  dirsH.push_back("4bL");
-  // dirsH.push_back("5bL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 5);
-  dirsH.clear();
+  // dirsH.push_back("2bL");
+  // dirsH.push_back("3bL");
+  // dirsH.push_back("4bL");
+  // // dirsH.push_back("5bL");
+  // printComparisonTable(samplesVec, names, selecs, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 5);
+  // dirsH.clear();
 
-  dirsH.push_back("2bM");
-  dirsH.push_back("3bM");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 5);
-  dirsH.clear();
-  dirsH.push_back("4bM");
-  dirsH.push_back("5bM");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 5);
-  dirsH.clear();
+  // dirsH.push_back("2bM");
+  // dirsH.push_back("3bM");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 5);
+  // dirsH.clear();
+  // dirsH.push_back("4bM");
+  // dirsH.push_back("5bM");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 5);
+  // dirsH.clear();
 
-  dirsH.push_back("2bH");
-  dirsH.push_back("3bH");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 5);
-  dirsH.clear();
-  dirsH.push_back("4bH");
-  dirsH.push_back("5bH");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 5);
-  dirsH.clear();
+  // dirsH.push_back("2bH");
+  // dirsH.push_back("3bH");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 5);
+  // dirsH.clear();
+  // dirsH.push_back("4bH");
+  // dirsH.push_back("5bH");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 5);
+  // dirsH.clear();
 
-  dirsH.push_back("2bUH");
-  dirsH.push_back("3bUH");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 5);
-  dirsH.clear();
-  dirsH.push_back("4bUH");
-  dirsH.push_back("5bUH");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 5);
-  dirsH.clear();
+  // dirsH.push_back("2bUH");
+  // dirsH.push_back("3bUH");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 5);
+  // dirsH.clear();
+  // dirsH.push_back("4bUH");
+  // dirsH.push_back("5bUH");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 5);
+  // dirsH.clear();
 
-  ofile << endl << "Tables with True bjets:" << endl;
-  vector<string> selecs2{"original", "minMTBMet", "orgtrueb", "mMTtrueb"};
-  vector<vector<TFile*>> samplesVec2;
-  for (auto it = selecs2.begin(); it != selecs2.end(); ++it)
-    samplesVec2.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
+  // ofile << endl << "Tables with True bjets:" << endl;
+  // vector<string> selecs2{"original", "minMTBMet", "orgtrueb", "mMTtrueb"};
+  // vector<vector<TFile*>> samplesVec2;
+  // for (auto it = selecs2.begin(); it != selecs2.end(); ++it)
+  //   samplesVec2.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  dirsH.push_back("2bVL");
-  dirsH.push_back("3bVL");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
-  dirsH.clear();
+  // dirsH.push_back("2bVL");
+  // dirsH.push_back("3bVL");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
+  // dirsH.clear();
 
 
-  dirsH.push_back("2bL");
-  dirsH.push_back("3bL");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 0);
-  dirsH.clear();
+  // dirsH.push_back("2bL");
+  // dirsH.push_back("3bL");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "L: 450 $<$ HT $<$ 575, MET $>$ 200", 0);
+  // dirsH.clear();
 
-  dirsH.push_back("2bM");
-  dirsH.push_back("3bM");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 0);
-  dirsH.clear();
+  // dirsH.push_back("2bM");
+  // dirsH.push_back("3bM");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "M: 575 $<$ HT $<$ 1000, MET $>$ 200", 0);
+  // dirsH.clear();
 
-  dirsH.push_back("2bH");
-  dirsH.push_back("3bH");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 0);
-  dirsH.clear();
+  // dirsH.push_back("2bH");
+  // dirsH.push_back("3bH");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "H: 1000 $<$ HT $<$ 1500, MET $>$ 30", 0);
+  // dirsH.clear();
 
-  dirsH.push_back("2bUH");
-  dirsH.push_back("3bUH");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 0);
-  dirsH.clear();
+  // dirsH.push_back("2bUH");
+  // dirsH.push_back("3bUH");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "UH: HT $>$ 1500, MET $>$ 30", 0);
+  // dirsH.clear();
 
-  ofile << endl << "Backup:" << endl;
+  // ofile << endl << "Backup:" << endl;
 
-  dirsH.push_back("2b2jVL");
-  dirsH.push_back("3b3jVL");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
-  dirsH.clear();
+  // dirsH.push_back("2b2jVL");
+  // dirsH.push_back("3b3jVL");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
+  // dirsH.clear();
 
-  dirsH.push_back("2b3jVL");
-  dirsH.push_back("3b4jVL");
-  printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
-  dirsH.clear();
+  // dirsH.push_back("2b3jVL");
+  // dirsH.push_back("3b4jVL");
+  // printComparisonRatioTable(samplesVec2, names, selecs2, dirsH, "VL: 200 $<$ HT $<$ 450", 0);
+  // dirsH.clear();
 
-  dirsH.push_back("2b2jVL");
-  dirsH.push_back("3b3jVL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "j = b with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
-  dirsH.clear();
+  // dirsH.push_back("2b2jVL");
+  // dirsH.push_back("3b3jVL");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "j = b with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
+  // dirsH.clear();
 
-  dirsH.push_back("4b4jVL");
-  dirsH.push_back("5b5jVL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "j = b with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
-  dirsH.clear();
+  // dirsH.push_back("4b4jVL");
+  // dirsH.push_back("5b5jVL");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "j = b with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
+  // dirsH.clear();
 
-  dirsH.push_back("2b3jVL");
-  dirsH.push_back("2b4jVL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "2bnj with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
-  dirsH.clear();
-  dirsH.push_back("2b5jVL");
-  dirsH.push_back("2bge6jVL");
-  printComparisonRatioTable(samplesVec, names, selecs, dirsH, "2bnj with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
-  dirsH.clear();
+  // dirsH.push_back("2b3jVL");
+  // dirsH.push_back("2b4jVL");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "2bnj with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
+  // dirsH.clear();
+  // dirsH.push_back("2b5jVL");
+  // dirsH.push_back("2bge6jVL");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "2bnj with VL: 200 $<$ HT $<$ 450, MET $>$ 200", 5);
+  // dirsH.clear();
 
 
 
