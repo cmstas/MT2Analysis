@@ -1674,17 +1674,17 @@ void plotMakerHcand() {
   bool printtables = true;
 
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
 
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
 
-  // vector<string> names{"ttsl", "ttdl"};
-  vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
+  vector<string> names{"ttsl", "ttdl"};
+  // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
   // ----------------------------------------
@@ -1749,7 +1749,8 @@ void plotMakerHcand() {
   vector<string> dirsH;
 
   // vector<string> selecs{"original", "minMTBMet", "MbbMax"};
-  vector<string> selecs{"sigorig", "sigminMT", "sigMbbMax"};
+  vector<string> selecs{"original", "minMTBMet", "orgtrueb", "mMTtrueb"};
+  // vector<string> selecs{"sigorig", "sigminMT", "sigMbbMax"};
   vector<vector<TFile*>> samplesVec;
   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
@@ -1759,7 +1760,7 @@ void plotMakerHcand() {
   // // dirsH.push_back("srbaseInclHcand");
   // printTable(samples, names, dirsH);
   // dirsH.clear();
-  names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
+  // names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
   dirsH.push_back("srbaseHcand");
   printComparisonTable(samplesVec, names, selecs, dirsH, "srbase");

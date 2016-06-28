@@ -76,6 +76,7 @@ class MT2Looper {
   float leppt_;
   float mt_;
   float mbbmax_;
+  float minMTbmet_;
   int nJet30Eta3_;
   bool isSignal_;
   bool passMonojetId_;

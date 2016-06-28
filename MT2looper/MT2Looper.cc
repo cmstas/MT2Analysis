@@ -696,6 +696,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   unsigned int SecondBJetCount = 0;
   unsigned int BadPtRatioCount = 0;
   unsigned int PossibleFakeBJetCount = 0;
+  unsigned int nIsGenBJet = 0;
+  unsigned int nIsTrueBJet = 0;
   // -* testing
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
@@ -1061,7 +1063,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // First restore the bjets
       vector<TLorentzVector> p4sBJets;
-      for (int ijet=0; ijet < t.njet; ++ijet) {
+      for (int ijet = 0; ijet < t.njet; ++ijet) {
         if (t.jet_pt[ijet] < 20) continue;
         if (fabs(t.jet_eta[ijet]) > 2.5) continue;
         if (t.jet_btagCSV[ijet] >= 0.800) {
@@ -1071,12 +1073,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
       }
       // calculate Mbb_hcand and Mbb_max
+      minMTbmet_ = 0;
       float Mbb_max = -1;
       // float Mbb_hcand = -1;
       bool isHcand = false;
       if (p4sBJets.size() > 1) {
-        for (unsigned int ibj1=0; ibj1 < p4sBJets.size(); ++ibj1) {
-          for (unsigned int ibj2=ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
+        for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
+          float mt = MT(p4sBJets[ibj1].Pt(), p4sBJets[ibj1].Phi(), t.met_pt, t.met_phi);
+          if (ibj1 == 0 || mt < minMTbmet_) minMTbmet_ = mt;
+
+          for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
             float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
             Mbb_max = max(Mbb_max, mbb);
             if (mbb > 100 && mbb < 150)
@@ -1091,39 +1097,63 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doMT2Higgs  = false;
       bool doMinMTBMet = false;
       bool doMbbMax    = false;
+      // bool doCounting  = false;
 
       if (p4sBJets.size() >= 2) doMT2Higgs = true;
-      if (doMT2Higgs && isHcand && t.minMTBMet > 200) doMinMTBMet = true;
+      if (doMT2Higgs && isHcand && minMTbmet_ > 200) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max >= 300) doMbbMax = true;
 
       // doMT2Higgs = doMinMTBMet;
-      doMT2Higgs = doMbbMax;
+      // doMT2Higgs = doMbbMax;
       // if (!doMT2Higgs) continue;
 
       // Gen matching for the bjets
       ntruebJets_ = 0;
       vector<float> ptratios;
-
+      // doCounting = doMT2Higgs;
       for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
         bool findMatching = false;
-        bool foundBJet = false;
+        bool isTrueBJet = false;
+        bool badPtRatio = false;
+        float tempDR = 1;
         for (int igen = 0; igen < t.ngenStat23; ++igen) {
           float thisDR = DeltaR(t.genStat23_eta[igen], p4sBJets[ibj].Eta(), t.genStat23_phi[igen], p4sBJets[ibj].Phi());
           if (thisDR > 0.1) continue;
           findMatching = true;
-          float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
-          if (abs(t.genStat23_pdgId[igen]) == 5) {
-            if (foundBJet) ++SecondBJetCount;
-            foundBJet = true;
-            if (ptratio < 0.5 || ptratio > 1.5) ++BadPtRatioCount;
-            ++ntruebJets_;
+          if (thisDR < tempDR) {
+            tempDR = thisDR;
+            isTrueBJet = false;
+            badPtRatio = false;
           }
-          else if (ptratio > 0.8 && ptratio < 1.2)
-            ++PossibleFakeBJetCount;
+          else if (tempDR < 1) {
+            continue;
+          }
+          if (abs(t.genStat23_pdgId[igen]) == 5) {
+            ++nIsGenBJet;
+            if (t.genStat23_sourceId[igen] == 6) {
+              if (isTrueBJet) ++SecondBJetCount;
+              ++nIsTrueBJet;
+              isTrueBJet = true;
+              float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
+              if (ptratio < 0.5 || ptratio > 1.5) badPtRatio = true;
+              // else if (ptratio > 0.8 && ptratio < 1.2) 
+            }
+          }
         }
+        if (isTrueBJet) ++ntruebJets_;
+        if (badPtRatio) ++BadPtRatioCount;
         if (findMatching) ++nWorking;
         else ++nNotWorking;
       }
+      // if (ntruebJets_ >= 2 && nIsTrueBJet < 5) {
+      //   cout << endl << BadPtRatioCount << "\n-----------------------\n";
+      //   for (int igen = 0; igen < t.ngenStat23; ++igen) 
+      //     cout << "igen: " << igen << " pdgID: " << t.genStat23_pdgId[igen] << " sourceID: " << t.genStat23_sourceId[igen]
+      //          << " pt: " << t.genStat23_pt[igen] << " eta: " << t.genStat23_eta[igen] << " phi: " << t.genStat23_phi[igen] << endl;
+      //   for (auto it = p4sBJets.begin(); it != p4sBJets.end(); ++it)
+      //     cout << "i: " << it - p4sBJets.begin() << " pt: " << it->Pt() << " eta: " << it->Eta() << " phi: " << it->Phi() << endl;
+      // }
+
       // -- end of mt2higgs --
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
@@ -1303,7 +1333,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
        << "nNotWorking: " << nNotWorking << endl
        << "SecondBJetCount: " << SecondBJetCount << endl
        << "BadPtRatioCount: " << BadPtRatioCount << endl
-       << "PossibleFakeBJetCount: " << PossibleFakeBJetCount << endl;
+       << "PossibleFakeBJetCount: " << PossibleFakeBJetCount << endl
+       << "nIsGenBJet: " << PossibleFakeBJetCount << endl;
   // -* testing
   cout << nEventsTotal << " Events Processed" << endl;
   cout << "------------------------------" << endl;
@@ -1374,8 +1405,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
-  values["nbjets"]      = t.nBJet20;
-  // values["nbjets"]      = ntruebJets_;
+  // values["nbjets"]      = t.nBJet20;
+  values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = t.mt2;
@@ -2273,7 +2304,7 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
 
   plot1D("h_mt"+s,            mt_,          evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
-  plot1D("h_minMTBMet"+s,     t.minMTBMet,  evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
+  plot1D("h_minMTBMet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
   plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 200, 0, 600);
 
   outfile_->cd();
