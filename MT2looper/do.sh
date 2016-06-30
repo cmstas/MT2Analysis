@@ -8,10 +8,11 @@ INDIR=/nfs-6/userdata/mt2/V00-08-03_MiniAODv2_nojson_skim_base_mt2gt200_ZinvV4
 # OUTDIR=output/V00-08-01_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4
 # OUTDIR=output/original
 # OUTDIR=output/minMTbmet
-# OUTDIR=output/Mbb200
+# OUTDIR=output/MbbMax200
 # OUTDIR=output/temp
+OUTDIR=output/mMTnMbb300
 # OUTDIR=output/mMTnHcand
-OUTDIR=output/isHcand
+# OUTDIR=output/isHcand
 LOGDIR=logs/
 # LOGDIR=$OUTDIR/logs/
 

@@ -1103,10 +1103,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       if (doMT2Higgs && Mbb_max > 300) doMbbMax = true;
 
-      doMT2Higgs = doMinMTBMet;
+      // doMT2Higgs = doMinMTBMet;
       // doMT2Higgs = doMinMTBMet && isHcand;
       // doMT2Higgs = doMT2Higgs && isHcand;
-      // doMT2Higgs = doMbbMax && doMinMTBMet;
+      doMT2Higgs = doMbbMax && doMinMTBMet;
       if (!doMT2Higgs) continue;
 
       // // Gen matching for the bjets
@@ -1170,7 +1170,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
 
         if (doMT2Higgs)
-          fillHistosSRMT2Higgs();
+          fillHistosSRMT2Higgs("srh");
       }
 
       // if (doDYplots) {
@@ -1244,7 +1244,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBaseHcand.GetName().c_str());
   for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if(!SRVecHcand.at(srN).srHistMap.empty()){
-      savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, SRVecHcand.at(srN).GetName().c_str());
+      savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, ("srh"+SRVecHcand.at(srN).GetName()).c_str());
     }
   }
 
@@ -1416,7 +1416,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBaseHcand.PassesSelection(values)) {
-    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), prefix+SRBaseHcand.GetName(), suffix);
+    fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), SRBaseHcand.GetName(), suffix);
   }
 
   // do monojet SRs
@@ -1433,7 +1433,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     if (SRBaseMonojet.PassesSelection(values_monojet)) passMonojet = true;
   }
   if ((SRBaseHcand.PassesSelection(values)) || (passMonojet)) {
-    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), prefix+SRBaseInclHcand.GetName(), suffix);
+    fillHistosMT2Higgs(SRBaseInclHcand.srHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), SRBaseInclHcand.GetName(), suffix);
   }
 
   values["njets"]       = t.nJet30;

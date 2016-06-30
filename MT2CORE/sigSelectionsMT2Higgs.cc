@@ -11,214 +11,37 @@ std::vector<SR> getSignalRegionsMT2Higgs(){
 
   //first set binning in njet-nbjet plane
 
-  sr.SetName("2b");
-  sr.SetVar("njets", 2, -1);
+  sr.SetName("1");
+  sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
+  sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 2, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("3b");
-  sr.SetVar("njets", 2, -1);
-  sr.SetVar("nbjets", 3, 4);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 3, 4);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("4b");
-  sr.SetVar("njets", 2, -1);
-  sr.SetVar("nbjets", 4, 5);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 4, 5);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("5b");
-  sr.SetVar("njets", 2, -1);
-  sr.SetVar("nbjets", 5, -1);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 5, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("2b2j");
-  sr.SetVar("njets", 2, 3);
+  sr.SetName("2");
+  sr.SetVar("njets", 7, -1);
   sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarCRSL("njets", 7, -1);
+  sr.SetVarCRSL("nbjets", 1, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("2b3j");
-  sr.SetVar("njets", 3, 4);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetName("3");
+  sr.SetVar("njets", 4, 7);
+  sr.SetVar("nbjets", 3, -1);
+  sr.SetVarCRSL("njets", 2, 7);
+  sr.SetVarCRSL("nbjets", 3, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("2b4j");
-  sr.SetVar("njets", 4, 5);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetName("4");
+  sr.SetVar("njets", 7, -1);
+  sr.SetVar("nbjets", 3, -1);
+  sr.SetVarCRSL("njets", 7, -1);
+  sr.SetVarCRSL("nbjets", 1, 3);
   temp_SR_vec.push_back(sr);
   sr.Clear();
-
-  sr.SetName("2b5j");
-  sr.SetVar("njets", 5, 6);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("2bge6j");
-  sr.SetVar("njets", 6, -1);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("3b3j");
-  sr.SetVar("njets", 4, 5);
-  sr.SetVar("nbjets", 3, 4);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("3b4j");
-  sr.SetVar("njets", 4, 5);
-  sr.SetVar("nbjets", 4, 5);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("3b5j");
-  sr.SetVar("njets", 5, 6);
-  sr.SetVar("nbjets", 5, 6);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("3bge6j");
-  sr.SetVar("njets", 6, -1);
-  sr.SetVar("nbjets", 2, 3);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("4b4j");
-  sr.SetVar("njets", 4, 5);
-  sr.SetVar("nbjets", 4, 5);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 4, 5);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("4b5j");
-  sr.SetVar("njets", 4, 5);
-  sr.SetVar("nbjets", 4, 5);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 4, 5);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("4b6j");
-  sr.SetVar("njets", 6, -1);
-  sr.SetVar("nbjets", 4, 5);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 4, 5);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("5b5j");
-  sr.SetVar("njets", 5, 6);
-  sr.SetVar("nbjets", 5, -1);
-  sr.SetVarCRSL("njets", 2, -1);
-  sr.SetVarCRSL("nbjets", 5, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  // sr.SetName("1");
-  // sr.SetVar("njets", 2, 4);
-  // sr.SetVar("nbjets", 2, 3);
-  // sr.SetVarCRSL("njets", 2, 4);
-  // sr.SetVarCRSL("nbjets", 2, 3);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("2");
-  // sr.SetVar("njets", 4, 7);
-  // sr.SetVar("nbjets", 2, 3);
-  // sr.SetVarCRSL("njets", 4, 7);
-  // sr.SetVarCRSL("nbjets", 2, 3);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("3");
-  // sr.SetVar("njets", 7, -1);
-  // sr.SetVar("nbjets", 2, 3);
-  // sr.SetVarCRSL("njets", 7, -1);
-  // sr.SetVarCRSL("nbjets", 1, 3);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("4");
-  // sr.SetVar("njets", 2, 5);
-  // sr.SetVar("nbjets", 3, 4);
-  // sr.SetVarCRSL("njets", 3, 6);
-  // sr.SetVarCRSL("nbjets", 3, 4);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("5");
-  // sr.SetVar("njets", 2, 5);
-  // sr.SetVar("nbjets", 3, 4);
-  // sr.SetVarCRSL("njets", 3, 6);
-  // sr.SetVarCRSL("nbjets", 3, 4);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("10");
-  // sr.SetVar("njets", 2, 7);
-  // sr.SetVar("nbjets", 3, -1);
-  // sr.SetVarCRSL("njets", 2, 7);
-  // sr.SetVarCRSL("nbjets", 3, -1);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("11");
-  // sr.SetVar("njets", 7, -1);
-  // sr.SetVar("nbjets", 3, -1);
-  // sr.SetVarCRSL("njets", 7, -1);
-  // sr.SetVarCRSL("nbjets", 1, 3);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("3");
-  // sr.SetVar("njets", 2, 6);
-  // sr.SetVar("nbjets", 4, 5);
-  // sr.SetVarCRSL("njets", 3, 6);
-  // sr.SetVarCRSL("nbjets", 3, 4);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
-  // sr.SetName("4");
-  // sr.SetVar("njets", 5, -1);
-  // sr.SetVar("nbjets", 5, -1);
-  // sr.SetVarCRSL("njets", 3, 6);
-  // sr.SetVarCRSL("nbjets", 3, 4);
-  // temp_SR_vec.push_back(sr);
-  // sr.Clear();
-
 
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
