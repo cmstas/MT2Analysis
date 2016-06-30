@@ -41,7 +41,7 @@ int getColor(const string& sample) {
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
   if (sample.find("top") != string::npos) return 855;
-  if (sample.find("wjets") != string::npos) return 417;
+  if (sample.find("wjets") != string::npos) return kRed-7;
   if (sample.find("zinv") != string::npos) return 418;
   if (sample.find("qcd") != string::npos) return 401;
   if (sample.find("multijet") != string::npos) return 402;
