@@ -651,6 +651,14 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
 
   if (nselecs < 2) cout << "Use printTable instead!\n";
 
+  if (caption == "Detailed") { // temporary
+    caption = dirs[0] + ": ";
+    caption += getJetBJetTableLabel(samples.at(0), dirs[0]) + ", ";
+    caption += getHTTableLabel(samples.at(0), dirs[0]) + ", ";
+    caption += getMETTableLabel(samples.at(0), dirs[0]);
+    caption += ", MT2 $>$ 200 GeV";
+  }
+
   // vector<string> dirs_all = dirs;
   vector<vector<string>> dirsVec;
   int nTabulars = ndirs*nselecs/8;
@@ -683,7 +691,8 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
     ofile << "\\hline\\hline" << endl;
     ofile << "\\multirow{2}{*}{Sample}";
     for (unsigned int idir = 0; idir < ndirs; ++idir)
-      ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << " }";
+      ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
+            << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", $\\mttwo > 200$~GeV" << " }";
     ofile << " \\\\" << endl
           << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
     for (unsigned int i = 0; i < ndirs; ++i)
@@ -1967,121 +1976,121 @@ void plotMakerHcand() {
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh1VL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh1VL: 200 $<$ HT $<$ 450, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh2VL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh2VL: 200 $<$ HT $<$ 450, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh3VL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh3VL: 200 $<$ HT $<$ 450, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh4VL");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh4VL: 200 $<$ HT $<$ 450, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh1L");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh1L: 450 $<$ HT $<$ 575, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh2L");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh2L: 450 $<$ HT $<$ 575, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh3L");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh3L: 450 $<$ HT $<$ 575, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh4L");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh4L: 450 $<$ HT $<$ 575, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh1M");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh1M: 575 $<$ HT $<$ 1000, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh2M");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh2M: 575 $<$ HT $<$ 1000, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh3M");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh3M: 575 $<$ HT $<$ 1000, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh4M");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh4M: 575 $<$ HT $<$ 1000, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh1H");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh1H: 1000 $<$ HT $<$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh2H");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh2H: 1000 $<$ HT $<$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh3H");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh3H: 1000 $<$ HT $<$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh4H");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh4H: 1000 $<$ HT $<$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh1UH");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh1UH: HT $>$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh2UH");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh2UH: HT $>$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh3UH");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh3UH: HT $>$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   ofile << "\\newpage\n";
   dirsH.push_back("srh4UH");
-  printComparisonTable(samplesVec, names, selecs, dirsH, "srh4UH: HT $>$ 1500, MT2 $>$ 200");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "Detailed");
   printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
