@@ -289,6 +289,10 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 //_______________________________________________________________________________
 void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "lostlep"){
 
+  // Running the script along
+  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  dataname = "data_Run2016";
+
   string output_name = input_dir+"/lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;
 
@@ -308,7 +312,7 @@ void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   TIter it(f_lostlep->GetListOfKeys());
   TKey* k;
   std::string keep = "srh";
-  std::string skip = "srbase";
+  std::string skip = "srhbase";
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
@@ -318,6 +322,9 @@ void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
     }
   }
 
+  // for (auto it = dirs.begin(); it != dirs.end(); ++it) {
+  //   cout << *it << endl;
+  // }
   makeLostLepFromCRs( f_data , f_lostlep , dirs, output_name );
 
 }

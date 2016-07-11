@@ -267,7 +267,7 @@ void MT2Looper::SetSignalRegions(){
   outfile_->cd();
 
   // -- mt2higgs define --
-  SRBaseHcand.SetName("srbaseHcand");
+  SRBaseHcand.SetName("srhbase");
   SRBaseHcand.SetVar("mt2", 200, -1);
   SRBaseHcand.SetVar("j1pt", 30, -1);
   SRBaseHcand.SetVar("j2pt", 30, -1);
@@ -302,7 +302,20 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.srHistMap, "", 1, 0, 2);
   outfile_->cd();
 
-  SRBaseInclHcand.SetName("srbaseInclHcand");
+  vars = SRBaseHcand.GetListOfVariablesCRSL();
+  dir = (TDirectory*)outfile_->Get("crhslbase");
+  if (dir == 0) {
+    dir = outfile_->mkdir("crhslbase");
+  }
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBoundCRSL(vars.at(j)), SRBaseHcand.crslHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBoundCRSL(vars.at(j)), SRBaseHcand.crslHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.crslHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
+  SRBaseInclHcand.SetName("srhbaseIncl");
   SRBaseInclHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
   dir = (TDirectory*)outfile_->Get(SRBaseInclHcand.GetName().c_str());
   if (dir == 0) {
@@ -1264,7 +1277,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   // savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
   savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBaseHcand.GetName().c_str());
-  savePlotsDir(SRBaseHcand.crslHistMap, outfile_, "crslbaseHcand");
+  savePlotsDir(SRBaseHcand.crslHistMap, outfile_, "crhslbase");
   for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if (!SRVecHcand.at(srN).srHistMap.empty())
       savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, ("srh"+SRVecHcand.at(srN).GetName()).c_str());
@@ -1445,7 +1458,9 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   }
 
   // Control Regions Single Lepton
-  if (SRBaseHcand.PassesSelectionCRSL(values)) {
+  std::map<std::string, float> valuesCRSL = values;
+  valuesCRSL["nlep"] = t.nLepLowMT;
+  if (SRBaseHcand.PassesSelectionCRSL(valuesCRSL)) {
     fillHistosMT2Higgs(SRBaseHcand.crslHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhslbase", suffix);
   }
 
@@ -1470,6 +1485,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
   values.erase("passesHtMet");
+  valuesCRSL = values;
+  valuesCRSL["nlep"] = t.nLepLowMT;
 
   for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if (SRVecHcand.at(srN).PassesSelection(values)){
@@ -1477,8 +1494,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
       // break; //signal regions are orthogonal, event cannot be in more than one
     }
     // Control Regions Single Lepton
-    if (SRVecHcand.at(srN).PassesSelectionCRSL(values)) {
-      fillHistosMT2Higgs(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhsl"+SRVecHcand.at(srN).GetName(), suffix);
+    if (SRVecHcand.at(srN).PassesSelectionCRSL(valuesCRSL)) {
+      fillHistosMT2Higgs(SRVecHcand.at(srN).crslHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhsl"+SRVecHcand.at(srN).GetName(), suffix);
     }
   }
 

@@ -45,8 +45,8 @@ cd $THISDIR
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,1)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",1)" >> dataDrivenEstimates.log
 
-echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
-root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
+# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
+# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
 
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,7)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",7)" >> dataDrivenEstimates.log
