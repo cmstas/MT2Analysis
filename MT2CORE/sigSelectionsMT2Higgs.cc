@@ -2,7 +2,7 @@
 
 namespace mt2 {
 
-std::vector<SR> getSignalRegionsMT2Higgs(){
+std::vector<SR> getSignalRegionsMT2Higgs() {
 
   std::vector<SR> temp_SR_vec;
   std::vector<SR> SRVec;

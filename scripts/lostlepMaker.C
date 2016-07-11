@@ -33,11 +33,11 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
   const unsigned int ndirs = dirs.size();
   
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-    TString directory = "sr"+dirs.at(idir);
+    TString directory = "srh"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameFinebin = directory + "/h_mt2";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
-    TString crdir = "crsl"+TString(dirs.at(idir));
+    TString crdir = "crhsl"+TString(dirs.at(idir));
     TString fullhistnameSL = crdir+"/h_mt2bins";
     TString fullhistnameSLfinebin = crdir+"/h_mt2";
     TString fullhistnameSLHT = crdir+"/h_htbins";
@@ -307,13 +307,13 @@ void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   //if directory begins with "sr", excluding "srbase", add it to vector signal regions.
   TIter it(f_lostlep->GetListOfKeys());
   TKey* k;
-  std::string keep = "sr";
+  std::string keep = "srh";
   std::string skip = "srbase";
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
-      sr_string.erase(0, 2);//remove "sr" from front of string
+      sr_string.erase(0, 3);//remove "srh" from front of string
       dirs.push_back(sr_string);
     }
   }
