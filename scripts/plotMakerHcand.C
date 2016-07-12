@@ -833,7 +833,7 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
       if (dataMCratio) {
         ofile << "data/MC";
         for (unsigned int idx = 0; idx < bgtot.size(); ++idx)
-          ofile << "  &  " << datatot[idx]/bgtot[idx];
+          ofile << "  &  " << setprecision(3) << datatot[idx]/bgtot[idx];
         ofile << " \\\\" << endl;
         ofile << "\\hline" << endl;
       }
@@ -1899,7 +1899,7 @@ void plotMakerHcand() {
 
   vector<string> names{"ttsl", "ttdl", "wjets_ht", "zinv_ht"};
   // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
-  names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
+  // vector<string> names{"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
   // ----------------------------------------
@@ -1969,7 +1969,7 @@ void plotMakerHcand() {
   // }
   vector<string> dirsH;
   // names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
-  // names = vector<string> {"lostlep", "data_Run2016B"};
+  names = vector<string> {"lostlep", "data_Run2016B"};
 
   // vector<string> selecs{"original", "minMTBMet", "MbbMax"};
   vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand",
