@@ -21,9 +21,9 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
 
   sr.SetName("2");
   sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 2, 3);
+  sr.SetVar("nbjets", 2, -1);
   sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 1, 3);
+  sr.SetVarCRSL("nbjets", 2, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
@@ -35,13 +35,13 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("4");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 3, -1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 1, 3);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
+  // sr.SetName("4");
+  // sr.SetVar("njets", 7, -1);
+  // sr.SetVar("nbjets", 3, -1);
+  // sr.SetVarCRSL("njets", 7, -1);
+  // sr.SetVarCRSL("nbjets", 1, 3);
+  // temp_SR_vec.push_back(sr);
+  // sr.Clear();
 
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
