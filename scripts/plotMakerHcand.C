@@ -913,7 +913,7 @@ void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string
 
   if (caption == "Detailed") { // temporary
     caption = dirs[0] + ": ";
-    caption += getJetBJetTableLabel(samples.at(0), dirs[0]) + ", ";
+    // caption += getJetBJetTableLabel(samples.at(0), dirs[0]) + ", ";
     caption += getHTTableLabel(samples.at(0), dirs[0]) + ", ";
     caption += getMETTableLabel(samples.at(0), dirs[0]);
     caption += ", MT2 $>$ 200 GeV";
@@ -953,7 +953,9 @@ void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string
     ofile << "\\multirow{2}{*}{Sample}";
     for (unsigned int idir = 0; idir < ndirs; ++idir)
       ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
-            << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", $\\mttwo > 200$~GeV" << " }";
+            // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
+            << " CR: " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", 1 lep ($M_{\\rm{T}} < 100$)."
+            << " }";
     ofile << " \\\\" << endl
           << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
     for (unsigned int i = 0; i < ndirs; ++i)
@@ -2070,7 +2072,7 @@ void plotMakerHcand() {
   //  samples definition
   // ----------------------------------------
 
-  vector<string> names{"ttsl", "ttdl", "wjets_ht", "zinv_ht"};
+  vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht"};
   // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
   // vector<string> names{"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
   vector<TFile*> samples = getSamples(names, input_dir);
@@ -2141,15 +2143,24 @@ void plotMakerHcand() {
   //   if(i % 2 != 0) std::cout << "\\pagebreak" << std::endl; //two tables per page
   // }
   vector<string> dirsH;
-  // names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
-  names = vector<string> {"lostlep", "data_Run2016B"};
+  // names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "2015zinv_ht"};
 
   // vector<string> selecs{"original", "minMTBMet", "MbbMax"};
   vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand",
                            "MbbMax200", "mMTnMbb200", "MbbMax300", "mMTnMbb300"};
-  vector<vector<TFile*>> samplesVec;
+  vector< vector<TFile*> > samplesVec;
   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
+
+  vector<string> names2 = {"lostlep", "data_Run2016B"};
+  vector< vector<TFile*> > samplesVec2;
+  for (auto it = selecs.begin(); it != selecs.end(); ++it)
+    samplesVec2.push_back(getSamples(names2, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
+
+  vector<string> names3 = {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
+  vector< vector<TFile*> > samplesVec3;
+  for (auto it = selecs.begin(); it != selecs.end(); ++it)
+    samplesVec3.push_back(getSamples(names3, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
   // dirsH.push_back("srbase");
   // dirsH.push_back("srbaseHcand");
@@ -2158,129 +2169,177 @@ void plotMakerHcand() {
   // dirsH.clear();
   // names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
-  dirsH.push_back("crhslbase");
-  // printComparisonTable(samplesVec, names, selecs, dirsH, "crslbase", true);
+  dirsH.push_back("srhbase");
+  printComparisonTable(samplesVec, names, selecs, dirsH, "srhbase");
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  dirsH.push_back("crhslbase");
+  printComparisonTable(samplesVec3, names3, selecs, dirsH, "crhslbase");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
+  dirsH.clear();
+
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl1VL");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh1VL");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  dirsH.clear();
+  dirsH.push_back("crsl6VL");
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl2VL");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh2VL");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl3VL");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh3VL");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   // ofile << "\\newpage\n";
   // dirsH.push_back("crhsl4VL");
-  // printComparisonTaCRSLble(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
+  // dirsH.push_back("srh4VL");
+  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   // dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl1L");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh1L");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl2L");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh2L");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl3L");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh3L");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   // ofile << "\\newpage\n";
   // dirsH.push_back("crhsl4L");
-  // printComparisonTaCRSLble(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
+  // dirsH.push_back("srh4L");
+  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   // dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl1M");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh1M");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl2M");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh2M");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl3M");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh3M");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   // ofile << "\\newpage\n";
   // dirsH.push_back("crhsl4M");
-  // printComparisonTaCRSLble(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
+  // dirsH.push_back("srh4M");
+  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   // dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl1H");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh1H");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl2H");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh2H");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl3H");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh3H");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   // ofile << "\\newpage\n";
   // dirsH.push_back("crhsl4H");
-  // printComparisonTaCRSLble(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
+  // dirsH.push_back("srh4H");
+  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   // dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl1UH");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh1UH");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl2UH");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh2UH");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
-  // ofile << "\\newpage\n";
+  ofile << "\\newpage\n";
   dirsH.push_back("crhsl3UH");
-  printComparisonTableCRSL(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  dirsH.clear();
+  dirsH.push_back("srh3UH");
+  printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   dirsH.clear();
 
   // ofile << "\\newpage\n";
   // dirsH.push_back("crhsl4UH");
-  // printComparisonTaCRSLble(samplesVec, names, selecs, dirsH, "Detailed", true);
-  // // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
+  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
+  // dirsH.push_back("srh4UH");
+  // printDetailedComparisonTable(samplesVec, names, selecs, dirsH);
   // dirsH.clear();
 
   ofile << "\\end{document}" << std::endl;

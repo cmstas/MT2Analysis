@@ -20,18 +20,18 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   sr.Clear();
 
   sr.SetName("2");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 2, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("3");
   sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 3, -1);
   sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 3, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("3");
+  sr.SetVar("njets", 7, -1);
+  sr.SetVar("nbjets", 2, -1);
+  sr.SetVarCRSL("njets", 7, -1);
+  sr.SetVarCRSL("nbjets", 2, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 

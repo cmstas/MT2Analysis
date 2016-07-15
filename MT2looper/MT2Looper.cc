@@ -274,7 +274,7 @@ void MT2Looper::SetSignalRegions(){
   SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
   SRBaseHcand.SetVar("diffMetMhtOverMet", 0, 0.5);
   // SRBaseHcand.SetVar("nHcand", 1, -1);
-  // SRBaseHcand.SetVar("njets", 3, -1);
+  // SRBaseHcand.SetVar("njets", 4, -1);
   SRBaseHcand.SetVar("nlep", 0, 1);
   SRBaseHcand.SetVar("nbjets", 2, -1);
   SRBaseHcand.SetVar("passesHtMet", 1, 2);
@@ -284,6 +284,7 @@ void MT2Looper::SetSignalRegions(){
   SRBaseHcand.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBaseHcand.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   SRBaseHcand.SetVarCRSL("nlep", 1, 2);
+  // SRBaseHcand.SetVarCRSL("njets", 4, -1);
   SRBaseHcand.SetVarCRSL("nbjets", 2, -1);
   SRBaseHcand.SetVarCRSL("passesHtMet", 1, 2);
   float SRBaseHcand_mt2bins[4] = {200, 300, 500, 1000}; 
@@ -1141,7 +1142,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // doMT2Higgs = doMinMTBMet;
       // doMT2Higgs = doMinMTBMet && isHcand;
       // doMT2Higgs = doMT2Higgs && isHcand;
-      // doMT2Higgs = doMbbMax && doMinMTBMet;
+      // doMT2Higgs = doMbbMax;
+      doMT2Higgs = doMbbMax && doMinMTBMet;
       if (!doMT2Higgs) continue;
 
       // // Gen matching for the bjets
@@ -1446,6 +1448,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = t.deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
   values["nlep"]        = nlepveto_;
+  // values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
   // values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = t.jet1_pt;
