@@ -303,6 +303,18 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.srHistMap, "", 1, 0, 2);
   outfile_->cd();
 
+  dir = (TDirectory*)outfile_->Get("crhgjbase");
+  if (dir == 0) {
+    dir = outfile_->mkdir("crhgjbase");
+  }
+  dir->cd();
+  for(unsigned int j = 0; j < vars.size(); j++){
+    plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBound(vars.at(j)), SRBaseHcand.crgjHistMap, "", 1, 0, 2);
+    plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBound(vars.at(j)), SRBaseHcand.crgjHistMap, "", 1, 0, 2);
+  }
+  plot1D("h_n_mt2bins",  1, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.crgjHistMap, "", 1, 0, 2);
+  outfile_->cd();
+
   vars = SRBaseHcand.GetListOfVariablesCRSL();
   dir = (TDirectory*)outfile_->Get("crhslbase");
   if (dir == 0) {
@@ -351,6 +363,16 @@ void MT2Looper::SetSignalRegions(){
     }
     plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crslHistMap, "", 1, 0, 2);
 
+    dir = (TDirectory*)outfile_->Get(("crgj"+SRVecHcand.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crhgj"+SRVecHcand.at(i).GetName()).c_str());
+    }
+    dir->cd();
+    for(unsigned int j = 0; j < vars.size(); j++){
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecHcand.at(i).GetLowerBound(vars.at(j)), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
   }
 
   // -- end of mt2higgs --
@@ -1282,12 +1304,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBaseHcand.GetName().c_str());
   savePlotsDir(SRBaseHcand.crslHistMap, outfile_, "crhslbase");
+  savePlotsDir(SRBaseHcand.crgjHistMap, outfile_, "crhgjbase");
   for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if (!SRVecHcand.at(srN).srHistMap.empty())
       savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, ("srh"+SRVecHcand.at(srN).GetName()).c_str());
 
     if (!SRVecHcand.at(srN).crslHistMap.empty())
       savePlotsDir(SRVecHcand.at(srN).crslHistMap, outfile_, ("crhsl"+SRVecHcand.at(srN).GetName()).c_str());
+    if (!SRVecHcand.at(srN).crgjHistMap.empty())
+      savePlotsDir(SRVecHcand.at(srN).crgjHistMap, outfile_, ("crhgj"+SRVecHcand.at(srN).GetName()).c_str());
   }
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
@@ -1553,7 +1578,7 @@ void MT2Looper::fillHistosCRMT2Higgs(const std::string& prefix, const std::strin
 
     for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
       if (SRVecHcand.at(srN).PassesSelection(values)) {
-        fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix+add);
+        fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhgj"+SRVecHcand.at(srN).GetName(), suffix+add);
         // break; //control regions are orthogonal, event cannot be in more than one
       }
     } // SRloop
@@ -2545,8 +2570,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot1D("h_njbins"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
   plot1D("h_nbjbins"+s,       t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
 
-  if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") 
-       && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight") )// Don't make these for Loose, NotLoose. SieieSB
+  if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || TString(dirname).Contains("crhgj") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH")
+       && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight") ) // Don't make these for Loose, NotLoose. SieieSB
     {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
