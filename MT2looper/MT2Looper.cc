@@ -1093,7 +1093,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       ////////////////////////////////////
       ///   time to fill histograms    /// 
       ////////////////////////////////////
-
       if (doGJplots) {
         saveGJplots = true;
 	if (t.gamma_nJet30FailId == 0) {
@@ -1111,6 +1110,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	}
       }
       if (verbose) cout<<__LINE__<<endl;
+
+      // MT2Higgs' crgj histo filling
+      if (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))
+        fillHistosCRMT2Higgs();
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
@@ -1231,7 +1234,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (doMT2Higgs) {
         fillHistosSRMT2Higgs("srh");
-        fillHistosCRMT2Higgs();
       }
 
       // if (doDYplots) {
