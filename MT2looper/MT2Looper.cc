@@ -1143,7 +1143,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // doMT2Higgs = doMinMTBMet && isHcand;
       // doMT2Higgs = doMT2Higgs && isHcand;
       // doMT2Higgs = doMbbMax;
-      doMT2Higgs = doMbbMax && doMinMTBMet;
+      // doMT2Higgs = doMbbMax && doMinMTBMet;
       if (!doMT2Higgs) continue;
 
       // // Gen matching for the bjets
@@ -1207,8 +1207,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	fillHistosInclusive();
       }
 
-      if (doMT2Higgs)
+      if (doMT2Higgs) {
         fillHistosSRMT2Higgs("srh");
+        fillHistosCRMT2Higgs();
+      }
 
       // if (doDYplots) {
       //   saveDYplots = true;
@@ -1500,6 +1502,75 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     if (SRVecHcand.at(srN).PassesSelectionCRSL(valuesCRSL)) {
       fillHistosMT2Higgs(SRVecHcand.at(srN).crslHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhsl"+SRVecHcand.at(srN).GetName(), suffix);
     }
+  }
+
+  return;
+}
+
+void MT2Looper::fillHistosCRMT2Higgs(const std::string& prefix, const std::string& suffix) {
+
+  // The GammaJets Control Region (only one for now)
+  if (t.ngamma == 0) return;
+
+  // trigger requirement
+  if (t.isData && !t.HLT_Photon165_HE10) return;
+
+  // just deal with the standard case now. Worry later about sideband in sieie
+  bool passSieie = t.gamma_idCutBased[0] ? true : false;
+
+  // fill hists
+  std::string add = "";
+
+  float passPtMT2 = (t.mt2 < 200 && t.gamma_pt[0] > 180.)? true : false;
+
+  std::map<std::string, float> values;
+  values["deltaPhiMin"] = t.gamma_deltaPhiMin;
+  values["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
+  values["nlep"]        = nlepveto_;
+  values["nbjets"]      = t.gamma_nBJet20;
+  values["j1pt"]        = t.gamma_jet1_pt;
+  values["j2pt"]        = t.gamma_jet2_pt;
+  values["mt2"]         = t.gamma_mt2;
+  values["passesHtMet"] = ( (t.gamma_ht > 200. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
+  bool passBase = SRBaseHcand.PassesSelection(values);
+
+  values["njets"]       = t.gamma_nJet30;
+  values["ht"]          = t.gamma_ht;
+  values["met"]         = t.gamma_met_pt;
+  values.erase("passesHtMet");
+
+  //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
+  float iso = t.gamma_chHadIso[0];
+  float isoCutTight = 2.5;
+  float isoCutLoose = 20.;
+  if (iso > isoCutTight && iso < isoCutLoose) add += "LooseNotTight";
+  if (iso > isoCutLoose) add += "NotLoose";
+  if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
+
+
+  if (passBase && passPtMT2) {
+    fillHistosGammaJets(SRBaseHcand.crgjHistMap, SRBaseHcand.crgjRooDataSetMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhgjbase", suffix+add);
+
+    for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
+      if (SRVecHcand.at(srN).PassesSelection(values)) {
+        fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix+add);
+        // break; //control regions are orthogonal, event cannot be in more than one
+      }
+    } // SRloop
+  }
+
+  // do monojet SRs
+  std::map<std::string, float> values_monojet;
+  values_monojet["deltaPhiMin"] = t.gamma_deltaPhiMin;
+  values_monojet["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
+  values_monojet["nlep"]        = nlepveto_;
+  values_monojet["ht"]          = t.gamma_ht; // ETH doesn't cut on jet1_pt here, only ht
+  values_monojet["njets"]       = t.gamma_nJet30;
+  values_monojet["met"]         = t.gamma_met_pt;
+  bool passBaseJ = SRBaseMonojet.PassesSelection(values_monojet);
+
+  if ((passBaseJ && t.gamma_pt[0] > 180.) || (passBase && passPtMT2)) {
+    fillHistosGammaJets(SRBaseInclHcand.crgjHistMap, SRBaseInclHcand.crgjRooDataSetMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "crhgjbaseIncl", suffix+add);
   }
 
   return;
