@@ -296,7 +296,7 @@ void MT2Looper::SetSignalRegions(){
     dir = outfile_->mkdir(SRBaseHcand.GetName().c_str());
   }
   dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
+  for (unsigned int j = 0; j < vars.size(); j++) {
     plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBound(vars.at(j)), SRBaseHcand.srHistMap, "", 1, 0, 2);
     plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBound(vars.at(j)), SRBaseHcand.srHistMap, "", 1, 0, 2);
   }
@@ -308,7 +308,7 @@ void MT2Looper::SetSignalRegions(){
     dir = outfile_->mkdir("crhgjbase");
   }
   dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
+  for (unsigned int j = 0; j < vars.size(); j++) {
     plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBound(vars.at(j)), SRBaseHcand.crgjHistMap, "", 1, 0, 2);
     plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBound(vars.at(j)), SRBaseHcand.crgjHistMap, "", 1, 0, 2);
   }
@@ -321,7 +321,7 @@ void MT2Looper::SetSignalRegions(){
     dir = outfile_->mkdir("crhslbase");
   }
   dir->cd();
-  for(unsigned int j = 0; j < vars.size(); j++){
+  for (unsigned int j = 0; j < vars.size(); j++) {
     plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRBaseHcand.GetLowerBoundCRSL(vars.at(j)), SRBaseHcand.crslHistMap, "", 1, 0, 2);
     plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRBaseHcand.GetUpperBoundCRSL(vars.at(j)), SRBaseHcand.crslHistMap, "", 1, 0, 2);
   }
@@ -357,18 +357,18 @@ void MT2Looper::SetSignalRegions(){
     } 
     dir->cd();
     std::vector<std::string> varsCRSL = SRVecHcand.at(i).GetListOfVariablesCRSL();
-    for(unsigned int j = 0; j < varsCRSL.size(); j++){
+    for (unsigned int j = 0; j < varsCRSL.size(); j++) {
       plot1D("h_"+varsCRSL.at(j)+"_"+"LOW",  1, SRVecHcand.at(i).GetLowerBoundCRSL(varsCRSL.at(j)), SRVecHcand.at(i).crslHistMap, "", 1, 0, 2);
       plot1D("h_"+varsCRSL.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBoundCRSL(varsCRSL.at(j)), SRVecHcand.at(i).crslHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crslHistMap, "", 1, 0, 2);
 
-    dir = (TDirectory*)outfile_->Get(("crgj"+SRVecHcand.at(i).GetName()).c_str());
+    dir = (TDirectory*)outfile_->Get(("crhgj"+SRVecHcand.at(i).GetName()).c_str());
     if (dir == 0) {
       dir = outfile_->mkdir(("crhgj"+SRVecHcand.at(i).GetName()).c_str());
     }
     dir->cd();
-    for(unsigned int j = 0; j < vars.size(); j++){
+    for (unsigned int j = 0; j < vars.size(); j++) {
       plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecHcand.at(i).GetLowerBound(vars.at(j)), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
       plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
     }
