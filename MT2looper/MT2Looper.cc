@@ -1088,39 +1088,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doQCDplots = false;
       if (t.nJet30 >= 2 && t.deltaPhiMin < 0.3) doQCDplots = true;
 
-      ////////////////////////////////////
-      /// done with overall selection  /// 
-      ////////////////////////////////////
-      ///   time to fill histograms    /// 
-      ////////////////////////////////////
-      if (doGJplots) {
-        saveGJplots = true;
-	if (t.gamma_nJet30FailId == 0) {
+      // -- MT2Higgs looper --
+      // This part is designed to run with the standard mt2baby without the help from hcand branches
 
-	  //// To test Madgraph fragmentation (need to remove drMinParton requirement from above) //
-	  //if ( t.gamma_mcMatchId[0] > 0 ) {
-	  //  if (t.evt_id < 200 || t.gamma_drMinParton[0]>0.4) fillHistosCRGJ("crgj"); // Prompt photon
-	  //  if (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4)  fillHistosCRGJ("crgj", "FragGJ");
-	  //  if (t.evt_id < 200 && t.gamma_drMinParton[0]<0.05) fillHistosCRGJ("crgj", "FragGJ");
-	  //}
-	  //// End of Madgraph fragmentation tests //
-	  
-	  if ( t.gamma_mcMatchId[0] > 0 || t.isData) fillHistosCRGJ("crgj"); // Prompt photon 
-	  else fillHistosCRGJ("crgj", "Fake");
-	}
-      }
-      if (verbose) cout<<__LINE__<<endl;
+      // Recalculating minMTbmet from jet vectors, using bjets down to 20
+      bool doMT2Higgs  = false;
+      bool doMinMTBMet = false;
+      bool doMbbMax200 = false;
+      bool doMbbMax300 = false;
+      bool isHcand     = false;
 
-      // MT2Higgs' crgj histo filling
-      if (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))
-        fillHistosCRMT2Higgs();
-
-      if (!passJetID) continue;
-      if (verbose) cout<<__LINE__<<endl;
-
-      // -- mt2Higgs looper: bmet stuff --
-      // This part is designed to run with the standard mt2baby without help from hcand branches
-      // the following cuts will reflected directly in the standard bins
+      minMTbmet_ = 0.;
+      mbbmax_    = 0.;
+      mbbclose_  = 0.;
 
       // First restore the bjets
       vector<TLorentzVector> p4sBJets;
@@ -1133,45 +1113,67 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           p4sBJets.push_back(bjet);
         }
       }
-      // calculate Mbb_hcand and Mbb_max
-      minMTbmet_ = 0;
-      float Mbb_max = -1;
-      // float Mbb_hcand = -1;
-      bool isHcand = false;
-      if (p4sBJets.size() > 1) {
+      // calculate Mbb_close and Mbb_max
+      if (p4sBJets.size() >= 2) {   // basic mt2higgs require >= 2 bjets
         for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
           float mt = MT(p4sBJets[ibj1].Pt(), p4sBJets[ibj1].Phi(), t.met_pt, t.met_phi);
           if (ibj1 == 0 || mt < minMTbmet_) minMTbmet_ = mt;
 
           for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
             float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
-            Mbb_max = max(Mbb_max, mbb);
-            if (mbb > 100 && mbb < 150)
-              isHcand = true;
-            // if (fabs(mbb-125.1) < fabs(Mbb_hcand-125.1))
-            //   Mbb_hcand = mbb;
+            mbbmax_ = max(mbbmax_, mbb);
+            if (fabs(mbb-125.1) < fabs(mbbclose_-125.1)) {
+                mbbclose_ = mbb;
+                if (mbb > 100 && mbb < 150) isHcand = true;
+            }
           }
         }
       }
-      mbbmax_ = Mbb_max;
-
-      bool doMT2Higgs  = false;
-      bool doMinMTBMet = false;
-      bool doMbbMax    = false;
 
       if (p4sBJets.size() >= 2) doMT2Higgs = true;
-      // if (doMT2Higgs && isHcand && minMTbmet_ > 200) doMinMTBMet = true;
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
-      if (doMT2Higgs && Mbb_max > 300) doMbbMax = true;
+      if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
+      if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
 
       // doMT2Higgs = doMinMTBMet;
-      // doMT2Higgs = doMinMTBMet && isHcand;
       // doMT2Higgs = doMT2Higgs && isHcand;
-      // doMT2Higgs = doMbbMax;
-      // doMT2Higgs = doMbbMax && doMinMTBMet;
-      if (!doMT2Higgs) continue;
+      // doMT2Higgs = doMinMTBMet && isHcand;
+      // doMT2Higgs = doMbbMax200;
+      // doMT2Higgs = doMbbMax200 && doMinMTBMet;
+      // doMT2Higgs = doMbbMax300;
+      // doMT2Higgs = doMbbMax300 && doMinMTBMet;
 
-      // // Gen matching for the bjets
+      // --- Gamma Jet control region for mt2higgs ---
+      bool doMT2HiggsGJ  = false;
+      bool doMinMTBMetGJ = false;
+      bool doMbbMax200GJ = doMbbMax200; // = false;
+      bool doMbbMax300GJ = doMbbMax300; // = false;
+      bool isHcandGJ     = isHcand; // = false;
+
+      gamma_minMTbmet_ = 0.;
+      if (p4sBJets.size() >= 2) {
+        for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
+          float mt = MT(p4sBJets[ibj1].Pt(), p4sBJets[ibj1].Phi(), t.gamma_met_pt, t.gamma_met_phi);
+          if (ibj1 == 0 || mt < minMTbmet_) gamma_minMTbmet_ = mt;
+        }
+      }
+
+      if (p4sBJets.size() >= 2) doMT2HiggsGJ = true;
+      if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
+      // if (doMT2HiggsGJ && Mbb_max > 200) doMbbMax200GJ = true;
+      // if (doMT2HiggsGJ && Mbb_max > 300) doMbbMax300GJ = true;
+
+      // doMT2HiggsGJ = doMinMTBMetGJ;
+      // doMT2HiggsGJ = doMinMTBMetGJ && isHcandGJ;
+      // doMT2HiggsGJ = doMT2HiggsGJ && isHcandGJ;
+      // doMT2HiggsGJ = doMbbMax200GJ;
+      // doMT2HiggsGJ = doMbbMax200GJ && doMinMTBMetGJ;
+      // doMT2HiggsGJ = doMbbMax300GJ;
+      // doMT2HiggsGJ = doMbbMax300GJ && doMinMTBMetGJ;
+
+      // --- end of crgj for mt2higgs ---
+
+      // // --- Gen matching for the bjets ---
       // ntruebJets_ = 0;
       // vector<float> ptratios;
       // // doCounting = doMT2Higgs;
@@ -1199,7 +1201,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //         isTrueBJet = true;
       //         float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
       //         if (ptratio < 0.5 || ptratio > 1.5) badPtRatio = true;
-      //         // else if (ptratio > 0.8 && ptratio < 1.2) 
+      //         // else if (ptratio > 0.8 && ptratio < 1.2)
       //       }
       //     }
       //   }
@@ -1212,14 +1214,47 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // if (ntruebJets_ >= 2 && nIsTrueBJet < 5) {
       //   cout << endl << BadPtRatioCount << "\n-----------------------\n";
-      //   for (int igen = 0; igen < t.ngenStat23; ++igen) 
+      //   for (int igen = 0; igen < t.ngenStat23; ++igen)
       //     cout << "igen: " << igen << " pdgID: " << t.genStat23_pdgId[igen] << " sourceID: " << t.genStat23_sourceId[igen]
       //          << " pt: " << t.genStat23_pt[igen] << " eta: " << t.genStat23_eta[igen] << " phi: " << t.genStat23_phi[igen] << endl;
       //   for (auto it = p4sBJets.begin(); it != p4sBJets.end(); ++it)
       //     cout << "i: " << it - p4sBJets.begin() << " pt: " << it->Pt() << " eta: " << it->Eta() << " phi: " << it->Phi() << endl;
       // }
+      // // --- end of gen matching ---
 
       // -- end of mt2higgs --
+
+      ////////////////////////////////////
+      /// done with overall selection  /// 
+      ////////////////////////////////////
+      ///   time to fill histograms    /// 
+      ////////////////////////////////////
+
+      if (doGJplots) {
+        saveGJplots = true;
+	if (t.gamma_nJet30FailId == 0) {
+
+	  //// To test Madgraph fragmentation (need to remove drMinParton requirement from above) //
+	  //if ( t.gamma_mcMatchId[0] > 0 ) {
+	  //  if (t.evt_id < 200 || t.gamma_drMinParton[0]>0.4) fillHistosCRGJ("crgj"); // Prompt photon
+	  //  if (t.evt_id >=200 && t.gamma_drMinParton[0]<0.4)  fillHistosCRGJ("crgj", "FragGJ");
+	  //  if (t.evt_id < 200 && t.gamma_drMinParton[0]<0.05) fillHistosCRGJ("crgj", "FragGJ");
+	  //}
+	  //// End of Madgraph fragmentation tests //
+	  
+	  if ( t.gamma_mcMatchId[0] > 0 || t.isData) fillHistosCRGJ("crgj"); // Prompt photon 
+	  else fillHistosCRGJ("crgj", "Fake");
+	}
+      }
+      if (verbose) cout<<__LINE__<<endl;
+
+      // MT2Higgs' crgj histo filling
+      if (doMT2HiggsGJ && (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData)))
+        fillHistosCRMT2Higgs();
+      if (!doMT2Higgs) continue;
+
+      if (!passJetID) continue;
+      if (verbose) cout<<__LINE__<<endl;
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -2593,6 +2628,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+    if (TString(dirname).Contains("crhgj")) plot1D("h_minMTbmet"+s,  gamma_minMTbmet_,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
 
     plot1D("h_drMinParton"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
     TString drName = "h_drMinPartonSample";

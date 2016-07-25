@@ -1632,8 +1632,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
       float btagprob_err_light_DN = 0.;
       float btagprob_mc = 1.;
 
-      // -- mt2higgs -- define bjets vector
-      std::vector<LorentzVector> p4sBJets;
+      std::vector<LorentzVector> p4sBJets;   // mt2higgs - define bjets vector
 
       if (verbose) cout << "before main jet loop" << endl;
 
@@ -1740,9 +1739,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, int bx, bool isF
             if(jet_btagCSV[njet] >= 0.800){
               nBJet20++; 
               nBJet20csv++;
-              // -- mt2higgs --
-              isbJet = true;
-              p4sBJets.push_back(p4sCorrJets.at(iJet));
+              isbJet = true;                            // mt2higgs
+              p4sBJets.push_back(p4sCorrJets.at(iJet)); // ""
 
 	      if (jet_pt[njet] > 30.0) nBJet30csv++;
               // btag SF - not final yet
