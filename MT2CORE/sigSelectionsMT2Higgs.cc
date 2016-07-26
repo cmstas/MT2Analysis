@@ -4,19 +4,37 @@ namespace mt2 {
 
 std::vector<SR> getSignalRegionsMT2Higgs() {
 
-  std::vector<SR> temp_SR_vec;
+  std::vector<SR> temp_SR_VL_vec;
+  std::vector<SR> temp_SR_MH_vec;
   std::vector<SR> SRVec;
   SR sr;
   SR baseSR;
 
-  //first set binning in njet-nbjet plane
+  // first set binning in njet-nbjet plane
+  // SR for VL and L regions, inclusive for >= 7 jets
+  sr.SetName("1");
+  sr.SetVar("njets", 4, -1);
+  sr.SetVar("nbjets", 2, 3);
+  sr.SetVarCRSL("njets", 4, -1);
+  sr.SetVarCRSL("nbjets", 2, 3);
+  temp_SR_VL_vec.push_back(sr);
+  sr.Clear();
 
+  sr.SetName("2");
+  sr.SetVar("njets", 4, -1);
+  sr.SetVar("nbjets", 3, -1);
+  sr.SetVarCRSL("njets", 4, -1);
+  sr.SetVarCRSL("nbjets", 3, -1);
+  temp_SR_VL_vec.push_back(sr);
+  sr.Clear();
+
+  // SR for M and H regions, separate for >= 7 jets
   sr.SetName("1");
   sr.SetVar("njets", 4, 7);
   sr.SetVar("nbjets", 2, 3);
   sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 2, 3);
-  temp_SR_vec.push_back(sr);
+  temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("2");
@@ -24,7 +42,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   sr.SetVar("nbjets", 3, -1);
   sr.SetVarCRSL("njets", 4, 7);
   sr.SetVarCRSL("nbjets", 3, -1);
-  temp_SR_vec.push_back(sr);
+  temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("3");
@@ -32,7 +50,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   sr.SetVar("nbjets", 2, -1);
   sr.SetVarCRSL("njets", 7, -1);
   sr.SetVarCRSL("nbjets", 2, -1);
-  temp_SR_vec.push_back(sr);
+  temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
   // sr.SetName("4");
@@ -44,8 +62,8 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   // sr.Clear();
 
   //add HT and MET requirements
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);
+  for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
+    SR fullSR = temp_SR_VL_vec.at(iSR);
     fullSR.SetName(fullSR.GetName() + "VL");
     fullSR.SetVar("ht", 200, 450);
     fullSR.SetVar("met", 200, -1);
@@ -61,8 +79,8 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
     SRVec.push_back(fullSR);
   }
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);
+  for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
+    SR fullSR = temp_SR_VL_vec.at(iSR);
     fullSR.SetName(fullSR.GetName() + "L");
     fullSR.SetVar("ht", 450, 575);
     fullSR.SetVar("met", 200, -1);
@@ -78,8 +96,8 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};           fullSR.SetMT2Bins(1, mt2bins);}
     SRVec.push_back(fullSR);
   }
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);
+  for(unsigned int iSR = 0; iSR < temp_SR_MH_vec.size(); iSR++){
+    SR fullSR = temp_SR_MH_vec.at(iSR);
     fullSR.SetName(fullSR.GetName() + "M");
     fullSR.SetVar("ht", 575, 1000);
     fullSR.SetVar("met", 200, -1);
@@ -95,14 +113,14 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};                fullSR.SetMT2Bins(1, mt2bins);}
     SRVec.push_back(fullSR);
   }
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);
+  for(unsigned int iSR = 0; iSR < temp_SR_MH_vec.size(); iSR++){
+    SR fullSR = temp_SR_MH_vec.at(iSR);
     fullSR.SetName(fullSR.GetName() + "H");
-    fullSR.SetVar("ht", 1000, 1500);
+    fullSR.SetVar("ht", 1000, -1);
     fullSR.SetVar("met", 30, -1);
-    fullSR.SetVarCRSL("ht", 1000, 1500);
+    fullSR.SetVarCRSL("ht", 1000, -1);
     fullSR.SetVarCRSL("met", 30, -1);
-    fullSR.SetVarCRQCD("ht", 1000, 1500);
+    fullSR.SetVarCRQCD("ht", 1000, -1);
     fullSR.SetVarCRQCD("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
@@ -112,23 +130,23 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
     SRVec.push_back(fullSR);
   }
-  for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
-    SR fullSR = temp_SR_vec.at(iSR);
-    fullSR.SetName(fullSR.GetName() + "UH");
-    fullSR.SetVar("ht", 1500, -1);
-    fullSR.SetVar("met", 30, -1);
-    fullSR.SetVarCRSL("ht", 1500, -1);
-    fullSR.SetVarCRSL("met", 30, -1);
-    fullSR.SetVarCRQCD("ht", 1500, -1);
-    fullSR.SetVarCRQCD("met", 30, -1);
-    int njets_lo = fullSR.GetLowerBound("njets");
-    int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    SRVec.push_back(fullSR);
-  }
+  // for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+  //   SR fullSR = temp_SR_vec.at(iSR);
+  //   fullSR.SetName(fullSR.GetName() + "UH");
+  //   fullSR.SetVar("ht", 1500, -1);
+  //   fullSR.SetVar("met", 30, -1);
+  //   fullSR.SetVarCRSL("ht", 1500, -1);
+  //   fullSR.SetVarCRSL("met", 30, -1);
+  //   fullSR.SetVarCRQCD("ht", 1500, -1);
+  //   fullSR.SetVarCRQCD("met", 30, -1);
+  //   int njets_lo = fullSR.GetLowerBound("njets");
+  //   int nbjets_lo = fullSR.GetLowerBound("nbjets");
+  //   if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+  //   else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+  //   else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+  //   else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+  //   SRVec.push_back(fullSR);
+  // }
 
   //define baseline selections commmon to all signal regions
   baseSR.SetVar("mt2", 200, -1);
