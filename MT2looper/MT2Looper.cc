@@ -1115,6 +1115,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       // calculate Mbb_close and Mbb_max
       if (p4sBJets.size() >= 2) {   // basic mt2higgs require >= 2 bjets
+        doMT2Higgs = true;
         for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
           float mt = MT(p4sBJets[ibj1].Pt(), p4sBJets[ibj1].Phi(), t.met_pt, t.met_phi);
           if (ibj1 == 0 || mt < minMTbmet_) minMTbmet_ = mt;
@@ -1130,7 +1131,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
       }
 
-      if (p4sBJets.size() >= 2) doMT2Higgs = true;
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
       if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
@@ -1152,14 +1152,30 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool isHcandGJ     = isHcand; // = false;
 
       gamma_minMTbmet_ = 0.;
-      if (p4sBJets.size() >= 2) {
-        for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
-          float mt = MT(p4sBJets[ibj1].Pt(), p4sBJets[ibj1].Phi(), t.gamma_met_pt, t.gamma_met_phi);
-          if (ibj1 == 0 || mt < gamma_minMTbmet_) gamma_minMTbmet_ = mt;
+      if (t.gamma_nBJet20 >= 2) {
+        doMT2HiggsGJ = true;
+
+        // If by any chance a bjets is overlaped with the gamma and hence removed
+        bool overlapBJetGamma = (t.gamma_nBJet20 != t.nBJet20);
+        unsigned int overlap_bjet_idx = -1;
+        if (overlapBJetGamma) {
+          float minDR = 999.;
+          for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
+            float thisDR = DeltaR(p4sBJets[ibj].Eta(), t.gamma_eta[0], p4sBJets[ibj].Phi(), t.gamma_phi[0]);
+            if (thisDR < minDR) {
+              minDR = thisDR;
+              overlap_bjet_idx = ibj;
+            }
+          }
+        }
+        for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
+          if (overlapBJetGamma && overlap_bjet_idx == ibj) continue;
+          float mt = MT(p4sBJets[ibj].Pt(), p4sBJets[ibj].Phi(), t.gamma_met_pt, t.gamma_met_phi);
+          if (ibj == 0 || mt < gamma_minMTbmet_)
+            gamma_minMTbmet_ = mt;
         }
       }
 
-      if (p4sBJets.size() >= 2) doMT2HiggsGJ = true;
       if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
       // if (doMT2HiggsGJ && Mbb_max > 200) doMbbMax200GJ = true;
       // if (doMT2HiggsGJ && Mbb_max > 300) doMbbMax300GJ = true;
@@ -2512,6 +2528,7 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
 
   plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 200, 0, 1000);
   plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 200, 0, 600);
+  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 200, 0, 250);
 
   if (dirname.find("crhsl") == 0) {
     plot1D("h_leppt"+s,      leppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
