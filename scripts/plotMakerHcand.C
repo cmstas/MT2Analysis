@@ -1137,11 +1137,14 @@ void printComparisonTableCR(vector<TFile*> samples, vector<string> names, vector
     crname = "CRSL";
   else if (TString(dirs.at(0)).Contains("crhgj") || TString(dirs.at(0)).Contains("crgj"))
     crname = "CRGJ";
+  else if (TString(dirs.at(0)).Contains("crhqcd") || TString(dirs.at(0)).Contains("crqcd"))
+    crname = "CRQCD";
 
   if (caption == "Detailed") { // temporary
     caption = dirs[0] + ": ";
     if (crname == "CRSL") caption += "[Single Lepton] ";
     else if (crname == "CRGJ") caption += "[Gamma + Jets] ";
+    else if (crname == "CRQCD") caption += "[QCD] ";
     // caption += getJetBJetTableLabel(samples.at(0), dirs[0]) + ", ";
     caption += getHTTableLabel(samples.at(0), dirs[0]) + ", ";
     caption += getMETTableLabel(samples.at(0), dirs[0]);
@@ -1183,7 +1186,7 @@ void printComparisonTableCR(vector<TFile*> samples, vector<string> names, vector
     for (unsigned int idir = 0; idir < ndirs; ++idir)
       ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
             // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
-            << crname << ": " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", 1 lep ($M_{\\rm{T}} < 100$)."
+            << crname << ": " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) <<( (crname == "CRSL")? ", 1 lep ($M_{\\rm{T}} < 100$)." : "")
             << " }";
     ofile << " \\\\" << endl
           << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
@@ -1245,6 +1248,8 @@ void printComparisonTableCR(vector<TFile*> samples, vector<string> names, vector
         ofile << "LostLep";
       else if (crname == "CRGJ")
         ofile << "$\\gamma$+Jets";
+      else if (crname == "CRQCD")
+        ofile << "QCD";
 
       for ( unsigned int idx = 0; idx < bgtot_cr.size(); ++idx ) {
         double yield = bgtot_cr.at(idx);
@@ -2733,8 +2738,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/orgtrueb";
 
   // ----------------------------------------
@@ -2835,6 +2840,9 @@ void plotMakerHcand() {
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec3.push_back(getSamples(names3, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
+  vector<string> names4 = {"qcd_ht", "data_Run2016"};
+  vector<TFile*> samples4= getSamples(names4, input_dir);
+
   // dirsH.push_back("srbase");
   // dirsH.push_back("srbaseHcand");
   // // dirsH.push_back("srbaseInclHcand");
@@ -2842,219 +2850,151 @@ void plotMakerHcand() {
   // dirsH.clear();
   // names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
-  dirsH.push_back("srhbase");
-  printComparisonTable(samples, names, selecs, dirsH, "srhbase");
-  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
-  dirsH.clear();
+  // dirsH.push_back("srhbase");
+  // printComparisonTable(samples, names, selecs, dirsH, "srhbase");
+  // // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
+  // dirsH.clear();
 
   // dirsH.push_back("crhslbase");
   // printComparisonTableCR(samples2, names2, selecs, dirsH, "crhslbase");
   // // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   // dirsH.clear();
 
-  dirsH.push_back("crhgjbase");
-  printComparisonTableCR(samples3, names3, selecs, dirsH, "crhgjbase");
-  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl1VL");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.push_back("crhgjbase");
+  // printComparisonTableCR(samples3, names3, selecs, dirsH, "crhgjbase");
+  // // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   // dirsH.clear();
-  dirsH.push_back("crhgj1VL");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl1VL");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh1VL");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  // dirsH.push_back("crgj6VL");
-  // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl2VL");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj2VL");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl2VL");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh2VL");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
 
   // ofile << "\\newpage\n";
-  // // dirsH.push_back("crhsl3VL");
-  // // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // // dirsH.clear();
-  // dirsH.push_back("crhgj3VL");
-  // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  // dirsH.push_back("crhgj1VL");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   // dirsH.clear();
-  // dirsH.push_back("srh3VL");
+  // // dirsH.push_back("crhsl1VL");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh1VL");
   // printDetailedComparisonTable(samples, names, selecs, dirsH);
   // dirsH.clear();
 
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl1L");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj1L");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl1L");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh1L");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl2L");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj2L");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl2L");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh2L");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
+  // // dirsH.push_back("crgj6VL");
+  // // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
 
   // ofile << "\\newpage\n";
-  // // dirsH.push_back("crhsl3L");
-  // // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
+  // dirsH.push_back("crhgj2VL");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl2VL");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
   // // dirsH.clear();
-  // dirsH.push_back("crhgj3L");
-  // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  // dirsH.push_back("srh3L");
-  // printDetailedComparisonTable(samples, names, selecs, dirsH);
-  // dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl1M");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj1M");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl1M");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh1M");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl2M");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj2M");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl2M");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh2M");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl3M");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj3M");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl3M");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh3M");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl1H");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj1H");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl1H");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh1H");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl2H");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj2H");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl2H");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh2H");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";
-  // dirsH.push_back("crhsl3H");
-  // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("crhgj3H");
-  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
-  dirsH.clear();
-  // dirsH.push_back("crhsl3H");
-  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  dirsH.push_back("srh3H");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
-
-  // ofile << "\\newpage\n";
-  // // dirsH.push_back("crhsl1UH");
-  // // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // // dirsH.clear();
-  // dirsH.push_back("crhgj1UH");
-  // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
-  // dirsH.clear();
-  // dirsH.push_back("srh1UH");
+  // dirsH.push_back("srh2VL");
   // printDetailedComparisonTable(samples, names, selecs, dirsH);
   // dirsH.clear();
 
   // ofile << "\\newpage\n";
-  // // dirsH.push_back("crhsl2UH");
-  // // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // // dirsH.clear();
-  // dirsH.push_back("crhgj2UH");
-  // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  // dirsH.push_back("crhgj1L");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   // dirsH.clear();
-  // dirsH.push_back("srh2UH");
+  // // dirsH.push_back("crhsl1L");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh1L");
   // printDetailedComparisonTable(samples, names, selecs, dirsH);
   // dirsH.clear();
 
   // ofile << "\\newpage\n";
-  // // dirsH.push_back("crhsl3UH");
-  // // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
-  // // dirsH.clear();
-  // dirsH.push_back("crhgj3UH");
-  // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  // dirsH.push_back("crhgj2L");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   // dirsH.clear();
-  // dirsH.push_back("srh3UH");
+  // // dirsH.push_back("crhsl2L");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh2L");
   // printDetailedComparisonTable(samples, names, selecs, dirsH);
   // dirsH.clear();
+
+  // ofile << "\\newpage\n";
+  // dirsH.push_back("crhgj1M");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl1M");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh1M");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
+
+  // ofile << "\\newpage\n";
+  // dirsH.push_back("crhgj2M");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl2M");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh2M");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
+
+  // ofile << "\\newpage\n";
+  // dirsH.push_back("crhgj3M");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl3M");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh3M");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
+
+  // ofile << "\\newpage\n";
+  // dirsH.push_back("crhgj1H");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl1H");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh1H");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
+
+  // ofile << "\\newpage\n";
+  // dirsH.push_back("crhgj2H");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl2H");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh2H");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
+
+  // ofile << "\\newpage\n";
+  // dirsH.push_back("crhgj3H");
+  // printDetailedComparisonTable(samples3, names3, selecs, dirsH);
+  // dirsH.clear();
+  // // dirsH.push_back("crhsl3H");
+  // // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // // dirsH.clear();
+  // dirsH.push_back("srh3H");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
+
+  dirsH.push_back("crhqcd1VL");
+  printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
+  dirsH.clear();
+
+  dirsH.push_back("crhqcd1L");
+  printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
+  dirsH.clear();
+
+  dirsH.push_back("crhqcd1M");
+  printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
+  dirsH.clear();
+
+  dirsH.push_back("crhqcd1H");
+  printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
+  dirsH.clear();
+
 
   ofile << "\\end{document}" << std::endl;
 
