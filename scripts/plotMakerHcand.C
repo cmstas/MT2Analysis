@@ -1094,6 +1094,192 @@ void printDetailedComparisonTable(vector<TFile*> samples, vector<string> names, 
 }
 
 //_______________________________________________________________________________
+void printComparisonTableCR(vector<TFile*> samples, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
+
+  // read off yields from h_mt2bins hist in each topological region
+  unsigned int n = samples.size();
+  unsigned int ndirs = dirs.size();
+  unsigned int nselecs = selecs.size();
+
+  if (nselecs < 2) cout << "Use printTable instead!\n";
+
+  string crname;
+  if (TString(dirs.at(0)).Contains("crhsl") || TString(dirs.at(0)).Contains("crsl"))
+    crname = "CRSL";
+  else if (TString(dirs.at(0)).Contains("crhgj") || TString(dirs.at(0)).Contains("crgj"))
+    crname = "CRGJ";
+
+  if (caption == "Detailed") { // temporary
+    caption = dirs[0] + ": ";
+    if (crname == "CRSL") caption += "[Single Lepton] ";
+    else if (crname == "CRGJ") caption += "[Gamma + Jets] ";
+    // caption += getJetBJetTableLabel(samples.at(0), dirs[0]) + ", ";
+    caption += getHTTableLabel(samples.at(0), dirs[0]) + ", ";
+    caption += getMETTableLabel(samples.at(0), dirs[0]);
+    caption += ", MT2 $>$ 200 GeV";
+  }
+
+  // vector<string> dirs_all = dirs;
+  vector<vector<string>> dirsVec;
+  int nTabulars = ndirs*nselecs/8;
+  if ((ndirs*nselecs)%8 > 0) ++nTabulars;
+  int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
+  auto it = dirs.begin();
+  for (int i = 0; i < nTabulars; ++i) {
+    vector<string> temp_dirs;
+    for (int j = 0; j < ndir_line && it != dirs.end(); ++j, ++it) 
+      temp_dirs.push_back(*it);
+    dirsVec.push_back(temp_dirs);
+  }
+
+  ofile << "\\begin{table}[H]" << std::endl;
+  ofile << "\\scriptsize" << std::endl;
+  ofile << "\\centering" << std::endl;
+  ofile << "\\caption{" << caption << "}" << std::endl;
+
+  for (int itab = 0; itab < nTabulars; ++itab) {
+    dirs = dirsVec[itab];
+    ndirs = dirs.size();
+
+    vector<double> bgtot_cr(ndirs*nselecs, 0);
+    vector<double> bgerr_cr(ndirs*nselecs, 0);
+    vector<double> bgtot_sr(ndirs*nselecs, 0);
+    vector<double> bgerr_sr(ndirs*nselecs, 0);
+
+    ofile << "\\begin{tabular}{r";
+    for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
+    ofile << "}" << std::endl;
+    ofile << "\\hline\\hline" << endl;
+    ofile << "\\multirow{2}{*}{Sample}";
+    for (unsigned int idir = 0; idir < ndirs; ++idir)
+      ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
+            // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
+            << crname << ": " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", 1 lep ($M_{\\rm{T}} < 100$)."
+            << " }";
+    ofile << " \\\\" << endl
+          << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
+    for (unsigned int i = 0; i < ndirs; ++i)
+      for (auto it = selecs.begin(); it != selecs.end(); ++it)
+        ofile << " & " << *it;
+    ofile << " \\\\" << endl;
+    ofile << "\\hline\\hline" << endl;
+
+    for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+
+      // backgrounds first -- loop backwards
+      for ( int i = n-1 ; i >= 0 ; --i ) {
+        if ( TString(names.at(i)).Contains("data") ) {found_data = true; continue;}
+        if ( TString(names.at(i)).Contains("sig") ) continue;
+        // ofile << getTableName(names.at(i));
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistnameCR = Form("%s/h_mt2bins_%s", dirs.at(idir).c_str(), selecs.at(isel).c_str());
+          TString fullhistnameSR = Form("%s/h_mt2bins_%s", string(dirs.at(idir)).replace(0,5,"srh").c_str(), selecs.at(isel).c_str());
+          TH1D* h_cr = (TH1D*) samples.at(i)->Get(fullhistnameCR);
+          TH1D* h_sr = (TH1D*) samples.at(i)->Get(fullhistnameSR);
+          double yield_cr = 0.;
+          double err_cr = 0.;
+          double yield_sr = 0.;
+          double err_sr = 0.;
+          int idx = idir*nselecs + isel;
+          if (h_cr) {
+            // use all bins
+            yield_cr = h_cr->IntegralAndError(0,-1,err_cr);
+            bgtot_cr.at(idx) += yield_cr;
+            bgerr_cr.at(idx) = sqrt(pow(bgerr_cr.at(idx),2) + pow(err_cr,2));
+          }
+          if (h_sr) {
+            // use all bins
+            yield_sr = h_sr->IntegralAndError(0,-1,err_sr);
+            bgtot_sr.at(idx) += yield_sr;
+            bgerr_sr.at(idx) = sqrt(pow(bgerr_sr.at(idx),2) + pow(err_sr,2));
+          }
+        }
+      } // loop over samples
+
+      // print bg_sr totals
+      // ofile << "LostLep SR";
+      // for ( unsigned int idx = 0; idx < bgtot_sr.size(); ++idx ) {
+      //   double yield = bgtot_sr.at(idx);
+      //   double err = bgerr_sr.at(idx);
+      //   ofile << "  &  ";
+      //   if (yield > 10.)
+      //     ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+      //   else
+      //     ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+      // }
+      // ofile << " \\\\" << endl;
+      // ofile << "\\hline" << endl;
+
+      // print bg_cr totals
+      // ofile << "LostLep";
+      if (crname == "CRSL")
+        ofile << "LostLep";
+      else if (crname == "CRGJ")
+        ofile << "$\\gamma$+Jets";
+
+      for ( unsigned int idx = 0; idx < bgtot_cr.size(); ++idx ) {
+        double yield = bgtot_cr.at(idx);
+        double err = bgerr_cr.at(idx);
+        ofile << "  &  ";
+        if (yield > 10.)
+          ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+        else
+          ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+      }
+      ofile << " \\\\" << endl;
+      ofile << "\\hline" << endl;
+
+      // next print data, if it exists
+      vector<int> datatot;
+      for( unsigned int i = 0 ; i < n ; i++ ){
+        if( !TString(names.at(i)).Contains("data") ) continue;
+        found_data = true;
+        ofile << "Data";
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2bins_%s", dirs.at(idir).c_str(), selecs.at(isel).c_str());
+          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          double yield = 0.;
+          if (h) {
+            // use all bins
+            yield = h->Integral(0,-1);
+          }
+          ofile << "  &  " << Form("%d",(int)yield);
+          if (dataMCratio) datatot.push_back(yield);
+        }
+        ofile << " \\\\" << endl;
+        ofile << "\\hline" << endl;
+      } // loop over samples
+
+      // print the data/MC and transfer factor ratios
+      if (dataMCratio) {
+        // ofile << "\\hline" << endl;
+        // ofile << "TF (SR/CR)";
+        // for (unsigned int idx = 0; idx < bgtot_cr.size(); ++idx)
+        //   ofile << "  &  " << ((bgtot_sr[idx] > bgtot_cr[idx])? setprecision(3) : setprecision(2) )<< bgtot_sr[idx]/bgtot_cr[idx];
+        // ofile << " \\\\" << endl;
+        // ofile << "\\hline" << endl;
+
+        ofile << "Data/MC";
+        for (unsigned int idx = 0; idx < bgtot_cr.size(); ++idx)
+          ofile << "  &  " << ((datatot[idx] > bgtot_cr[idx])? setprecision(3) : setprecision(2)) << datatot[idx]/bgtot_cr[idx];
+        ofile << " \\\\" << endl;
+        ofile << "\\hline" << endl;
+
+      }
+    }
+
+    if (itab == nTabulars-1) ofile << "\\hline" << std::endl;
+    else ofile << "\\multicolumn{" << ndirs*nselecs+1 << "}{c}{} \\\\" << endl;
+    ofile << "\\end{tabular}" << std::endl;
+  }
+
+  ofile << "\\end{table}" << std::endl;
+
+  ofile << endl;
+  return;
+}
+
+//_______________________________________________________________________________
 void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
@@ -2518,7 +2704,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/4ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/orgtrueb";
 
   // ----------------------------------------
@@ -2605,12 +2792,15 @@ void plotMakerHcand() {
   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  // vector<string> names2 = {"lostlep", "data_Run2016B"};
+  vector<string> names2 = {"lostlep", "data_Run2016"};
+  // vector<string> names2 = {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016"};
+  vector<TFile*> samples2 = getSamples(names2, input_dir);
+
   // vector< vector<TFile*> > samplesVec2;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec2.push_back(getSamples(names2, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  vector<string> names3 = {"gjets_dr0p05_ht", "data_Run2016B"};
+  vector<string> names3 = {"gjets_dr0p05_ht", "data_Run2016"};
   vector<TFile*> samples3 = getSamples(names3, input_dir);
   // vector< vector<TFile*> > samplesVec3;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
@@ -2628,8 +2818,13 @@ void plotMakerHcand() {
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
 
+  // dirsH.push_back("crhslbase");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "crhslbase");
+  // // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
+  // dirsH.clear();
+
   dirsH.push_back("crhgjbase");
-  printComparisonTable(samples3, names3, selecs, dirsH, "crhgjbase");
+  printComparisonTableCR(samples3, names3, selecs, dirsH, "crhgjbase");
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
 
@@ -2638,11 +2833,15 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj1VL");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl1VL");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh1VL");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
+
   // dirsH.push_back("crgj6VL");
   // printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
   // dirsH.clear();
@@ -2652,8 +2851,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj2VL");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl2VL");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh2VL");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2674,8 +2876,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj1L");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl1L");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh1L");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2685,8 +2890,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj2L");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl2L");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh2L");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2707,8 +2915,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj1M");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl1M");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh1M");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2718,8 +2929,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj2M");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl2M");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh2M");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2729,8 +2943,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj3M");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl3M");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh3M");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2740,8 +2957,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj1H");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl1H");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh1H");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2751,8 +2971,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj2H");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl2H");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh2H");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
@@ -2762,8 +2985,11 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samplesVec2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
   dirsH.push_back("crhgj3H");
-  printComparisonTable(samples3, names3, selecs, dirsH, "Detailed");
+  printDetailedComparisonTable(samples3, names3, selecs, dirsH);
   dirsH.clear();
+  // dirsH.push_back("crhsl3H");
+  // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
+  // dirsH.clear();
   dirsH.push_back("srh3H");
   printDetailedComparisonTable(samples, names, selecs, dirsH);
   dirsH.clear();
