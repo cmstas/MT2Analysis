@@ -3,7 +3,7 @@
 #INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
 #INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
 # INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
-INDIR=/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnMbb300
+INDIR=/home/users/sicheng/MT2Analysis/MT2looper/output/temp
 THISDIR=`pwd`
 
 ## to use data for lostlepton
@@ -29,8 +29,8 @@ if [ ! -d "$INDIR" ]; then
 fi
 
 cd $INDIR
-echo "hadd -f data_Run2016.root data_Run2016B.root"
-hadd -f data_Run2016.root data_Run2016B.root > dataDrivenEstimates.log
+echo "hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root"
+hadd -f data_Run2016.root data_Run2016B.root data_Run2016C.root > dataDrivenEstimates.log
 
 # ## (temporarily replaced tth with ttg, because of sample availability)
 # echo "hadd -f top.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root"
@@ -42,8 +42,8 @@ hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.ro
 cd $THISDIR
 
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
-echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,1)"
-root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",1)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/data_Run2016.root,2)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/data_Run2016.root\",2)" >> dataDrivenEstimates.log
 
 # echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
 # root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
