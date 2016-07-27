@@ -373,6 +373,17 @@ void MT2Looper::SetSignalRegions(){
       plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
+
+    dir = (TDirectory*)outfile_->Get(("crhqcd"+SRVecHcand.at(i).GetName()).c_str());
+    if (dir == 0) {
+      dir = outfile_->mkdir(("crhqcd"+SRVecHcand.at(i).GetName()).c_str());
+    }
+    dir->cd();
+    for (unsigned int j = 0; j < vars.size(); j++) {
+      plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecHcand.at(i).GetLowerBound(vars.at(j)), SRVecHcand.at(i).crqcdHistMap, "", 1, 0, 2);
+      plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).crqcdHistMap, "", 1, 0, 2);
+    }
+    plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
   }
 
   // -- end of mt2higgs --
@@ -1134,15 +1145,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
       if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
-
-      // doMT2Higgs = doMinMTBMet;
-      // doMT2Higgs = doMT2Higgs && isHcand;
-      // doMT2Higgs = doMinMTBMet && isHcand;
-      // doMT2Higgs = doMbbMax200;
-      // doMT2Higgs = doMbbMax200 && doMinMTBMet;
-      // doMT2Higgs = doMbbMax300;
-      // doMT2Higgs = doMbbMax300 && doMinMTBMet;
-      // if (!doMT2Higgs) continue;
+      if (!doMT2Higgs) continue; // For faster runtime
 
       // --- Gamma Jet control region for mt2higgs ---
       bool doMT2HiggsGJ  = false;
@@ -1179,14 +1182,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
       // if (doMT2HiggsGJ && Mbb_max > 200) doMbbMax200GJ = true;
       // if (doMT2HiggsGJ && Mbb_max > 300) doMbbMax300GJ = true;
-
-      // doMT2HiggsGJ = doMinMTBMetGJ;
-      // doMT2HiggsGJ = doMT2HiggsGJ && isHcandGJ;
-      // doMT2HiggsGJ = doMinMTBMetGJ && isHcandGJ;
-      // doMT2HiggsGJ = doMbbMax200GJ;
-      // doMT2HiggsGJ = doMbbMax200GJ && doMinMTBMetGJ;
-      // doMT2HiggsGJ = doMbbMax300GJ;
-      // doMT2HiggsGJ = doMbbMax300GJ && doMinMTBMetGJ;
 
       // --- end of crgj for mt2higgs ---
 
@@ -1304,11 +1299,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (doMbbMax300 && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnMbb300");
       }
 
-      // if (doDYplots) {
-      //   saveDYplots = true;
-      //   if (verbose) cout<<__LINE__<<endl;
-      //   fillHistosCRDY("crdy");
-      // }
+      if (doDYplots) {
+        saveDYplots = true;
+        if (verbose) cout<<__LINE__<<endl;
+        fillHistosCRDY("crdy");
+      }
       // if (doRLplots) {
       //   saveRLplots = true;
       //   if (verbose) cout<<__LINE__<<endl;
@@ -1335,11 +1330,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //   saveSLELplots = true;
       //   fillHistosCRSL("crslel");
       // }
-      // if (doQCDplots) {
-      //   saveQCDplots = true;
-      //   if (verbose) cout<<__LINE__<<endl;
-      //   fillHistosCRQCD("crqcd");
-      // }
+      if (doQCDplots) {
+        saveQCDplots = true;
+        if (verbose) cout<<__LINE__<<endl;
+        fillHistosCRQCD("crqcd");
+      }
 
 
    }//end loop on events in a file
@@ -1383,6 +1378,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       savePlotsDir(SRVecHcand.at(srN).crslHistMap, outfile_, ("crhsl"+SRVecHcand.at(srN).GetName()).c_str());
     if (!SRVecHcand.at(srN).crgjHistMap.empty())
       savePlotsDir(SRVecHcand.at(srN).crgjHistMap, outfile_, ("crhgj"+SRVecHcand.at(srN).GetName()).c_str());
+    if (!SRVecHcand.at(srN).crqcdHistMap.empty())
+      savePlotsDir(SRVecHcand.at(srN).crqcdHistMap, outfile_, ("crhqcd"+SRVecHcand.at(srN).GetName()).c_str());
   }
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
@@ -1587,6 +1584,9 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values.erase("passesHtMet");
   valuesCRSL = values;
   valuesCRSL["nlep"] = t.nLepLowMT;
+  std::map<std::string, float> valuesCRQCD = values;
+  valuesCRQCD.erase("njets");
+  valuesCRQCD.erase("nbjets");
 
   for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if (SRVecHcand.at(srN).PassesSelection(values)){
@@ -1596,6 +1596,11 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     // Control Regions Single Lepton
     if (SRVecHcand.at(srN).PassesSelectionCRSL(valuesCRSL)) {
       fillHistosMT2Higgs(SRVecHcand.at(srN).crslHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhsl"+SRVecHcand.at(srN).GetName(), suffix);
+    }
+    // Control Regions Single Lepton
+    if (SRVecHcand.at(srN).PassesSelectionCRQCD(valuesCRQCD)) {
+      if (t.nJet30 >= 4)
+        fillHistosMT2Higgs(SRVecHcand.at(srN).crqcdHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhqcd"+SRVecHcand.at(srN).GetName(), suffix);
     }
   }
 
