@@ -563,8 +563,6 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
   outfile_->cd();
 
-
-  
   // inclusive in njets (mono+multi jet regions)
   SRBaseIncl.SetName("srbaseIncl");
   float SRBaseIncl_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500};
@@ -625,7 +623,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  // const char* json_file = "../babymaker/jsons/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -877,7 +876,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
       // const float lumi = 20;
-      const float lumi = 7.7;
+      const float lumi = 7.65;
+      // const float lumi = 3.99;
     
       evtweight_ = 1.;
 
@@ -1142,7 +1142,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // doMT2Higgs = doMbbMax200 && doMinMTBMet;
       // doMT2Higgs = doMbbMax300;
       // doMT2Higgs = doMbbMax300 && doMinMTBMet;
-      if (!doMT2Higgs) continue;
+      // if (!doMT2Higgs) continue;
 
       // --- Gamma Jet control region for mt2higgs ---
       bool doMT2HiggsGJ  = false;

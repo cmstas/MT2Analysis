@@ -1047,6 +1047,35 @@ void printDetailedComparisonTable(vector<TFile*> samples, vector<string> names, 
     ofile << " \\\\" << endl;
     ofile << "\\hline" << endl;
 
+    for( unsigned int i = 0 ; i < n ; i++ ){
+      if( !TString(names.at(i)).Contains("data") ) continue;
+      ofile << getTableName(names.at(i));
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2bins_%s", dirs.at(idir).c_str(), selecs.at(isel).c_str());
+          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          double yield = 0.;
+          if (h) {
+            // use all bins
+            if(ibin != n_mt2bins) {
+              yield = h->GetBinContent(ibin);
+            }
+            // last bin: include overflow
+            else if (ibin == h->GetXaxis()->GetNbins()) {
+              yield = h->Integral(ibin, -1);
+            }
+            else {
+              ofile << "Shouldn't get here" << std::endl;
+              return;
+            }
+          }
+          ofile << "  &  " << Form("%d",(int)yield);
+        }
+      }
+      ofile << " \\\\" << endl;
+      ofile << "\\hline" << endl;
+    }
+
     // for( unsigned int jsamp = 0 ; jsamp < n ; jsamp++ ){
     //   if( !TString(names.at(jsamp)).Contains("sig") ) continue;
     //   ofile << getTableName(names.at(jsamp));
@@ -2705,7 +2734,7 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTBMet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/4ifb";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/orgtrueb";
 
   // ----------------------------------------
