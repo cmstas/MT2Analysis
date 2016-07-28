@@ -1186,7 +1186,8 @@ void printComparisonTableCR(vector<TFile*> samples, vector<string> names, vector
     for (unsigned int idir = 0; idir < ndirs; ++idir)
       ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
             // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
-            << crname << ": " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) <<( (crname == "CRSL")? ", 1 lep ($M_{\\rm{T}} < 100$)." : "")
+            << crname << ": " << ((crname == "CRQCD")? "Inclusive $\\geq$ 4j, $\\geq$ 2b" : getJetBJetTableLabel(samples.at(0), dirs.at(idir)))
+            << ((crname == "CRSL")? ", 1 lep ($M_{\\rm{T}} < 100$)." : "")
             << " }";
     ofile << " \\\\" << endl
           << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
