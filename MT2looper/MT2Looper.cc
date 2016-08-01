@@ -634,8 +634,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  // const char* json_file = "../babymaker/jsons/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON_snt.txt";
-  const char* json_file = "../babymaker/jsons/Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -887,8 +886,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
       // const float lumi = 20;
-      const float lumi = 7.65;
-      // const float lumi = 3.99;
+      const float lumi = 12.9;
     
       evtweight_ = 1.;
 
@@ -1155,7 +1153,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool isHcandGJ     = isHcand; // = false;
 
       gamma_minMTbmet_ = 0.;
-      if (t.gamma_nBJet20 >= 2) {
+      if (doGJplots && t.gamma_nBJet20 >= 2) {
         doMT2HiggsGJ = true;
 
         // If by any chance a bjets is overlaped with the gamma and hence removed
@@ -1262,15 +1260,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // mt2higgs' crgj histo filling
       if (doMT2HiggsGJ && (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))) {
-        fillHistosCRMT2Higgs();
-        fillHistosCRMT2Higgs("", "_original");
-        if (doMinMTBMetGJ)              fillHistosCRMT2Higgs("", "_minMTbmet");
-        if (isHcandGJ)                  fillHistosCRMT2Higgs("", "_isHcand");
-        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRMT2Higgs("", "_mMTnHcand");
-        if (doMbbMax200GJ)              fillHistosCRMT2Higgs("", "_MbbMax200");
-        if (doMbbMax300GJ)              fillHistosCRMT2Higgs("", "_MbbMax300");
-        if (doMbbMax200GJ && isHcandGJ) fillHistosCRMT2Higgs("", "_mMTnMbb200");
-        if (doMbbMax300GJ && isHcandGJ) fillHistosCRMT2Higgs("", "_mMTnMbb300");
+        fillHistosCRGJMT2Higgs();
+        fillHistosCRGJMT2Higgs("", "_original");
+        if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet");
+        if (isHcandGJ)                  fillHistosCRGJMT2Higgs("", "_isHcand");
+        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnHcand");
+        if (doMbbMax200GJ)              fillHistosCRGJMT2Higgs("", "_MbbMax200");
+        if (doMbbMax300GJ)              fillHistosCRGJMT2Higgs("", "_MbbMax300");
+        if (doMbbMax200GJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb200");
+        if (doMbbMax300GJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300");
       }
 
       if (!passJetID) continue;
@@ -1588,7 +1586,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   valuesCRQCD.erase("njets");
   valuesCRQCD.erase("nbjets");
 
-  for(unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
+  for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
     if (SRVecHcand.at(srN).PassesSelection(values)){
       fillHistosMT2Higgs(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix);
       // break; //signal regions are orthogonal, event cannot be in more than one
@@ -1607,7 +1605,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   return;
 }
 
-void MT2Looper::fillHistosCRMT2Higgs(const std::string& prefix, const std::string& suffix) {
+void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::string& suffix) {
 
   // The GammaJets Control Region (only one for now)
   if (t.ngamma == 0) return;

@@ -308,8 +308,8 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   //if directory begins with "sr", excluding "srbase", add it to vector signal regions.
   TIter it(f_zinv->GetListOfKeys());
   TKey* k;
-  std::string keep = "sr";
-  std::string skip = "srbase";
+  std::string keep = "srh";
+  std::string skip = "srhbase";
   while ((k = (TKey *)it())) {
 //    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0 
@@ -323,9 +323,8 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
   makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
-   output_name = input_dir+"/zinvFromDY.root";
+  output_name = input_dir+"/zinvFromDY.root";
 
   makeZinvFromDY( f_zinv , f_dy , dirs, output_name, 0 ); 
-
 
 }

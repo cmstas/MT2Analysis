@@ -45,7 +45,8 @@ class MT2Looper {
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosSRMT2Higgs(const std::string& prefix = "", const std::string& suffix = "");
-  void fillHistosCRMT2Higgs(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosCRGJMT2Higgs(const std::string& prefix = "", const std::string& suffix = "");
+  void fillHistosCRDYMT2Higgs(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRGJ(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRDY(const std::string& prefix = "", const std::string& suffix = "");
