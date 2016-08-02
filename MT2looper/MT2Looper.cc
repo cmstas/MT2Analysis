@@ -1282,17 +1282,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (verbose) cout<<__LINE__<<endl;
 
       // mt2higgs' crgj histo filling
-      if (doMT2HiggsGJ && (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))) {
+      if (doMT2HiggsGJ) {
+        string sufadd = (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))? "" : "Fake";
         // fillHistosCRGJMT2Higgs();
-        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs();
-        fillHistosCRGJMT2Higgs("", "_original");
-        if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet");
-        if (isHcandGJ)                  fillHistosCRGJMT2Higgs("", "_isHcand");
-        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnHcand");
-        if (doMbbMax200GJ)              fillHistosCRGJMT2Higgs("", "_MbbMax200");
-        if (doMbbMax300GJ)              fillHistosCRGJMT2Higgs("", "_MbbMax300");
-        if (doMbbMax200GJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb200");
-        if (doMbbMax300GJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300");
+        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
+        fillHistosCRGJMT2Higgs("", "_original" + sufadd);
+        if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
+        if (isHcandGJ)                  fillHistosCRGJMT2Higgs("", "_isHcand" + sufadd);
+        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnHcand" + sufadd);
+        if (doMbbMax200GJ)              fillHistosCRGJMT2Higgs("", "_MbbMax200" + sufadd);
+        if (doMbbMax300GJ)              fillHistosCRGJMT2Higgs("", "_MbbMax300" + sufadd);
+        if (doMbbMax200GJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb200" + sufadd);
+        if (doMbbMax300GJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300" + sufadd);
       }
 
       if (!passJetID) continue;
