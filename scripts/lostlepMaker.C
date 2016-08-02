@@ -317,7 +317,7 @@ void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
-      sr_string.erase(0, 3);//remove "srh" from front of string
+      sr_string.erase(0, 3);    //remove "srh" from front of string
       dirs.push_back(sr_string);
     }
   }

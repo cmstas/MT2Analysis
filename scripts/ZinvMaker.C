@@ -22,7 +22,6 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
 
-
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
   const unsigned int ndirs = dirs.size();
@@ -37,8 +36,8 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
     
-    TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgjbaseIncl/"+inclPlots[incl])->Clone();
-    TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdybaseIncl/"+inclPlots[incl])->Clone();
+    TH1D* hGJetIncl = (TH1D*) fGJet->Get("crhgjbaseIncl/"+inclPlots[incl])->Clone();
+    TH1D* hZllIncl  = (TH1D*)  fZll->Get("crhdybaseIncl/"+inclPlots[incl])->Clone();
 
     if(!hGJetIncl || !hZllIncl){
       cout<<"could not find histogram "<<inclPlots[incl]<<endl;
@@ -64,8 +63,8 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
 
-    TString directory = "sr"+dirs.at(idir);
-    TString directoryGJ = "crgj"+dirs.at(idir);
+    TString directory = "srh"+dirs.at(idir);
+    TString directoryGJ = "crhgj"+dirs.at(idir);
 
     cout<<"Looking at directory "<<directory<<endl;
 
@@ -117,7 +116,6 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       else Stat->SetBinError(ibin, hZinv->GetBinContent(ibin));
     }
     
-    
     // Zgamma ratio in each MT2bin -> to get MC stat error on ratio
     TH1D* ratio = (TH1D*) hZinv->Clone("h_mt2binsRatio");
     //ratio->Print("all");
@@ -133,7 +131,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
         ratioInt->SetBinContent(ibin, ratioInt->GetBinContent(ibin)/nGamma);
         float errOld = ratioInt->GetBinError(ibin)/nGamma;
         float errNew = (nGammaErr/nGamma) * ratioInt->GetBinContent(ibin);
-        cout<<nGamma<<" "<<nGammaErr<<" "<<errOld<<" "<<errNew<<endl;
+        // cout<<nGamma<<" "<<nGammaErr<<" "<<errOld<<" "<<errNew<<endl;
         ratioInt->SetBinError(ibin, sqrt( errOld*errOld + errNew*errNew ) );
       }
       else {
@@ -141,7 +139,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
         ratioInt->SetBinError(ibin, 0);
       }
     }
-    ratioInt->Print("all");
+    // ratioInt->Print("all");
     
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
@@ -202,8 +200,8 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
   const unsigned int ndirs = dirs.size();
   
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-    TString directory = "sr"+dirs.at(idir);
-    TString directoryDY = "crdy"+dirs.at(idir);
+    TString directory = "srh"+dirs.at(idir);
+    TString directoryDY = "crhdy"+dirs.at(idir);
 
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameDY = directoryDY + "/h_mt2bins";
@@ -214,6 +212,7 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
     // If Zinv or DY histograms are not filled, just leave (shouldn't happen when running on full stat MC)
     if(!hDY || !hZinv){
       cout<<"could not find histogram "<<fullhistname<<endl;
+      if (!hDY) cout << "hdy\n";
       continue;
     }
     
@@ -279,9 +278,10 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 //_______________________________________________________________________________
 void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
 
-  //  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
-  //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
-  //string input_dir = "../MT2looper/output/2015LowLumi/";
+  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
+  // string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  // string input_dir = "../MT2looper/output/2015ExtendedNJets/";
+  // string input_dir = "../MT2looper/output/2015LowLumi/";
   string output_name = input_dir+"/zinvFromGJ.root";
   // ----------------------------------------
   //  samples definition
@@ -291,10 +291,11 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
 
   // get input files
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  TFile* f_gjet = new TFile(Form("%s/gjets_ht.root",input_dir.c_str()));
-  //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
-  //  TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
-  TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
+  // TFile* f_gjet = new TFile(Form("%s/gjets_ht.root",input_dir.c_str()));
+  TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
+  // TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
+  // TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
 
 
   if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
@@ -312,19 +313,18 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::string skip = "srhbase";
   while ((k = (TKey *)it())) {
 //    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
-    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0 
-) {//it is a signal region
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
-      sr_string.erase(0, 2);//remove "sr" from front of string
+      sr_string.erase(0, 3);    //remove "srh" from front of string
       dirs.push_back(sr_string);
     }
   }
 
-  //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
-  makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
+  // makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
+  makeZinvFromGJets( f_zinv, f_gjet, f_dy, dirs, output_name, 1.23 ); // not using QCD for now
 
   output_name = input_dir+"/zinvFromDY.root";
 
-  makeZinvFromDY( f_zinv , f_dy , dirs, output_name, 0 ); 
+  makeZinvFromDY( f_zinv, f_dy, dirs, output_name, 0 );
 
 }
