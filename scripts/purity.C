@@ -25,6 +25,7 @@
 #include "../MT2CORE/sigSelections.h"
 #include "../MT2CORE/SR.h"
 #include "../MT2CORE/sigSelections.cc"
+#include "../MT2CORE/sigSelectionsMT2Higgs.cc"
 #include "../MT2CORE/SR.cc"
 
 using namespace std;
@@ -67,7 +68,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
   if(s.Contains("FailSieie")) bin = "SingleBin";
   
   //get LooseNotTight hist (this only contains Fakes, there are no Prompts, so no subtraction is needed for MC)
-  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crgj"+srName+"/h_mt2binsLooseNotTight");
+  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crhgj"+srName+"/h_mt2binsLooseNotTight");
 
   //check for empty hists
   if(!h_FR){
@@ -106,10 +107,10 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
       Float_t pred_error_total = 0.0;
   
       //get FR binned hists for this mt2 bin
-      TH2D* h_sidebandqcdPrompt = (TH2D*) f_qcd->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //qcdPrompt (Fragmentation)
-      TH2D* h_sidebandgjetPrompt = (TH2D*) f_gjet->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //gjetPrompt (Prompt contamination)
-      TH2D* h_sideband = (TH2D*) f_in->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //Data
-      if (!realDataLocal) h_sideband = (TH2D*) f_in->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"FakeLooseNotTight"); //Need "Fake" folder if running on MC
+      TH2D* h_sidebandqcdPrompt = (TH2D*) f_qcd->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //qcdPrompt (Fragmentation)
+      TH2D* h_sidebandgjetPrompt = (TH2D*) f_gjet->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //gjetPrompt (Prompt contamination)
+      TH2D* h_sideband = (TH2D*) f_in->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //Data
+      if (!realDataLocal) h_sideband = (TH2D*) f_in->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"FakeLooseNotTight"); //Need "Fake" folder if running on MC
       
       //if "Poisson", undo sumw2() errors
       if(s.Contains("Poisson")){
@@ -235,7 +236,7 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
   if(s.Contains("FailSieie")) bin = "SingleBin";
   
   //get LooseNotTight hist (this only contains Fakes, there are no Prompts, so no subtraction is needed for MC)
-  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
+  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
   
   //check for empty hists
   if(!h_FR){
@@ -266,10 +267,10 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
   }
   
   
-  TH1F* h_sidebandqcdPrompt = (TH1F*) f_qcd->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
-  TH1F* h_sidebandgjetPrompt = (TH1F*) f_gjet->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
-  TH1F* h_sideband = (TH1F*) f_in->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
-  if (!realDataLocal) h_sideband = (TH1F*) f_in->Get("crgj"+srName+"/h_"+plotname+"FakeLooseNotTight");
+  TH1F* h_sidebandqcdPrompt = (TH1F*) f_qcd->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
+  TH1F* h_sidebandgjetPrompt = (TH1F*) f_gjet->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
+  TH1F* h_sideband = (TH1F*) f_in->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
+  if (!realDataLocal) h_sideband = (TH1F*) f_in->Get("crhgj"+srName+"/h_"+plotname+"FakeLooseNotTight");
   //h_sidebandqcdPrompt->Print("all");
   //h_sidebandgjetPrompt->Print("all");
   //h_sideband->Print("all");
@@ -406,25 +407,24 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
 
 
 void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TFile* f_zOrig, TString sr, TString FR_type, TString plotname = "mt2bins")
-
 {
   if (verbose) cout<<__LINE__<<" Making plots for region "<<sr<<", FR_type "<<FR_type<<", plotname "<<plotname<<" **************************"<<endl;
   //get hists
-  TH1F* h_gjet = (TH1F*) f_gjet->Get("crgj"+sr+"/h_"+plotname);
-  TH1F* h_qcd  = (TH1F*) f_qcd->Get("crgj"+sr+"/h_"+plotname);
-  TH1F* h_tmp  = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname);
+  TH1F* h_gjet = (TH1F*) f_gjet->Get("crhgj"+sr+"/h_"+plotname);
+  TH1F* h_qcd  = (TH1F*) f_qcd->Get("crhgj"+sr+"/h_"+plotname);
+  TH1F* h_tmp  = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname);
   if(!h_gjet || !h_tmp) return;
-  TH1F* h_full  = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname)->Clone();
+  TH1F* h_full  = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname)->Clone();
   //check existence
-  TH1F* h_qcdFake = (TH1F*) f_qcd->Get("crgj"+sr+"/h_"+plotname+"Fake");
+  TH1F* h_qcdFake = (TH1F*) f_qcd->Get("crhgj"+sr+"/h_"+plotname+"Fake");
   if (!FR_type.Contains("Data") && h_qcdFake) {
     h_full->Add(h_qcdFake); // need to add MC fakes to our total, if running on MC.
   }
   // now h_full includes purity and f
 
-  TH1F* h_fullLooseNotTight = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname+"FakeLooseNotTight");
+  TH1F* h_fullLooseNotTight = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname+"FakeLooseNotTight");
   if (FR_type.Contains("Data") ) {
-    h_fullLooseNotTight = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname+"LooseNotTight"); // Can't have "Fake" in the name, if running on data
+    h_fullLooseNotTight = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname+"LooseNotTight"); // Can't have "Fake" in the name, if running on data
   }
   
   TString srdir = "sr"+sr;
@@ -440,8 +440,8 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
 
 
-  if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_full:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_full:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
   if (verbose && h_fullLooseNotTight) cout<<__LINE__<<" h_fullLooseNotTight has integral "<<h_fullLooseNotTight->Integral()<<endl;
   if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
   if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<" ratio is "<<endl; h_ratio->GetBinContent(1);
@@ -648,9 +648,13 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/", string dataname = "data")
 {
   
+  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  dataname = "data_Run2016";
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsJamboree();
-  vector<SR> SRVec2 =  getSignalRegionsMonojet();
+  // vector<SR> SRVec =  getSignalRegionsJamboree();
+  // vector<SR> SRVec2 =  getSignalRegionsMonojet();
+  vector<SR> SRVec = getSignalRegionsMT2Higgs();
+  vector<SR> SRVec2 = getSignalRegionsMonojet();
 
   //open files
   // get input files -- default to faking data with same MC file
@@ -670,28 +674,33 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   cout << "Making Fake-Rate Histograms..." << endl;
   
   //get hists for FR calc
-  TH2D* h_qcdTight = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptFake");
-  TH2D* h_qcdLoose = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptFakeLoose");
-  if (!h_qcdTight || !h_qcdLoose) cout<<"Could not find FR histograms in QCD MC"<<endl;
+  TH2D* h_qcdTight = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptFake");
+  TH2D* h_qcdLoose = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptFakeLoose");
+  if (!h_qcdTight || !h_qcdLoose) {
+    cout<<"Could not find FR histograms in QCD MC"<<endl;
+    return;
+  }
   h_qcdTight->SetName("h_qcdTight");
   h_qcdLoose->SetName("h_qcdLoose");
   
-  
   //get hists for FR calc, Sieie Sideband
-  TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
-  TH2D* h_qcdLooseFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
+  TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
+  TH2D* h_qcdLooseFailSieie = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
   if (!h_qcdTightFailSieie || !h_qcdLooseFailSieie) cout<<"Could not find SieieSB FR histograms in QCD MC"<<endl;
   h_qcdTightFailSieie->SetName("h_qcdTightFailSieie");
   h_qcdLooseFailSieie->SetName("h_qcdLooseFailSieie");
   
   //get hists for FR calc, Sieie Sideband (Data)
-  TH2D* h_qcdTightFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinSieieSB");
-  TH2D* h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinLooseSieieSB");
+  TH2D* h_qcdTightFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinSieieSB");
+  TH2D* h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinLooseSieieSB");
   if (!realData) {
-    h_qcdTightFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
-    h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
+    h_qcdTightFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
+    h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
   }
-  if (!h_qcdTightFailSieieData || !h_qcdTightFailSieieData) cout<<"Could not find SieieSB FR histograms in (pseudo)data"<<endl;
+  if (!h_qcdTightFailSieieData || !h_qcdTightFailSieieData) {
+    cout<<"Could not find SieieSB FR histograms in (pseudo)data"<<endl;
+    return;
+  }
 
   h_qcdTightFailSieieData->SetName("h_qcdTightFailSieieData");
   h_qcdLooseFailSieieData->SetName("h_qcdLooseFailSieieData");

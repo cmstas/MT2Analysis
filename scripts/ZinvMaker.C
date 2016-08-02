@@ -278,7 +278,7 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 //_______________________________________________________________________________
 void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
 
-  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
+  // input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
   // string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
   // string input_dir = "../MT2looper/output/2015ExtendedNJets/";
   // string input_dir = "../MT2looper/output/2015LowLumi/";
@@ -291,8 +291,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
 
   // get input files
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  // TFile* f_gjet = new TFile(Form("%s/gjets_ht.root",input_dir.c_str()));
-  TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
+  TFile* f_gjet = new TFile(Form("%s/gjets_ht.root",input_dir.c_str()));
   // TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
   // TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));

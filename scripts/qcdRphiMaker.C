@@ -16,7 +16,8 @@
 
 using namespace std;
 
-const bool verbose = false;
+// const bool verbose = false;
+const bool verbose = true;
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
@@ -38,10 +39,10 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
   const unsigned int ndirs = dirs.size();
   
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-    TString directory = "sr"+dirs.at(idir);
+    TString directory = "srh"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
-    TString crdir = "crqcd"+TString(dirs.at(idir));
+    TString crdir = "crhqcd"+TString(dirs.at(idir));
     TString fullhistnameCR = crdir+"/h_mt2bins";
 
     if (verbose) std::cout << "making estimate for region: " << directory << ", from CR: " << crdir << std::endl;
@@ -203,6 +204,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
       TH1D* h_fjets = (TH1D*) f_qcd->Get(Form("%s/%s/yield_%s_%s",f_jets_dir.c_str(),channel_htonly.c_str(),f_jets_dir.c_str(),channel_htonly.c_str()));
       TH1D* h_rb = (TH1D*) f_qcd->Get(Form("r_hat_data/%s/yield_r_hat_data_%s",channel_njonly.c_str(),channel_njonly.c_str()));
+      if (!h_rb) cout << "h_rb command is: " << Form("r_hat_data/%s/yield_r_hat_data_%s",channel_njonly.c_str(),channel_njonly.c_str()) << endl;
       TH1D* h_purity = (TH1D*) f_qcd->Get(Form("qcdPurity/%s/yield_qcdPurity_%s",channel.c_str(),channel.c_str()));
 
       float fjets = h_fjets->GetBinContent( h_fjets->FindBin(njets_LOW) );
@@ -297,6 +299,8 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 //_______________________________________________________________________________
 void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "data_Run2015D", string qcdname = "qcdEstimateData", string qcdmonojetname = "qcdEstimateMonojet") {
 
+  dataname = "data_Run2016";
+  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"; // temporary for debugging
   string output_name = input_dir+"/qcdFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;
 
@@ -317,13 +321,13 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   //if directory begins with "sr", excluding "srbase", add it to vector signal regions.
   TIter it(f_data->GetListOfKeys());
   TKey* k;
-  std::string keep = "sr";
-  std::string skip = "srbase";
+  std::string keep = "srh";
+  std::string skip = "srhbase";
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
-      sr_string.erase(0, 2);//remove "sr" from front of string
+      sr_string.erase(0, 3);//remove "sr" from front of string
       dirs.push_back(sr_string);
     }
   }

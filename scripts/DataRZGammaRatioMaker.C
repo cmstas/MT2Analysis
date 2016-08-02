@@ -115,7 +115,6 @@ void DataRZGammaRatioMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis
   TFile* f_purity = new TFile(Form("%s/purity.root",input_dir.c_str()));
   TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str()));
 
-
   if(f_data->IsZombie() || f_purity->IsZombie() || f_top->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;

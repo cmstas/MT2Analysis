@@ -12,7 +12,7 @@ LOSTLEPFILE=data_Run2016
 ## to use MC for lostlepton
 #LOSTLEPFILE=lostlep
 
-# GJETFILE=data_Run2016
+GJETFILE=data_Run2016
 #GJETFILE=data_Run2015D
 #GJETFILE=qcdplusgjet
 
@@ -20,7 +20,7 @@ LOSTLEPFILE=data_Run2016
 #RLFILE=data_Run2015D
 #RLFILE=removedlep
 
-# QCDFILE=data_Run2016
+QCDFILE=data_Run2016
 #QCDFILE=data_Run2015D
 #QCDFILE=qcd_ht
 
@@ -58,28 +58,32 @@ root -b -q "lostlepMaker.C+(\"${INDIR}\",\"${LOSTLEPFILE}\")" >> dataDrivenEstim
 echo "root -b -q ZinvMaker.C+(${INDIR})"
 root -b -q "ZinvMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 
-# cd $INDIR
-# echo "hadd qcdplusgjet.root gjets_ht.root qcd_ht.root"
-# hadd -f qcdplusgjet.root gjets_ht.root qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
-# echo "hadd CRRLbkg.root ttsl.root ttdl.root singletop.root" # should probably include QCD here
-# hadd -f CRRLbkg.root ttsl.root ttdl.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
-# hadd -f removedlep.root wjets_ht.root CRRLbkg.root >> $THISDIR/dataDrivenEstimates.log
-# cd $THISDIR
+cd $INDIR
+echo "hadd qcdplusgjet.root gjets_ht.root qcd_ht.root"
+hadd -f qcdplusgjet.root gjets_ht.root qcd_ht.root  >> $THISDIR/dataDrivenEstimates.log
+echo "hadd CRRLbkg.root ttsl.root ttdl.root singletop.root" # should probably include QCD here
+hadd -f CRRLbkg.root ttsl.root ttdl.root singletop.root  >> $THISDIR/dataDrivenEstimates.log
+hadd -f removedlep.root wjets_ht.root CRRLbkg.root >> $THISDIR/dataDrivenEstimates.log
+cd $THISDIR
 
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/qcdplusgjet.root,2)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/qcdplusgjet.root\",2)" >> dataDrivenEstimates.log
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/CRRLbkg.root,3)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/CRRLbkg.root\",3)" >> dataDrivenEstimates.log
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/removedlep.root,2)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/removedlep.root\",2)" >> dataDrivenEstimates.log
-# echo "root -b -q purity.C+(${INDIR})"
-# root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/qcdplusgjet.root,2)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/qcdplusgjet.root\",2)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/CRRLbkg.root,3)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/CRRLbkg.root\",3)" >> dataDrivenEstimates.log
+echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/removedlep.root,2)"
+root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/removedlep.root\",2)" >> dataDrivenEstimates.log
+
+echo "root -b -q purity.C+(${INDIR})"
+root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
+
 # echo "root -b -q purityRL.C+(${INDIR}, ${RLFILE})"
 # root -b -q "purityRL.C+(\"${INDIR}\",\"${RLFILE}\")" >> dataDrivenEstimates.log
-# echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
-# root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
-# echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
-# root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
+
+echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
+root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
+
+echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
+root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
 echo "done"
 
 
