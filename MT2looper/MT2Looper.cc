@@ -1688,13 +1688,25 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
 
   if (passBase && passPtMT2) {
     fillHistosGammaJets(SRBaseHcand.crgjHistMap, SRBaseHcand.crgjRooDataSetMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhgjbase", suffix+add);
-
     for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
       if (SRVecHcand.at(srN).PassesSelection(values)) {
         fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhgj"+SRVecHcand.at(srN).GetName(), suffix+add);
         // break; //control regions are orthogonal, event cannot be in more than one
       }
     } // SRloop
+
+    // Remake everything again to get "Loose"
+    if (iso < isoCutLoose) {
+      add = "Loose";
+      if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
+      fillHistosGammaJets(SRBaseHcand.crgjHistMap, SRBaseHcand.crgjRooDataSetMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhgjbase", suffix+add);
+      for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
+        if (SRVecHcand.at(srN).PassesSelection(values)) {
+          fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhgj"+SRVecHcand.at(srN).GetName(), suffix+add);
+          // break; //control regions are orthogonal, event cannot be in more than one
+        }
+      } // SRloop
+    }
   }
 
   // do monojet SRs
