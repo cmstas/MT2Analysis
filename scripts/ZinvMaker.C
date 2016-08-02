@@ -131,7 +131,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
         ratioInt->SetBinContent(ibin, ratioInt->GetBinContent(ibin)/nGamma);
         float errOld = ratioInt->GetBinError(ibin)/nGamma;
         float errNew = (nGammaErr/nGamma) * ratioInt->GetBinContent(ibin);
-        // cout<<nGamma<<" "<<nGammaErr<<" "<<errOld<<" "<<errNew<<endl;
+        cout<<nGamma<<" "<<nGammaErr<<" "<<errOld<<" "<<errNew<<endl;
         ratioInt->SetBinError(ibin, sqrt( errOld*errOld + errNew*errNew ) );
       }
       else {
@@ -139,7 +139,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
         ratioInt->SetBinError(ibin, 0);
       }
     }
-    // ratioInt->Print("all");
+    ratioInt->Print("all");
     
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");

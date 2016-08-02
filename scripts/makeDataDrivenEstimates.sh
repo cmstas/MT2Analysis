@@ -82,8 +82,8 @@ root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
 root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 
-echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
-root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
+# echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
+# root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
 echo "done"
 
 
