@@ -441,10 +441,10 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 
 
   if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_full:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
+  if (verbose && h_full) cout<<__LINE__<<" f_full:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
   if (verbose && h_fullLooseNotTight) cout<<__LINE__<<" h_fullLooseNotTight has integral "<<h_fullLooseNotTight->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<" ratio is "<<endl; h_ratio->GetBinContent(1);
+  if (verbose && h_trueZinv) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
+  if (verbose && h_ratio) cout<<__LINE__<<" f_zinv:sr"<<sr<<" ratio is "<<endl; h_ratio->GetBinContent(1);
   
   f_out->cd();
   TString directory = "sr"+sr;
