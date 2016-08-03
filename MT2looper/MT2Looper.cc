@@ -406,7 +406,7 @@ void MT2Looper::SetSignalRegions(){
       plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecHcand.at(i).GetLowerBound(vars.at(j)), SRVecHcand.at(i).crqcdHistMap, "", 1, 0, 2);
       plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).crqcdHistMap, "", 1, 0, 2);
     }
-    plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crgjHistMap, "", 1, 0, 2);
+    plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crqcdHistMap, "", 1, 0, 2);
   }
 
   // -- end of mt2higgs --
