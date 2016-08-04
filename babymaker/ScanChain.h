@@ -30,7 +30,7 @@ class babyMaker {
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample", int bx = 50, bool isFastsim = false);
+  void ScanChain(TChain*, std::string = "testSample", bool isFastsim = false, int max_events = -1);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -80,6 +80,7 @@ class babyMaker {
   Int_t           lumi;
   ULong64_t       evt;
   Int_t           isData;
+  Int_t           isGolden;
 
   Float_t         evt_scale1fb;
   Float_t         evt_xsec;
@@ -105,6 +106,7 @@ class babyMaker {
   Int_t           nBJet30mva;
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
+  Int_t           nJet20BadFastsim;
   Int_t           nMuons10;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;
@@ -113,7 +115,9 @@ class babyMaker {
   Int_t           nPFCHCand3;
 
   Float_t         deltaPhiMin;
+  Float_t         deltaPhiMin_genmet;
   Float_t         diffMetMht;
+  Float_t         diffMetMht_genmet;
   Float_t         minMTBMet;
   Float_t         gamma_minMTBMet;
   Float_t         zll_minMTBMet;
@@ -122,6 +126,7 @@ class babyMaker {
   Float_t         ht;
   Float_t         mt2;
   Float_t         mt2_gen;
+  Float_t         mt2_genmet;
 
   Float_t         jet1_pt;
   Float_t         jet2_pt;
@@ -167,7 +172,8 @@ class babyMaker {
   Int_t           Flag_HBHENoiseIsoFilter;
   Int_t           Flag_goodVertices;
   Int_t           Flag_eeBadScFilter;
-  Int_t           Flag_badChargedCandidateFilter;
+  Int_t           Flag_badMuonFilter;
+  Int_t           Flag_badChargedHadronFilter;
   Int_t           Flag_METFilters;
 
 //----- TRIGGER 
@@ -188,12 +194,16 @@ class babyMaker {
   Int_t           HLT_PFMET110_PFMHT110;
   Int_t           HLT_PFMET120_PFMHT120;
   Int_t           HLT_SingleMu;   
+  Int_t           HLT_SingleMu_NonIso;   
   Int_t           HLT_SingleEl;   
+  Int_t           HLT_SingleEl_NonIso;   
   Int_t           HLT_DoubleEl;   
   Int_t           HLT_DoubleEl33;   
   Int_t           HLT_MuX_Ele12;   
   Int_t           HLT_Mu8_EleX;   
+  Int_t           HLT_Mu30_Ele30_NonIso;   
   Int_t           HLT_DoubleMu;   
+  Int_t           HLT_DoubleMu_NonIso;   
   Int_t           HLT_Photon120;   
   Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_PFHT125_Prescale;   
@@ -468,6 +478,8 @@ class babyMaker {
   Float_t         weight_phottrigsf;
   Float_t         weight_pu;
   Float_t         weight_isr;
+  Float_t         weight_isr_UP;
+  Float_t         weight_isr_DN;
   Float_t         weight_scales_UP;
   Float_t         weight_scales_DN;
   Float_t         weight_pdfs_UP;
@@ -480,6 +492,7 @@ class babyMaker {
   Int_t           genProd_pdgId;
   Float_t         weight_pol_L;
   Float_t         weight_pol_R;
+  Int_t           nisrMatch;
 
 //----- MC SCALE AND PDF WEIGHTS
   static const int max_nLHEweight = 500;

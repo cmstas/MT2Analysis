@@ -25,7 +25,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
   TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
   outfile->cd();
   const unsigned int ndirs = dirs.size();
-  
+
   // Do the inclusive ones
   vector<TString> inclPlots;
   inclPlots.push_back("h_njbins");
@@ -35,7 +35,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
   inclPlots.push_back("h_mt2bins");
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
-    
+
     TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgjbaseIncl/"+inclPlots[incl])->Clone();
     TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdybaseIncl/"+inclPlots[incl])->Clone();
 
@@ -68,7 +68,6 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
 
     cout<<"Looking at directory "<<directory<<endl;
 
-    
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameHT = directory + "/h_htbins";
     TString fullhistnameHT2 = directory + "/h_htbins2";
@@ -99,7 +98,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     }
     //hGJet->Print("all");
     hGJet->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
-    
+
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
     dir = (TDirectory*)outfile->Get(directory.Data());
@@ -122,7 +121,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     //hGJet->Print("all");
     ratio->Divide(hGJet);
     //ratio->Print("all");
-    
+
     TH1D* ratioInt = (TH1D*) hZinv->Clone("h_mt2binsRatioInt");
     double nGammaErr = 0;
     double nGamma = hGJet->IntegralAndError(0, -1, nGammaErr);
@@ -140,13 +139,13 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       }
     }
     ratioInt->Print("all");
-    
+
     // MCStat: use relative bin error from ratio hist, normalized to Zinv MC prediction
     TH1D* MCStat = (TH1D*) hZinv->Clone("h_mt2binsMCStat");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
       MCStat->SetBinError(ibin, MCStat->GetBinContent(ibin) * ratio->GetBinError(ibin) / ratio->GetBinContent(ibin) );
     }
-    
+
     TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
     TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
@@ -157,7 +156,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     //pred->Print("all");
     
     TH1D* CRyield = (TH1D*) hGJet->Clone("h_mt2binsCRyield");
-    
+
     // Extrapolation to next bin: just a ratio of GJet_i/GJet_i-1, so that we can later obtain bin i prediction from bin i-1 yield
     // Instead of : GJet_i * R(Zinv_i/GJet_i), we will do GJet_i-1 * R(GJet_i/GJet_i-1) * R(Zinv_i/GJet_i)
     TH1D* PreviousBinRatio = (TH1D*) hGJet->Clone("h_mt2binsPreviousBinRatio");
@@ -170,7 +169,7 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
       PreviousBinRatio->SetBinError(ibin, 0.); // Ignore uncertainty (just MC anyway)
     }
     
-    
+
     pred->Write();
     Stat->Write();
     Syst->Write();
@@ -295,7 +294,6 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   // TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
   // TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
-
 
   if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;

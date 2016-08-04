@@ -40,7 +40,8 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
   TH1::SetDefaultSumw2();
 
   //TString suffix = "_hovere001";
-  TString suffix = "";
+  TString suffix = "_zmet2016";
+  //  TString suffix = "";
   
   TChain* t_jetht = new TChain("mt2");
   TChain* t_muon = new TChain("mt2");
@@ -69,6 +70,8 @@ void plot_trigeff_Photon165 (const TString& indir = "/nfs-6/userdata/mt2/V00-08-
 
   TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 ";
   //  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 && gamma_hOverE[0] < 0.01 ";
+  // -- cuts for ZMET 2016, or as close as I can get..
+  //  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && nElectrons10 == 0 && ngamma > 0 && gamma_idCutBased[0] > 0 && ( (fabs(gamma_eta[0]) < 1.442 && gamma_chHadIso[0] < 3.32 && (gamma_neuHadIso[0] < 1.92 + 0.014  * gamma_pt[0] + 0.000019*pow(gamma_pt[0],2)) && gamma_phIso[0] < 0.81 + 0.0053 * gamma_pt[0]) || ((fabs(gamma_eta[0]) > 1.566 && fabs(gamma_eta[0]) < 2.4 && gamma_chHadIso[0] < 1.97 && (gamma_neuHadIso[0] < 11.86 + 0.0139  * gamma_pt[0] + 0.000025*pow(gamma_pt[0],2)) && gamma_phIso[0] < 0.83 + 0.0034 * gamma_pt[0]) ) ) ";
   TCut eb = "abs(gamma_eta[0]) < 1.479";
   TCut ee = "abs(gamma_eta[0]) > 1.479 && abs(gamma_eta[0]) < 2.5";
   TCut had = base + "nJet30 > 0";

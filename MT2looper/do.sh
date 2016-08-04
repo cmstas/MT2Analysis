@@ -31,10 +31,14 @@ LOGDIR=logs/
 declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D)
 # declare -a Samples=(ttsl ttdl wjets_ht zinv_ht gjets_dr0p05_ht singletop ttw ttz ttg qcd_ht dyjetsll_ht)
 # declare -a Samples=(ttdl T5qqqqWH_1400_700 T5qqqqWH_1100_950 T5qqqqWH_1400_200 T2ttZH_800_400 T2ttZH_800_200)
-# declare -a Samples=(dyjetsll_ht)
+# declare -a Samples=(ttsl)
 #declare -a Samples=(T1tttt_1500_100 T1tttt_1200_800 T1bbbb_1500_100 T1bbbb_1000_900 T1qqqq_1400_100 T1qqqq_1000_800 T2tt_850_100 T2tt_650_325 T2tt_500_325 T2tt_425_325 T2bb_900_100 T2bb_600_580 T2qq_1200_100 T2qq_600_550)
 #declare -a Samples=(T1tttt_1500_100 T1tttt_1200_800 T1bbbb_1500_100 T1bbbb_1000_900 T1qqqq_1400_100 T1qqqq_1000_800)
 #declare -a Samples=(T1bbbb)
+
+# 2015 samples for Zinvisible estimate
+#INDIR=/nfs-6/userdata/mt2/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4/
+#declare -a Samples=(2015qcd_ht 2015gjets_ht 2015dyjetsll_ht 2015zinv_ht)
 
 mkdir -p ${OUTDIR}
 mkdir -p ${LOGDIR}
