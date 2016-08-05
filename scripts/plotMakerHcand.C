@@ -1576,10 +1576,9 @@ void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> na
   return;
 }
 
-void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
+void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
-  vector<TFile*> samples = samplesVec[0];
 
   unsigned int n = samples.size();
   unsigned int ndirs = dirs.size();
@@ -1626,17 +1625,20 @@ void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string
     for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
     ofile << "}" << std::endl;
     ofile << "\\hline\\hline" << endl;
-    ofile << "\\multirow{2}{*}{Sample}";
+    // ofile << "\\multirow{2}{*}{Sample}";
+    // for (unsigned int idir = 0; idir < ndirs; ++idir)
+    //   ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
+    //         // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
+    //         // << " CR: " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", 1 lep ($M_{\\rm{T}} < 100$)."
+    //         << " }";
+    // ofile << " \\\\" << endl
+    //       << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
+    ofile << "Sample";
     for (unsigned int idir = 0; idir < ndirs; ++idir)
-      ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
-            // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
-            << " CR: " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", 1 lep ($M_{\\rm{T}} < 100$)."
-            << " }";
-    ofile << " \\\\" << endl
-          << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
-    for (unsigned int i = 0; i < ndirs; ++i)
-      for (auto it = selecs.begin(); it != selecs.end(); ++it)
-        ofile << " & " << *it;
+      ofile << "  &  " << string(dirs.at(idir)).replace(0, 5, "");
+    // for (unsigned int i = 0; i < ndirs; ++i)
+    //   for (auto it = selecs.begin(); it != selecs.end(); ++it)
+    //     ofile << " & " << *it;
     ofile << " \\\\" << endl;
     ofile << "\\hline\\hline" << endl;
 
@@ -1644,13 +1646,13 @@ void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string
     for ( int i = n-1 ; i >= 0 ; --i ) {
       if ( TString(names.at(i)).Contains("data") ) {found_data = true; continue;}
       if ( TString(names.at(i)).Contains("sig") ) continue;
-      // ofile << getTableName(names.at(i));
+      if ( TString(names.at(i)).Contains("lostlepFromCRs") ) continue;
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
         for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
           TString fullhistnameCR = Form("%s/h_mt2bins", dirs.at(idir).c_str());
           TString fullhistnameSR = Form("%s/h_mt2bins", string(dirs.at(idir)).replace(0,5,"srh").c_str());
-          TH1D* h_cr = (TH1D*) samplesVec[isel].at(i)->Get(fullhistnameCR);
-          TH1D* h_sr = (TH1D*) samplesVec[isel].at(i)->Get(fullhistnameSR);
+          TH1D* h_cr = (TH1D*) samples.at(i)->Get(fullhistnameCR);
+          TH1D* h_sr = (TH1D*) samples.at(i)->Get(fullhistnameSR);
           double yield_cr = 0.;
           double err_cr = 0.;
           double yield_sr = 0.;
@@ -1709,7 +1711,7 @@ void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
         for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
           TString fullhistname = Form("%s/h_mt2bins", dirs.at(idir).c_str());
-          TH1D* h = (TH1D*) samplesVec[isel].at(i)->Get(fullhistname);
+          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
           if (h) {
             // use all bins
@@ -1739,6 +1741,30 @@ void printComparisonTableCRSL(vector< vector<TFile*> > samplesVec, vector<string
       ofile << "\\hline" << endl;
 
     }
+
+    for( unsigned int i = 0 ; i < n ; i++ ){
+      if (!TString(names.at(i)).Contains("lostlepFromCRs")) continue;
+      ofile << "\\hline" << endl;
+      ofile << "DD Estimates";
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2bins", string(dirs.at(idir)).replace(0,5,"srh").c_str());
+          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          double yield = 0.;
+          double err = 0.;
+          if (h) {
+            yield = h->IntegralAndError(0, -1, err);
+          }
+          ofile << "  &  ";
+          if (yield > 10.)
+            ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+          else
+            ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+        }
+      }
+      ofile << " \\\\" << endl;
+      ofile << "\\hline" << endl;
+    } // loop over samples
 
     if (itab == nTabulars-1) ofile << "\\hline" << std::endl;
     else ofile << "\\multicolumn{" << ndirs*nselecs+1 << "}{c}{} \\\\" << endl;
@@ -2963,9 +2989,11 @@ void plotMakerHcand() {
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  vector<string> names2 = {"lostlep", "data_Run2016"};
+  vector<string> names2 = {"lostlepFromCRs", "lostlep", "data_Run2016"};
   // vector<string> names2 = {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016"};
   vector<TFile*> samples2 = getSamples(names2, input_dir);
+  vector< vector<TFile*> > samplesVec2 = {samples2};
+  vector<string> selecs2 = {"temp"};
 
   // vector< vector<TFile*> > samplesVec2;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
@@ -3133,6 +3161,19 @@ void plotMakerHcand() {
 
   // dirsH.push_back("crhqcd1H");
   // printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
+  // dirsH.clear();
+
+  // dirsH.push_back("crhsl1VL");
+  // dirsH.push_back("crhsl2VL");
+  // dirsH.push_back("crhsl1L");
+  // dirsH.push_back("crhsl2L");
+  // dirsH.push_back("crhsl1M");
+  // dirsH.push_back("crhsl2M");
+  // dirsH.push_back("crhsl3M");
+  // dirsH.push_back("crhsl1H");
+  // dirsH.push_back("crhsl2H");
+  // dirsH.push_back("crhsl3H");
+  // printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
   // dirsH.clear();
 
   dirsH.push_back("srh1VL");
