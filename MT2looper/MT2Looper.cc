@@ -802,15 +802,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   unsigned int nEventsChain = nEvents;
   cout << "[MT2Looper::loop] running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
-  // -- testing
-  unsigned int nWorking = 0;
-  unsigned int nNotWorking = 0;
-  unsigned int SecondBJetCount = 0;
-  unsigned int BadPtRatioCount = 0;
-  unsigned int PossibleFakeBJetCount = 0;
-  unsigned int nIsGenBJet = 0;
-  unsigned int nIsTrueBJet = 0;
-  // -* testing
+  // // -- testing
+  // unsigned int nWorking = 0;
+  // unsigned int nNotWorking = 0;
+  // unsigned int SecondBJetCount = 0;
+  // unsigned int BadPtRatioCount = 0;
+  // unsigned int PossibleFakeBJetCount = 0;
+  // unsigned int nIsGenBJet = 0;
+  // unsigned int nIsTrueBJet = 0;
+  // // -* testing
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
@@ -1365,8 +1365,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // mt2higgs' crgj histo filling
       if (doMT2HiggsGJ) {
         string sufadd = (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))? "" : "Fake";
-        // fillHistosCRGJMT2Higgs();
-        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
+        fillHistosCRGJMT2Higgs("crhgj", sufadd);
+        // if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
         fillHistosCRGJMT2Higgs("", "_original" + sufadd);
         if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
         if (isHcandGJ)                  fillHistosCRGJMT2Higgs("", "_isHcand" + sufadd);
@@ -1392,8 +1392,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
 
       if (doMT2Higgs) {
-        // fillHistosSRMT2Higgs("srh");
-        if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh");
+        fillHistosSRMT2Higgs("srh");
+        // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh");
         fillHistosSRMT2Higgs("srh", "_original");
         if (doMinMTBMet)            fillHistosSRMT2Higgs("srh", "_minMTbmet");
         if (isHcand)                fillHistosSRMT2Higgs("srh", "_isHcand");
@@ -1404,7 +1404,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (doMbbMax300 && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnMbb300");
 
         if (doDYplots) {
-          if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs();
+          fillHistosCRDYMT2Higgs();
+          // if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs();
           fillHistosCRDYMT2Higgs("", "_original");
           if (doMinMTBMet)            fillHistosCRDYMT2Higgs("", "_minMTbmet");
           if (isHcand)                fillHistosCRDYMT2Higgs("", "_isHcand");
@@ -1421,32 +1422,32 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (verbose) cout<<__LINE__<<endl;
         fillHistosCRDY("crdy");
       }
-      // if (doRLplots) {
-      //   saveRLplots = true;
-      //   if (verbose) cout<<__LINE__<<endl;
-      //   fillHistosCRRL("crrl");
-      // }
-      // if (doRLELplots && !doMinimalPlots) {
-      //   saveRLELplots = true;
-      //   fillHistosCRRL("crrlel");
-      // }
-      // if (doRLMUplots && !doMinimalPlots) {
-      //   saveRLMUplots = true;
-      //   fillHistosCRRL("crrlmu");
-      // }
+      if (doRLplots) {
+        saveRLplots = true;
+	if (verbose) cout<<__LINE__<<endl;
+        fillHistosCRRL("crrl");
+      }
+      if (doRLELplots && !doMinimalPlots) {
+        saveRLELplots = true;
+        fillHistosCRRL("crrlel");
+      }
+      if (doRLMUplots && !doMinimalPlots) {
+        saveRLMUplots = true;
+        fillHistosCRRL("crrlmu");
+      }
       if (doSLplots) {
         saveSLplots = true;
         if (verbose) cout<<__LINE__<<endl;
         fillHistosCRSL("crsl");
       }
-      // if (doSLMUplots && !doMinimalPlots) {
-      //   saveSLMUplots = true;
-      //   fillHistosCRSL("crslmu");
-      // }
-      // if (doSLELplots && !doMinimalPlots) {
-      //   saveSLELplots = true;
-      //   fillHistosCRSL("crslel");
-      // }
+      if (doSLMUplots && !doMinimalPlots) {
+        saveSLMUplots = true;
+        fillHistosCRSL("crslmu");
+      }
+      if (doSLELplots && !doMinimalPlots) {
+        saveSLELplots = true;
+        fillHistosCRSL("crslel");
+      }
       if (doQCDplots) {
         saveQCDplots = true;
         if (verbose) cout<<__LINE__<<endl;
@@ -1473,15 +1474,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_->cd();
   savePlotsDir(h_1d_global,outfile_,"");
-  // savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
+  savePlotsDir(SRNoCut.srHistMap,outfile_,SRNoCut.GetName().c_str());
   savePlotsDir(SRBase.srHistMap,outfile_,SRBase.GetName().c_str());
   savePlotsDir(SRBase.crslHistMap,outfile_,"crslbase");
-  // savePlotsDir(SRBase.crrlHistMap,outfile_,"crrlbase");
+  savePlotsDir(SRBase.crrlHistMap,outfile_,"crrlbase");
   if (!doMinimalPlots) {
     savePlotsDir(CRSL_WJets.crslHistMap,outfile_,CRSL_WJets.GetName().c_str());
     savePlotsDir(CRSL_TTbar.crslHistMap,outfile_,CRSL_TTbar.GetName().c_str());
   }
-  // savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
+  savePlotsDir(SRNoCut.crgjHistMap,outfile_,"crgjnocut");
   savePlotsDir(SRBase.crgjHistMap,outfile_,"crgjbase");
 
   savePlotsDir(SRBaseHcand.srHistMap, outfile_, SRBaseHcand.GetName().c_str());
@@ -1584,14 +1585,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   bmark->Stop("benchmark");
   cout << endl;
-  // -- testing
-  cout << "nWorking: " << nWorking << endl
-       << "nNotWorking: " << nNotWorking << endl
-       << "SecondBJetCount: " << SecondBJetCount << endl
-       << "BadPtRatioCount: " << BadPtRatioCount << endl
-       << "PossibleFakeBJetCount: " << PossibleFakeBJetCount << endl
-       << "nIsGenBJet: " << PossibleFakeBJetCount << endl;
-  // -* testing
+  // // -- testing
+  // cout << "nWorking: " << nWorking << endl
+  //      << "nNotWorking: " << nNotWorking << endl
+  //      << "SecondBJetCount: " << SecondBJetCount << endl
+  //      << "BadPtRatioCount: " << BadPtRatioCount << endl
+  //      << "PossibleFakeBJetCount: " << PossibleFakeBJetCount << endl
+  //      << "nIsGenBJet: " << PossibleFakeBJetCount << endl;
+  // // -* testing
   cout << nEventsTotal << " Events Processed" << endl;
   cout << "------------------------------" << endl;
   cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
