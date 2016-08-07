@@ -1584,6 +1584,9 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
   unsigned int ndirs = dirs.size();
   unsigned int nselecs = selecs.size();
 
+  string sr = "srh";
+  string cr = "crhsl";
+
   if (nselecs < 2) cout << "Use printTable instead!\n";
 
   if (caption == "Detailed") { // temporary
@@ -1635,7 +1638,7 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
     //       << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
     ofile << "Sample";
     for (unsigned int idir = 0; idir < ndirs; ++idir)
-      ofile << "  &  " << string(dirs.at(idir)).replace(0, 5, "");
+      ofile << "  &  " << dirs.at(idir);
     // for (unsigned int i = 0; i < ndirs; ++i)
     //   for (auto it = selecs.begin(); it != selecs.end(); ++it)
     //     ofile << " & " << *it;
@@ -1649,8 +1652,8 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
       if ( TString(names.at(i)).Contains("lostlepFromCRs") ) continue;
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
         for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
-          TString fullhistnameCR = Form("%s/h_mt2bins", dirs.at(idir).c_str());
-          TString fullhistnameSR = Form("%s/h_mt2bins", string(dirs.at(idir)).replace(0,5,"srh").c_str());
+          TString fullhistnameCR = Form("%s/h_mt2bins", (cr+dirs.at(idir)).c_str());
+          TString fullhistnameSR = Form("%s/h_mt2bins", (sr+dirs.at(idir)).c_str());
           TH1D* h_cr = (TH1D*) samples.at(i)->Get(fullhistnameCR);
           TH1D* h_sr = (TH1D*) samples.at(i)->Get(fullhistnameSR);
           double yield_cr = 0.;
@@ -1710,7 +1713,7 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
       ofile << "Data CR";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
         for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
-          TString fullhistname = Form("%s/h_mt2bins", dirs.at(idir).c_str());
+          TString fullhistname = Form("%s/h_mt2bins", (cr+dirs.at(idir)).c_str());
           TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
           if (h) {
@@ -1748,7 +1751,7 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
       ofile << "DD Estimates";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
         for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
-          TString fullhistname = Form("%s/h_mt2bins", string(dirs.at(idir)).replace(0,5,"srh").c_str());
+          TString fullhistname = Form("%s/h_mt2bins", (sr+dirs.at(idir)).c_str());
           TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
           double err = 0.;
@@ -3163,37 +3166,47 @@ void plotMakerHcand() {
   // printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
   // dirsH.clear();
 
-  // dirsH.push_back("crhsl1VL");
-  // dirsH.push_back("crhsl2VL");
-  // dirsH.push_back("crhsl1L");
-  // dirsH.push_back("crhsl2L");
-  // dirsH.push_back("crhsl1M");
-  // dirsH.push_back("crhsl2M");
-  // dirsH.push_back("crhsl3M");
-  // dirsH.push_back("crhsl1H");
-  // dirsH.push_back("crhsl2H");
-  // dirsH.push_back("crhsl3H");
-  // printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
+  dirsH.push_back("1VL");
+  dirsH.push_back("2VL");
+  dirsH.push_back("1L");
+  dirsH.push_back("2L");
+  dirsH.push_back("1M");
+  dirsH.push_back("2M");
+  dirsH.push_back("3M");
+  dirsH.push_back("1H");
+  dirsH.push_back("2H");
+  dirsH.push_back("3H");
+  printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
+  dirsH.clear();
+
+  // dirsH.push_back("sr6VL");
+  // dirsH.push_back("sr6L");
+  // printDetailedTableDataDriven(samples5, names5, dirsH);
   // dirsH.clear();
 
-  dirsH.push_back("srh1VL");
-  dirsH.push_back("srh2VL");
-  dirsH.push_back("srh1L");
-  dirsH.push_back("srh2L");
-  printDetailedTableDataDriven(samples5, names5, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("sr6M");
+  // dirsH.push_back("sr6H");
+  // printDetailedTableDataDriven(samples5, names5, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srh1M");
-  dirsH.push_back("srh2M");
-  dirsH.push_back("srh3M");
-  printDetailedTableDataDriven(samples5, names5, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1VL");
+  // dirsH.push_back("srh2VL");
+  // dirsH.push_back("srh1L");
+  // dirsH.push_back("srh2L");
+  // printDetailedTableDataDriven(samples5, names5, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srh1H");
-  dirsH.push_back("srh2H");
-  dirsH.push_back("srh3H");
-  printDetailedTableDataDriven(samples5, names5, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1M");
+  // dirsH.push_back("srh2M");
+  // dirsH.push_back("srh3M");
+  // printDetailedTableDataDriven(samples5, names5, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srh1H");
+  // dirsH.push_back("srh2H");
+  // dirsH.push_back("srh3H");
+  // printDetailedTableDataDriven(samples5, names5, dirsH);
+  // dirsH.clear();
 
   ofile << "\\end{document}" << std::endl;
 
