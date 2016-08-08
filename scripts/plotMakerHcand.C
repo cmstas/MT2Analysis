@@ -3166,18 +3166,18 @@ void plotMakerHcand() {
   // printComparisonTableCR(samples4, names4, selecs, dirsH, "Detailed");
   // dirsH.clear();
 
-  dirsH.push_back("1VL");
-  dirsH.push_back("2VL");
-  dirsH.push_back("1L");
-  dirsH.push_back("2L");
-  dirsH.push_back("1M");
-  dirsH.push_back("2M");
-  dirsH.push_back("3M");
-  dirsH.push_back("1H");
-  dirsH.push_back("2H");
-  dirsH.push_back("3H");
-  printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
-  dirsH.clear();
+  // dirsH.push_back("1VL");
+  // dirsH.push_back("2VL");
+  // dirsH.push_back("1L");
+  // dirsH.push_back("2L");
+  // dirsH.push_back("1M");
+  // dirsH.push_back("2M");
+  // dirsH.push_back("3M");
+  // dirsH.push_back("1H");
+  // dirsH.push_back("2H");
+  // dirsH.push_back("3H");
+  // printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
+  // dirsH.clear();
 
   // dirsH.push_back("sr6VL");
   // dirsH.push_back("sr6L");
@@ -3189,24 +3189,24 @@ void plotMakerHcand() {
   // printDetailedTableDataDriven(samples5, names5, dirsH);
   // dirsH.clear();
 
-  // dirsH.push_back("srh1VL");
-  // dirsH.push_back("srh2VL");
-  // dirsH.push_back("srh1L");
-  // dirsH.push_back("srh2L");
-  // printDetailedTableDataDriven(samples5, names5, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1VL");
+  dirsH.push_back("srh2VL");
+  dirsH.push_back("srh1L");
+  dirsH.push_back("srh2L");
+  printDetailedTableDataDriven(samples5, names5, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srh1M");
-  // dirsH.push_back("srh2M");
-  // dirsH.push_back("srh3M");
-  // printDetailedTableDataDriven(samples5, names5, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1M");
+  dirsH.push_back("srh2M");
+  dirsH.push_back("srh3M");
+  printDetailedTableDataDriven(samples5, names5, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srh1H");
-  // dirsH.push_back("srh2H");
-  // dirsH.push_back("srh3H");
-  // printDetailedTableDataDriven(samples5, names5, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1H");
+  dirsH.push_back("srh2H");
+  dirsH.push_back("srh3H");
+  printDetailedTableDataDriven(samples5, names5, dirsH);
+  dirsH.clear();
 
   ofile << "\\end{document}" << std::endl;
 

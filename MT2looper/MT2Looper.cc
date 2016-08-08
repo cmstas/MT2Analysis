@@ -1248,7 +1248,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
       if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
-      if (!doMT2Higgs) continue; // For faster runtime
+      // if (!doMT2Higgs) continue; // For faster runtime
 
       // --- Gamma Jet control region for mt2higgs ---
       bool doMT2HiggsGJ  = false;
@@ -1365,8 +1365,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // mt2higgs' crgj histo filling
       if (doMT2HiggsGJ) {
         string sufadd = (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))? "" : "Fake";
-        fillHistosCRGJMT2Higgs("crhgj", sufadd);
-        // if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
+        // fillHistosCRGJMT2Higgs("crhgj", sufadd);
+        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
         fillHistosCRGJMT2Higgs("", "_original" + sufadd);
         if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
         if (isHcandGJ)                  fillHistosCRGJMT2Higgs("", "_isHcand" + sufadd);
@@ -1392,8 +1392,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
 
       if (doMT2Higgs) {
-        fillHistosSRMT2Higgs("srh");
-        // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh");
+        // fillHistosSRMT2Higgs("srh");
+        if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh");
         fillHistosSRMT2Higgs("srh", "_original");
         if (doMinMTBMet)            fillHistosSRMT2Higgs("srh", "_minMTbmet");
         if (isHcand)                fillHistosSRMT2Higgs("srh", "_isHcand");
@@ -1404,8 +1404,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (doMbbMax300 && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnMbb300");
 
         if (doDYplots) {
-          fillHistosCRDYMT2Higgs();
-          // if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs();
+          // fillHistosCRDYMT2Higgs();
+          if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs();
           fillHistosCRDYMT2Higgs("", "_original");
           if (doMinMTBMet)            fillHistosCRDYMT2Higgs("", "_minMTbmet");
           if (isHcand)                fillHistosCRDYMT2Higgs("", "_isHcand");
