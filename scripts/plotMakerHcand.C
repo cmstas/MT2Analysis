@@ -3166,7 +3166,7 @@ void plotMakerHcand() {
   // printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
   // dirsH.clear();
 
-  vector<string> names5 = {"lostlepFromCRs", "lostlep", "zinvDataDriven", "zinv_ht"};
+  vector<string> names5 = {"lostlepFromCRs", "lostlep", "zinvDataDriven", "2015zinv_ht"};
   vector<TFile*> samples5 = getSamples(names5, input_dir);
 
   // dirsH.push_back("sr6VL");
