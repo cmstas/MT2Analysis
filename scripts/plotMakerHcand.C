@@ -2599,8 +2599,6 @@ void printDetailedTableDataDriven(vector<TFile*> samples, vector<string> names, 
     if (!h_mt2bins) { cout << "Couldn't get the mt2 binning" << std::endl; return; }
   }
 
-  // vector<double> bgtot(nmt2bins, 0.);
-  // vector<double> bgerr(nmt2bins, 0.);
   int ncols(0);
 
   ofile << "\\begin{table}[H]" << std::endl;
@@ -2625,14 +2623,6 @@ void printDetailedTableDataDriven(vector<TFile*> samples, vector<string> names, 
 
   ofile << " \\\\" << endl;
   ofile << "\\hline\\hline" << endl;
-
-  // header
-  // for (int ibin = 1; ibin < n_mt2bins; ++ibin) {
-  //   ofile << " & " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin) << " $<$ \\mttwo $<$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(ibin+1) << " GeV";
-  // }
-  // ofile << " & \\mttwo $>$ " << h_mt2bins->GetXaxis()->GetBinLowEdge(n_mt2bins) << " GeV";
-  // ofile << " \\\\" << endl
-  //   << "\\hline\\hline" << endl;
 
   // backgrounds first -- loop backwards
   for( int isamp = n-1 ; isamp >= 0 ; --isamp ) {
@@ -3011,9 +3001,6 @@ void plotMakerHcand() {
   vector<string> names4 = {"qcd_ht", "data_Run2016"};
   vector<TFile*> samples4= getSamples(names4, input_dir);
 
-  vector<string> names5 = {"lostlepFromCRs", "lostlep", "purity", "zinv_ht"};
-  vector<TFile*> samples5 = getSamples(names5, input_dir);
-
   // dirsH.push_back("srbase");
   // dirsH.push_back("srbaseHcand");
   // // dirsH.push_back("srbaseInclHcand");
@@ -3178,6 +3165,9 @@ void plotMakerHcand() {
   // dirsH.push_back("3H");
   // printComparisonTableCRSL(samples2, names2, vector<string>{""}, dirsH, "", true);
   // dirsH.clear();
+
+  vector<string> names5 = {"lostlepFromCRs", "lostlep", "zinvDataDriven", "zinv_ht"};
+  vector<TFile*> samples5 = getSamples(names5, input_dir);
 
   // dirsH.push_back("sr6VL");
   // dirsH.push_back("sr6L");
