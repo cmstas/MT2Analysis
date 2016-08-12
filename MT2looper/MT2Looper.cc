@@ -1363,8 +1363,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (verbose) cout<<__LINE__<<endl;
 
       // mt2higgs' crgj histo filling
-      if (doMT2HiggsGJ) {
-        string sufadd = (t.gamma_nJet30FailId == 0 && (t.gamma_mcMatchId[0] > 0 || t.isData))? "" : "Fake";
+      if (doMT2HiggsGJ && t.gamma_nJet30FailId == 0) {
+        string sufadd = (t.gamma_mcMatchId[0] > 0 || t.isData)? "" : "Fake";
         // fillHistosCRGJMT2Higgs("crhgj", sufadd);
         if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
         fillHistosCRGJMT2Higgs("", "_original" + sufadd);
