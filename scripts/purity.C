@@ -508,6 +508,13 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   h_denInt->SetBinContent(1, h_denFR->IntegralAndError(0, -1, errden) );
   h_denInt->SetBinError(1, errden );
   h_purityInt->Divide(h_numInt,h_denInt,1,1,"B");
+  if ((directory == "srh1M" || directory == "sr6M")) {
+    cout << endl << endl;
+    cout << "plotname = " << plotname << " directory = " << directory << " FR_type = " << FR_type << endl;
+    cout << "purityInt = " << h_purityInt->GetBinContent(1) << "  numInt = " << h_numInt->GetBinContent(1) << " denInt = " << h_denInt->GetBinContent(1) << endl;
+    cout << "h_full = " << h_full->Integral() << "  h_numFR = " << h_numFR->Integral() << " h_denFR = " << h_denFR->Integral() << " predFakes = " << h_predFakes->Integral() << endl;
+    cout << endl << endl;
+  }
 //  for (int ibin = 1; ibin <= h_purityInt->GetNbinsX(); ibin++) {
 //    float fivepercent = 0.05*h_purityInt->GetBinContent(ibin);
 //    float err = h_purityInt->GetBinError(ibin);
@@ -656,9 +663,12 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/", string dataname = "data")
 {
   
+  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
+  dataname = "data_Run2016";
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsJamboree();
-  vector<SR> SRVec2 =  getSignalRegionsMonojet();
+  vector<SR> SRVec =  getSignalRegionsMT2Higgs();
+  // vector<SR> SRVec2 =  getSignalRegionsMonojet();
+  vector<SR> SRVec2;
 
   //open files
   // get input files -- default to faking data with same MC file
@@ -666,10 +676,10 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) realData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or qcd+gjets file
   TFile* f_gq = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
-  TFile* f_g = new TFile(Form("%s/gjets_ht.root",input_dir.c_str())); //gjet file
-  TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
+  TFile* f_g = new TFile(Form("%s/2015gjets_ht.root",input_dir.c_str())); //gjet file
+  TFile* f_q = new TFile(Form("%s/2015qcd_ht.root",input_dir.c_str())); //qcd file
   TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
-  TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
+  TFile* f_zOrig = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str())); //zinv file out of the box
   if(f_g->IsZombie() || f_q->IsZombie() || f_gq->IsZombie() || f_data->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
@@ -678,26 +688,26 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   cout << "Making Fake-Rate Histograms..." << endl;
   
   //get hists for FR calc
-  TH2D* h_qcdTight = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptFake");
-  TH2D* h_qcdLoose = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptFakeLoose");
+  TH2D* h_qcdTight = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptFake");
+  TH2D* h_qcdLoose = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptFakeLoose");
   if (!h_qcdTight || !h_qcdLoose) cout<<"Could not find FR histograms in QCD MC"<<endl;
   h_qcdTight->SetName("h_qcdTight");
   h_qcdLoose->SetName("h_qcdLoose");
   
   
   //get hists for FR calc, Sieie Sideband
-  TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
-  TH2D* h_qcdLooseFailSieie = (TH2D*) f_q->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
+  TH2D* h_qcdTightFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
+  TH2D* h_qcdLooseFailSieie = (TH2D*) f_q->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
   if (!h_qcdTightFailSieie || !h_qcdLooseFailSieie) cout<<"Could not find SieieSB FR histograms in QCD MC"<<endl;
   h_qcdTightFailSieie->SetName("h_qcdTightFailSieie");
   h_qcdLooseFailSieie->SetName("h_qcdLooseFailSieie");
   
   //get hists for FR calc, Sieie Sideband (Data)
-  TH2D* h_qcdTightFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinSieieSB");
-  TH2D* h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinLooseSieieSB");
+  TH2D* h_qcdTightFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinSieieSB");
+  TH2D* h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinLooseSieieSB");
   if (!realData) {
-    h_qcdTightFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
-    h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crhgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
+    h_qcdTightFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeSieieSB");
+    h_qcdLooseFailSieieData = (TH2D*) f_data->Get("crgjbase/h2d_gammaht_gammaptSingleBinFakeLooseSieieSB");
   }
   if (!h_qcdTightFailSieieData || !h_qcdTightFailSieieData) cout<<"Could not find SieieSB FR histograms in (pseudo)data"<<endl;
 
@@ -772,13 +782,13 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "njbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
-  additionalRegions.push_back("baseJ");
-  additionalRegions.push_back("baseVL");
-  additionalRegions.push_back("baseL");
-  additionalRegions.push_back("baseM");
-  additionalRegions.push_back("baseH");
-  additionalRegions.push_back("baseUH");
-  additionalRegions.push_back("baseIncl");
+  // additionalRegions.push_back("baseJ");
+  // additionalRegions.push_back("baseVL");
+  // additionalRegions.push_back("baseL");
+  // additionalRegions.push_back("baseM");
+  // additionalRegions.push_back("baseH");
+  // additionalRegions.push_back("baseUH");
+  // additionalRegions.push_back("baseIncl");
   for(int i = 0; i< (int) additionalRegions.size(); i++){
    srName = additionalRegions.at(i);
     makePred(f_out, f_gq, f_q, f_g, srName, h_FR, 0, ""); //FR using passSieie, LooseNotTight Fakes + 0 qcdPrompt
@@ -807,13 +817,13 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   }
   additionalRegions.clear();
   additionalRegions.push_back("base");
-  additionalRegions.push_back("baseJ");
-  additionalRegions.push_back("baseVL");
-  additionalRegions.push_back("baseL");
-  additionalRegions.push_back("baseM");
-  additionalRegions.push_back("baseH");
-  additionalRegions.push_back("baseUH");
-  additionalRegions.push_back("baseIncl");
+  // additionalRegions.push_back("baseJ");
+  // additionalRegions.push_back("baseVL");
+  // additionalRegions.push_back("baseL");
+  // additionalRegions.push_back("baseM");
+  // additionalRegions.push_back("baseH");
+  // additionalRegions.push_back("baseUH");
+  // additionalRegions.push_back("baseIncl");
   for(int i = 0; i< (int) additionalRegions.size(); i++){
     srName = additionalRegions.at(i);
     purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "");

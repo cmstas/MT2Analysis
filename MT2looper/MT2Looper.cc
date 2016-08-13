@@ -1379,6 +1379,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
+      // if (!doMT2Higgs) continue; // For faster runtime
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -1733,10 +1734,12 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   if (t.ngamma == 0) return;
 
   // trigger requirement
-  if (t.isData && !t.HLT_Photon165_HE10) return;
+  // if (t.isData && !t.HLT_Photon165_HE10) return;
+  if (( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon165_HE10) return;
 
-  // just deal with the standard case now. Worry later about sideband in sieie
-  bool passSieie = t.gamma_idCutBased[0] ? true : false;
+  // the photon trigger weight should have already been applied in fillHistosCRGJ which should be called before this
+
+  bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
   // fill hists
   std::string add = "";
@@ -1762,7 +1765,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float iso = t.gamma_chHadIso[0];
   float isoCutTight = 2.5;
-  float isoCutLoose = 20.;
+  float isoCutLoose = 10.;
   if (iso > isoCutTight && iso < isoCutLoose) add += "LooseNotTight";
   if (iso > isoCutLoose) add += "NotLoose";
   if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
