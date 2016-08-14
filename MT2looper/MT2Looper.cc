@@ -1214,7 +1214,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       minMTbmet_ = 0.;
       mbbmax_    = 0.;
-      mbbclose_  = 0.;
+      mbbclose_  = 9999.;
 
       // First restore the bjets
       vector<TLorentzVector> p4sBJets;
