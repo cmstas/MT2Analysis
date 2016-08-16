@@ -947,7 +947,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //      const float lumi = 1.264;
       //      const float lumi = 2.11;
       //const float lumi = 2.155;
-      // const float lumi = 20;
+      // const float lumi = 40;
       const float lumi = 12.9;
     
       evtweight_ = 1.;
@@ -1237,10 +1237,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
             float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
             mbbmax_ = max(mbbmax_, mbb);
-            if (fabs(mbb-125.1) < fabs(mbbclose_-125.1)) {
-                mbbclose_ = mbb;
-                if (mbb > 100 && mbb < 150) isHcand = true;
-            }
+            if (mbb > 100 && mbb < 150) isHcand = true;
+            if (fabs(mbb-125.1) < fabs(mbbclose_-125.1)) mbbclose_ = mbb;
           }
         }
       }
@@ -1379,7 +1377,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
-      // if (!doMT2Higgs) continue; // For faster runtime
+      if (!doMT2Higgs) continue; // For faster runtime
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -2775,9 +2773,9 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   // plot1D("h_bMET_MTclose"+s,       t.bMET_MTclose,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
   // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
 
-  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 200, 0, 1000);
+  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 200, 0, 600);
   plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 200, 0, 600);
-  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 200, 0, 250);
+  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 200, 0, 600);
 
   if (dirname.find("crhsl") == 0) {
     plot1D("h_leppt"+s,      leppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);

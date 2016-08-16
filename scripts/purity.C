@@ -663,8 +663,6 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/", string dataname = "data")
 {
   
-  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
-  dataname = "data_Run2016";
   //load signal regions
   vector<SR> SRVec =  getSignalRegionsMT2Higgs();
   // vector<SR> SRVec2 =  getSignalRegionsMonojet();

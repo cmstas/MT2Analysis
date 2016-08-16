@@ -61,7 +61,11 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
 
     if (h_zinv_mcstat == 0) cout << "Cannot find histogram: " << fullhistnameRatio << endl;
     if (h_zinv_purity == 0) cout << "Cannot find histogram: " << fullhistnamePurity << endl;
-    if (h_zinv_cryield == 0) cout << "Cannot find CR histogram in purity.root: " << fullhistname << endl;
+    if (h_zinv_cryield == 0) {
+      cout << "Cannot find CR histogram in purity.root: " << fullhistname << endl;
+      continue;
+      // h_zinv_cryield = new TH1D("h_empty", "Empty hist", 1, 0, 1);
+    }
 
     // Make directory and plot(s) in the output file
     TDirectory* dir = 0;
@@ -74,6 +78,10 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     TH1D* pred = (TH1D*) h_zinv->Clone("h_mt2bins");
     TH1D* h_mcyield = (TH1D*) h_zinv->Clone("h_mt2binsMCyield");
     TH1D* h_cryield = (TH1D*) h_zinv_cryield->Clone("h_mt2binsCRyield");
+    TH1D* h_gjyield = (TH1D*) h_gjetyield->Clone("h_mt2binsGJyield");
+    // TH1D* h_cryield;
+    // if (h_zinv_cryield) h_cryield = (TH1D*) h_zinv_cryield->Clone("h_mt2binsCRyield");
+    // else h_cryield = new TH1D("h_mt2binsCRyield", "Empty hist", 1, 0, 1);
 
     for (int mt2bin = 1; mt2bin <= n_mt2bins; ++mt2bin) {
       double n_zinv(0.);
@@ -93,7 +101,8 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
         err_zinv_mcstat = 1.;
         zinv_ratio_zg = last_zinv_ratio;
       }
-      n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
+      if (h_zinv_cryield) n_zinv_cr = round(h_zinv_cryield->GetBinContent(mt2bin));
+      else n_zinv_cr = 0;
       if (integratedZinvEstimate) n_zinv_cr = round(h_zinv_cryield->Integral(0,-1));
 
       int mt2bin_tmp = (integratedZinvEstimate)? 1 : mt2bin;
@@ -129,6 +138,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     pred->Write();
     h_mcyield->Write();
     h_cryield->Write();
+    h_gjyield->Write();
   } // loop over signal regions
 
   return;
@@ -138,7 +148,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
 //_______________________________________________________________________________
 void zinvDDMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"){
 
-  // input_dir = "/home/users/sicheng/temp/MT2Analysis/MT2looper/output/temp";
+  // input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   string output_name = input_dir+"/zinvDataDriven.root";
   // ----------------------------------------
   //  samples definition
