@@ -3068,14 +3068,38 @@ void plotMakerHcand() {
   ratioPad->SetTopMargin(0.05);
   ratioPad->SetLeftMargin(0.12);
   ratioPad->Draw();
+  mainPad->SetLogy();
   mainPad->Draw();
   mainPad->cd();
 
   hSR_org->SetFillColor(kOrange+1);
   // hSR_org->SetFillStyle(3244);
+  // for (unsigned int i = 0; i < dirsAll.size(); ++i)
+  hSR_org->GetXaxis()->SetLabelSize(0.05);
+  hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,300]");
+  hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [300,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(4, "1L: [200,300]");
+  hSR_org->GetXaxis()->SetBinLabel(5, "1L: [300,400]");
+  hSR_org->GetXaxis()->SetBinLabel(6, "1L: [400,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(7, "2L: [200,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(8, "1M: [200,300]");
+  hSR_org->GetXaxis()->SetBinLabel(9, "1M: [300,400]");
+  hSR_org->GetXaxis()->SetBinLabel(10, "1M: [400,600]");
+  hSR_org->GetXaxis()->SetBinLabel(11, "1M: [600,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(12, "2M: [200,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(13, "3M: [200,300]");
+  hSR_org->GetXaxis()->SetBinLabel(14, "3M: [300,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(15, "1M: [200,400]");
+  hSR_org->GetXaxis()->SetBinLabel(16, "2M: [400,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(17, "2M: [200,#infty]");
+  hSR_org->GetXaxis()->SetBinLabel(18, "3M: [200,#infty]");
+  hSR_org->GetXaxis()->LabelsOption("u");
+
   hSR_org->Draw("hist");
   hSR_mMT->SetFillColor(kAzure+7);
   hSR_mMT->Draw("histsame");
+  hSR_mMT->Draw("axissame");
   TLegend* leg = new TLegend(0.70, 0.72, 0.87, 0.85);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
@@ -3090,9 +3114,9 @@ void plotMakerHcand() {
   h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
   // h_axis_ratio->GetYaxis()->SetNdivisions(5);
   h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-  h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.25);
+  h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.26);
   // h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
-  h_axis_ratio->GetYaxis()->SetTitle("Ratio ");
+  h_axis_ratio->GetYaxis()->SetTitle("new/old  ");
   h_axis_ratio->GetXaxis()->SetTickLength(0.07);
   h_axis_ratio->GetXaxis()->SetTitleSize(0.);
   h_axis_ratio->GetXaxis()->SetLabelSize(0.);
@@ -3100,6 +3124,7 @@ void plotMakerHcand() {
   hRatio->Draw("same");
   c0->SaveAs("SRyieldsHist.pdf");
   // dataMCplotMaker(hSR_mMT, hbg, vector<string>{"original"});
+
 
   // Start outputing to file of yields table
   ofile.open("tables/table.tex");
