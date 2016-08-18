@@ -216,10 +216,10 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if( logplot ) plotpad->SetLogy();
   }
 
-  TLegend* leg = new TLegend(0.75,0.57,0.95,0.87);
+  TLegend* leg = new TLegend(0.65,0.57,0.85,0.87);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
-  leg->SetTextSize(0.032);
+  leg->SetTextSize(0.026);
   if (doRatio) leg->SetTextSize(0.06);
 
   TH1D* data_hist(0);
@@ -2986,6 +2986,7 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
   string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/orgtrueb";
 
@@ -2993,6 +2994,8 @@ void plotMakerHcand() {
   //  samples definition
   // ----------------------------------------
 
+  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
+  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
   vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "data_Run2016"};
   // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
@@ -3015,11 +3018,11 @@ void plotMakerHcand() {
     std::string cr_skip = "cr";
     std::string sr_skip = "sr";
     while ((k = (TKey *)it())) {
-      // if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
-      if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
+      if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
+      // if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
-      if(dir_name != "crhslbase") continue; //to do only this dir
+      if(dir_name != "srhbase") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
       string s = "_original";
 
@@ -3032,13 +3035,14 @@ void plotMakerHcand() {
       // // makePlot( samples , names , dir_name , "h_mt2bins"+s , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_nJet30Eta3"+s , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
-      // makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 600 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 600 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 250 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
       if (dir_name.find("crhsl") == 0) {
-        makePlot( samples , names , dir_name , "h_mt"+s , "M_{T} [GeV]" , "Events" , 0 , 150 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-        makePlot( samples , names , dir_name , "h_leppt"+s , "p_{T}(lep) [GeV]" , "Events" , 0 , 200 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_mt"+s , "M_{T} [GeV]" , "Events" , 0 , 150 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+        makePlot( samples , names , dir_name , "h_leppt"+s , "p_{T}(lep) [GeV]" , "Events" , 0 , 200 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       }
     }
   }
@@ -3048,9 +3052,12 @@ void plotMakerHcand() {
   vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
 
   TH1F* hSR_org = makeSRYieldsPlot(samples, dirsAll, "_original");
-  TH1F* hSR_mMT = makeSRYieldsPlot(samples, dirsAll, "_mMTnHcand");
+  TH1F* hSR_mMT = makeSRYieldsPlot(samples, dirsAll, "_ivmMTnHcand");
   TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
   hRatio->Divide(hSR_org);
+
+  hSR_org->Scale(40/12.9);
+  hSR_mMT->Scale(40/12.9);
 
   TCanvas* c0 = new TCanvas("c0", "c0", 800, 600);
   gStyle->SetOptStat("");
@@ -3064,7 +3071,7 @@ void plotMakerHcand() {
   TPad* ratioPad = new TPad("2", "2", 0.0, 0.0, 1.0, 0.20);
   mainPad->SetTopMargin(0.08);
   mainPad->SetLeftMargin(0.12);
-  mainPad->SetBottomMargin(0.11);
+  mainPad->SetBottomMargin(0.22);
   ratioPad->SetTopMargin(0.05);
   ratioPad->SetLeftMargin(0.12);
   ratioPad->Draw();
@@ -3094,7 +3101,7 @@ void plotMakerHcand() {
   hSR_org->GetXaxis()->SetBinLabel(16, "2M: [400,#infty]");
   hSR_org->GetXaxis()->SetBinLabel(17, "2M: [200,#infty]");
   hSR_org->GetXaxis()->SetBinLabel(18, "3M: [200,#infty]");
-  hSR_org->GetXaxis()->LabelsOption("u");
+  hSR_org->GetXaxis()->LabelsOption("v");
 
   hSR_org->Draw("hist");
   hSR_mMT->SetFillColor(kAzure+7);
@@ -3105,17 +3112,18 @@ void plotMakerHcand() {
   leg->SetBorderSize(0);
   leg->SetTextSize(0.042);
   leg->AddEntry(hSR_org, "original");
-  leg->AddEntry(hSR_mMT, "mMTnHcand");
+  // leg->AddEntry(hSR_mMT, "mMTnHcand");
+  leg->AddEntry(hSR_mMT, "ivmMTnHcand");
   leg->Draw("same");
   ratioPad->cd();
   hRatio->SetMarkerStyle(20);
   TH1F* h_axis_ratio = new TH1F("ratio_axis","", 18, 0, 18);
-  h_axis_ratio->GetYaxis()->SetTitleOffset(0.25);
+  h_axis_ratio->GetYaxis()->SetTitleOffset(0.24);
   h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
-  // h_axis_ratio->GetYaxis()->SetNdivisions(5);
+  h_axis_ratio->GetYaxis()->SetNdivisions(4);
   h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-  h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.26);
-  // h_axis_ratio->GetYaxis()->SetRangeUser(0.001,2.0);
+  // h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.25);
+  h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.8);
   h_axis_ratio->GetYaxis()->SetTitle("new/old  ");
   h_axis_ratio->GetXaxis()->SetTickLength(0.07);
   h_axis_ratio->GetXaxis()->SetTitleSize(0.);
@@ -3155,7 +3163,7 @@ void plotMakerHcand() {
   // names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "2015zinv_ht"};
 
   // vector<string> selecs{"original", "minMTBMet", "MbbMax"};
-  vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand"};
+  vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand", "ivmMTnHcand"};
                            // "MbbMax200", "mMTnMbb200", "MbbMax300", "mMTnMbb300"};
   // vector< vector<TFile*> > samplesVec;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
