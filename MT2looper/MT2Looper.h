@@ -120,6 +120,7 @@ class MT2Looper {
   float mbbclose_;
   float gamma_minMTbmet_;
   int ntruebJets_;
+  int nHcand_;
 
 };
 
