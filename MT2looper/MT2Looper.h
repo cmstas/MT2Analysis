@@ -122,6 +122,13 @@ class MT2Looper {
   int ntruebJets_;
   int nHcand_;
 
+  float deltaPhiminMTbmet_;
+  float deltaPhiMinbmet_;
+  float deltaPhibbHcand_;
+  float deltaPhiMinGenbmet_;
+  float deltaPhiminMTgenbmet_;
+  float deltaPhigenbgenb_;
+
 };
 
 #endif

@@ -2972,7 +2972,7 @@ void plotMakerHcand() {
   lumiTextSize = 0.4;
   writeExtraText = false;
   //lumi_13TeV = "42 pb^{-1}";
-  lumi_13TeV = "20 fb^{-1}";
+  lumi_13TeV = "12.9 fb^{-1}";
 
   // ----------------------------------------
   //  control sequences
@@ -2995,8 +2995,10 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
-  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
-  vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht"};
+  // vector<string> names = {"ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
+  // vector<string> names = {"ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
+  vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
+  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "data_Run2016"};
   // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
   // vector<string> names{"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
@@ -3008,7 +3010,7 @@ void plotMakerHcand() {
 
   float scalesig = -1.;
   //float scalesig = 50.;
-  // printplots = true;
+  printplots = true;
   bool doRatio = false;
   bool scaleBGtoData = false;
 
@@ -3027,18 +3029,26 @@ void plotMakerHcand() {
       string s = "_original";
 
       // makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // // makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 100 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_met"+s  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_met"+s  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_nlepveto"+s , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_nJet30"+s , "N(jets)" , "Events" , 0 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_nBJet20"+s , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nJet30"+s , "N(jets)" , "Events" , 2 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nBJet20"+s , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_mt2bins"+s , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_nJet30Eta3"+s , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
       makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 600 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 250 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+
+      makePlot( samples , names , dir_name , "h_deltaPhiminMTbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_deltaPhiMinbmet"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_deltaPhibbHcand"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+
+      // makePlot( samples , names , dir_name , "h_deltaPhiMinGenbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_deltaPhiminMTgenbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_deltaPhigenbgenb"+s, "#Delta#phi (b, b)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
       if (dir_name.find("crhsl") == 0) {
         makePlot( samples , names , dir_name , "h_mt"+s , "M_{T} [GeV]" , "Events" , 0 , 150 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );

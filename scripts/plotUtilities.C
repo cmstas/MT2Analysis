@@ -38,6 +38,8 @@ int getColor(const string& sample) {
   if (sample.find("tt+2l fakeLep") != string::npos) return kOrange-1+3;
   if (sample.find("st fakeLep") != string::npos) return kViolet+3;
   
+  if (sample.find("T2ttZH_800_400") != string::npos) return kPink+9;
+  if (sample.find("T2ttZH_800_200") != string::npos) return kCyan;
   if (sample.find("data") != string::npos) return kBlack;
   if (sample.find("ttbar") != string::npos) return 855;
   if (sample.find("top") != string::npos) return 855;
