@@ -56,12 +56,19 @@ int getColor(const string& sample) {
   if (sample.find("T2-4bd_275_255") != string::npos) return kTeal+8;
   if (sample.find("T2-4bd_275_265") != string::npos) return kSpring+8;
 
+  if (sample.find("pred dilep") != string::npos) return kAzure;
+  if (sample.find("pred onelep") != string::npos) return 417;
   
   if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return kGreen+1;
   if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return kBlue+1;
+
+  //
+  if (sample.find("#tilde{g} #rightarrow qqff'#chi (1100, 500)") != string::npos) return kRed-1+3;
+  if (sample.find("#tilde{t} #rightarrow bff'#chi (275, 235)") != string::npos) return kOrange+8;
+  if (sample.find("#tilde{t} #rightarrow bff'#chi (325, 275)") != string::npos) return kOrange+8;
   
   if (sample.find("T5qqqqWW_1025_775_modified") != string::npos) return kGreen+1;
-  if (sample.find("T5qqqqWW_1100_500_modified") != string::npos) return kBlue+1;
+  if (sample.find("T5qqqqWW_1100_500_modified") != string::npos) return kSpring+8;
   
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return kYellow+1;
   if (sample.find("T5qqqqWW_1100_500") != string::npos) return kRed+1;
@@ -146,14 +153,18 @@ string getLegendName(const string& sample) {
   if (sample.find("wz dilep") != string::npos) return "WZ (2L)";
   if (sample.find("zz dilep") != string::npos) return "ZZ (2L)";
   if (sample.find("diboson dilep") != string::npos) return "Diboson (2L)";
-  if (sample.find("top dilep") != string::npos) return "Top (2L)";  
+  if (sample.find("top dilep") != string::npos) return "Top (2L)";
+
+  if (sample.find("pred dilep") != string::npos) return "2L Prediction";
+  if (sample.find("pred onelep") != string::npos) return "1L Prediction";
   
   if (sample.find("T5qqqqWW_1025_775_old") != string::npos) return "T5qqqql#nul#nu 1025, 775";
   if (sample.find("T5qqqqWW_1100_500_old") != string::npos) return "T5qqqql#nul#nu 1100, 500";
   if (sample.find("T5qqqqWW_1025_775_custom") != string::npos) return "T5qqqqWW 1025, 775";
   if (sample.find("T5qqqqWW_1100_500_custom") != string::npos) return "T5qqqqWW 1100, 500";
   if (sample.find("T5qqqqWW_1025_775") != string::npos) return "T5qqqqWW 1025, 775";
-  if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
+  if (sample.find("T5qqqqWW_1100_500") != string::npos) return "#tilde{g} #rightarrow qqff'#chi (1100, 500)";
+  // if (sample.find("T5qqqqWW_1100_500") != string::npos) return "T5qqqqWW 1100, 500";
   
   if (sample.find("TChiNeu_300_285") != string::npos) return "TChiNeu 300, 285 (x50)";
   if (sample.find("TChiNeu_100_90") != string::npos) return "TChiNeu 100, 90";
@@ -199,7 +210,8 @@ string getLegendName(const string& sample) {
   if (sample.find("T2-4bd_375_355") != string::npos) return "T2-4bd 375, 355";
   if (sample.find("T2-4bd_375_365") != string::npos) return "T2-4bd 375, 365";
   if (sample.find("T2-4bd_275_195") != string::npos) return "T2-4bd 275, 195";
-  if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
+  if (sample.find("T2-4bd_275_235") != string::npos) return "#tilde{t} #rightarrow bff'#chi (275, 235)";
+  // if (sample.find("T2-4bd_275_235") != string::npos) return "T2-4bd 275, 235";
   if (sample.find("T2-4bd_275_255") != string::npos) return "T2-4bd 275, 255";
   if (sample.find("T2-4bd_275_265") != string::npos) return "T2-4bd 275, 265";
 
