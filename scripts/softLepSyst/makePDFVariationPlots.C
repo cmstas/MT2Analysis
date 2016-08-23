@@ -58,10 +58,10 @@ void setHistParams(TH1D* h, int nlep, int updn){
   if (nlep==2) h->GetYaxis()->SetRangeUser(0.0,0.15);
   else if (nlep==1) h->GetYaxis()->SetRangeUser(0.0,0.05);
   
-  if (nlep==2 && updn==2) h->SetTitle("PDF UP Variations;;2L Transfer Factor Variation");
-  else if (nlep==2 && updn==1) h->SetTitle("PDF DOWN Variations;;2L Transfer Factor Variation");
-  else if (nlep==1 && updn==2) h->SetTitle("PDF UP Variations;;1L Transfer Factor Variation");
-  else if (nlep==1 && updn==1) h->SetTitle("PDF DOWN Variations;;1L Transfer Factor Variation");
+  if (nlep==2 && updn==2) h->SetTitle("PDF UP Variations;;2L Transfer Factor Variation (% of TF)");
+  else if (nlep==2 && updn==1) h->SetTitle("PDF DOWN Variations;;2L Transfer Factor Variation (% of TF)");
+  else if (nlep==1 && updn==2) h->SetTitle("PDF UP Variations;;1L Transfer Factor Variation (% of TF)");
+  else if (nlep==1 && updn==1) h->SetTitle("PDF DOWN Variations;;1L Transfer Factor Variation (% of TF)");
   
   return;
   
@@ -71,7 +71,7 @@ void drawHist(TH1D* h, TString name, int nlep, int updn) {
 
   setHistParams(h, nlep, updn);
   
-  for (int ibin = 1; ibin < h->GetNbinsX(); ibin++){
+  for (int ibin = 1; ibin <= h->GetNbinsX(); ibin++){
     string binName = setBinLabel(ibin);
     h->GetXaxis()->SetBinLabel(ibin, binName.c_str());
   }
@@ -153,12 +153,16 @@ void makePDFVariationPlots(TString inputDir="../../SoftLepLooper/output/test_pdf
   TH1D* h_TF1L_nominal = (TH1D*) fOut->Get("h_TF1L_PDFvar0")->Clone("h_TF1L_nominal");
   TH1D* h_TF1L_pdfVarSigmaUP = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF1L_pdfVarSigmaUP");
   TH1D* h_TF1L_pdfVarSigmaDN = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF1L_pdfVarSigmaDN");
+  TH1D* h_TF1L_pdfVarTotalUP = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF1L_pdfVarTotalUP");
+  TH1D* h_TF1L_pdfVarTotalDN = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF1L_pdfVarTotalDN");
   TH1D* h_TF1L_pdfVarUP = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF1L_pdfVarUP");
   TH1D* h_TF1L_pdfVarDN = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF1L_pdfVarDN");
   
   TH1D* h_TF2L_nominal = (TH1D*) fOut->Get("h_TF2L_PDFvar0")->Clone("h_TF2L_nominal");
   TH1D* h_TF2L_pdfVarSigmaUP = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF2L_pdfVarSigmaUP");
   TH1D* h_TF2L_pdfVarSigmaDN = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF2L_pdfVarSigmaDN");
+  TH1D* h_TF2L_pdfVarTotalUP = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF2L_pdfVarTotalUP");
+  TH1D* h_TF2L_pdfVarTotalDN = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF2L_pdfVarTotalDN");
   TH1D* h_TF2L_pdfVarUP = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF2L_pdfVarUP");
   TH1D* h_TF2L_pdfVarDN = (TH1D*) fIn->Get("h_srLep_mtbinsPDFvar0")->Clone("h_TF2L_pdfVarDN");
 
@@ -170,6 +174,10 @@ void makePDFVariationPlots(TString inputDir="../../SoftLepLooper/output/test_pdf
   h_TF2L_pdfVarSigmaUP->Reset();
   h_TF1L_pdfVarSigmaDN->Reset();
   h_TF2L_pdfVarSigmaDN->Reset();
+  h_TF1L_pdfVarTotalUP->Reset();
+  h_TF2L_pdfVarTotalUP->Reset();
+  h_TF1L_pdfVarTotalDN->Reset();
+  h_TF2L_pdfVarTotalDN->Reset();
 
   //1L, loop over bins
   float dA_plus1L(0), dA_minus1L(0);
@@ -201,14 +209,29 @@ void makePDFVariationPlots(TString inputDir="../../SoftLepLooper/output/test_pdf
 	N_minus1L++;
       }
     }//loop over pdf variations
-    h_TF1L_pdfVarSigmaUP->SetBinContent(ibin, sqrt(1./(N_plus1L*1.-1.)*dA_plus1L));
-    h_TF1L_pdfVarSigmaDN->SetBinContent(ibin, sqrt(1./(N_minus1L*1.-1.)*dA_minus1L));
-    h_TF1L_pdfVarUP->SetBinContent(ibin, h_TF1L_pdfVarSigmaUP->GetBinContent(ibin)/h_TF1L_nominal->GetBinContent(ibin));
-    h_TF1L_pdfVarDN->SetBinContent(ibin, h_TF1L_pdfVarSigmaDN->GetBinContent(ibin)/h_TF1L_nominal->GetBinContent(ibin));    
+
+    //hack to fix ordering of bins, 18-21 swap with 15-17
+    int setBin = ibin;
+    if (ibin==15) setBin = 19;
+    if (ibin==16) setBin = 20;
+    if (ibin==17) setBin = 21;
+    if (ibin==18) setBin = 15;
+    if (ibin==19) setBin = 16;
+    if (ibin==20) setBin = 17;
+    if (ibin==21) setBin = 18;
+    
+    h_TF1L_pdfVarSigmaUP->SetBinContent(setBin, sqrt(1./(N_plus1L*1.-1.)*dA_plus1L));
+    h_TF1L_pdfVarSigmaDN->SetBinContent(setBin, sqrt(1./(N_minus1L*1.-1.)*dA_minus1L));
+    h_TF1L_pdfVarTotalUP->SetBinContent(setBin, h_TF1L_pdfVarSigmaUP->GetBinContent(setBin)+h_TF1L_nominal->GetBinContent(ibin));
+    h_TF1L_pdfVarTotalDN->SetBinContent(setBin, -1*h_TF1L_pdfVarSigmaDN->GetBinContent(setBin)+h_TF1L_nominal->GetBinContent(ibin)); 
+    h_TF1L_pdfVarUP->SetBinContent(setBin, h_TF1L_pdfVarSigmaUP->GetBinContent(setBin)/h_TF1L_nominal->GetBinContent(ibin));
+    h_TF1L_pdfVarDN->SetBinContent(setBin, h_TF1L_pdfVarSigmaDN->GetBinContent(setBin)/h_TF1L_nominal->GetBinContent(ibin));    
   }//loop over bins
 
   h_TF1L_pdfVarSigmaUP->Write();
   h_TF1L_pdfVarSigmaDN->Write();
+  h_TF1L_pdfVarTotalUP->Write();
+  h_TF1L_pdfVarTotalDN->Write();
   h_TF1L_pdfVarUP->Write();
   h_TF1L_pdfVarDN->Write();
 
@@ -242,14 +265,29 @@ void makePDFVariationPlots(TString inputDir="../../SoftLepLooper/output/test_pdf
 	N_minus2L++;
       }
     }//loop over pdf variations
-    h_TF2L_pdfVarSigmaUP->SetBinContent(ibin, sqrt(1./(N_plus2L*1.-1.)*dA_plus2L));
-    h_TF2L_pdfVarSigmaDN->SetBinContent(ibin, sqrt(1./(N_minus2L*1.-1.)*dA_minus2L));
-    h_TF2L_pdfVarUP->SetBinContent(ibin, h_TF2L_pdfVarSigmaUP->GetBinContent(ibin)/h_TF2L_nominal->GetBinContent(ibin));
-    h_TF2L_pdfVarDN->SetBinContent(ibin, h_TF2L_pdfVarSigmaDN->GetBinContent(ibin)/h_TF2L_nominal->GetBinContent(ibin));    
+
+    //hack to fix ordering of bins, 18-21 swap with 15-17
+    int setBin = ibin;
+    if (ibin==15) setBin = 19;
+    if (ibin==16) setBin = 20;
+    if (ibin==17) setBin = 21;
+    if (ibin==18) setBin = 15;
+    if (ibin==19) setBin = 16;
+    if (ibin==20) setBin = 17;
+    if (ibin==21) setBin = 18;
+    
+    h_TF2L_pdfVarSigmaUP->SetBinContent(setBin, sqrt(1./(N_plus2L*1.-1.)*dA_plus2L));
+    h_TF2L_pdfVarSigmaDN->SetBinContent(setBin, sqrt(1./(N_minus2L*1.-1.)*dA_minus2L));
+    h_TF2L_pdfVarTotalUP->SetBinContent(setBin, h_TF2L_pdfVarSigmaUP->GetBinContent(setBin)+h_TF2L_nominal->GetBinContent(ibin));
+    h_TF2L_pdfVarTotalDN->SetBinContent(setBin, -1*h_TF2L_pdfVarSigmaDN->GetBinContent(setBin)+h_TF2L_nominal->GetBinContent(ibin)); 
+    h_TF2L_pdfVarUP->SetBinContent(setBin, h_TF2L_pdfVarSigmaUP->GetBinContent(setBin)/h_TF2L_nominal->GetBinContent(ibin));
+    h_TF2L_pdfVarDN->SetBinContent(setBin, h_TF2L_pdfVarSigmaDN->GetBinContent(setBin)/h_TF2L_nominal->GetBinContent(ibin));    
   }//loop over bins
 
   h_TF2L_pdfVarSigmaUP->Write();
   h_TF2L_pdfVarSigmaDN->Write();
+  h_TF2L_pdfVarTotalUP->Write();
+  h_TF2L_pdfVarTotalDN->Write();
   h_TF2L_pdfVarUP->Write();
   h_TF2L_pdfVarDN->Write();
 

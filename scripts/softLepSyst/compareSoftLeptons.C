@@ -25,7 +25,7 @@ using namespace std;
 
 //---options---
 bool verbose = false;
-
+bool doLines = false;
 // -- for CMS_lumi label
 
 const int iPeriod = 4; // 13 tev
@@ -44,6 +44,32 @@ std::vector<TH1F*> outputBinnedSR;
 std::vector<TH1F*> outputBinnedNormSR;
 std::vector<TH1F*> outputHighMTSR;
 
+std::string regionCode(int number) {
+
+  if (number <= 2 ) return "1L";
+  if (number > 2 && number <= 5  ) return "2L";
+  if (number > 5 && number <= 8  ) return "3L";
+  if (number > 8 && number <= 11  ) return "4L";
+  if (number > 11 && number <= 14  ) return "5L";
+  if (number > 14 && number <= 17  ) return "6L";
+  if (number > 17 && number <= 20  ) return "7L";
+  if (number > 20 && number <= 23  ) return "1M";
+  if (number > 23 && number <= 26  ) return "2M";
+  if (number > 26 && number <= 29  ) return "3M";
+  if (number > 29 && number <= 32  ) return "4M";
+  if (number > 32 && number <= 35  ) return "5M";
+  if (number > 35 && number <= 38  ) return "6M";
+  if (number > 38 && number <= 41  ) return "7M";
+  if (number > 41 && number <= 44  ) return "J1L";
+  if (number > 44 && number <= 47  ) return "J1M";
+  if (number > 47 && number <= 50  ) return "J2L";
+  if (number > 50 && number <= 53  ) return "J3L";
+  if (number > 53 && number <= 56  ) return "B3";
+  if (number > 56 && number <= 59  ) return "MET";
+  if (number > 59 && number <= 62  ) return "HT";
+
+  return "ERROR";
+}
 
 void setRegions(std::vector<TString> &regions) {
   
@@ -90,6 +116,30 @@ void setRegions(std::vector<TString> &regions) {
 }
 std::string getFullLabel(TString region) {
 
+  if (doLines) {
+    if (region == "srLep1L") return "";
+    if (region == "srLep2L") return "";
+    if (region == "srLep3L") return "";
+    if (region == "srLep4L") return "";
+    if (region == "srLep5L") return "";
+    if (region == "srLep6L") return "";
+    if (region == "srLep7L") return "";
+    if (region == "srLep1M") return "";
+    if (region == "srLep2M") return "";
+    if (region == "srLep3M") return "";
+    if (region == "srLep4M") return "";
+    if (region == "srLep5M") return "";
+    if (region == "srLep6M") return "";
+    if (region == "srLep7M") return "";
+    if (region == "srLepJ1L") return "";
+    if (region == "srLepJ1M") return "";
+    if (region == "srLepJ2L") return "";
+    if (region == "srLepJ3L") return "";
+    if (region == "srLepB3") return "";
+    if (region == "srLepMET") return "";
+    if (region == "srLepHT") return "";
+  }
+  
   if (region == "srLepbaseAll") return "Total Baseline";
   if (region == "srLepbase") return "Multijet Baseline";
   if (region == "srLepbaseJ") return "Monojet Baseline";
@@ -131,40 +181,40 @@ std::string getFullLabel(TString region) {
 
 void setRegionsDilep(std::vector<TString> &regions) {
   
-  // regions.push_back("srLep1L"); // +M
-  // regions.push_back("srLep2L"); // +M
-  // regions.push_back("srLep3L"); // +M
-  // regions.push_back("srLep4L"); // +M
-  // regions.push_back("srLep5L"); // +M
-  // regions.push_back("srLep6L"); // +M
-  // regions.push_back("srLepJ1L"); // +M
-  // regions.push_back("srLepJ2L"); // +M will not work
-  // regions.push_back("srLepJ3L"); // +M will not work
-  // regions.push_back("srLepB3");
-  // regions.push_back("srLepMET");
-  // regions.push_back("srLepHT");
-
-  regions.push_back("srLep1L");
-  regions.push_back("srLep2L");
-  regions.push_back("srLep3L");
-  regions.push_back("srLep4L");
-  regions.push_back("srLep5L");
-  regions.push_back("srLep6L");
-  regions.push_back("srLep7L");
-  regions.push_back("srLep1M");
-  regions.push_back("srLep2M");
-  regions.push_back("srLep3M");
-  regions.push_back("srLep4M");
-  regions.push_back("srLep5M");
-  regions.push_back("srLep6M");
-  regions.push_back("srLep7M");
-  regions.push_back("srLepJ1L");
-  regions.push_back("srLepJ1M");
-  regions.push_back("srLepJ2L");
-  regions.push_back("srLepJ3L");
+  regions.push_back("srLep1L"); // +M
+  regions.push_back("srLep2L"); // +M
+  regions.push_back("srLep3L"); // +M
+  regions.push_back("srLep4L"); // +M
+  regions.push_back("srLep5L"); // +M
+  regions.push_back("srLep6L"); // +M
+  regions.push_back("srLepJ1L"); // +M
+  regions.push_back("srLepJ2L"); // +M will not work
+  regions.push_back("srLepJ3L"); // +M will not work
   regions.push_back("srLepB3");
   regions.push_back("srLepMET");
   regions.push_back("srLepHT");
+
+  // regions.push_back("srLep1L");
+  // regions.push_back("srLep2L");
+  // regions.push_back("srLep3L");
+  // regions.push_back("srLep4L");
+  // regions.push_back("srLep5L");
+  // regions.push_back("srLep6L");
+  // regions.push_back("srLep7L");
+  // regions.push_back("srLep1M");
+  // regions.push_back("srLep2M");
+  // regions.push_back("srLep3M");
+  // regions.push_back("srLep4M");
+  // regions.push_back("srLep5M");
+  // regions.push_back("srLep6M");
+  // regions.push_back("srLep7M");
+  // regions.push_back("srLepJ1L");
+  // regions.push_back("srLepJ1M");
+  // regions.push_back("srLepJ2L");
+  // regions.push_back("srLepJ3L");
+  // regions.push_back("srLepB3");
+  // regions.push_back("srLepMET");
+  // regions.push_back("srLepHT");
   
   
 }
@@ -236,8 +286,8 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   gStyle->SetCanvasColor(0);
   gStyle->SetPadGridX(0);
   gStyle->SetPadGridY(0);
-  gStyle->SetPadTickX(1);
-  gStyle->SetPadTickY(1);
+  gStyle->SetPadTickX(0);
+  gStyle->SetPadTickY(0);
   gStyle->SetFrameBorderMode(0);
   
   // if ratio was requested, check if data is present.  If not, turn ratio off again
@@ -287,6 +337,9 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     
     // main plot pad, for ratio on bottom
     plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
+    if (doLines) {
+      plotpad = new TPad("plotpad","plotpad",0,0.1,1,0.99);
+    }
     plotpad->SetRightMargin(0.05);
 //    plotpad->SetBottomMargin(0.12);
     plotpad->SetBottomMargin(0.26);
@@ -296,6 +349,12 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   }
   
   TLegend* leg = new TLegend(0.55,0.75,0.85,0.87);
+  if (doLines){
+    // leg = new TLegend(0.39,0.78,0.45,0.90);
+    leg = new TLegend(0.41,0.70,0.50,0.86);
+    gStyle->SetLegendBorderSize(2);
+    leg->SetBorderSize(2);
+  }
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.032);
@@ -428,7 +487,8 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   float xmax = data_hist->GetXaxis()->GetXmax();
   
   cout<<"xmin "<<xmin<<", xmax "<<xmax<<endl;
-  
+
+  //if (doLines) ymax = 1000000;
   TH2F* h_axes = new TH2F(Form("%s_axes",histname.c_str()),"",xmax,xmin,xmax,1000,ymin,ymax);
   for (int ibin=1; ibin <= h_axes->GetNbinsX(); ++ibin) {
     h_axes->GetXaxis()->SetBinLabel(ibin, data_hist->GetXaxis()->GetBinLabel(ibin));
@@ -438,6 +498,10 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
   h_axes->GetXaxis()->SetLabelSize(0.04);
   h_axes->GetXaxis()->SetTitleSize(0.05);
   h_axes->GetYaxis()->SetTitle(ytitle.c_str());
+  if (doLines) {
+    h_axes->GetXaxis()->SetTitleOffset(1.87);
+    h_axes->GetXaxis()->SetTitleSize(0.04);
+  }
   h_axes->GetYaxis()->SetLabelSize(0.04);
   h_axes->GetYaxis()->SetTitleOffset(0.95);
   h_axes->GetYaxis()->SetTitleSize(0.05);
@@ -475,6 +539,146 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     label_y_spacing = 0.04;
   }
 
+
+  if (doLines) {
+
+    //major lines
+    int nLines = 3;
+    TLine* lines[nLines];
+    lines[0] = new TLine(21,-3.0, 21, 60000.0 );
+    lines[1] = new TLine(42,-3.0, 42, 60000.0 );
+    lines[2] = new TLine(54,-3.0, 54, 60000.0 );
+    for( int iLine=1; iLine < nLines+1; iLine++ ){
+      lines[iLine-1]->SetLineColor(kBlack);
+      lines[iLine-1]->SetLineStyle(2);
+      lines[iLine-1]->SetLineWidth(1);  
+      lines[iLine-1]->Draw("same");
+    }
+
+    //major labels
+    int nLabels = 4;
+    TLatex labels[4];
+    string metLabel1 = "Multijet, 200 < E_{T}^{miss} < 300";
+    string metLabel2 = "Multijet, 300 < E_{T}^{miss} < 500";
+    string monojetLabel = "Monojet";
+    string tailLabel = "Tails";
+    for( int iLabel=1; iLabel < nLabels+1; iLabel++ ){
+      labels[iLabel-1].SetTextSize(0.035);
+      labels[iLabel-1].SetTextAlign(22);  //align at top
+    }
+    labels[0].DrawLatex(10.5,40000,metLabel1.c_str());
+    labels[0].DrawLatex(31.5,40000,metLabel2.c_str());
+    labels[0].DrawLatex(  48,40000,monojetLabel.c_str());
+    labels[0].DrawLatex(58.5,40000,tailLabel.c_str());
+
+    //minor lines
+    int nSubLines = 6;
+    TLine* sublines[nSubLines];
+    sublines[0] = new TLine(9,-3.0, 9, 6500.0 );
+    sublines[1] = new TLine(18,-3.0, 18, 6500.0 );
+    sublines[2] = new TLine(30,-3.0, 30, 6500.0 );
+    sublines[3] = new TLine(39,-3.0, 39, 6500.0 );
+    // sublines[4] = new TLine(45,-3.0, 45, 6500.0 );
+    // sublines[5] = new TLine(48,-3.0, 48, 6500.0 );
+    // sublines[6] = new TLine(51,-3.0, 51, 6500.0 );
+    // sublines[7] = new TLine(57,-3.0, 57, 6500.0 );
+    // sublines[8] = new TLine(60,-3.0, 60, 6500.0 );
+    sublines[4] = new TLine(57,-3.0, 57, 6500.0 );
+    sublines[5] = new TLine(60,-3.0, 60, 6500.0 );
+    for( int iLine=1; iLine < nSubLines+1; iLine++ ){
+      sublines[iLine-1]->SetLineColor(kBlack);
+      sublines[iLine-1]->SetLineStyle(2);
+      sublines[iLine-1]->SetLineWidth(1);  
+      sublines[iLine-1]->Draw("same");
+    }
+
+    //minor labels
+    TLatex sublabels;
+    string sublabel1 = "2-3 jets";
+    string sublabel2 = "4-5 jets";
+    string sublabel3 = "6+ jets";
+    string sublabel4 = "E_{T}^{miss}";
+    string sublabel5 = "E_{T}^{miss}";
+    string sublabel6 = "E_{T}^{miss}";
+    string sublabel7 = "E_{T}^{miss}";
+    string sublabel8 = "#geq3 b";
+    string sublabel9 = "E_{T}^{miss}";
+    string sublabel10 = "H_{T}";
+    sublabels.SetTextSize(0.028);
+    sublabels.SetTextAlign(22);  //align at top
+    
+    sublabels.DrawLatex( 4.5,4000,sublabel1.c_str());
+    sublabels.DrawLatex(13.5,4000,sublabel2.c_str());
+    sublabels.DrawLatex(19.5,4000,sublabel3.c_str());
+    sublabels.DrawLatex(25.5,4000,sublabel1.c_str());
+    sublabels.DrawLatex(34.5,4000,sublabel2.c_str());
+    sublabels.DrawLatex(40.5,4000,sublabel3.c_str());
+    sublabels.DrawLatex(43.5,4000,sublabel4.c_str());
+    sublabels.DrawLatex(46.5,4000,sublabel5.c_str());
+    sublabels.DrawLatex(49.5,4000,sublabel6.c_str());
+    sublabels.DrawLatex(52.5,4000,sublabel7.c_str());
+    sublabels.DrawLatex(55.5,4000,sublabel8.c_str());
+    sublabels.DrawLatex(58.5,4000,sublabel9.c_str());
+    sublabels.DrawLatex(61.5,4000,sublabel10.c_str());
+
+    //even minorer labels
+    TLatex subsublabel;
+    string subsublabel1 = "";
+    string subsublabel2 = "";
+    string subsublabel3 = "";
+    string subsublabel4 = "200-300";
+    string subsublabel5 = "#geq 300";
+    string subsublabel6 = "#geq 200";
+    string subsublabel7 = "#geq 200";
+    string subsublabel8 = "";
+    string subsublabel9 = "#geq500";
+    string subsublabel10 = "#geq1000";
+
+    string subsublabel11 = "0 b";
+    string subsublabel12 = "soft b";
+    string subsublabel13 = "hard b";
+
+    
+    subsublabel.SetTextSize(0.026);
+    subsublabel.SetTextAlign(22);  //align at top
+    
+    subsublabel.DrawLatex( 4.5,2000,subsublabel1.c_str());
+    subsublabel.DrawLatex(13.5,2000,subsublabel2.c_str());
+    subsublabel.DrawLatex(19.5,2000,subsublabel3.c_str());
+    subsublabel.DrawLatex(25.5,2000,subsublabel1.c_str());
+    subsublabel.DrawLatex(34.5,2000,subsublabel2.c_str());
+    subsublabel.DrawLatex(40.5,2000,subsublabel3.c_str());
+    subsublabel.DrawLatex(43.5,2000,subsublabel4.c_str());
+    subsublabel.DrawLatex(46.5,2000,subsublabel5.c_str());
+    subsublabel.DrawLatex(49.5,2000,subsublabel6.c_str());
+    subsublabel.DrawLatex(52.5,2000,subsublabel7.c_str());
+    subsublabel.DrawLatex(55.5,2000,subsublabel8.c_str());
+    subsublabel.DrawLatex(58.5,2000,subsublabel9.c_str());
+    subsublabel.DrawLatex(61.5,2000,subsublabel10.c_str());
+    //b-labels
+    subsublabel.DrawLatex( 1.5,2000,subsublabel11.c_str());
+    subsublabel.DrawLatex( 4.5,2000,subsublabel12.c_str());
+    subsublabel.DrawLatex( 7.5,2000,subsublabel13.c_str());
+    subsublabel.DrawLatex(10.5,2000,subsublabel11.c_str());
+    subsublabel.DrawLatex(13.5,2000,subsublabel12.c_str());
+    subsublabel.DrawLatex(16.5,2000,subsublabel13.c_str());
+    subsublabel.DrawLatex(19.5,2000,subsublabel11.c_str());
+
+    //bonus labels
+    TLatex superlabel;
+    string superlabel1 = "0 b";
+    string superlabel2 = "soft b";
+    string superlabel3 = "hard b";
+    superlabel.SetTextSize(0.028);
+    superlabel.SetTextAlign(22);  //align at top
+    superlabel.DrawLatex(43.5,9500,superlabel1.c_str());
+    superlabel.DrawLatex(46.5,9500,superlabel1.c_str());
+    superlabel.DrawLatex(49.5,9500,superlabel2.c_str());
+    superlabel.DrawLatex(52.5,9500,superlabel3.c_str());
+
+    
+  }
+  
   //TString ht_label = getHTPlotLabel(histdir);
   //TString ht_label = getHTPlotLabel(samples.at(0), histdir);
   //TString region_label = getJetBJetPlotLabel(samples.at(0), histdir);
@@ -510,6 +714,7 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
 //  
   leg->Draw();
   h_axes->Draw("axissame");
+  if (doLines) leg->Draw();
   
   if (doRatio) {
     lumiTextSize     = 0.4;
@@ -562,9 +767,13 @@ TCanvas* makePlot( const vector<TH1F*>& histos , const std::vector<TString>& nam
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-    //h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
-    ratiopad->SetLogy();
-    h_axis_ratio->GetYaxis()->SetRangeUser(0.1,10.0);
+    h_axis_ratio->GetYaxis()->SetRangeUser(0.5,1.5);
+    //ratiopad->SetLogy();
+    //h_axis_ratio->GetYaxis()->SetRangeUser(0.1,10.0);
+    if (doLines){  
+      ratiopad->SetLogy();
+      h_axis_ratio->GetYaxis()->SetRangeUser(0.1,10.0);
+    }
     h_axis_ratio->GetYaxis()->SetTitle("Var/Central");
     if (TString(histname).Contains("Closure") || TString(histname).Contains("cr2Lpreds") ) {
       h_axis_ratio->GetYaxis()->SetTitle("/ MC (Truth)");
@@ -887,6 +1096,13 @@ std::vector<TH1F*> makeYieldsHistos(std::vector<TFile*> filesSR, std::vector<TSt
         }
         
         std::string fullLabel = getFullLabel(regions.at(j))+ ", " + toString(k+1);;
+	if (doLines) {
+	  std::string metBin = "";
+	  if (k==0) metBin = "[20,90]";
+	  if (k==1) metBin = "[90,120]";
+	  if (k==2) metBin = "> 120";
+	  fullLabel = getFullLabel(regions.at(j))+" " + metBin;
+	}
         h_sr_yields_binned->GetXaxis()->SetBinLabel(3*j+1+k, fullLabel.c_str());
         h_sr_yields_binned_norm->GetXaxis()->SetBinLabel(3*j+1+k, fullLabel.c_str());
       }
@@ -920,13 +1136,8 @@ std::vector<TH1F*> makePostFitYieldsHistos(std::vector<TFile*> filesSR, std::vec
   
   int binMultiplier = 3;
 
-  string fitName = "TEST";
-
-  //TFile* postfitFile = new TFile(Form("mlFit%s.root",fitName.c_str()));
-  //TFile* postfitFile = new TFile(Form("mlFit%s.root",fitName.c_str()));
-  
   for(unsigned int iSamp = 0; iSamp < filesSR.size(); iSamp++) {
-
+  
     if (filesSR.at(iSamp)->IsZombie()) {
       cerr << "WARNING: File " << filesSR.at(iSamp) << " is Zombie!" << endl;
     }
@@ -946,11 +1157,20 @@ std::vector<TH1F*> makePostFitYieldsHistos(std::vector<TFile*> filesSR, std::vec
     for(unsigned int iRegion = 0; iRegion < regions.size()*binMultiplier; iRegion++) {
       if (verbose) cout<<"looking at \"ch\" region "<<iRegion<<endl;
         TString fullhistname = Form("shapes_fit_b/ch%d/%s", iRegion+1, sampleType.c_str());
+	if (legendNames.at(iSamp).Contains("ff")) fullhistname = Form("srLep%s/%s", regionCode(iRegion).c_str(), histoNames.at(iSamp).Data());
         TH1F* hSR = (TH1F*) filesSR.at(iSamp)->Get(fullhistname);
 	
 	double yield = 0.;
 	double err = 0.;
 	if (!hSR) yield = 0.0;
+	else if (legendNames.at(iSamp).Contains("ff")) {
+	  int mtBin = -1;
+	  if (iRegion % 3 == 0) mtBin = 1;
+	  else if (iRegion % 3 == 1) mtBin = 2;
+	  else if (iRegion % 3 == 2) mtBin = 3;
+	  yield = hSR->GetBinContent(mtBin);
+	  err = hSR->GetBinError(mtBin);
+	}
 	else {
 	  // cout << "--- hSR yields ---" << endl;
 	  // hSR->Print("all");
@@ -1070,27 +1290,65 @@ void compareSoftLeptons1L2L(){
   std::vector<TString> purpose;
 
   //--------- mark's TF plots---------
-  string markDir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
-  string jecUPdir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_JECup_apr30/";
-  string jecDOWNdir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_JECdown_apr30/";
+  string testDir = "/nfs-5/users/mderdzinski/archive/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/test/";
+  string markDir = "/nfs-5/users/mderdzinski/archive/winter2016/softMT2/MT2Analysis/SoftLepLooper/output//softLep_unblind_skim_may25/";
+  string jecUPdir = "/nfs-5/users/mderdzinski/archive/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_JECup_apr30/";
+  string jecDOWNdir = "/nfs-5/users/mderdzinski/archive/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_JECdown_apr30/";
   TFile* allMCfile = new TFile(Form("%s/allBkg.root",markDir.c_str()));
   TFile* dyUPfile = new TFile(Form("%s/allBkg_dyUP.root",markDir.c_str()));
   TFile* dyDNfile = new TFile(Form("%s/allBkg_dyDN.root",markDir.c_str()));
   TFile* wttfile = new TFile(Form("%s/WTT.root",markDir.c_str()));
   TFile* wttJECupfile = new TFile(Form("%s/WTT.root",jecUPdir.c_str()));
   TFile* wttJECdownfile = new TFile(Form("%s/WTT.root",jecDOWNdir.c_str()));
+  TFile* pdfVarFile = new TFile("pdfVars.root");
+  
+  TFile* ttdlFile = new TFile(Form("%s/ttdl.root",testDir.c_str()));
 
   setRegions(regions);
   setRegionsDilep(regionsDilep);
 
+  //-----try to draw pdf variations only-----
+  TH1F* h_1LpdfUP = (TH1F*) pdfVarFile->Get("h_TF1L_pdfVarSigmaUP");
+  TH1F* h_1LpdfDN = (TH1F*) pdfVarFile->Get("h_TF1L_pdfVarSigmaDN");
+  TH1F* h_2LpdfUP = (TH1F*) pdfVarFile->Get("h_TF2L_pdfVarSigmaUP");
+  TH1F* h_2LpdfDN = (TH1F*) pdfVarFile->Get("h_TF2L_pdfVarSigmaDN");
+
+  //pdf variation in cr2l
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(wttfile);  filesCR.push_back(wttfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  string systVar = "pdfVar";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  std::vector<TH1F*> histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr2L", true);
+  //append extra histos
+  h_2LpdfUP->Add(h_2LpdfUP,histos[0],1,1);
+  h_2LpdfDN->Add(h_2LpdfDN,histos[0],-1,1);
+  histos.push_back(h_2LpdfUP); legendNames.push_back("PDF UP"); purpose.push_back("colored point");
+  histos.push_back(h_2LpdfDN); legendNames.push_back("PDF DN"); purpose.push_back("colored point");
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  
+  //pdf variations in cr1L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(wttfile);  filesCR.push_back(wttfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  systVar = "pdfVar";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true); 
+  //append extra histos
+  h_1LpdfUP->Add(h_1LpdfUP,histos[0],1,1);
+  h_1LpdfDN->Add(h_1LpdfDN,histos[0],-1,1);
+  histos.push_back(h_1LpdfUP); legendNames.push_back("PDF UP"); purpose.push_back("colored point");
+  histos.push_back(h_1LpdfDN); legendNames.push_back("PDF DN"); purpose.push_back("colored point");
+  makePlot( histos , legendNames , purpose,   "OnelepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+
+  //return;
+  
   //DY up/down variation in cr2l
   filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
   filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
   filesSR.push_back(dyUPfile);  filesCR.push_back(dyUPfile); legendNames.push_back("DY +50%"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("colored point");
   filesSR.push_back(dyDNfile);  filesCR.push_back(dyDNfile); legendNames.push_back("DY -50%"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("colored point");
-  string systVar = "dyUPDN";
+  systVar = "dyUPDN";
   outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
-  std::vector<TH1F*> histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
   makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
   makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
   
@@ -1172,6 +1430,50 @@ void compareSoftLeptons1L2L(){
   filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("Renorm UP"); histoNames.push_back("h_mtbins_renorm_UPDilepton"); purpose.push_back("colored point");
   filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("Renorm DN"); histoNames.push_back("h_mtbins_renorm_DNDilepton"); purpose.push_back("colored point");
   systVar = "Renorm";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
+
+  //--
+
+  //Lep Eff variations in cr1L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("LepEff UP"); histoNames.push_back("h_mtbins_lepeff_UPOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("LepEff DN"); histoNames.push_back("h_mtbins_lepeff_DNOnelep"); purpose.push_back("colored point");
+  systVar = "lepeff";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true); 
+  makePlot( histos , legendNames , purpose,   "OnelepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+
+  //Lep Eff variations in cr2L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("LepEff UP"); histoNames.push_back("h_mtbins_lepeff_UPDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("LepEff DN"); histoNames.push_back("h_mtbins_lepeff_DNDilepton"); purpose.push_back("colored point");
+  systVar = "lepeff";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
+  makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+  makePlot( outputKht , legendNames , purpose,   "DilepKmet_"+systVar ,  "" ,  "k_{MET}" ,  false ,  true  );
+
+  //W polarization variations in cr1L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("black point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("polW UP"); histoNames.push_back("h_mtbins_polW_UPOnelep"); purpose.push_back("colored point");
+  filesSR.push_back(allMCfile);  filesCR.push_back(allMCfile); legendNames.push_back("polW DN"); histoNames.push_back("h_mtbins_polW_DNOnelep"); purpose.push_back("colored point");
+  systVar = "polW";
+  outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
+  histos       = makeTFHistos(filesSR, filesCR, regions, legendNames, histoNames, "cr1L", true); 
+  makePlot( histos , legendNames , purpose,   "OnelepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
+
+  //W polarization variations in cr2L
+  filesSR.clear();  filesCR.clear(); legendNames.clear(); histoNames.clear(); purpose.clear();
+  filesSR.push_back(ttdlFile);  filesCR.push_back(ttdlFile); legendNames.push_back("default"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("black point");
+  filesSR.push_back(ttdlFile);  filesCR.push_back(ttdlFile); legendNames.push_back("polW UP"); histoNames.push_back("h_mtbins_polW_UPDilepton"); purpose.push_back("colored point");
+  filesSR.push_back(ttdlFile);  filesCR.push_back(ttdlFile); legendNames.push_back("polW DN"); histoNames.push_back("h_mtbins_polW_DNDilepton"); purpose.push_back("colored point");
+  systVar = "polW";
   outputKht.clear(); outputBinnedSR.clear(); outputBinnedNormSR.clear();
   histos       = makeTFHistos(filesSR, filesCR, regionsDilep, legendNames, histoNames, "cr2L", true); 
   makePlot( histos , legendNames , purpose,   "DilepTFs_"+systVar ,  "" ,  "Transfer Factor" ,  false ,  true  );
@@ -1318,7 +1620,7 @@ void compareSoftLeptonsClosure1L2L(){
   
   //string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
   //string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLepMark15Apr16/";
-  string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may10/";
+  string input_dir = "../../SoftLepLooper/output/softLep_unblind_skim_may25/";
   
 
   TFile* bkg = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
@@ -1424,8 +1726,8 @@ void compareSoftLeptonsEstimatesToData(){
   
   // string input_dir = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep25Feb16/";
   // string input_dir2 = "/Users/giovannizevidellaporta/UCSD/MT2lepton/HistFolder/softLep12Apr16/";
-  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
-  string input_dir2 = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
+  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may25/";
+  string input_dir2 = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may25/";
   
   //TFile* fake = new TFile(Form("%s/pred_FakeRate.root",input_dir.c_str()));
   TFile* fake = new TFile("/home/users/gzevi/pred_FakeRate.root");
@@ -1434,19 +1736,18 @@ void compareSoftLeptonsEstimatesToData(){
   TFile* all = new TFile(Form("%s/allBkg.root",input_dir.c_str()));
   TFile* data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
   TFile* T24bd = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
-  TFile* T5qqqqWW = new TFile(Form("%s/1025_775_T5qqqqWW_modified.root",input_dir.c_str()));
-  //  TFile* T5qqqqWW = new TFile(Form("%s/T5qqqqWW_1025_775_custom.root",input_dir.c_str()));
-  //  TFile* T5qqqqWW2 = new TFile(Form("%s/T5qqqqWW_1100_500_custom.root",input_dir.c_str()));
+  //TFile* T5qqqqWW = new TFile(Form("%s/1025_775_T5qqqqWW_modified.root",input_dir.c_str()));
+  TFile* T5qqqqWW = new TFile(Form("%s/1100_500_T5qqqqWW_modified.root",input_dir.c_str()));
   TFile* TChiNeu = new TFile(Form("%s/TChiNeu_100_90.root",input_dir.c_str()));
   
   
   filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
   filesSR.push_back(all);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_mtbinsFake"); purpose.push_back("stack");
   filesSR.push_back(all);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsDilepton"); purpose.push_back("stack");
-  filesSR.push_back(all);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("stack");
-  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd_275_235"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
+  filesSR.push_back(all);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsOnelep"); purpose.push_back("stack"); 
+  // filesSR.push_back(T24bd);  legendNames.push_back("#tilde{t} #rightarrow bff'#chi (275, 235)"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
   //filesSR.push_back(TChiNeu);  legendNames.push_back("TChiNeu 100 90"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
-  //filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW_1025_775"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
+  //filesSR.push_back(T5qqqqWW);  legendNames.push_back("#tilde{g} #rightarrow qqff'#chi (1100, 500)"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 //  filesSR.push_back(T5qqqqWW2);  legendNames.push_back("T5qqqqWW_1100_500"); histoNames.push_back("h_mtbins"); purpose.push_back("stack signal");
 
   setRegions(regions);
@@ -1460,12 +1761,12 @@ void compareSoftLeptonsEstimatesToData(){
   filesSR.push_back(fake);  legendNames.push_back("fakeLep bkg"); histoNames.push_back("h_predMC12"); purpose.push_back("stack");
   filesSR.push_back(dilep);  legendNames.push_back("diLep bkg"); histoNames.push_back("h_mtbinsSyst"); purpose.push_back("stack");
   filesSR.push_back(onelep);  legendNames.push_back("oneLep bkg"); histoNames.push_back("h_mtbinsSyst"); purpose.push_back("stack");
-  filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd 275,235"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
-  filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW 1025,775"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
+  // filesSR.push_back(T24bd);  legendNames.push_back("T2-4bd 275,235"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
+  // filesSR.push_back(T5qqqqWW);  legendNames.push_back("T5qqqqWW 1100,500"); histoNames.push_back("h_mtbins"); purpose.push_back("colored point");
 
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_Syst" ,  "" ,  "Entries" ,  true ,  true , true );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPrediction_Syst" ,  "m_{T} [GeV]" ,  "Entries" ,  true ,  true , true );
 
   // filesSR.clear();  legendNames.clear(); histoNames.clear(); purpose.clear();
   // filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
@@ -1499,29 +1800,45 @@ void compareSoftLeptonsPostFitEstimates(){
   std::vector<TFile*> filesSR2;
   std::vector<TString> purpose2;
 
-  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may18/";
+  std::vector<TString> legendNamesSig;
+  std::vector<TString> histoNamesSig;
+  std::vector<TFile*> filesSRSig;
+  std::vector<TString> purposeSig;
+
+  string input_dir = "/nfs-5/users/mderdzinski/winter2016/softMT2/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may25/";
   string input_dir_postfit = "/nfs-5/users/mderdzinski/limits/MT2Analysis/limits/SignalScan/";
   
-  TFile* postFit = new TFile(Form("%s/mlfitNominal.root",input_dir_postfit.c_str()));
+  TFile* postFit = new TFile(Form("%s/mlfitNominal_may25.root",input_dir_postfit.c_str()));
   TFile* data = new TFile(Form("%s/data_Run2015CD.root",input_dir.c_str()));
+  TFile* T24bd_325 = new TFile(Form("%s/T2-4bd_325_275.root",input_dir.c_str()));
+  TFile* T24bd_275 = new TFile(Form("%s/T2-4bd_275_235.root",input_dir.c_str()));
+  //TFile* T5qqqqWW = new TFile(Form("%s/1025_775_T5qqqqWW_modified.root",input_dir.c_str()));
+  TFile* T5qqqqWW = new TFile(Form("%s/1100_500_T5qqqqWW_modified.root",input_dir.c_str()));
   
   filesSR.push_back(data);  legendNames.push_back("Data"); histoNames.push_back("h_mtbins"); purpose.push_back("black point");
   //filesSR2.push_back(postFit);  legendNames2.push_back("Total (shown as Data)"); histoNames2.push_back("total_background"); purpose2.push_back("black point");
   filesSR2.push_back(postFit);  legendNames2.push_back("fakeLep bkg"); histoNames2.push_back("fakeLep"); purpose2.push_back("stack");
   filesSR2.push_back(postFit);  legendNames2.push_back("diLep bkg"); histoNames2.push_back("diLep"); purpose2.push_back("stack");
   filesSR2.push_back(postFit);  legendNames2.push_back("oneLep bkg"); histoNames2.push_back("oneLep"); purpose2.push_back("stack");
+  //filesSR2.push_back(T24bd_275);  legendNames2.push_back("#tilde{t} #rightarrow bff'#chi (275, 235)"); histoNames2.push_back("h_mtbins"); purpose2.push_back("stack signal");
+  //filesSR2.push_back(T24bd_325);  legendNames2.push_back("#tilde{t} #rightarrow bff'#chi (325, 275)"); histoNames2.push_back("h_mtbins"); purpose2.push_back("stack signal");
+  //filesSR2.push_back(T5qqqqWW);  legendNames2.push_back("#tilde{g} #rightarrow qqff'#chi (1100, 500)"); histoNames2.push_back("h_mtbins"); purpose2.push_back("stack signal");
 
   setRegions(regions);
   
   outputBinnedSR.clear(); outputBinnedNormSR.clear(); outputHighMTSR.clear();
   std::vector<TH1F*>  histos       = makeYieldsHistos(filesSR, regions, legendNames, histoNames, true);
   std::vector<TH1F*>  histos2      = makePostFitYieldsHistos(filesSR2, regions, legendNames2, histoNames2, true);
+  //std::vector<TH1F*>  histosSig      = makePostFitYieldsHistos(filesSRSig, regions, legendNamesSig, histoNamesSig, true);
   //add vectors
   histos.insert(histos.end(), histos2.begin(), histos2.end());
   legendNames.insert(legendNames.end(), legendNames2.begin(), legendNames2.end());
   purpose.insert(purpose.end(), purpose2.begin(), purpose2.end());
+  // histos.insert(histos.end(), histosSig.begin(), histosSig.end());
+  // legendNames.insert(legendNames.end(), legendNamesSig.begin(), legendNamesSig.end());
+  // purpose.insert(purpose.end(), purposeSig.begin(), purposeSig.end());
 
-  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPostFitEstimates" ,  "" ,  "Entries" ,  true ,  true , true );
+  makePlot( outputBinnedSR , legendNames , purpose,   "DataVsPostFitEstimates" ,  "m_{T} [GeV]" ,  "Entries" ,  true ,  true , true );
   
   
   return;
@@ -1657,11 +1974,11 @@ void compareSoftLeptonsSRVariations(){
 }
 
 void compareSoftLeptons(){
-  //compareSoftLeptonsPostFitEstimates();
-  //compareSoftLeptons1L2L();
+  compareSoftLeptonsPostFitEstimates();
+  compareSoftLeptons1L2L();
   //compareSoftLeptonsClosure1L2L();
   //compareSoftLeptonsFake();
-  compareSoftLeptonsEstimatesToData();
+  //compareSoftLeptonsEstimatesToData();
   //compareSoftLeptonsSRVariations();
   
   return;
