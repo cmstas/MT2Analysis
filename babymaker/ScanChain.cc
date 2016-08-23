@@ -2008,6 +2008,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       sort(p4sForDphiZllMT.begin(), p4sForDphiZllMT.end(), sortByPt);
       sort(p4sForHemsRl.begin(), p4sForHemsRl.end(), sortByPt);
       sort(p4sForDphiRl.begin(), p4sForDphiRl.end(), sortByPt);
+      sort(p4sForHemsHcand.begin(), p4sForHemsHcand.end(), sortByPt);
 
       ht = 0;
       deltaPhiMin = 999;

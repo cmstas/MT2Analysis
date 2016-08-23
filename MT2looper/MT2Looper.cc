@@ -20,6 +20,8 @@
 
 // Tools
 #include "../CORE/Tools/utils.h"
+#include "../CORE/Tools/hemJet.h"
+#include "../CORE/Tools/MT2/MT2.h"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/dorky/dorky.h"
 #include "../CORE/Tools/badEventFilter.h"
@@ -44,6 +46,10 @@ std::string toString(float in){
   std::stringstream ss;
   ss << in;
   return ss.str();
+}
+
+inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
+  return vec1.pt() > vec2.pt();
 }
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
@@ -279,6 +285,7 @@ void MT2Looper::SetSignalRegions(){
   // -- mt2higgs define --
   SRBaseHcand.SetName("srhbase");
   SRBaseHcand.SetVar("mt2", 200, -1);
+  // SRBaseHcand.SetVar("mt2", 0, -1); // remove mt2 requirement for plotting
   SRBaseHcand.SetVar("j1pt", 30, -1);
   SRBaseHcand.SetVar("j2pt", 30, -1);
   SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
@@ -1218,8 +1225,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doMbbMax200 = false;
       bool doMbbMax300 = false;
       bool isHcand     = false;
-      int ibjminmt = -1;
+      unsigned int ibjminmt = -1;
+      int hcand_ibj1 = -1;
+      int hcand_ibj2 = -1;
 
+      hcand_mt2_ = 0.;
       minMTbmet_ = 0.;
       mbbmax_    = 0.;
       mbbclose_  = 9999.;
@@ -1228,16 +1238,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       deltaPhiMinbmet_ = 999.;
       deltaPhibbHcand_ = 999.;
 
-      // first restore all the bjets
+      // first restore all the bjets as well as get hem jets
       vector<TLorentzVector> p4sBJets;
+      vector<LorentzVector> p4sForHemsHcand;
       for (int ijet = 0; ijet < t.njet; ++ijet) {
         if (t.jet_pt[ijet] < 20) continue;
-        if (fabs(t.jet_eta[ijet]) > 2.5) continue;
-        if (t.jet_btagCSV[ijet] >= 0.800) {
-          TLorentzVector bjet;
-          bjet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
-          p4sBJets.push_back(bjet);
-        }
+        if (fabs(t.jet_eta[ijet]) > 2.4) continue;
+        TLorentzVector jet;
+        jet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
+
+        if (t.jet_btagCSV[ijet] >= 0.800)
+          p4sBJets.push_back(jet);
+        else if (t.jet_pt[ijet] > 30)
+          p4sForHemsHcand.push_back(LorentzVector(jet.Px(), jet.Py(), jet.Pz(), jet.E()));
       }
       // calculate Mbb_close and Mbb_max
       if (p4sBJets.size() >= 2) { // basic mt2higgs require >= 2 bjets
@@ -1268,11 +1281,32 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
             }
             if (fabs(mbb-125.1) < fabs(mbbclose_-125.1)) {
               mbbclose_ = mbb;
+              hcand_ibj1 = ibj1;
+              hcand_ibj2 = ibj2;
               deltaPhibbHcand_ = DeltaPhi(p4sBJets[ibj1].Phi(), p4sBJets[ibj2].Phi());
             }
           }
         }
         nHcand_ = max(nHcand_, (int) isHcand); // for case only 1 good pair found
+      }
+
+      // a higgs candidate is found and the mt2 with Hcand can be calculated
+      int ibj = 0;
+      for (auto itbj = p4sBJets.begin(); itbj != p4sBJets.end(); ++itbj, ++ibj) {
+        if ((!isHcand || (ibj != hcand_ibj1 && ibj != hcand_ibj2)) && (*itbj).Pt() > 30)
+          p4sForHemsHcand.push_back(LorentzVector((*itbj).Px(), (*itbj).Py(), (*itbj).Pz(), (*itbj).E()));
+      }
+      if (isHcand) {
+        TLorentzVector p4_higgs = p4sBJets[hcand_ibj1] + p4sBJets[hcand_ibj2];
+        p4sForHemsHcand.push_back(LorentzVector(p4_higgs.Px(), p4_higgs.Py(), p4_higgs.Pz(), p4_higgs.E()));
+      }
+      // calculate every mt2 that has no Hcand and check with the t.mt2
+      sort(p4sForHemsHcand.begin(), p4sForHemsHcand.end(), sortByPt);
+      vector<LorentzVector> hemJetsHcand;
+      if (p4sForHemsHcand.size() > 1) {
+        // Hemispheres used in MT2 calculation
+        hemJetsHcand = getHemJets(p4sForHemsHcand);
+        hcand_mt2_ = HemMT2(t.met_pt, t.met_phi, hemJetsHcand.at(0), hemJetsHcand.at(1));
       }
 
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
@@ -1378,7 +1412,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         // if (findMatching) ++nWorking;
         // else ++nNotWorking;
       }
-      doMT2Higgs = (doMT2Higgs && ntruebJets_ < 2);
+      // doMT2Higgs = (doMT2Higgs && ntruebJets_ < 2);
 
       // if (ntruebJets_ >= 2 && nIsTrueBJet < 5) {
       //   cout << endl << BadPtRatioCount << "\n-----------------------\n";
@@ -1434,8 +1468,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
-      // if (!doMT2Higgs) continue; // for faster runtime
-      doMT2Higgs = true;        // remove 2b requirement for testing
+      if (!doMT2Higgs) continue; // for faster runtime
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -2835,9 +2868,10 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   // plot1D("h_bMET_MTclose"+s,       t.bMET_MTclose,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
   // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
 
-  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 200, 0, 600);
-  plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 200, 0, 600);
-  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 200, 0, 600);
+  plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 100, 0, 600);
+  plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 100, 0, 600);
+  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 100, 0, 600);
   plot1D("h_nHcand"+s,        nHcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
 
   if (dirname.find("crhsl") == 0) {
@@ -2854,6 +2888,9 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
     plot1D("h_deltaPhiMinGenbmet"+s,   deltaPhiMinGenbmet_,     evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
   // if (deltaPhigenbgenb_ > 0 && deltaPhigenbgenb_ < 10)
   plot1D("h_deltaPhigenbgenb"+s,    deltaPhigenbgenb_,    evtweight_, h_1d, ";#Delta#phi (b, b)", 60, -3.4, 3.4);
+
+  if (nHcand_ == 0 && fabs(t.mt2 - hcand_mt2_) > 0.01) // testing plot, shouldn't be any
+    plot1D("h_test_diffmt2"+s, fabs(t.mt2 - hcand_mt2_), evtweight_, h_1d, ";diff M_{T2} [GeV]", 100, 0, 400);
 
   outfile_->cd();
 
