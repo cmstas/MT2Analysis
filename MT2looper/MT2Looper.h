@@ -126,9 +126,6 @@ class MT2Looper {
   float deltaPhiminMTbmet_;
   float deltaPhiMinbmet_;
   float deltaPhibbHcand_;
-  float deltaPhiMinGenbmet_;
-  float deltaPhiminMTgenbmet_;
-  float deltaPhigenbgenb_;
 
 };
 

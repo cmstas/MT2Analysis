@@ -285,7 +285,7 @@ void MT2Looper::SetSignalRegions(){
   // -- mt2higgs define --
   SRBaseHcand.SetName("srhbase");
   SRBaseHcand.SetVar("mt2", 200, -1);
-  // SRBaseHcand.SetVar("mt2", 0, -1); // remove mt2 requirement for plotting
+  // SRBaseHcand.SetVar("mt2", 0, -1); // remove mt2 requirement for test plotting
   SRBaseHcand.SetVar("j1pt", 30, -1);
   SRBaseHcand.SetVar("j2pt", 30, -1);
   SRBaseHcand.SetVar("deltaPhiMin", 0.3, -1);
@@ -1225,9 +1225,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doMbbMax200 = false;
       bool doMbbMax300 = false;
       bool isHcand     = false;
-      unsigned int ibjminmt = -1;
-      int hcand_ibj1 = -1;
-      int hcand_ibj2 = -1;
+      // unsigned int ibjminmt = -1;
+      unsigned int hcand_ibj1 = -1;
+      unsigned int hcand_ibj2 = -1;
 
       hcand_mt2_ = 0.;
       minMTbmet_ = 0.;
@@ -1261,7 +1261,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           if (ibj1 == 0 || mt < minMTbmet_) {
             minMTbmet_ = mt;
             deltaPhiminMTbmet_ = DeltaPhi(p4sBJets[ibj1].Phi(), t.met_phi);
-            ibjminmt = ibj1;
+            // ibjminmt = ibj1;
           }
           deltaPhiMinbmet_ = min(deltaPhiMinbmet_, DeltaPhi(p4sBJets[ibj1].Phi(), t.met_phi));
 
@@ -1291,22 +1291,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
 
       // a higgs candidate is found and the mt2 with Hcand can be calculated
-      int ibj = 0;
-      for (auto itbj = p4sBJets.begin(); itbj != p4sBJets.end(); ++itbj, ++ibj) {
-        if ((!isHcand || (ibj != hcand_ibj1 && ibj != hcand_ibj2)) && (*itbj).Pt() > 30)
-          p4sForHemsHcand.push_back(LorentzVector((*itbj).Px(), (*itbj).Py(), (*itbj).Pz(), (*itbj).E()));
-      }
       if (isHcand) {
+        unsigned int ibj = 0;
+        for (auto itbj = p4sBJets.begin(); itbj != p4sBJets.end(); ++itbj, ++ibj) {
+          if (ibj != hcand_ibj1 && ibj != hcand_ibj2 && (*itbj).Pt() > 30)
+            p4sForHemsHcand.push_back(LorentzVector((*itbj).Px(), (*itbj).Py(), (*itbj).Pz(), (*itbj).E()));
+        }
         TLorentzVector p4_higgs = p4sBJets[hcand_ibj1] + p4sBJets[hcand_ibj2];
         p4sForHemsHcand.push_back(LorentzVector(p4_higgs.Px(), p4_higgs.Py(), p4_higgs.Pz(), p4_higgs.E()));
-      }
-      // calculate every mt2 that has no Hcand and check with the t.mt2
-      sort(p4sForHemsHcand.begin(), p4sForHemsHcand.end(), sortByPt);
-      vector<LorentzVector> hemJetsHcand;
-      if (p4sForHemsHcand.size() > 1) {
-        // Hemispheres used in MT2 calculation
-        hemJetsHcand = getHemJets(p4sForHemsHcand);
-        hcand_mt2_ = HemMT2(t.met_pt, t.met_phi, hemJetsHcand.at(0), hemJetsHcand.at(1));
+        sort(p4sForHemsHcand.begin(), p4sForHemsHcand.end(), sortByPt);
+
+        vector<LorentzVector> hemJetsHcand;
+        if (p4sForHemsHcand.size() > 1) {
+          hemJetsHcand = getHemJets(p4sForHemsHcand); // Hemispheres used in MT2 calculation
+          hcand_mt2_ = HemMT2(t.met_pt, t.met_phi, hemJetsHcand.at(0), hemJetsHcand.at(1));
+        }
+      } else {
+        hcand_mt2_ = t.mt2;
       }
 
       if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
@@ -1326,7 +1327,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       gamma_minMTbmet_ = 0.;
       if (doGJplots && t.gamma_nBJet20 >= 2) {
         doMT2HiggsGJ = true;
-
         // if by any chance a bjets is overlaped with the gamma and hence removed
         bool overlapBJetGamma = (t.gamma_nBJet20 != t.nBJet20);
         unsigned int overlap_bjet_idx = -1;
@@ -1346,6 +1346,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           if (ibj == 0 || mt < gamma_minMTbmet_)
             gamma_minMTbmet_ = mt;
         }
+        if (overlapBJetGamma && nHcand_ < 2 && (overlap_bjet_idx == hcand_ibj1 || overlap_bjet_idx == hcand_ibj2)) {
+          isHcandGJ = false;       // will also need to be re-evaluated
+          if (p4sBJets.size() > 2)
+            for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
+              if (overlap_bjet_idx == ibj1) continue;
+              for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
+                if (overlap_bjet_idx == ibj2) continue;
+                float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
+                if (mbb > 100 && mbb < 150)
+                  isHcandGJ = true;
+              }
+            }
+        }
       }
 
       if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
@@ -1355,74 +1368,74 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // --- end of crgj for mt2higgs ---
 
-      // --- Gen matching for the bjets ---
-      ntruebJets_ = 0;
-      // deltaPhiGenbFromH_ = 999.;
-      deltaPhiMinGenbmet_ = 999.;
-      deltaPhigenbgenb_ = 999.;
-      // float mtbmet_temp = 9999.;
-      vector<float> ptratios;
-      int ib1 = -1;
+      // // --- Gen matching for the bjets ---
+      // ntruebJets_ = 0;
+      // // deltaPhiGenbFromH_ = 999.;
+      // deltaPhiMinGenbmet_ = 999.;
+      // deltaPhigenbgenb_ = 999.;
+      // // float mtbmet_temp = 9999.;
+      // vector<float> ptratios;
+      // int ib1 = -1;
 
-      // doCounting = doMT2Higgs;
-      for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
-        if (ibj != ibjminmt) continue;
-        bool isTrueBJet = false;
-        // bool findMatching = false;
-        // bool badPtRatio = false;
-        float tempDR = 1;
-        for (int igen = 0; igen < t.ngenStat23; ++igen) {
-          float thisDR = DeltaR(t.genStat23_eta[igen], p4sBJets[ibj].Eta(), t.genStat23_phi[igen], p4sBJets[ibj].Phi());
-          if (thisDR > 0.1) continue;
-          float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
-          if (ptratio < 0.5 || ptratio > 2) continue;
-          // findMatching = true;
-          if (thisDR < tempDR) {
-            tempDR = thisDR;
-            isTrueBJet = false;
-            // badPtRatio = false;
-          } else if (tempDR < 0.1) {
-            continue;
-          }
-          if (abs(t.genStat23_pdgId[igen]) == 5) {
-            // ++nIsGenBJet;
-            // cout << "found bjet at igen = " << igen << " with source id: " << t.genStat23_sourceId[igen] << endl;
-            // deltaPhiMinGenbmet_ = min(deltaPhiMinGenbmet_, DeltaPhi(t.genStat23_phi[igen], t.met_phi));
-            // float mt = MT(t.genStat23_pt[igen], t.genStat23_phi[igen], t.met_pt, t.met_phi);
-            // if (mt < mtbmet_temp) {
-            //   mtbmet_temp = mt;
-            //   deltaPhiminMTgenbmet_ = DeltaPhi(t.genStat23_phi[igen], t.met_phi);
-            // }
-            // if (t.genStat23_sourceId[igen] == 6) {
-            //   // ++nIsTrueBJet;
-            //   // isTrueBJet = true;
-            //   // if (ptratio < 0.5 || ptratio > 2) badPtRatio = true;
-            // }
-            deltaPhiminMTgenbmet_ = DeltaPhi(t.genStat23_phi[igen], t.met_phi);
-            if (ib1 < 0)
-              ib1 = igen;
-            else if (deltaPhigenbgenb_ < 10)
-              deltaPhigenbgenb_ = -1;
-            else
-              deltaPhigenbgenb_ = DeltaPhi(t.genStat23_phi[igen], t.genStat23_phi[ib1]);
-          }
-        }
-        if (isTrueBJet) ++ntruebJets_;
-        // if (badPtRatio) ++BadPtRatioCount;
-        // if (findMatching) ++nWorking;
-        // else ++nNotWorking;
-      }
-      // doMT2Higgs = (doMT2Higgs && ntruebJets_ < 2);
-
-      // if (ntruebJets_ >= 2 && nIsTrueBJet < 5) {
-      //   cout << endl << BadPtRatioCount << "\n-----------------------\n";
-      //   for (int igen = 0; igen < t.ngenStat23; ++igen)
-      //     cout << "igen: " << igen << " pdgID: " << t.genStat23_pdgId[igen] << " sourceID: " << t.genStat23_sourceId[igen]
-      //          << " pt: " << t.genStat23_pt[igen] << " eta: " << t.genStat23_eta[igen] << " phi: " << t.genStat23_phi[igen] << endl;
-      //   for (auto it = p4sBJets.begin(); it != p4sBJets.end(); ++it)
-      //     cout << "i: " << it - p4sBJets.begin() << " pt: " << it->Pt() << " eta: " << it->Eta() << " phi: " << it->Phi() << endl;
+      // // doCounting = doMT2Higgs;
+      // for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
+      //   if (ibj != ibjminmt) continue;
+      //   bool isTrueBJet = false;
+      //   // bool findMatching = false;
+      //   // bool badPtRatio = false;
+      //   float tempDR = 1;
+      //   for (int igen = 0; igen < t.ngenStat23; ++igen) {
+      //     float thisDR = DeltaR(t.genStat23_eta[igen], p4sBJets[ibj].Eta(), t.genStat23_phi[igen], p4sBJets[ibj].Phi());
+      //     if (thisDR > 0.1) continue;
+      //     float ptratio = p4sBJets[ibj].Pt()/t.genStat23_pt[igen];
+      //     if (ptratio < 0.5 || ptratio > 2) continue;
+      //     // findMatching = true;
+      //     if (thisDR < tempDR) {
+      //       tempDR = thisDR;
+      //       isTrueBJet = false;
+      //       // badPtRatio = false;
+      //     } else if (tempDR < 0.1) {
+      //       continue;
+      //     }
+      //     if (abs(t.genStat23_pdgId[igen]) == 5) {
+      //       // ++nIsGenBJet;
+      //       // cout << "found bjet at igen = " << igen << " with source id: " << t.genStat23_sourceId[igen] << endl;
+      //       // deltaPhiMinGenbmet_ = min(deltaPhiMinGenbmet_, DeltaPhi(t.genStat23_phi[igen], t.met_phi));
+      //       // float mt = MT(t.genStat23_pt[igen], t.genStat23_phi[igen], t.met_pt, t.met_phi);
+      //       // if (mt < mtbmet_temp) {
+      //       //   mtbmet_temp = mt;
+      //       //   deltaPhiminMTgenbmet_ = DeltaPhi(t.genStat23_phi[igen], t.met_phi);
+      //       // }
+      //       // if (t.genStat23_sourceId[igen] == 6) {
+      //       //   // ++nIsTrueBJet;
+      //       //   // isTrueBJet = true;
+      //       //   // if (ptratio < 0.5 || ptratio > 2) badPtRatio = true;
+      //       // }
+      //       deltaPhiminMTgenbmet_ = DeltaPhi(t.genStat23_phi[igen], t.met_phi);
+      //       if (ib1 < 0)
+      //         ib1 = igen;
+      //       else if (deltaPhigenbgenb_ < 10)
+      //         deltaPhigenbgenb_ = -1;
+      //       else
+      //         deltaPhigenbgenb_ = DeltaPhi(t.genStat23_phi[igen], t.genStat23_phi[ib1]);
+      //     }
+      //   }
+      //   if (isTrueBJet) ++ntruebJets_;
+      //   // if (badPtRatio) ++BadPtRatioCount;
+      //   // if (findMatching) ++nWorking;
+      //   // else ++nNotWorking;
       // }
-      // --- end of gen matching ---
+      // // doMT2Higgs = (doMT2Higgs && ntruebJets_ < 2);
+
+      // // if (ntruebJets_ >= 2 && nIsTrueBJet < 5) {
+      // //   cout << endl << BadPtRatioCount << "\n-----------------------\n";
+      // //   for (int igen = 0; igen < t.ngenStat23; ++igen)
+      // //     cout << "igen: " << igen << " pdgID: " << t.genStat23_pdgId[igen] << " sourceID: " << t.genStat23_sourceId[igen]
+      // //          << " pt: " << t.genStat23_pt[igen] << " eta: " << t.genStat23_eta[igen] << " phi: " << t.genStat23_phi[igen] << endl;
+      // //   for (auto it = p4sBJets.begin(); it != p4sBJets.end(); ++it)
+      // //     cout << "i: " << it - p4sBJets.begin() << " pt: " << it->Pt() << " eta: " << it->Eta() << " phi: " << it->Phi() << endl;
+      // // }
+      // // --- end of gen matching ---
 
       // -- end of mt2higgs --
 
@@ -1761,7 +1774,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   // values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
-  values["mt2"]         = t.mt2;
+  values["mt2"]         = hcand_mt2_;
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBaseHcand.PassesSelection(values)) {
@@ -1837,7 +1850,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   // fill hists
   std::string add = "";
 
-  float passPtMT2 = (t.mt2 < 200 && t.gamma_pt[0] > 180.)? true : false;
+  float passPtMT2 = (hcand_mt2_ < 200 && t.gamma_pt[0] > 180.)? true : false;
 
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.gamma_deltaPhiMin;
@@ -2665,6 +2678,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
   // workaround for monojet bins
   float mt2_temp = t.mt2;
+  // mt2_temp = hcand_mt2_;
   if (t.nJet30 == 1) mt2_temp = t.ht;
 
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -2883,14 +2897,14 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   plot1D("h_deltaPhiMinbmet"+s,     deltaPhiMinbmet_,     evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
   plot1D("h_deltaPhibbHcand"+s,     deltaPhibbHcand_,     evtweight_, h_1d, ";#Delta#phi (b, b)", 60, -3.4, 3.4);
 
-  plot1D("h_deltaPhiminMTgenbmet"+s, deltaPhiminMTgenbmet_,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
-  if (deltaPhiMinGenbmet_ < 10)
-    plot1D("h_deltaPhiMinGenbmet"+s,   deltaPhiMinGenbmet_,     evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
-  // if (deltaPhigenbgenb_ > 0 && deltaPhigenbgenb_ < 10)
-  plot1D("h_deltaPhigenbgenb"+s,    deltaPhigenbgenb_,    evtweight_, h_1d, ";#Delta#phi (b, b)", 60, -3.4, 3.4);
+  // plot1D("h_deltaPhiminMTgenbmet"+s, deltaPhiminMTgenbmet_,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
+  // if (deltaPhiMinGenbmet_ < 10)
+  //   plot1D("h_deltaPhiMinGenbmet"+s,   deltaPhiMinGenbmet_,     evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
+  // // if (deltaPhigenbgenb_ > 0 && deltaPhigenbgenb_ < 10)
+  // plot1D("h_deltaPhigenbgenb"+s,    deltaPhigenbgenb_,    evtweight_, h_1d, ";#Delta#phi (b, b)", 60, -3.4, 3.4);
 
-  if (nHcand_ == 0 && fabs(t.mt2 - hcand_mt2_) > 0.01) // testing plot, shouldn't be any
-    plot1D("h_test_diffmt2"+s, fabs(t.mt2 - hcand_mt2_), evtweight_, h_1d, ";diff M_{T2} [GeV]", 100, 0, 400);
+  // if (nHcand_ == 0 && fabs(t.mt2 - hcand_mt2_) > 0.01) // testing plot, shouldn't be any
+  //   plot1D("h_test_diffmt2"+s, fabs(t.mt2 - hcand_mt2_), evtweight_, h_1d, ";diff M_{T2} [GeV]", 100, 0, 400);
 
   outfile_->cd();
 
