@@ -63,8 +63,10 @@ int getColor(const string& sample) {
   if (sample.find("st") != string::npos) return kViolet;
   if (sample.find("ttdl") != string::npos) return kAzure+7;
   if (sample.find("ttsl") != string::npos) return kSpring-5;
+  if (sample.find("T5qqqqWH_1400_700_new") != string::npos) return kCyan;
   if (sample.find("T5qqqqWH_1400_700") != string::npos) return kPink+9;
   if (sample.find("T5qqqqWH_1400_200") != string::npos) return kCyan;
+  if (sample.find("Allbkg") != string::npos) return kRed;
 
   cout << "getColor: WARNING: didn't recognize sample: " << sample << endl;
   return kBlack;
@@ -109,12 +111,14 @@ string getLegendName(const string& sample) {
   if (sample.find("T2bb_600_580") != string::npos) return "T2bb 600, 580";
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
+  if (sample.find("T5qqqqWH_1400_700_new") != string::npos) return "T5qqqqWH, 1400 700 new";
   if (sample.find("T5qqqqWH_1400_700") != string::npos) return "T5qqqqWH, 1400 700";
   if (sample.find("T5qqqqWH_1400_200") != string::npos) return "T5qqqqWH, 1400 200";
   if (sample.find("T5qqqqWH_1100_750") != string::npos) return "T5qqqqWH, 1100 750";
   if (sample.find("tt+1l") != string::npos) return "tt + 1l";
   if (sample.find("tt+2l") != string::npos) return "tt + 2l";
   if (sample.find("st") != string::npos) return "singletop";
+  if (sample.find("Allbkg") != string::npos) return "MT2 with H cand";
 
   cout << "getLegendName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;
