@@ -647,6 +647,7 @@ void printComparisonTable(vector<TFile*> samples, vector<string> names, vector<s
   unsigned int n = samples.size();
   unsigned int ndirs = dirs.size();
   unsigned int nselecs = selecs.size();
+  float scale = 40/12.9;
 
   if (nselecs < 2) cout << "Use printTable instead!\n";
 
@@ -745,6 +746,8 @@ void printComparisonTable(vector<TFile*> samples, vector<string> names, vector<s
               colorFactor = 30*(yield_base/yield)/(2*colorReduction);
             ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
           }
+          yield *= scale;
+          err *= scale;
           if (yield > 10.)
             ofile << Form("%.1f $\\pm$ %.1f", yield, err);
           else
@@ -776,6 +779,8 @@ void printComparisonTable(vector<TFile*> samples, vector<string> names, vector<s
           ofile << "\\cellcolor{cyan!" << colorFactor << "} ";
         }
       }
+      yield *= scale;
+      err *= scale;
       if (yield > 10.)
         ofile << Form("%.1f $\\pm$ %.1f", yield, err);
       else
@@ -2865,11 +2870,12 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   return;
 }
 
-TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string suffix = "") {
+TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string bmetsuf, string suffix = "") {
   const unsigned int nsamp = samples.size();
   const unsigned int ndirs = dirs.size();
 
-  int n_srbins = 21;            // for now
+  int n_srbins = 21;
+  if (bmetsuf == "_L") n_srbins = 23;
 
   TH1F* srhist = new TH1F(Form("h_sryields%s", suffix.c_str()), "SR Yields Hist", n_srbins, 0, n_srbins);
 
@@ -2878,7 +2884,7 @@ TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string suffi
 
   int srbin = 0;
   for (unsigned int idir = 0; idir < ndirs; ++idir) {
-    string dir = "srh" + dirs.at(idir);
+    string dir = "srh" + dirs.at(idir) + bmetsuf;
     TString nbinshistname = Form("%s/h_n_mt2bins", dir.c_str());
     TH1F* h_n_mt2bins = (TH1F*) samples.at(0)->Get(nbinshistname);
     int n_mt2bins;
@@ -2947,13 +2953,14 @@ TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string suffi
   return srhist;
 }
 
-void makeSRyieldsComparisonHist(vector<TFile*> samples, string selec) {
+void makeSRyieldsComparisonHist(vector<TFile*> samples, string bmetsuf, string selec) {
   int n_srbins = 21;
+  if (bmetsuf == "_L") n_srbins = 23;
 
   vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
 
-  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, "_original");
-  TH1F* hSR_mMT = fillSRYieldsPlot(samples, dirsAll, "_" + selec);
+  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_original");
+  TH1F* hSR_mMT = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_" + selec);
   TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
   hRatio->Divide(hSR_mMT, hSR_org, 1, 1, "B");
 
@@ -2983,28 +2990,55 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, string selec) {
   hSR_org->SetFillColor(kOrange+1);
   // hSR_org->SetFillStyle(3244);
   // for (unsigned int i = 0; i < dirsAll.size(); ++i)
-  hSR_org->GetXaxis()->SetLabelSize(0.05);
-  hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
-  hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,350]");
-  hSR_org->GetXaxis()->SetBinLabel(4, "2VL: [350,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(5, "1L: [200,350]");
-  hSR_org->GetXaxis()->SetBinLabel(6, "1L: [350,450]");
-  hSR_org->GetXaxis()->SetBinLabel(7, "1L: [450,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(8, "2L: [200,350]");
-  hSR_org->GetXaxis()->SetBinLabel(9, "2L: [350,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(10, "1M: [200,450]");
-  hSR_org->GetXaxis()->SetBinLabel(11, "1M: [450,550]");
-  hSR_org->GetXaxis()->SetBinLabel(12, "1M: [550,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(13, "2M: [200,450]");
-  hSR_org->GetXaxis()->SetBinLabel(14, "2M: [450,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(15, "3M: [200,350]");
-  hSR_org->GetXaxis()->SetBinLabel(16, "3M: [350,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(17, "1H: [200,450]");
-  hSR_org->GetXaxis()->SetBinLabel(18, "1H: [450,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(19, "2H: [200,#infty]");
-  hSR_org->GetXaxis()->SetBinLabel(20, "3H: [200,350]");
-  hSR_org->GetXaxis()->SetBinLabel(21, "3H: [350,#infty]");
+  if (bmetsuf == "_H") {
+    hSR_org->GetXaxis()->SetLabelSize(0.05);
+    hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(4, "2VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(5, "1L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(6, "1L: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(7, "1L: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(8, "2L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(9, "2L: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(10, "1M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(11, "1M: [450,550]");
+    hSR_org->GetXaxis()->SetBinLabel(12, "1M: [550,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(13, "2M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(14, "2M: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(15, "3M: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(16, "3M: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(17, "1H: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(18, "1H: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(19, "2H: [200,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(20, "3H: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(21, "3H: [350,#infty]");
+  } else if (bmetsuf == "_L") {
+    hSR_org->GetXaxis()->SetLabelSize(0.05);
+    hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(4, "2VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(5, "1L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(6, "1L: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(7, "1L: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(8, "2L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(9, "2L: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(10, "1M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(11, "1M: [450,550]");
+    hSR_org->GetXaxis()->SetBinLabel(12, "1M: [550,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(13, "2M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(14, "2M: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(15, "3M: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(16, "3M: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(17, "3M: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(18, "1H: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(19, "1H: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(20, "2H: [200,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(21, "3H: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(22, "3H: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(23, "3H: [450,#infty]");
+  }
   hSR_org->GetXaxis()->LabelsOption("v");
 
   hSR_org->GetYaxis()->SetRangeUser(0.1, 4000);
@@ -3017,28 +3051,37 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, string selec) {
   leg->SetBorderSize(0);
   leg->SetTextSize(0.042);
   leg->AddEntry(hSR_org, "original");
-  leg->AddEntry(hSR_mMT, selec.c_str());
-  // leg->AddEntry(hSR_mMT, "ivmMTnHcand");
+  if (selec == "mMTnHcand")
+    leg->AddEntry(hSR_mMT, "HMTnHcand");
+  else if (selec == "ivmMTnHcand")
+    leg->AddEntry(hSR_mMT, "LMTnHcand");
   leg->Draw("same");
   ratioPad->cd();
   hRatio->SetMarkerStyle(20);
   TH1F* h_axis_ratio = new TH1F("ratio_axis","", n_srbins, 0, n_srbins);
   h_axis_ratio->GetYaxis()->SetTitleOffset(0.24);
   h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
-  h_axis_ratio->GetYaxis()->SetNdivisions(4);
+  h_axis_ratio->GetYaxis()->SetNdivisions(7);
   h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
-  if (selec == "mMTnHcand")
-    h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.4);
-  else if (selec == "ivmMTnHcand")
-    h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.8);
+  h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.65);
+  // if (selec == "mMTnHcand")
+  //   h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.4);
+  // else if (selec == "ivmMTnHcand")
+  //   h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.8);
   h_axis_ratio->GetYaxis()->SetTitle("new/old  ");
   h_axis_ratio->GetXaxis()->SetTickLength(0.07);
   h_axis_ratio->GetXaxis()->SetTitleSize(0.);
   h_axis_ratio->GetXaxis()->SetLabelSize(0.);
   h_axis_ratio->Draw("axis");
   hRatio->Draw("same");
-  c0->SaveAs("SRyieldsHist.pdf");
+  c0->SaveAs(Form("SRyieldsHist_%s.pdf", selec.c_str()));
   // dataMCplotMaker(hSR_mMT, hbg, vector<string>{"original"});
+
+  delete hSR_org;
+  delete hSR_mMT;
+  delete c0;
+  delete leg;
+  delete h_axis_ratio;
 }
 
 
@@ -3155,8 +3198,10 @@ void plotMakerHcand() {
   }
 
   // Make SR Yields hist
-  makeSRyieldsComparisonHist(samples, "mMTnHcand");
+  makeSRyieldsComparisonHist(samples, "_H", "mMTnHcand");
+  makeSRyieldsComparisonHist(samples, "_L", "ivmMTnHcand");
 
+  return;
   // Start outputing to file of yields table
   ofile.open("tables/table.tex");
   ofile << "\\documentclass[landscape,11pt]{article}" << std::endl;
@@ -3219,10 +3264,10 @@ void plotMakerHcand() {
   // dirsH.clear();
   // names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
-  // dirsH.push_back("srhbase");
-  // printComparisonTable(samples, names, selecs, dirsH, "srhbase");
-  // // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
-  // dirsH.clear();
+  dirsH.push_back("srhbase");
+  printComparisonTable(samples, names, selecs, dirsH, "srhbase");
+  // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
+  dirsH.clear();
 
   // dirsH.push_back("crhslbase");
   // printComparisonTableCR(samples2, names2, selecs, dirsH, "crhslbase");
@@ -3311,9 +3356,9 @@ void plotMakerHcand() {
   // dirsH.push_back("crhsl3M");
   // printComparisonTableCR(samples2, names2, selecs, dirsH, "Detailed");
   // dirsH.clear();
-  dirsH.push_back("srh3M");
-  printDetailedComparisonTable(samples, names, selecs, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh3M");
+  // printDetailedComparisonTable(samples, names, selecs, dirsH);
+  // dirsH.clear();
 
   // ofile << "\\newpage\n";
   // dirsH.push_back("crhgj1H");
