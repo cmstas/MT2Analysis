@@ -1348,19 +1348,20 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           if (ibj == 0 || mt < gamma_minMTbmet_)
             gamma_minMTbmet_ = mt;
         }
-        if (overlapBJetGamma && nHcand_ < 2 && (overlap_bjet_idx == hcand_ibj1 || overlap_bjet_idx == hcand_ibj2)) {
-          isHcandGJ = false;       // will also need to be re-evaluated
-          if (p4sBJets.size() > 2)
-            for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
-              if (overlap_bjet_idx == ibj1) continue;
-              for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
-                if (overlap_bjet_idx == ibj2) continue;
-                float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
-                if (mbb > 100 && mbb < 150)
-                  isHcandGJ = true;
-              }
-            }
-        }
+        // // if the photon is overlayed with the bjets, still use the bjets for isHcand, for now.
+        // if (overlapBJetGamma && nHcand_ < 2 && (overlap_bjet_idx == hcand_ibj1 || overlap_bjet_idx == hcand_ibj2)) {
+        //   isHcandGJ = false;       // will also need to be re-evaluated
+        //   if (p4sBJets.size() > 2)
+        //     for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
+        //       if (overlap_bjet_idx == ibj1) continue;
+        //       for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
+        //         if (overlap_bjet_idx == ibj2) continue;
+        //         float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
+        //         if (mbb > 100 && mbb < 150)
+        //           isHcandGJ = true;
+        //       }
+        //     }
+        // }
       }
 
       if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
