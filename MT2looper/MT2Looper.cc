@@ -295,6 +295,7 @@ void MT2Looper::SetSignalRegions(){
   SRBaseHcand.SetVar("nlep", 0, 1);
   SRBaseHcand.SetVar("nbjets", 2, -1);
   // SRBaseHcand.SetVar("nbjets", 0, -1); // remove 2b for testing
+  SRBaseHcand.SetVar("minMTbmet", 0, -1);
   SRBaseHcand.SetVar("passesHtMet", 1, 2);
   SRBaseHcand.SetVarCRSL("mt2", 200, -1);
   SRBaseHcand.SetVarCRSL("j1pt", 30, -1);
@@ -304,6 +305,7 @@ void MT2Looper::SetSignalRegions(){
   SRBaseHcand.SetVarCRSL("nlep", 1, 2);
   // SRBaseHcand.SetVarCRSL("njets", 4, -1);
   SRBaseHcand.SetVarCRSL("nbjets", 2, -1);
+  SRBaseHcand.SetVarCRSL("minMTbmet", 0, -1);
   SRBaseHcand.SetVarCRSL("passesHtMet", 1, 2);
   float SRBaseHcand_mt2bins[4] = {200, 300, 500, 1000}; 
   SRBaseHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
@@ -1775,6 +1777,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = hcand_mt2_;
+  values["minMTbmet"]   = minMTbmet_;
   values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   if (SRBaseHcand.PassesSelection(values)) {
@@ -1860,6 +1863,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   values["j1pt"]        = t.gamma_jet1_pt;
   values["j2pt"]        = t.gamma_jet2_pt;
   values["mt2"]         = t.gamma_mt2;
+  values["minMTbmet"]   = gamma_minMTbmet_;
   values["passesHtMet"] = ( (t.gamma_ht > 200. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   bool passBase = SRBaseHcand.PassesSelection(values);
 
@@ -1934,6 +1938,7 @@ void MT2Looper::fillHistosCRDYMT2Higgs(const std::string& prefix, const std::str
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
+  values["minMTbmet"]   = minMTbmet_;
 
  // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -1944,6 +1949,7 @@ void MT2Looper::fillHistosCRDYMT2Higgs(const std::string& prefix, const std::str
   valuesBase["j2pt"]        = t.jet2_pt;
   valuesBase["nbjets"]      = t.nBJet20;
   valuesBase["mt2"]         = t.zll_mt2;
+  valuesBase["minMTbmet"]   = minMTbmet_;
   valuesBase["passesHtMet"] = ( (t.zll_ht > 200. && t.zll_met_pt > 200.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
   bool passBase = SRBaseHcand.PassesSelection(valuesBase);
 

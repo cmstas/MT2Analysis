@@ -64,7 +64,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   //add HT and MET requirements
   for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
     SR fullSR = temp_SR_VL_vec.at(iSR);
-    fullSR.SetName(fullSR.GetName() + "VL");
+    std::string fullSRname = fullSR.GetName() + "VL";
     fullSR.SetVar("ht", 200, 450);
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 200, 450);
@@ -73,15 +73,22 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 300, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
+    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
+    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetVar("minMTbmet", 200, -1);
+    fullSR.SetVarCRSL("minMTbmet", 200, -1);
+    fullSR.SetVarCRQCD("minMTbmet", 200, -1);
+    SRVec.push_back(fullSR);
+    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetVar("minMTbmet", 0, 200);
+    fullSR.SetVarCRSL("minMTbmet", 0, 200);
+    fullSR.SetVarCRQCD("minMTbmet", 0, 200);
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
     SR fullSR = temp_SR_VL_vec.at(iSR);
-    fullSR.SetName(fullSR.GetName() + "L");
+    std::string fullSRname = fullSR.GetName() + "L";
     fullSR.SetVar("ht", 450, 575);
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 450, 575);
@@ -90,15 +97,22 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};           fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};           fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};           fullSR.SetMT2Bins(1, mt2bins);}
+    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 350, 1500};      fullSR.SetMT2Bins(2, mt2bins);}
+    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetVar("minMTbmet", 200, -1);
+    fullSR.SetVarCRSL("minMTbmet", 200, -1);
+    fullSR.SetVarCRQCD("minMTbmet", 200, -1);
+    SRVec.push_back(fullSR);
+    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetVar("minMTbmet", 0, 200);
+    fullSR.SetVarCRSL("minMTbmet", 0, 200);
+    fullSR.SetVarCRQCD("minMTbmet", 0, 200);
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_MH_vec.size(); iSR++){
     SR fullSR = temp_SR_MH_vec.at(iSR);
-    fullSR.SetName(fullSR.GetName() + "M");
+    std::string fullSRname = fullSR.GetName() + "M";
     fullSR.SetVar("ht", 575, 1000);
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVarCRSL("ht", 575, 1000);
@@ -107,15 +121,24 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[5] = {200, 300, 400, 600, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[3] = {200, 300, 1500};           fullSR.SetMT2Bins(2, mt2bins);}
-    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};                fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};                fullSR.SetMT2Bins(1, mt2bins);}
+    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 450, 550, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 450, 1500};      fullSR.SetMT2Bins(2, mt2bins);}
+    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500};      fullSR.SetMT2Bins(2, mt2bins);}
+    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetVar("minMTbmet", 200, -1);
+    fullSR.SetVarCRSL("minMTbmet", 200, -1);
+    fullSR.SetVarCRQCD("minMTbmet", 200, -1);
+    SRVec.push_back(fullSR);
+    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetVar("minMTbmet", 0, 200);
+    fullSR.SetVarCRSL("minMTbmet", 0, 200);
+    fullSR.SetVarCRQCD("minMTbmet", 0, 200);
+    if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_MH_vec.size(); iSR++){
     SR fullSR = temp_SR_MH_vec.at(iSR);
-    fullSR.SetName(fullSR.GetName() + "H");
+    std::string fullSRname = fullSR.GetName() + "H";
     fullSR.SetVar("ht", 1000, -1);
     fullSR.SetVar("met", 30, -1);
     fullSR.SetVarCRSL("ht", 1000, -1);
@@ -124,10 +147,19 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetVarCRQCD("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 400, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 450, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
     else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
-    else if (njets_lo == 7 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
+    else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
+    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetVar("minMTbmet", 200, -1);
+    fullSR.SetVarCRSL("minMTbmet", 200, -1);
+    fullSR.SetVarCRQCD("minMTbmet", 200, -1);
+    SRVec.push_back(fullSR);
+    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetVar("minMTbmet", 0, 200);
+    fullSR.SetVarCRSL("minMTbmet", 0, 200);
+    fullSR.SetVarCRQCD("minMTbmet", 0, 200);
+    if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
     SRVec.push_back(fullSR);
   }
   // for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
