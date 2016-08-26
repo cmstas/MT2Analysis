@@ -112,8 +112,10 @@ string getLegendName(const string& sample) {
   if (sample.find("T2qq_1200_100") != string::npos) return "T2qq 1200, 100";
   if (sample.find("T2qq_600_550") != string::npos) return "T2qq 600, 550";
   if (sample.find("T5qqqqWH_1400_700_new") != string::npos) return "T5qqqqWH, 1400 700 new";
-  if (sample.find("T5qqqqWH_1400_700") != string::npos) return "T5qqqqWH, 1400 700";
-  if (sample.find("T5qqqqWH_1400_200") != string::npos) return "T5qqqqWH, 1400 200";
+  // if (sample.find("T5qqqqWH_1400_700") != string::npos) return "T5qqqqWH_1400 700 1";
+  // if (sample.find("T5qqqqWH_1400_200") != string::npos) return "T5qqqqWH_1400 200 1";
+  if (sample.find("T5qqqqWH_1400_700") != string::npos) return "Example Sig. 1";
+  if (sample.find("T5qqqqWH_1400_200") != string::npos) return "Example Sig. 2";
   if (sample.find("T5qqqqWH_1100_750") != string::npos) return "T5qqqqWH, 1100 750";
   if (sample.find("tt+1l") != string::npos) return "tt + 1l";
   if (sample.find("tt+2l") != string::npos) return "tt + 2l";

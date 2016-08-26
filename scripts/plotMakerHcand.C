@@ -338,8 +338,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   Double_t bg_integral_err = 0.;
   float bg_integral = h_bgtot->IntegralAndError(0,h_bgtot->GetXaxis()->GetNbins(),bg_integral_err);
   float data_integral = 1.;
-  // float bg_sf = 1.;
-  float bg_sf = 40./12.9;
+  float bg_sf = 1.;
+  // float bg_sf = 40./12.9;
   float bg_sf_err = 0.;
   if (data_hist) {
     data_integral = data_hist->Integral(0,data_hist->GetXaxis()->GetNbins());
@@ -348,12 +348,11 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     std::cout << "Data/MC is: " << bg_sf << " +/- " << bg_sf_err << std::endl;
   }
   for (unsigned int ibg = 0; ibg < bg_hists.size(); ++ibg) {
-    // if (scaleBGtoData && data_hist) bg_hists.at(ibg)->Scale(bg_sf);
+    if (scaleBGtoData && data_hist) bg_hists.at(ibg)->Scale(bg_sf);
     bg_hists.at(ibg)->Scale(bg_sf);
     t->Add(bg_hists.at(ibg));
   }
-  // if (scaleBGtoData && data_hist) {
-  {
+  if (scaleBGtoData && data_hist) {
     h_bgtot->Scale(bg_sf);
     std::cout << "Scaled background by: " << bg_sf << " +/- " << bg_sf_err << std::endl;
   }
@@ -3027,7 +3026,7 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, string bmetsuf, string s
 
   vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
 
-  vector<Color_t> colorsAll = {kAzure+7, kSpring-5, kRed-7, kOrange-2, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
+  vector<Color_t> colorsAll = {kRed-7, kAzure+7, kSpring-5, kOrange-2, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
   vector<Color_t> colors;
   for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i]);
   THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, bmetsuf, colors, "_" + selec);
@@ -3128,17 +3127,15 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, string bmetsuf, string s
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.042);
-  leg->SetNColumns(3);
+  leg->SetNColumns(2);
   leg->AddEntry(hSR_org, "original");
   // if (selec == "mMTnHcand")
   //   leg->AddEntry(hSR_mMT, "HMTnHcand");
   // else if (selec == "ivmMTnHcand")
   //   leg->AddEntry(hSR_mMT, "LMTnHcand");
-  leg->AddEntry(hSR_stk->GetHists()->At(0), "ttsl");
-  leg->AddEntry(hSR_stk->GetHists()->At(1), "zinv");
-  leg->AddEntry(hSR_stk->GetHists()->At(2), "ttdl");
-  leg->AddEntry(hSR_stk->GetHists()->At(3), "wjets");
-  leg->AddEntry(hSR_stk->GetHists()->At(4), "qcd");
+  leg->AddEntry(hSR_stk->GetHists()->At(0), "QCD");
+  leg->AddEntry(hSR_stk->GetHists()->At(1), "lostlep");
+  leg->AddEntry(hSR_stk->GetHists()->At(2), "Zinv");
   leg->Draw("same");
 
   ratioPad->cd();
@@ -3209,8 +3206,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/orgtrueb";
 
@@ -3218,10 +3215,11 @@ void plotMakerHcand() {
   //  samples definition
   // ----------------------------------------
 
-  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
+  vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
+  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
-  vector<string> names = {"ttsl", "2015zinv_ht", "wjets_ht", "ttdl", "2015qcd_ht"};
-  // vector<string> names = {"2015qcd_ht", "lostlepton", "2015zinv_ht"};
+  // vector<string> names = {"ttsl", "2015zinv_ht", "wjets_ht", "ttdl", "2015qcd_ht"};
+  // vector<string> names = {"2015qcd_ht", "lostlep", "2015zinv_ht"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_Allbkg", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_700_new"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "data_Run2016"};
   // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
@@ -3233,7 +3231,7 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   float scalesig = -1.;
-  //float scalesig = 50.;
+  // float scalesig = 30;
   // printplots = true;
   bool doRatio = false;
   bool scaleBGtoData = false;
@@ -3250,7 +3248,7 @@ void plotMakerHcand() {
       if(dir_name == "") continue;
       if(dir_name != "srhbase") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
-      string s = "_mMTnHcand";
+      string s = "_original";
 
       // makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3263,12 +3261,10 @@ void plotMakerHcand() {
       // // makePlot( samples , names , dir_name , "h_nJet30Eta3"+s , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
       makePlot( samples , names , dir_name , "h_hcand_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 500 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 600 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 250 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 600 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 500 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 500 , 1 , true, printplots, true, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 500 , 1 , true, printplots, true, doRatio, scaleBGtoData );
 
       makePlot( samples , names , dir_name , "h_deltaPhiminMTbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_deltaPhiMinbmet"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3289,7 +3285,6 @@ void plotMakerHcand() {
   // Make SR Yields hist
   makeSRyieldsComparisonHist(samples, "_H", "mMTnHcand");
   makeSRyieldsComparisonHist(samples, "_L", "ivmMTnHcand");
-  return;
 
   // Start outputing to file of yields table
   ofile.open("tables/table.tex");

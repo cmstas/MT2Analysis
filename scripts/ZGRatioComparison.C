@@ -5,14 +5,14 @@ TH1F* getRatios(TFile* sample, vector<string> dirs, string suffix = "") {
   vector<double> bgtot(n_srbins, 0.);
   vector<double> bgerr(n_srbins, 0.);
 
-  TH1F* hist = new TH1F(Form("h_%s", suffix.c_str()), "R(Z/#gamma) Ratio Hist", n_srbins, 0, n_srbins);
-  // TH1F* hist = new TH1F(Form("h_%s", suffix.c_str()), "Photo Purity for CRs", n_srbins, 0, n_srbins);
+  // TH1F* hist = new TH1F(Form("h_%s", suffix.c_str()), "R(Z/#gamma) Ratio Hist", n_srbins, 0, n_srbins);
+  TH1F* hist = new TH1F(Form("h_%s", suffix.c_str()), "Photon Purity for CRs", n_srbins, 0, n_srbins);
 
   for (unsigned int idir = 0; idir < dirs.size(); ++idir) {
     string dir = "srh" + dirs.at(idir);
 
-    TString fullhistname = dir + "/h_mt2binsRatioInt";
-    // TString fullhistname = dir + "/h_mt2binspurityIntFailSieieData";
+    // TString fullhistname = dir + "/h_mt2binsRatioInt";
+    TString fullhistname = dir + "/h_mt2binspurityIntFailSieieData";
     TH1D* h = (TH1D*) sample->Get(fullhistname);
     double yield = 0.;
     double err = 0.;
@@ -29,7 +29,7 @@ TH1F* getRatios(TFile* sample, vector<string> dirs, string suffix = "") {
   for (int ibin = 0; ibin < n_srbins; ++ibin) {
     hist->SetBinContent(ibin+1, bgtot[ibin]);
     hist->SetBinError(ibin+1, bgerr[ibin]);
-    cout << " & " << setprecision(2) << bgtot[ibin] << " \\pm " << bgerr[ibin];
+    cout << " & " << setprecision(2) << bgtot[ibin] << " \\pm " << setprecision(1) << bgerr[ibin];
   }
   cout << endl;
 
@@ -39,14 +39,15 @@ TH1F* getRatios(TFile* sample, vector<string> dirs, string suffix = "") {
 
 int ZGRatioComparison()
 {
-  TFile* f_tight = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand/zinvFromGJ.root");
-  TFile* f_loose = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet/zinvFromGJ.root");
+  // TFile* f_tight = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand/zinvFromGJ.root");
+  // TFile* f_loose = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet/zinvFromGJ.root");
 
-  // TFile* f_tight = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand/purity.root");
-  // TFile* f_loose = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet/purity.root");
+  TFile* f_tight = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/temp/purity.root");
+  TFile* f_loose = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet/purity.root");
 
   // vector<string> dirs = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
-  vector<string> dirs = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
+  // vector<string> dirs = {"1VL_H", "2VL_H", "1L_H", "2L_H", "1M_H", "2M_H", "3M_H", "1H_H", "2H_H", "3H_H"};
+  vector<string> dirs = {"1VL_L", "2VL_L", "1L_L", "2L_L", "1M_L", "2M_L", "3M_L", "1H_L", "2H_L", "3H_L"};
 
   int n_srbins = 10;
 
@@ -84,7 +85,8 @@ int ZGRatioComparison()
   h_loose->GetXaxis()->SetBinLabel(10, "3H");
   // h_loose->GetXaxis()->LabelsOption("u");
   h_loose->GetXaxis()->SetLabelSize(0.06);
-  h_loose->GetYaxis()->SetRangeUser(0, 1.8);
+  // h_loose->GetYaxis()->SetRangeUser(0, 1.8);
+  h_loose->GetYaxis()->SetRangeUser(0, 1.2);
   h_loose->SetMarkerStyle(20);
   h_tight->SetMarkerStyle(20);
   h_loose->SetMarkerColor(kRed);
@@ -93,8 +95,8 @@ int ZGRatioComparison()
   h_tight->SetLineColor(kBlack);
   h_loose->Draw("PE");
   h_tight->Draw("PEsame");
-  TLegend* leg = new TLegend(0.47, 0.72, 0.73, 0.85);
-  // TLegend* leg = new TLegend(0.14, 0.42, 0.3, 0.55);
+  // TLegend* leg = new TLegend(0.47, 0.72, 0.73, 0.85);
+  TLegend* leg = new TLegend(0.14, 0.42, 0.3, 0.55);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.042);
