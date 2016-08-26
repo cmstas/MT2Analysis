@@ -1469,10 +1469,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2HiggsGJ && t.gamma_nJet30FailId == 0) {
         string sufadd = (t.gamma_mcMatchId[0] > 0 || t.isData)? "" : "Fake";
         // fillHistosCRGJMT2Higgs("crhgj", sufadd);
-        if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
-        // if (doMinMTBMetGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
+        if (isHcandGJ) fillHistosCRGJMT2Higgs("crhgj", sufadd);
         if (true)                       fillHistosCRGJMT2Higgs("", "_original" + sufadd);
-        if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
+        // if (doMinMTBMetGJ)              fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
         if (isHcandGJ)                  fillHistosCRGJMT2Higgs("", "_isHcand" + sufadd);
         if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnHcand" + sufadd);
         if (ivMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_ivmMTnHcand" + sufadd);
@@ -1499,10 +1498,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (doMT2Higgs) {
         // fillHistosSRMT2Higgs("srh");
-        if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh");
-        // if (doMinMTBMet) fillHistosSRMT2Higgs("srh");
+        if (isHcand) fillHistosSRMT2Higgs("srh");
         if (true)                   fillHistosSRMT2Higgs("srh", "_original");
-        if (doMinMTBMet)            fillHistosSRMT2Higgs("srh", "_minMTbmet");
+        // if (doMinMTBMet)            fillHistosSRMT2Higgs("srh", "_minMTbmet");
         if (isHcand)                fillHistosSRMT2Higgs("srh", "_isHcand");
         if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnHcand");
         if (ivMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_ivmMTnHcand");
@@ -1513,10 +1511,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
         if (doDYplots) {
           // fillHistosCRDYMT2Higgs();
-          if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs();
-          // if (doMinMTBMet) fillHistosCRDYMT2Higgs();
+          if (isHcand) fillHistosCRDYMT2Higgs();
           if (true)                   fillHistosCRDYMT2Higgs("", "_original");
-          if (doMinMTBMet)            fillHistosCRDYMT2Higgs("", "_minMTbmet");
+          // if (doMinMTBMet)            fillHistosCRDYMT2Higgs("", "_minMTbmet");
           if (isHcand)                fillHistosCRDYMT2Higgs("", "_isHcand");
           if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_mMTnHcand");
           if (ivMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_ivmMTnHcand");
@@ -2890,9 +2887,9 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
 
   plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
-  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 100, 0, 600);
-  plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 100, 0, 600);
-  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 100, 0, 600);
+  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 600);
+  plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 80, 0, 800);
+  plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 80, 0, 500);
   plot1D("h_nHcand"+s,        nHcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
 
   if (dirname.find("crhsl") == 0) {
