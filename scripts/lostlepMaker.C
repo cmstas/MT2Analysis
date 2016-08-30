@@ -257,6 +257,36 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
     //    pred_finebin->Print("all");
 
+    // set uncertainties on prediction hist
+    // - MC stat
+    // - data CR stat -> use just sqrt(N) instead of (correct) poisson uncertainties
+    // - 10% for transfer factor syst uncertainty
+    // - 12% transfer factor uncertainty from lepton eff
+    // - some complicated shape uncertainty
+    // NOTE that this sets uncertainty to 0 for bins with 0 data CR stats (i.e. pred = 0)... 
+
+    for ( int ibin = 1; ibin <= pred->GetNbinsX(); ++ibin) {
+      float val = pred->GetBinContent(ibin);
+      if (val <= 0.) continue;
+      float err_mcstat = h_lostlepMC_sr->GetBinError(ibin)/h_lostlepMC_sr->GetBinContent(ibin);
+      float err_datastat = (data_cr_yield > 0) ? sqrt(data_cr_yield)/data_cr_yield : 0.; // should never get 0 data CR yield and nonzero pred
+      float err_shape = 0.;
+      if (n_mt2bins > 1) {
+        if (ibin == 1 && val > 0.) {
+          // first bin needs to compensate normalization from the rest
+          float increment = 0.;
+          for (int i = 2; i <= pred->GetNbinsX(); i++) 
+            increment += 0.4 / (n_mt2bins - 1) * (i - 1) * pred->GetBinContent(i);
+          err_shape = 1. - increment/val;
+        } else {
+          err_shape = 1. + 0.4 / (n_mt2bins - 1) * (ibin - 1);
+        }
+      }
+      float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + 0.10*0.10 + 0.12*0.12 + err_shape*err_shape;
+      if (njets_LOW >= 7 && nbjets_LOW >= 1) quadrature += 0.2*0.2;
+      pred->SetBinError(ibin, val*sqrt(quadrature));
+    }
+
     pred->Write();
     pred_finebin->Write();
     Syst->Write();
