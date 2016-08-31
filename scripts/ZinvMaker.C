@@ -275,7 +275,7 @@ void makeZinvFromDY( TFile* fZinv , TFile* fDY ,vector<string> dirs, string outp
 
 
 //_______________________________________________________________________________
-void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
+void ZinvMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"){
 
   // input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
   // string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
@@ -289,13 +289,12 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
-  TFile* f_zinv = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str()));
-  TFile* f_gjet = new TFile(Form("%s/2015gjets_ht.root",input_dir.c_str()));
-  // TFile* f_qcd = new TFile(Form("%s/2015qcd_pt.root",input_dir.c_str()));
-  TFile* f_dy = new TFile(Form("%s/2015dyjetsll_ht.root",input_dir.c_str()));
-  // TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  TFile* f_gjet = new TFile(Form("%s/gjet_ht.root",input_dir.c_str()));
+  // TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
 
-  if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
+  if(f_zinv->IsZombie() || f_gjet->IsZombie() || f_dy->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }

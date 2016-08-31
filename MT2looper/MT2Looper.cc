@@ -1219,11 +1219,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // -- MT2Higgs looper --
       // This part is designed to run with the standard mt2baby without the help from hcand branches
+      bool fasterRuntime = true;
 
       // recalculating minMTbmet from jet vectors, using bjets down to 20
       bool doMT2Higgs  = false;
-      bool doMinMTBMet = false;
-      bool ivMinMTBMet = false;
+      // bool doMinMTBMet = false;
+      // bool ivMinMTBMet = false;
       bool doMbbMax200 = false;
       bool doMbbMax300 = false;
       bool isHcand     = false;
@@ -1324,8 +1325,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // --- Gamma Jet control region for mt2higgs ---
       bool doMT2HiggsGJ  = false;
-      bool doMinMTBMetGJ = false;
-      bool ivMinMTBMetGJ = false;
+      // bool doMinMTBMetGJ = false;
+      // bool ivMinMTBMetGJ = false;
       bool doMbbMax200GJ = doMbbMax200; // = false;
       bool doMbbMax300GJ = doMbbMax300; // = false;
       bool isHcandGJ     = isHcand; // = false;
@@ -1493,7 +1494,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
-      if (!doMT2Higgs) continue; // for faster runtime
+      if (fasterRuntime && !doMT2Higgs) continue; // for faster runtime
 
       if ( !(t.isData && doBlindData && t.mt2 > 200) ) {
 	if (verbose) cout<<__LINE__<<endl;
@@ -1547,6 +1548,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (verbose) cout<<__LINE__<<endl;
         fillHistosCRDY("crdy");
       }
+      if (fasterRuntime) continue; // for faster runtime
+
       if (doRLplots) {
         saveRLplots = true;
 	if (verbose) cout<<__LINE__<<endl;

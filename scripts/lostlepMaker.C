@@ -242,8 +242,8 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     // set uncertainties on finebin prediction hist
     // - MC stat (already included)
     // - data CR stat -> use just sqrt(N) instead of (correct) poisson uncertainties
-    // - 15% for lepton efficiency
-    // - 5% transfer factor error for most bins, additional 20% for 7j,>=1b
+    // - 12% for lepton efficiency
+    // - 10% transfer factor error for most bins, additional 20% for 7j,>=1b
     // - not including MT2 shape uncertainty at this point
     // NOTE that this sets uncertainty to 0 for bins with 0 data CR stats (i.e. pred = 0)... 
     for ( int ibin = 1; ibin <= pred_finebin->GetNbinsX(); ++ibin) {
@@ -251,7 +251,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       if (val <= 0.) continue;
       float err_mcstat = h_lostlepMC_sr_finebin->GetBinError(ibin)/h_lostlepMC_sr_finebin->GetBinContent(ibin);
       float err_datastat = (data_cr_yield > 0) ? sqrt(data_cr_yield)/data_cr_yield : 0.; // should never get 0 data CR yield and nonzero pred
-      float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + 0.15*0.15 + 0.05*0.05;
+      float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + 0.10*0.10 + 0.12*0.12;
       if (njets_LOW >= 7 && nbjets_LOW >= 1) quadrature += 0.2*0.2;
       pred_finebin->SetBinError(ibin,val*sqrt(quadrature));
     }

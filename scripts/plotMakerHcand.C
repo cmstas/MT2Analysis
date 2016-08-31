@@ -1006,7 +1006,7 @@ void printDetailedComparisonTable(vector<TFile*> samples, vector<string> names, 
 
 
     // backgrounds first -- loop backwards
-    for( int isamp = n-1 ; isamp >= 0 ; --isamp ){
+    for( int isamp = 0 ; isamp < n ; ++isamp ){
       if( TString(names.at(isamp)).Contains("data")  ) continue;
       if( TString(names.at(isamp)).Contains("sig")  ) continue;
       ofile << getTableName(names.at(isamp));
@@ -3242,7 +3242,9 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
-  vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
+  // vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "data_Run2016"};
+  vector<string> names = {"qcd_ht", "zinv_ht", "wjets_ht", "top", "data_Run2016"};
+  // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
   // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
   // vector<string> names = {"ttsl", "2015zinv_ht", "wjets_ht", "ttdl", "2015qcd_ht"};
@@ -3343,7 +3345,7 @@ void plotMakerHcand() {
   vector<string> dirsH;
   // names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "2015zinv_ht"};
 
-  vector<string> selecs{"HcandCR"};
+  vector<string> selecs{"noHcandCR"};
   // vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand", "ivmMTnHcand"};
                            // "MbbMax200", "mMTnMbb200", "MbbMax300", "mMTnMbb300"};
   // vector< vector<TFile*> > samplesVec;
