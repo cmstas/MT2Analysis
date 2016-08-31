@@ -277,9 +277,9 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
           float increment = 0.;
           for (int i = 2; i <= pred->GetNbinsX(); i++) 
             increment += 0.4 / (n_mt2bins - 1) * (i - 1) * pred->GetBinContent(i);
-          err_shape = 1. - increment/val;
+          err_shape = - increment/val;
         } else {
-          err_shape = 1. + 0.4 / (n_mt2bins - 1) * (ibin - 1);
+          err_shape = 0.4 / (n_mt2bins - 1) * (ibin - 1);
         }
       }
       float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + 0.10*0.10 + 0.12*0.12 + err_shape*err_shape;
@@ -287,6 +287,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       pred->SetBinError(ibin, val*sqrt(quadrature));
     }
 
+    h_n_mt2bins->Write();
     pred->Write();
     pred_finebin->Write();
     Syst->Write();

@@ -74,6 +74,8 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     if (!h_zinv_cryield) cout << "Cannot find CR yields histogram in purity.root: " << fullhistname << endl;
     if (!h_zinv_cryield && !h_zinv_purity && !h_zinv_mcstat) continue;
 
+    TH1D* h_n_mt2bins = new TH1D("h_n_mt2bins", "n_mt2bins", 1, 0, 2);
+    h_n_mt2bins->SetBinContent(1, n_mt2bins);
     TH1D* pred = (TH1D*) h_zinv->Clone("h_mt2bins");
     TH1D* h_mcyield = (TH1D*) h_zinv->Clone("h_mt2binsMCyield");
     TH1D* h_cryield;
@@ -158,9 +160,9 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
             float increment = 0.;
             for (int ibin=2; ibin<=h_zinv->GetNbinsX(); ibin++) 
               increment += 0.4 / (n_mt2bins - 1) * (ibin - 1) * h_zinv->GetBinContent(ibin);
-            err_shape = 1. - increment/n_zinv;
+            err_shape = - increment/n_zinv;
           } else {
-            err_shape = 1. + 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
+            err_shape = 0.4 / (n_mt2bins - 1) * (mt2bin - 1);
           }
         }
       }
@@ -183,6 +185,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       }
     }
 
+    h_n_mt2bins->Write();
     pred->Write();
     h_mcyield->Write();
     h_cryield->Write();
