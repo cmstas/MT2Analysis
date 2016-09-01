@@ -3038,7 +3038,15 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot1D("h_njbins"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
   plot1D("h_nbjbins"+s,       t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
 
-  if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || TString(dirname).Contains("crhgj") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH")
+  if (TString(dirname).Contains("crhgj")) {
+    plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_minMTbmet"+s,     gamma_minMTbmet_,  evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
+    plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
+    plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
+    plot1D("h_nHcand"+s,        nHcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
+  }
+
+  if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || TString(dirname).Contains("crhgjbase") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH")
        && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight") ) // Don't make these for Loose, NotLoose. SieieSB
     {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -3101,6 +3109,14 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
 
   plot1D("h_mt2bins"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   
+  if (TString(dirname).Contains("crhdy")) {
+    plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_minMTbmet"+s,     gamma_minMTbmet_,  evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
+    plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
+    plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
+    plot1D("h_nHcand"+s,        nHcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
+  }
+
   if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || TString(dirname).Contains("crhdybase") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
