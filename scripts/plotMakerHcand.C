@@ -55,6 +55,14 @@ void addOverflow(TH1* h) {
   return;
 }
 
+void addOverflowToXmax(TH1* h, double xmax) {
+  Double_t err = 0;
+  Int_t lastbin = h->FindBin(xmax) - 1;
+  float lastBinPlusOverflow = h->IntegralAndError(lastbin, -1, err);
+  h->SetBinContent(lastbin, lastBinPlusOverflow);
+  h->SetBinError(lastbin, err);
+  return;
+}
 
 
 TGraphAsymmErrors* getPoissonGraph( TH1D* histo, bool drawZeros, const std::string& xerrType = "0", float nSigma = 1 ) {
@@ -237,7 +245,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     data_hist->SetLineColor(kBlack);
     data_hist->SetMarkerColor(kBlack);
     data_hist->SetMarkerStyle(20);
-    addOverflow(data_hist); // Add Overflow
+    // addOverflow(data_hist); // Add Overflow
+    addOverflowToXmax(data_hist, xmax); // Add Overflow to visual max
     if (rebin > 1) data_hist->Rebin(rebin);
 
     // fake data -> set error bars to correspond to data stats
@@ -251,13 +260,10 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     break;
   }
 
-  TGraphAsymmErrors* graph_data{0};
-  if (data_hist) {
-    graph_data = getPoissonGraph(data_hist, true);
-    graph_data->SetLineColor(kBlack);
-    graph_data->SetMarkerColor(kBlack);
-    graph_data->SetMarkerStyle(20);
-  }
+  TGraphAsymmErrors* graph_data = getPoissonGraph(data_hist, true);
+  graph_data->SetLineColor(kBlack);
+  graph_data->SetMarkerColor(kBlack);
+  graph_data->SetMarkerStyle(20);
 
   if (graph_data) leg->AddEntry(graph_data,getLegendName(data_name).c_str(),"pe1");
 
@@ -300,7 +306,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     h->SetFillColor(getColor(names.at(i)));
     h->SetLineColor(kBlack);
-    addOverflow(h); // Add Overflow
+    // addOverflow(h); // Add Overflow
+    addOverflowToXmax(h, xmax); // Add Overflow to the visual max
     if (rebin > 1) h->Rebin(rebin);
     if( h_bgtot==0 ) h_bgtot = (TH1D*) h->Clone(Form("%s_%s_bgtot",histname.c_str(),histdir.c_str()));
     else h_bgtot->Add(h);
@@ -327,7 +334,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     TH1D* h = (TH1D*) h_temp->Clone(newhistname);
     h->SetLineColor(getColor(names.at(i)));
     h->SetLineWidth(2);
-    addOverflow(h); // Add Overflow
+    // addOverflow(h); // Add Overflow
+    addOverflowToXmax(h, xmax); // Add Overflow to visual max
     if (rebin > 1) h->Rebin(rebin);
     if (scalesig > 0.) h->Scale(scalesig);
     sig_hists.push_back(h);
@@ -339,7 +347,6 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   float bg_integral = h_bgtot->IntegralAndError(0,h_bgtot->GetXaxis()->GetNbins(),bg_integral_err);
   float data_integral = 1.;
   float bg_sf = 1.;
-  // float bg_sf = 40./12.9;
   float bg_sf_err = 0.;
   if (data_hist) {
     data_integral = data_hist->Integral(0,data_hist->GetXaxis()->GetNbins());
@@ -349,7 +356,6 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   }
   for (unsigned int ibg = 0; ibg < bg_hists.size(); ++ibg) {
     if (scaleBGtoData && data_hist) bg_hists.at(ibg)->Scale(bg_sf);
-    bg_hists.at(ibg)->Scale(bg_sf);
     t->Add(bg_hists.at(ibg));
   }
   if (scaleBGtoData && data_hist) {
@@ -553,8 +559,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     ratiopad->cd();
 
     TH1D* h_ratio = (TH1D*) data_hist->Clone(Form("ratio_%s",data_hist->GetName()));
-    h_ratio->Sumw2();
-    h_bgtot->Sumw2();
+    // h_ratio->Sumw2();
+    // h_bgtot->Sumw2();
 
 
     // draw axis only
@@ -3337,6 +3343,7 @@ void plotMakerHcand() {
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
   vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "data_Run2016"};
+  // vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "gjet_ht", "dyjetsll_ht", "data_Run2016"};
   // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
   // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
@@ -3354,7 +3361,7 @@ void plotMakerHcand() {
 
   float scalesig = -1.;
   // float scalesig = 30;
-  // printplots = true;
+  printplots = true;
   // bool doRatio = false;
   bool doRatio = true;
   bool scaleBGtoData = false;
@@ -3370,6 +3377,7 @@ void plotMakerHcand() {
       std::string dir_name = k->GetTitle();
       if(dir_name == "") continue;
       if(dir_name != "srhbase") continue; //to do only this dir
+      // if(dir_name != "srhbase") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
       string s = "_noHcandCR";
 
@@ -3390,9 +3398,9 @@ void plotMakerHcand() {
       makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
 
-      makePlot( samples , names , dir_name , "h_deltaPhiminMTbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_deltaPhiMinbmet"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_deltaPhibbHcand"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_deltaPhiminMTbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_deltaPhiMinbmet"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_deltaPhibbHcand"+s  , "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
       // makePlot( samples , names , dir_name , "h_deltaPhiMinGenbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_deltaPhiminMTgenbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3724,7 +3732,7 @@ void plotMakerHcand() {
   // dirsH.clear();
 
   // vector<string> names5 = {"lostlepFromCRs", "lostlep", "zinvDataDriven", "2015zinv_ht"};
-  vector<string> names5 = {"lostlepFromCRs", "zinvDataDriven"};
+  vector<string> names5 = {"qcd_ht", "lostlepFromCRs", "zinvDataDriven"};
   vector<TFile*> samples5 = getSamples(names5, input_dir);
 
   // dirsH.push_back("sr6VL");
@@ -3744,17 +3752,37 @@ void plotMakerHcand() {
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
-  // dirsH.push_back("srh1M");
-  // dirsH.push_back("srh2M");
-  // dirsH.push_back("srh3M");
-  // printDetailedTableDataDriven(samples5, names5, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1M_H");
+  dirsH.push_back("srh2M_H");
+  dirsH.push_back("srh3M_H");
+  printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srh1H");
-  // dirsH.push_back("srh2H");
-  // dirsH.push_back("srh3H");
-  // printDetailedTableDataDriven(samples5, names5, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1H_H");
+  dirsH.push_back("srh2H_H");
+  dirsH.push_back("srh3H_H");
+  printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
+  dirsH.clear();
+
+
+  dirsH.push_back("srh1VL_L");
+  dirsH.push_back("srh2VL_L");
+  dirsH.push_back("srh1L_L");
+  dirsH.push_back("srh2L_L");
+  printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srh1M_L");
+  dirsH.push_back("srh2M_L");
+  dirsH.push_back("srh3M_L");
+  printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srh1H_L");
+  dirsH.push_back("srh2H_L");
+  dirsH.push_back("srh3H_L");
+  printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
+  dirsH.clear();
 
   // dirsH.push_back("srh1VL");
   // dirsH.push_back("srh2VL");
