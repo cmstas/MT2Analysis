@@ -303,10 +303,18 @@ void MT2Looper::SetSignalRegions(){
   SRBaseHcand.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBaseHcand.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   SRBaseHcand.SetVarCRSL("nlep", 1, 2);
-  // SRBaseHcand.SetVarCRSL("njets", 4, -1);
   SRBaseHcand.SetVarCRSL("nbjets", 2, -1);
   SRBaseHcand.SetVarCRSL("minMTbmet", 0, -1);
   SRBaseHcand.SetVarCRSL("passesHtMet", 1, 2);
+  SRBaseHcand.SetVarCRQCD("mt2", 0, 200);
+  SRBaseHcand.SetVarCRQCD("j1pt", 30, -1);
+  SRBaseHcand.SetVarCRQCD("j2pt", 30, -1);
+  SRBaseHcand.SetVarCRQCD("deltaPhiMin", 0, 0.3);
+  SRBaseHcand.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
+  SRBaseHcand.SetVarCRQCD("nlep", 0, 1);
+  SRBaseHcand.SetVarCRQCD("nbjets", 0, -1);
+  SRBaseHcand.SetVarCRQCD("minMTbmet", 0, -1);
+  SRBaseHcand.SetVarCRQCD("passesHtMet", 1, 2);
   float SRBaseHcand_mt2bins[4] = {200, 300, 500, 1000}; 
   SRBaseHcand.SetMT2Bins(3, SRBaseHcand_mt2bins);
 
@@ -1252,7 +1260,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         TLorentzVector jet;
         jet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
 
-        if (t.jet_btagCSV[ijet] >= 0.800)
+        float bTaggingPoint = (stringsample.Contains("2015"))? 0.890 : 0.800; // fix for 2015 samples
+        if (t.jet_btagCSV[ijet] >= bTaggingPoint)
           p4sBJets.push_back(jet);
         else if (t.jet_pt[ijet] > 30)
           p4sForHemsHcand.push_back(LorentzVector(jet.Px(), jet.Py(), jet.Pz(), jet.E()));
@@ -1802,6 +1811,9 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   if (SRBaseHcand.PassesSelection(values)) {
     fillHistosMT2Higgs(SRBaseHcand.srHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), SRBaseHcand.GetName(), suffix);
   }
+  else if (SRBaseHcand.PassesSelectionCRQCD(values)) {
+    fillHistosMT2Higgs(SRBaseHcand.crqcdHistMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhqcdbase", suffix);
+  }
 
   // Control Regions Single Lepton
   std::map<std::string, float> valuesCRSL = values;
@@ -1992,12 +2004,12 @@ void MT2Looper::fillHistosCRDYMT2Higgs(const std::string& prefix, const std::str
   values_monojet["ht"]          = t.zll_ht;
   values_monojet["met"]         = t.zll_met_pt;
 
-  if (passBase) fillHistosDY(SRBase.crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crhdybase", suffix);
-  if (passBase || passBaseJ) fillHistosDY(SRBaseInclHcand.crdyHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "crhdybaseIncl", suffix);
+  if (passBase) fillHistosMT2Higgs(SRBase.crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crhdybase", suffix);
+  if (passBase || passBaseJ) fillHistosMT2Higgs(SRBaseInclHcand.crdyHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "crhdybaseIncl", suffix);
 
   for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
     if (SRVecHcand.at(srN).PassesSelection(values)) {
-      fillHistosDY(SRVecHcand.at(srN).crdyHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhdy"+SRVecHcand.at(srN).GetName(), suffix);
+      fillHistosMT2Higgs(SRVecHcand.at(srN).crdyHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crhdy"+SRVecHcand.at(srN).GetName(), suffix);
       // break;//control regions are orthogonal, event cannot be in more than one
     }
   }
@@ -2913,10 +2925,6 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
   plot1D("h_nHcand"+s,        nHcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
 
-  if (dirname.find("crhsl") == 0) {
-    plot1D("h_leppt"+s,      leppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
-    plot1D("h_mt"+s,            mt_,          evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
-  }
   // if (s.find("isHcand"))
   plot1D("h_deltaPhiminMTbmet"+s,   deltaPhiminMTbmet_,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
   plot1D("h_deltaPhiMinbmet"+s,     deltaPhiMinbmet_,     evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
@@ -2933,7 +2941,17 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
 
   outfile_->cd();
 
-  fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
+  if (dirname.find("srh") == 0)
+    fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
+  else if (dirname.find("crhsl") == 0)
+    fillHistosSingleLepton(h_1d, n_mt2bins, mt2bins, dirname, s);
+  else if (dirname.find("crhdy") == 0)
+    fillHistosDY(h_1d, n_mt2bins, mt2bins, dirname, s);
+  else if (dirname.find("crhqcd") == 0)
+    fillHistosQCD(h_1d, n_mt2bins, mt2bins, dirname, s);
+  else   // shouldn't get here, but let's fill it anyway
+    fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
+
   return;
 }
 
@@ -3109,14 +3127,6 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
 
   plot1D("h_mt2bins"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   
-  if (TString(dirname).Contains("crhdy")) {
-    plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
-    plot1D("h_minMTbmet"+s,     gamma_minMTbmet_,  evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
-    plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
-    plot1D("h_MbbClose"+s,      mbbclose_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
-    plot1D("h_nHcand"+s,        nHcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
-  }
-
   if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || TString(dirname).Contains("crhdybase") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);

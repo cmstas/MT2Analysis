@@ -674,10 +674,10 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   if (datanamestring.Contains("Data") || datanamestring.Contains("data")) realData = true;
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or qcd+gjets file
   TFile* f_gq = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
-  TFile* f_g = new TFile(Form("%s/gjet_ht.root",input_dir.c_str())); //gjet file
-  TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
+  TFile* f_g = new TFile(Form("%s/2015gjet_ht.root",input_dir.c_str())); //gjet file
+  TFile* f_q = new TFile(Form("%s/2015qcd_ht.root",input_dir.c_str())); //qcd file
   TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
-  TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
+  TFile* f_zOrig = new TFile(Form("%s/2015zinv_ht.root",input_dir.c_str())); //zinv file out of the box
   if(f_g->IsZombie() || f_q->IsZombie() || f_gq->IsZombie() || f_data->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
