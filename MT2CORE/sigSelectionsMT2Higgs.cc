@@ -78,16 +78,10 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetName(fullSRname + "_H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 200);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, 0.3);
     SRVec.push_back(fullSR);
     fullSR.SetName(fullSRname + "_L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 100);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, -1);
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
@@ -106,16 +100,10 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetName(fullSRname + "_H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 200);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, 0.3);
     SRVec.push_back(fullSR);
     fullSR.SetName(fullSRname + "_L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 100);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, -1);
     SRVec.push_back(fullSR);
   }
   for(unsigned int iSR = 0; iSR < temp_SR_MH_vec.size(); iSR++){
@@ -135,16 +123,10 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetName(fullSRname + "_H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 200);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, 0.3);
     SRVec.push_back(fullSR);
     fullSR.SetName(fullSRname + "_L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 100);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, -1);
     if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
     SRVec.push_back(fullSR);
   }
@@ -165,16 +147,10 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
     fullSR.SetName(fullSRname + "_H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 200);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, 0.3);
     SRVec.push_back(fullSR);
     fullSR.SetName(fullSRname + "_L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
-    fullSR.SetVarCRQCD("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("mt2", 0, 100);
-    fullSR.SetVarCRQCD("deltaPhiMin", 0, -1);
     if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
     SRVec.push_back(fullSR);
   }
@@ -197,12 +173,13 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   baseSR.SetVarCRSL("nlep", 1, 2);
 
   // common selections for QCD
-  // baseSR.SetVarCRQCD("mt2", 200, -1);
+  baseSR.SetVarCRQCD("mt2", 0, 200);
   baseSR.SetVarCRQCD("j1pt", 30, -1);
   baseSR.SetVarCRQCD("j2pt", 30, -1);
-  // baseSR.SetVarCRQCD("deltaPhiMin", 0., 0.3);
+  baseSR.SetVarCRQCD("deltaPhiMin", 0., 0.3);
   baseSR.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
   baseSR.SetVarCRQCD("nlep", 0, 1);
+  baseSR.SetVarCRQCD("minMTbmet", 0, -1);
 
   //add baseline selections to all signal regions
   std::vector<std::string> vars = baseSR.GetListOfVariables();
@@ -231,5 +208,6 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   return SRVec;
 
 }
+
 
 } // namespace mt2
