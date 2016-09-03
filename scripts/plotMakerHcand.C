@@ -260,10 +260,13 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     break;
   }
 
-  TGraphAsymmErrors* graph_data = getPoissonGraph(data_hist, true);
-  graph_data->SetLineColor(kBlack);
-  graph_data->SetMarkerColor(kBlack);
-  graph_data->SetMarkerStyle(20);
+  TGraphAsymmErrors* graph_data{0};
+  if (data_hist) {
+    graph_data = getPoissonGraph(data_hist, true);
+    graph_data->SetLineColor(kBlack);
+    graph_data->SetMarkerColor(kBlack);
+    graph_data->SetMarkerStyle(20);
+  }
 
   if (graph_data) leg->AddEntry(graph_data,getLegendName(data_name).c_str(),"pe1");
 
@@ -3342,7 +3345,8 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
-  vector<string> names = {"wjets_ht", "2015zinv_ht", "top", "2015qcd_ht", "data_Run2016"};
+  // vector<string> names = {"wjets_ht", "2015zinv_ht", "top", "2015qcd_ht", "data_Run2016"};
+  vector<string> names = {"wjets_ht", "2015zinv_ht", "top", "2015qcd_ht"};
   // vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "gjet_ht", "dyjetsll_ht", "data_Run2016"};
   // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
   // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
@@ -3362,8 +3366,8 @@ void plotMakerHcand() {
   float scalesig = -1.;
   // float scalesig = 30;
   printplots = true;
-  // bool doRatio = false;
-  bool doRatio = true;
+  bool doRatio = false;
+  // bool doRatio = true;
   bool scaleBGtoData = false;
 
   if (printplots) {
@@ -3375,7 +3379,7 @@ void plotMakerHcand() {
       // if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       // if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      if(dir_name == "") continue;
+      // if(dir_name == "") continue;
       if(dir_name != "crhqcdbase") continue; //to do only this dir
       // if(dir_name != "srhbase") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
@@ -3383,7 +3387,7 @@ void plotMakerHcand() {
 
       // makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 2 , true, printplots, scalesig, doRatio, true );
+      makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_met"+s  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_nlepveto"+s , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_nJet30"+s , "N(jets)" , "Events" , 2 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3413,6 +3417,7 @@ void plotMakerHcand() {
       }
     }
   }
+  return;
 
   // Make SR Yields hist
   // makeSRyieldsComparisonHist(samples, "_H", "mMTnHcand");
