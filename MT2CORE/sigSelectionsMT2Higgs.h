@@ -8,7 +8,8 @@
 namespace mt2
 {
 
-  std::vector<SR> getSignalRegionsMT2Higgs();
+std::vector<SR> getSignalRegionsMT2Higgs();
+std::vector<SR> getSignalRegionsMbbMax();
 
 } // namespace mt2
 
