@@ -260,35 +260,35 @@ std::vector<SR> getSignalRegionsMbbMax() {
   sr.Clear();
 
   //add HT and MET requirements
-  for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
-    SR fullSR = temp_SR_VL_vec.at(iSR);
-    std::string fullSRname = fullSR.GetName() + "VL";
-    fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 200, 450);
-    fullSR.SetVar("met", 200, -1);
-    fullSR.SetVar("minMTbmet", 0, -1);
-    fullSR.SetVarCRSL("ht", 200, 450);
-    fullSR.SetVarCRSL("met", 200, -1);
-    fullSR.SetVarCRSL("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("ht", 200, 450);
-    fullSR.SetVarCRQCD("met", 200, -1);
-    int njets_lo = fullSR.GetLowerBound("njets");
-    int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
-    else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 300, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
-    SRVec.push_back(fullSR);
-  }
+  // for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
+  //   SR fullSR = temp_SR_VL_vec.at(iSR);
+  //   std::string fullSRname = fullSR.GetName() + "VL";
+  //   fullSR.SetName(fullSRname);
+  //   fullSR.SetVar("ht", 200, 450);
+  //   fullSR.SetVar("met", 200, -1);
+  //   fullSR.SetVar("minMTbmet", 0, -1);
+  //   fullSR.SetVarCRSL("ht", 200, 450);
+  //   fullSR.SetVarCRSL("met", 200, -1);
+  //   fullSR.SetVarCRSL("minMTbmet", 0, -1);
+  //   fullSR.SetVarCRQCD("ht", 200, 450);
+  //   fullSR.SetVarCRQCD("met", 200, -1);
+  //   int njets_lo = fullSR.GetLowerBound("njets");
+  //   int nbjets_lo = fullSR.GetLowerBound("nbjets");
+  //   if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
+  //   else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 300, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
+  //   SRVec.push_back(fullSR);
+  // }
   for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
     SR fullSR = temp_SR_VL_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "L";
     fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 450, 575);
+    fullSR.SetVar("ht", 200, 575);
     fullSR.SetVar("met", 200, -1);
     fullSR.SetVar("minMTbmet", 0, -1);
-    fullSR.SetVarCRSL("ht", 450, 575);
+    fullSR.SetVarCRSL("ht", 200, 575);
     fullSR.SetVarCRSL("met", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("ht", 450, 575);
+    fullSR.SetVarCRQCD("ht", 200, 575);
     fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
