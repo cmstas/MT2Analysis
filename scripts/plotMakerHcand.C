@@ -115,8 +115,6 @@ TGraphAsymmErrors* getPoissonGraph( TH1D* histo, bool drawZeros, const std::stri
 
 }
 
-
-
 TGraphAsymmErrors* getRatioGraph( TH1D* histo_data, TH1D* histo_mc ){
 
   if( !histo_data || !histo_mc ) return 0;
@@ -929,7 +927,7 @@ void printDetailedComparisonTable(vector<TFile*> samples, vector<string> names, 
   unsigned int ndirs = dirs.size();
   unsigned int nselecs = selecs.size();
 
-  // vector< vector<string> > dirsVec;
+  // vector<vector<string>> dirsVec;
   // int nTabulars = ndirs*nselecs/8;
   // if ((ndirs*nselecs)%8 > 0) ++nTabulars;
   // int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
@@ -1339,7 +1337,7 @@ void printComparisonTableCR(vector<TFile*> samples, vector<string> names, vector
 }
 
 //_______________________________________________________________________________
-void printComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
+void printComparisonTable(vector<vector<TFile*>> samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
   vector<TFile*> samples = samplesVec[0];
@@ -1809,7 +1807,7 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
 }
 
 //_______________________________________________________________________________
-void printComparisonRatioTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int colorReduction = 0, int mt2bin = -1) {
+void printComparisonRatioTable(vector<vector<TFile*>> samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int colorReduction = 0, int mt2bin = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
   vector<TFile*> samples = samplesVec[0];
@@ -2404,7 +2402,7 @@ void printRatioTable( vector<TFile*> samples , vector<string> names , vector<str
 }
 
 //_______________________________________________________________________________
-void printDetailedComparisonTable(vector< vector<TFile*> > samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int colorReduction = 0) {
+void printDetailedComparisonTable(vector<vector<TFile*>> samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int colorReduction = 0) {
 
   // read off yields from h_mt2bins hist in each topological region
   vector<TFile*> samples = samplesVec[0];
@@ -2416,7 +2414,7 @@ void printDetailedComparisonTable(vector< vector<TFile*> > samplesVec, vector<st
   unsigned int nselecs = selecs.size();
   if (nselecs < 2) cout << "Use printTable instead!\n";
 
-  // vector< vector<string> > dirsVec;
+  // vector<vector<string>> dirsVec;
   // int nTabulars = ndirs*nselecs/8;
   // if ((ndirs*nselecs)%8 > 0) ++nTabulars;
   // int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
@@ -3323,6 +3321,189 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, vector<string> names, st
   delete h_axis_ratio;
 }
 
+void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, vector<string> signames, string bmetsuf, string selec) {
+  int n_srbins = 21;
+
+  vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
+  if (bmetsuf == "_L") n_srbins = 23;
+  else if (bmetsuf == "") {
+    n_srbins = 21;
+    dirsAll = vector<string>{"1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
+  }
+
+  vector<Color_t> colorsAll = {kOrange-2, kRed-7, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
+  vector<Color_t> colors;
+  for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i]);
+  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, bmetsuf, colors, "_" + selec, n_srbins, 40/12.9);
+
+  // TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_original", n_srbins);
+  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_" + selec, n_srbins);
+  hSR_org->SetName("h_SRyields_org");
+  // Only works for having only 1 signal for now. Should be using individual 
+  TH1F* hSR_mMT = fillSRYieldsPlot(sigs, dirsAll, bmetsuf, "_" + selec, n_srbins);
+  TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
+  hRatio->Divide(hSR_mMT, hSR_org, 1, 1, "B");
+
+  hSR_org->Scale(40/12.9);
+  // hSR_mMT->Scale(40/12.9);
+
+  TCanvas* c0 = new TCanvas("c0", "c0", 800, 600);
+  gStyle->SetOptStat("");
+  gStyle->SetPadGridX(0);
+  gStyle->SetPadGridY(0);
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
+  gStyle->SetFrameBorderMode(0);
+  // c0->SetCanvasSize(600, 700);
+  TPad* mainPad = new TPad("1", "1", 0.0, 0.20, 1.0, 1.0);
+  TPad* ratioPad = new TPad("2", "2", 0.0, 0.0, 1.0, 0.20);
+  mainPad->SetTopMargin(0.08);
+  mainPad->SetLeftMargin(0.12);
+  mainPad->SetBottomMargin(0.22);
+  ratioPad->SetTopMargin(0.05);
+  ratioPad->SetLeftMargin(0.12);
+  ratioPad->Draw();
+  mainPad->SetLogy();
+  mainPad->Draw();
+  mainPad->cd();
+
+  hSR_org->SetLineColor(kOrange+1);
+  hSR_org->SetFillColor(kOrange+1);
+  // hSR_org->SetFillStyle(3002);
+  // for (unsigned int i = 0; i < dirsAll.size(); ++i)
+  if (bmetsuf == "_H") {
+    hSR_org->GetXaxis()->SetLabelSize(0.05);
+    hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(4, "2VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(5, "1L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(6, "1L: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(7, "1L: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(8, "2L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(9, "2L: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(10, "1M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(11, "1M: [450,550]");
+    hSR_org->GetXaxis()->SetBinLabel(12, "1M: [550,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(13, "2M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(14, "2M: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(15, "3M: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(16, "3M: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(17, "1H: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(18, "1H: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(19, "2H: [200,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(20, "3H: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(21, "3H: [350,#infty]");
+  } else if (bmetsuf == "_L") {
+    hSR_org->GetXaxis()->SetLabelSize(0.05);
+    hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(4, "2VL: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(5, "1L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(6, "1L: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(7, "1L: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(8, "2L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(9, "2L: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(10, "1M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(11, "1M: [450,550]");
+    hSR_org->GetXaxis()->SetBinLabel(12, "1M: [550,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(13, "2M: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(14, "2M: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(15, "3M: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(16, "3M: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(17, "3M: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(18, "1H: [200,450]");
+    hSR_org->GetXaxis()->SetBinLabel(19, "1H: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(20, "2H: [200,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(21, "3H: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(22, "3H: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(23, "3H: [450,#infty]");
+  } else if (bmetsuf == "") {
+    hSR_org->GetXaxis()->SetLabelSize(0.05);
+    // hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
+    // hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
+    // hSR_org->GetXaxis()->SetBinLabel(3, "2VL: [200,300]");
+    // hSR_org->GetXaxis()->SetBinLabel(4, "2VL: [300,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(1, "1L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(2, "1L: [350,450]");
+    hSR_org->GetXaxis()->SetBinLabel(3, "1L: [450,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(4, "2L: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(5, "2L: [350,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(6, "1M: [200,400]");
+    hSR_org->GetXaxis()->SetBinLabel(7, "1M: [400,600]");
+    hSR_org->GetXaxis()->SetBinLabel(8, "1M: [600,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(9, "2M: [200,500]");
+    hSR_org->GetXaxis()->SetBinLabel(10, "2M: [500,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(11, "3M: [200,350]");
+    hSR_org->GetXaxis()->SetBinLabel(12, "3M: [350,500]");
+    hSR_org->GetXaxis()->SetBinLabel(13, "3M: [500,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(14, "1H: [200,400]");
+    hSR_org->GetXaxis()->SetBinLabel(15, "1H: [400,700]");
+    hSR_org->GetXaxis()->SetBinLabel(16, "1H: [700,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(17, "2H: [200,500]");
+    hSR_org->GetXaxis()->SetBinLabel(18, "2H: [500,#infty]");
+    hSR_org->GetXaxis()->SetBinLabel(19, "3H: [200,400]");
+    hSR_org->GetXaxis()->SetBinLabel(20, "3H: [400,600]");
+    hSR_org->GetXaxis()->SetBinLabel(21, "3H: [600,#infty]");
+  }
+  hSR_org->GetXaxis()->LabelsOption("v");
+
+  hSR_org->GetYaxis()->SetRangeUser(0.1, 5000);
+  hSR_org->Draw("hist");
+  // hSR_mMT->SetFillColor(kAzure+7);
+  hSR_mMT->SetLineColor(kAzure-3);
+  hSR_mMT->Draw("histsame");
+  hSR_mMT->Draw("axissame");
+  // hSR_stk->Draw("histsame");
+  // hSR_stk->Draw("axissame");
+
+  TLegend* leg = new TLegend(0.56, 0.76, 0.87, 0.89);
+  leg->SetFillColor(0);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+  leg->SetTextSize(0.042);
+  // leg->SetNColumns(2);
+  leg->AddEntry(hSR_org, "Total SM");
+  leg->AddEntry(hSR_mMT, signames[0].c_str()); // hardcoded alert
+  // if (selec == "mMTnHcand")
+  //   leg->AddEntry(hSR_mMT, "HMTnHcand");
+  // else if (selec == "ivmMTnHcand")
+  //   leg->AddEntry(hSR_mMT, "LMTnHcand");
+  // for (unsigned int i = 0; i < names.size(); ++i) // hardcoded alert!
+    // leg->AddEntry(hSR_stk->GetHists()->At(i), names.at(i).c_str());
+  // leg->AddEntry(hSR_stk->GetHists()->At(1), "lostlep");
+  // leg->AddEntry(hSR_stk->GetHists()->At(2), "Zinv");
+  leg->Draw("same");
+
+  ratioPad->cd();
+  hRatio->SetMarkerStyle(20);
+  TH1F* h_axis_ratio = new TH1F("ratio_axis","", n_srbins, 0, n_srbins);
+  h_axis_ratio->GetYaxis()->SetTitleOffset(0.24);
+  h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
+  h_axis_ratio->GetYaxis()->SetNdivisions(7);
+  h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
+  h_axis_ratio->GetYaxis()->SetRangeUser(0, 1);
+  // if (selec == "mMTnHcand")
+  //   h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.4);
+  // else if (selec == "ivmMTnHcand")
+  //   h_axis_ratio->GetYaxis()->SetRangeUser(0, 0.8);
+  h_axis_ratio->GetYaxis()->SetTitle("sig/SM bkg");
+  h_axis_ratio->GetXaxis()->SetTickLength(0.07);
+  h_axis_ratio->GetXaxis()->SetTitleSize(0.);
+  h_axis_ratio->GetXaxis()->SetLabelSize(0.);
+  h_axis_ratio->Draw("axis");
+  hRatio->Draw("same");
+  c0->SaveAs(Form("sigYieldsCompareHist_%s.pdf", signames[0].c_str()));
+  // dataMCplotMaker(hSR_mMT, hbg, vector<string>{"original"});
+
+  delete hSR_org;
+  delete hSR_mMT;
+  delete hSR_stk;
+  delete c0;
+  delete leg;
+  delete h_axis_ratio;
+}
 
 vector<TFile*> getSamples(vector<string>& names, string input_dir) {
   vector<TFile*> samples;
@@ -3362,8 +3543,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/notUseHighCSV";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/notUseHighCSV";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/20ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
@@ -3429,8 +3610,9 @@ void plotMakerHcand() {
       // makePlot( samples , names , dir_name , "h_hcand_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 600 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 1000 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbClose"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_MbbZcand"+s , "M(bb) (Zcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
 
       // makePlot( samples , names , dir_name , "h_deltaPhiminMTbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3452,9 +3634,17 @@ void plotMakerHcand() {
   // Make SR Yields hist
   // makeSRyieldsComparisonHist(samples, names, "_H", "isHcand");
   // makeSRyieldsComparisonHist(samples, names, "_L", "isHcand");
-  makeSRyieldsComparisonHist(samples, names, "", "MbbMax300");
-  // makeSRyieldsComparisonHist(samples, names, "", "mMTnMbb300");
+  // makeSRyieldsComparisonHist(samples, names, "", "isZcand");
+  // makeSRyieldsComparisonHist(samples, names, "", "MbbMax300");
+  // makeSRyieldsComparisonHist(samples, names, "", "MbbMaxM");
+  // makeSRyieldsComparisonHist(samples, names, "", "MbbMaxH");
+  // makeSRyieldsComparisonHist(samples, names, "", "mMTnMbbM");
+  // makeSRyieldsComparisonHist(samples, names, "", "ivmMTnMbbM");
   // makeSRyieldsComparisonHist(samples, names, "", "ivmMTnMbb300");
+
+  vector<string> signame = {"T5qqqqWH_1400_700"};
+  vector<TFile*> sigs = getSamples(signame, input_dir);
+  makeSigYieldsComparisonHist(samples, sigs, signame,  "_H", "isHcand");
 
   return;
 
@@ -3489,24 +3679,24 @@ void plotMakerHcand() {
   vector<string> selecs{"noHcandCR"};
   // vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand", "ivmMTnHcand"};
                            // "MbbMax200", "mMTnMbb200", "MbbMax300", "mMTnMbb300"};
-  // vector< vector<TFile*> > samplesVec;
+  // vector<vector<TFile*>> samplesVec;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
   vector<string> names2 = {"lostlepFromCRs", "lostlep", "data_Run2016"};
   // vector<string> names2 = {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016"};
   vector<TFile*> samples2 = getSamples(names2, input_dir);
-  vector< vector<TFile*> > samplesVec2 = {samples2};
+  vector<vector<TFile*>> samplesVec2 = {samples2};
   vector<string> selecs2 = {"mMTnHcand"};
 
-  // vector< vector<TFile*> > samplesVec2;
+  // vector<vector<TFile*>> samplesVec2;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec2.push_back(getSamples(names2, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
   // vector<string> names3 = {"2015gjets_ht", "data_Run2016"};
   vector<string> names3 = {"2015gjets_ht", "zinvDataDriven", "data_Run2016"};
   vector<TFile*> samples3 = getSamples(names3, input_dir);
-  // vector< vector<TFile*> > samplesVec3;
+  // vector<vector<TFile*>> samplesVec3;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec3.push_back(getSamples(names3, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
