@@ -127,8 +127,8 @@ void MT2Looper::SetSignalRegions(){
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
   SRVec =  getSignalRegionsICHEP(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
-  // SRVecHcand = getSignalRegionsMT2Higgs();
-  SRVecHcand = getSignalRegionsMbbMax();
+  SRVecHcand = getSignalRegionsMT2Higgs();
+  // SRVecHcand = getSignalRegionsMbbMax();
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -1262,7 +1262,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (fabs(t.jet_eta[ijet]) > 2.4) continue;
         TLorentzVector jet;
         jet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
-
+        // float bTaggingPoint = (stringsample.Contains("2015"))? 0.605 : 0.460; // loose b-tagging points, temporary for test on QCD estimates
         float bTaggingPoint = (stringsample.Contains("2015"))? 0.890 : 0.800; // fix for 2015 samples
         if (t.jet_btagCSV[ijet] >= bTaggingPoint) {
           csvForBJets.push_back(make_pair(p4sBJets.size(), t.jet_btagCSV[ijet]));
@@ -1271,6 +1271,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           p4sForHemsHcand.push_back(LorentzVector(jet.Px(), jet.Py(), jet.Pz(), jet.E()));
         }
       }
+      // nbjet_loose_ = p4sBJets.size(); // temporary for test on QCD estimates
       // calculate Mbb_close and Mbb_max
       if (p4sBJets.size() >= 2) {
         // basic mt2higgs require >= 2 bjets
@@ -1842,6 +1843,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["nlep"]        = nlepveto_;
   // values["njets"]       = t.nJet30;
   values["nbjets"]      = t.nBJet20;
+  // values["nbjets"]      = nbjet_loose_;
   // values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;

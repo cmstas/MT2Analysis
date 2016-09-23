@@ -21,7 +21,7 @@ INDIR4=/nfs-6/userdata/mt2/V00-08-08_mt2Higgs
 # OUTDIR=output/MbbMax300
 # OUTDIR=output/mMTnMbb300
 OUTDIR=output/temp
-# OUTDIR=output/test
+# OUTDIR=output/testsr4to6j
 LOGDIR=logs/
 # LOGDIR=$OUTDIR/logs/
 
