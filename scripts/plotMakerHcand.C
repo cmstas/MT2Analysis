@@ -3342,10 +3342,10 @@ void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, ve
   // Only works for having only 1 signal for now. Should be using individual 
   TH1F* hSR_mMT = fillSRYieldsPlot(sigs, dirsAll, bmetsuf, "_" + selec, n_srbins);
   TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
-  hRatio->Divide(hSR_mMT, hSR_org, 1, 1, "B");
 
   hSR_org->Scale(40/12.9);
   // hSR_mMT->Scale(40/12.9);
+  hRatio->Divide(hSR_mMT, hSR_org, 1, 1, "B");
 
   TCanvas* c0 = new TCanvas("c0", "c0", 800, 600);
   gStyle->SetOptStat("");
@@ -3449,7 +3449,7 @@ void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, ve
   }
   hSR_org->GetXaxis()->LabelsOption("v");
 
-  hSR_org->GetYaxis()->SetRangeUser(0.1, 5000);
+  hSR_org->GetYaxis()->SetRangeUser(0.1, 2000);
   hSR_org->Draw("hist");
   // hSR_mMT->SetFillColor(kAzure+7);
   hSR_mMT->SetLineColor(kAzure-3);
@@ -3497,6 +3497,15 @@ void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, ve
   c0->SaveAs(Form("sigYieldsCompareHist_%s.pdf", signames[0].c_str()));
   // dataMCplotMaker(hSR_mMT, hbg, vector<string>{"original"});
 
+  bool printHistContent = true;
+  if (printHistContent) {
+    for (int i = 1; i <= hSR_org->GetNbinsX(); i++) {
+      if (hSR_org->GetXaxis()->GetBinLabel(i)[0] == '1') continue;
+      cout << "SR " << hSR_org->GetXaxis()->GetBinLabel(i) << " has bkgd: " << setprecision(4) << hSR_org->GetBinContent(i)
+           << " while signal: " << hSR_mMT->GetBinContent(i) << endl;
+    }
+  }
+
   delete hSR_org;
   delete hSR_mMT;
   delete hSR_stk;
@@ -3543,8 +3552,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/notUseHighCSV";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/UseHighCSV";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/20ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
@@ -3555,8 +3564,8 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
-  // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
-  vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "2015gjet_ht", "top"};
+  vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
+  // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "2015gjet_ht", "top"};
   // vector<string> names = {"2015qcd_ht"};
   // vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "gjet_ht", "dyjetsll_ht", "data_Run2016"};
   // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
@@ -3593,9 +3602,9 @@ void plotMakerHcand() {
       std::string dir_name = k->GetTitle();
       // if(dir_name == "") continue;
       // if(dir_name != "srh2H") continue; //to do only this dir
-      if(dir_name != "srhbase") continue; //to do only this dir
+      if(dir_name != "crhqcdbase") continue; //to do only this dir
       //if(dir_name != "sr1H") continue; //for testing
-      string s = "_original";
+      string s = "_noHcandCR";
 
       // makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3612,7 +3621,7 @@ void plotMakerHcand() {
       makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 1000 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbZcand"+s , "M(bb) (Zcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_MbbZcand"+s , "M(bb) (Zcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
 
       // makePlot( samples , names , dir_name , "h_deltaPhiminMTbmet"+s, "#Delta#phi (b, met)", "Events", -0.26, 3.4, 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
@@ -3632,7 +3641,7 @@ void plotMakerHcand() {
   }
 
   // Make SR Yields hist
-  // makeSRyieldsComparisonHist(samples, names, "_H", "isHcand");
+  // makeSRyieldsComparisonHist(samples, names, "_H", "noHcandCR");
   // makeSRyieldsComparisonHist(samples, names, "_L", "isHcand");
   // makeSRyieldsComparisonHist(samples, names, "", "isZcand");
   // makeSRyieldsComparisonHist(samples, names, "", "MbbMax300");
