@@ -139,7 +139,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     double srerr = 0.;
     double cryields = 0.;
     double crerr = 0.;
-    TH1F* h_sryields = (TH1F*) f_qcd->Get(Form("testsr%d/h_Mbbhcand", i));
+    TH1F* h_sryields = (TH1F*) f_qcd->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields = h_sryields->IntegralAndError(0, -1, srerr);
     TH1F* h_cryields = (TH1F*) f_qcd->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
     if (h_cryields) cryields = h_cryields->IntegralAndError(0, -1, crerr);
@@ -158,7 +158,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     h_qcdratios->SetBinContent(i+1, ratio);
     h_qcdratios->SetBinError(i+1, ratio*error);
   }
-  h_qcdratios->GetYaxis()->SetRangeUser(0, 3);
+  h_qcdratios->GetYaxis()->SetRangeUser(0, 0.6);
   h_qcdratios->SetLineColor(kRed-7);
   if (selec == "geq3b")
     h_qcdratios->SetTitle("QCD In/Out Ratio with #geq 3b");
@@ -175,7 +175,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     double cryields = 0.;
     double crerr = 0.;
     double err = 0.;
-    TH1F* h_sryields = (TH1F*) f_qcd->Get(Form("testsr%d/h_Mbbhcand", i));
+    TH1F* h_sryields = (TH1F*) f_qcd->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields += h_sryields->IntegralAndError(0, -1, err);
     srerr = sqrt(srerr*srerr + err*err);
     TH1F* h_cryields = (TH1F*) f_qcd->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
@@ -183,7 +183,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     else err = 0.;
     crerr = sqrt(crerr*crerr + err*err);
 
-    h_sryields = (TH1F*) f_lostlep->Get(Form("testsr%d/h_Mbbhcand", i));
+    h_sryields = (TH1F*) f_lostlep->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields += h_sryields->IntegralAndError(0, -1, err);
     srerr = sqrt(srerr*srerr + err*err);
     h_cryields = (TH1F*) f_lostlep->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
@@ -191,7 +191,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     else err = 0.;
     crerr = sqrt(crerr*crerr + err*err);
 
-    h_sryields = (TH1F*) f_zinv->Get(Form("testsr%d/h_Mbbhcand", i));
+    h_sryields = (TH1F*) f_zinv->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields += h_sryields->IntegralAndError(0, -1, err);
     srerr = sqrt(srerr*srerr + err*err);
     h_cryields = (TH1F*) f_zinv->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
@@ -220,7 +220,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     double srerr = 0.;
     double cryields = 0.;
     double crerr = 0.;
-    TH1F* h_sryields = (TH1F*) f_data->Get(Form("testsr%d/h_Mbbhcand", i));
+    TH1F* h_sryields = (TH1F*) f_data->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields = h_sryields->IntegralAndError(0, -1, srerr);
     TH1F* h_cryields = (TH1F*) f_data->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
     if (h_cryields) cryields = h_cryields->IntegralAndError(0, -1, crerr);
@@ -252,7 +252,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     double cryields = 0.;
     double crerr = 0.;
     double err = 0.;
-    TH1F* h_sryields = (TH1F*) f_data->Get(Form("testsr%d/h_Mbbhcand", i));
+    TH1F* h_sryields = (TH1F*) f_data->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields += h_sryields->IntegralAndError(0, -1, err);
     srerr = sqrt(srerr*srerr + err*err);
     TH1F* h_cryields = (TH1F*) f_data->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
@@ -262,7 +262,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     double datasr = sryields;
     double datacr = cryields;
 
-    h_sryields = (TH1F*) f_lostlep->Get(Form("testsr%d/h_Mbbhcand", i));
+    h_sryields = (TH1F*) f_lostlep->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields -= h_sryields->IntegralAndError(0, -1, err);
     srerr = sqrt(srerr*srerr + err*err);
     h_cryields = (TH1F*) f_lostlep->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
@@ -270,7 +270,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
     else err = 0.;
     crerr = sqrt(crerr*crerr + err*err);
 
-    h_sryields = (TH1F*) f_zinv->Get(Form("testsr%d/h_Mbbhcand", i));
+    h_sryields = (TH1F*) f_zinv->Get(Form("testsr%d/h_Mbbhcand_isHcand", i));
     if (h_sryields) sryields -= h_sryields->IntegralAndError(0, -1, err);
     srerr = sqrt(srerr*srerr + err*err);
     h_cryields = (TH1F*) f_zinv->Get(Form("testsr%d/h_Mbbhcand_MbbCRall", i));
@@ -308,6 +308,7 @@ void testSRMaker(string input_dir, string dataname, string selec){
   leg->AddEntry(h_qcdratios, "qcd ratios");
   leg->AddEntry(h_corratios, "corrected ratios");
   leg->AddEntry(h_dataratios, "data ratios");
+  leg->AddEntry(h_allratios, "All MC ratios");
   leg->Draw("same");
 
   c0->SaveAs(Form("qcdInNOutRatio_%s.pdf", selec.c_str()));
