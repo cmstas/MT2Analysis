@@ -288,7 +288,7 @@ void MT2Looper::SetSignalRegions(){
     std::vector<std::string> vars = SRVecHcand.at(i).GetListOfVariables();
     TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVecHcand.at(i).GetName()).c_str());
     if (dir == 0) {
-      dir = outfile_->mkdir(("srh"+SRVecHcand.at(i).GetName()).c_str());
+      dir = outfile_->mkdir(("sr"+SRVecHcand.at(i).GetName()).c_str());
     } 
     dir->cd();
     for (unsigned int j = 0; j < vars.size(); j++) {
@@ -1463,36 +1463,36 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
 
       if (doMT2Higgs) {
-        // fillHistosSRMT2Higgs("srh");
-        // if (isHcand) fillHistosSRMT2Higgs("srh");
-        if (!isHcand) fillHistosSRMT2Higgs("srh"); // Looking at Hcand CR
-        if (true)           fillHistosSRMT2Higgs("srh", "_original");
-        if (isHcand)        fillHistosSRMT2Higgs("srh", "_isHcand");
-        else                fillHistosSRMT2Higgs("srh", "_noHcandCR");
-        if (isZcand)        fillHistosSRMT2Higgs("srh", "_isZcand");
-        if (doMbbCRlo)      fillHistosSRMT2Higgs("srh", "_MbbCRlo");
-        if (doMbbCRhi)      fillHistosSRMT2Higgs("srh", "_MbbCRhi");
-        if (doMbbMax200)    fillHistosSRMT2Higgs("srh", "_MbbMax200");
-        else if (doMbbCRhi) fillHistosSRMT2Higgs("srh", "_MbbCRhi200");
-        if (doMbbMax300)    fillHistosSRMT2Higgs("srh", "_MbbMax300");
-        else if (doMbbCRhi) fillHistosSRMT2Higgs("srh", "_MbbCRhi300");
-        // if (doMinMTBMet)            fillHistosSRMT2Higgs("srh", "_minMTbmet");
-        // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnHcand");
-        // if (ivMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_ivmMTnHcand");
-        if (doMinMTBMet && doMbbMax200) fillHistosSRMT2Higgs("srh", "_mMTnMbb200");
-        else if (doMbbMax200)           fillHistosSRMT2Higgs("srh", "_ivmMTnMbb200");
-        if (doMinMTBMet && doMbbMax300) fillHistosSRMT2Higgs("srh", "_mMTnMbb300");
-        else if (doMbbMax300)           fillHistosSRMT2Higgs("srh", "_ivmMTnMbb300");
-        if (!doMbbMax300 && !isHcand)   fillHistosSRMT2Higgs("srh", "_MbbCRall");
-        if (doMbbMax300 && isHcand)     fillHistosSRMT2Higgs("srh", "_overlap");
-        if (mbbhcand_ > 300)            fillHistosSRMT2Higgs("srh", "_Mbbhcand300");
-        if (doMbbMax300 && !isHcand)    fillHistosSRMT2Higgs("srh", "_Mbb300");
+        // fillHistosSRMT2Higgs("sr");
+        // if (isHcand) fillHistosSRMT2Higgs("sr");
+        if (!isHcand) fillHistosSRMT2Higgs("sr"); // Looking at Hcand CR
+        if (true)           fillHistosSRMT2Higgs("sr", "_original");
+        if (isHcand)        fillHistosSRMT2Higgs("sr", "_isHcand");
+        else                fillHistosSRMT2Higgs("sr", "_noHcandCR");
+        if (isZcand)        fillHistosSRMT2Higgs("sr", "_isZcand");
+        if (doMbbCRlo)      fillHistosSRMT2Higgs("sr", "_MbbCRlo");
+        if (doMbbCRhi)      fillHistosSRMT2Higgs("sr", "_MbbCRhi");
+        if (doMbbMax200)    fillHistosSRMT2Higgs("sr", "_MbbMax200");
+        else if (doMbbCRhi) fillHistosSRMT2Higgs("sr", "_MbbCRhi200");
+        if (doMbbMax300)    fillHistosSRMT2Higgs("sr", "_MbbMax300");
+        else if (doMbbCRhi) fillHistosSRMT2Higgs("sr", "_MbbCRhi300");
+        // if (doMinMTBMet)            fillHistosSRMT2Higgs("sr", "_minMTbmet");
+        // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("sr", "_mMTnHcand");
+        // if (ivMinMTBMet && isHcand) fillHistosSRMT2Higgs("sr", "_ivmMTnHcand");
+        if (doMinMTBMet && doMbbMax200) fillHistosSRMT2Higgs("sr", "_mMTnMbb200");
+        else if (doMbbMax200)           fillHistosSRMT2Higgs("sr", "_ivmMTnMbb200");
+        if (doMinMTBMet && doMbbMax300) fillHistosSRMT2Higgs("sr", "_mMTnMbb300");
+        else if (doMbbMax300)           fillHistosSRMT2Higgs("sr", "_ivmMTnMbb300");
+        if (!doMbbMax300 && !isHcand)   fillHistosSRMT2Higgs("sr", "_MbbCRall");
+        if (doMbbMax300 && isHcand)     fillHistosSRMT2Higgs("sr", "_overlap");
+        if (mbbhcand_ > 300)            fillHistosSRMT2Higgs("sr", "_Mbbhcand300");
+        if (doMbbMax300 && !isHcand)    fillHistosSRMT2Higgs("sr", "_Mbb300");
         if (doMbbMax300 && mbbmax_ < 500) {
-          fillHistosSRMT2Higgs("srh", "_MbbMaxM");
-          if (doMinMTBMet) fillHistosSRMT2Higgs("srh", "_mMTnMbbM");
-          else             fillHistosSRMT2Higgs("srh", "_ivmMTnMbbM");
+          fillHistosSRMT2Higgs("sr", "_MbbMaxM");
+          if (doMinMTBMet) fillHistosSRMT2Higgs("sr", "_mMTnMbbM");
+          else             fillHistosSRMT2Higgs("sr", "_ivmMTnMbbM");
         }
-        if (doMbbMax300 && mbbmax_ > 500) fillHistosSRMT2Higgs("srh", "_MbbMaxH");
+        if (doMbbMax300 && mbbmax_ > 500) fillHistosSRMT2Higgs("sr", "_MbbMaxH");
 
         if (doDYplots) {
           // fillHistosCRDYMT2Higgs();
@@ -1846,7 +1846,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   float isoCutTight = 2.5;
   float isoCutLoose = 10.;
   if (iso > isoCutTight && iso < isoCutLoose) add += "LooseNotTight";
-  if (iso > isoCutLoose) add += "NotLoose";
+  else if (iso > isoCutLoose) add += "NotLoose";
   if (!passSieie) add += "SieieSB"; // Keep Sigma IEta IEta sideband
 
   // bool passBase = SRVecHcand[0].PassesSelection(values);
@@ -3028,7 +3028,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
-    if (TString(dirname).Contains("crhgj")) plot1D("h_minMTbmet"+s,  gamma_minMTbmet_,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+    if (TString(dirname).Contains("crgjh") || TString(dirname).Contains("crgjH"))
+      plot1D("h_minMTbmet"+s,  gamma_minMTbmet_,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
 
     plot1D("h_drMinParton"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
     TString drName = "h_drMinPartonSample";

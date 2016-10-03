@@ -33,7 +33,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
 
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
 
-    TString directory = "srh" + dirs.at(idir);
+    TString directory = "sr" + dirs.at(idir);
     // TString directoryGJ = "crhgj"+dirs.at(idir);
 
     cout<<"Looking at directory "<<directory<<endl;
@@ -224,13 +224,14 @@ void zinvDDMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/o
   // if directory begins with "sr", excluding "srbase", add it to vector signal regions.
   TIter it(f_purity->GetListOfKeys());
   TKey* k;
-  std::string keep = "srh";
-  std::string skip = "srhbase";
+  std::string keep = "sr";
+  std::string skip = "srbase";
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { // it is a signal region
       std::string sr_string = k->GetTitle();
-      sr_string.erase(0, 3);    // remove "srh" from front of string
+      sr_string.erase(0, 2);    // remove "sr" from front of string
+      if (sr_string[0] < 'A' || sr_string[0] == 'b') continue; // don't want the standard mt2 regions
       dirs.push_back(sr_string);
     }
   }

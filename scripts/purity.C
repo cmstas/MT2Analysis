@@ -68,7 +68,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
   if(s.Contains("FailSieie")) bin = "SingleBin";
   
   //get LooseNotTight hist (this only contains Fakes, there are no Prompts, so no subtraction is needed for MC)
-  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crhgj"+srName+"/h_mt2binsLooseNotTight");
+  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crgj"+srName+"/h_mt2binsLooseNotTight");
 
   //check for empty hists
   if(!h_FR){
@@ -107,10 +107,10 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
       Float_t pred_error_total = 0.0;
   
       //get FR binned hists for this mt2 bin
-      TH2D* h_sidebandqcdPrompt = (TH2D*) f_qcd->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //qcdPrompt (Fragmentation)
-      TH2D* h_sidebandgjetPrompt = (TH2D*) f_gjet->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //gjetPrompt (Prompt contamination)
-      TH2D* h_sideband = (TH2D*) f_in->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //Data
-      if (!realDataLocal) h_sideband = (TH2D*) f_in->Get("crhgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"FakeLooseNotTight"); //Need "Fake" folder if running on MC
+      TH2D* h_sidebandqcdPrompt = (TH2D*) f_qcd->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //qcdPrompt (Fragmentation)
+      TH2D* h_sidebandgjetPrompt = (TH2D*) f_gjet->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //gjetPrompt (Prompt contamination)
+      TH2D* h_sideband = (TH2D*) f_in->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"LooseNotTight"); //Data
+      if (!realDataLocal) h_sideband = (TH2D*) f_in->Get("crgj"+srName+"/h2d_gammaht_gammapt"+bin+mt2binsname[xbin]+"FakeLooseNotTight"); //Need "Fake" folder if running on MC
       
       //if "Poisson", undo sumw2() errors
       if(s.Contains("Poisson")){
@@ -119,7 +119,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
       }
 	
       //skip this mt2bin if there are no fakes
-      if(!h_sideband) {cout<<"crhgj"<<srName<<"/h2d_gammaht_gammapt"<<bin<<mt2binsname[xbin]<<"LooseNotTight not found"<<endl; continue;}
+      if(!h_sideband) {cout<<"crgj"<<srName<<"/h2d_gammaht_gammapt"<<bin<<mt2binsname[xbin]<<"LooseNotTight not found"<<endl; continue;}
 
       // Subtract prompt contamination in sideband (when looking at data)
       if (h_sidebandgjetPrompt && realDataLocal) {
@@ -202,7 +202,7 @@ void makePred(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TString sr
 
   //make and fill prediction histogram
   f_out->cd();
-  TString directory = "srh"+srName;
+  TString directory = "sr"+srName;
   TDirectory* dir = 0;
   dir = (TDirectory*)f_out->Get(directory.Data());
   if (dir == 0) {
@@ -237,7 +237,7 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
   if(s.Contains("FailSieie")) bin = "SingleBin";
   
   //get LooseNotTight hist (this only contains Fakes, there are no Prompts, so no subtraction is needed for MC)
-  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
+  TH1F* h_LooseNotTight = (TH1F*) f_in->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
   
   //check for empty hists
   if(!h_FR){
@@ -268,10 +268,10 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
   }
   
   
-  TH1F* h_sidebandqcdPrompt = (TH1F*) f_qcd->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
-  TH1F* h_sidebandgjetPrompt = (TH1F*) f_gjet->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
-  TH1F* h_sideband = (TH1F*) f_in->Get("crhgj"+srName+"/h_"+plotname+"LooseNotTight");
-  if (!realDataLocal) h_sideband = (TH1F*) f_in->Get("crhgj"+srName+"/h_"+plotname+"FakeLooseNotTight");
+  TH1F* h_sidebandqcdPrompt = (TH1F*) f_qcd->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
+  TH1F* h_sidebandgjetPrompt = (TH1F*) f_gjet->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
+  TH1F* h_sideband = (TH1F*) f_in->Get("crgj"+srName+"/h_"+plotname+"LooseNotTight");
+  if (!realDataLocal) h_sideband = (TH1F*) f_in->Get("crgj"+srName+"/h_"+plotname+"FakeLooseNotTight");
   //h_sidebandqcdPrompt->Print("all");
   //h_sidebandgjetPrompt->Print("all");
   //h_sideband->Print("all");
@@ -379,7 +379,7 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
   //h_sideband->Delete();
   //make and fill prediction histogram
   f_out->cd();
-  TString directory = "srh"+srName;
+  TString directory = "sr"+srName;
   TDirectory* dir = 0;
   dir = (TDirectory*)f_out->Get(directory.Data());
   if (dir == 0) {
@@ -412,24 +412,24 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 {
   if (verbose) cout<<__LINE__<<" Making plots for region "<<sr<<", FR_type "<<FR_type<<", plotname "<<plotname<<" **************************"<<endl;
   //get hists
-  TH1F* h_gjet = (TH1F*) f_gjet->Get("crhgj"+sr+"/h_"+plotname);
-  TH1F* h_qcd  = (TH1F*) f_qcd->Get("crhgj"+sr+"/h_"+plotname);
-  TH1F* h_tmp  = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname);
+  TH1F* h_gjet = (TH1F*) f_gjet->Get("crgj"+sr+"/h_"+plotname);
+  TH1F* h_qcd  = (TH1F*) f_qcd->Get("crgj"+sr+"/h_"+plotname);
+  TH1F* h_tmp  = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname);
   if(!h_gjet || !h_tmp) return;
-  TH1F* h_full  = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname)->Clone();
+  TH1F* h_full  = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname)->Clone();
   //check existence
-  TH1F* h_qcdFake = (TH1F*) f_qcd->Get("crhgj"+sr+"/h_"+plotname+"Fake");
+  TH1F* h_qcdFake = (TH1F*) f_qcd->Get("crgj"+sr+"/h_"+plotname+"Fake");
   if (!FR_type.Contains("Data") && h_qcdFake) {
     h_full->Add(h_qcdFake); // need to add MC fakes to our total, if running on MC.
   }
   // now h_full includes purity and f
 
-  TH1F* h_fullLooseNotTight = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname+"FakeLooseNotTight");
+  TH1F* h_fullLooseNotTight = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname+"FakeLooseNotTight");
   if (FR_type.Contains("Data") ) {
-    h_fullLooseNotTight = (TH1F*) f_data->Get("crhgj"+sr+"/h_"+plotname+"LooseNotTight"); // Can't have "Fake" in the name, if running on data
+    h_fullLooseNotTight = (TH1F*) f_data->Get("crgj"+sr+"/h_"+plotname+"LooseNotTight"); // Can't have "Fake" in the name, if running on data
   }
   
-  TString srdir = "srh"+sr;
+  TString srdir = "sr"+sr;
   TH1F* h_predFakes = (TH1F*) f_out->Get(srdir+"/h_pred"+plotname+FR_type);
 //  if (plotname.Contains("mt2bins")) {
 //    h_predFakes = (TH1F*) f_out->Get(srdir+"/h_pred"+FR_type);
@@ -442,14 +442,14 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
 
 
-  if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_full:crhgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_full:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
   if (verbose && h_fullLooseNotTight) cout<<__LINE__<<" h_fullLooseNotTight has integral "<<h_fullLooseNotTight->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:srh"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
-  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:srh"<<sr<<" ratio is "<<endl; h_ratio->GetBinContent(1);
+  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<"/h_"<<plotname<<" has integral "<<h_trueZinv->Integral()<<endl;
+  if (verbose && h_gjet) cout<<__LINE__<<" f_zinv:sr"<<sr<<" ratio is "<<endl; h_ratio->GetBinContent(1);
   
   f_out->cd();
-  TString directory = "srh"+sr;
+  TString directory = "sr"+sr;
   TDirectory* dir = 0;
   dir = (TDirectory*)f_out->Get(directory.Data());
   if (dir == 0) {
@@ -660,7 +660,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 }
 
 
-void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/", string dataname = "data")
+void purity(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp", string dataname = "data_Run2016")
 {
   
   //load signal regions
@@ -814,7 +814,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
     purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   additionalRegions.clear();
-  additionalRegions.push_back("base");
+  // additionalRegions.push_back("base");
   // additionalRegions.push_back("baseJ");
   // additionalRegions.push_back("baseVL");
   // additionalRegions.push_back("baseL");
@@ -829,10 +829,10 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
     purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   vector<TString> additionalPlots;
-  additionalPlots.push_back("htbins");
-  additionalPlots.push_back("htbins2");
-  additionalPlots.push_back("njbins");
-  additionalPlots.push_back("nbjbins");
+  // additionalPlots.push_back("htbins");
+  // additionalPlots.push_back("htbins2");
+  // additionalPlots.push_back("njbins");
+  // additionalPlots.push_back("nbjbins");
   for(int i = 0; i< (int) additionalPlots.size(); i++){
     srName = "base";
     TString plot = additionalPlots.at(i);
