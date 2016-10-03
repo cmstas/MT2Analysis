@@ -69,11 +69,10 @@ std::vector<SR> getSignalRegionsHcand() {
   // first set binning in njet-nbjet plane
   // SR for VL and L regions, inclusive for >= 7 jets
   sr.SetName("h1");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVar("nhcand", 1, 2);
-  sr.SetVarCRSL("njets", 4, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarAll("njets", 4, -1);
+  sr.SetVarAll("nbjets", 2, -1);
+  // sr.SetVarCRSL("njets", 4, -1);
+  // sr.SetVarCRSL("nbjets", 2, 3);
   temp_SR_VL_vec.push_back(sr);
   sr.Clear();
 
@@ -87,10 +86,10 @@ std::vector<SR> getSignalRegionsHcand() {
 
   // SR for M and H regions, separate for >= 7 jets
   sr.SetName("h1");
-  sr.SetVar("njets", 4, 7);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVarCRSL("njets", 4, 7);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarAll("njets", 4, 7);
+  sr.SetVarAll("nbjets", 2, -1);
+  // sr.SetVarCRSL("njets", 4, 7);
+  // sr.SetVarCRSL("nbjets", 2, 3);
   temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
@@ -103,10 +102,10 @@ std::vector<SR> getSignalRegionsHcand() {
   // sr.Clear();
 
   sr.SetName("h3");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 2, -1);
+  sr.SetVarAll("njets", 7, -1);
+  sr.SetVarAll("nbjets", 2, -1);
+  // sr.SetVarCRSL("njets", 7, -1);
+  // sr.SetVarCRSL("nbjets", 2, -1);
   temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
@@ -132,11 +131,11 @@ std::vector<SR> getSignalRegionsHcand() {
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {300, 400, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
     // else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
-    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetName(fullSRname + "H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
     SRVec.push_back(fullSR);
-    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetName(fullSRname + "L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
     SRVec.push_back(fullSR);
@@ -154,11 +153,11 @@ std::vector<SR> getSignalRegionsHcand() {
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {300, 400, 500, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
     // else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 350, 1500};      fullSR.SetMT2Bins(2, mt2bins);}
-    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetName(fullSRname + "H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
     SRVec.push_back(fullSR);
-    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetName(fullSRname + "L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
     SRVec.push_back(fullSR);
@@ -177,11 +176,11 @@ std::vector<SR> getSignalRegionsHcand() {
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 450, 550, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
     else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[3] = {200, 450, 1500};      fullSR.SetMT2Bins(2, mt2bins);}
     else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500};      fullSR.SetMT2Bins(2, mt2bins);}
-    fullSR.SetName(fullSRname + "_H");
+    fullSR.SetName(fullSRname + "H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
     SRVec.push_back(fullSR);
-    fullSR.SetName(fullSRname + "_L");
+    fullSR.SetName(fullSRname + "L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
     if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
@@ -286,12 +285,12 @@ std::vector<SR> getSignalRegionsMbbMax() {
 
   // SR for VL and L regions, inclusive for >= 7 jets
   sr.SetName("H1");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVar("mbbmax", 300, -1);
-  sr.SetVarCRSL("njets", 4, -1);
-  sr.SetVarCRSL("nbjets", 2, -1);
-  sr.SetVarCRSL("mbbmax", 300, -1);
+  sr.SetVarAll("njets", 4, -1);
+  sr.SetVarAll("nbjets", 2, -1);
+  sr.SetVarAll("mbbmax", 300, -1);
+  // sr.SetVarCRSL("njets", 4, -1);
+  // sr.SetVarCRSL("nbjets", 2, -1);
+  // sr.SetVarCRSL("mbbmax", 300, -1);
   temp_SR_VL_vec.push_back(sr);
   sr.Clear();
 
@@ -305,12 +304,12 @@ std::vector<SR> getSignalRegionsMbbMax() {
 
   // SR for M and H regions, separate for >= 7 jets
   sr.SetName("H1");
-  sr.SetVar("njets", 4, 7);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVar("mbbmax", 300, -1);
-  sr.SetVarCRSL("njets", 4, 7);
-  sr.SetVarCRSL("nbjets", 2, -1);
-  sr.SetVarCRSL("mbbmax", 300, -1);
+  sr.SetVarAll("njets", 4, 7);
+  sr.SetVarAll("nbjets", 2, -1);
+  sr.SetVarAll("mbbmax", 300, -1);
+  // sr.SetVarCRSL("njets", 4, 7);
+  // sr.SetVarCRSL("nbjets", 2, -1);
+  // sr.SetVarCRSL("mbbmax", 300, -1);
   temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
@@ -323,12 +322,12 @@ std::vector<SR> getSignalRegionsMbbMax() {
   // sr.Clear();
 
   sr.SetName("H3");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVar("mbbmax", 300, -1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 2, -1);
-  sr.SetVarCRSL("mbbmax", 300, -1);
+  sr.SetVarAll("njets", 7, -1);
+  sr.SetVarAll("nbjets", 2, -1);
+  sr.SetVarAll("mbbmax", 300, -1);
+  // sr.SetVarCRSL("njets", 7, -1);
+  // sr.SetVarCRSL("nbjets", 2, -1);
+  // sr.SetVarCRSL("mbbmax", 300, -1);
   temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
@@ -503,10 +502,10 @@ std::vector<SR> getSignalRegionsZcand() {
   // first set binning in njet-nbjet plane
   // SR for VL and L regions, inclusive for >= 7 jets
   sr.SetName("Z1");
-  sr.SetVar("njets", 4, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVarCRSL("njets", 4, -1);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarAll("njets", 4, -1);
+  sr.SetVarAll("nbjets", 2, -1);
+  // sr.SetVarCRSL("njets", 4, -1);
+  // sr.SetVarCRSL("nbjets", 2, 3);
   temp_SR_VL_vec.push_back(sr);
   sr.Clear();
 
@@ -520,10 +519,10 @@ std::vector<SR> getSignalRegionsZcand() {
 
   // SR for M and H regions, separate for >= 7 jets
   sr.SetName("Z1");
-  sr.SetVar("njets", 4, 7);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVarCRSL("njets", 4, 7);
-  sr.SetVarCRSL("nbjets", 2, 3);
+  sr.SetVarAll("njets", 4, 7);
+  sr.SetVarAll("nbjets", 2, -1);
+  // sr.SetVarCRSL("njets", 4, 7);
+  // sr.SetVarCRSL("nbjets", 2, 3);
   temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 
@@ -536,10 +535,10 @@ std::vector<SR> getSignalRegionsZcand() {
   // sr.Clear();
 
   sr.SetName("Z3");
-  sr.SetVar("njets", 7, -1);
-  sr.SetVar("nbjets", 2, -1);
-  sr.SetVarCRSL("njets", 7, -1);
-  sr.SetVarCRSL("nbjets", 2, -1);
+  sr.SetVarAll("njets", 7, -1);
+  sr.SetVarAll("nbjets", 2, -1);
+  // sr.SetVarCRSL("njets", 7, -1);
+  // sr.SetVarCRSL("nbjets", 2, -1);
   temp_SR_MH_vec.push_back(sr);
   sr.Clear();
 

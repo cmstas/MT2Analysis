@@ -159,7 +159,7 @@ bool SR::PassesSelectionCRQCD(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariablesCRQCD() != values.size()){
     std::cout << "Number of variables to cut on != number of variables in CRQCD region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRQCD() << std::endl;
-    throw std::invalid_argument("Number of variables to cut on != number of variables in CRQCD region");
+    throw std::invalid_argument(srName_ + ": Number of variables to cut on != number of variables in CRQCD region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
     if(binsCRQCD_.find(it->first) != binsCRQCD_.end()){ //check that we actually have bounds set for this variable

@@ -1320,14 +1320,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // --- end of crgj for mt2higgs ---
 
       // --- testing for signal ---
-      int nhiggs = 0;
-      for (int igen = 0; igen < t.ngenStat23; ++igen)
-        if (t.genStat23_pdgId[igen] == 25) nhiggs++;
-      // if (nhiggs > 1) continue;
-      if (nhiggs < 2) continue;
-      // if (nhiggs > 1 && nhcand_ < 2 && isHcand) cout << "!!!\n";
-      if (nhcand_ > 1 && !isHcand) cout << "!!!\n";
-      if (nhcand_ > 1) isHcand = true;
+      // int nhiggs = 0;
+      // for (int igen = 0; igen < t.ngenStat23; ++igen)
+      //   if (t.genStat23_pdgId[igen] == 25) nhiggs++;
+      // // if (nhiggs > 1) continue;
+      // if (nhiggs < 2) continue;
+      // // if (nhiggs > 1 && nhcand_ < 2 && isHcand) cout << "!!!\n";
+      // if (nhcand_ > 1 && !isHcand) cout << "!!!\n";
+      // if (nhcand_ > 1) isHcand = true;
 
       // // --- Gen matching for the bjets ---
       // ntruebJets_ = 0;
@@ -1440,8 +1440,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (doMbbMax300GJ)    fillHistosCRGJMT2Higgs("", "_MbbMax300" + sufadd);
         else if (doMbbCRhiGJ) fillHistosCRGJMT2Higgs("", "_MbbCRhi300" + sufadd);
         // if (doMinMTBMetGJ)            fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
-        // if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnhcand" + sufadd);
-        // if (ivMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_ivmMTnhcand" + sufadd);
+        // if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnHcand" + sufadd);
+        // if (ivMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_ivmMTnHcand" + sufadd);
         if (doMinMTBMetGJ && doMbbMax200GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb200" + sufadd);
         if (doMinMTBMetGJ && doMbbMax300GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300" + sufadd);
 
@@ -1477,8 +1477,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (doMbbMax300)    fillHistosSRMT2Higgs("srh", "_MbbMax300");
         else if (doMbbCRhi) fillHistosSRMT2Higgs("srh", "_MbbCRhi300");
         // if (doMinMTBMet)            fillHistosSRMT2Higgs("srh", "_minMTbmet");
-        // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnhcand");
-        // if (ivMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_ivmMTnhcand");
+        // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_mMTnHcand");
+        // if (ivMinMTBMet && isHcand) fillHistosSRMT2Higgs("srh", "_ivmMTnHcand");
         if (doMinMTBMet && doMbbMax200) fillHistosSRMT2Higgs("srh", "_mMTnMbb200");
         else if (doMbbMax200)           fillHistosSRMT2Higgs("srh", "_ivmMTnMbb200");
         if (doMinMTBMet && doMbbMax300) fillHistosSRMT2Higgs("srh", "_mMTnMbb300");
@@ -1509,8 +1509,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           if (doMbbMax300)    fillHistosCRDYMT2Higgs("", "_MbbMax300");
           else if (doMbbCRhi) fillHistosCRDYMT2Higgs("", "_MbbCRhi300");
           // if (doMinMTBMet)            fillHistosCRDYMT2Higgs("", "_minMTbmet");
-          // if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_mMTnhcand");
-          // if (ivMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_ivmMTnhcand");
+          // if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_mMTnHcand");
+          // if (ivMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_ivmMTnHcand");
         }
       }
 
@@ -1765,24 +1765,21 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["j1pt"]        = t.jet1_pt;
   values["j2pt"]        = t.jet2_pt;
   values["mt2"]         = hcand_mt2_;
+  values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
+  values["njets"]       = t.nJet30;
+  values["ht"]          = t.ht;
+  values["met"]         = t.met_pt;
   values["nhcand"]      = nhcand_;
   values["nZcand"]      = nZcand_;
   values["mbbmax"]      = mbbmax_;
   values["minMTbmet"]   = minMTbmet_;
-  values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
 
   // std::map<std::string, float> valuesIncl2h = values;
   // if (SRIncl2h.PassesSelection(valuesIncl2h)) {
   //   fillHistosMT2Higgs(SRIncl2h.srHistMap, SRIncl2h.GetNumberOfMT2Bins(), SRIncl2h.GetMT2Bins(), SRIncl2h.GetName(), suffix);
   // }
-  
-  values["njets"]       = t.nJet30;
-  values["ht"]          = t.ht;
-  values["met"]         = t.met_pt;
-  values.erase("passesHtMet");
 
   std::map<std::string, float> valuesCRSL = values;
-  valuesCRSL = values;
   valuesCRSL["nlep"] = t.nLepLowMT;
   std::map<std::string, float> valuesCRQCD = values;
   // valuesCRQCD.erase("njets");
