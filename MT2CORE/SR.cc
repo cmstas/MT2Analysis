@@ -28,6 +28,12 @@ void SR::SetVarCRQCD(std::string var_name, float lower_bound, float upper_bound)
   binsCRQCD_[var_name] = std::pair<float, float>(lower_bound, upper_bound);
 }
 
+void SR::SetVarAll(std::string var_name, float lower_bound, float upper_bound){
+  SetVar(var_name, lower_bound, upper_bound);
+  SetVarCRSL(var_name, lower_bound, upper_bound);
+  SetVarCRQCD(var_name, lower_bound, upper_bound);
+}
+
 void SR::SetMT2Bins(int nbins, float* bins){
   n_mt2bins_ = nbins;
   mt2bins_ = new float [n_mt2bins_+1];
@@ -111,7 +117,7 @@ int SR::GetNumberOfMT2Bins(){
 bool SR::PassesSelection(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariables() != values.size()){
-    throw std::invalid_argument("Number of variables to cut on != number of variables in signal region");
+    throw std::invalid_argument(srName_ + ": Number of variables to cut on != number of variables in signal region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
     if(bins_.find(it->first) != bins_.end()){ //check that we actually have bounds set for this variable
@@ -132,7 +138,7 @@ bool SR::PassesSelectionCRSL(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariablesCRSL() != values.size()){
     std::cout << "Number of variables to cut on != number of variables in CRSL region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRSL() << std::endl;
-    throw std::invalid_argument("Number of variables to cut on != number of variables in CRSL region");
+    throw std::invalid_argument(srName_ + ": Number of variables to cut on != number of variables in CRSL region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
     if(binsCRSL_.find(it->first) != binsCRSL_.end()){ //check that we actually have bounds set for this variable

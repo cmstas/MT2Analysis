@@ -39,7 +39,7 @@ declare -a Samples4=(T5qqqqWH_1400_700 T5qqqqWH_1100_950 T5qqqqWH_1400_200 T2ttZ
 # declare -a Samples=(data_Run2016E data_Run2016F)
 #declare -a Samples=(T1tttt_1500_100 T1tttt_1200_800 T1bbbb_1500_100 T1bbbb_1000_900 T1qqqq_1400_100 T1qqqq_1000_800 T2tt_850_100 T2tt_650_325 T2tt_500_325 T2tt_425_325 T2bb_900_100 T2bb_600_580 T2qq_1200_100 T2qq_600_550)
 #declare -a Samples=(T1tttt_1500_100 T1tttt_1200_800 T1bbbb_1500_100 T1bbbb_1000_900 T1qqqq_1400_100 T1qqqq_1000_800)
-# declare -a Samples=(ttsl)
+declare -a Samples=(ttsl)
 # declare -a Samples2=(data_Run2016C)
 # declare -a Samples3=(2015qcd_ht)
 
@@ -55,15 +55,15 @@ for SAMPLE in ${Samples[@]};
      nohup ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
 done
 
-for SAMPLE in ${Samples2[@]};
-  do echo ./runLooper ${INDIR2} ${SAMPLE} ${OUTDIR}
-     nohup ./runLooper ${INDIR2} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
-done
+# for SAMPLE in ${Samples2[@]};
+#   do echo ./runLooper ${INDIR2} ${SAMPLE} ${OUTDIR}
+#      nohup ./runLooper ${INDIR2} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
+# done
 
-for SAMPLE in ${Samples3[@]};
-  do echo ./runLooper ${INDIR3} ${SAMPLE} ${OUTDIR}
-     nohup ./runLooper ${INDIR3} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
-done
+# for SAMPLE in ${Samples3[@]};
+#   do echo ./runLooper ${INDIR3} ${SAMPLE} ${OUTDIR}
+#      nohup ./runLooper ${INDIR3} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &
+# done
 
 # for SAMPLE in ${Samples4[@]};
 #   do echo ./runLooper ${INDIR4} ${SAMPLE} ${OUTDIR}

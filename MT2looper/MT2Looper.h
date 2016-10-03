@@ -90,8 +90,8 @@ class MT2Looper {
   std::vector<SR> InclusiveRegionsMonojet;
   SR SRBase;
   SR SRBaseIncl;
-  SR SRBaseHcand;
-  SR SRBaseInclHcand;
+  // SR SRBaseHcand;
+  // SR SRBaseInclHcand;
   SR SRBaseMonojet;
   SR SRBaseMonojet0B;
   SR SRBaseMonojet1B;
@@ -122,7 +122,8 @@ class MT2Looper {
   float gamma_minMTbmet_;
   float hcand_mt2_;
   int ntruebJets_;
-  int nHcand_;
+  int nhcand_;
+  int nZcand_;
 
   float deltaPhiminMTbmet_;
   float deltaPhiMinbmet_;

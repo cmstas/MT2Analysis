@@ -20,6 +20,7 @@ class SR {
     void SetVar(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRSL(std::string var_name, float lower_bound, float upper_bound);
     void SetVarCRQCD(std::string var_name, float lower_bound, float upper_bound);
+    void SetVarAll(std::string var_name, float lower_bound, float upper_bound);
     void SetMT2Bins(int nbins, float* bins);
 
     std::string GetName();

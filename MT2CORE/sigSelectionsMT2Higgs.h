@@ -5,12 +5,13 @@
 #include "TTree.h"
 #include "SR.h"
 
-namespace mt2
-{
+namespace mt2 {
 
 std::vector<SR> getSignalRegionsMT2Higgs();
+std::vector<SR> getSignalRegionsHcand();
+std::vector<SR> getSignalRegionsZcand();
 std::vector<SR> getSignalRegionsMbbMax();
 
 } // namespace mt2
 
-#endif // SIGNALREGIONSLEP_H
+#endif // SIGNALREGIONSMT2HIGGS_H
