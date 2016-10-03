@@ -3501,8 +3501,8 @@ void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, ve
   if (printHistContent) {
     for (int i = 1; i <= hSR_org->GetNbinsX(); i++) {
       if (hSR_org->GetXaxis()->GetBinLabel(i)[0] == '1') continue;
-      cout << "SR " << hSR_org->GetXaxis()->GetBinLabel(i) << " has bkgd: " << setprecision(4) << hSR_org->GetBinContent(i)
-           << " while signal: " << hSR_mMT->GetBinContent(i) << endl;
+      cout << "SR " << hSR_org->GetXaxis()->GetBinLabel(i) << " has bkgd: " << setprecision(3) << hSR_org->GetBinContent(i) << " +- "
+           << hSR_org->GetBinError(i) << " while signal: " << hSR_mMT->GetBinContent(i) << " +- " << hSR_mMT->GetBinError(i) << endl;
     }
   }
 
@@ -3552,8 +3552,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/UseHighCSV";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/UseHighCSV";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/20ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
@@ -3651,7 +3651,7 @@ void plotMakerHcand() {
   // makeSRyieldsComparisonHist(samples, names, "", "ivmMTnMbbM");
   // makeSRyieldsComparisonHist(samples, names, "", "ivmMTnMbb300");
 
-  vector<string> signame = {"T5qqqqWH_1400_700"};
+  vector<string> signame = {"T5qqqqWH_1400_700_2h"};
   vector<TFile*> sigs = getSamples(signame, input_dir);
   makeSigYieldsComparisonHist(samples, sigs, signame,  "_H", "isHcand");
 
