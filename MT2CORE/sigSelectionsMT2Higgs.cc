@@ -42,7 +42,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
 
   SRBase.SetName("hbase");
   SRBase.SetVarAll("njets", 2, -1);
-  SRBase.SetVarAll("nhcand", 1, 2);
+  SRBase.SetVarAll("nhcand", 1, -1);
   SRVec.insert(SRVec.begin(), SRBase);
 
   SRBase.SetName("Zbase");
