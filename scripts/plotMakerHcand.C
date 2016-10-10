@@ -17,9 +17,11 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TH1D.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 #include "TKey.h"
+#include "TGraphAsymmErrors.h"
 
 #include "plotUtilities.C"
 #include "CMS_lumi.C"
@@ -2599,6 +2601,7 @@ void printDetailedComparisonTable(vector<vector<TFile*>> samplesVec, vector<stri
 void printDetailedTableDataDriven(vector<TFile*> samplesMC, vector<string> namesMC, vector<TFile*> samplesDD, vector<string> namesDD, vector<string> dirs, string caption = "") {
 
   // read off yields from h_mt2bins hist in each topological region
+  // cout << "Reaching heres: " << __LINE__ << endl;
 
   const unsigned int nmc = samplesMC.size();
   const unsigned int ndirs = dirs.size();
@@ -2645,8 +2648,7 @@ void printDetailedTableDataDriven(vector<TFile*> samplesMC, vector<string> names
   ofile << "\\hline\\hline" << endl;
   ofile << "\\multirow{2}{*}{Sample}";
   for (unsigned int idir = 0; idir < ndirs; ++idir)
-    ofile << " & \\multicolumn{" << nmt2bins[idir] << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
-          << string(dirs[idir]).replace(dirs[idir].size()-2, 1, " ") << " }";
+    ofile << " & \\multicolumn{" << nmt2bins[idir] << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << dirs[idir] << " }";
           // << getJetBJetTableLabel(sample, dirs[idir]) << ", "
           // << getHTTableLabel(sample, dirs[idir]) << " }";
   ofile << " \\\\" << endl
@@ -3002,7 +3004,7 @@ void printDetailedTable( vector<TFile*> samples , vector<string> names , string 
   return;
 }
 
-TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string bmetsuf, string suffix = "", int n_srbins = 21) {
+TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string suffix = "", int n_srbins = 21) {
   const unsigned int nsamp = samples.size();
   const unsigned int ndirs = dirs.size();
 
@@ -3013,7 +3015,7 @@ TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string bmets
 
   int srbin = 0;
   for (unsigned int idir = 0; idir < ndirs; ++idir) {
-    string dir = "srh" + dirs.at(idir) + bmetsuf;
+    string dir = dirs.at(idir);
     TString nbinshistname = Form("%s/h_n_mt2bins", dir.c_str());
     TH1F* h_n_mt2bins = (TH1F*) samples.at(0)->Get(nbinshistname);
     int n_mt2bins;
@@ -3082,11 +3084,11 @@ TH1F* fillSRYieldsPlot(vector<TFile*> samples, vector<string> dirs, string bmets
   return srhist;
 }
 
-THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, string bmetsuf, vector<Color_t> colors, string suffix = "", int n_srbins = 21, float scale = 1.) {
+THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, vector<Color_t> colors, string suffix = "", int n_srbins = 21, float scale = 1.) {
   const unsigned int nsamp = samples.size();
   const unsigned int ndirs = dirs.size();
 
-  THStack* srhstack = new THStack(Form("stack_sryields_%s", suffix.c_str()), "SR Yields Hist");
+  THStack* srhstack = new THStack(Form("stack_sryields%s", suffix.c_str()), "SR Yields Hist");
 
   for (int isamp = 0 ; isamp < nsamp; ++isamp) {
     TH1F* srhist = new TH1F(Form("h_sryields%s_%d", suffix.c_str(), isamp), "SR Yields Hist", n_srbins, 0, n_srbins);
@@ -3094,7 +3096,7 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, stri
     vector<double> bgtot(n_srbins, 0.);
     vector<double> bgerr(n_srbins, 0.);
     for (unsigned int idir = 0; idir < ndirs; ++idir) {
-      string dir = "srh" + dirs.at(idir) + bmetsuf;
+      string dir = dirs.at(idir);
       TString nbinshistname = Form("%s/h_n_mt2bins", dir.c_str());
       TH1F* h_n_mt2bins = (TH1F*) samples.at(0)->Get(nbinshistname);
       int n_mt2bins;
@@ -3142,23 +3144,193 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, stri
   return srhstack;
 }
 
-void makeSRyieldsComparisonHist(vector<TFile*> samples, vector<string> names, string bmetsuf, string selec) {
-  int n_srbins = 21;
+void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefix, string selec = "", string bmetsuf = "", string mbbsuf = "") {
+  int n_srbins = 0;
+  vector<string> dirsAll;
 
-  vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
-  if (bmetsuf == "_L") n_srbins = 23;
-  else if (bmetsuf == "") {
-    n_srbins = 21;
-    dirsAll = vector<string>{"1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
+  TIter it(samples[0]->GetListOfKeys());
+  TKey* k;
+  string keep = "sr" + prefix;
+  string skip = keep + "base";
+  while ((k = (TKey *)it())) {
+    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { // it is a signal region
+      string sr_string = k->GetTitle();
+      if (bmetsuf != "" && *(sr_string.end()-1) != bmetsuf) continue;
+      if (mbbsuf != "" && sr_string[5] != mbbsuf) continue;
+      dirsAll.push_back(sr_string);
+      n_srbins += ((TH1F*) samples[0]->Get((sr_string + "/h_n_mt2bins").c_str()))->GetBinContent(1);
+    }
   }
 
+  TFile* f_data(0);
+  TH1F* hSR_data(0);
+  TH1F* hRatio(0);
+  for (int i = names.size()-1; i >= 0; --i) {
+    if (names[i].find("data") == 0) {
+      cout << "Found data!\n";
+      f_data = samples[i];
+      samples.erase(samples.begin()+i);
+      names.erase(names.begin()+i);
+      break;
+    }
+  }
+  if (selec != "") selec = "_" + selec;
   vector<Color_t> colorsAll = {kOrange-2, kRed-7, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
   vector<Color_t> colors;
   for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i]);
-  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, bmetsuf, colors, "_" + selec, n_srbins, 40/12.9);
 
-  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_original", n_srbins);
-  TH1F* hSR_mMT = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_" + selec, n_srbins);
+  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, selec, n_srbins, 40/12.9);
+  TH1F* hSR_all = fillSRYieldsPlot(samples, dirsAll, selec, n_srbins);
+  hSR_all->SetName("h_sryields_all");
+
+  if (f_data) {
+    cout << "There is data!!\n";
+    hSR_data = fillSRYieldsPlot(vector<TFile*>{f_data}, dirsAll, selec, n_srbins);
+    hSR_data->Scale(40/12.9);
+    hRatio = (TH1F*) hSR_data->Clone("h_ratio");
+    hRatio->Divide(hSR_all);
+  }
+
+  TCanvas* c0 = new TCanvas("c0", "c0", 800, 640);
+  gStyle->SetOptStat("");
+  gStyle->SetPadGridX(0);
+  gStyle->SetPadGridY(0);
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
+  gStyle->SetFrameBorderMode(0);
+  // c0->SetCanvasSize(600, 700);
+  TPad* mainPad;
+  TPad* ratioPad(0);
+  if (hRatio) {
+    mainPad = new TPad("1", "1", 0.0, 0.20, 1.0, 1.0);
+    ratioPad = new TPad("2", "2", 0.0, 0.0, 1.0, 0.20);
+  } else {
+    c0->SetCanvasSize(800, 560);
+    mainPad = new TPad("1", "1", 0.0, 0.0, 1.0, 1.0);
+  }
+  mainPad->SetTopMargin(0.08);
+  mainPad->SetLeftMargin(0.12);
+  mainPad->SetBottomMargin(0.22);
+  mainPad->SetLogy();
+  mainPad->Draw();
+  if (ratioPad) {
+    ratioPad->SetTopMargin(0.05);
+    ratioPad->SetLeftMargin(0.12);
+    ratioPad->Draw();
+  }
+  mainPad->cd();
+
+  // hSR_all->SetLineColor(kOrange+1);
+  // hSR_all->SetFillColor(kOrange+1);
+  // hSR_all->SetFillStyle(3002);
+  TString histtitle("SRyields Hist");
+  if (prefix == "h") histtitle += " for hcand regions";
+  if (prefix == "H") histtitle += " for Mbbmax regions";
+  if (prefix == "Z") histtitle += " for Zcand regions";
+  if (mbbsuf  != "") histtitle += " with mbb " + mbbsuf;
+  if (bmetsuf != "") histtitle += " with bmet " + bmetsuf;
+  hSR_all->SetTitle(histtitle);
+  // for (unsigned int i = 0; i < dirsAll.size(); ++i)
+
+  // hSR_all->GetXaxis()->LabelsOption("v");
+
+  hSR_all->GetYaxis()->SetRangeUser(0.1, 5000);
+  hSR_all->Draw("hist");
+  // hSR_data->SetFillColor(kAzure+7);
+  // hSR_data->Draw("axissame");
+  hSR_stk->Draw("histsame");
+  hSR_stk->Draw("axissame");
+  hSR_data->SetMarkerStyle(20);
+  hSR_data->SetMarkerColor(kBlack);
+  hSR_data->Draw("same");
+
+  TLegend* leg = new TLegend(0.56, 0.76, 0.87, 0.89);
+  leg->SetFillColor(0);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+  leg->SetTextSize(0.042);
+  leg->SetNColumns(2);
+  // leg->AddEntry(hSR_all, "original");
+  for (unsigned int i = 0; i < names.size(); ++i)
+    leg->AddEntry(hSR_stk->GetHists()->At(i), names.at(i).c_str());
+  leg->Draw("same");
+
+  TH1F* h_axis_ratio;
+  TLine* line1;
+  if (hRatio) {
+    h_axis_ratio = new TH1F("ratio_axis","", n_srbins, 0, n_srbins);
+    line1 = new TLine(0, 1, n_srbins, 1);
+    cout << "There is Ratio!\n";
+    ratioPad->cd();
+    hRatio->SetMarkerStyle(20);
+    h_axis_ratio->GetYaxis()->SetTitleOffset(0.24);
+    h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
+    h_axis_ratio->GetYaxis()->SetNdivisions(7);
+    h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
+    h_axis_ratio->GetYaxis()->SetRangeUser(0, 2);
+    h_axis_ratio->GetYaxis()->SetTitle("data/MC  ");
+    h_axis_ratio->GetXaxis()->SetTickLength(0.07);
+    h_axis_ratio->GetXaxis()->SetTitleSize(0.);
+    h_axis_ratio->GetXaxis()->SetLabelSize(0.);
+    h_axis_ratio->Draw("axis");
+    line1->SetLineStyle(2);
+    // line1->SetLineColor(kGray);
+    line1->Draw("same");
+    hRatio->Draw("same");
+  }
+  c0->SetTitle("Title");
+  c0->SaveAs(Form("SRyieldsHist_%s%s%s.pdf", prefix.c_str(), bmetsuf.c_str(), selec.c_str()));
+
+  delete hSR_all;
+  delete hSR_data;
+  delete hSR_stk;
+  delete c0;
+  delete leg;
+  delete h_axis_ratio;
+  delete line1;
+}
+
+void makeSRyieldsComparisonHist(vector<TFile*> samples, vector<string> names, string prefix, string selec = "", string bmetsuf = "", string mbbsuf = "") {
+  int n_srbins = 0;
+  vector<string> dirsAll;
+
+  TIter it(samples[0]->GetListOfKeys());
+  TKey* k;
+  string keep = "sr" + prefix;
+  string skip = keep + "base";
+  while ((k = (TKey *)it())) {
+    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { // it is a signal region
+      string sr_string = k->GetTitle();
+      if (bmetsuf != "" && *(sr_string.end()-1) != bmetsuf) continue;
+      if (mbbsuf != "" && sr_string[5] != mbbsuf) continue;
+      dirsAll.push_back(sr_string);
+      n_srbins += ((TH1F*) samples[0]->Get((sr_string + "/h_n_mt2bins").c_str()))->GetBinContent(1);
+    }
+  }
+
+  // // vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
+  // if (prefix == "h") {
+  //   // dirsAll = vector<string>{"1VL", "1L", "1M", "3M", "1H", "3H"};
+  //   if      (bmetsuf == "H") n_srbins = 21;
+  //   else if (bmetsuf == "L") n_srbins = 23;
+  // }
+  // else if (prefix == "H") {
+  //   dirsAll = vector<string>{"1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
+  //   n_srbins = 21;
+  //   // if (bmetsuf == "") {
+  // }
+  // for (auto it = dirsAll.begin(); it ! = dirsAll.end(); ++it) *it = prefix + *it + mbbsuf + bmetsuf;
+
+  if (selec != "") selec = "_" + selec;
+  vector<Color_t> colorsAll = {kOrange-2, kRed-7, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
+  vector<Color_t> colors;
+  for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i]);
+  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, selec, n_srbins, 40/12.9);
+
+  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, "_original", n_srbins);
+  TH1F* hSR_mMT = fillSRYieldsPlot(samples, dirsAll, selec, n_srbins);
   TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
   hRatio->Divide(hSR_mMT, hSR_org, 1, 1, "B");
 
@@ -3189,7 +3361,7 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, vector<string> names, st
   hSR_org->SetFillColor(kOrange+1);
   hSR_org->SetFillStyle(3002);
   // for (unsigned int i = 0; i < dirsAll.size(); ++i)
-  if (bmetsuf == "_H") {
+  if (prefix == "h" && bmetsuf == "H") {
     hSR_org->GetXaxis()->SetLabelSize(0.05);
     hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
     hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
@@ -3212,7 +3384,7 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, vector<string> names, st
     hSR_org->GetXaxis()->SetBinLabel(19, "2H: [200,#infty]");
     hSR_org->GetXaxis()->SetBinLabel(20, "3H: [200,350]");
     hSR_org->GetXaxis()->SetBinLabel(21, "3H: [350,#infty]");
-  } else if (bmetsuf == "_L") {
+  } else if (prefix == "h" && bmetsuf == "L") {
     hSR_org->GetXaxis()->SetLabelSize(0.05);
     hSR_org->GetXaxis()->SetBinLabel(1, "1VL: [200,350]");
     hSR_org->GetXaxis()->SetBinLabel(2, "1VL: [350,#infty]");
@@ -3321,26 +3493,28 @@ void makeSRyieldsComparisonHist(vector<TFile*> samples, vector<string> names, st
   delete h_axis_ratio;
 }
 
-void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, vector<string> signames, string bmetsuf, string selec) {
+void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, vector<string> signames, string bmetsuf, string selec = "") {
   int n_srbins = 21;
 
+  // vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
   vector<string> dirsAll = {"1VL", "2VL", "1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
-  if (bmetsuf == "_L") n_srbins = 23;
+  if (bmetsuf == "L") n_srbins = 23;
   else if (bmetsuf == "") {
     n_srbins = 21;
     dirsAll = vector<string>{"1L", "2L", "1M", "2M", "3M", "1H", "2H", "3H"};
   }
 
+  if (selec != "") selec = "_" + selec;
   vector<Color_t> colorsAll = {kOrange-2, kRed-7, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
   vector<Color_t> colors;
   for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i]);
-  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, bmetsuf, colors, "_" + selec, n_srbins, 40/12.9);
+  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, "_" + selec, n_srbins, 40/12.9);
 
   // TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_original", n_srbins);
-  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_" + selec, n_srbins);
+  TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, selec, n_srbins);
   hSR_org->SetName("h_SRyields_org");
   // Only works for having only 1 signal for now. Should be using individual 
-  TH1F* hSR_mMT = fillSRYieldsPlot(sigs, dirsAll, bmetsuf, "_" + selec, n_srbins);
+  TH1F* hSR_mMT = fillSRYieldsPlot(sigs, dirsAll, selec, n_srbins);
   TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
 
   hSR_org->Scale(40/12.9);
@@ -3519,7 +3693,7 @@ vector<TFile*> getSamples(vector<string>& names, string input_dir) {
   for (unsigned int i = 0; i < names.size(); ++i) {
     TFile* f_sample = new TFile(Form("%s/%s.root", input_dir.c_str(), names[i].c_str()));
     if (f_sample == nullptr) {
-      cerr << "Error: Cannot find file ", names[i], ".root ! Removing!\n";
+      cout << "Error: Cannot find file ", names[i], ".root ! Removing!\n";
       names.erase(names.begin() + i--);
     }
     else
@@ -3552,8 +3726,8 @@ void plotMakerHcand() {
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/UseHighCSV";
+  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
+  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/UseHighCSV";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/20ifb";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
   // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
@@ -3651,11 +3825,12 @@ void plotMakerHcand() {
   // makeSRyieldsComparisonHist(samples, names, "", "ivmMTnMbbM");
   // makeSRyieldsComparisonHist(samples, names, "", "ivmMTnMbb300");
 
-  vector<string> signame = {"T5qqqqWH_1400_700_2h"};
-  vector<TFile*> sigs = getSamples(signame, input_dir);
-  makeSigYieldsComparisonHist(samples, sigs, signame,  "_H", "isHcand");
+  // vector<string> signame = {"T5qqqqWH_1400_700_2h"};
+  // vector<TFile*> sigs = getSamples(signame, input_dir);
+  // makeSigYieldsComparisonHist(samples, sigs, signame,  "_H", "isHcand");
 
-  return;
+  makeSRyieldsHist(samples, names, "h", "", "H");
+
 
   // Start outputing to file of yields table
   ofile.open("tables/table.tex");
@@ -3685,7 +3860,7 @@ void plotMakerHcand() {
   vector<string> dirsH;
   // names = vector<string> {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "2015zinv_ht"};
 
-  vector<string> selecs{"noHcandCR"};
+  vector<string> selecs{"isHcand"};
   // vector<string> selecs = {"original", "minMTbmet", "isHcand", "mMTnHcand", "ivmMTnHcand"};
                            // "MbbMax200", "mMTnMbb200", "MbbMax300", "mMTnMbb300"};
   // vector<vector<TFile*>> samplesVec;
@@ -3703,7 +3878,7 @@ void plotMakerHcand() {
   //   samplesVec2.push_back(getSamples(names2, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
   // vector<string> names3 = {"2015gjets_ht", "data_Run2016"};
-  vector<string> names3 = {"2015gjets_ht", "zinvDataDriven", "data_Run2016"};
+  vector<string> names3 = {"2015gjet_ht", "zinvDataDriven", "data_Run2016"};
   vector<TFile*> samples3 = getSamples(names3, input_dir);
   // vector<vector<TFile*>> samplesVec3;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
@@ -3720,7 +3895,8 @@ void plotMakerHcand() {
   // names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
   dirsH.push_back("srhbase");
-  printComparisonTable(samples, names, selecs, dirsH, "srhbase");
+  // printComparisonTable(samples, names, selecs, dirsH, "srhbase");
+  printComparisonTable(samples, names, vector<string>{"original"}, dirsH, "srhbase");
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
 
@@ -3984,42 +4160,42 @@ void plotMakerHcand() {
   // printDetailedTableDataDriven(samples5, names5, dirsH);
   // dirsH.clear();
 
-  dirsH.push_back("srh1VL_H");
-  dirsH.push_back("srh2VL_H");
-  dirsH.push_back("srh1L_H");
-  dirsH.push_back("srh2L_H");
+  dirsH.push_back("srh1VLH");
+  // dirsH.push_back("srh2VLH");
+  dirsH.push_back("srh1LH");
+  // dirsH.push_back("srh2LH");
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("srh1M_H");
-  dirsH.push_back("srh2M_H");
-  dirsH.push_back("srh3M_H");
+  dirsH.push_back("srh1MH");
+  // dirsH.push_back("srh2MH");
+  dirsH.push_back("srh3MH");
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("srh1H_H");
-  dirsH.push_back("srh2H_H");
-  dirsH.push_back("srh3H_H");
+  dirsH.push_back("srh1HH");
+  // dirsH.push_back("srh2HH");
+  dirsH.push_back("srh3HH");
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
 
-  dirsH.push_back("srh1VL_L");
-  dirsH.push_back("srh2VL_L");
-  dirsH.push_back("srh1L_L");
-  dirsH.push_back("srh2L_L");
+  dirsH.push_back("srh1VLL");
+  // dirsH.push_back("srh2VLL");
+  dirsH.push_back("srh1LL");
+  // dirsH.push_back("srh2LL");
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("srh1M_L");
-  dirsH.push_back("srh2M_L");
-  dirsH.push_back("srh3M_L");
+  dirsH.push_back("srh1ML");
+  // dirsH.push_back("srh2ML");
+  dirsH.push_back("srh3ML");
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
-  dirsH.push_back("srh1H_L");
-  dirsH.push_back("srh2H_L");
-  dirsH.push_back("srh3H_L");
+  dirsH.push_back("srh1HL");
+  // dirsH.push_back("srh2HL");
+  dirsH.push_back("srh3HL");
   printDetailedTableDataDriven(samples, names, samples5, names5, dirsH);
   dirsH.clear();
 
