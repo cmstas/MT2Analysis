@@ -1838,11 +1838,10 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   values["njets"]       = t.gamma_nJet30;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
-  // values.erase("passesHtMet");
   values["nhcand"]      = nhcand_;
   values["nZcand"]      = nZcand_;
   values["mbbmax"]      = mbbmax_;
-  values["minMTbmet"]   = minMTbmet_;
+  // values.erase("passesHtMet");
 
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
   float iso = t.gamma_chHadIso[0];

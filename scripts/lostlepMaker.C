@@ -318,7 +318,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp", string dataname = "lostlep"){
+void lostlepMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp", string dataname = "data_Run2016"){
 
   // Running the script along
 
@@ -347,7 +347,7 @@ void lostlepMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
       sr_string.erase(0, 2);    //remove "srh" from front of string
-      if (sr_string[0] < 'A' || sr_string[0] == 'b') continue; // don't want the standard mt2 regions
+      if (sr_string[0] < 'A' || sr_string[0] == 'b' || sr_string[0] == 'I') continue; // don't want the standard mt2 regions
       dirs.push_back(sr_string);
     }
   }
