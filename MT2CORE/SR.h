@@ -22,6 +22,7 @@ class SR {
     void SetVarCRQCD(std::string var_name, float lower_bound, float upper_bound);
     void SetVarAll(std::string var_name, float lower_bound, float upper_bound);
     void SetMT2Bins(int nbins, float* bins);
+    void SetAllowingDummyVars(bool val);
 
     std::string GetName();
 
@@ -97,6 +98,7 @@ class SR {
     std::map<std::string, std::pair<float, float> > binsCRQCD_;
     int n_mt2bins_;
     float *mt2bins_;
+    bool kAllowDummyVars_;
 
 };
 

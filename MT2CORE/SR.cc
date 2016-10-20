@@ -42,6 +42,10 @@ void SR::SetMT2Bins(int nbins, float* bins){
   }
 }
 
+void SR::SetAllowingDummyVars(bool val){
+  kAllowDummyVars_ = val;
+}
+
 std::string SR::GetName(){
   return srName_;
 }
@@ -116,19 +120,20 @@ int SR::GetNumberOfMT2Bins(){
 
 bool SR::PassesSelection(std::map<std::string, float> values){
   float ep = 0.000001;
-  if(GetNumberOfVariables() != values.size()){
+  if((kAllowDummyVars_)? GetNumberOfVariables() < values.size() : GetNumberOfVariables() != values.size()){
+    std::cout << "Number of variables to cut on != number of variables in signal region. Passed " << values.size() << ", expected " << GetNumberOfVariables() << std::endl;
     throw std::invalid_argument(srName_ + ": Number of variables to cut on != number of variables in signal region");
   }
-  for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
-    if(bins_.find(it->first) != bins_.end()){ //check that we actually have bounds set for this variable
-      float value = it->second;
-      float cut_lower = GetLowerBound(it->first);
-      float cut_upper = GetUpperBound(it->first);
+  for(auto it = bins_.begin(); it != bins_.end(); it++){
+    if(values.find(it->first) != values.end()){ //check that we actually have bounds set for this variable
+      float value = values[it->first];
+      float cut_lower = (it->second).first;
+      float cut_upper = (it->second).second;
       if(value < cut_lower) return false;
       if(( std::abs(cut_upper + 1.0) > ep ) && (value >= cut_upper)) return false;
     }
-    else{
-      throw std::invalid_argument("Cut values not set for this variable");
+    else if(!kAllowDummyVars_){
+      throw std::invalid_argument("Cut variable " + it->first + " not found in values");
     }
   }
   return true;
@@ -136,20 +141,20 @@ bool SR::PassesSelection(std::map<std::string, float> values){
 
 bool SR::PassesSelectionCRSL(std::map<std::string, float> values){
   float ep = 0.000001;
-  if(GetNumberOfVariablesCRSL() != values.size()){
+  if((kAllowDummyVars_)? GetNumberOfVariablesCRSL() < values.size() : GetNumberOfVariablesCRSL() != values.size()){
     std::cout << "Number of variables to cut on != number of variables in CRSL region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRSL() << std::endl;
     throw std::invalid_argument(srName_ + ": Number of variables to cut on != number of variables in CRSL region");
   }
-  for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
-    if(binsCRSL_.find(it->first) != binsCRSL_.end()){ //check that we actually have bounds set for this variable
-      float value = it->second;
-      float cut_lower = GetLowerBoundCRSL(it->first);
-      float cut_upper = GetUpperBoundCRSL(it->first);
+  for(auto it = binsCRSL_.begin(); it != binsCRSL_.end(); it++){
+    if(values.find(it->first) != values.end()){ //check that we actually have bounds set for this variable
+      float value = values[it->first];
+      float cut_lower = (it->second).first;
+      float cut_upper = (it->second).second;
       if(value < cut_lower) return false;
       if(( std::abs(cut_upper + 1.0) > ep ) && (value >= cut_upper)) return false;
     }
-    else{
-      throw std::invalid_argument("Cut values not set for this variable");
+    else if(!kAllowDummyVars_){
+      throw std::invalid_argument("Cut variable " + it->first + " not found in values");
     }
   }
   return true;
@@ -157,20 +162,20 @@ bool SR::PassesSelectionCRSL(std::map<std::string, float> values){
 
 bool SR::PassesSelectionCRQCD(std::map<std::string, float> values){
   float ep = 0.000001;
-  if(GetNumberOfVariablesCRQCD() != values.size()){
+  if((kAllowDummyVars_)? GetNumberOfVariablesCRQCD() < values.size() : GetNumberOfVariablesCRQCD() != values.size()){
     std::cout << "Number of variables to cut on != number of variables in CRQCD region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRQCD() << std::endl;
     throw std::invalid_argument(srName_ + ": Number of variables to cut on != number of variables in CRQCD region");
   }
-  for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
-    if(binsCRQCD_.find(it->first) != binsCRQCD_.end()){ //check that we actually have bounds set for this variable
-      float value = it->second;
-      float cut_lower = GetLowerBoundCRQCD(it->first);
-      float cut_upper = GetUpperBoundCRQCD(it->first);
+  for(auto it = binsCRQCD_.begin(); it != binsCRQCD_.end(); it++){
+    if(values.find(it->first) != values.end()){ //check that we actually have bounds set for this variable
+      float value = values[it->first];
+      float cut_lower = (it->second).first;
+      float cut_upper = (it->second).second;
       if(value < cut_lower) return false;
       if(( std::abs(cut_upper + 1.0) > ep ) && (value >= cut_upper)) return false;
     }
-    else{
-      throw std::invalid_argument("Cut values not set for this variable");
+    else if(!kAllowDummyVars_){
+      throw std::invalid_argument("Cut variable " + it->first + " not found in values");
     }
   }
   return true;
@@ -196,4 +201,5 @@ void SR::Clear(){
   bins_.clear();
   binsCRSL_.clear();
   binsCRQCD_.clear();
+  kAllowDummyVars_ = false;
 }
