@@ -3147,6 +3147,7 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, vect
 void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefix, string selec = "", string bmetsuf = "", string mbbsuf = "") {
   int n_srbins = 0;
   vector<string> dirsAll;
+  TFile* samp = *(samples.end()-1);
 
   TIter it(samples[0]->GetListOfKeys());
   TKey* k;
@@ -3159,7 +3160,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
       if (bmetsuf != "" && *(sr_string.end()-1) != bmetsuf) continue;
       if (mbbsuf != "" && sr_string[5] != mbbsuf) continue;
       dirsAll.push_back(sr_string);
-      n_srbins += ((TH1F*) samples[0]->Get((sr_string + "/h_n_mt2bins").c_str()))->GetBinContent(1);
+      n_srbins += ((TH1F*) samp->Get((sr_string + "/h_n_mt2bins").c_str()))->GetBinContent(1);
     }
   }
 
@@ -3233,7 +3234,24 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   hSR_all->SetTitle(histtitle);
   // for (unsigned int i = 0; i < dirsAll.size(); ++i)
 
-  // hSR_all->GetXaxis()->LabelsOption("v");
+  int idx = 1;
+  for (int i = 0; i < dirsAll.size(); ++i) {
+    int n_mt2bins = ((TH1F*) samp->Get((dirsAll[i] + "/h_n_mt2bins").c_str()))->GetBinContent(1);
+    TH1F* h_mt2bins = (TH1F*) samp->Get((dirsAll[i] + "/h_mt2bins").c_str());
+    for (int j = 1; j <= n_mt2bins; ++j) {
+      string label;
+      if (h_mt2bins) {
+        int lower_edge = h_mt2bins->GetBinLowEdge(j);
+        int upper_edge = h_mt2bins->GetBinLowEdge(j+1);
+        label = string(dirsAll[i]).erase(0, 3) + ": [" + to_string(lower_edge) + "," + ((upper_edge == 1500)? "#infty" : to_string(upper_edge)) + "]";
+      } else {
+        cout << "In " << dirsAll[i] << " i = " << i << " the h_mt2bins hist is not found!!\n";
+      }
+      hSR_all->GetXaxis()->SetBinLabel(idx, label.c_str());
+      idx++;
+    }
+  }
+  hSR_all->GetXaxis()->LabelsOption("v");
 
   hSR_all->GetYaxis()->SetRangeUser(0.1, 5000);
   hSR_all->Draw("hist");
@@ -3886,6 +3904,8 @@ void plotMakerHcand() {
 
   vector<string> names4 = {"lostlepFromCRs", "zinvDataDriven", "data_Run2016"};
   vector<TFile*> samples4= getSamples(names4, input_dir);
+  names4 = vector<string>{"lostlep", "Zinv", "data"};
+  // makeSRyieldsHist(samples4, names4, "h", "", "H");
 
   // dirsH.push_back("srbase");
   // dirsH.push_back("srbaseHcand");
