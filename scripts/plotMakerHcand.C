@@ -3145,6 +3145,7 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, vect
 }
 
 void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefix, string selec = "", string bmetsuf = "", string mbbsuf = "") {
+  float scale = 40/12.9;
   int n_srbins = 0;
   vector<string> dirsAll;
   TFile* samp = *(samples.end()-1);
@@ -3179,16 +3180,17 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   if (selec != "") selec = "_" + selec;
   vector<Color_t> colorsAll = {kOrange-2, kRed-7, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
   vector<Color_t> colors;
-  for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i]);
+  for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i+2]);
 
-  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, selec, n_srbins, 40/12.9);
+  THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, selec, n_srbins, scale);
   TH1F* hSR_all = fillSRYieldsPlot(samples, dirsAll, selec, n_srbins);
   hSR_all->SetName("h_sryields_all");
+  hSR_all->Scale(scale);
 
   if (f_data) {
     cout << "There is data!!\n";
     hSR_data = fillSRYieldsPlot(vector<TFile*>{f_data}, dirsAll, selec, n_srbins);
-    hSR_data->Scale(40/12.9);
+    hSR_data->Scale(scale);
     hRatio = (TH1F*) hSR_data->Clone("h_ratio");
     hRatio->Divide(hSR_all);
   }
@@ -3268,7 +3270,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.042);
-  leg->SetNColumns(2);
+  // leg->SetNColumns(2);
   // leg->AddEntry(hSR_all, "original");
   for (unsigned int i = 0; i < names.size(); ++i)
     leg->AddEntry(hSR_stk->GetHists()->At(i), names.at(i).c_str());
@@ -3298,7 +3300,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
     hRatio->Draw("same");
   }
   c0->SetTitle("Title");
-  c0->SaveAs(Form("SRyieldsHist_%s%s%s.pdf", prefix.c_str(), bmetsuf.c_str(), selec.c_str()));
+  c0->SaveAs(Form("SRyieldsHist_%s%s%s%s.pdf", prefix.c_str(), bmetsuf.c_str(), mbbsuf.c_str(), selec.c_str()));
 
   delete hSR_all;
   delete hSR_data;
@@ -3847,7 +3849,7 @@ void plotMakerHcand() {
   // vector<TFile*> sigs = getSamples(signame, input_dir);
   // makeSigYieldsComparisonHist(samples, sigs, signame,  "_H", "isHcand");
 
-  makeSRyieldsHist(samples, names, "h", "", "H");
+  // makeSRyieldsHist(samples, names, "h", "", "H");
 
 
   // Start outputing to file of yields table
@@ -3905,7 +3907,11 @@ void plotMakerHcand() {
   vector<string> names4 = {"lostlepFromCRs", "zinvDataDriven", "data_Run2016"};
   vector<TFile*> samples4= getSamples(names4, input_dir);
   names4 = vector<string>{"lostlep", "Zinv", "data"};
-  // makeSRyieldsHist(samples4, names4, "h", "", "H");
+  makeSRyieldsHist(samples4, names4, "h", "", "H");
+  makeSRyieldsHist(samples4, names4, "h", "", "L");
+  makeSRyieldsHist(samples4, names4, "H", "", "", "U");
+  makeSRyieldsHist(samples4, names4, "H", "", "", "M");
+  makeSRyieldsHist(samples4, names4, "Z");
 
   // dirsH.push_back("srbase");
   // dirsH.push_back("srbaseHcand");
