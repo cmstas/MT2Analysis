@@ -218,6 +218,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     else if (baby_name.find("T2-4bd") != std::string::npos) sparticle = "stop";
     else if (baby_name.find("T2tb") != std::string::npos) sparticle = "stop";
     else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
+    else if (baby_name.find("T6") != std::string::npos) sparticle = "squark";
     //else if (baby_name.find("TChi") != std::string::npos) sparticle = "chargino";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
 
@@ -248,6 +249,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     cout << "running on file: " << currentFile->GetTitle() << endl;
 
     evt_id = sampleID(currentFile->GetTitle());
+    cout << "EVTID: " << evt_id << endl;
+
     TString currentFileName(currentFile->GetTitle());
 
     // ----------------------------------
