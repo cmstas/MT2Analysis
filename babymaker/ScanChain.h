@@ -15,10 +15,14 @@
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
+// TODO: add this file and get everything working
+/* #include "../MT2CORE/RebalSmear/JRTreader.h" */
+							      
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
 class BTagCalibration;
 class BTagCalibrationReader;
+
 
 class babyMaker {
 
@@ -30,7 +34,7 @@ class babyMaker {
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample", int bx = 50, bool isFastsim = false);
+  void ScanChain(TChain*, std::string = "testSample", bool isFastsim = false, int max_events = -1);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -38,6 +42,9 @@ class babyMaker {
   void CloseBabyNtuple();
 
   void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
+
+  /* static void minuitFunction(int& nDim, double* gout, double& result, double par[], int flg); */
+  /* JRTreader rebal_reader; */
 
  private:
 
@@ -73,13 +80,15 @@ class babyMaker {
   TH2D* h_btag_eff_b_fastsim;
   TH2D* h_btag_eff_c_fastsim;
   TH2D* h_btag_eff_udsg_fastsim;
-  
+
+
   //baby ntuple variables
 
   Int_t           run;
   Int_t           lumi;
   ULong64_t       evt;
   Int_t           isData;
+  Int_t           isGolden;
 
   Float_t         evt_scale1fb;
   Float_t         evt_xsec;
@@ -103,9 +112,16 @@ class babyMaker {
   Int_t           nBJet25;
   Int_t           nBJet30;
   Int_t           nBJet40;
+  Int_t           nBJet20csv;
+  Int_t           nBJet20mva;
+  Int_t           nBJet30csv;
+  Int_t           nBJet30mva;
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
+  Int_t           nJet20BadFastsim;
+  Int_t           nJet200MuFrac50DphiMet;
   Int_t           nMuons10;
+  Int_t           nBadMuons20;
   Int_t           nElectrons10;
   Int_t           nLepLowMT;
   Int_t           nTaus20;
@@ -113,9 +129,11 @@ class babyMaker {
   Int_t           nPFCHCand3;
 
   Float_t         deltaPhiMin;
+  Float_t         deltaPhiMin_genmet;
+  Float_t         diffMetMht;
+  Float_t         diffMetMht_genmet;
   Float_t         deltaPhiMinJECup;
   Float_t         deltaPhiMinJECdn;
-  Float_t         diffMetMht;
   Float_t         diffMetMhtJECup;
   Float_t         diffMetMhtJECdn;
   Float_t         minMTBMet;
@@ -130,6 +148,7 @@ class babyMaker {
   Float_t         mt2JECup;
   Float_t         mt2JECdn;
   Float_t         mt2_gen;
+  Float_t         mt2_genmet;
 
   Float_t         jet1_pt;
   Float_t         jet2_pt;
@@ -170,6 +189,8 @@ class babyMaker {
   Float_t         met_trkPhi;
   Float_t         met_genPt;
   Float_t         met_genPhi;
+  Float_t         met_miniaodPt;
+  Float_t         met_miniaodPhi;
 
 //----- MET FILTERS
   Int_t           Flag_EcalDeadCellTriggerPrimitiveFilter;
@@ -181,31 +202,58 @@ class babyMaker {
   Int_t           Flag_trkPOGFilters;
   Int_t           Flag_trackingFailureFilter;
   Int_t           Flag_CSCTightHaloFilter;
+  Int_t           Flag_CSCTightHalo2015Filter;
+  Int_t           Flag_globalTightHalo2016Filter;
+  Int_t           Flag_globalSuperTightHalo2016Filter;
   Int_t           Flag_HBHENoiseFilter;
-  Int_t           Flag_HBHEIsoNoiseFilter;
+  Int_t           Flag_HBHENoiseIsoFilter;
   Int_t           Flag_goodVertices;
   Int_t           Flag_eeBadScFilter;
-  Int_t           Flag_METFilters;
+  Int_t           Flag_badMuonFilter;
+  Int_t           Flag_badMuonFilterV2;  
+  Int_t           Flag_badChargedHadronFilter;
+  Int_t           Flag_badChargedHadronFilterV2;  
+  Int_t           Flag_METFilters;  
+  Int_t           Flag_badMuons;  
+  Int_t           Flag_duplicateMuons;  
+  Int_t           Flag_noBadMuons;  
 
 //----- TRIGGER 
   Int_t           HLT_PFHT800;   
   Int_t           HLT_PFHT900;   
   Int_t           HLT_PFMET170;
+  Int_t           HLT_PFHT300_PFMET100;   
+  Int_t           HLT_PFHT300_PFMET110;   
   Int_t           HLT_PFHT350_PFMET100;   
   Int_t           HLT_PFHT350_PFMET120;   
   Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
   Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
+  Int_t           HLT_PFMETNoMu100_PFMHTNoMu100;
+  Int_t           HLT_PFMETNoMu110_PFMHTNoMu110;
   Int_t           HLT_PFMETNoMu120_PFMHTNoMu120;
   Int_t           HLT_PFMET90_PFMHT90;
+  Int_t           HLT_PFMET100_PFMHT100;
+  Int_t           HLT_PFMET110_PFMHT110;
+  Int_t           HLT_PFMET120_PFMHT120;
+  Int_t           HLT_PFJet450;   
+  Int_t           HLT_PFJet500;   
+  Int_t           HLT_ECALHT800;   
   Int_t           HLT_SingleMu;   
+  Int_t           HLT_SingleMu_NonIso;   
   Int_t           HLT_SingleEl;   
+  Int_t           HLT_SingleEl_NonIso;   
   Int_t           HLT_DoubleEl;   
   Int_t           HLT_DoubleEl33;   
   Int_t           HLT_MuX_Ele12;   
   Int_t           HLT_Mu8_EleX;   
+  Int_t           HLT_Mu30_Ele30_NonIso;   
+  Int_t           HLT_Mu33_Ele33_NonIso;   
   Int_t           HLT_DoubleMu;   
+  Int_t           HLT_DoubleMu_NonIso;   
   Int_t           HLT_Photon120;   
   Int_t           HLT_Photon165_HE10;   
+  Int_t           HLT_Photon250_NoHE;   
+  Int_t           HLT_PFHT125_Prescale;   
   Int_t           HLT_PFHT200_Prescale;   
   Int_t           HLT_PFHT300_Prescale;   
   Int_t           HLT_PFHT350_Prescale;   
@@ -229,6 +277,9 @@ class babyMaker {
   Float_t         lep_dz[max_nlep];   //[nlep]
   Int_t           lep_tightId[max_nlep];   //[nlep]
   Int_t           lep_heepId[max_nlep];   //[nlep]
+  Float_t         lep_highPtFit_pt[max_nlep];   //[nlep]
+  Float_t         lep_highPtFit_eta[max_nlep];   //[nlep]
+  Float_t         lep_highPtFit_phi[max_nlep];   //[nlep]
   Float_t         lep_relIso03[max_nlep];   //[nlep]
   Float_t         lep_relIso04[max_nlep];   //[nlep]
   Float_t         lep_miniRelIso[max_nlep];   //[nlep]
@@ -262,6 +313,19 @@ class babyMaker {
   Int_t             nPFHad10LowMT;
   Int_t             nPFHad10;
 
+//----- HIGH PT PF CANDS
+  static const int max_nhighPtPFcands = 50;
+  Int_t             nhighPtPFcands;
+  Float_t           highPtPFcands_pt[max_nhighPtPFcands];
+  Float_t           highPtPFcands_eta[max_nhighPtPFcands];
+  Float_t           highPtPFcands_phi[max_nhighPtPFcands];
+  Float_t           highPtPFcands_mass[max_nhighPtPFcands];
+  Float_t           highPtPFcands_absIso[max_nhighPtPFcands];
+  Float_t           highPtPFcands_relIsoAn04[max_nhighPtPFcands];
+  Float_t           highPtPFcands_dz[max_nhighPtPFcands];
+  Int_t             highPtPFcands_pdgId[max_nhighPtPFcands];
+  Int_t             highPtPFcands_mcMatchId[max_nhighPtPFcands];
+
 //----- TAUS
   static const int max_ntau = 50;
   Int_t           ntau;
@@ -292,6 +356,7 @@ class babyMaker {
   Float_t         gamma_sigmaIetaIeta[max_ngamma];   //[ngamma]
   Float_t         gamma_r9[max_ngamma];   //[ngamma]
   Float_t         gamma_hOverE[max_ngamma];   //[ngamma]
+  Float_t         gamma_hOverE015[max_ngamma];   //[ngamma]
   Int_t           gamma_idCutBased[max_ngamma];   //[ngamma]
 
   // event level vars recalculated for soft lep 1L control region
@@ -304,6 +369,8 @@ class babyMaker {
   Int_t           gamma_nJet30FailId;
   Int_t           gamma_nJet100FailId;
   Int_t           gamma_nBJet20;
+  Int_t           gamma_nBJet20csv;
+  Int_t           gamma_nBJet20mva;
   Int_t           gamma_nBJet25;
   Int_t           gamma_nBJet30;
   Int_t           gamma_nBJet40;
@@ -328,6 +395,24 @@ class babyMaker {
   Float_t         zll_eta;
   Float_t         zll_phi;
   Float_t         zll_ht;
+
+  Float_t         zll_mt2JECup;
+  Float_t         zll_deltaPhiMinJECup;
+  Float_t         zll_diffMetMhtJECup;
+  Float_t         zll_met_ptJECup;
+  Float_t         zll_met_phiJECup;
+  Float_t         zll_mht_ptJECup;
+  Float_t         zll_mht_phiJECup;
+  Float_t         zll_htJECup;
+
+  Float_t         zll_mt2JECdn;
+  Float_t         zll_deltaPhiMinJECdn;
+  Float_t         zll_diffMetMhtJECdn;
+  Float_t         zll_met_ptJECdn;
+  Float_t         zll_met_phiJECdn;
+  Float_t         zll_mht_ptJECdn;
+  Float_t         zll_mht_phiJECdn;
+  Float_t         zll_htJECdn;
 
   // event level vars recalculated for Z-->ll MT control region
   Float_t         zllmt_mt2;
@@ -436,6 +521,7 @@ class babyMaker {
   Float_t         jet_phi[max_njet];   //[njet]
   Float_t         jet_mass[max_njet];   //[njet]
   Float_t         jet_btagCSV[max_njet];   //[njet]
+  Float_t         jet_btagMVA[max_njet];   //[njet]
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
   Float_t         jet_chf[max_njet];   //[njet]
@@ -446,6 +532,7 @@ class babyMaker {
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
+  Float_t         jet_muf[max_njet];   //[njet]
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;
@@ -457,6 +544,9 @@ class babyMaker {
   Float_t         weight_lepsf;
   Float_t         weight_lepsf_UP;
   Float_t         weight_lepsf_DN;
+  Float_t         weight_lepsf_0l;
+  Float_t         weight_lepsf_0l_UP;
+  Float_t         weight_lepsf_0l_DN;
   Float_t         weight_btagsf;
   Float_t         weight_btagsf_heavy_UP;
   Float_t         weight_btagsf_light_UP;
@@ -467,6 +557,8 @@ class babyMaker {
   Float_t         weight_phottrigsf;
   Float_t         weight_pu;
   Float_t         weight_isr;
+  Float_t         weight_isr_UP;
+  Float_t         weight_isr_DN;
   Float_t         weight_scales_UP;
   Float_t         weight_scales_DN;
   Float_t         weight_pdfs_UP;
@@ -476,12 +568,31 @@ class babyMaker {
   Float_t         genRecoil_pt;
   Float_t         genTop_pt;
   Float_t         genTbar_pt;
+  Int_t           genProd_pdgId;
+  Float_t         weight_pol_L;
+  Float_t         weight_pol_R;
+  Int_t           nisrMatch;
+  Int_t           ngenLepFromZ;
+  Int_t           ngenNuFromZ;
 
 //----- MC SCALE AND PDF WEIGHTS
   static const int max_nLHEweight = 500;
   Int_t           nLHEweight;
   Float_t         LHEweight_wgt[max_nLHEweight];   //[nmcweights]
-  
+
+//----- REBALANCING VARIABLES
+  Int_t           rebal_status;
+  Int_t           nRebalJets;
+  Int_t           rebal_useJet[max_njet];
+  Float_t         rebal_jetpt[max_njet];
+  Float_t         rebal_jeteta[max_njet];
+  Float_t         rebal_jetphi[max_njet];
+  Float_t         rebal_jetbtagcsv[max_njet];
+  Float_t         rebal_factors[max_njet];
+  Float_t         rebal_met_pt;
+  Float_t         rebal_met_phi;
+  Float_t         rebal_pt_soft_x;
+  Float_t         rebal_pt_soft_y;
 };
 
 #endif

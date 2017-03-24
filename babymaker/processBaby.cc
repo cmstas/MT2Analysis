@@ -14,6 +14,11 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  int max_events = -1;
+  if (argc >= 4) max_events = atoi(argv[3]);
+  std::cout << "set max number of events to: " << max_events << std::endl;
+
+  
   TString outfileid(argv[1]); 
   TString infile(argv[2]); 
 
@@ -213,26 +218,26 @@ int main(int argc, char **argv) {
 
   std::cout<<"sample is "<<sample<<std::endl;
 
-  // get bx value (for JEC etc)
-  int bx = 0;
-  if (infile.Contains("Run2015B")) bx = 50;
-  else if (infile.Contains("Run2015C")) bx = 25; // will need to account for the 50ns run somehow..
-  else if (infile.Contains("Run2015D")) bx = 25; 
-  else if (infile.Contains("50ns")) bx = 50;
-  else if (infile.Contains("25ns")) bx = 25;
-  else if (infile.Contains("FSPremix")) bx = 25;
-  else if (infile.Contains("TChi")) bx = 25;
-  else if (infile.Contains("condor")) bx = 25;
+  // // get bx value (for JEC etc)
+  // int bx = 0;
+  // if (infile.Contains("Run2015B")) bx = 50;
+  // else if (infile.Contains("Run2015C")) bx = 25; // will need to account for the 50ns run somehow..
+  // else if (infile.Contains("Run2015D")) bx = 25; 
+  // else if (infile.Contains("50ns")) bx = 50;
+  // else if (infile.Contains("25ns")) bx = 25;
+  // else if (infile.Contains("FSPremix")) bx = 25;
+  // else if (infile.Contains("TChi")) bx = 25;
+  // else if (infile.Contains("condor")) bx = 25;
 
-  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("TChi") || infile.Contains("condor"));
+  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast"));
 
   bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
   
-  if (bx == 0) {
-    std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
-    return 3;
-  }
-  else std::cout << "found bx value: " << bx << std::endl;
+  // if (bx == 0) {
+  //   std::cout << "ERROR: couldn't figure out bx for sample!! filename was: " << infile << ". Exiting" << std::endl;
+  //   return 3;
+  // }
+  // else std::cout << "found bx value: " << bx << std::endl;
   
   //--------------------------------
   // run
@@ -240,6 +245,6 @@ int main(int argc, char **argv) {
   
   babyMaker *looper = new babyMaker();
   if (isBadMiniAodV1) looper->SetRecomputeRawPFMET(true);
-  looper->ScanChain(chain, sample, bx, isFastsim); 
+  looper->ScanChain(chain, sample, isFastsim, max_events); 
   return 0;
 }
