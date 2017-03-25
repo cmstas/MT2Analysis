@@ -238,7 +238,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double wjets_shape_bin2 = 1.15;
   double wjets_shape_bin3 = 1.15;
 
-
+  // Set SR yield so that it is based on CR yield
+  n_ttsl = ttsl_CRstat * ttsl_TF;
+  n_ttdl = ttdl_CRstat * ttdl_TF;
+  n_wjets = wjets_CRstat * wjets_TF;
 
   TString name_ttsl_syst = "ttsl_syst";
   TString name_ttdl_syst = "ttdl_syst";
