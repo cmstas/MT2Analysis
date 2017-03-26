@@ -99,6 +99,8 @@ bool doBlindData = false;
 bool doGenTauVars = false;
 // make variation histograms for e+mu efficiency
 bool doLepEffVars = false;
+// turn on to apply lepton sf to central value - reread from files
+bool applyLeptonSFfromFiles = true; // default true
 // make only minimal hists needed for results
 bool doMinimalPlots = false;
 
@@ -519,10 +521,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_btagsf_heavy_DN_ = 0;
   h_sig_avgweight_btagsf_light_DN_ = 0;
   h_sig_avgweight_isr_ = 0;
-  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
+  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
+    else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -549,16 +552,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     delete f_nsig_weights;
   }
 
-  if (doLepEffVars) {
-    setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
-    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
-    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
+  if (applyLeptonSFfromFiles) {
+    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
   
-  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
-    setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
-    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
-    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
+  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
+    setElSFfile_fastsim("../babymaker/lepsf/moriond17/sf_el_vetoCB_mini01.root");  
+    setMuSFfile_fastsim("../babymaker/lepsf/moriond17/sf_mu_looseID.root",
+			"../babymaker/lepsf/moriond17/sf_mu_looseID_mini02.root",
+			"../babymaker/lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
+    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
   }
   
   // set up signal binning
@@ -712,6 +720,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
+
 	if (applyBtagSF) {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
@@ -723,6 +732,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    evtweight_ /= avgweight_btagsf;
 	  }
 	}
+
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
 	  int nvtx_input = t.nVert;
@@ -731,6 +741,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
+
 	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
 	  fillLepCorSRfastsim();
 	  evtweight_ *= (1. + cor_lepeff_sr_);
@@ -741,6 +752,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  evtweight_ *= t.weight_toppt;
 	}
       } // !isData
+
 
       plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
       plot1D("h_mt2",       t.mt2,       evtweight_, h_1d_global, ";M_{T2} [GeV]", 80, 0, 800);
@@ -758,6 +770,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (t.jet_pt[ijet] > 30. && fabs(t.jet_eta[ijet]) > 3.0) ++nJet30Eta3_;
       }
 
+
       // veto on forward jets
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
 
@@ -772,6 +785,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  break;
 	}
       }
+
 
       // simple counter to check for 1L CR
       if (t.nLepLowMT == 1) {
