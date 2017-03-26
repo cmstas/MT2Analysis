@@ -74,6 +74,7 @@ public :
    Float_t         htJECup;
    Float_t         htJECdn;
    Float_t         mt2;
+   Float_t         sl_mt2;
    Float_t         mt2JECup;
    Float_t         mt2JECdn;
    Float_t         mt2_gen;
@@ -186,6 +187,7 @@ public :
    Int_t           HLT_DiCentralPFJet70_PFMET120;   
    Int_t           HLT_DiCentralPFJet55_PFMET110;   
    Int_t           nlep;
+   Int_t           nlepIso;
    Float_t         lep_pt[50];   //[nlep]
    Float_t         lep_eta[50];   //[nlep]
    Float_t         lep_phi[50];   //[nlep]
@@ -195,6 +197,7 @@ public :
    Float_t         lep_dxy[50];   //[nlep]
    Float_t         lep_dz[50];   //[nlep]
    Int_t           lep_tightId[50];   //[nlep]
+   Int_t           lep_tightIdNoIso[50];   //[nlep]
    Int_t           lep_heepId[50];   //[nlep]
    Float_t         lep_relIso03[50];   //[nlep]
    Float_t         lep_relIso04[50];   //[nlep]
@@ -216,6 +219,7 @@ public :
    Int_t           isoTrack_mcMatchId[50];   //[nisoTrack]
    Int_t           nPFLep5LowMT;
    Int_t           nPFHad10LowMT;
+   Int_t           nPFHad10;
    Int_t           ntau;
    Float_t         tau_pt[50];   //[ntau]
    Float_t         tau_eta[50];   //[ntau]
@@ -466,6 +470,7 @@ public :
    TBranch        *b_htJECup;   //!
    TBranch        *b_htJECdn;   //!
    TBranch        *b_mt2;   //!
+   TBranch        *b_sl_mt2;   //!
    TBranch        *b_mt2JECup;   //!
    TBranch        *b_mt2JECdn;   //!
    TBranch        *b_mt2_gen;   //!
@@ -578,6 +583,7 @@ public :
    TBranch        *b_HLT_DiCentralPFJet70_PFMET120;   //!
    TBranch        *b_HLT_DiCentralPFJet55_PFMET110;   //!
    TBranch        *b_nlep;   //!
+   TBranch        *b_nlepIso;   //!
    TBranch        *b_lep_pt;   //!
    TBranch        *b_lep_eta;   //!
    TBranch        *b_lep_phi;   //!
@@ -587,6 +593,7 @@ public :
    TBranch        *b_lep_dxy;   //!
    TBranch        *b_lep_dz;   //!
    TBranch        *b_lep_tightId;   //!
+   TBranch        *b_lep_tightIdNoIso;   //!
    TBranch        *b_lep_heepId;   //!
    TBranch        *b_lep_relIso03;   //!
    TBranch        *b_lep_relIso04;   //!
@@ -608,6 +615,7 @@ public :
    TBranch        *b_isoTrack_mcMatchId;   //!
    TBranch        *b_nPFLep5LowMT;   //!
    TBranch        *b_nPFHad10LowMT;   //!
+   TBranch        *b_nPFHad10;   //!
    TBranch        *b_ntau;   //!
    TBranch        *b_tau_pt;   //!
    TBranch        *b_tau_eta;   //!
@@ -916,6 +924,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("htJECup", &htJECup, &b_htJECup);
    fChain->SetBranchAddress("htJECdn", &htJECdn, &b_htJECdn);
    fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
+   fChain->SetBranchAddress("sl_mt2", &sl_mt2, &b_sl_mt2);
    fChain->SetBranchAddress("mt2JECup", &mt2JECup, &b_mt2JECup);
    fChain->SetBranchAddress("mt2JECdn", &mt2JECdn, &b_mt2JECdn);
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
@@ -1028,6 +1037,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120, &b_HLT_DiCentralPFJet70_PFMET120);
    fChain->SetBranchAddress("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110, &b_HLT_DiCentralPFJet55_PFMET110);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
+   fChain->SetBranchAddress("nlepIso", &nlepIso, &b_nlepIso);
    fChain->SetBranchAddress("lep_pt", lep_pt, &b_lep_pt);
    fChain->SetBranchAddress("lep_eta", lep_eta, &b_lep_eta);
    fChain->SetBranchAddress("lep_phi", lep_phi, &b_lep_phi);
@@ -1037,6 +1047,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_dxy", lep_dxy, &b_lep_dxy);
    fChain->SetBranchAddress("lep_dz", lep_dz, &b_lep_dz);
    fChain->SetBranchAddress("lep_tightId", lep_tightId, &b_lep_tightId);
+   fChain->SetBranchAddress("lep_tightIdNoIso", lep_tightIdNoIso, &b_lep_tightIdNoIso);
    fChain->SetBranchAddress("lep_heepId", lep_heepId, &b_lep_heepId);
    fChain->SetBranchAddress("lep_relIso03", lep_relIso03, &b_lep_relIso03);
    fChain->SetBranchAddress("lep_relIso04", lep_relIso04, &b_lep_relIso04);
@@ -1058,6 +1069,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("isoTrack_mcMatchId", isoTrack_mcMatchId, &b_isoTrack_mcMatchId);
    fChain->SetBranchAddress("nPFLep5LowMT", &nPFLep5LowMT, &b_nPFLep5LowMT);
    fChain->SetBranchAddress("nPFHad10LowMT", &nPFHad10LowMT, &b_nPFHad10LowMT);
+   fChain->SetBranchAddress("nPFHad10", &nPFHad10, &b_nPFHad10);
    fChain->SetBranchAddress("ntau", &ntau, &b_ntau);
    fChain->SetBranchAddress("tau_pt", tau_pt, &b_tau_pt);
    fChain->SetBranchAddress("tau_eta", tau_eta, &b_tau_eta);

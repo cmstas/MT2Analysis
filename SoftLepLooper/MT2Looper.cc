@@ -81,7 +81,7 @@ bool applyLeptonSF = true;
 // turn on to apply reweighting to ttbar based on top pt --> should be used as uncertainty, not correction
 bool applyTopPtReweightSyst = true;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
-bool applyLeptonSFfastsim = true;
+bool applyLeptonSFfastsim = false; // default true
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
@@ -97,7 +97,7 @@ bool doBlindData = false;
 // make variation histograms for tau efficiency
 bool doGenTauVars = true;
 // make variation histograms for e+mu efficiency
-bool doLepEffVars = true;
+bool doLepEffVars = false; // default true
 // make only minimal hists needed for results
 bool doMinimalPlots = true;
 // if true, only make plots with both el,mu
@@ -340,13 +340,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_renorm_UP_ = 0;
   h_sig_avgweight_renorm_DN_ = 0;
   if ((doScanWeights || applyBtagSF) && 
-      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
+      ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
     std::string scan_name = sample;
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2-4bd") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T5qqqqWW_modified") != std::string::npos) scan_name = "T5qqqqWW_modified";
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
+    else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("TChiNeu") != std::string::npos) scan_name = sample.substr(0,7);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
@@ -380,21 +381,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     delete f_nsig_weights;
   }
 
-  if (doLepEffVars) {
-    setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
-    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
-    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
-    setSoftElSFfile("../babymaker/lepsf/ElSoftSF.root");
-    setSoftMuSFfile("../babymaker/lepsf/MuSoftSF.root");
-  }
-  
-  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
-    setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
-    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
-    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
-    setSoftElSFfile_fastsim("../babymaker/lepsf/lepeff_Ele.root");
-    setSoftMuSFfile_fastsim("../babymaker/lepsf/lepeff_Mu.root");
-  }
+//  if (doLepEffVars) {
+//    setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
+//    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+//    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
+//    setSoftElSFfile("../babymaker/lepsf/ElSoftSF.root");
+//    setSoftMuSFfile("../babymaker/lepsf/MuSoftSF.root");
+//  }
+//  
+//  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
+//    setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
+//    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
+//    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
+//    setSoftElSFfile_fastsim("../babymaker/lepsf/lepeff_Ele.root");
+//    setSoftMuSFfile_fastsim("../babymaker/lepsf/lepeff_Mu.root");
+//  }
 
   // set up signal binning
   for (int i = 0; i <= n_m1bins; ++i) {
@@ -778,7 +779,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doHFJetVeto && nJet30Eta3_ > 0) continue;
 
       // veto Fastim events with crazy jets
-      if (isSignal_ && t.jet_failFSveto) continue; 
+      //      if (isSignal_ && t.jet_failFSveto) continue; 
       
       // check jet id for monojet
       passMonojetId_ = false;
@@ -1033,48 +1034,48 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// 1. For tight soft leptons, need to use OWN scale factors (+ own Fastsim SFs) --> This affects SR, but also CR2L (CR2L is complicated, need both central and own SFs)
 	// 2. For loose soft leptons, or hard leptons, can use central scale factors (which already include central Fastsim SFs)
 	// 3. For lost leptons, use central scale factors (which already include central central FastSim)
-      if ( !t.isData && ( applyLeptonSFfastsim || applyLeptonSF ) &&  (foundsoftlep || foundhardlep) ) {
-
-	bool fastsim = isSignal_ && applyLeptonSFfastsim;
-	if (foundsoftlep) {
-	  weightStruct weights = getSoftSF(softleppt_, softlepeta_, abs(softlepId_));
-	  evtweight_ *= weights.cent;
-	  evtweight_lepEffUp_ = evtweight_ / weights.cent * weights.up;
-	  evtweight_lepEffDn_ = evtweight_ / weights.cent * weights.dn;
-	  //cout<<"for soft with id/pt/eta "<<softlepId_<<"/"<<softleppt_<<"/"<<softlepeta_<<", lepSF is "<<weights.cent<<" +"<<weights.up<<" -"<< weights.dn<<endl;
-	  if (fastsim) {
-	    weightStruct weightsFS = getSoftSF_fastsim(softleppt_, softlepeta_, abs(softlepId_));
-	    evtweight_ *= weightsFS.cent;
-	    evtweight_lepEffUp_ = evtweight_ / weightsFS.cent * weightsFS.up;
-	    evtweight_lepEffDn_ = evtweight_ / weightsFS.cent * weightsFS.dn;
-	    //cout<<"And Fastsim lepSF is "<<weightsFS.cent<<" +"<<weightsFS.up<<" -"<< weightsFS.dn<<endl;
-	    //cout<<"Previous SF would have been "<< t.weight_lepsf<<", so we went from that to " << weightsFS.cent*weights.cent<<endl;
-	  }
-	}
-	else {
-	  evtweight_ *= t.weight_lepsf;
-	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
-	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
-	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
-	}
-      }
+     //if ( !t.isData && ( applyLeptonSFfastsim || applyLeptonSF ) &&  (foundsoftlep || foundhardlep) ) {
+     //
+     //	bool fastsim = isSignal_ && applyLeptonSFfastsim;
+     //	if (foundsoftlep) {
+     //	  weightStruct weights = getSoftSF(softleppt_, softlepeta_, abs(softlepId_));
+     //	  evtweight_ *= weights.cent;
+     //	  evtweight_lepEffUp_ = evtweight_ / weights.cent * weights.up;
+     //	  evtweight_lepEffDn_ = evtweight_ / weights.cent * weights.dn;
+     //	  //cout<<"for soft with id/pt/eta "<<softlepId_<<"/"<<softleppt_<<"/"<<softlepeta_<<", lepSF is "<<weights.cent<<" +"<<weights.up<<" -"<< weights.dn<<endl;
+     //	  if (fastsim) {
+     //	    weightStruct weightsFS = getSoftSF_fastsim(softleppt_, softlepeta_, abs(softlepId_));
+     //	    evtweight_ *= weightsFS.cent;
+     //	    evtweight_lepEffUp_ = evtweight_ / weightsFS.cent * weightsFS.up;
+     //	    evtweight_lepEffDn_ = evtweight_ / weightsFS.cent * weightsFS.dn;
+     //	    //cout<<"And Fastsim lepSF is "<<weightsFS.cent<<" +"<<weightsFS.up<<" -"<< weightsFS.dn<<endl;
+     //	    //cout<<"Previous SF would have been "<< t.weight_lepsf<<", so we went from that to " << weightsFS.cent*weights.cent<<endl;
+     //	  }
+     //	}
+     //	else {
+     //	  evtweight_ *= t.weight_lepsf;
+     //	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
+     //	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
+     //	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
+     //	}
+     //}
 
 
       // Scale factors (and uncertainties) for SR events with a lost lepton: these use the standard variables in the babies (centrally produced)
-      if ( !t.isData && (foundMissingLep || foundMissingLepFromTau) && ( applyLeptonSFfastsim || applyLeptonSF ) &&  foundsoftlep && !foundhardlep) {
-	  bool fastsim = isSignal_ && applyLeptonSFfastsim;
-	  float lostsf = 1.;
-	  float lostsf_up = 1.;
-	  float lostsf_dn = 1.;
-	  
-	  if (missIdx_ != -1 && missPt_ > 5 && fabs(missEta_) < 2.4) {
-	    fillMissLepSF(missIdx_, foundMissingLepFromTau, fastsim, lostsf, lostsf_up, lostsf_dn);
-	    //cout<<"found lost lep SF weights to be "<<lostsf<<", "<<lostsf_up<<", "<<lostsf_dn<<endl;
-	    evtweight_ *= lostsf;
-	    evtweight_lepEffUp_ *= lostsf_up;
-	    evtweight_lepEffDn_ *= lostsf_dn;
-	  }
-      }
+      //if ( !t.isData && (foundMissingLep || foundMissingLepFromTau) && ( applyLeptonSFfastsim || applyLeptonSF ) &&  foundsoftlep && !foundhardlep) {
+      //	  bool fastsim = isSignal_ && applyLeptonSFfastsim;
+      //	  float lostsf = 1.;
+      //	  float lostsf_up = 1.;
+      //	  float lostsf_dn = 1.;
+      //	  
+      //	  if (missIdx_ != -1 && missPt_ > 5 && fabs(missEta_) < 2.4) {
+      //	    fillMissLepSF(missIdx_, foundMissingLepFromTau, fastsim, lostsf, lostsf_up, lostsf_dn);
+      //	    //cout<<"found lost lep SF weights to be "<<lostsf<<", "<<lostsf_up<<", "<<lostsf_dn<<endl;
+      //	    evtweight_ *= lostsf;
+      //	    evtweight_lepEffUp_ *= lostsf_up;
+      //	    evtweight_lepEffDn_ *= lostsf_dn;
+      //	  }
+      //}
 
       //---------------------------------------//
       //-------Soft SR/CR1L/CR2L Regions-------//
