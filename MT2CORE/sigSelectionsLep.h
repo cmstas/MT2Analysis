@@ -13,6 +13,10 @@ namespace mt2
   std::vector<SR> getSignalRegionsLep3();
   std::vector<SR> getSignalRegionsLep4();
 
+  //2017
+  std::vector<SR> getSignalRegionsLep4withLepPt();
+  std::vector<SR> getSignalRegionsLep5withLepPt();
+
 } // namespace mt2
 
 #endif // SIGNALREGIONSLEP_H

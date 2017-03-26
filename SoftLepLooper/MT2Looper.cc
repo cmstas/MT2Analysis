@@ -113,6 +113,8 @@ bool doWpolarizationReweight = true;
 bool doRenormFactScaleReweight = true;
 // turn on to (only) make full PDF variation histograms
 bool doFullPDFVariations = false;
+// add lepton pT as additional SR variable (this is OK even for 2016 SRs, if using SRLep4withLepPt)
+bool useLepPtForSRs = true;
 
 // This is meant to be passed as the third argument, the predicate, of the standard library sort algorithm
 inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
@@ -130,7 +132,12 @@ void MT2Looper::SetSignalRegions(){
 
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVecLep =  getSignalRegionsLep4(); 
+  if (!useLepPtForSRs)
+    SRVecLep =  getSignalRegionsLep4(); 
+  else
+    SRVecLep =  getSignalRegionsLep4withLepPt(); // Standard SRs, updated to have an extra variable
+  //SRVecLep =  getSignalRegionsLep5withLepPt(); // NEW SRs for F2F. Uncomment this to test!
+
   //  SRVecLep =  getSignalRegionsLep5();  // 4 bins in MT, start at 0
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
 
@@ -1874,6 +1881,7 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
+  if (useLepPtForSRs) values["leppt"]       = softleppt_;
 
   if (doFullPDFVariations) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
@@ -1952,6 +1960,8 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values["ht"]          = t.ht; //corrected ht in this CR
   values["met"]         = softleppt_; //replace met with lepton pT in cr1L
   values["mt"]          = softlepmt_;
+  if (useLepPtForSRs) values["leppt"]       = 19; // dummy
+
 
   //second value map for mt validation region
   std::map<std::string, float> values2;
@@ -1965,6 +1975,8 @@ void MT2Looper::fillHistosCR1L(const std::string& prefix, const std::string& suf
   values2["ht"]          = t.ht; //corrected ht in this CR
   values2["met"]         = 201; //dummy variable for validation region
   values2["mt"]          = softlepmt_;
+  if (useLepPtForSRs) values2["leppt"]       = 19; // dummy
+
 
   if (doFullPDFVariations) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
@@ -2156,6 +2168,8 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   values["ht"]          = t.ht;
   values["met"]         = t.met_pt;
   values["mt"]          = softlepmt_;
+  if (useLepPtForSRs) values["leppt"]       = softleppt_;
+
 
   //alternate valueMap for lepton-triggered CR
   std::map<std::string, float> values2;
@@ -2169,6 +2183,8 @@ void MT2Looper::fillHistosDoubleL(const std::string& prefix, const std::string& 
   values2["ht"]          = t.ht;
   values2["met"]         = 201; //dummy value for alt double lepton CR
   values2["mt"]          = softlepmt_;
+  if (useLepPtForSRs) values2["leppt"]       = softleppt_;
+
 
   if (doFullPDFVariations) {
     for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
@@ -2231,6 +2247,8 @@ void MT2Looper::fillHistosZll(const std::string& prefix, const std::string& suff
   values["ht"]          = t.ht;
   values["met"]         = 201; //dummy value
   values["mt"]          = zllmt_; //use recalculated MT
+  if (useLepPtForSRs) values["leppt"]       = 19; // dummy
+
   
   // trigger requirement on data
   if (t.isData && !(t.HLT_SingleEl || t.HLT_SingleMu)) return;
