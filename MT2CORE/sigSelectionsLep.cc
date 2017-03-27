@@ -1079,15 +1079,26 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
 
   sr.SetName("3");
   sr.SetVar("met", 300, 600);
-  sr.SetVar("ht", 1000, -1);
+  sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("4");
   sr.SetVar("met", 600, -1);
-  sr.SetVar("ht", 1000, -1);
+  sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
+
+  sr.SetName("5");
+  sr.SetVar("met", 300, 600);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("6");
+  sr.SetVar("met", 600, -1);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
   
   //add LepPt requirements
   for (unsigned int iLepPt = 0; iLepPt < 3; iLepPt++) {
