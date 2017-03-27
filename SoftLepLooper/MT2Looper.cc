@@ -579,7 +579,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  evtweight_ = lumi * t.evt_xsec*1000./nevents; // assumes xsec is already filled correctly
-	  if (sample.find("T6qqWW") == std::string::npos) evtweight_ *= 5./9;  // account for lepton filter efficiency on WW
+	  if (sample.find("T6qqWW") != std::string::npos) evtweight_ *= 5./9;  // account for lepton filter efficiency on WW
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
