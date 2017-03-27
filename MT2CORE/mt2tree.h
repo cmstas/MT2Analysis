@@ -185,7 +185,7 @@ public :
    Int_t           HLT_PFHT475_Prescale;   
    Int_t           HLT_PFHT600_Prescale;   
    Int_t           HLT_DiCentralPFJet70_PFMET120;   
-   Int_t           HLT_DiCentralPFJet55_PFMET110;   
+   Int_t           HLT_DiCentralPFJet55_PFMET110;  
    Int_t           nlep;
    Int_t           nlepIso;
    Float_t         lep_pt[50];   //[nlep]
@@ -366,6 +366,8 @@ public :
    Float_t         jet_btagMVA[100];   //[njet]
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
+   Float_t         jet_chf[100];   //[njet]
+   Float_t         jet_failFSveto[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
    Float_t         jet_qgl[100];   //[njet]
    Float_t         jet_area[100];   //[njet]
@@ -762,6 +764,8 @@ public :
    TBranch        *b_jet_btagMVA;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
+   TBranch        *b_jet_chf;   //!
+   TBranch        *b_jet_failFSveto;   //!
    TBranch        *b_jet_mcFlavour;   //!
    TBranch        *b_jet_qgl;   //!
    TBranch        *b_jet_area;   //!
@@ -1216,6 +1220,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
+   fChain->SetBranchAddress("jet_chf", jet_chf, &b_jet_chf);
+   fChain->SetBranchAddress("jet_failFSveto", jet_failFSveto, &b_jet_failFSveto);
    fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);
    fChain->SetBranchAddress("jet_qgl", jet_qgl, &b_jet_qgl);
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
