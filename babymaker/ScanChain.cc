@@ -69,7 +69,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = true;
 // turn on to remove jets overlapping with leptons (default true)
@@ -590,21 +590,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
-	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
+	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();
 	// inputs for badMuonFilters in latest cms3 tags
 	if (recent_cms3_version) {
 	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
 	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
-          Flag_badMuonFilter                            = badMuonFilter();
+          Flag_badMuonFilter                            = badMuonFilterV2(); // supposed to be removed later
           Flag_badMuonFilterV2                          = badMuonFilterV2();
 	  if (small_cms3_version >= 18) {
 	    Flag_badMuons                                 = cms3.filt_badMuons();
 	    Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
 	    Flag_noBadMuons                               = cms3.filt_noBadMuons();
 	  }
-          Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
+          Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();
 	}
-	Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
+	Flag_badChargedHadronFilter                   = badChargedCandidateFilterV2(); // supposed to be removed later
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
       }
@@ -657,7 +657,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           genPart_pt[ngenPart] = cms3.genps_p4().at(iGen).pt();
           genPart_eta[ngenPart] = cms3.genps_p4().at(iGen).eta();
           genPart_phi[ngenPart] = cms3.genps_p4().at(iGen).phi();
-          genPart_mass[ngenPart] = cms3.genps_mass().at(iGen);
+          genPart_mass[ngenPart] = cms3.genps_p4().at(iGen).mass();
           genPart_pdgId[ngenPart] = cms3.genps_id().at(iGen);
           genPart_status[ngenPart] = cms3.genps_status().at(iGen);
           genPart_charge[ngenPart] = cms3.genps_charge().at(iGen);
@@ -742,7 +742,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genStat23_pt[ngenStat23] = cms3.genps_p4().at(iGen).pt();
             genStat23_eta[ngenStat23] = cms3.genps_p4().at(iGen).eta();
             genStat23_phi[ngenStat23] = cms3.genps_p4().at(iGen).phi();
-            genStat23_mass[ngenStat23] = cms3.genps_mass().at(iGen);
+            genStat23_mass[ngenStat23] = cms3.genps_p4().at(iGen).mass();
             genStat23_pdgId[ngenStat23] = cms3.genps_id().at(iGen);
             genStat23_status[ngenStat23] = cms3.genps_status().at(iGen);
             genStat23_charge[ngenStat23] = cms3.genps_charge().at(iGen);
@@ -876,7 +876,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genLep_pt[ngenLep] = cms3.genps_p4().at(iGen).pt();
             genLep_eta[ngenLep] = cms3.genps_p4().at(iGen).eta();
             genLep_phi[ngenLep] = cms3.genps_p4().at(iGen).phi();
-            genLep_mass[ngenLep] = cms3.genps_mass().at(iGen);
+            genLep_mass[ngenLep] = cms3.genps_p4().at(iGen).mass();
             genLep_pdgId[ngenLep] = cms3.genps_id().at(iGen);
             genLep_status[ngenLep] = cms3.genps_status().at(iGen);
             genLep_charge[ngenLep] = cms3.genps_charge().at(iGen);
@@ -889,7 +889,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genTau_pt[ngenTau] = cms3.genps_p4().at(iGen).pt();
             genTau_eta[ngenTau] = cms3.genps_p4().at(iGen).eta();
             genTau_phi[ngenTau] = cms3.genps_p4().at(iGen).phi();
-            genTau_mass[ngenTau] = cms3.genps_mass().at(iGen);
+            genTau_mass[ngenTau] = cms3.genps_p4().at(iGen).mass();
             genTau_pdgId[ngenTau] = cms3.genps_id().at(iGen);
             genTau_status[ngenTau] = cms3.genps_status().at(iGen);
             genTau_charge[ngenTau] = cms3.genps_charge().at(iGen);
@@ -907,7 +907,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genLepFromTau_pt[ngenLepFromTau] = cms3.genps_p4().at(iGen).pt();
             genLepFromTau_eta[ngenLepFromTau] = cms3.genps_p4().at(iGen).eta();
             genLepFromTau_phi[ngenLepFromTau] = cms3.genps_p4().at(iGen).phi();
-            genLepFromTau_mass[ngenLepFromTau] = cms3.genps_mass().at(iGen);
+            genLepFromTau_mass[ngenLepFromTau] = cms3.genps_p4().at(iGen).mass();
             genLepFromTau_pdgId[ngenLepFromTau] = cms3.genps_id().at(iGen);
             genLepFromTau_status[ngenLepFromTau] = cms3.genps_status().at(iGen);
             genLepFromTau_charge[ngenLepFromTau] = cms3.genps_charge().at(iGen);
@@ -1064,7 +1064,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
         vec_lep_phi.push_back ( cms3.els_p4().at(iEl).phi());
-        vec_lep_mass.push_back ( cms3.els_mass().at(iEl));
+        vec_lep_mass.push_back ( cms3.els_p4().at(iEl).mass());
         vec_lep_charge.push_back ( cms3.els_charge().at(iEl));
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
@@ -1142,7 +1142,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
         vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
         vec_lep_phi.push_back ( cms3.mus_p4().at(iMu).phi());
-        vec_lep_mass.push_back ( cms3.mus_mass().at(iMu));
+        vec_lep_mass.push_back ( cms3.mus_p4().at(iMu).mass());
         vec_lep_charge.push_back ( cms3.mus_charge().at(iMu));
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
@@ -1625,7 +1625,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_gamma_pt.push_back ( pt );
         vec_gamma_eta.push_back ( eta );
         vec_gamma_phi.push_back ( phi );
-        vec_gamma_mass.push_back ( cms3.photons_mass().at(iGamma) );
+        vec_gamma_mass.push_back ( cms3.photons_p4().at(iGamma).mass() );
         vec_gamma_sigmaIetaIeta.push_back ( cms3.photons_full5x5_sigmaIEtaIEta().at(iGamma) );
         vec_gamma_chHadIso.push_back ( photons_recoChargedHadronIso().at(iGamma) );
         vec_gamma_neuHadIso.push_back ( photons_recoNeutralHadronIso().at(iGamma) );
@@ -2634,7 +2634,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         tau_pt[ntau]   = cms3.taus_pf_p4().at(iTau).pt();
         tau_eta[ntau]  = cms3.taus_pf_p4().at(iTau).eta();
         tau_phi[ntau]  = cms3.taus_pf_p4().at(iTau).phi();
-        tau_mass[ntau] = cms3.taus_pf_mass().at(iTau);
+        tau_mass[ntau] = cms3.taus_pf_p4().at(iTau).mass();
         tau_charge[ntau] = cms3.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
@@ -2782,7 +2782,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               }
           }
       } // end rebalancing
-
 
       FillBabyNtuple();
 
