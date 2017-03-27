@@ -1,6 +1,8 @@
 #!/bin/bash
 
-INDIR=../../SoftLepLooper/output/fromMark_test_newSoftBabies_Mar25/
+#INDIR=../../SoftLepLooper/output/fromMark_test_newSoftBabies_Mar25/
+#INDIR=../../SoftLepLooper/output/fromMark_test_newSoftBabies_newSRs_Mar25/
+INDIR=../../SoftLepLooper/output/test_newSoftBabies_newSRs2_Mar25/
 THISDIR=`pwd`
 
 
@@ -15,8 +17,8 @@ echo "hadd -f allBkg.root ttsl.root ttdl.root singletop.root ttw.root ttz.root t
 hadd -f allBkg.root ttsl.root ttdl.root singletop.root ttw.root ttz.root tth.root ttg.root ww.root wz.root zz.root qcd_ht.root zinv_ht.root wjets_ht.root dyjetsll.root>> dataDrivenEstimates.log
 cd $THISDIR
 
-echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/top.root,14)"
-root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/top.root\",14)" >> dataDrivenEstimates.log
+echo "root -b -q ../rescaleBoundaryHists.C+(${INDIR}/allBkg.root,14)"
+root -b -q "../rescaleBoundaryHists.C+(\"${INDIR}/allBkg.root\",14)" >> dataDrivenEstimates.log
 
 echo "done"
 
