@@ -5,25 +5,31 @@
 #INDIR=../../SoftLepLooper/output/softLep_unblind_skim_may25/
 
 #2016 result
-INDIR=/home/users/gzevi/MT2/MT2AnalysisSoft2016/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may25_mark/ 
+#INDIR=/home/users/gzevi/MT2/MT2AnalysisSoft2016/MT2Analysis/SoftLepLooper/output/softLep_unblind_skim_may25_mark/ 
+#OUTDIR=cards_T2-4bd_MC
 
-#OUTDIR=cards_softLep3Feb16
-OUTDIR=cards_T2-4bd_MC
-#OUTDIR=cards_T5qqqqWW
+#2017 old SRs
+#INDIR=/home/users/mderdzinski/winter2017/soft/SoftLepLooper/output/test_newSoftBabies_Mar25
+#OUTDIR=cards_T6qqWW_oldSRsMC3
+
+#2017 new SRs
+INDIR=../../SoftLepLooper/output/fromMark_test_newSoftBabies_newSRs_Mar25/
+OUTDIR=cards_T6qqWW_newSRsMC
 
 if [ ! -d "$OUTDIR" ]; then
   mkdir -p $OUTDIR
 fi
 
-declare -a samples=("T2-4bd_275_235" )
-#declare -a samples=("T5qqqqWW" )
+#declare -a samples=("T2-4bd_275_235" )
+declare -a samples=("T6qqWW" )
 
 for i in "${samples[@]}"
 do
 #default
-#  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\", 0, 1)" > make_cards_$i.log 2>&1 &
-#uses MC only
-  nohup root -b -q "cardMakerMC.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\", 0, 1)" > make_cards_$i.log 2>&1 &
+#  nohup root -b -q "cardMakerMC.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\", 0, 1)" > make_cards_$i.log 2>&1 &
 ### option for full scans
-#  nohup root -b -q "cardMaker.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",1, 0)" > make_cards_$i.log 2>&1 &
+  nohup root -b -q "cardMakerMC.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\",1, 0)" > make_cards_$i.log 2>&1 &
 done
+
+
+#void cardMakerMC(string signal, string input_dir, string output_dir, bool isScan = false, bool doData = false){
