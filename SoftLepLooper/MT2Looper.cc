@@ -82,6 +82,8 @@ bool applyLeptonSF = true;
 bool applyTopPtReweightSyst = true;
 // turn on to apply lepton sf to central value for 0L sample in fastsim
 bool applyLeptonSFfastsim = false; // default true
+// turn on to apply lepton sf to central value - reread from files
+bool applyLeptonSFfromFiles = true; // default true
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
 bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
@@ -135,8 +137,8 @@ void MT2Looper::SetSignalRegions(){
   if (!useLepPtForSRs)
     SRVecLep =  getSignalRegionsLep4(); 
   else
-    SRVecLep =  getSignalRegionsLep4withLepPt(); // Standard SRs, updated to have an extra variable
-  //SRVecLep =  getSignalRegionsLep5withLepPt(); // NEW SRs for F2F. Uncomment this to test!
+    // SRVecLep =  getSignalRegionsLep4withLepPt(); // Standard SRs, updated to have an extra variable
+    SRVecLep =  getSignalRegionsLep5withLepPt(); // NEW SRs for F2F. Uncomment this to test!
 
   //  SRVecLep =  getSignalRegionsLep5();  // 4 bins in MT, start at 0
   SRVecMonojet = getSignalRegionsMonojet(); // first pass of monojet regions
@@ -336,7 +338,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     f_weights->Close();
     delete f_weights;
   }
-
   h_sig_nevents_ = 0;
   h_sig_avgweight_btagsf_ = 0;
   h_sig_avgweight_btagsf_heavy_UP_ = 0;
@@ -356,6 +357,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
     else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("TChiNeu") != std::string::npos) scan_name = sample.substr(0,7);
+    else if (sample.find("T6qqWW") != std::string::npos) scan_name = sample.substr(0,6);
+
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -366,6 +369,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     TH2D* h_sig_avgweight_isr_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr");
     TH2D* h_sig_avgweight_renorm_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_UP");
     TH2D* h_sig_avgweight_renorm_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_DN");
+
     h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
     h_sig_avgweight_btagsf_ = (TH2D*) h_sig_avgweight_btagsf_temp->Clone("h_sig_avgweight_btagsf");
     h_sig_avgweight_btagsf_heavy_UP_ = (TH2D*) h_sig_avgweight_btagsf_heavy_UP_temp->Clone("h_sig_avgweight_btagsf_heavy_UP");
@@ -375,6 +379,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_isr_ = (TH2D*) h_sig_avgweight_isr_temp->Clone("h_sig_avgweight_isr");
     h_sig_avgweight_renorm_UP_ = (TH2D*) h_sig_avgweight_renorm_UP_temp->Clone("h_sig_avgweight_renorm_UP");
     h_sig_avgweight_renorm_DN_ = (TH2D*) h_sig_avgweight_renorm_DN_temp->Clone("h_sig_avgweight_renorm_DN");
+
     h_sig_nevents_->SetDirectory(0);
     h_sig_avgweight_btagsf_->SetDirectory(0);
     h_sig_avgweight_btagsf_heavy_UP_->SetDirectory(0);
@@ -387,22 +392,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
-
-//  if (doLepEffVars) {
-//    setElSFfile("../babymaker/lepsf/kinematicBinSFele.root");
-//    setMuSFfile("../babymaker/lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","../babymaker/lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
-//    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  
-//    setSoftElSFfile("../babymaker/lepsf/ElSoftSF.root");
-//    setSoftMuSFfile("../babymaker/lepsf/MuSoftSF.root");
-//  }
-//  
-//  if (applyLeptonSFfastsim && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T5") != std::string::npos) || (sample.find("TChiNeu") != std::string::npos) )) {
-//    setElSFfile_fastsim("../babymaker/lepsf/sf_el_vetoCB_mini01.root");  
-//    setMuSFfile_fastsim("../babymaker/lepsf/sf_mu_looseID_mini02.root");  
-//    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt_mGluino-1500to1525.root");  
-//    setSoftElSFfile_fastsim("../babymaker/lepsf/lepeff_Ele.root");
-//    setSoftMuSFfile_fastsim("../babymaker/lepsf/lepeff_Mu.root");
-//  }
+  
+  if (applyLeptonSFfromFiles) {
+    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
+  }
+  
+  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos)|| (sample.find("T6") != std::string::npos))) {
+    setElSFfile_fastsim("../babymaker/lepsf/moriond17/sf_el_vetoCB_mini01.root");  
+    setMuSFfile_fastsim("../babymaker/lepsf/moriond17/sf_mu_looseID.root",
+			"../babymaker/lepsf/moriond17/sf_mu_looseID_mini02.root",
+			"../babymaker/lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
+    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
+  }
 
   // set up signal binning
   for (int i = 0; i <= n_m1bins; ++i) {
@@ -459,7 +465,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
-      //for( unsigned int event = 0; event < 10000; ++event) {
+      //for( unsigned int event = 0; event < 100; ++event) {
       
       t.GetEntry(event);
 
@@ -535,31 +541,31 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = 2.26;
+      const float lumi = 35.867; // full 2016
       //const float lumi = 4;
       
       //only keep single mass point in scans
-    if (isSignal_ 
-	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
-	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
-	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
-	  && !(t.GenSusyMScan1 == 325 && t.GenSusyMScan2 == 275 && sample  == "T2-4bd_325_275")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
-	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
-	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
-	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
-  	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
-	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
-	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
-        ) continue;
+    // if (isSignal_ 
+    // 	  // && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275")
+    // 	  && !(t.GenSusyMScan1 == 100 && t.GenSusyMScan2 == 90 && sample  == "TChiNeu_100_90")
+    // 	  && !(t.GenSusyMScan1 == 300 && t.GenSusyMScan2 == 285 && sample  == "TChiNeu_300_285")
+    // 	  && !(t.GenSusyMScan1 == 325 && t.GenSusyMScan2 == 275 && sample  == "T2-4bd_325_275")
+    // 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 295 && sample  == "T2-4bd_375_295")
+    // 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 335 && sample  == "T2-4bd_375_335")
+    // 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 355 && sample  == "T2-4bd_375_355")
+    // 	  && !(t.GenSusyMScan1 == 375 && t.GenSusyMScan2 == 365 && sample  == "T2-4bd_375_365")
+    // 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 195 && sample  == "T2-4bd_275_195")
+    // 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 235 && sample  == "T2-4bd_275_235")
+    // 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 255 && sample  == "T2-4bd_275_255")
+    // 	  && !(t.GenSusyMScan1 == 275 && t.GenSusyMScan2 == 265 && sample  == "T2-4bd_275_265")
+    // 	  && !(t.GenSusyMScan1 == 1025 && t.GenSusyMScan2 == 775 && (sample  == "T5qqqqWW_1025_775_custom" || sample  == "1025_775_T5qqqqWW_modified" || sample  == "T5qqqqWW_1025_775_old"))
+    // 	  && !(t.GenSusyMScan1 == 1100 && t.GenSusyMScan2 == 500 && (sample  == "T5qqqqWW_1100_500_custom" || sample  == "1100_500_T5qqqqWW_modified" || sample  == "T5qqqqWW_1100_500_old"))
+    // 	  && !(t.GenSusyMScan1 == 1300 && t.GenSusyMScan2 == 600 && sample  == "T5qqqqWW_1300_600")
+    // 	  && !(t.GenSusyMScan1 == 1500 && t.GenSusyMScan2 == 100 && sample  == "T5qqqqWW_1500_100")
+    //     ) continue;
 
       evtweight_ = 1.;
-      
+
       // apply relevant weights to MC
       if (!t.isData) {
 	if (isSignal_ && doScanWeights && sample  == "TChiNeu_100_90") {
@@ -576,6 +582,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
+
 	if (applyBtagSF && (sample.find("TChi") == std::string::npos)) {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
@@ -595,16 +602,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
 	}
-
 	// old MT2 stuff
 //MT2	if (isSignal_ && applyLeptonSFfastsim && nlepveto_ == 0) {
 //MT2	  fillLepCorSRfastsim();
 //MT2	  evtweight_ *= (1. + cor_lepeff_sr_);
 //MT2	}
 //MT2	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
-	
-
-	
+		
 	if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
 	  if (!isSignal_) { 
 	    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
@@ -1041,31 +1045,32 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	// 1. For tight soft leptons, need to use OWN scale factors (+ own Fastsim SFs) --> This affects SR, but also CR2L (CR2L is complicated, need both central and own SFs)
 	// 2. For loose soft leptons, or hard leptons, can use central scale factors (which already include central Fastsim SFs)
 	// 3. For lost leptons, use central scale factors (which already include central central FastSim)
-     //if ( !t.isData && ( applyLeptonSFfastsim || applyLeptonSF ) &&  (foundsoftlep || foundhardlep) ) {
-     //
-     //	bool fastsim = isSignal_ && applyLeptonSFfastsim;
-     //	if (foundsoftlep) {
-     //	  weightStruct weights = getSoftSF(softleppt_, softlepeta_, abs(softlepId_));
-     //	  evtweight_ *= weights.cent;
-     //	  evtweight_lepEffUp_ = evtweight_ / weights.cent * weights.up;
-     //	  evtweight_lepEffDn_ = evtweight_ / weights.cent * weights.dn;
-     //	  //cout<<"for soft with id/pt/eta "<<softlepId_<<"/"<<softleppt_<<"/"<<softlepeta_<<", lepSF is "<<weights.cent<<" +"<<weights.up<<" -"<< weights.dn<<endl;
-     //	  if (fastsim) {
-     //	    weightStruct weightsFS = getSoftSF_fastsim(softleppt_, softlepeta_, abs(softlepId_));
-     //	    evtweight_ *= weightsFS.cent;
-     //	    evtweight_lepEffUp_ = evtweight_ / weightsFS.cent * weightsFS.up;
-     //	    evtweight_lepEffDn_ = evtweight_ / weightsFS.cent * weightsFS.dn;
-     //	    //cout<<"And Fastsim lepSF is "<<weightsFS.cent<<" +"<<weightsFS.up<<" -"<< weightsFS.dn<<endl;
-     //	    //cout<<"Previous SF would have been "<< t.weight_lepsf<<", so we went from that to " << weightsFS.cent*weights.cent<<endl;
-     //	  }
-     //	}
-     //	else {
-     //	  evtweight_ *= t.weight_lepsf;
-     //	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
-     //	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
-     //	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
-     //	}
-     //}
+
+      // if ( !t.isData && ( applyLeptonSFfastsim || applyLeptonSF ) &&  (foundsoftlep || foundhardlep) ) {
+
+      // 	bool fastsim = isSignal_ && applyLeptonSFfastsim;
+      // 	if (foundsoftlep) {
+      // 	  weightStruct weights = getSoftSF(softleppt_, softlepeta_, abs(softlepId_));
+      // 	  evtweight_ *= weights.cent;
+      // 	  evtweight_lepEffUp_ = evtweight_ / weights.cent * weights.up;
+      // 	  evtweight_lepEffDn_ = evtweight_ / weights.cent * weights.dn;
+      // 	  //cout<<"for soft with id/pt/eta "<<softlepId_<<"/"<<softleppt_<<"/"<<softlepeta_<<", lepSF is "<<weights.cent<<" +"<<weights.up<<" -"<< weights.dn<<endl;
+      // 	  if (fastsim) {
+      // 	    weightStruct weightsFS = getSoftSF_fastsim(softleppt_, softlepeta_, abs(softlepId_));
+      // 	    evtweight_ *= weightsFS.cent;
+      // 	    evtweight_lepEffUp_ = evtweight_ / weightsFS.cent * weightsFS.up;
+      // 	    evtweight_lepEffDn_ = evtweight_ / weightsFS.cent * weightsFS.dn;
+      // 	    //cout<<"And Fastsim lepSF is "<<weightsFS.cent<<" +"<<weightsFS.up<<" -"<< weightsFS.dn<<endl;
+      // 	    //cout<<"Previous SF would have been "<< t.weight_lepsf<<", so we went from that to " << weightsFS.cent*weights.cent<<endl;
+      // 	  }
+      // 	}
+      // 	else {
+      // 	  evtweight_ *= t.weight_lepsf;
+      // 	  evtweight_lepEffUp_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_UP;
+      // 	  evtweight_lepEffDn_ = evtweight_ / t.weight_lepsf * t.weight_lepsf_DN;
+      // 	  //cout<<"lepSF is "<<t.weight_lepsf<<", "<<t.weight_lepsf_UP<<", "<<t.weight_lepsf_DN<<endl;
+      // 	}
+      // }
 
 
       // Scale factors (and uncertainties) for SR events with a lost lepton: these use the standard variables in the babies (centrally produced)
@@ -1901,6 +1906,7 @@ void MT2Looper::fillHistosLepSignalRegions(const std::string& prefix, const std:
   
   for(unsigned int srN = 0; srN < SRVecLep.size(); srN++){
     if(SRVecLep.at(srN).PassesSelection(values)){
+
       //cosThetaStar plots
       if(TString(SRVecLep.at(srN).GetName()).Contains("baseAll") && prefix=="srLep" && !doMinimalPlots) {
 	if (costhetastar_ != 999 ) {
@@ -2539,7 +2545,7 @@ void MT2Looper::fillHistosSingleSoftLepton(std::map<std::string, TH1*>& h_1d, in
     return;
   }
 
-
+  
   plot1D("h_leppt"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 1000, 0, 1000);
   plot1D("h_lepptshort"+s,      softleppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
   plot1D("h_lepptshort_w1"+s,      softleppt_,   1, h_1d, ";p_{T}(lep) [GeV]", 30, 0, 30);
