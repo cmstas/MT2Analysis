@@ -29,7 +29,7 @@ const bool verbose = false;
 
 const bool suppressZeroBins = false;
 
-const bool suppressZeroTRs = false;
+const bool suppressZeroTRs = true;
 
 const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
