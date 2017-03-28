@@ -355,10 +355,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T5qqqqWW_modified") != std::string::npos) scan_name = "T5qqqqWW_modified";
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
-    else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("TChiNeu") != std::string::npos) scan_name = sample.substr(0,7);
-    else if (sample.find("T6qqWW") != std::string::npos) scan_name = sample.substr(0,6);
-
+    else if (sample.find("T6qqWW") != std::string::npos) scan_name = sample.substr(0,11);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -500,17 +498,25 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------
       // basic event selection and cleaning
       //---------------------
-      
+
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
-      
+
       if (t.nVert == 0) continue;
 
-      // MET filters (data and MC)
-      if (!t.Flag_goodVertices) continue;
-      //if (!t.Flag_CSCTightHaloFilter) continue; // use txt files instead
-      if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
-      if (!t.Flag_HBHENoiseFilter) continue;
-      if (!t.Flag_HBHEIsoNoiseFilter) continue;
+      // MET filters (first 2 only in data)
+      if (t.isData) {
+        if (!t.Flag_globalTightHalo2016Filter) continue; 
+        if (!t.Flag_badMuonFilterV2) continue;
+	if (!t.Flag_eeBadScFilter) continue; 
+      }
+      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
+	if (!t.Flag_goodVertices) continue;
+	if (!t.Flag_HBHENoiseFilter) continue;
+	if (!t.Flag_HBHENoiseIsoFilter) continue;
+	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (!t.Flag_badChargedHadronFilterV2) continue; 
+      }
+      
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
 	//cout<<"Found bad event in data: "<<t.run<<", "<<t.lumi<<", "<<t.evt<<endl;
@@ -583,7 +589,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	} else {
 	  evtweight_ = t.evt_scale1fb * lumi;
 	}
-
 	if (applyBtagSF && (sample.find("TChi") == std::string::npos)) {
 	  // remove events with 0 btag weight for now..
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
@@ -609,7 +614,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 //MT2	  evtweight_ *= (1. + cor_lepeff_sr_);
 //MT2	}
 //MT2	else if (doLepEffVars && nlepveto_ == 0) fillLepUncSR();
-		
+	
 	if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
 	  if (!isSignal_) { 
 	    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
