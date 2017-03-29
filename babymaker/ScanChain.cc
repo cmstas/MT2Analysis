@@ -560,9 +560,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
       met_caloPt  = cms3.evt_calomet();
       met_caloPhi = cms3.evt_calometPhi();
-      metStruct trkmet = trackerMET(0.1);
-      met_trkPt = trkmet.met;
-      met_trkPhi = trkmet.metphi;
+      metStruct trkmet = trackerMET(0.1); // breaks in cms4, should not be used
+      met_trkPt = trkmet.met;             // same as above
+      met_trkPhi = trkmet.metphi;         // same as above
       if (useMuEGCleanedMet){
 	met_miniaodPt  = cms3.evt_muegclean_pfmet();
 	met_miniaodPhi = cms3.evt_muegclean_pfmetPhi();
@@ -1360,12 +1360,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         if(cand_pt > 3) ++nPFCHCand3;
         if(cand_pt < 5) continue;
 
-        float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
+        float absiso  = cms3.pfcands_trackIso().at(ipf);
         if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
-        float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
+        float mt = MT(cand_pt, cms3.pfcands_p4().at(ipf).phi(), met_pt, met_phi);
         int pdgId = abs(cms3.pfcands_particleId().at(ipf));
-        float an04 = PFCandRelIsoAn04(ipf);
+        float an04 = PFCandRelIsoAn04(ipf); // breaks in cms4, should not be used
 
         if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
           ++nPFLep5LowMT;
@@ -1470,8 +1470,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  if(cand_pt < 50) continue;
 	  if(cand_pt < 300 && !(abs(cms3.pfcands_particleId().at(ipf)) == 13) ) continue;
 	  
-	  float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
-	  float an04 = PFCandRelIsoAn04(ipf);
+	  float absiso  = cms3.pfcands_trackIso().at(ipf);
+	  float an04 = PFCandRelIsoAn04(ipf); // breaks in cms4, should not be used
 	  
 	  pf_pt_ordering.push_back(std::pair<int,float>(nhighPtPFcands,cand_pt));
 	  
@@ -1984,7 +1984,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  const float jet_etaUP =  p4sCorrJetsUP.at(iJet).eta();
 	  const float jet_ptDN  =  p4sCorrJetsDN.at(iJet).pt();
 	  const float jet_etaDN =  p4sCorrJetsDN.at(iJet).eta();
-          jet_mass[njet] = cms3.pfjets_mass().at(iJet);
+          jet_mass[njet] = cms3.pfjets_p4().at(iJet).mass();
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
