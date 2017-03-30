@@ -2954,9 +2954,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     }
   }
 
-  if (applyJECfromFile) delete jet_corrector_pfL1FastJetL2L3;
-  if (!isDataFromFileName && applyJECfromFile && applyJECunc != 0) delete jetcorr_uncertainty;
-
   bmark->Stop("benchmark");
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
