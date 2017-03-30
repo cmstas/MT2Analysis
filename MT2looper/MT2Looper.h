@@ -70,6 +70,7 @@ class MT2Looper {
   void fillLepSFWeightsFromFile();
   void fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			const std::string& dir = "", const std::string& suffix = ""); 
+  float getAverageISRWeight(const int evt_id, const int var = 0);
   
  private:
 
@@ -77,6 +78,18 @@ class MT2Looper {
   mt2tree t;
   float evtweight_;
   int nlepveto_;
+  float mt2_;
+  float ht_;
+  float met_pt_;
+  float met_phi_;
+  float mht_pt_;
+  float mht_phi_;
+  float jet1_pt_;
+  float jet2_pt_;
+  float deltaPhiMin_;
+  float diffMetMht_;
+  int nJet30_;
+  int nBJet20_;
   float leppt_;
   float mt_;
   int nJet30Eta3_;
@@ -99,6 +112,7 @@ class MT2Looper {
   SR CRSL_WJets;
   SR CRSL_TTbar;
   TH1D* h_nvtx_weights_;
+  TH1D* h_nTrueInt_weights_;
   TH2D* h_sig_nevents_;
   TH2D* h_sig_avgweight_btagsf_;
   TH2D* h_sig_avgweight_btagsf_heavy_UP_;
@@ -114,6 +128,8 @@ class MT2Looper {
   float weight_lepsf_cr_;
   float weight_lepsf_cr_UP_;
   float weight_lepsf_cr_DN_;
+  float evtweight_renormUp_;
+  float evtweight_renormDn_;
 
   float minMTbmet_;
   float mbbmax_;
@@ -129,7 +145,7 @@ class MT2Looper {
   float deltaPhiMinbmet_;
   float deltaPhibbHcand_;
   float nbjet_loose_;
-
+  
 };
 
 #endif

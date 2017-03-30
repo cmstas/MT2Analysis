@@ -98,9 +98,18 @@ int sampleID (const string& name) {
   else if (name.find("TBarToLeptons_s-channel") != string::npos) return 403;
   else if (name.find("TBarToLeptons_t-channel") != string::npos) return 404;
   else if (name.find("Tbar_tW-channel") != string::npos) return 405;
-  else if ((name.find("TTWJets") != string::npos) || (name.find("ttWJets") != string::npos)) return 410;
-  else if ((name.find("TTZJets") != string::npos) || (name.find("ttZJets") != string::npos)) return 411;
-  else if (name.find("TTbarH") != string::npos) return 412;
+  // amcatnlo
+  else if (name.find("TTWToLNu") != string::npos) return 410; 
+  else if (name.find("TTWToQQ") != string::npos) return 411; 
+  else if (name.find("TTZToLLNuNu") != string::npos) return 412; 
+  else if (name.find("TTZToQQ") != string::npos) return 413; 
+  else if (name.find("TTGJets") != string::npos) return 414;
+  // powheg
+  else if (name.find("ttHTobb") != string::npos) return 415;
+  else if (name.find("ttHToNonbb") != string::npos) return 416;
+  // LO madgraph
+  else if ((name.find("TTWJets") != string::npos) || (name.find("ttWJets") != string::npos)) return 450;
+  else if ((name.find("TTZJets") != string::npos) || (name.find("ttZJets") != string::npos)) return 452;
 
   else if (name.find("WJets") != string::npos) {
     if ((name.find("WJetsToLNu_HT-100to200") != string::npos) || (name.find("WJetsToLNu_HT-100To200") != string::npos)) return 502;
@@ -132,7 +141,24 @@ int sampleID (const string& name) {
   }
 
   // 800 block: diboson etc
-
+  else if (name.find("VVTo2L2Nu") != string::npos) return 801;
+  else if (name.find("WWTo2L2Nu") != string::npos) return 802;
+  else if (name.find("WWToLNuQQ") != string::npos) return 803;
+  else if (name.find("WZTo1L3Nu") != string::npos) return 804;
+  else if (name.find("WZTo1L1Nu2Q") != string::npos) return 805;
+  else if (name.find("WZTo2L2Q") != string::npos) return 806;
+  else if (name.find("WZTo3LNu") != string::npos) return 807;
+  else if (name.find("ZZTo2Q2Nu") != string::npos) return 808;
+  else if (name.find("ZZTo2L2Q") != string::npos) return 809;
+  else if (name.find("ZZTo2L2Nu") != string::npos) return 810;
+  else if (name.find("ZZTo4L") != string::npos) return 811;
+  
+  // 900 block: triboson
+  else if (name.find("WWW") != string::npos) return 901;
+  else if (name.find("WWZ") != string::npos) return 902;
+  else if (name.find("WZZ") != string::npos) return 903;
+  else if (name.find("ZZZ") != string::npos) return 904;
+  
   else if (name.find("SMS-") != string::npos) {
     if (name.find("SMS-T1tttt") != string::npos) return 1001;
     else if (name.find("SMS-T1qqqq") != string::npos) return 1010;
@@ -142,8 +168,11 @@ int sampleID (const string& name) {
 
     else if (name.find("SMS-T2tt") != string::npos) return 1101;
     else if (name.find("SMS-T2qq") != string::npos) return 1110;
+    else if (name.find("SMS-T6qqWW") != string::npos) return 1115;
     else if (name.find("SMS-T2bb") != string::npos) return 1120;
     else if (name.find("SMS-T2cc") != string::npos) return 1130;
+    else if (name.find("SMS-T2bW") != string::npos) return 1140;
+    else if (name.find("SMS-T2bt") != string::npos) return 1150;
   }
 
   cout << "sampleID: WARNING: sample not recognized!  " << name << endl;

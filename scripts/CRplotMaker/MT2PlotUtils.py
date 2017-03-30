@@ -11,6 +11,7 @@ def GetCRName(cr):
              "crdybase": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crdybaseJ": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crdybaseIncl": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
+             "crdybaseInclLowPt": "#font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crslbase": "Single Lepton CR",
              "crslbaseJ": "Single Lepton CR",
              "crslbaseVL": "Single Lepton CR",
@@ -30,17 +31,23 @@ def GetCRName(cr):
 
 def GetSampleName(sample):
     names = {"wjets_ht": "W+Jets",
+             "2015wjets_ht": "W+Jets",
              "wjets_incl": "W+Jets",
              "dyjetsll_ht": "Z(#font[12]{ll})+Jets",
+             "2015dyjetsll_ht": "Z(#font[12]{ll})+Jets",
              "dyjetsll_incl": "Z(#font[12]{ll})+Jets",
              "zinv_ht": "Z(#nu#nu)+Jets",
+             "2015zinv_ht": "Z(#nu#nu)+Jets",
              "top": "Top",
+             "ww": "WW",
              "gjets_ht": "Prompt #gamma",
              "2015gjets_ht": "Prompt #gamma",
              "gjets_dr0p05_ht": "Prompt #gamma",
              "fakephoton": "Fake #gamma",
              "fragphoton": "Frag. #gamma",
              "qcd_ht": "QCD",
+             "2015qcd_ht": "QCD",
+             "lostlepFromCRs": "Lost Lepton",
              }
 
     # use the above name if defined, otherwise use sample itself
@@ -79,14 +86,14 @@ def GetUnit(vn):
 def GetSubtitles(dirname):
     # do special cases first
     if dirname=="crqcdbaseJ":
-        return ["p_{T}(jet1) > 200 GeV", "N(jet) = 2"]
+        return ["p_{T}(jet1) > 250 GeV", "N(jet) = 2"]
 
     if dirname[-4:]=="Incl":
-        return ["H_{T} > 200 GeV", "MET > 200 GeV (1j)", "M_{T2} > 200 GeV (#geq 2j)"]
+        return ["H_{T} > 250 GeV", "MET > 250 GeV (1j)", "M_{T2} > 200 GeV (#geq 2j)"]
     if dirname[-1:]=="J":
-        return ["H_{T} > 200 GeV", "1j"]
+        return ["H_{T} > 250 GeV", "1j"]
     if dirname[-2:]=="VL":
-        return ["200 < H_{T} < 450 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["250 < H_{T} < 450 GeV","M_{T2} > 200 GeV", "#geq 2j"]
     if dirname[-1:]=="L":
         return ["450 < H_{T} < 575 GeV","M_{T2} > 200 GeV", "#geq 2j"]
     if dirname[-1:]=="M":
@@ -96,10 +103,12 @@ def GetSubtitles(dirname):
     if dirname[-1:]=="H":
         return ["1000 < H_{T} < 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 
-    return ["H_{T} > 200 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+    return ["H_{T} > 250 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 
 def Rebin(h_bkg_vec, h_data, r):
     for h in h_bkg_vec:
         h.Rebin(r)
-    h_data.Rebin(r)
+    if h_data!=None:
+        h_data.Rebin(r)
+
 

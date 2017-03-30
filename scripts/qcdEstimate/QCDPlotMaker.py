@@ -6,9 +6,9 @@ import numpy as np
 import ROOT
 
 def makeRbPlot(h_mc, h_data, nj_reg, outfile):
-    nj_reg = ["j2to3","j4to6","j7toInf"].index(nj_reg)
+    nj_reg = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"].index(nj_reg)
 
-    nj_bounds = [(2,3),(4,6),(7,"Inf")]
+    nj_bounds = [(2,3),(4,6),(2,6),(7,"Inf"),(4,"Inf"),(2,"Inf")]
 
     h_mcerr = h_mc.Clone("h_mcerr")
 
@@ -56,10 +56,10 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     
 
 def makeFjPlot(h_mc, h_data, ht_reg, outfile):
-    ht_reg = ["ht200to450","ht450to575","ht575to1000",
-              "ht1000to1500","ht1500toInf"].index(ht_reg)
+    ht_reg = ["ht250to450","ht450to575","ht575to1000",
+              "ht1000to1500","ht1500toInf","ht1000toInf"].index(ht_reg)
 
-    ht_bounds = [(200,450),(450,575),(575,1000),(1000,1500),(1500,"Inf")]
+    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf"),(1000,"Inf")]
 
     h_mcerr = h_mc.Clone("h_mcerr")
 
@@ -106,11 +106,11 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     c.SaveAs(outfile+".png")
     
 
-def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
-    ht_reg = ["ht200to450","ht450to575","ht575to1000",
-              "ht1000to1500","ht1500toInf"].index(ht_reg)
+def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile, fit_systUp=None, fit_systDown=None):
+    ht_reg = ["ht250to450","ht450to575","ht575to1000",
+              "ht1000to1500","ht1500toInf","ht1000toInf"].index(ht_reg)
 
-    ht_bounds = [(200,450),(450,575),(575,1000),(1000,1500),(1500,"Inf")]
+    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf"),(1000,"Inf")]
 
     # h_errBand = ROOT.TH1D("h_errBand","",294,30,1500)
     # h_errBand.SetFillColor(ROOT.kGray)
@@ -138,6 +138,14 @@ def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
     h_qcd.GetYaxis().SetTitle("r_{#phi}")
     h_qcd.GetYaxis().SetTitleOffset(1.4)
     
+    if fit_systUp != None:
+        fit_systUp.SetLineWidth(2)
+        fit_systUp.SetLineColor(ROOT.kBlue+1)
+
+    if fit_systDown != None:
+        fit_systDown.SetLineWidth(2)
+        fit_systDown.SetLineColor(ROOT.kGreen+2)
+
     fit.SetLineWidth(2)
     fit.SetLineColor(ROOT.kRed+1)
 
@@ -152,6 +160,10 @@ def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile):
     line.DrawLine(100,0.01,100,200)
     
     # h_errBand.Draw("SAME E3")
+    if fit_systUp != None:
+        fit_systUp.Draw("SAME")
+    if fit_systDown != None:
+        fit_systDown.Draw("SAME")
     fit.Draw("SAME")
     h_qcd.Draw("SAMEPE0")
     h_all.Draw("SAMEPE0")
@@ -194,7 +206,7 @@ def drawHeaders(canvas, isData):
         text.SetTextAlign(31)
         text.SetTextSize(0.035)
         text.SetTextFont(42)
-        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(4.0, 'fb', 13))
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(12.9, 'fb', 13))
         cmsText = "CMS Preliminary"
     #CMS text
     text.SetTextSize(0.035)

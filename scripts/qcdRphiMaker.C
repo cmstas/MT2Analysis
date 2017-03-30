@@ -1,6 +1,8 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <string>
+#include <cctype>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -39,6 +41,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
   const unsigned int ndirs = dirs.size();
   
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+    bool is_ssr_dir = false;
     TString directory = "srh"+dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
@@ -73,7 +76,10 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     TH1D* h_ht_HI = (TH1D*) f_data->Get(directory+"/h_ht_HI");
     int ht_LOW = h_ht_LOW->GetBinContent(1);
     int ht_HI = h_ht_HI->GetBinContent(1);
-  
+
+    std::cout << dirs.at(idir) << std::endl;
+    if (not isalpha(dirs.at(idir)[dirs.at(idir).length()-1]) and ht_LOW == 1500) is_ssr_dir = true;
+    
     TH1D* h_nbjets_LOW = (TH1D*) f_data->Get(directory+"/h_nbjets_LOW");
     TH1D* h_nbjets_HI = (TH1D*) f_data->Get(directory+"/h_nbjets_HI");
     int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
@@ -89,7 +95,20 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     if(nbjets_HI != -1) nbjets_HI_mod--;
     if(njets_HI != -1) njets_HI_mod--;
 
+    if (njets_LOW == 1 && njets_HI_mod == njets_LOW && nbjets_LOW == 0 && nbjets_HI_mod == nbjets_LOW)
+    {
+      if (ht_HI > 1200) ht_HI = -1;
+      if (ht_LOW > 1200) ht_LOW = 1000;
+    }
+
+    if (njets_LOW == 1 && njets_HI_mod == njets_LOW && nbjets_LOW == 1 && nbjets_HI_mod == -1)
+    {
+      if (ht_HI > 700) ht_HI = -1;
+      if (ht_LOW > 700) ht_LOW = 700;
+    }
+    
     std::string ht_str = "HT" + std::to_string(ht_LOW) + "to" + std::to_string(ht_HI);
+    if (is_ssr_dir) ht_str += "_ssr";
     std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + std::to_string(njets_LOW) : "j" + std::to_string(njets_LOW) + "to" + std::to_string(njets_HI_mod);
     std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + std::to_string(nbjets_LOW) : "b" + std::to_string(nbjets_LOW) + "to" + std::to_string(nbjets_HI_mod);
   
@@ -99,9 +118,10 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
     ReplaceString(bjet_str, "-1", "Inf");
 
     std::string channel = ht_str + "_" + jet_str + "_" + bjet_str;
-    std::string channel_njonly = std::string("HT200toInf_") + jet_str + "_b0toInf";
+    std::string channel_njonly = std::string("HT250toInf_") + jet_str + "_b0toInf";
     // special case for j2to6_b3toInf: use j4to6
-    if (nbjets_LOW == 3 && njets_LOW == 2) channel_njonly = "HT200toInf_j4to6_b0toInf";
+    if (nbjets_LOW == 3 && njets_LOW == 2) channel_njonly = "HT250toInf_j4to6_b0toInf";
+    if (njets_LOW == 4 && njets_HI == -1) channel_njonly = "HT250toInf_j4to6_b0toInf";
     std::string channel_htonly = ht_str + "_j2toInf_b0toInf";
 
     if (verbose) std::cout << "channel is: " << channel << std::endl;
@@ -201,7 +221,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
       TH1D* h_reff = (TH1D*) f_qcd->Get(Form("r_effective/%s/yield_r_effective_%s",channel.c_str(),channel.c_str()));
       TH1D* h_fitsyst = (TH1D*) f_qcd->Get(Form("r_systFit/%s/yield_r_systFit_%s",channel.c_str(),channel.c_str()));
       string f_jets_dir = "f_jets_data";
-      if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
+      // if (ht_LOW == 200) f_jets_dir = "f_jets_data_noPS";
       TH1D* h_fjets = (TH1D*) f_qcd->Get(Form("%s/%s/yield_%s_%s",f_jets_dir.c_str(),channel_htonly.c_str(),f_jets_dir.c_str(),channel_htonly.c_str()));
       TH1D* h_rb = (TH1D*) f_qcd->Get(Form("r_hat_data/%s/yield_r_hat_data_%s",channel_njonly.c_str(),channel_njonly.c_str()));
       if (!h_rb) cout << "h_rb command is: " << Form("r_hat_data/%s/yield_r_hat_data_%s",channel_njonly.c_str(),channel_njonly.c_str()) << endl;
@@ -329,6 +349,7 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
       std::string sr_string = k->GetTitle();
       sr_string.erase(0, 3);//remove "sr" from front of string
       dirs.push_back(sr_string);
+      std::cout << "Adding reg " << sr_string << std::endl;
     }
   }
 

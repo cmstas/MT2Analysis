@@ -22,8 +22,9 @@ TH2D* h_elSF_trk = 0;
 TH2D* h_muSF = 0;
 TH1D* h_muSF_trk_ptlt10 = 0;
 TH1D* h_muSF_trk_ptgt10 = 0;
-bool setElSFfile(TString filenameIDISO, TString filenameTRK);
+bool setElSFfile(TString filenameIDISO, TString filenameTRK, bool useTight = false);
 bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK);
+bool setMuSFfileNoTrk(TString filenameID, TString filenameISO, TString filenameIP);
 weightStruct getLepSFFromFile(float pt, float eta, int pdgId);
 
 TH2D* h_elSF_fastsim = 0;
@@ -43,5 +44,7 @@ bool setVetoEffFile_fastsim(TString filename);
 float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
 
 float getPhotonTriggerWeight(float eta, float pt);
+
+float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int unc = 0);
 
 #endif

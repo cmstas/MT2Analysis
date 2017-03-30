@@ -50,6 +50,7 @@ ls -lrth
 
 echo "running combineCards.py"
 python combineCards.py -S "datacard_"*"_$SAMPLE.txt" > "card_all_$SAMPLE.txt"  
+#mv "datacard_${SAMPLE}_combined.txt" "card_all_$SAMPLE.txt"  #use this line instead of combineCards.py if cards are already combined
 echo "ls -lrth after combineCards.py"
 ls -lrth
 echo "running text2workspace.py"
@@ -73,7 +74,9 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
 fi
 
 #Copy the output
-lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/limit_$SAMPLE.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/limit_$SAMPLE.root
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_$SAMPLE.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/limit_$SAMPLE.root
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/log_$SAMPLE.log srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/logs/log_$SAMPLE.log
+#lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/limit_$SAMPLE.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/limit_$SAMPLE.root
 stageout_error=$?
 
 if [ $stageout_error != 0 ]

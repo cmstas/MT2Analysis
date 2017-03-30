@@ -31,12 +31,14 @@ using namespace duplicate_removal;
 class mt2tree;
 class SR;
 
-// turn on to apply weights to central value
-bool applyWeights = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply json file to data
 bool applyJSON = true;
+// turn on to apply btag sf to central value
+bool applyBtagSF = true;
+// turn on to apply lepton sf to central value - take from babies
+bool applyLeptonSFfromBabies = true;
 
 //_______________________________________
 ZllMTLooper::ZllMTLooper(){
@@ -57,11 +59,11 @@ void ZllMTLooper::SetSignalRegions(){
   CRMTNj2Nb0.SetVar("nJet30", 2, -1);
   CRMTNj2Nb0.SetVar("nBJet20", 0, 1);
 
-  // CRMT with 2 jets, bveto, ht > 200
-  CRMTHT200.SetName("crmtht200");
-  CRMTHT200.SetVar("nJet30", 2, -1);
-  CRMTHT200.SetVar("nBJet20", 0, 1);
-  CRMTHT200.SetVar("ht", 200, -1);
+  // CRMT with 2 jets, bveto, ht > 250
+  CRMTHT250.SetName("crmtht250");
+  CRMTHT250.SetVar("nJet30", 2, -1);
+  CRMTHT250.SetVar("nBJet20", 0, 1);
+  CRMTHT250.SetVar("ht", 250, -1);
 
   // CRMT with 2 jets, bveto, ht > 450
   CRMTHT450.SetName("crmtht450");
@@ -85,7 +87,8 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  // full 2016 dataset json, 36.26/fb:
+  const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -185,11 +188,13 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       if (t.isData) {
 	// MET filters (data and MC)
 	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHalo2015Filter) continue; // use txt files instead
-	if (!t.Flag_eeBadScFilter) continue; // txt files are in addition to this flag
+	if (!t.Flag_globalTightHalo2016Filter) continue; 
+	if (!t.Flag_eeBadScFilter) continue; 
 	if (!t.Flag_HBHENoiseFilter) continue;
 	if (!t.Flag_HBHENoiseIsoFilter) continue;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+	if (!t.Flag_badMuonFilterV2) continue;
+	if (!t.Flag_badChargedHadronFilterV2) continue;
       }
       
       // // txt MET filters (data only)
@@ -204,7 +209,7 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       // basic dilepton selection: vertex, 2 leptons, dilepton trigger
       if (t.nVert == 0) continue;
       if (t.nlep < 2) continue;
-      if (t.isData && (!t.HLT_DoubleEl && !t.HLT_DoubleMu)) continue;
+      if (t.isData && (!t.HLT_DoubleEl && !t.HLT_DoubleMu && !t.HLT_DoubleMu_NonIso && !t.HLT_DoubleEl33)) continue;
       //if (!t.HLT_DoubleEl && !t.HLT_DoubleMu) continue;
       // also allow single muon triggers
       //if (!t.HLT_DoubleEl && !t.HLT_DoubleMu && !t.HLT_SingleMu) continue;
@@ -216,16 +221,13 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      //      const float lumi = 4.;
-      //      const float lumi = 0.042;
-      //      const float lumi = 0.804;
-      const float lumi = 3.99;
+      //      const float lumi = 12.9;
+      const float lumi = 35.867; // full 2016
       evtweight_ = 1.;
 
       // apply relevant weights to MC
       if (!t.isData) {
 	evtweight_ = t.evt_scale1fb * lumi;
-	if (applyWeights) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
 	// get pu weight from hist, restrict range to nvtx 4-31
 	if (doNvtxReweight) {
 	  int nvtx_input = t.nVert;
@@ -233,6 +235,14 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 	  if (t.nVert < 1) nvtx_input = 1;
 	  float puWeight = h_nvtx_weights_->GetBinContent(h_nvtx_weights_->FindBin(nvtx_input));
 	  evtweight_ *= puWeight;
+	}
+	if (applyBtagSF) {
+	  // remove events with 0 btag weight for now..
+	  if (fabs(t.weight_btagsf) < 0.001) continue;
+	  evtweight_ *= t.weight_btagsf;
+	}
+	if (applyLeptonSFfromBabies) {
+	  evtweight_ *= t.weight_lepsf;
 	}
       } // !isData
 
@@ -266,14 +276,14 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
 	else if (pass_muons) fillHistosMT(CRMTNj2Nb0.crslmuHistMap,"crmtmunj2nb0");
       }
 
-      std::map<std::string, float> valuesHT200;
-      valuesHT200["ht"] = t.ht;
-      valuesHT200["nJet30"] = t.nJet30;
-      valuesHT200["nBJet20"] = t.nBJet20;
-      if (CRMTHT200.PassesSelection(valuesHT200)) {
-	fillHistosMT(CRMTHT200.crslHistMap,"crmtht200");
-	if (pass_electrons) fillHistosMT(CRMTHT200.crslelHistMap,"crmtelht200");
-	else if (pass_muons) fillHistosMT(CRMTHT200.crslmuHistMap,"crmtmuht200");
+      std::map<std::string, float> valuesHT250;
+      valuesHT250["ht"] = t.ht;
+      valuesHT250["nJet30"] = t.nJet30;
+      valuesHT250["nBJet20"] = t.nBJet20;
+      if (CRMTHT250.PassesSelection(valuesHT250)) {
+	fillHistosMT(CRMTHT250.crslHistMap,"crmtht250");
+	if (pass_electrons) fillHistosMT(CRMTHT250.crslelHistMap,"crmtelht250");
+	else if (pass_muons) fillHistosMT(CRMTHT250.crslmuHistMap,"crmtmuht250");
       }
 
       std::map<std::string, float> valuesHT450;
@@ -311,9 +321,9 @@ void ZllMTLooper::loop(TChain* chain, std::string sample, std::string output_dir
   savePlotsDir(CRMTNj2Nb0.crslHistMap,outfile_,"crmtnj2nb0");
   savePlotsDir(CRMTNj2Nb0.crslelHistMap,outfile_,"crmtelnj2nb0");
   savePlotsDir(CRMTNj2Nb0.crslmuHistMap,outfile_,"crmtmunj2nb0");
-  savePlotsDir(CRMTHT200.crslHistMap,outfile_,"crmtht200");
-  savePlotsDir(CRMTHT200.crslelHistMap,outfile_,"crmtelht200");
-  savePlotsDir(CRMTHT200.crslmuHistMap,outfile_,"crmtmuht200");
+  savePlotsDir(CRMTHT250.crslHistMap,outfile_,"crmtht250");
+  savePlotsDir(CRMTHT250.crslelHistMap,outfile_,"crmtelht250");
+  savePlotsDir(CRMTHT250.crslmuHistMap,outfile_,"crmtmuht250");
   savePlotsDir(CRMTHT450.crslHistMap,outfile_,"crmtht450");
   savePlotsDir(CRMTHT450.crslelHistMap,outfile_,"crmtelht450");
   savePlotsDir(CRMTHT450.crslmuHistMap,outfile_,"crmtmuht450");

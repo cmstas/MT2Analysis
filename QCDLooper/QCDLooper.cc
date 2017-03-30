@@ -33,10 +33,19 @@ class SR;
 // turn on to apply json file to data
 bool applyJSON = true;
 
-const float lumi = 3.990;
+const float lumi = 27.70;
 
 // input effective prescales for PFHT125, PFHT350, PFHT475
-double eff_prescales[3] = {2564., 294.9, 73.9};
+// 4/fb
+// double eff_prescales[3] = {2564., 294.9, 73.9};
+// // 7.65/fb
+// double eff_prescales[3] = {3628., 346.3, 86.8};
+// 12.9/fb
+// double eff_prescales[3] = {4748., 377.5, 94.6};
+// 27.66/fb
+double eff_prescales[3] = {7900., 440.6, 110.2};
+// 36.46/fb
+// double eff_prescales[3] = {9200., 460.6, 115.2};
 
 //_______________________________________
 QCDLooper::QCDLooper(){
@@ -49,8 +58,8 @@ QCDLooper::~QCDLooper(){
 //_______________________________________
 void QCDLooper::SetSignalRegions(){
 
-    string HTnames[5] = {"ht200to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf"};
-    double HTcuts[6] = {200,450,575,1000,1500,-1};
+  string HTnames[6] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf","ht1000toInf"};
+    double HTcuts[6] = {250,450,575,1000,1500,-1};
     for(unsigned int i=0; i<5; i++){
         SR sr;
         sr.SetName("rphi_"+HTnames[i]);
@@ -69,14 +78,41 @@ void QCDLooper::SetSignalRegions(){
         SRVec_fj.push_back(sr);
         outfile_->mkdir(sr.GetName().c_str());
     }
+    //
+    // now we have to add an extra ht region for the SSRs
+    //
+    SR sr;
+    sr.SetName("rphi_"+HTnames[5]);
+    sr.SetVar("ht",1000,-1);
+    sr.SetVar("njets",2,-1);
+    sr.SetVar("mt2",50,-1);
+    sr.SetVar("deltaPhiMin",0,-1);
+    SRVec_rphi.push_back(sr);
+    outfile_->mkdir(sr.GetName().c_str());
 
-    string NJnames[3] = {"j2to3","j4to6","j7toInf"};
+    sr.SetName("fj_"+HTnames[5]);
+    sr.SetVar("ht",1000,-1);
+    sr.SetVar("njets",2,-1);
+    sr.SetVar("mt2",100,200);
+    sr.SetVar("deltaPhiMin",0,0.3);
+    SRVec_fj.push_back(sr);
+    outfile_->mkdir(sr.GetName().c_str());
+    
+    
+    string NJnames[6] = {"j2to3","j4to6","j7toInf", "j2to6", "j4toInf", "j2toInf"};
     int NJcuts[4] = {2,4,7,-1};
-    for(unsigned int i=0; i<3; i++){
+    for(unsigned int i=0; i<6; i++){
         SR sr;
         sr.SetName("rb_"+NJnames[i]);
         sr.SetVar("ht",1000,-1); // put cut at ht 1000 to allow use of unprescaled trigger PFHT800
-        sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
+        if (i < 3)
+          sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
+        else if (i == 3)
+          sr.SetVar("njets",NJcuts[0],NJcuts[2]);
+        else if (i == 4)
+          sr.SetVar("njets",NJcuts[1],NJcuts[3]);
+        else if (i == 5)
+          sr.SetVar("njets",NJcuts[0],NJcuts[3]);
         sr.SetVar("mt2",100,200);
         sr.SetVar("deltaPhiMin",0,0.3);
         SRVec_rb.push_back(sr);
@@ -94,7 +130,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -166,17 +202,22 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
-      // MET filters (data only)
+      //
+      // because of trigger issues, decide to only use eras B-G for 2016 data
+      //
+      // if (t.run > 280385) continue;
+      
+      // MET filters (first 2 data only)
       if (t.isData) {
-	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_CSCTightHalo2015Filter) continue;
-	if (!t.Flag_eeBadScFilter) continue;
-	if (!t.Flag_HBHENoiseFilter) continue;
-        if (!t.Flag_HBHENoiseIsoFilter) continue;
-        if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-
+        if (!t.Flag_globalTightHalo2016Filter) continue; 
+        if (!t.Flag_badMuonFilter) continue;
       }
-      if (!t.Flag_badChargedCandidateFilter) continue;
+      if (!t.Flag_goodVertices) continue;
+      if (!t.Flag_eeBadScFilter) continue;
+      if (!t.Flag_HBHENoiseFilter) continue;
+      if (!t.Flag_HBHENoiseIsoFilter) continue;
+      if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      if (!t.Flag_badChargedHadronFilter) continue;
       
 
       // some simple baseline selections
@@ -199,7 +240,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       //----------------------
       // try pfmet/calomet cut
       //----------------------
-      if(t.met_pt/t.met_caloPt >= 5) continue;
+      // if(t.met_pt/t.met_caloPt >= 5) continue;
 
       //---------------------
       // set weights and start making plots
@@ -217,21 +258,21 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       // fill histograms
       //---------------------------
       std::map<std::string, float> values;
-      values["njets"]        = t.nJet30;
-      values["ht"]         = t.ht;
-      values["mt2"] = t.mt2;
+      values["njets"]       = t.nJet30;
+      values["ht"]          = t.ht;
+      values["mt2"]         = t.mt2;
       values["deltaPhiMin"] = t.deltaPhiMin;
       for(unsigned int i=0; i<SRVec_rphi.size(); i++){
-          if(SRVec_rphi.at(i).PassesSelection(values))
-              fillHistosRphi(SRVec_rphi.at(i).srHistMap,SRVec_rphi.at(i).GetName().c_str());
-          if(SRVec_fj.at(i).PassesSelection(values))
-              fillHistosFj(SRVec_fj.at(i).srHistMap,SRVec_fj.at(i).GetName().c_str());
+        if(SRVec_rphi.at(i).PassesSelection(values))
+          fillHistosRphi(SRVec_rphi.at(i).srHistMap,SRVec_rphi.at(i).GetName().c_str());
+        if(SRVec_fj.at(i).PassesSelection(values))
+          fillHistosFj(SRVec_fj.at(i).srHistMap,SRVec_fj.at(i).GetName().c_str());
       }
       for(unsigned int i=0; i<SRVec_rb.size(); i++){
-          if(SRVec_rb.at(i).PassesSelection(values))
-              fillHistosRb(SRVec_rb.at(i).srHistMap,SRVec_rb.at(i).GetName().c_str());
+        if(SRVec_rb.at(i).PassesSelection(values))
+          fillHistosRb(SRVec_rb.at(i).srHistMap,SRVec_rb.at(i).GetName().c_str());
       }
-
+      
     }//end loop on events in a file
   
     delete tree;
@@ -323,7 +364,7 @@ void QCDLooper::fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::strin
     } 
     dir->cd();
 
-    if (t.isData && !t.HLT_PFHT800)
+    if (t.isData && !t.HLT_PFHT900 && !t.HLT_PFJet450)
         return;
 
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -338,7 +379,7 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
     if(!t.isData)
         return 1;
 
-    if(strstr(dirname.c_str(),"ht200to450") != NULL){
+    if(strstr(dirname.c_str(),"ht250to450") != NULL){
         return t.HLT_PFHT125_Prescale==0 ? -1 : eff_prescales[0];
     }
     if(strstr(dirname.c_str(),"ht450to575") != NULL){
@@ -348,10 +389,13 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
         return t.HLT_PFHT475_Prescale==0 ? -1 : eff_prescales[2];
     }
     if(strstr(dirname.c_str(),"ht1000to1500") != NULL){
-        return t.HLT_PFHT800==0 ? -1 : 1;
+      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     }
     if(strstr(dirname.c_str(),"ht1500toInf") != NULL){
-        return t.HLT_PFHT800==0 ? -1 : 1;
+      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
+    }
+    if(strstr(dirname.c_str(),"ht1000toInf") != NULL){
+      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     }
 
     std::cerr << "ERROR [getTriggerPrescale]: did not recognize dirname " << dirname << std::endl;

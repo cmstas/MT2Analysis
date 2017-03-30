@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-08-05_nojson
+TAG=V00-08-08_nojson
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -39,6 +39,56 @@ chmod -R a+wrx $OUTPUTDIR
 # run data_Run2016C_DoubleMuon_PromptReco
 # run data_Run2016C_MuonEG_PromptReco
 
+# run data_Run2016D_JetHT_PromptReco
+# run data_Run2016D_MET_PromptReco
+# run data_Run2016D_HTMHT_PromptReco
+# run data_Run2016D_SingleElectron_PromptReco
+# run data_Run2016D_SingleMuon_PromptReco
+# run data_Run2016D_SinglePhoton_PromptReco
+# run data_Run2016D_DoubleEG_PromptReco
+# run data_Run2016D_DoubleMuon_PromptReco
+# run data_Run2016D_MuonEG_PromptReco
+
+# run data_Run2016E_JetHT_PromptReco
+# run data_Run2016E_MET_PromptReco
+# run data_Run2016E_HTMHT_PromptReco
+# run data_Run2016E_SingleElectron_PromptReco
+# run data_Run2016E_SingleMuon_PromptReco
+# run data_Run2016E_SinglePhoton_PromptReco
+# run data_Run2016E_DoubleEG_PromptReco
+# run data_Run2016E_DoubleMuon_PromptReco
+# run data_Run2016E_MuonEG_PromptReco
+
+# run data_Run2016F_JetHT_PromptReco
+# run data_Run2016F_MET_PromptReco
+# run data_Run2016F_HTMHT_PromptReco
+# run data_Run2016F_SingleElectron_PromptReco
+# run data_Run2016F_SingleMuon_PromptReco
+# run data_Run2016F_SinglePhoton_PromptReco
+# run data_Run2016F_DoubleEG_PromptReco
+# run data_Run2016F_DoubleMuon_PromptReco
+# run data_Run2016F_MuonEG_PromptReco
+
+# run data_Run2016G_JetHT_PromptReco
+# run data_Run2016G_MET_PromptReco
+# run data_Run2016G_HTMHT_PromptReco
+# run data_Run2016G_SingleElectron_PromptReco
+# run data_Run2016G_SingleMuon_PromptReco
+# run data_Run2016G_SinglePhoton_PromptReco
+# run data_Run2016G_DoubleEG_PromptReco
+# run data_Run2016G_DoubleMuon_PromptReco
+# run data_Run2016G_MuonEG_PromptReco
+
+# run data_Run2016H_JetHT_PromptReco
+# run data_Run2016H_MET_PromptReco
+# run data_Run2016H_HTMHT_PromptReco
+# run data_Run2016H_SingleElectron_PromptReco
+# run data_Run2016H_SingleMuon_PromptReco
+# run data_Run2016H_SinglePhoton_PromptReco
+# run data_Run2016H_DoubleEG_PromptReco
+# run data_Run2016H_DoubleMuon_PromptReco
+# run data_Run2016H_MuonEG_PromptReco
+
 #
 # TTBAR
 #
@@ -51,15 +101,15 @@ chmod -R a+wrx $OUTPUTDIR
 # HIGH STATS TTBAR EXTENSION
 #
 
-# run ttdl_mg_lo_ext1
-# #run ttsl_mg_lo_top_ext1
+# run ttsl_mg_lo_top_ext1
 # run ttsl_mg_lo_tbar_ext1
+# run ttdl_mg_lo_ext1
 
 #
 # W+JETS
 #
 
-# #run wjets_ht100to200
+# run wjets_ht100to200
 # run wjets_ht200to400
 # run wjets_ht400to600
 # run wjets_ht600to800
@@ -69,13 +119,11 @@ chmod -R a+wrx $OUTPUTDIR
 
 # run wjets_ht100to200_ext1
 # run wjets_ht200to400_ext1
-# #run wjets_ht400to600_ext1
-# #run wjets_ht600to800_ext1
+# run wjets_ht400to600_ext1
+# run wjets_ht600to800_ext1
 # run wjets_ht800to1200_ext1
 # run wjets_ht1200to2500_ext1
-# #run wjets_ht2500toInf_ext1
-
-
+# run wjets_ht2500toInf_ext1
 
 # # run wjets_incl
 
@@ -84,24 +132,28 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 # run singletop_amcatnlo_4f_schan
-# run singletop_powheg_5f_tWchan
-# run singletop_powheg_5f_tbarWchan
-# #run singletop_powheg_4f_ttchan_l
+# run singletop_powheg_5f_tWchan_l
+# run singletop_powheg_5f_tbarWchan_l
+# run singletop_powheg_4f_ttchan_l
 # run singletop_powheg_4f_tbartchan_l
 
 #
 # DY+JETS
 #
 
-# #run dyjetsll_ht100to200
-# #run dyjetsll_ht200to400
-# #run dyjetsll_ht400to600
-# run dyjetsll_ht600toInf
+# run dyjetsll_ht100to200
+# run dyjetsll_ht200to400
+# run dyjetsll_ht400to600
+# run dyjetsll_ht600to800
+# run dyjetsll_ht800to1200
+# run dyjetsll_ht1200to2500
+# run dyjetsll_ht2500toInf
+# #run dyjetsll_ht600toInf
 
 # run dyjetsll_ht100to200_ext1
 # run dyjetsll_ht200to400_ext1
 # run dyjetsll_ht400to600_ext1
-# run dyjetsll_ht600toInf_ext1
+# #run dyjetsll_ht600toInf_ext1
 
 # #run dyjetsll_incl
 
@@ -126,17 +178,17 @@ chmod -R a+wrx $OUTPUTDIR
 # Z INVISIBLE
 #
 
-# # run zinv_ht100to200
-# # run zinv_ht200to400
-# # run zinv_ht400to600
+# run zinv_ht100to200
+# run zinv_ht200to400
+# run zinv_ht400to600
 # run zinv_ht600to800
 # run zinv_ht800to1200
 # run zinv_ht1200to2500
 # run zinv_ht2500toInf
 
 # run zinv_ht100to200_ext1
-# # run zinv_ht200to400_ext1
-# # run zinv_ht400to600_ext1
+# run zinv_ht200to400_ext1
+# run zinv_ht400to600_ext1
 # # run zinv_ht600to800_ext1
 # # run zinv_ht800to1200_ext1
 # run zinv_ht1200to2500_ext1
@@ -151,14 +203,25 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 #
-# TTV
+# TTV, TT+X
 #
 
 # run ttg_amcatnlo
-# run ttw_lnu_amcatnlo
-# run ttw_qq_amcatnlo
-# run ttz_nunu_amcatnlo
-# run ttz_qq_amcatnlo
+# #run ttw_lnu_amcatnlo
+# #run ttw_qq_amcatnlo
+# #run ttz_nunu_amcatnlo
+# #run ttz_qq_amcatnlo
+
+# run ttw_mg_lo
+# run ttz_mg_lo
+
+# run tttt
+# run ttbb
+# run ttbb_ext1
+
+
+# run tth_bb
+# run tth_nonbb
 
 #
 # QCD
@@ -182,7 +245,7 @@ chmod -R a+wrx $OUTPUTDIR
 
 # # run qcd_ht200to300
 # run qcd_ht300to500
-# # run qcd_ht500to700
+# run qcd_ht500to700
 # run qcd_ht700to1000
 # run qcd_ht1000to1500
 # run qcd_ht1500to2000
@@ -214,9 +277,10 @@ chmod -R a+wrx $OUTPUTDIR
 # run T1tttt
 # run T1bbbb
 # run T1qqqq
-# run T5qqqqVV
+# # run T5qqqqVV
 # run T2bb
 # run T2tt_mStop-400to1200
 # run T2tt_mStop-150to250
 # run T2tt_mStop-250to350
 # run T2tt_mStop-350to400
+# run T2qq

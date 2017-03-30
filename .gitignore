@@ -1,0 +1,11 @@
+*.o
+*.so
+*.gdb_history
+*.cxx
+*logs*
+*.pcm
+*.d
+*.log
+*.pyc
+*.cmd
+*.display.screen
