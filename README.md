@@ -10,6 +10,7 @@ cd MT2Analysis
 git checkout cms4
 source setup.sh
 ```
+if you are switching from an already setupped branch, make sure that the `CORE` is also in the `cms4` branch.
 
 ## Babymaker
 ### For a test run

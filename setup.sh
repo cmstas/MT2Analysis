@@ -13,17 +13,11 @@ cmsenv
 cd ../..
 # git clone git@github.com:cmstas/CORE.git
 
-if [ -d /home/users/$USER/CORE ]
-then
-  echo "Creating symbolic link to ~/CORE , make sure that it's up to date."
-  ln -s /home/users/$USER/CORE . 
-else 
-  git clone git@github.com:cmstas/CORE.git
-  cd CORE
-  git checkout master
-  cd ..
+git clone git@github.com:cmstas/CORE.git
+cd CORE
+git checkout cms4
+cd ..
 #  git clone git@github.com:cmstas/Tools.git
-fi
 
 cd babymaker
 make -j 8
