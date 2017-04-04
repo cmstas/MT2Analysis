@@ -291,6 +291,9 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
       else if (fullhistname.Contains("LooseSieieSB")) fullhistname.ReplaceAll("LooseSieieSB", "FakeLooseSieieSB");
       else if (fullhistname.Contains("Loose")) fullhistname.ReplaceAll("Loose", "FakeLoose");
     }
+    if (TString(names.at(i)).Contains("fakeLep") ) {
+      fullhistname+="Fake";
+    }
     // Try data-driven fake estimates: LooseNotTight * FR / (1 - FR)
     bool DataDrivenQCD = false;
     if (TString(names.at(i)).Contains("fakephotonData") && !fullhistname.Contains("Loose")) DataDrivenQCD = true;
@@ -3103,7 +3106,7 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, vect
       if (h_n_mt2bins) {
         n_mt2bins = h_n_mt2bins->GetBinContent(1);
       } else {
-        ofile << "Couldn't get number of mt2 bins" << std::endl;
+        cout << "Couldn't get number of mt2 bins!! in dir: " << dir << std::endl;
         return srhstack;
       }
       for (int ibin = 1; ibin <= n_mt2bins; ++ibin) {
@@ -3123,8 +3126,8 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, vect
             bgerr.at(srbin) = err;
           }
           else {
-            ofile << "Shouldn't get here" << std::endl;
-            ofile << "n_mt2bins: " << n_mt2bins << " h->XaxisNbins: " << h->GetXaxis()->GetNbins() << endl;
+            cout << "Shouldn't get here" << std::endl;
+            cout << "n_mt2bins: " << n_mt2bins << " h->XaxisNbins: " << h->GetXaxis()->GetNbins() << endl;
             return srhstack;
           }
           // srhist->Fill(srbin, yield);
@@ -3272,6 +3275,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   leg->SetTextSize(0.042);
   // leg->SetNColumns(2);
   // leg->AddEntry(hSR_all, "original");
+  if (hSR_stk->GetHists() == nullptr) { cout << "SR stack not getting histograms!\n"; return; }
   for (unsigned int i = 0; i < names.size(); ++i)
     leg->AddEntry(hSR_stk->GetHists()->At(i), names.at(i).c_str());
   leg->Draw("same");
@@ -3733,7 +3737,7 @@ void plotMakerHcand() {
   lumiTextSize = 0.4;
   writeExtraText = false;
   //lumi_13TeV = "42 pb^{-1}";
-  lumi_13TeV = "40 fb^{-1}";
+  lumi_13TeV = "35.9 fb^{-1}";
 
   // ----------------------------------------
   //  control sequences
@@ -3742,36 +3746,19 @@ void plotMakerHcand() {
   bool printplots = false;
   bool printtables = true;
 
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/original";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/MbbMax";
-  string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/UseHighCSV";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/20ifb";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/7p65ifb";
-  // string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/orgtrueb";
+  string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp";
 
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
-  vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
-  // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "2015gjet_ht", "top"};
-  // vector<string> names = {"2015qcd_ht"};
-  // vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "gjet_ht", "dyjetsll_ht", "data_Run2016"};
   // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
-  // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
+  vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
   // vector<string> names = {"ttsl", "2015zinv_ht", "wjets_ht", "ttdl", "2015qcd_ht"};
-  // vector<string> names = {"2015qcd_ht", "lostlep", "2015zinv_ht"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_Allbkg", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_700_new"};
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "data_Run2016"};
-  // vector<string> names{"ttsl", "ttdl", "T5qqqqWH_1400_700", "T5qqqqWH_1100_950", "T5qqqqWH_1400_200", "T2ttZH_800_400", "T2ttZH_800_200"};
-  // vector<string> names{"T5qqqqWH_1400_200"};
-  // vector<string> names{"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016B"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
   // ----------------------------------------
@@ -3887,10 +3874,10 @@ void plotMakerHcand() {
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  vector<string> names2 = {"lostlepFromCRs", "lostlep", "data_Run2016"};
+  // vector<string> names2 = {"lostlepFromCRs", "lostlep", "data_Run2016"};
   // vector<string> names2 = {"ttsl", "ttdl", "wjets_ht", "singletop", "ttw", "ttz", "ttg", "data_Run2016"};
-  vector<TFile*> samples2 = getSamples(names2, input_dir);
-  vector<vector<TFile*>> samplesVec2 = {samples2};
+  // vector<TFile*> samples2 = getSamples(names2, input_dir);
+  // vector<vector<TFile*>> samplesVec2 = {samples2};
   vector<string> selecs2 = {"mMTnHcand"};
 
   // vector<vector<TFile*>> samplesVec2;
@@ -3898,8 +3885,8 @@ void plotMakerHcand() {
   //   samplesVec2.push_back(getSamples(names2, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
   // vector<string> names3 = {"2015gjets_ht", "data_Run2016"};
-  vector<string> names3 = {"2015gjet_ht", "zinvDataDriven", "data_Run2016"};
-  vector<TFile*> samples3 = getSamples(names3, input_dir);
+  // vector<string> names3 = {"2015gjet_ht", "zinvDataDriven", "data_Run2016"};
+  // vector<TFile*> samples3 = getSamples(names3, input_dir);
   // vector<vector<TFile*>> samplesVec3;
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec3.push_back(getSamples(names3, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
@@ -4173,7 +4160,7 @@ void plotMakerHcand() {
   // dirsH.clear();
 
   // vector<string> names5 = {"lostlepFromCRs", "lostlep", "zinvDataDriven", "2015zinv_ht"};
-  vector<string> names5 = {"2015qcd_ht", "lostlepFromCRs", "zinvDataDriven"};
+  vector<string> names5 = {"qcd_ht", "lostlepFromCRs", "zinvDataDriven"};
   vector<TFile*> samples5 = getSamples(names5, input_dir);
 
   // dirsH.push_back("sr6VL");

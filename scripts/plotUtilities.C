@@ -171,6 +171,7 @@ string getTableName(const string& sample) {
   if (sample.find("T5qqqqWH_1100_950") != string::npos) return "T5qqqqWH 1100, 950";
   if (sample.find("T2ttZH_800_400") != string::npos) return "T2ttZH 800, 400";
   if (sample.find("T2ttZH_800_200") != string::npos) return "T2ttZH 800, 200";
+  if (sample.find("lostlepFromCRs") != string::npos) return "lost lep";
 
   cout << "getTableName: WARNING: didn't recognize sample: " << sample << endl;
   return sample;

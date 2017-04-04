@@ -49,7 +49,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 
     if (verbose) cout << "Running on dir " << dirs.at(idir) << endl;
     
-    TString directory = "sr"+dirs.at(idir);
+    TString directory = "sr" + dirs.at(idir);
     TString fullhistname = directory + "/h_mt2bins";
     TString fullhistnameFinebin = directory + "/h_mt2";
     TString n_mt2bins_name = directory + "/h_n_mt2bins";
@@ -491,6 +491,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     TH1D* h_lastmt2Hybrid = new TH1D("h_lastmt2Hybrid",";last M_{T2} value",1,0,1);
     h_lastmt2Hybrid->SetBinContent(1,lastmt2val_hybrid);
     
+    h_n_mt2bins->Write();
     pred->Write();
     pred_finebin->Write();
     Syst->Write();
@@ -535,8 +536,6 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 
 //_______________________________________________________________________________
 void lostlepMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp", string dataname = "data_Run2016"){
-
-  // Running the script along
 
   string output_name = input_dir+"/lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;

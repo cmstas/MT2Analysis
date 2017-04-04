@@ -1,12 +1,8 @@
 #!/bin/bash
 
 #INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
-#INDIR=/home/users/olivito/mt2_74x_dev/MT2Analysis/MT2looper/output/V00-01-07_25ns_miniaodv2_skim_base_1p26fb_mt2gt200_crqcd/
-# INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/Bennett_V00-08-02_json_Cert_271036-274421_skim_base_mt2gt200_ZinvV4/
-# INDIR=/home/users/gzevi/MT2/MT2Analysis80X/MT2Analysis/MT2looper/output/V00-08-02_nojson_skim_base_mt2gt200_ZinvV4
-INDIR=/home/users/sicheng/MT2Analysis/MT2looper/output/temp
-# INDIR=/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet
 # INDIR=/home/users/mderdzinski/winter2017/clean_master/MT2looper/output/full2016_v16_Feb15/
+INDIR=/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp
 
 THISDIR=`pwd`
 
@@ -29,6 +25,7 @@ QCDMONOJET=./inputs/qcdEstimateMonojet
 
 if [ ! -d "$INDIR" ]; then
   echo "Input directory does not exist" 
+  return -1
 fi
 
 cd $INDIR
@@ -48,26 +45,6 @@ hadd -f top.root ttsl.root ttdl.root singletop.root ttw_mg_lo.root ttz_mg_lo.roo
 echo "hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw.root ttz.root tth.root wjets_ht.root"
 hadd -f lostlep.root ttsl.root ttdl.root singletop.root ttw_mg_lo.root ttz_mg_lo.root tth.root wjets_ht.root >> dataDrivenEstimates.log
 
-# echo "hadd -f wz.root wz_1l3n.root wz_3lnu.root wz_lnqq.root"
-# hadd -f wz.root wz_1l3n.root wz_3lnu.root wz_lnqq.root >> dataDrivenEstimates.log
-
-# echo "hadd -f ww.root ww_2l2nu.root ww_lnuqq.root"
-# hadd -f ww.root ww_2l2nu.root ww_lnuqq.root >> dataDrivenEstimates.log
-
-# echo "hadd -f zz.root zz_2l2n.root zz_2l2q.root zz_2q2n.root zz_4l.root"
-# hadd -f zz.root zz_2l2n.root zz_2l2q.root zz_2q2n.root zz_4l.root >> dataDrivenEstimates.log
-
-# echo "hadd -f vv.root ww_2l2nu.root ww_lnuqq.root zz_2l2n.root zz_2l2q.root zz_2q2n.root zz_4l.root"
-# hadd -f vv.root ww_2l2nu.root ww_lnuqq.root zz_2l2n.root zz_2l2q.root zz_2q2n.root zz_4l.root >> dataDrivenEstimates.log
-
-# echo "hadd -f vvv.root  www_incl_amcnlo.root wwz_incl_amcnlo.root wzz_incl_amcnlo.root zzz_incl_amcnlo.root"
-# hadd -f vvv.root  www_incl_amcnlo.root wwz_incl_amcnlo.root wzz_incl_amcnlo.root zzz_incl_amcnlo.root >> dataDrivenEstimates.log
-
-## make "lostlep" from sum of MC lostlep backgrounds and diboson (except QCD, to avoid spikes)
-# echo "hadd -f lostlep_diboson.root ttsl.root ttdl.root singletop.root ttw.root ttz.root ttg.root wjets_ht.root ww.root wz.root" ## (temporarily replaced tth with ttg, because of sample availability)
-# hadd -f lostlep_diboson.root ttsl.root ttdl.root singletop.root ttw_mg_lo.root ttz_mg_lo.root ttg.root wjets_ht.root ww.root wz.root >> dataDrivenEstimates.log
-
-
 cd $THISDIR
 
 #this script scales the HI and LOW boundary histograms by 1/numSamples since we don't want these hadd'ed
@@ -80,26 +57,8 @@ root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/wjets_ht.root\",7)" >> dataDriven
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/top.root,6)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/top.root\",6)" >> dataDrivenEstimates.log
 
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/wz.root,3)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/wz.root\",3)" >> dataDrivenEstimates.log
-
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/ww.root,2)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/ww.root\",2)" >> dataDrivenEstimates.log
-
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/zz.root,4)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/zz.root\",4)" >> dataDrivenEstimates.log
-
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/vv.root,6)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/vv.root\",6)" >> dataDrivenEstimates.log
-
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/vvv.root,4)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/vvv.root\",4)" >> dataDrivenEstimates.log
-
 echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep.root,13)"
 root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep.root\",13)" >> dataDrivenEstimates.log
-
-# echo "root -b -q rescaleBoundaryHists.C+(${INDIR}/lostlep_diboson.root,18)"
-# root -b -q "rescaleBoundaryHists.C+(\"${INDIR}/lostlep_diboson.root\",18)" >> dataDrivenEstimates.log
 
 # make the data driven background files
 echo "root -b -q lostlepMaker.C+(${INDIR},${LOSTLEPFILE})"
@@ -131,9 +90,6 @@ root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 
 echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
 root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
-echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE},${QCDESTIMATE},${QCDMONOJET})"
-root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\",\"${QCDESTIMATE}\",\"${QCDMONOJET}\")" >> dataDrivenEstimates.log
-echo "done"
 
 echo "root -b -q zinvDDMaker.C+(\"${INDIR}\")"
 root -b -q "zinvDDMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
