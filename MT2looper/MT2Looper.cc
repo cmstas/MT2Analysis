@@ -1947,23 +1947,28 @@ void MT2Looper::fillHistosSRBase() {
 void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::string& suffix) {
 
   // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT800 || t.HLT_PFHT300_PFMET100 || t.HLT_PFMET100_PFMHT100)) return;
+  if (t.isData && !(t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+
+  // met/caloMet filter for additional cleaning
+  if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
 
   std::map<std::string, float> values;
-  values["deltaPhiMin"] = t.deltaPhiMin;
-  values["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+  values["deltaPhiMin"] = deltaPhiMin_;
+  values["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
   values["nlep"]        = nlepveto_;
   // values["njets"]       = t.nJet30;
-  values["nbjets"]      = t.nBJet20;
+  values["nbjets"]      = nBJet20_;
   // values["nbjets"]      = nbjet_loose_;
   // values["nbjets"]      = ntruebJets_;
-  values["j1pt"]        = t.jet1_pt;
-  values["j2pt"]        = t.jet2_pt;
+  values["j1pt"]        = jet1_pt_;
+  values["j2pt"]        = jet2_pt_;
   values["mt2"]         = hcand_mt2_;
-  values["passesHtMet"] = ( (t.ht > 200. && t.met_pt > 200.) || (t.ht > 1000. && t.met_pt > 30.) );
-  values["njets"]       = t.nJet30;
-  values["ht"]          = t.ht;
-  values["met"]         = t.met_pt;
+  values["passesHtMet"] = ( (ht_ > 200. && met_pt_ > 200.) || (ht_ > 1000. && met_pt_ > 30.) );
+  values["njets"]       = nJet30_;
+  values["ht"]          = ht_;
+  values["met"]         = met_pt_;
   values["nhcand"]      = nhcand_;
   values["nZcand"]      = nZcand_;
   values["mbbmax"]      = mbbmax_;
@@ -2007,10 +2012,15 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   if (t.ngamma == 0) return;
 
   // trigger requirement
-  // if (t.isData && !t.HLT_Photon165_HE10) return;
   if (( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon165_HE10) return;
 
-  // the photon trigger weight should have already been applied in fillHistosCRGJ which should be called before this
+  // additional cleaning for fakes and HLT-emulation (2016)
+  if (fabs(t.gamma_eta[0])>2.4 || t.gamma_hOverE015[0]>0.1 ) return;
+
+  // apply trigger weights to mc
+  if (!t.isData && applyPhotonTriggerWeights){
+    evtweight_ *= getPhotonTriggerWeight(t.gamma_eta[0], t.gamma_pt[0]);
+  }
 
   bool passSieie = t.gamma_idCutBased[0] ? true : false; // just deal with the standard case now. Worry later about sideband in sieie
 
@@ -2092,14 +2102,19 @@ void MT2Looper::fillHistosCRDYMT2Higgs(const std::string& prefix, const std::str
 
   // trigger requirement on data and MC already implemented when defining doDYplots
 
+  // met/caloMet filter for additional cleaning, only for pfmet > 200
+  if ((t.met_miniaodPt > 200.) && (t.met_miniaodPt / t.met_caloPt > 5.0)) return;
+  // ad-hoc RA2/b filter
+  if (t.nJet200MuFrac50DphiMet > 0) return;
+
   std::map<std::string, float> values;
   values["deltaPhiMin"] = t.zll_deltaPhiMin;
   values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
   values["nlep"]        = 0; // dummy value
-  values["j1pt"]        = t.jet1_pt;
-  values["j2pt"]        = t.jet2_pt;
-  values["njets"]       = t.nJet30;
-  values["nbjets"]      = t.nBJet20;
+  values["j1pt"]        = jet1_pt_;
+  values["j2pt"]        = jet2_pt_;
+  values["njets"]       = nJet30_;
+  values["nbjets"]      = nBJet20_;
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
@@ -3318,9 +3333,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_nhcand"+s,        nhcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
   }
 
-  // if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || TString(dirname).Contains("base") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH")
-  //      && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight") ) // Don't make these for Loose, NotLoose. SieieSB
-  if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") 
+  if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || TString(dirname).Contains("base") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") 
        && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight" || s=="FakeLooseNotTight") )// Don't make these for Loose, NotLoose. SieieSB
   {
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -3428,8 +3441,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     }
   }
   
-  // if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || TString(dirname).Contains("base") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
-  if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
+  if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || TString(dirname).Contains("base") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
 
 //    // Count Loose b-tags (and also Medium, just to make sure we do it right)
 //    int nlooseb = 0;

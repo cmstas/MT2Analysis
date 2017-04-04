@@ -648,7 +648,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   gPad->Update();
 
   if( printplot ) {
-    can->Print(Form("plots/%s.pdf",canvas_name.Data()));
+    can->Print(Form("hcandplots/%s.pdf",canvas_name.Data()));
     //can->Print(Form("plots/%s.eps",canvas_name.Data()));
   }
 
@@ -3753,12 +3753,8 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
-  // vector<string> names = {"2015qcd_ht", "wjets_ht", "2015zinv_ht", "top", "data_Run2016"};
-  vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
-  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
-  // vector<string> names = {"ttsl", "2015zinv_ht", "wjets_ht", "ttdl", "2015qcd_ht"};
-  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_Allbkg", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_700_new"};
-  // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "data_Run2016"};
+  // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "qcd_ht", "data_Run2016"};
+  vector<string> names = {"top", "wjets_ht", "zinv_ht", "qcd_ht", "data_Run2016"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
   // ----------------------------------------
@@ -3767,7 +3763,7 @@ void plotMakerHcand() {
 
   float scalesig = -1.;
   // float scalesig = 30;
-  // printplots = true;
+  printplots = true;
   // bool doRatio = false;
   bool doRatio = true;
   bool scaleBGtoData = false;
@@ -3781,11 +3777,12 @@ void plotMakerHcand() {
       // if (strncmp (k->GetTitle(), cr_skip.c_str(), cr_skip.length()) == 0) continue; //skip control regions
       // if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
-      // if(dir_name == "") continue;
-      // if(dir_name != "srh2H") continue; //to do only this dir
-      if(dir_name != "crhqcdbase") continue; //to do only this dir
-      //if(dir_name != "sr1H") continue; //for testing
-      string s = "_noHcandCR";
+      // if (dir_name == "") continue;
+      // if (dir_name != "srh2H") continue; //to do only this dir
+      if (dir_name != "srHbase") continue; //to do only this dir
+      //if (dir_name != "sr1H") continue; //for testing
+      // string s = "_noHcandCR";
+      string s = "";
 
       // makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );

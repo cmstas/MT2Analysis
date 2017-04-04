@@ -7,7 +7,6 @@ git clone https://github.com/cmstas/MT2Analysis.git
 and then 
 ``` bash
 cd MT2Analysis
-git checkout mt2-higgs
 source setup.sh
 ```
 

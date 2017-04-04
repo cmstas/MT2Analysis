@@ -12,6 +12,7 @@ cd CMSSW_8_0_5/src
 cmsenv
 cd ../..
 # git clone git@github.com:cmstas/CORE.git
+git checkout mt2higgs
 
 if [ -d /home/users/$USER/CORE ]
 then
