@@ -155,9 +155,30 @@ MT2Looper::~MT2Looper(){
 void MT2Looper::SetSignalRegions(){
   //SRVec =  getSignalRegionsZurich_jetpt30(); //same as getSignalRegionsZurich(), but with j1pt and j2pt cuts changed to 30 GeV
   //  SRVec =  getSignalRegionsJamboree(); //adds HT 200-450 regions
-  SRVec =  getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
+  SRVec = getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
   SRVecHcand = getSignalRegionsMT2Higgs();
+  for (auto it = SRVec.begin(); it != SRVec.end(); ++it) {         // debug
+    cout << it-SRVec.begin() << "  "<< it->GetName() << endl;      // debug
+    if (it->GetName() != "26") {
+      SRVec.erase(it--);                                           // for faster runtime
+      continue;
+    }
+    if (it->GetLowerBound("nbjets") < 2) continue;
+    SR sr = *it;
+    sr.SetName(sr.GetName() + "test");
+    sr.SetVarAll("nhcand", 0, -1);
+    sr.SetVarAll("mbbmax", 0, -1);
+    sr.SetVarAll("nZcand", 0, -1);
+    sr.SetVarAll("passesHtMet", 0, 2);
+    sr.SetVarAll("minMTbmet", 0, -1);
+    sr.SetVarCRQCD("njets", sr.GetLowerBound("njets"), sr.GetUpperBound("njets"));
+    sr.SetVarCRQCD("nbjets", sr.GetLowerBound("nbjets"), sr.GetUpperBound("nbjets"));
+    SRVecHcand.push_back(sr);
+  }
+  cout << "SRVec.size = " << SRVec.size() << endl;
+  for (auto it = SRVecHcand.begin(); it != SRVecHcand.end(); ++it)
+    cout << it-SRVecHcand.begin() << "  "<< it->GetName() << endl;  // debug
   // SRVecHcand = getSignalRegionsHcand();
   // SRVecZcand = getSignalRegionsZcand();
   // SRVecMbbMax = getSignalRegionsMbbMax();
@@ -1965,7 +1986,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["j1pt"]        = jet1_pt_;
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = hcand_mt2_;
-  values["passesHtMet"] = ( (ht_ > 200. && met_pt_ > 200.) || (ht_ > 1000. && met_pt_ > 30.) );
+  values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
   values["njets"]       = nJet30_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
@@ -2038,7 +2059,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   values["j2pt"]        = t.gamma_jet2_pt;
   values["mt2"]         = t.gamma_mt2;
   values["minMTbmet"]   = gamma_minMTbmet_;
-  values["passesHtMet"] = ( (t.gamma_ht > 200. && t.gamma_met_pt > 200.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
+  values["passesHtMet"] = ( (t.gamma_ht > 250. && t.gamma_met_pt > 250.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   values["njets"]       = t.gamma_nJet30;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
@@ -2079,20 +2100,6 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
     }
   }
 
-  // // do monojet SRs
-  // std::map<std::string, float> values_monojet;
-  // values_monojet["deltaPhiMin"] = t.gamma_deltaPhiMin;
-  // values_monojet["diffMetMhtOverMet"]  = t.gamma_diffMetMht/t.gamma_met_pt;
-  // values_monojet["nlep"]        = nlepveto_;
-  // values_monojet["ht"]          = t.gamma_ht; // ETH doesn't cut on jet1_pt here, only ht
-  // values_monojet["njets"]       = t.gamma_nJet30;
-  // values_monojet["met"]         = t.gamma_met_pt;
-  // bool passBaseJ = SRBaseMonojet.PassesSelection(values_monojet);
-
-  // if ((passBaseJ && t.gamma_pt[0] > 180.) || (passBase && passPtMT2)) {
-  //   fillHistosGammaJets(SRBaseInclHcand.crgjHistMap, SRBaseInclHcand.crgjRooDataSetMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "crhgjbaseIncl", suffix+add);
-  // }
-
   return;
 }
 
@@ -2118,44 +2125,11 @@ void MT2Looper::fillHistosCRDYMT2Higgs(const std::string& prefix, const std::str
   values["mt2"]         = t.zll_mt2;
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
-  values["passesHtMet"] = ( (t.zll_ht > 200. && t.zll_met_pt > 200.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
+  values["passesHtMet"] = ( (t.zll_ht > 250. && t.zll_met_pt > 250.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
   values["nhcand"]      = nhcand_;
   values["nZcand"]      = nZcand_;
   values["mbbmax"]      = mbbmax_;
   values["minMTbmet"]   = minMTbmet_;
-
- // Separate list for SRBASE
-  // std::map<std::string, float> valuesBase;
-  // valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
-  // valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  // valuesBase["nlep"]        = 0; // dummy value
-  // valuesBase["j1pt"]        = t.jet1_pt;
-  // valuesBase["j2pt"]        = t.jet2_pt;
-  // valuesBase["nbjets"]      = t.nBJet20;
-  // valuesBase["mt2"]         = t.zll_mt2;
-  // valuesBase["minMTbmet"]   = minMTbmet_;
-  // valuesBase["passesHtMet"] = ( (t.zll_ht > 200. && t.zll_met_pt > 200.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
-  // bool passBase = SRBaseHcand.PassesSelection(valuesBase);
-
-  // std::map<std::string, float> valuesBase_monojet;
-  // valuesBase_monojet["deltaPhiMin"] = t.zll_deltaPhiMin;
-  // valuesBase_monojet["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  // valuesBase_monojet["nlep"]        = 0;
-  // valuesBase_monojet["ht"]          = t.ht; // ETH doesn't cut on jet1_pt here, only ht
-  // valuesBase_monojet["njets"]       = t.nJet30;
-  // valuesBase_monojet["met"]         = t.zll_met_pt;
-
-  // bool passBaseJ = SRBaseMonojet.PassesSelection(valuesBase_monojet) && passMonojetId_;
-
-  // std::map<std::string, float> values_monojet;
-  // values_monojet["deltaPhiMin"] = t.zll_deltaPhiMin;
-  // values_monojet["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  // values_monojet["nlep"]        = 0;
-  // //  values_monojet["j1pt"]        = t.jet1_pt; // ETH doesn't explictly cut on jet1_pt
-  // values_monojet["njets"]       = t.nJet30;
-  // values_monojet["nbjets"]      = t.nBJet20;
-  // values_monojet["ht"]          = t.zll_ht;
-  // values_monojet["met"]         = t.zll_met_pt;
 
   // if (passBase) fillHistosMT2Higgs(SRBase.crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crhdybase", suffix);
   // if (passBase || passBaseJ) fillHistosMT2Higgs(SRBaseInclHcand.crdyHistMap, SRBaseInclHcand.GetNumberOfMT2Bins(), SRBaseInclHcand.GetMT2Bins(), "crhdybaseIncl", suffix);
