@@ -26,6 +26,11 @@ else
 #  git clone git@github.com:cmstas/Tools.git
 fi
 
+cd scripts
+mkdir -p latex
+mkdir -p hcandplots
+cd ..
+
 cd babymaker
 make -j 8
 cd ..

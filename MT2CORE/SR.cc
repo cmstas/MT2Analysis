@@ -35,6 +35,7 @@ void SR::SetVarCRQCD(std::string var_name, float lower_bound, float upper_bound)
 void SR::SetVarAll(std::string var_name, float lower_bound, float upper_bound){
   SetVar(var_name, lower_bound, upper_bound);
   SetVarCRSL(var_name, lower_bound, upper_bound);
+  SetVarCRDY(var_name, lower_bound, upper_bound);
   SetVarCRQCD(var_name, lower_bound, upper_bound);
 }
 

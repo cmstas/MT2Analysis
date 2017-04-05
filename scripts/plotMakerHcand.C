@@ -3264,9 +3264,11 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   // hSR_data->Draw("axissame");
   hSR_stk->Draw("histsame");
   hSR_stk->Draw("axissame");
-  hSR_data->SetMarkerStyle(20);
-  hSR_data->SetMarkerColor(kBlack);
-  hSR_data->Draw("same");
+  if (hSR_data) {
+    hSR_data->SetMarkerStyle(20);
+    hSR_data->SetMarkerColor(kBlack);
+    hSR_data->Draw("same");
+  }
 
   TLegend* leg = new TLegend(0.56, 0.76, 0.87, 0.89);
   leg->SetFillColor(0);
@@ -3281,7 +3283,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   leg->Draw("same");
 
   TH1F* h_axis_ratio;
-  TLine* line1;
+  TLine* line1(0);
   if (hRatio) {
     h_axis_ratio = new TH1F("ratio_axis","", n_srbins, 0, n_srbins);
     line1 = new TLine(0, 1, n_srbins, 1);
@@ -3837,7 +3839,7 @@ void plotMakerHcand() {
 
 
   // Start outputing to file of yields table
-  ofile.open("tables/table.tex");
+  ofile.open("latex/table.tex");
   ofile << "\\documentclass[landscape,11pt]{article}" << std::endl;
   ofile << "\\usepackage{amsmath}" << std::endl;
   ofile << "\\usepackage{amssymb}" << std::endl;
@@ -3888,20 +3890,20 @@ void plotMakerHcand() {
   // for (auto it = selecs.begin(); it != selecs.end(); ++it)
   //   samplesVec3.push_back(getSamples(names3, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
-  vector<string> names4 = {"lostlepFromCRs", "zinvDataDriven", "data_Run2016"};
+  // vector<string> names4 = {"lostlepFromCRs", "zinvDataDriven", "data_Run2016"};
+  vector<string> names4 = {"lostlepFromCRs", "zinvDataDriven"};
   vector<TFile*> samples4= getSamples(names4, input_dir);
-  names4 = vector<string>{"lostlep", "Zinv", "data"};
-  makeSRyieldsHist(samples4, names4, "h", "", "H");
-  makeSRyieldsHist(samples4, names4, "h", "", "L");
-  makeSRyieldsHist(samples4, names4, "H", "", "", "U");
-  makeSRyieldsHist(samples4, names4, "H", "", "", "M");
-  makeSRyieldsHist(samples4, names4, "Z");
+  // names4 = vector<string>{"lostlep", "Zinv"};
+  // makeSRyieldsHist(samples4, names4, "h", "", "H");
+  // makeSRyieldsHist(samples4, names4, "h", "", "L");
+  // makeSRyieldsHist(samples4, names4, "H", "", "", "U");
+  // makeSRyieldsHist(samples4, names4, "H", "", "", "M");
+  // makeSRyieldsHist(samples4, names4, "Z");
 
-  // dirsH.push_back("srbase");
-  // dirsH.push_back("srbaseHcand");
-  // // dirsH.push_back("srbaseInclHcand");
-  // printTable(samples, names, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srbase");
+  dirsH.push_back("sr3VL");
+  printTable(samples, names, dirsH);
+  dirsH.clear();
   // names = vector<string>{"ttsl", "ttdl", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T5qqqqWH_1400_200", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
 
   dirsH.push_back("srhbase");
