@@ -2,7 +2,7 @@
 
 #INDIR=/home/users/jgran/limits_for_paper/MT2Analysis/MT2looper/output/V00-01-09_25ns_skim_base_mt2gt200_ZinvV3_2p2fb/
 # INDIR=/home/users/mderdzinski/winter2017/clean_master/MT2looper/output/full2016_v16_Feb15/
-INDIR=/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp
+INDIR=../MT2looper/output/temp
 
 THISDIR=`pwd`
 

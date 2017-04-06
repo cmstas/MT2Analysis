@@ -133,6 +133,11 @@ bool doubleRatioShapeCorrection = false;
 bool ignoreScale1fb = false;
 // print qcd CR event list
 bool print_qcd_event_list = false;
+// -- mt2higgs --
+// to test synchronization with the standard MT2 Analysis
+bool synchronizing = true;
+// not running the standard MT2 regions to speed up
+bool fasterRuntime = true;
 
 // load rphi fits to perform r_effective calculation.
 bool doReffCalculation = true;
@@ -158,27 +163,31 @@ void MT2Looper::SetSignalRegions(){
   SRVec = getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
   SRVecHcand = getSignalRegionsMT2Higgs();
-  for (auto it = SRVec.begin(); it != SRVec.end(); ++it) {         // debug
-    cout << it-SRVec.begin() << "  "<< it->GetName() << endl;      // debug
-    if (it->GetName() != "26") {
-      SRVec.erase(it--);                                           // for faster runtime
-      continue;
+  if (fasterRuntime) SRVecMonojet.clear(); // for faster runtime in mt2higgs
+  // ** the full list of SRVec might be needed in the purity calculation -- check later
+  if (synchronizing) {
+    for (auto it = SRVec.begin(); it != SRVec.end(); ++it) {
+      cout << it-SRVec.begin() << "  "<< it->GetName() << endl;
+      // if (it->GetName() != "26") {
+      if (it->GetLowerBound("nbjets") < 2) {
+        SRVec.erase(it--);                   // for faster runtime
+        continue;
+      }
+      SR sr = *it;
+      sr.SetName("Sync"+sr.GetName());
+      sr.SetVarAll("nhcand", 0, -1);
+      sr.SetVarAll("mbbmax", 0, -1);
+      sr.SetVarAll("nZcand", 0, -1);
+      sr.SetVarAll("passesHtMet", 0, 2);
+      sr.SetVarAll("minMTbmet", 0, -1);
+      sr.SetVarCRQCD("njets", sr.GetLowerBound("njets"), sr.GetUpperBound("njets"));
+      sr.SetVarCRQCD("nbjets", sr.GetLowerBound("nbjets"), sr.GetUpperBound("nbjets"));
+      SRVecHcand.push_back(sr);
     }
-    if (it->GetLowerBound("nbjets") < 2) continue;
-    SR sr = *it;
-    sr.SetName(sr.GetName() + "test");
-    sr.SetVarAll("nhcand", 0, -1);
-    sr.SetVarAll("mbbmax", 0, -1);
-    sr.SetVarAll("nZcand", 0, -1);
-    sr.SetVarAll("passesHtMet", 0, 2);
-    sr.SetVarAll("minMTbmet", 0, -1);
-    sr.SetVarCRQCD("njets", sr.GetLowerBound("njets"), sr.GetUpperBound("njets"));
-    sr.SetVarCRQCD("nbjets", sr.GetLowerBound("nbjets"), sr.GetUpperBound("nbjets"));
-    SRVecHcand.push_back(sr);
+    cout << "SRVec.size = " << SRVec.size() << endl;
+    for (auto it = SRVecHcand.begin(); it != SRVecHcand.end(); ++it)
+      cout << it-SRVecHcand.begin() << "  "<< it->GetName() << endl;
   }
-  cout << "SRVec.size = " << SRVec.size() << endl;
-  for (auto it = SRVecHcand.begin(); it != SRVecHcand.end(); ++it)
-    cout << it-SRVecHcand.begin() << "  "<< it->GetName() << endl;  // debug
   // SRVecHcand = getSignalRegionsHcand();
   // SRVecZcand = getSignalRegionsZcand();
   // SRVecMbbMax = getSignalRegionsMbbMax();
@@ -1334,7 +1343,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // -- MT2Higgs looper --
       // This part is designed to run with the standard mt2baby without the help from hcand branches
-      bool fasterRuntime = true;
       // bool useHighestCSVbjets = false;
       bool useHighestCSVbjets = true;
 
@@ -1650,6 +1658,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
+      if (synchronizing) fasterRuntime = false;
       if (fasterRuntime && !doMT2Higgs) continue; // for faster runtime
 
       maxQCD = 154; // We want to include 153 when making photon plots, but we start from 154 for everything else
@@ -1979,17 +1988,14 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   values["deltaPhiMin"] = deltaPhiMin_;
   values["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
   values["nlep"]        = nlepveto_;
-  // values["njets"]       = t.nJet30;
+  values["njets"]       = nJet30_;
   values["nbjets"]      = nBJet20_;
-  // values["nbjets"]      = nbjet_loose_;
-  // values["nbjets"]      = ntruebJets_;
   values["j1pt"]        = jet1_pt_;
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = hcand_mt2_;
-  values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
-  values["njets"]       = nJet30_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
+  values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1000. && met_pt_ > 30.) );
   values["nhcand"]      = nhcand_;
   values["nZcand"]      = nZcand_;
   values["mbbmax"]      = mbbmax_;
@@ -2001,6 +2007,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   // }
   if (suffix == "_noHcandCR")
     values["nhcand"] = (mbbhcand_ < 100 || (mbbhcand_ > 150 && mbbmax_ < 300));
+  if (synchronizing) values["mt2"] = mt2_; // debug: for sync testing
 
   std::map<std::string, float> valuesCRSL = values;
   valuesCRSL["nlep"] = t.nLepLowMT;
@@ -2008,6 +2015,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   // valuesCRQCD.erase("njets");
   // valuesCRQCD.erase("nbjets");
 
+  // float mt2_temp = mt2_;
+  // mt2_ = hcand_mt2_;            // for mt2bins filling, may or may not be needed
   for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
     if (SRVecHcand.at(srN).PassesSelection(values)){
       fillHistosMT2Higgs(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix);
@@ -2023,6 +2032,7 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
       fillHistosMT2Higgs(SRVecHcand.at(srN).crqcdHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crqcd"+SRVecHcand.at(srN).GetName(), suffix);
     }
   }
+  // mt2_ = mt2_temp;
 
   return;
 }
@@ -2894,8 +2904,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
   // workaround for monojet bins
   float mt2_temp = mt2_;
-  // mt2_temp = hcand_mt2_;
   if (nJet30_ == 1) mt2_temp = ht_;
+  if (dirname.find("srh") == 0) mt2_temp = hcand_mt2_; // need to revisit this later
 
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);

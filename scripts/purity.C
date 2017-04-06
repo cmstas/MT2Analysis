@@ -675,7 +675,18 @@ void purity(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output
   //load signal regions
   vector<SR> SRVec =  getSignalRegionsMT2Higgs();
   // vector<SR> SRVec2 =  getSignalRegionsMonojet();
-  vector<SR> SRVec2;
+  vector<SR> SRVec2 = getSignalRegions2016(); //adds 2 bins at UH HT, for 3b;
+  for (auto it = SRVec2.begin(); it != SRVec2.end(); ++it) {         // debug
+    cout << it-SRVec2.begin() << "  "<< it->GetName() << endl;      // debug
+    // if (it->GetName() != "26") {
+    if (it->GetLowerBound("nbjets") < 2) {
+      SRVec2.erase(it--);                                           // for faster runtime
+      continue;
+    }
+    SR sr = *it;
+    sr.SetName(sr.GetName()+"test");
+    SRVec.push_back(sr);
+  }
 
   //open files
   // get input files -- default to faking data with same MC file
