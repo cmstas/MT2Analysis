@@ -154,11 +154,11 @@ std::vector<SR> getSignalRegionsHcand() {
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 450, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
     else if (njets_lo == 4 && nbjets_lo == 3) {float mt2bins[2] = {200, 1500};      fullSR.SetMT2Bins(1, mt2bins);}
     else if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
-    fullSR.SetName(fullSRname + "L");
+    fullSR.SetName(fullSRname + "H");
     fullSR.SetVar("minMTbmet", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
     SRVec.push_back(fullSR);
-    fullSR.SetName(fullSRname + "H");
+    fullSR.SetName(fullSRname + "L");
     fullSR.SetVar("minMTbmet", 0, 200);
     fullSR.SetVarCRSL("minMTbmet", 0, 200);
     if (njets_lo == 7 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
