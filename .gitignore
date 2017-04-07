@@ -9,3 +9,10 @@
 *.pyc
 *.cmd
 *.display.screen
+*.pdf
+*.tramp_history
+CORE
+CMSSW_8_0_5
+MT2looper/output
+MT2looper/runLooper
+babymaker/processBaby

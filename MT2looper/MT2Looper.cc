@@ -135,7 +135,7 @@ bool ignoreScale1fb = false;
 bool print_qcd_event_list = false;
 // -- mt2higgs --
 // to test synchronization with the standard MT2 Analysis
-bool synchronizing = true;
+bool synchronizing = false;
 // not running the standard MT2 regions to speed up
 bool fasterRuntime = true;
 

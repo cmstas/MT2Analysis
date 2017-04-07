@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INDIR=/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-12_binsHI/
+INDIR=../MT2looper/output/temp/
 OUTDIR=cards_test
 
 ## set to 1 if doing full signal scans (instead of benchmark signal points)

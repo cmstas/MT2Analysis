@@ -317,10 +317,9 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 }
 
 //_______________________________________________________________________________
-void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "data_Run2015D", string qcdname = "qcdEstimateData", string qcdmonojetname = "qcdEstimateMonojet") {
+void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "data_Run2016", string qcdname = "qcdEstimateData", string qcdmonojetname = "qcdEstimateMonojet") {
 
-  dataname = "data_Run2016";
-  input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"; // temporary for debugging
+  // input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"; // temporary for debugging
   string output_name = input_dir+"/qcdFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;
 
@@ -341,7 +340,7 @@ void qcdRphiMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/
   //if directory begins with "sr", excluding "srbase", add it to vector signal regions.
   TIter it(f_data->GetListOfKeys());
   TKey* k;
-  std::string keep = "srh";
+  std::string keep = "sr";
   std::string skip = "srhbase";
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
