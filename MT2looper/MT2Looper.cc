@@ -169,7 +169,7 @@ void MT2Looper::SetSignalRegions(){
     for (auto it = SRVec.begin(); it != SRVec.end(); ++it) {
       cout << it-SRVec.begin() << "  "<< it->GetName() << endl;
       // if (it->GetName() != "26") {
-      if (it->GetLowerBound("nbjets") < 2) {
+      if (it->GetLowerBound("nbjets") < 2 || it->GetLowerBoundCRSL("nbjets") < 2 || it->GetLowerBoundCRDY("nbjets") < 2) {
         SRVec.erase(it--);                   // for faster runtime
         continue;
       }
@@ -2015,8 +2015,6 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   // valuesCRQCD.erase("njets");
   // valuesCRQCD.erase("nbjets");
 
-  // float mt2_temp = mt2_;
-  // mt2_ = hcand_mt2_;            // for mt2bins filling, may or may not be needed
   for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
     if (SRVecHcand.at(srN).PassesSelection(values)){
       fillHistosMT2Higgs(SRVecHcand.at(srN).srHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), prefix+SRVecHcand.at(srN).GetName(), suffix);
@@ -2032,7 +2030,6 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
       fillHistosMT2Higgs(SRVecHcand.at(srN).crqcdHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crqcd"+SRVecHcand.at(srN).GetName(), suffix);
     }
   }
-  // mt2_ = mt2_temp;
 
   return;
 }
@@ -2067,7 +2064,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   values["nbjets"]      = t.gamma_nBJet20;
   values["j1pt"]        = t.gamma_jet1_pt;
   values["j2pt"]        = t.gamma_jet2_pt;
-  values["mt2"]         = t.gamma_mt2;
+  values["mt2"]         = t.gamma_mt2; // might need hcand_gamma_mt2_? to revisit later
   values["minMTbmet"]   = gamma_minMTbmet_;
   values["passesHtMet"] = ( (t.gamma_ht > 250. && t.gamma_met_pt > 250.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   values["njets"]       = t.gamma_nJet30;
@@ -2132,7 +2129,7 @@ void MT2Looper::fillHistosCRDYMT2Higgs(const std::string& prefix, const std::str
   values["j2pt"]        = jet2_pt_;
   values["njets"]       = nJet30_;
   values["nbjets"]      = nBJet20_;
-  values["mt2"]         = t.zll_mt2;
+  values["mt2"]         = t.zll_mt2; // Need this to be hcand_zll_mt2? to revisit later
   values["ht"]          = t.zll_ht;
   values["met"]         = t.zll_met_pt;
   values["passesHtMet"] = ( (t.zll_ht > 250. && t.zll_met_pt > 250.) || (t.zll_ht > 1000. && t.zll_met_pt > 30.) );
@@ -2905,17 +2902,16 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   // workaround for monojet bins
   float mt2_temp = mt2_;
   if (nJet30_ == 1) mt2_temp = ht_;
-  if (dirname.find("srh") == 0) mt2_temp = hcand_mt2_; // need to revisit this later
 
-  plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
-  plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
-  plot1D("h_mt2bins"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-  plot1D("h_mt2binsAll"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins_SRBase, SRBase_mt2bins);
-  plot1D("h_htbins"+s,       ht_,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
-  plot1D("h_htbins2"+s,       ht_,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
-  plot1D("h_njbins"+s,       nJet30_,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
-  plot1D("h_nbjbins"+s,       nBJet20_,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
-  plot1D("h_mt2"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_Events"+s,     1,        1,          h_1d, ";Events, Unweighted", 1, 0, 2);
+  plot1D("h_Events_w"+s,   1,        evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+  plot1D("h_mt2bins"+s,    mt2_temp, evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_mt2binsAll"+s, mt2_temp, evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins_SRBase, SRBase_mt2bins);
+  plot1D("h_htbins"+s,     ht_,      evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
+  plot1D("h_htbins2"+s,    ht_,      evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
+  plot1D("h_njbins"+s,     nJet30_,  evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
+  plot1D("h_nbjbins"+s,    nBJet20_, evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
+  plot1D("h_mt2"+s,        mt2_temp, evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
 
   // Templates for hybrid method
   //const std::string&  NB = nBJet20_ == 0 ? "_0" : ( nBJet20_ == 1 ? "_1" : ( nBJet20_ == 2 ? "_2" : "_3") );
@@ -3171,17 +3167,19 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   // plot1D("h_bMET_MTclose"+s,       t.bMET_MTclose,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
   // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
 
-  plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
-  plot1D("h_minMTbmet"+s,     minMTbmet_,   evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
-  plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
-  plot1D("h_Mbbhcand"+s,      mbbhcand_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
-  plot1D("h_MbbZcand"+s,      mbbZcand_,    evtweight_, h_1d, ";M_{bb} (Z cand) [GeV]", 96, 0, 1200);
-  plot1D("h_nhcand"+s,        nhcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
+  plot1D("h_mt2Standrd"+s,      mt2_,       evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_mt2binsStandard"+s, mt2_,       evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins, mt2bins);
+  plot1D("h_hcand_mt2"+s,       hcand_mt2_, evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+  plot1D("h_minMTbmet"+s,       minMTbmet_, evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
+  plot1D("h_MbbMax"+s,          mbbmax_,    evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
+  plot1D("h_Mbbhcand"+s,        mbbhcand_,  evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
+  plot1D("h_MbbZcand"+s,        mbbZcand_,  evtweight_, h_1d, ";M_{bb} (Z cand) [GeV]", 96, 0, 1200);
+  plot1D("h_nhcand"+s,          nhcand_,    evtweight_, h_1d, ";num of H cand", 6, 0, 6);
 
   // if (s.find("isHcand"))
-  plot1D("h_deltaPhiminMTbmet"+s,   deltaPhiminMTbmet_,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
-  plot1D("h_deltaPhiMinbmet"+s,     deltaPhiMinbmet_,     evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
-  plot1D("h_deltaPhibbHcand"+s,     deltaPhibbHcand_,     evtweight_, h_1d, ";#Delta#phi (b, b)", 60, -3.4, 3.4);
+  plot1D("h_deltaPhiminMTbmet"+s, deltaPhiminMTbmet_, evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
+  plot1D("h_deltaPhiMinbmet"+s,   deltaPhiMinbmet_,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
+  plot1D("h_deltaPhibbHcand"+s,   deltaPhibbHcand_,   evtweight_, h_1d, ";#Delta#phi (b, b)", 60, -3.4, 3.4);
 
   // plot1D("h_deltaPhiminMTgenbmet"+s, deltaPhiminMTgenbmet_,   evtweight_, h_1d, ";#Delta#phi (b, met)", 60, -3.4, 3.4);
   // if (deltaPhiMinGenbmet_ < 10)
@@ -3194,6 +3192,8 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
 
   outfile_->cd();
 
+  float mt2_temp = mt2_;
+  mt2_ = hcand_mt2_;            // for proper (consistent) mt2bins filling
   if (dirname.find("sr") == 0)
     fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
   else if (dirname.find("crsl") == 0)
@@ -3204,6 +3204,7 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
     fillHistosQCD(h_1d, n_mt2bins, mt2bins, dirname, s);
   else   // shouldn't get here, but let's fill it anyway
     fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
+  mt2_ = mt2_temp;
 
   return;
 }
