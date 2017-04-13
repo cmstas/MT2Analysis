@@ -1632,7 +1632,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       }
       if (verbose) cout<<__LINE__<<endl;
 
-      // mt2higgs' crgj histo filling
+      // needed the above normal GJ filling for purity calculation <-- revisit this later
+      // -- mt2higgs' crgj histo filling
       if (doMT2HiggsGJ && t.gamma_nJet30FailId == 0) {
         string sufadd = (t.gamma_mcMatchId[0] > 0 || t.isData)? "" : "Fake";
         fillHistosCRGJMT2Higgs("crgj", sufadd);
@@ -1655,11 +1656,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (doMinMTBMetGJ && doMbbMax300GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300" + sufadd);
 
       }
+      if (synchronizing) fasterRuntime = false;
+      if (fasterRuntime && !doMT2Higgs) continue; // for faster runtime
+      // -- end of mt2higgs crgj filling
 
       if (!passJetID) continue;
       if (verbose) cout<<__LINE__<<endl;
-      if (synchronizing) fasterRuntime = false;
-      if (fasterRuntime && !doMT2Higgs) continue; // for faster runtime
 
       maxQCD = 154; // We want to include 153 when making photon plots, but we start from 154 for everything else
       if (t.evt_id >= 151 && t.evt_id < maxQCD) continue;

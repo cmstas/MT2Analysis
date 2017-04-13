@@ -441,8 +441,8 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     // set uncertainties on finebin prediction hist
     // - MC stat (already included)
     // - data CR stat -> use just sqrt(N) instead of (correct) poisson uncertainties
-    // - 12% for lepton efficiency
-    // - 10% transfer factor error for most bins, additional 20% for 7j,>=1b
+    // - 15% for lepton efficiency
+    // - 5% transfer factor error for most bins, additional 20% for 7j,>=1b
     // - not including MT2 shape uncertainty at this point
     // NOTE that this sets uncertainty to 0 for bins with 0 data CR stats (i.e. pred = 0)... 
     for ( int ibin = 1; ibin <= pred_finebin->GetNbinsX(); ++ibin) {
@@ -556,13 +556,13 @@ void lostlepMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/
   TIter it(f_lostlep->GetListOfKeys());
   TKey* k;
   std::string keep = "sr";
-  std::string skip = "base";
+  std::string skip = "srbase";
   while ((k = (TKey *)it())) {
     //if ( (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) && k->GetTitle() != "srbaseJ0B" &&  k->GetTitle() != "srbaseJ1B" ) continue;
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
-      sr_string.erase(0, 2);    //remove "srh" from front of string
+      sr_string.erase(0, 2);    //remove "sr" from front of string
       if (sr_string[0] < 'A' || sr_string[0] == 'b' || sr_string[0] == 'I') continue; // don't want the standard mt2 regions
       dirs.push_back(sr_string);
     }
