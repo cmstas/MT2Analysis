@@ -3376,7 +3376,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
 
   TFile* f_data(0);
   TH1F* hSR_data(0);
-  TH1F* hRatio(0);
+  TH1F* h_ratio(0);
   for (int i = names.size()-1; i >= 0; --i) {
     if (names[i].find("data") == 0) {
       cout << "Found data!\n";
@@ -3400,8 +3400,17 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
     cout << "There is data!!\n";
     hSR_data = fillSRYieldsPlot(vector<TFile*>{f_data}, dirsAll, selec, n_srbins);
     hSR_data->Scale(scale);
-    hRatio = (TH1F*) hSR_data->Clone("h_ratio");
-    hRatio->Divide(hSR_all);
+    h_ratio = (TH1F*) hSR_data->Clone("h_ratio");
+    if (true) {                 // waiting for a good name for the bool
+      for (int i = 1; i <= h_ratio->GetNbinsX(); ++i) {
+        float bkgyield = hSR_all->GetBinContent(i);
+        if (bkgyield == 0) bkgyield = 0.0001; // prevent divide by 0 <-- necessary?
+        h_ratio->SetBinContent(i, h_ratio->GetBinContent(i)/bkgyield);
+        h_ratio->SetBinError(i, h_ratio->GetBinError(i)/bkgyield);
+      }
+    } else {
+      h_ratio->Divide(hSR_all);
+    }
   }
 
   TCanvas* c0 = new TCanvas("c0", "c0", 800, 640);
@@ -3414,7 +3423,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   // c0->SetCanvasSize(600, 700);
   TPad* mainPad;
   TPad* ratioPad(0);
-  if (hRatio) {
+  if (h_ratio) {
     mainPad = new TPad("1", "1", 0.0, 0.20, 1.0, 1.0);
     ratioPad = new TPad("2", "2", 0.0, 0.0, 1.0, 0.20);
   } else {
@@ -3471,6 +3480,9 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   // hSR_data->Draw("axissame");
   hSR_stk->Draw("histsame");
   hSR_stk->Draw("axissame");
+  hSR_all->SetFillStyle(3244);
+  hSR_all->SetFillColor(kGray+3);
+  hSR_all->Draw("E2same");
   if (hSR_data) {
     hSR_data->SetMarkerStyle(20);
     hSR_data->SetMarkerColor(kBlack);
@@ -3490,13 +3502,14 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   leg->Draw("same");
 
   TH1F* h_axis_ratio(0);
+  TH1F* h_bkgerr_ratio(0);
   TLine* line1(0);
-  if (hRatio) {
+  if (h_ratio) {
     h_axis_ratio = new TH1F("ratio_axis","", n_srbins, 0, n_srbins);
     line1 = new TLine(0, 1, n_srbins, 1);
     cout << "There is Ratio!\n";
     ratioPad->cd();
-    hRatio->SetMarkerStyle(20);
+    h_ratio->SetMarkerStyle(20);
     h_axis_ratio->GetYaxis()->SetTitleOffset(0.24);
     h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
     h_axis_ratio->GetYaxis()->SetNdivisions(7);
@@ -3507,10 +3520,22 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
     h_axis_ratio->GetXaxis()->SetTitleSize(0.);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.);
     h_axis_ratio->Draw("axis");
+    if (true) {
+      h_bkgerr_ratio = (TH1F*) hSR_all->Clone("h_bkgerr_ratio");
+      for (int i = 1; i <= h_bkgerr_ratio->GetNbinsX(); ++i) {
+        float bkyield = h_bkgerr_ratio->GetBinContent(i);
+        if (bkyield == 0) h_bkgerr_ratio->SetBinError(i, 0);
+        else h_bkgerr_ratio->SetBinError(i, h_bkgerr_ratio->GetBinError(i)/bkyield);
+        h_bkgerr_ratio->SetBinContent(i, 1);
+        h_bkgerr_ratio->SetFillStyle(1003);
+        h_bkgerr_ratio->SetFillColor(kGray);
+        h_bkgerr_ratio->Draw("E2same");
+      }
+    }
+    h_axis_ratio->Draw("axissame");
     line1->SetLineStyle(2);
-    // line1->SetLineColor(kGray);
     line1->Draw("same");
-    hRatio->Draw("same");
+    h_ratio->Draw("same");
   }
   c0->SetTitle("Title");
   c0->SaveAs(Form("SRyieldsHist_%s%s%s%s%s.pdf", sr.c_str(), prefix.c_str(), bmetsuf.c_str(), mbbsuf.c_str(), selec.c_str()));
@@ -3521,6 +3546,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   delete c0;
   delete leg;
   delete h_axis_ratio;
+  delete h_bkgerr_ratio;
   delete line1;
 }
 
