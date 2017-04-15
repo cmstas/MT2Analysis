@@ -47,9 +47,9 @@ exts = ["png"]
 
 # # single lepton
 # MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslbase", pd.sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslhbase", pd.hcand_sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslHbase", pd.hcand_sl_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslZbase", pd.hcand_sl_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslhbase", pd.crslh_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslHbase", pd.crslH_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslZbase", pd.crslZ_plots, output_dir, exts)
 
 
 # MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslwjets", pd.sl_plots, output_dir, exts)
@@ -66,9 +66,9 @@ MT2PlotMaker(input_dir, ["wjets_ht", "top", "qcd_ht"], "data_Run2016", "crslZbas
 
 # # photon+jets
 # MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbase", pd.gj_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjhbase", pd.hcand_gj_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjHbase", pd.hcand_gj_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjZbase", pd.hcand_gj_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjhbase", pd.crgjh_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjHbase", pd.crgjH_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjZbase", pd.crgjZ_plots, output_dir, exts)
  
 # MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseJ", pd.ht_njet_plots, output_dir, exts)
 # MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_Run2016", "crgjbaseIncl", pd.gamma_vars_only, output_dir, exts)
@@ -82,9 +82,9 @@ MT2PlotMaker(input_dir, ["gjets_dr0p05_ht", "fragphoton", "fakephoton"], "data_R
 
 # # z->ll
 # MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybase", pd.dy_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyhbase", pd.hcand_dy_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyHbase", pd.hcand_dy_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyZbase", pd.hcand_dy_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyhbase", pd.crdyh_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyHbase", pd.crdyH_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyZbase", pd.crdyZ_plots, output_dir, exts)
 
 # MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseJ", pd.ht_njet_plots, output_dir, exts)
 # MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdybaseIncl", pd.ht_njet_plots, output_dir, exts)
@@ -122,5 +122,9 @@ MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyZbase", pd.
 
 # # example of using no data
 # MT2PlotMaker(input_dir, ["top","wjets_ht","qcd_ht"], None, "srbaseM", pd.mt2_only, output_dir, exts)
+output_dir = "srplots/srbaseplots"
 
+MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srhbase", pd.srh_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srHbase", pd.srH_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srZbase", pd.srZ_plots, output_dir, exts)
 
