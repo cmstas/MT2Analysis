@@ -648,7 +648,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   gPad->Update();
 
   if( printplot ) {
-    can->Print(Form("hcandplots/%s.pdf",canvas_name.Data()));
+    // can->Print(Form("hcandplots/%s.pdf",canvas_name.Data()));
+    can->Print(Form("hcandplots/%s.png",canvas_name.Data()));
     //can->Print(Form("plots/%s.eps",canvas_name.Data()));
   }
 
@@ -3389,7 +3390,11 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   if (selec != "") selec = "_" + selec;
   vector<Color_t> colorsAll = {kRed-7, kOrange-2, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
   vector<Color_t> colors;
-  for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i+1]);
+  int color_shift = 1;
+  if (sr == "crsl") color_shift = 2;
+  if (sr == "crdy") color_shift = 3;
+  if (sr == "crgj") color_shift = 0;
+  for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i+color_shift]);
 
   THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, selec, n_srbins, scale);
   TH1F* hSR_all = fillSRYieldsPlot(samples, dirsAll, selec, n_srbins);
@@ -3990,7 +3995,7 @@ void plotMakerHcand() {
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
   // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "qcd_ht", "data_Run2016"};
   vector<string> names = {"top", "wjets_ht", "zinv_ht", "qcdplusgjet", "dyjetsll_ht", "data_Run2016"};
-  // vector<string> names = {"top", "wjets_ht", "zinv_ht", "qcdplusgjet"};
+  // vector<string> names = {"fakephoton", "qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
   // ----------------------------------------
@@ -4002,7 +4007,7 @@ void plotMakerHcand() {
   // printplots = true;
   // bool doRatio = false;
   bool doRatio = true;
-  bool scaleBGtoData = false;
+  bool scaleBGtoData = true;
 
   if (printplots) {
     TIter it(samples[0]->GetListOfKeys());
@@ -4016,24 +4021,25 @@ void plotMakerHcand() {
       // if (dir_name == "") continue;
       // if (dir_name != "srh2H") continue; //to do only this dir
       if (dir_name != "crgjhbase" && dir_name != "crslhbase" && dir_name != "crdyhbase" &&
-          dir_name != "crgjHbase" && dir_name != "crslHbase" && dir_name != "crdyHbase") continue; //to do only this dir
-      //if (dir_name != "sr1H") continue; //for testing
+          dir_name != "crgjHbase" && dir_name != "crslHbase" && dir_name != "crdyHbase" &&
+          dir_name != "crgjZbase" && dir_name != "crslZbase" && dir_name != "crdyZbase") continue; //to do only these dirs
+      // if (dir_name.find("crgjbase") != 0) continue; //for testing
       // string s = "_noHcandCR";
       string s = "";
 
-      makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_ht"+s  , "H_{T} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1500 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_met"+s  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // // makePlot( samples , names , dir_name , "h_nlepveto"+s , "N(leptons)" , "Events" , 0 , 10 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nJet30"+s , "N(jets)" , "Events" , 2 , 15 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_nBJet20"+s , "N(b jets)" , "Events" , 0 , 6 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_met"+s  , "E_{T}^{miss} [GeV]" , "Events / 50 GeV" , 0 , 800 , 5 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // // makePlot( samples , names , dir_name , "h_nlepveto"+s , "N(leptons)" , "Events" , 0 , 10 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nJet30"+s , "N(jets)" , "Events" , 2 , 15 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_nBJet20"+s , "N(b jets)" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_mt2bins"+s , "M_{T2} [GeV]" , "Events / Bin" , 200 , 1500 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // // makePlot( samples , names , dir_name , "h_nJet30Eta3"+s , "N(jets, |#eta| > 3.0)" , "Events" , 0 , 5 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
 
-      makePlot( samples , names , dir_name , "h_hcand_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_hcand_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 600 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 1000 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 1000 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_MbbZcand"+s , "M(bb) (Zcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
@@ -4120,23 +4126,23 @@ void plotMakerHcand() {
   // makeSRyieldsHist(samples4, names4, "Z");
 
   // vector<string> names2 = {"qcdplusgjet", "wjets_ht", "top", "dyjetsll_ht", "zinv_ht", "data_Run2016"};
-  vector<string> names2 = {"qcdplusgjet", "wjets_ht", "top", "dyjetsll_ht", "data_Run2016"};
+  vector<string> names2 = {"top", "dyjetsll_ht", "data_Run2016"};
   vector<TFile*> samples2= getSamples(names2, input_dir);
-  makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crsl");
+  // makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crsl");
   // makeSRyieldsHist(samples2, names2, "h", "", "L", "", "crsl");
   // makeSRyieldsHist(samples2, names2, "H", "", "", "U", "crsl");
   // makeSRyieldsHist(samples2, names2, "H", "", "", "M", "crsl");
   // makeSRyieldsHist(samples2, names2, "Z", "", "", "",  "crsl");
 
-  // makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crdy");
-  // makeSRyieldsHist(samples2, names2, "h", "", "L", "", "crdy");
-  // makeSRyieldsHist(samples2, names2, "H", "", "", "U", "crdy");
-  // makeSRyieldsHist(samples2, names2, "H", "", "", "M", "crdy");
-  // makeSRyieldsHist(samples2, names2, "Z", "", "", "",  "crdy");
+  makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crdy");
+  makeSRyieldsHist(samples2, names2, "h", "", "L", "", "crdy");
+  makeSRyieldsHist(samples2, names2, "H", "", "", "U", "crdy");
+  makeSRyieldsHist(samples2, names2, "H", "", "", "M", "crdy");
+  makeSRyieldsHist(samples2, names2, "Z", "", "", "",  "crdy");
 
 
-  // vector<string> names3 = {"fakegamma", "qcdplusgjet", "data_Run2016"};
-  vector<string> names3 = {"qcdplusgjet", "data_Run2016"};
+  vector<string> names3 = {"fakephoton", "qcdplusgjet", "data_Run2016"};
+  // vector<string> names3 = {"qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples3= getSamples(names3, input_dir);
   // makeSRyieldsHist(samples3, names3, "h", "", "H", "", "crgj");
   // makeSRyieldsHist(samples3, names3, "h", "", "L", "", "crgj");
@@ -4147,7 +4153,7 @@ void plotMakerHcand() {
   dirsH.push_back("srhbase");
   dirsH.push_back("srHbase");
   dirsH.push_back("srZbase");
-  printTable(samples, names, dirsH, "");
+  // printTable(samples, names, dirsH, "");
   // printComparisonTable(samples, names, vector<string>{"original"}, dirsH, "srhbase");
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
@@ -4181,108 +4187,107 @@ void plotMakerHcand() {
   // printDetailedTableDataDriven(dd_samples, dd_names, dirsH);
   // dirsH.clear();
 
-  // dirsH.push_back("srh1VLH");
-  // dirsH.push_back("srh1LH");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1VLH");
+  dirsH.push_back("srh1LH");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srh1MH");
-  // dirsH.push_back("srh3MH");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1MH");
+  dirsH.push_back("srh3MH");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srh1HH");
-  // dirsH.push_back("srh3HH");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-
-  // dirsH.push_back("srh1VLL");
-  // dirsH.push_back("srh1LL");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srh1ML");
-  // dirsH.push_back("srh3ML");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srh1HL");
-  // dirsH.push_back("srh3HL");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // ofile << "\\newpage\n";       // Here start the MbbMax (srH) regions
-
-  // dirsH.push_back("srH1L");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srH1MM");
-  // dirsH.push_back("srH3MM");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srH1MU");
-  // dirsH.push_back("srH3MU");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srH1HML");
-  // dirsH.push_back("srH3HML");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srH1HMH");
-  // dirsH.push_back("srH3HMH");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srH1HUL");
-  // dirsH.push_back("srH3HUL");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
-
-  // dirsH.push_back("srH1HUH");
-  // dirsH.push_back("srH3HUH");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1HH");
+  dirsH.push_back("srh3HH");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
 
-  // ofile << "\\newpage\n";       // Here start the Zcand (srZ) regions
+  dirsH.push_back("srh1VLL");
+  dirsH.push_back("srh1LL");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srZ1VL");
-  // dirsH.push_back("srZ1L");
-  // dirsH.push_back("srZ3L");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1ML");
+  dirsH.push_back("srh3ML");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srZ1M");
-  // dirsH.push_back("srZ3M");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
+  dirsH.push_back("srh1HL");
+  dirsH.push_back("srh3HL");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
-  // dirsH.push_back("srZ1H");
-  // dirsH.push_back("srZ3H");
-  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  // dirsH.clear();
+  ofile << "\\newpage\n";       // Here start the MbbMax (srH) regions
 
+  dirsH.push_back("srH1L");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srH1MM");
+  dirsH.push_back("srH3MM");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srH1MU");
+  dirsH.push_back("srH3MU");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srH1HML");
+  dirsH.push_back("srH3HML");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srH1HMH");
+  dirsH.push_back("srH3HMH");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srH1HUL");
+  dirsH.push_back("srH3HUL");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srH1HUH");
+  dirsH.push_back("srH3HUH");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+
+  ofile << "\\newpage\n";       // Here start the Zcand (srZ) regions
+
+  dirsH.push_back("srZ1VL");
+  dirsH.push_back("srZ1L");
+  dirsH.push_back("srZ3L");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srZ1M");
+  dirsH.push_back("srZ3M");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
+
+  dirsH.push_back("srZ1H");
+  dirsH.push_back("srZ3H");
+  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  dirsH.clear();
 
   vector<string> sl_names = {"lostlepFromCRs", "lostlep", "data_Run2016"};
   vector<TFile*> sl_samples = getSamples(sl_names, input_dir);
@@ -4292,20 +4297,51 @@ void plotMakerHcand() {
 
   // ofile << "\\newpage\n";       // Here start the CR yields for hcand
 
-  // dirsH.push_back("h1VLH");
-  // dirsH.push_back("h1LH");
-  // dirsH.push_back("h1MH");
-  // dirsH.push_back("h3MH");
-  // dirsH.push_back("h1HH");
-  // dirsH.push_back("h3HH");
-  // dirsH.push_back("h1VLL");
-  // dirsH.push_back("h1LL");
-  // dirsH.push_back("h1ML");
-  // dirsH.push_back("h3ML");
-  // dirsH.push_back("h1HL");
-  // dirsH.push_back("h3HL");
-  // printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
-  // dirsH.clear();
+  dirsH.push_back("h1VLH");
+  dirsH.push_back("h1LH");
+  dirsH.push_back("h1MH");
+  dirsH.push_back("h3MH");
+  dirsH.push_back("h1HH");
+  dirsH.push_back("h3HH");
+  dirsH.push_back("h1VLL");
+  dirsH.push_back("h1LL");
+  dirsH.push_back("h1ML");
+  dirsH.push_back("h3ML");
+  dirsH.push_back("h1HL");
+  dirsH.push_back("h3HL");
+  printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
+  dirsH.clear();
+
+  dirsH.push_back("H1L");
+  dirsH.push_back("H1MU");
+  dirsH.push_back("H3MU");
+  dirsH.push_back("H1HUH");
+  dirsH.push_back("H1HUL");
+  dirsH.push_back("H3HUH");
+  dirsH.push_back("H3HUL");
+  dirsH.push_back("H1MM");
+  dirsH.push_back("H3MM");
+  dirsH.push_back("H1HMH");
+  dirsH.push_back("H1HML");
+  dirsH.push_back("H3HMH");
+  dirsH.push_back("H3HML");
+  printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
+  dirsH.clear();
+
+  dirsH.push_back("h1VLH");
+  dirsH.push_back("h1LH");
+  dirsH.push_back("h1MH");
+  dirsH.push_back("h3MH");
+  dirsH.push_back("h1HH");
+  dirsH.push_back("h3HH");
+  dirsH.push_back("h1VLL");
+  dirsH.push_back("h1LL");
+  dirsH.push_back("h1ML");
+  dirsH.push_back("h3ML");
+  dirsH.push_back("h1HL");
+  dirsH.push_back("h3HL");
+  printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
+  dirsH.clear();
 
   dirsH.push_back("h1VLH");
   dirsH.push_back("h1LH");
