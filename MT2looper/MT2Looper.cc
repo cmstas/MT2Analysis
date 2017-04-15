@@ -389,6 +389,8 @@ void MT2Looper::SetSignalRegions(){
       plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecHcand.at(i).GetUpperBound(vars.at(j)), SRVecHcand.at(i).crdyHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).crdyHistMap, "", 1, 0, 2);
+    // fill with dummy value of weight 0 just to force it to make the histogram. need the binning info later
+    plot1D("h_mt2bins",  -1, 0, SRVecHcand.at(i).crdyHistMap, "; M_{T2} [GeV]", SRVecHcand.at(i).GetNumberOfMT2Bins(), SRVecHcand.at(i).GetMT2Bins());
 
     dir = (TDirectory*)outfile_->Get(("crqcd"+SRVecHcand.at(i).GetName()).c_str());
     if (dir == 0) {
