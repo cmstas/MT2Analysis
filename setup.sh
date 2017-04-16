@@ -27,8 +27,8 @@ else
 fi
 
 cd scripts
-mkdir -p latex
-mkdir -p hcandplots
+mkdir -p tables
+mkdir -p plots
 cd ..
 
 cd babymaker

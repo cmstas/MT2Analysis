@@ -7,7 +7,38 @@ git clone https://github.com/cmstas/MT2Analysis.git
 and then 
 ``` bash
 cd MT2Analysis
+git checkout mt2higgs
 source setup.sh
+```
+
+## The mt2higgs Branch Workflow
+The mt2higgs studies can directly run on the babies genenrated by the standard MT2 search.
+### 1. Run on the MT2looper
+Before runing, check the signal regions definition at `MT2CORE/sigSelectionsMT2Higgs.cc`
+``` bash
+cd MT2looper
+. do.sh
+```
+### 2. Do the data-driven Estimates
+This step will also combined the output files to a more compact format
+``` bash
+cd scripts
+. makeDataDrivenEstimates.sh
+```
+### 3. Do the SRyieldsHist and SR yields Tables
+Choose the desired SRs and the proper funcion in the file and then run
+``` bash
+edit plotMakerHcand.C
+root -b -q plotMakerHcand.C
+```
+the output of plots will be in the folder `plots/` and the tables will be in the file `tables/table.tex`
+
+### 4. Make kinematic plots
+Though kinematic plots can also be made by the plotMaker in previous step, a nicer version can be made by the `pyPlotMaker`
+``` bash
+cd CRplotMaker
+edit do.py
+python do.py
 ```
 
 ## Babymaker

@@ -648,8 +648,8 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
   gPad->Update();
 
   if( printplot ) {
-    // can->Print(Form("hcandplots/%s.pdf",canvas_name.Data()));
-    can->Print(Form("hcandplots/%s.png",canvas_name.Data()));
+    // can->Print(Form("plots/%s.pdf",canvas_name.Data()));
+    can->Print(Form("plots/%s.png",canvas_name.Data()));
     //can->Print(Form("plots/%s.eps",canvas_name.Data()));
   }
 
@@ -4080,7 +4080,7 @@ void plotMakerHcand() {
 
 
   // Start outputing to file of yields table
-  ofile.open("latex/table.tex");
+  ofile.open("tables/table.tex");
   ofile << "\\documentclass[landscape,11pt]{article}" << std::endl;
   ofile << "\\usepackage{amsmath}" << std::endl;
   ofile << "\\usepackage{amssymb}" << std::endl;
