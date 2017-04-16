@@ -2011,6 +2011,11 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   // }
   if (suffix == "_noHcandCR")
     values["nhcand"] = (mbbhcand_ < 100 || (mbbhcand_ > 150 && mbbmax_ < 300));
+  if (suffix == "_MbbCRall") {
+    values["mbbmax"] = 314;
+    values["nhcand"] = 1;
+    values["nZcand"] = 1;
+  }
   if (synchronizing) values["mt2"] = mt2_; // debug: for sync testing
 
   std::map<std::string, float> valuesCRSL = values;

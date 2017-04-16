@@ -184,3 +184,14 @@ crgjh_plots = srh_plots + gj_add
 crgjH_plots = srH_plots + gj_add
 # crgjZ_plots = srZ_plots + gj_add
 crgjZ_plots = basic_plots + gj_add # MbbZcand seems to yields 0 in this case
+
+mbbcr_plots = [
+    ("ht_MbbCRall",True,(250,1500),None,2),
+    ("met_MbbCRall",True,(200,1000),None,2),
+    ("mt2_MbbCRall",True,(200,1000),None,2),
+    ("nJet30_MbbCRall",True,(0,14),None),
+    ("nBJet20_MbbCRall",True,(0,6),None),
+    ("MbbMax_MbbCRall",True,(0,6),None),
+]
+
+# mbbcr_plots = [].append(x for x in basic_plots: x[0].append("_MbbCRall"))

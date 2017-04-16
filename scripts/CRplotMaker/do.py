@@ -122,9 +122,15 @@ MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyZbase", pd.
 
 # # example of using no data
 # MT2PlotMaker(input_dir, ["top","wjets_ht","qcd_ht"], None, "srbaseM", pd.mt2_only, output_dir, exts)
-output_dir = "srplots/srbaseplots"
 
+# SR without data
+output_dir = "srplots/srbaseplots"
 MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srhbase", pd.srh_plots, output_dir, exts)
 MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srHbase", pd.srH_plots, output_dir, exts)
 MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srZbase", pd.srZ_plots, output_dir, exts)
 
+# MbbCR plots
+output_dir = "srplots/mbbCRplots"
+# MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srhbase", pd.mbbcr_plots, output_dir, exts)
+MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srHbase", pd.mbbcr_plots, output_dir, exts)
+# MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srZbase", pd.mbbcr_plots, output_dir, exts)
