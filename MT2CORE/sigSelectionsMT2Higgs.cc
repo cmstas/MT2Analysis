@@ -91,8 +91,8 @@ std::vector<SR> getSignalRegionsHcand() {
   for(unsigned int iSR = 0; iSR < temp_SR_VL_vec.size(); iSR++){
     SR fullSR = temp_SR_VL_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "VL";
-    fullSR.SetVarAll("ht", 200, 450);
-    fullSR.SetVarAll("met", 200, -1);
+    fullSR.SetVarAll("ht", 250, 450);
+    fullSR.SetVarAll("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {200, 350, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
@@ -110,7 +110,7 @@ std::vector<SR> getSignalRegionsHcand() {
     SR fullSR = temp_SR_VL_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "L";
     fullSR.SetVarAll("ht", 450, 575);
-    fullSR.SetVarAll("met", 200, -1);
+    fullSR.SetVarAll("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 500, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -128,7 +128,7 @@ std::vector<SR> getSignalRegionsHcand() {
     SR fullSR = temp_SR_MH_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "M";
     fullSR.SetVarAll("ht", 575, 1000);
-    fullSR.SetVarAll("met", 200, -1);
+    fullSR.SetVarAll("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 450, 550, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -265,14 +265,10 @@ std::vector<SR> getSignalRegionsMbbMax() {
     SR fullSR = temp_SR_VL_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "L";
     fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 200, 575);
-    fullSR.SetVar("met", 200, -1);
+    fullSR.SetVarAll("ht", 250, 575);
+    fullSR.SetVarAll("met", 250, -1);
     fullSR.SetVar("minMTbmet", 0, -1);
-    fullSR.SetVarCRSL("ht", 200, 575);
-    fullSR.SetVarCRSL("met", 200, -1);
     fullSR.SetVarCRSL("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("ht", 200, 575);
-    fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 350, 450, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -283,16 +279,12 @@ std::vector<SR> getSignalRegionsMbbMax() {
     SR fullSR = temp_SR_MH_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "M";
     fullSR.SetName(fullSRname + "U");
-    fullSR.SetVar("ht", 575, 1000);
-    fullSR.SetVar("met", 200, -1);
+    fullSR.SetVarAll("ht", 575, 1000);
+    fullSR.SetVarAll("met", 250, -1);
     fullSR.SetVar("mbbmax", 500, -1);
     fullSR.SetVar("minMTbmet", 0, -1);
-    fullSR.SetVarCRSL("ht", 575, 1000);
-    fullSR.SetVarCRSL("met", 200, -1);
     fullSR.SetVarCRSL("mbbmax", 500, -1);
     fullSR.SetVarCRSL("minMTbmet", 0, -1);
-    fullSR.SetVarCRQCD("ht", 575, 1000);
-    fullSR.SetVarCRQCD("met", 200, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 400, 600, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -309,16 +301,12 @@ std::vector<SR> getSignalRegionsMbbMax() {
     SR fullSR = temp_SR_MH_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "H";
     fullSR.SetName(fullSRname + "U" + "H");
-    fullSR.SetVar("ht", 1000, -1);
-    fullSR.SetVar("met", 30, -1);
+    fullSR.SetVarAll("ht", 1000, -1);
+    fullSR.SetVarAll("met", 30, -1);
     fullSR.SetVar("mbbmax", 500, -1);
     fullSR.SetVar("minMTbmet", 200, -1);
-    fullSR.SetVarCRSL("ht", 1000, -1);
-    fullSR.SetVarCRSL("met", 30, -1);
     fullSR.SetVarCRSL("mbbmax", 500, -1);
     fullSR.SetVarCRSL("minMTbmet", 200, -1);
-    fullSR.SetVarCRQCD("ht", 1000, -1);
-    fullSR.SetVarCRQCD("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 400, 700, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -439,12 +427,8 @@ std::vector<SR> getSignalRegionsZcand() {
     SR fullSR = temp_SR_VL_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "VL";
     fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 200, 450);
-    fullSR.SetVar("met", 200, -1);
-    fullSR.SetVarCRSL("ht", 200, 450);
-    fullSR.SetVarCRSL("met", 200, -1);
-    fullSR.SetVarCRQCD("ht", 200, 450);
-    fullSR.SetVarCRQCD("met", 200, -1);
+    fullSR.SetVarAll("ht", 250, 450);
+    fullSR.SetVarAll("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[3] = {300, 400, 1500}; fullSR.SetMT2Bins(2, mt2bins);}
@@ -455,12 +439,8 @@ std::vector<SR> getSignalRegionsZcand() {
     SR fullSR = temp_SR_VL_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "L";
     fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 450, 575);
-    fullSR.SetVar("met", 200, -1);
-    fullSR.SetVarCRSL("ht", 450, 575);
-    fullSR.SetVarCRSL("met", 200, -1);
-    fullSR.SetVarCRQCD("ht", 450, 575);
-    fullSR.SetVarCRQCD("met", 200, -1);
+    fullSR.SetVarAll("ht", 450, 575);
+    fullSR.SetVarAll("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {300, 400, 500, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -471,12 +451,8 @@ std::vector<SR> getSignalRegionsZcand() {
     SR fullSR = temp_SR_MH_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "M";
     fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 575, 1000);
-    fullSR.SetVar("met", 200, -1);
-    fullSR.SetVarCRSL("ht", 575, 1000);
-    fullSR.SetVarCRSL("met", 200, -1);
-    fullSR.SetVarCRQCD("ht", 575, 1000);
-    fullSR.SetVarCRQCD("met", 200, -1);
+    fullSR.SetVarAll("ht", 575, 1000);
+    fullSR.SetVarAll("met", 250, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 450, 550, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
@@ -488,12 +464,8 @@ std::vector<SR> getSignalRegionsZcand() {
     SR fullSR = temp_SR_MH_vec.at(iSR);
     std::string fullSRname = fullSR.GetName() + "H";
     fullSR.SetName(fullSRname);
-    fullSR.SetVar("ht", 1000, -1);
-    fullSR.SetVar("met", 30, -1);
-    fullSR.SetVarCRSL("ht", 1000, -1);
-    fullSR.SetVarCRSL("met", 30, -1);
-    fullSR.SetVarCRQCD("ht", 1000, -1);
-    fullSR.SetVarCRQCD("met", 30, -1);
+    fullSR.SetVarAll("ht", 1000, -1);
+    fullSR.SetVarAll("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
     if      (njets_lo == 4 && nbjets_lo == 2) {float mt2bins[4] = {200, 400, 500, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
