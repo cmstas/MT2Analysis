@@ -2097,6 +2097,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
     // fillHistosGammaJets(SRBaseHcand.crgjHistMap, SRBaseHcand.crgjRooDataSetMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhgjbase", suffix+add);
     for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
       if (SRVecHcand.at(srN).PassesSelection(values)) {
+        fillHistosMT2Higgs(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crgj"+SRVecHcand.at(srN).GetName(), suffix+add);
         fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crgj"+SRVecHcand.at(srN).GetName(), suffix+add);
         // break; //control regions are orthogonal, event cannot be in more than one
       }
@@ -2109,6 +2110,7 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
       // fillHistosGammaJets(SRBaseHcand.crgjHistMap, SRBaseHcand.crgjRooDataSetMap, SRBaseHcand.GetNumberOfMT2Bins(), SRBaseHcand.GetMT2Bins(), "crhgjbase", suffix+add);
       for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++) {
         if (SRVecHcand.at(srN).PassesSelection(values)) {
+          fillHistosMT2Higgs(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crgj"+SRVecHcand.at(srN).GetName(), suffix+add);
           fillHistosGammaJets(SRVecHcand.at(srN).crgjHistMap, SRVecHcand.at(srN).crgjRooDataSetMap, SRVecHcand.at(srN).GetNumberOfMT2Bins(), SRVecHcand.at(srN).GetMT2Bins(), "crgj"+SRVecHcand.at(srN).GetName(), suffix+add);
           // break; //control regions are orthogonal, event cannot be in more than one
         }
@@ -3211,6 +3213,7 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
     fillHistosDY(h_1d, n_mt2bins, mt2bins, dirname, s);
   else if (dirname.find("crqcd") == 0)
     fillHistosQCD(h_1d, n_mt2bins, mt2bins, dirname, s);
+  else if (dirname.find("crgj") == 0) ; // the filling will be taken care of by fillHistosGammaJets
   else   // shouldn't get here, but let's fill it anyway
     fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
   mt2_ = mt2_temp;
@@ -3318,14 +3321,6 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot1D("h_htbins2"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
   plot1D("h_njbins"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", n_njbins, njbins);
   plot1D("h_nbjbins"+s,       t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
-
-  if (TString(dirname).Contains("crgjh") || TString(dirname).Contains("crgjH") || TString(dirname).Contains("crgjZ")) {
-    plot1D("h_hcand_mt2"+s,     hcand_mt2_,   evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
-    plot1D("h_minMTbmet"+s,     gamma_minMTbmet_,  evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
-    plot1D("h_MbbMax"+s,        mbbmax_,      evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
-    plot1D("h_Mbbhcand"+s,      mbbhcand_,    evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
-    plot1D("h_nhcand"+s,        nhcand_,      evtweight_, h_1d, ";num of H cand", 6, 0, 6);
-  }
 
   if ( (dirname=="crgjnocut" || TString(dirname).Contains("crgjbase") || TString(dirname).Contains("base") || dirname=="crgjL" || dirname=="crgjM" || dirname=="crgjH") 
        && (s=="" || s=="Fake" || s=="FragGJ" || s=="AllIso" || s=="LooseNotTight" || s=="FakeLooseNotTight") )// Don't make these for Loose, NotLoose. SieieSB
