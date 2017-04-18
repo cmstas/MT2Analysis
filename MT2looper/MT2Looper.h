@@ -136,10 +136,14 @@ class MT2Looper {
   float mbbhcand_;
   float mbbZcand_;
   float gamma_minMTbmet_;
+  float gamma_mbbmax_;
+  float gamma_hcand_mt2_;
   float hcand_mt2_;
   int ntruebJets_;
   int nhcand_;
   int nZcand_;
+  int gamma_nhcand_;
+  int gamma_nZcand_;
 
   float deltaPhiminMTbmet_;
   float deltaPhiMinbmet_;

@@ -832,6 +832,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   // unsigned int PossibleFakeBJetCount = 0;
   // unsigned int nIsGenBJet = 0;
   // unsigned int nIsTrueBJet = 0;
+  // unsigned int nOverlapBJetGamma = 0;
   // // -* testing
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
@@ -1375,19 +1376,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // first restore all the bjets as well as get hem jets
       vector<pair<int,float>> csvForBJets;
       vector<TLorentzVector> p4sBJets;
-      vector<LorentzVector> p4sForHemsHcand;
+      vector<LorentzVector> p4sForHems;
       for (int ijet = 0; ijet < t.njet; ++ijet) {
         if (t.jet_pt[ijet] < 20) continue;
         if (fabs(t.jet_eta[ijet]) > 2.4) continue;
         TLorentzVector jet;
         jet.SetPtEtaPhiM(t.jet_pt[ijet], t.jet_eta[ijet], t.jet_phi[ijet], t.jet_mass[ijet]);
         // float bTaggingPoint = (stringsample.Contains("2015"))? 0.605 : 0.460; // loose b-tagging points, temporary for test on QCD estimates
-        float bTaggingPoint = (stringsample.Contains("2015"))? 0.890 : 0.800; // fix for 2015 samples
+        float bTaggingPoint = 0.8484; // new b-tagging point
         if (t.jet_btagCSV[ijet] >= bTaggingPoint) {
           csvForBJets.push_back(make_pair(p4sBJets.size(), t.jet_btagCSV[ijet]));
           p4sBJets.push_back(jet);
         } else if (t.jet_pt[ijet] > 30) {
-          p4sForHemsHcand.push_back(LorentzVector(jet.Px(), jet.Py(), jet.Pz(), jet.E()));
+          p4sForHems.push_back(LorentzVector(jet.Px(), jet.Py(), jet.Pz(), jet.E()));
         }
       }
       // nbjet_loose_ = p4sBJets.size(); // temporary for test on QCD estimates
@@ -1447,7 +1448,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       nhcand_ = (nhcand_ > 1)? nhcand_ : isHcand;
 
       // a higgs candidate is found and the mt2 with Hcand can be calculated
-      if (isHcand) {
+      if (doMT2Higgs) {
+        vector<LorentzVector> p4sForHemsHcand(p4sForHems);
         unsigned int ibj = 0;
         for (auto itbj = p4sBJets.begin(); itbj != p4sBJets.end(); ++itbj, ++ibj) {
           if (ibj != hcand_ibj1 && ibj != hcand_ibj2 && (*itbj).Pt() > 30)
@@ -1485,13 +1487,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doMbbCRloGJ   = doMbbCRlo;
       bool doMbbCRhiGJ   = doMbbCRhi;
 
-      gamma_minMTbmet_ = 0.;
+      gamma_minMTbmet_ = 0;
+      gamma_mbbmax_ = mbbmax_;
+      gamma_hcand_mt2_ = hcand_mt2_;
       if (doGJplots && t.gamma_nBJet20 >= 2) {
         doMT2HiggsGJ = true;
+
         // if by any chance a bjets is overlaped with the gamma and hence removed
         bool overlapBJetGamma = (t.gamma_nBJet20 != t.nBJet20);
         unsigned int overlap_bjet_idx = -1;
         if (overlapBJetGamma) {
+          isHcandGJ = false;       // will also need to be re-evaluated
           float minDR = 999.;
           for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
             float thisDR = DeltaR(p4sBJets[ibj].Eta(), t.gamma_eta[0], p4sBJets[ibj].Phi(), t.gamma_phi[0]);
@@ -1500,27 +1506,57 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
               overlap_bjet_idx = ibj;
             }
           }
+          // ++nOverlapBJetGamma;
         }
-        for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
+
+        vector<LorentzVector> p4sForHemsGamma(p4sForHems);
+        if (t.gamma_nJet30 != t.nJet30 && !overlapBJetGamma) {
+          float minDR = 0.4;
+          vector<LorentzVector>::iterator minIter;
+          for (auto itj = p4sForHemsGamma.begin(); itj != p4sForHemsGamma.end(); ++itj) {
+            float thisDR = DeltaR(itj->Eta(), t.gamma_eta[0], itj->Phi(), t.gamma_phi[0]);
+            if (thisDR < minDR) {
+              minDR = thisDR;
+              minIter = itj;
+            }
+          }
+          p4sForHemsGamma.erase(minIter);
+        }
+
+        unsigned int gamma_ibj1 = hcand_ibj1;
+        unsigned int gamma_ibj2 = hcand_ibj2;
+        if (overlapBJetGamma && p4sBJets.size() > 2) {
+          if      (overlap_bjet_idx == hcand_ibj2) gamma_ibj2 = csvForBJets[2].first;
+          else if (overlap_bjet_idx == hcand_ibj1) gamma_ibj1 = csvForBJets[2].first;
+        }
+
+        unsigned int ibj = 0;
+        for (auto itbj = p4sBJets.begin(); itbj != p4sBJets.end(); ++itbj, ++ibj) {
           if (overlapBJetGamma && overlap_bjet_idx == ibj) continue;
-          float mt = MT(p4sBJets[ibj].Pt(), p4sBJets[ibj].Phi(), t.gamma_met_pt, t.gamma_met_phi);
+          float mt = MT(itbj->Pt(), itbj->Phi(), t.gamma_met_pt, t.gamma_met_phi);
           if (ibj == 0 || mt < gamma_minMTbmet_)
             gamma_minMTbmet_ = mt;
+
+          if (ibj != gamma_ibj1 && ibj != gamma_ibj2 && (*itbj).Pt() > 30)
+            p4sForHemsGamma.push_back(LorentzVector((*itbj).Px(), (*itbj).Py(), (*itbj).Pz(), (*itbj).E()));
         }
-        // // if the photon is overlayed with the bjets, still use the bjets for isHcand, for now.
-        // if (overlapBJetGamma && nhcand_ < 2 && (overlap_bjet_idx == hcand_ibj1 || overlap_bjet_idx == hcand_ibj2)) {
-        //   isHcandGJ = false;       // will also need to be re-evaluated
-        //   if (p4sBJets.size() > 2)
-        //     for (unsigned int ibj1 = 0; ibj1 < p4sBJets.size(); ++ibj1) {
-        //       if (overlap_bjet_idx == ibj1) continue;
-        //       for (unsigned int ibj2 = ibj1+1; ibj2 < p4sBJets.size(); ++ibj2) {
-        //         if (overlap_bjet_idx == ibj2) continue;
-        //         float mbb = (p4sBJets[ibj1] + p4sBJets[ibj2]).M();
-        //         if (mbb > 100 && mbb < 150)
-        //           isHcandGJ = true;
-        //       }
-        //     }
-        // }
+
+        TLorentzVector p4_higgs = p4sBJets[gamma_ibj1] + p4sBJets[gamma_ibj2];
+        if (overlapBJetGamma && useHighestCSVbjets) {
+          float mbb = p4_higgs.M();
+          gamma_mbbmax_ = mbb;
+          gamma_nhcand_ = (mbb > 100 && mbb < 150)? 1 : 0; // for simplicity, won't be huge difference
+          gamma_nZcand_ = (mbb > 70 && mbb < 110)? 1 : 0;
+          isHcandGJ = gamma_nhcand_;
+        }                                                  // missing case with not using higheset CSV bjets
+        p4sForHemsGamma.push_back(LorentzVector(p4_higgs.Px(), p4_higgs.Py(), p4_higgs.Pz(), p4_higgs.E()));
+        sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), [](LorentzVector &vec1, LorentzVector &vec2) { return vec1.pt() > vec2.pt(); });
+
+        vector<LorentzVector> hemJetsGamma;
+        if (p4sForHemsGamma.size() > 1) {
+          hemJetsGamma = getHemJets(p4sForHemsGamma); // Hemispheres used in MT2 calculation
+          gamma_hcand_mt2_ = HemMT2(t.gamma_met_pt, t.gamma_met_phi, hemJetsGamma.at(0), hemJetsGamma.at(1));
+        }
       }
 
       if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
@@ -2073,15 +2109,15 @@ void MT2Looper::fillHistosCRGJMT2Higgs(const std::string& prefix, const std::str
   values["nbjets"]      = t.gamma_nBJet20;
   values["j1pt"]        = t.gamma_jet1_pt;
   values["j2pt"]        = t.gamma_jet2_pt;
-  values["mt2"]         = t.gamma_mt2; // might need hcand_gamma_mt2_? to revisit later
+  values["mt2"]         = gamma_hcand_mt2_;
   values["minMTbmet"]   = gamma_minMTbmet_;
   values["passesHtMet"] = ( (t.gamma_ht > 250. && t.gamma_met_pt > 250.) || (t.gamma_ht > 1000. && t.gamma_met_pt > 30.) );
   values["njets"]       = t.gamma_nJet30;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
-  values["nhcand"]      = nhcand_;
-  values["nZcand"]      = nZcand_;
-  values["mbbmax"]      = mbbmax_;
+  values["nhcand"]      = gamma_nhcand_;
+  values["nZcand"]      = gamma_nZcand_;
+  values["mbbmax"]      = gamma_mbbmax_;
   // values.erase("passesHtMet");
 
   //float iso = t.gamma_chHadIso[0] + t.gamma_phIso[0];
