@@ -1490,14 +1490,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       gamma_minMTbmet_ = 0;
       gamma_mbbmax_ = mbbmax_;
       gamma_hcand_mt2_ = hcand_mt2_;
+      gamma_nhcand_ = nhcand_;
+      gamma_nZcand_ = nZcand_;
       if (doGJplots && t.gamma_nBJet20 >= 2) {
         doMT2HiggsGJ = true;
-
         // if by any chance a bjets is overlaped with the gamma and hence removed
         bool overlapBJetGamma = (t.gamma_nBJet20 != t.nBJet20);
         unsigned int overlap_bjet_idx = -1;
         if (overlapBJetGamma) {
-          isHcandGJ = false;       // will also need to be re-evaluated
           float minDR = 999.;
           for (unsigned int ibj = 0; ibj < p4sBJets.size(); ++ibj) {
             float thisDR = DeltaR(p4sBJets[ibj].Eta(), t.gamma_eta[0], p4sBJets[ibj].Phi(), t.gamma_phi[0]);
@@ -1525,7 +1525,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
         unsigned int gamma_ibj1 = hcand_ibj1;
         unsigned int gamma_ibj2 = hcand_ibj2;
-        if (overlapBJetGamma && p4sBJets.size() > 2) {
+        bool overlapHcandBJet = (overlap_bjet_idx == hcand_ibj2 || overlap_bjet_idx == hcand_ibj2);
+        if (overlapHcandBJet && p4sBJets.size() > 2) {
           if      (overlap_bjet_idx == hcand_ibj2) gamma_ibj2 = csvForBJets[2].first;
           else if (overlap_bjet_idx == hcand_ibj1) gamma_ibj1 = csvForBJets[2].first;
         }
@@ -1542,11 +1543,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
 
         TLorentzVector p4_higgs = p4sBJets[gamma_ibj1] + p4sBJets[gamma_ibj2];
-        if (overlapBJetGamma && useHighestCSVbjets) {
+        if (overlapHcandBJet && useHighestCSVbjets) {
           float mbb = p4_higgs.M();
           gamma_mbbmax_ = mbb;
-          gamma_nhcand_ = (mbb > 100 && mbb < 150)? 1 : 0; // for simplicity, won't be huge difference
-          gamma_nZcand_ = (mbb > 70 && mbb < 110)? 1 : 0;
+          if (mbb < 100 || mbb > 150) --gamma_nhcand_;
+          if (mbb < 70 || mbb > 110) --gamma_nZcand_;
           isHcandGJ = gamma_nhcand_;
         }                                                  // missing case with not using higheset CSV bjets
         p4sForHemsGamma.push_back(LorentzVector(p4_higgs.Px(), p4_higgs.Py(), p4_higgs.Pz(), p4_higgs.E()));

@@ -35,7 +35,7 @@ input_dir = "../../MT2looper/output/temp/"
 ## 589/pb
 #input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-00_json_Cert_271036-273730_skim_base_mt2gt200_ZinvV4"
 
-output_dir = "crplots/crbaseplots"
+output_dir = "crplots"
 
 # exts = ["pdf","png"]
 exts = ["png"]
@@ -124,13 +124,13 @@ MT2PlotMaker(input_dir, ["dyjetsll_ht", "top"], "data_Run2016", "crdyZbase", pd.
 # MT2PlotMaker(input_dir, ["top","wjets_ht","qcd_ht"], None, "srbaseM", pd.mt2_only, output_dir, exts)
 
 # SR without data
-output_dir = "srplots/srbaseplots"
+output_dir = "srplots"
 MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srhbase", pd.srh_plots, output_dir, exts)
 MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srHbase", pd.srH_plots, output_dir, exts)
 MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srZbase", pd.srZ_plots, output_dir, exts)
 
 # MbbCR plots
-output_dir = "srplots/mbbCRplots"
+output_dir = "mbbCRplots"
 # MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srhbase", pd.mbbcr_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srHbase", pd.mbbcr_plots, output_dir, exts)
+# MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srHbase", pd.mbbcr_plots, output_dir, exts)
 # MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srZbase", pd.mbbcr_plots, output_dir, exts)

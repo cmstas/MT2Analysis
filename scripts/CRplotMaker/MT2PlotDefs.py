@@ -108,17 +108,18 @@ basic_plots = [
     ("ht",True,(250,1500),None,2),
     ("met",True,(200,1000),None,2),
     ("mt2",True,(200,1000),None,2),
-    ("nJet30",True,(0,14),None),
-    ("nBJet20",True,(0,6),None),
+    ("nJet30",True,(2,14),None),
+    ("nBJet20",True,(2,7),None),
 ]
 
 hcand_xtra = [
-    ("minMTbmet",True,(0,1000),None,2),
-    ("Mbbhcand",True,(0,1200),None,2),
+    ("minMTbmet",True,(0,600),None),
+    ("Mbbhcand",True,(100,150),None),
     ("nhcand",False,None,None),
 ]
 
 Hcand_xtra = [
+    ("minMTbmet",True,(0,600),None),
     ("MbbMax",True,(300,1000),None,2),
 ]
 
