@@ -3214,9 +3214,11 @@ void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2b
   // plot1D("h_bMET_MTclose"+s,       t.bMET_MTclose,       evtweight_, h_1d, ";M_{T}(bMet) [GeV]", 80, 0, 500);
   // plot1D("h_hcand_mt2"+s,          t.hcand_mt2,          evtweight_, h_1d, ";M_{T2} [GeV]", 80, 160, 700);
 
-  plot1D("h_mt2Standrd"+s,      mt2_,       evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
-  plot1D("h_mt2binsStandard"+s, mt2_,       evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins, mt2bins);
-  plot1D("h_hcand_mt2"+s,       hcand_mt2_, evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+  if (dirname.find("sr") == 0) {
+    plot1D("h_mt2Standrd"+s,      mt2_,       evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_mt2binsStandard"+s, mt2_,       evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  // plot1D("h_hcand_mt2"+s,       hcand_mt2_, evtweight_, h_1d, ";M_{T2} [GeV]", 150, 0, 1500);
   plot1D("h_minMTbmet"+s,       minMTbmet_, evtweight_, h_1d, ";M_{T}^{bMet} [GeV]", 80, 0, 1000);
   plot1D("h_MbbMax"+s,          mbbmax_,    evtweight_, h_1d, ";M_{bb} [GeV]", 96, 0, 1200);
   plot1D("h_Mbbhcand"+s,        mbbhcand_,  evtweight_, h_1d, ";M_{bb} (H cand) [GeV]", 96, 0, 1200);
@@ -3326,6 +3328,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
   plot2D("h2d_gammaht_gammaptDoubleBin"+s, fabs(t.gamma_eta[0]), t.gamma_pt[0], evtweight_, h_1d, ";gamma eta;gamma p_{T} [GeV]",n_FRetabins, FRetabins,n_FRptbinsOne,FRptbinsOne);
   //  }
   float gamma_mt2_temp = t.gamma_mt2;
+  if (dirname.find("crgjh") == 0 || (dirname.find("crgjH") == 0 && dirname != "crgjH") || dirname.find("crgjZ") == 0 || dirname.find("crgjI") == 0)
+    gamma_mt2_temp = gamma_hcand_mt2_;
   // workaround for monojet bins
   if (t.gamma_nJet30 == 1) gamma_mt2_temp = t.gamma_ht;
 
@@ -3379,10 +3383,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_diffMetMhtOverMet"+s,   t.gamma_diffMetMht/t.gamma_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.gamma_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
-    if (TString(dirname).Contains("crgjh") || TString(dirname).Contains("crgjH"))
-      plot1D("h_minMTbmet"+s,  gamma_minMTbmet_,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
-
     plot1D("h_drMinParton"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
+
     TString drName = "h_drMinPartonSample";
     drName += TString::Itoa(t.evt_id, 10);
     drName += s;
