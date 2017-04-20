@@ -27,7 +27,7 @@ TFile* f_data = 0;
 
 const bool verbose = false;
 
-const bool suppressZeroBins = false;
+const bool suppressZeroBins = true;
 
 const bool suppressZeroTRs = true;
 

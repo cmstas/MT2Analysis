@@ -10,20 +10,23 @@
 
 #2017 old SRs
 #INDIR=/home/users/mderdzinski/winter2017/soft/SoftLepLooper/output/test_newSoftBabies_Mar25
-#OUTDIR=cards_T6qqWW_oldSRsMC3
+#INDIR=../../SoftLepLooper/output/oldSRs_test_Mar29/
+#OUTDIR=cards_T6qqWW_oldSRsMC_Mar29_testdm20
 
 #2017 new SRs
-INDIR=../../SoftLepLooper/output/fromMark_test_newSoftBabies_newSRs_Mar25/
-OUTDIR=cards_T6qqWW_newSRsMC
+#INDIR=../../SoftLepLooper/output/fromMark_test_newSoftBabies_newSRs_Mar25/
+INDIR=../../SoftLepLooper/output/newSRs_test_Mar29/
+OUTDIR=cards_T6qqWW_newSRsMC_Mar29_dM20full
 
 if [ ! -d "$OUTDIR" ]; then
   mkdir -p $OUTDIR
 fi
 
 #declare -a samples=("T2-4bd_275_235" )
-declare -a samples=("T6qqWW" )
+declare -a samples=(T6qqWW_dM20)
+# T6qqWW_dM10 T6qqWW_dM15  )
 
-for i in "${samples[@]}"
+for i in ${samples[@]}
 do
 #default
 #  nohup root -b -q "cardMakerMC.C+(\"$i\",\"${INDIR}\",\"${OUTDIR}\", 0, 1)" > make_cards_$i.log 2>&1 &

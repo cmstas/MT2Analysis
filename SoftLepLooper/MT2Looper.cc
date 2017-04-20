@@ -112,7 +112,7 @@ bool doPrescaleWeight = false;
 // turn on to make mtbins histograms with W polarization systematic uncertainty
 bool doWpolarizationReweight = true;
 // turn on to make mtbins histograms with theory scale variations
-bool doRenormFactScaleReweight = true;
+bool doRenormFactScaleReweight = false;
 // turn on to (only) make full PDF variation histograms
 bool doFullPDFVariations = false;
 // add lepton pT as additional SR variable (this is OK even for 2016 SRs, if using SRLep4withLepPt)
@@ -357,7 +357,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     else if (sample.find("T5") != std::string::npos) scan_name = sample.substr(0,8);
     else if (sample.find("TChiNeu") != std::string::npos) scan_name = sample.substr(0,7);
     else if (sample.find("T6qqWW") != std::string::npos) scan_name = sample.substr(0,11);
+    cout<<"Looking for file "<<Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str())<<endl;
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
+    cout<<"opened"<<endl;
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
     TH2D* h_sig_avgweight_btagsf_heavy_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_heavy_UP");
@@ -365,8 +367,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     TH2D* h_sig_avgweight_btagsf_heavy_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_heavy_DN");
     TH2D* h_sig_avgweight_btagsf_light_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_light_DN");
     TH2D* h_sig_avgweight_isr_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr");
-    TH2D* h_sig_avgweight_renorm_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_UP");
-    TH2D* h_sig_avgweight_renorm_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_DN");
+    //TH2D* h_sig_avgweight_renorm_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_UP");
+    //TH2D* h_sig_avgweight_renorm_DN_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_renorm_DN");
+    cout<<"got histos"<<endl;
 
     h_sig_nevents_ = (TH2D*) h_sig_nevents_temp->Clone("h_sig_nevents");
     h_sig_avgweight_btagsf_ = (TH2D*) h_sig_avgweight_btagsf_temp->Clone("h_sig_avgweight_btagsf");
@@ -375,8 +378,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_btagsf_heavy_DN_ = (TH2D*) h_sig_avgweight_btagsf_heavy_DN_temp->Clone("h_sig_avgweight_btagsf_heavy_DN");
     h_sig_avgweight_btagsf_light_DN_ = (TH2D*) h_sig_avgweight_btagsf_light_DN_temp->Clone("h_sig_avgweight_btagsf_light_DN");
     h_sig_avgweight_isr_ = (TH2D*) h_sig_avgweight_isr_temp->Clone("h_sig_avgweight_isr");
-    h_sig_avgweight_renorm_UP_ = (TH2D*) h_sig_avgweight_renorm_UP_temp->Clone("h_sig_avgweight_renorm_UP");
-    h_sig_avgweight_renorm_DN_ = (TH2D*) h_sig_avgweight_renorm_DN_temp->Clone("h_sig_avgweight_renorm_DN");
+    //h_sig_avgweight_renorm_UP_ = (TH2D*) h_sig_avgweight_renorm_UP_temp->Clone("h_sig_avgweight_renorm_UP");
+    //h_sig_avgweight_renorm_DN_ = (TH2D*) h_sig_avgweight_renorm_DN_temp->Clone("h_sig_avgweight_renorm_DN");
+    cout<<"cloned histos"<<endl;
 
     h_sig_nevents_->SetDirectory(0);
     h_sig_avgweight_btagsf_->SetDirectory(0);
@@ -385,8 +389,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
     h_sig_avgweight_btagsf_heavy_DN_->SetDirectory(0);
     h_sig_avgweight_btagsf_light_DN_->SetDirectory(0);
     h_sig_avgweight_isr_->SetDirectory(0);
-    h_sig_avgweight_renorm_UP_->SetDirectory(0);
-    h_sig_avgweight_renorm_DN_->SetDirectory(0);
+    //h_sig_avgweight_renorm_UP_->SetDirectory(0);
+    //h_sig_avgweight_renorm_DN_->SetDirectory(0);
     f_nsig_weights->Close();
     delete f_nsig_weights;
   }
@@ -509,13 +513,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         if (!t.Flag_badMuonFilterV2) continue;
 	if (!t.Flag_eeBadScFilter) continue; 
       }
-      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
-	if (!t.Flag_goodVertices) continue;
-	if (!t.Flag_HBHENoiseFilter) continue;
-	if (!t.Flag_HBHENoiseIsoFilter) continue;
-	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-	if (!t.Flag_badChargedHadronFilterV2) continue; 
-      }
+//      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
+//	if (!t.Flag_goodVertices) continue;
+//	if (!t.Flag_HBHENoiseFilter) continue;
+//	if (!t.Flag_HBHENoiseIsoFilter) continue;
+//	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+//	if (!t.Flag_badChargedHadronFilterV2) continue; 
+//      }
       
       // txt MET filters (data only)
       if (t.isData && metFilterTxt.eventFails(t.run, t.lumi, t.evt)) {
@@ -621,15 +625,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	    evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
 	  }
 	  else {
-	    int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(t.GenSusyMScan1);
-	    int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(t.GenSusyMScan2);
-	    float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
-	    float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
-	    float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
-	    float avgweight_renorm_DN = h_sig_avgweight_renorm_DN_->GetBinContent(binx,biny);
+	    //int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(t.GenSusyMScan1);
+	    //int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	    //float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+	    //float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
+	    //float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+	    //float avgweight_renorm_DN = h_sig_avgweight_renorm_DN_->GetBinContent(binx,biny);
 	    
-	    evtweight_renormUp_ = weight_renorm_UP / avgweight_renorm_UP;
-	    evtweight_renormDn_ = weight_renorm_DN / avgweight_renorm_DN;
+	    //evtweight_renormUp_ = weight_renorm_UP / avgweight_renorm_UP;
+	    //evtweight_renormDn_ = weight_renorm_DN / avgweight_renorm_DN;
 	    
 	  }
 	}
@@ -902,7 +906,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if ( abs(t.lep_eta[ilep])>1.479 ) continue;
 	//iso/id requirements
 	if (abs(t.lep_pdgId[ilep]) == 13 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02) passIsoId = true;
-	if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightIdNoIso[ilep] > 0) passIsoId = true;
+	if (abs(t.lep_pdgId[ilep]) == 11 && t.lep_miniRelIso[ilep]<0.1 && t.lep_relIso03[ilep]<0.2 && t.lep_tightIdNoIso[ilep] > 0 &&  abs(t.lep_dxy[ilep])< 0.02 && abs(t.lep_dz[ilep]) < 0.02) passIsoId = true;
 	// Apply Random Smearing to MET
 //	TRandom3 gRand;
 //	gRand.SetSeed( t.evt );
@@ -2462,8 +2466,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   }
 
   if ( !t.isData && doRenormFactScaleReweight) {
-    plot1D("h_mtbins_renorm_UP"+s,       softlepmt_,   evtweight_renormUp_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mtbins_renorm_DN"+s,       softlepmt_,   evtweight_renormDn_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    //plot1D("h_mtbins_renorm_UP"+s,       softlepmt_,   evtweight_renormUp_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
+    //plot1D("h_mtbins_renorm_DN"+s,       softlepmt_,   evtweight_renormDn_ , h_1d, "; M_{T} [GeV]", n_mt2bins, mt2bins);
   }
   
   if ( !t.isData && applyTopPtReweightSyst && !isSignal_ ) {

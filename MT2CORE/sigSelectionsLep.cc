@@ -1084,22 +1084,49 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   sr.Clear();
 
   sr.SetName("4");
-  sr.SetVar("met", 600, -1);
+  sr.SetVar("met", 600, 800);
   sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
   sr.SetName("5");
+  sr.SetVar("met", 800, 1000);
+  sr.SetVar("ht", 1000, 1500);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("6");
   sr.SetVar("met", 300, 600);
   sr.SetVar("ht", 1500, -1);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("6");
-  sr.SetVar("met", 600, -1);
+  sr.SetName("7");
+  sr.SetVar("met", 600, 800);
   sr.SetVar("ht", 1500, -1);
   temp_SR_vec.push_back(sr);
+
+  sr.SetName("8");
+  sr.SetVar("met", 800, 1000);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("9");
+  sr.SetVar("met", 1000, -1);
+  sr.SetVar("ht", 1000, 1500);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("10");
+  sr.SetVar("met", 1000, -1);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
   
+  float mtbins[4] = {20, 90, 120, 300};      
+  //  float nomtbins[2] = {20, 300};      
+
   //add LepPt requirements
   for (unsigned int iLepPt = 0; iLepPt < 3; iLepPt++) {
     for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
@@ -1107,11 +1134,35 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
       if (iLepPt == 0) { fullSR.SetName(fullSR.GetName() + "L"); fullSR.SetVar("leppt",  5, 10); }
       if (iLepPt == 1) { fullSR.SetName(fullSR.GetName() + "M"); fullSR.SetVar("leppt", 10, 15); }
       if (iLepPt == 2) { fullSR.SetName(fullSR.GetName() + "H"); fullSR.SetVar("leppt", 15, 20); }
-      float mtbins[4] = {20, 90, 120, 300};      fullSR.SetMT2Bins(3, mtbins);
+      fullSR.SetMT2Bins(3, mtbins);
       SRVec.push_back(fullSR);
     }
   }
- 
+
+  // Special setup unifying low pT regions
+//  //add LepPt requirements
+//  for (unsigned int iLepPt = 0; iLepPt < 3; iLepPt++) {
+//    for(unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++){
+//      SR fullSR = temp_SR_vec.at(iSR);  
+//      if (iLepPt == 0 && iSR < 3) { fullSR.SetName(fullSR.GetName() + "L"); fullSR.SetVar("leppt",  5, 10); }
+//      if (iLepPt == 0 && iSR >= 3) { continue; } // all of this goes into SR7 below
+//      if (iLepPt == 1) { fullSR.SetName(fullSR.GetName() + "M"); fullSR.SetVar("leppt", 10, 15); }
+//      if (iLepPt == 2) { fullSR.SetName(fullSR.GetName() + "H"); fullSR.SetVar("leppt", 15, 20); }
+//      if (iSR < 5) fullSR.SetMT2Bins(3, mtbins);
+//      if (iSR == 5) fullSR.SetMT2Bins(1, nomtbins);
+//      SRVec.push_back(fullSR);
+//    }
+//  }
+//  
+//  // special low pT region, no MT binning, reduced HT binning
+//  sr.Clear();
+//  sr.SetName("7L");
+//  sr.SetVar("met", 600, -1);
+//  sr.SetVar("ht", 1000, -1);
+//  sr.SetVar("leppt",  5, 10);
+//  sr.SetMT2Bins(1, nomtbins);
+//  SRVec.push_back(sr); 
+
   //define baseline selections commmon to all signal regions 
   baseSR.SetVar("mt2", 0, -1);
   baseSR.SetVar("deltaPhiMin", 0.3, -1);
@@ -1145,7 +1196,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
     topologicalSR.SetVar("nbjets", 0, 1);
     topologicalSR.SetVar("nbjetshard", 0, 1);
     topologicalSR.SetVar("leppt", 5, 20);
-    float mtbins[4] = {20, 90, 120, 300};      topologicalSR.SetMT2Bins(3, mtbins);
+    topologicalSR.SetMT2Bins(3, mtbins);
     SRVec.push_back(topologicalSR);
   }
 
@@ -1159,8 +1210,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebase.SetVar("met", 200, -1);
   inclusivebase.SetVar("mt", 20, -1);
   inclusivebase.SetVar("leppt", 5, 20);
-  float mtbinsBase[4] = {20, 90, 120, 300};      
-  inclusivebase.SetMT2Bins(3, mtbinsBase);
+  inclusivebase.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebase);
 
   SR inclusivebaseHighHT = baseSR;  
@@ -1172,7 +1222,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseHighHT.SetVar("met", 200, -1);
   inclusivebaseHighHT.SetVar("mt", 20, -1);  
   inclusivebaseHighHT.SetVar("leppt", 5, 20);
-  inclusivebaseHighHT.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseHighHT.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseHighHT);
 
   SR inclusivebaseMedHT = baseSR;  
@@ -1184,7 +1234,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseMedHT.SetVar("met", 200, -1);
   inclusivebaseMedHT.SetVar("mt", 20, -1);  
   inclusivebaseMedHT.SetVar("leppt", 5, 20);
-  inclusivebaseMedHT.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseMedHT.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseMedHT);
 
   SR inclusivebaseZeroB = baseSR;  
@@ -1196,7 +1246,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseZeroB.SetVar("met", 200, -1);
   inclusivebaseZeroB.SetVar("mt", 20, -1);
   inclusivebaseZeroB.SetVar("leppt", 5, 20);
-  inclusivebaseZeroB.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseZeroB.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseZeroB);
 
   SR inclusivebaseWithB = baseSR;  
@@ -1208,7 +1258,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseWithB.SetVar("met", 200, -1);
   inclusivebaseWithB.SetVar("mt", 20, -1);
   inclusivebaseWithB.SetVar("leppt", 5, 20);
-  inclusivebaseWithB.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseWithB.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseWithB);
   
   SR inclusivebaseAll = baseSR;  
@@ -1220,7 +1270,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseAll.SetVar("met", 200, -1);
   inclusivebaseAll.SetVar("mt", 20, -1);
   inclusivebaseAll.SetVar("leppt", 5, 20);
-  inclusivebaseAll.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseAll.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseAll);
   
   SR inclusivebaseJ = baseSR;  
@@ -1232,7 +1282,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseJ.SetVar("met", 200, -1);
   inclusivebaseJ.SetVar("mt", 20, -1);
   inclusivebaseJ.SetVar("leppt", 5, 20);
-  inclusivebaseJ.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseJ.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseJ);
 
   SR inclusivebaseJ1 = baseSR;  
@@ -1244,7 +1294,7 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   inclusivebaseJ1.SetVar("met", 200, -1);
   inclusivebaseJ1.SetVar("mt", 20, -1);
   inclusivebaseJ1.SetVar("leppt", 5, 20);
-  inclusivebaseJ1.SetMT2Bins(3, mtbinsBase);
+  inclusivebaseJ1.SetMT2Bins(3, mtbins);
   SRVec.push_back(inclusivebaseJ1);
 
   return SRVec;
