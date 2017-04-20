@@ -225,7 +225,7 @@ TCanvas* makePlot( const vector<TFile*>& samples , const vector<string>& names ,
     if( logplot ) plotpad->SetLogy();
   }
 
-  TLegend* leg = new TLegend(0.65,0.57,0.85,0.87);
+  TLegend* leg = new TLegend(0.65,0.59,0.85,0.87);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -3388,12 +3388,12 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
     }
   }
   if (selec != "") selec = "_" + selec;
-  vector<Color_t> colorsAll = {kRed-7, kOrange-2, kSpring-5, kAzure+7, kCyan-7, kMagenta-7, kTeal+6, kGray+2};
+  vector<Color_t> colorsAll = {kOrange-2, kSpring-5, kAzure+7, kCyan-7, kRed-7, 18, kMagenta-7, kTeal+6, kGray+2};
   vector<Color_t> colors;
-  int color_shift = 1;
-  if (sr == "crsl") color_shift = 2;
-  if (sr == "crdy") color_shift = 3;
-  if (sr == "crgj") color_shift = 0;
+  int color_shift = 0;
+  if (sr == "crsl") color_shift = 1;
+  if (sr == "crdy") color_shift = 2;
+  if (sr == "crgj") color_shift = 4;
   for (unsigned int i = 0; i < samples.size(); ++i) colors.push_back(colorsAll[i+color_shift]);
 
   THStack* hSR_stk = fillSRYieldsStackHist(samples, dirsAll, colors, selec, n_srbins, scale);
@@ -3453,7 +3453,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   TString histtitle("SRyields Hist");
   if (sr != "sr") histtitle = sr + " yields Hist";
   if (prefix == "h") histtitle += " for hcand regions";
-  if (prefix == "H") histtitle += " for Mbbmax regions";
+  if (prefix == "H") histtitle += " for H-cand regions";
   if (prefix == "Z") histtitle += " for Zcand regions";
   if (mbbsuf  != "") histtitle += " with mbb " + mbbsuf;
   if (bmetsuf != "") histtitle += " with bmet " + bmetsuf;
@@ -3994,7 +3994,8 @@ void plotMakerHcand() {
 
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
   // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "qcd_ht", "data_Run2016"};
-  vector<string> names = {"top", "wjets_ht", "zinv_ht", "qcdplusgjet", "dyjetsll_ht", "data_Run2016"};
+  // vector<string> names = {"top", "wjets_ht", "zinv_ht", "qcdplusgjet", "dyjetsll_ht", "data_Run2016"};
+  vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "data_Run2016"};
   // vector<string> names = {"fakephoton", "qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
@@ -4019,10 +4020,10 @@ void plotMakerHcand() {
       // if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       // if (dir_name == "") continue;
-      // if (dir_name != "srh2H") continue; //to do only this dir
-      if (dir_name != "crgjhbase" && dir_name != "crslhbase" && dir_name != "crdyhbase" &&
-          dir_name != "crgjHbase" && dir_name != "crslHbase" && dir_name != "crdyHbase" &&
-          dir_name != "crgjZbase" && dir_name != "crslZbase" && dir_name != "crdyZbase") continue; //to do only these dirs
+      if (dir_name != "srHbase") continue; //to do only this dir
+      // if (dir_name != "crgjhbase" && dir_name != "crslhbase" && dir_name != "crdyhbase" &&
+      //     dir_name != "crgjHbase" && dir_name != "crslHbase" && dir_name != "crdyHbase" &&
+      //     dir_name != "crgjZbase" && dir_name != "crslZbase" && dir_name != "crdyZbase") continue; //to do only these dirs
       // if (dir_name.find("crgjbase") != 0) continue; //for testing
       // string s = "_noHcandCR";
       string s = "";
@@ -4039,9 +4040,9 @@ void plotMakerHcand() {
 
       // makePlot( samples , names , dir_name , "h_hcand_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 600 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_MbbMax"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 1000 , 2 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_MbbMax_MbbCRall"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 350 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      makePlot( samples , names , dir_name , "h_Mbbhcand_MbbCRall"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 350 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_MbbZcand"+s , "M(bb) (Zcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
 
@@ -4126,7 +4127,7 @@ void plotMakerHcand() {
   // makeSRyieldsHist(samples4, names4, "Z");
 
   // vector<string> names2 = {"qcdplusgjet", "wjets_ht", "top", "dyjetsll_ht", "zinv_ht", "data_Run2016"};
-  vector<string> names2 = {"top", "dyjetsll_ht", "data_Run2016"};
+  vector<string> names2 = {"wjets_ht", "top", "dyjetsll_ht", "data_Run2016"};
   vector<TFile*> samples2= getSamples(names2, input_dir);
   // makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crsl");
   // makeSRyieldsHist(samples2, names2, "h", "", "L", "", "crsl");
@@ -4134,21 +4135,23 @@ void plotMakerHcand() {
   // makeSRyieldsHist(samples2, names2, "H", "", "", "M", "crsl");
   // makeSRyieldsHist(samples2, names2, "Z", "", "", "",  "crsl");
 
-  makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crdy");
-  makeSRyieldsHist(samples2, names2, "h", "", "L", "", "crdy");
-  makeSRyieldsHist(samples2, names2, "H", "", "", "U", "crdy");
-  makeSRyieldsHist(samples2, names2, "H", "", "", "M", "crdy");
-  makeSRyieldsHist(samples2, names2, "Z", "", "", "",  "crdy");
+  vector<string> dy_names = {"top", "dyjetsll_ht", "data_Run2016"};
+  vector<TFile*> dy_samples= getSamples(dy_names, input_dir);
+  // makeSRyieldsHist(dy_samples, dy_names, "h", "", "H", "", "crdy");
+  // makeSRyieldsHist(dy_samples, dy_names, "h", "", "L", "", "crdy");
+  // makeSRyieldsHist(dy_samples, dy_names, "H", "", "", "U", "crdy");
+  // makeSRyieldsHist(dy_samples, dy_names, "H", "", "", "M", "crdy");
+  // makeSRyieldsHist(dy_samples, dy_names, "Z", "", "", "",  "crdy");
 
 
   vector<string> names3 = {"fakephoton", "qcdplusgjet", "data_Run2016"};
   // vector<string> names3 = {"qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples3= getSamples(names3, input_dir);
-  // makeSRyieldsHist(samples3, names3, "h", "", "H", "", "crgj");
-  // makeSRyieldsHist(samples3, names3, "h", "", "L", "", "crgj");
-  // makeSRyieldsHist(samples3, names3, "H", "", "", "U", "crgj");
-  // makeSRyieldsHist(samples3, names3, "H", "", "", "M", "crgj");
-  // makeSRyieldsHist(samples3, names3, "Z", "", "", "",  "crgj");
+  makeSRyieldsHist(samples3, names3, "h", "", "H", "", "crgj");
+  makeSRyieldsHist(samples3, names3, "h", "", "L", "", "crgj");
+  makeSRyieldsHist(samples3, names3, "H", "", "", "U", "crgj");
+  makeSRyieldsHist(samples3, names3, "H", "", "", "M", "crgj");
+  makeSRyieldsHist(samples3, names3, "Z", "", "", "",  "crgj");
 
   dirsH.push_back("srhbase");
   dirsH.push_back("srHbase");

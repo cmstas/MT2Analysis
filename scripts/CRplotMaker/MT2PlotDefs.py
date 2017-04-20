@@ -192,7 +192,7 @@ mbbcr_plots = [
     ("mt2_MbbCRall",True,(200,1000),None,2),
     ("nJet30_MbbCRall",True,(0,14),None),
     ("nBJet20_MbbCRall",True,(0,6),None),
-    ("MbbMax_MbbCRall",True,(0,6),None),
+    ("MbbMax_MbbCRall",True,(0,300),None),
 ]
 
 # mbbcr_plots = [].append(x for x in basic_plots: x[0].append("_MbbCRall"))

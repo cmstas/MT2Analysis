@@ -1351,14 +1351,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // recalculating minMTbmet from jet vectors, using bjets down to 20
       bool doMT2Higgs  = false;
-      bool doMinMTBMet = false;
+      // bool doMinMTBMet = false;
       // bool ivMinMTBMet = false;
-      bool doMbbMax200 = false;
+      // bool doMbbMax200 = false;
       bool doMbbMax300 = false;
       bool isHcand     = false;
       bool isZcand     = false;
-      bool doMbbCRlo   = false;
-      bool doMbbCRhi   = false;
+      // bool doMbbCRlo   = false;
+      // bool doMbbCRhi   = false;
       // unsigned int ibjminmt = -1;
       unsigned int hcand_ibj1 = -1;
       unsigned int hcand_ibj2 = -1;
@@ -1468,24 +1468,24 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         hcand_mt2_ = t.mt2;
       }
 
-      if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
+      // if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       // else if (doMT2Higgs) ivMinMTBMet = true;
-      if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
+      // if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
       if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
-      if (doMT2Higgs && mbbhcand_ < 100) doMbbCRlo = true;
-      if (doMT2Higgs && mbbhcand_ > 150) doMbbCRhi = true;
+      // if (doMT2Higgs && mbbhcand_ < 100) doMbbCRlo = true;
+      // if (doMT2Higgs && mbbhcand_ > 150) doMbbCRhi = true;
       // if (!doMT2Higgs) continue; // For faster runtime
 
       // --- Gamma Jet control region for mt2higgs ---
       bool doMT2HiggsGJ  = false;
-      bool doMinMTBMetGJ = false;
+      // bool doMinMTBMetGJ = false;
       // bool ivMinMTBMetGJ = false;
-      bool doMbbMax200GJ = doMbbMax200; // = false;
-      bool doMbbMax300GJ = doMbbMax300; // = false;
-      bool isHcandGJ     = isHcand; // = false;
-      bool isZcandGJ     = isZcand; // = false;
-      bool doMbbCRloGJ   = doMbbCRlo;
-      bool doMbbCRhiGJ   = doMbbCRhi;
+      // bool doMbbMax200GJ = doMbbMax200; // = false;
+      // bool doMbbMax300GJ = doMbbMax300; // = false;
+      // bool isHcandGJ     = isHcand; // = false;
+      // bool isZcandGJ     = isZcand; // = false;
+      // bool doMbbCRloGJ   = doMbbCRlo;
+      // bool doMbbCRhiGJ   = doMbbCRhi;
 
       gamma_minMTbmet_ = 0;
       gamma_mbbmax_ = mbbmax_;
@@ -1548,7 +1548,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
           gamma_mbbmax_ = mbb;
           if (mbb < 100 || mbb > 150) --gamma_nhcand_;
           if (mbb < 70 || mbb > 110) --gamma_nZcand_;
-          isHcandGJ = gamma_nhcand_;
         }                                                  // missing case with not using higheset CSV bjets
         p4sForHemsGamma.push_back(LorentzVector(p4_higgs.Px(), p4_higgs.Py(), p4_higgs.Pz(), p4_higgs.E()));
         sort(p4sForHemsGamma.begin(), p4sForHemsGamma.end(), [](LorentzVector &vec1, LorentzVector &vec2) { return vec1.pt() > vec2.pt(); });
@@ -1560,7 +1559,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         }
       }
 
-      if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
+      // if (doMT2HiggsGJ && gamma_minMTbmet_ > 200) doMinMTBMetGJ = true;
       // else if (doMT2HiggsGJ) ivMinMTBMetGJ = true;
       // if (doMT2HiggsGJ && Mbb_max > 200) doMbbMax200GJ = true;
       // if (doMT2HiggsGJ && Mbb_max > 300) doMbbMax300GJ = true;
@@ -1678,21 +1677,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         fillHistosCRGJMT2Higgs("crgj", sufadd);
         // if (isHcandGJ) fillHistosCRGJMT2Higgs("crgj", sufadd);
         // if (!isHcandGJ) fillHistosCRGJMT2Higgs("crgj", sufadd); // Looking at Hcand CR
-        if (true)             fillHistosCRGJMT2Higgs("", "_original" + sufadd);
-        if (isHcandGJ)        fillHistosCRGJMT2Higgs("", "_isHcand" + sufadd);
-        else                  fillHistosCRGJMT2Higgs("", "_noHcandCR" + sufadd);
-        if (isZcandGJ)        fillHistosCRGJMT2Higgs("", "_isZcand" + sufadd);
-        if (doMbbCRloGJ)      fillHistosCRGJMT2Higgs("", "_MbbCRlo" + sufadd);
-        if (doMbbCRhiGJ)      fillHistosCRGJMT2Higgs("", "_MbbCRhi" + sufadd);
-        if (doMbbMax200GJ)    fillHistosCRGJMT2Higgs("", "_MbbMax200" + sufadd);
-        else if (doMbbCRhiGJ) fillHistosCRGJMT2Higgs("", "_MbbCRhi200" + sufadd);
-        if (doMbbMax300GJ)    fillHistosCRGJMT2Higgs("", "_MbbMax300" + sufadd);
-        else if (doMbbCRhiGJ) fillHistosCRGJMT2Higgs("", "_MbbCRhi300" + sufadd);
+        // if (true)             fillHistosCRGJMT2Higgs("", "_original" + sufadd);
+        // if (isHcandGJ)        fillHistosCRGJMT2Higgs("", "_isHcand" + sufadd);
+        // else                  fillHistosCRGJMT2Higgs("", "_noHcandCR" + sufadd);
+        // if (isZcandGJ)        fillHistosCRGJMT2Higgs("", "_isZcand" + sufadd);
+        // if (doMbbCRloGJ)      fillHistosCRGJMT2Higgs("", "_MbbCRlo" + sufadd);
+        // if (doMbbCRhiGJ)      fillHistosCRGJMT2Higgs("", "_MbbCRhi" + sufadd);
+        // if (doMbbMax200GJ)    fillHistosCRGJMT2Higgs("", "_MbbMax200" + sufadd);
+        // else if (doMbbCRhiGJ) fillHistosCRGJMT2Higgs("", "_MbbCRhi200" + sufadd);
+        // if (doMbbMax300GJ)    fillHistosCRGJMT2Higgs("", "_MbbMax300" + sufadd);
+        // else if (doMbbCRhiGJ) fillHistosCRGJMT2Higgs("", "_MbbCRhi300" + sufadd);
         // if (doMinMTBMetGJ)            fillHistosCRGJMT2Higgs("", "_minMTbmet" + sufadd);
         // if (doMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_mMTnHcand" + sufadd);
         // if (ivMinMTBMetGJ && isHcandGJ) fillHistosCRGJMT2Higgs("", "_ivmMTnHcand" + sufadd);
-        if (doMinMTBMetGJ && doMbbMax200GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb200" + sufadd);
-        if (doMinMTBMetGJ && doMbbMax300GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300" + sufadd);
+        // if (doMinMTBMetGJ && doMbbMax200GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb200" + sufadd);
+        // if (doMinMTBMetGJ && doMbbMax300GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300" + sufadd);
 
       }
       if (synchronizing) fasterRuntime = false;
@@ -1718,50 +1717,51 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (doMT2Higgs) {
         fillHistosSRMT2Higgs("sr");
+        if (!doMbbMax300 && !isHcand && !isZcand) fillHistosSRMT2Higgs("sr", "_MbbCRall");
         // if (isHcand) fillHistosSRMT2Higgs("sr");
         // if (!isHcand) fillHistosSRMT2Higgs("sr"); // Looking at Hcand CR
-        if (true)           fillHistosSRMT2Higgs("sr", "_original");
-        if (isHcand)        fillHistosSRMT2Higgs("sr", "_isHcand");
-        else                fillHistosSRMT2Higgs("sr", "_noHcandCR");
-        if (isZcand)        fillHistosSRMT2Higgs("sr", "_isZcand");
-        if (doMbbCRlo)      fillHistosSRMT2Higgs("sr", "_MbbCRlo");
-        if (doMbbCRhi)      fillHistosSRMT2Higgs("sr", "_MbbCRhi");
-        if (doMbbMax200)    fillHistosSRMT2Higgs("sr", "_MbbMax200");
-        else if (doMbbCRhi) fillHistosSRMT2Higgs("sr", "_MbbCRhi200");
-        if (doMbbMax300)    fillHistosSRMT2Higgs("sr", "_MbbMax300");
-        else if (doMbbCRhi) fillHistosSRMT2Higgs("sr", "_MbbCRhi300");
+        // if (true)           fillHistosSRMT2Higgs("sr", "_original");
+        // if (isHcand)        fillHistosSRMT2Higgs("sr", "_isHcand");
+        // else                fillHistosSRMT2Higgs("sr", "_noHcandCR");
+        // if (isZcand)        fillHistosSRMT2Higgs("sr", "_isZcand");
+        // if (doMbbCRlo)      fillHistosSRMT2Higgs("sr", "_MbbCRlo");
+        // if (doMbbCRhi)      fillHistosSRMT2Higgs("sr", "_MbbCRhi");
+        // if (doMbbMax200)    fillHistosSRMT2Higgs("sr", "_MbbMax200");
+        // else if (doMbbCRhi) fillHistosSRMT2Higgs("sr", "_MbbCRhi200");
+        // if (doMbbMax300)    fillHistosSRMT2Higgs("sr", "_MbbMax300");
+        // else if (doMbbCRhi) fillHistosSRMT2Higgs("sr", "_MbbCRhi300");
         // if (doMinMTBMet)            fillHistosSRMT2Higgs("sr", "_minMTbmet");
         // if (doMinMTBMet && isHcand) fillHistosSRMT2Higgs("sr", "_mMTnHcand");
         // if (ivMinMTBMet && isHcand) fillHistosSRMT2Higgs("sr", "_ivmMTnHcand");
-        if (doMinMTBMet && doMbbMax200) fillHistosSRMT2Higgs("sr", "_mMTnMbb200");
-        else if (doMbbMax200)           fillHistosSRMT2Higgs("sr", "_ivmMTnMbb200");
-        if (doMinMTBMet && doMbbMax300) fillHistosSRMT2Higgs("sr", "_mMTnMbb300");
-        else if (doMbbMax300)           fillHistosSRMT2Higgs("sr", "_ivmMTnMbb300");
-        if (!doMbbMax300 && !isHcand)   fillHistosSRMT2Higgs("sr", "_MbbCRall");
-        if (doMbbMax300 && isHcand)     fillHistosSRMT2Higgs("sr", "_overlap");
-        if (mbbhcand_ > 300)            fillHistosSRMT2Higgs("sr", "_Mbbhcand300");
-        if (doMbbMax300 && !isHcand)    fillHistosSRMT2Higgs("sr", "_Mbb300");
-        if (doMbbMax300 && mbbmax_ < 500) {
-          fillHistosSRMT2Higgs("sr", "_MbbMaxM");
-          if (doMinMTBMet) fillHistosSRMT2Higgs("sr", "_mMTnMbbM");
-          else             fillHistosSRMT2Higgs("sr", "_ivmMTnMbbM");
-        }
-        if (doMbbMax300 && mbbmax_ > 500) fillHistosSRMT2Higgs("sr", "_MbbMaxH");
+        // if (doMinMTBMet && doMbbMax200) fillHistosSRMT2Higgs("sr", "_mMTnMbb200");
+        // else if (doMbbMax200)           fillHistosSRMT2Higgs("sr", "_ivmMTnMbb200");
+        // if (doMinMTBMet && doMbbMax300) fillHistosSRMT2Higgs("sr", "_mMTnMbb300");
+        // else if (doMbbMax300)           fillHistosSRMT2Higgs("sr", "_ivmMTnMbb300");
+        // if (!doMbbMax300 && !isHcand)   fillHistosSRMT2Higgs("sr", "_MbbCRall");
+        // if (doMbbMax300 && isHcand)     fillHistosSRMT2Higgs("sr", "_overlap");
+        // if (mbbhcand_ > 300)            fillHistosSRMT2Higgs("sr", "_Mbbhcand300");
+        // if (doMbbMax300 && !isHcand)    fillHistosSRMT2Higgs("sr", "_Mbb300");
+        // if (doMbbMax300 && mbbmax_ < 500) {
+        //   fillHistosSRMT2Higgs("sr", "_MbbMaxM");
+        //   if (doMinMTBMet) fillHistosSRMT2Higgs("sr", "_mMTnMbbM");
+        //   else             fillHistosSRMT2Higgs("sr", "_ivmMTnMbbM");
+        // }
+        // if (doMbbMax300 && mbbmax_ > 500) fillHistosSRMT2Higgs("sr", "_MbbMaxH");
 
         if (doDYplots) {
           fillHistosCRDYMT2Higgs();
           // if (isHcand) fillHistosCRDYMT2Higgs();
           // if (!isHcand) fillHistosCRDYMT2Higgs(); // Looking at Hcand CR
-          if (true)           fillHistosCRDYMT2Higgs("", "_original");
-          if (isHcand)        fillHistosCRDYMT2Higgs("", "_isHcand");
-          else                fillHistosCRDYMT2Higgs("", "_noHcandCR");
-          if (isZcand)        fillHistosCRDYMT2Higgs("", "_isZcand");
-          if (doMbbCRlo)      fillHistosCRDYMT2Higgs("", "_MbbCRlo");
-          if (doMbbCRhi)      fillHistosCRDYMT2Higgs("", "_MbbCRhi");
-          if (doMbbMax200)    fillHistosCRDYMT2Higgs("", "_MbbMax200");
-          else if (doMbbCRhi) fillHistosCRDYMT2Higgs("", "_MbbCRhi200");
-          if (doMbbMax300)    fillHistosCRDYMT2Higgs("", "_MbbMax300");
-          else if (doMbbCRhi) fillHistosCRDYMT2Higgs("", "_MbbCRhi300");
+          // if (true)           fillHistosCRDYMT2Higgs("", "_original");
+          // if (isHcand)        fillHistosCRDYMT2Higgs("", "_isHcand");
+          // else                fillHistosCRDYMT2Higgs("", "_noHcandCR");
+          // if (isZcand)        fillHistosCRDYMT2Higgs("", "_isZcand");
+          // if (doMbbCRlo)      fillHistosCRDYMT2Higgs("", "_MbbCRlo");
+          // if (doMbbCRhi)      fillHistosCRDYMT2Higgs("", "_MbbCRhi");
+          // if (doMbbMax200)    fillHistosCRDYMT2Higgs("", "_MbbMax200");
+          // else if (doMbbCRhi) fillHistosCRDYMT2Higgs("", "_MbbCRhi200");
+          // if (doMbbMax300)    fillHistosCRDYMT2Higgs("", "_MbbMax300");
+          // else if (doMbbCRhi) fillHistosCRDYMT2Higgs("", "_MbbCRhi300");
           // if (doMinMTBMet)            fillHistosCRDYMT2Higgs("", "_minMTbmet");
           // if (doMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_mMTnHcand");
           // if (ivMinMTBMet && isHcand) fillHistosCRDYMT2Higgs("", "_ivmMTnHcand");
@@ -2046,8 +2046,8 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
   // if (SRIncl2h.PassesSelection(valuesIncl2h)) {
   //   fillHistosMT2Higgs(SRIncl2h.srHistMap, SRIncl2h.GetNumberOfMT2Bins(), SRIncl2h.GetMT2Bins(), SRIncl2h.GetName(), suffix);
   // }
-  if (suffix == "_noHcandCR")
-    values["nhcand"] = (mbbhcand_ < 100 || (mbbhcand_ > 150 && mbbmax_ < 300));
+  // if (suffix == "_noHcandCR")
+  //   values["nhcand"] = (mbbhcand_ < 100 || (mbbhcand_ > 150 && mbbmax_ < 300));
   if (suffix == "_MbbCRall") {
     values["mbbmax"] = 314;
     values["nhcand"] = 1;
