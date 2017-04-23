@@ -3354,7 +3354,7 @@ THStack* fillSRYieldsStackHist(vector<TFile*> samples, vector<string> dirs, vect
 }
 
 void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefix, string selec = "", string bmetsuf = "", string mbbsuf = "", string sr = "sr") {
-  float scale = 40/12.9;
+  float scale = 1;
   int n_srbins = 0;
   vector<string> dirsAll;
   TFile* samp = *(samples.end()-1);
@@ -4116,19 +4116,22 @@ void plotMakerHcand() {
   //   samplesVec.push_back(getSamples(names, "/home/users/sicheng/MT2Analysis/MT2looper/output/" + *it));
 
 
-  vector<string> names4 = {"qcdplusgjet", "zinvDataDriven", "lostlepFromCRs"};
+  // vector<string> names4 = {"qcdplusgjet", "zinvDataDriven", "lostlepFromCRs"};
+  vector<string> names4 = {"qcd_ht", "wjets_ht", "zinv_ht", "top"};
   // vector<string> names4 = {"qcdplusgjet", "zinvDataDriven", "lostlepFromCRs", "data_Run2016"};
   vector<TFile*> samples4= getSamples(names4, input_dir);
   // names4 = vector<string>{"lostlep", "Zinv"};
-  // makeSRyieldsHist(samples4, names4, "h", "", "H");
-  // makeSRyieldsHist(samples4, names4, "h", "", "L");
-  // makeSRyieldsHist(samples4, names4, "H", "", "", "U");
-  // makeSRyieldsHist(samples4, names4, "H", "", "", "M");
-  // makeSRyieldsHist(samples4, names4, "Z");
+
+  makeSRyieldsHist(samples4, names4, "h", "", "H");
+  makeSRyieldsHist(samples4, names4, "h", "", "L");
+  makeSRyieldsHist(samples4, names4, "H", "", "", "U");
+  makeSRyieldsHist(samples4, names4, "H", "", "", "M");
+  makeSRyieldsHist(samples4, names4, "Z");
 
   // vector<string> names2 = {"qcdplusgjet", "wjets_ht", "top", "dyjetsll_ht", "zinv_ht", "data_Run2016"};
   vector<string> names2 = {"wjets_ht", "top", "dyjetsll_ht", "data_Run2016"};
   vector<TFile*> samples2= getSamples(names2, input_dir);
+
   // makeSRyieldsHist(samples2, names2, "h", "", "H", "", "crsl");
   // makeSRyieldsHist(samples2, names2, "h", "", "L", "", "crsl");
   // makeSRyieldsHist(samples2, names2, "H", "", "", "U", "crsl");
@@ -4137,6 +4140,7 @@ void plotMakerHcand() {
 
   vector<string> dy_names = {"top", "dyjetsll_ht", "data_Run2016"};
   vector<TFile*> dy_samples= getSamples(dy_names, input_dir);
+
   // makeSRyieldsHist(dy_samples, dy_names, "h", "", "H", "", "crdy");
   // makeSRyieldsHist(dy_samples, dy_names, "h", "", "L", "", "crdy");
   // makeSRyieldsHist(dy_samples, dy_names, "H", "", "", "U", "crdy");
@@ -4147,11 +4151,12 @@ void plotMakerHcand() {
   vector<string> names3 = {"fakephoton", "qcdplusgjet", "data_Run2016"};
   // vector<string> names3 = {"qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples3= getSamples(names3, input_dir);
-  makeSRyieldsHist(samples3, names3, "h", "", "H", "", "crgj");
-  makeSRyieldsHist(samples3, names3, "h", "", "L", "", "crgj");
-  makeSRyieldsHist(samples3, names3, "H", "", "", "U", "crgj");
-  makeSRyieldsHist(samples3, names3, "H", "", "", "M", "crgj");
-  makeSRyieldsHist(samples3, names3, "Z", "", "", "",  "crgj");
+
+  // makeSRyieldsHist(samples3, names3, "h", "", "H", "", "crgj");
+  // makeSRyieldsHist(samples3, names3, "h", "", "L", "", "crgj");
+  // makeSRyieldsHist(samples3, names3, "H", "", "", "U", "crgj");
+  // makeSRyieldsHist(samples3, names3, "H", "", "", "M", "crgj");
+  // makeSRyieldsHist(samples3, names3, "Z", "", "", "",  "crgj");
 
   dirsH.push_back("srhbase");
   dirsH.push_back("srHbase");

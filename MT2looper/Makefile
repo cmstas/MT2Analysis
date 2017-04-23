@@ -15,7 +15,7 @@ ifndef VERBOSE
   QUIET := @
 endif
 
-#ROOFITINCLUDE = 
+#ROOFITINCLUDE =
 #ifdef CMSSW_VERSION
 #	ROOFITINCLUDE = $(shell scramv1 tool info roofitcore | grep INCLUDE | sed 's/^INCLUDE=/-I/')
 #endif
@@ -23,7 +23,7 @@ endif
 CC = g++
 CMSROOT = ./
 INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
-CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
+CFLAGS = -Wall -Wno-unused-function -g -O3 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
 COREDIR = CORE
 
@@ -39,7 +39,7 @@ OBJECTS = $(SOURCES:.cc=.o)
 LIB = libMT2Looper.so
 
 CORESOURCES = $(wildcard ../MT2CORE/*.cc) $(wildcard ../MT2CORE/MT2/*.cc) $(wildcard ../MT2CORE/Plotting/*.cc)
-COREOBJECTS = $(CORESOURCES:.cc=.o) 
+COREOBJECTS = $(CORESOURCES:.cc=.o)
 CORELIB = libMT2LooperCORE.so
 
 TOOLSSOURCES = $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc) $(wildcard ../CORE/Tools/dorky/*.cc)
@@ -73,7 +73,7 @@ $(LIB):	$(DICT) $(OBJECTS)
 $(EXE):  $(LIBS)
 	$(QUIET) echo "Building $@"; \
 	echo "$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./"; \
-	$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./ 
+	$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./
 
 %.o: 	%.cc %.h
 	$(QUIET) echo "Compiling $<"; \
@@ -91,7 +91,7 @@ $(EXE):  $(LIBS)
 	$(QUIET) echo "Compiling $<"; \
 	$(CC) $(CFLAGS) $< -c -o $@
 
-%.o:    %.cxx 
+%.o:    %.cxx
 	$(QUIET) echo "Compiling $<"; \
 	$(CC) $(CFLAGS) $< -c -o $@
 
@@ -121,6 +121,6 @@ clean:
         ../CORE/Tools/MT2/*.so \
         ../CORE/Tools/dorky/*.o \
 	../CORE/Tools/dorky/*.d \
-        ../CORE/Tools/dorky/*.so 
+        ../CORE/Tools/dorky/*.so
 
 endif
