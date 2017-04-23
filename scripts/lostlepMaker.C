@@ -445,6 +445,36 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     // - 5% transfer factor error for most bins, additional 20% for 7j,>=1b
     // - not including MT2 shape uncertainty at this point
     // NOTE that this sets uncertainty to 0 for bins with 0 data CR stats (i.e. pred = 0)... 
+
+    for ( int ibin = 1; ibin <= pred->GetNbinsX(); ++ibin) {
+      float val = pred->GetBinContent(ibin);
+      if (val <= 0.) continue;
+      float err_mcstat = h_lostlepMC_sr_finebin->GetBinError(ibin)/h_lostlepMC_sr_finebin->GetBinContent(ibin);
+      float err_datastat = (data_cr_totalyield > 0) ? sqrt(data_cr_totalyield)/data_cr_totalyield : 0.; // should never get 0 data CR yield and nonzero pred
+      float err_shape = 0.;
+      if (n_mt2bins > 1) {
+        if (ibin == 1 && val > 0.) {
+          // first bin needs to compensate normalization from the rest
+          float increment = 0.;
+          for (int i = 2; i <= pred->GetNbinsX(); i++)
+            increment += 0.4 / (n_mt2bins - 1) * (i - 1) * pred->GetBinContent(i);
+          err_shape = - increment/val;
+        } else {
+          err_shape = 0.4 / (n_mt2bins - 1) * (ibin - 1);
+        }
+      }
+      float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + err_shape*err_shape;
+      quadrature += 0.10 * 0.10;  // alphaerr
+      quadrature += 0.15 * 0.15;  // lepeff
+      quadrature += 0.03 * 0.03;  // mtcut
+      quadrature += 0.03 * 0.03;  // taueff  <-- fix later (or not)
+      quadrature += 0.03 * 0.03;  // btageff <-- fix later (or not)
+      quadrature += 0.02 * 0.02;  // jec
+      quadrature += 0.10 * 0.10;  // renorm
+      if (njets_LOW >= 7 && nbjets_LOW >= 1) quadrature += 0.2*0.2;
+      pred->SetBinError(ibin, val*sqrt(quadrature));
+    }
+
     for ( int ibin = 1; ibin <= pred_finebin->GetNbinsX(); ++ibin) {
       float val = pred_finebin->GetBinContent(ibin);
       if (val <= 0.) continue;

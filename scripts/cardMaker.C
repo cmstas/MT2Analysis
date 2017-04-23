@@ -1,3 +1,4 @@
+// C++
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -35,7 +36,7 @@ const bool verbose = false;
 
 const bool suppressZeroBins = false;
 
-const bool suppressZeroTRs = true;
+const bool suppressZeroTRs = false;
 
 const bool doSuperSignalRegions = false;
 
@@ -43,31 +44,54 @@ const float dummy_alpha = 1.; // dummy value for gmN when there are no SR events
 
 const bool uncorrelatedZGratio = false; // treat ZGratio uncertainty as fully uncorrelated
 
-const bool fourNuisancesPerBinZGratio = true;
+const bool fourNuisancesPerBinZGratio = false;
 
 const bool integratedZinvEstimate = true;
 
-const bool doDummySignalSyst = false;
+const bool doDummySignalSyst = true;
 
 const bool subtractSignalContam = true;
 
-const bool doZinvFromDY = true; //if false, will take estimate from GJets
+const bool doZinvFromDY = false; //if false, will take estimate from GJets
 
 const bool decorrelateLostlepNuisances = false; //if true, new lostlep nuisances will be decorrelated in all regions
 
 const bool doSimpleLostlepNuisances = false; //if true, reverts to ICHEP lostlep nuisances (only alpha & lepeff)
 
-const bool printTable = false; //if true, prints additional .txt files with the data & bkg yields and uncertainties for plotmaking
+const bool printTable = true; //if true, prints additional .txt files with the data & bkg yields and uncertainties for plotmaking
 
-const bool suppressUHmt2bin = true; //if true, skips the lowest mt2bin in the UH HT region
+const bool suppressUHmt2bin = false; //if true, skips the lowest mt2bin in the UH HT region
 
 double last_zinv_ratio = 0.5;
 double last_lostlep_transfer = 2.;
+double last_zinv_transfer = 2.;
 double last_zinvDY_transfer = 2.;
 
 inline bool FileExists(const TString name) {
-  struct stat buffer;   
-  return (stat (name.Data(), &buffer) == 0); 
+  struct stat buffer;
+  return (stat (name.Data(), &buffer) == 0);
+}
+
+inline double getHistBin(TFile* file, const TString hname, const int ibin = 1, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+  return (hist)? hist->GetBinContent(ibin) : 0.;
+}
+
+inline double getHistBinAndErr(TFile* file, const TString hname, const int ibin, double& err, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) {
+    cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+    return 0.;
+  }
+  err = hist->GetBinError(ibin);
+  return hist->GetBinContent(ibin);
+}
+
+inline double getHistIntegral(TFile* file, const TString hname, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+  return (hist)? hist->Integral(0, -1) : 0.;
 }
 
 //_______________________________________________________________________________
@@ -79,9 +103,7 @@ void ReplaceString(std::string& subject, const std::string& search, const std::s
     }
 }
 
-//_______________________________________________________________________________
-double round(double d)
-{
+inline double round(double d) {
   return floor(d + 0.5);
 }
 
@@ -90,6 +112,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // read off yields from h_mt2bins hist in each topological region
   if (verbose) cout<<"Looking at region "<<dir_str<<", mt2 bin "<<mt2bin<<endl;
+
+  string binname = dir_str;
+  // binname.erase(0, 2) += "_bin" + to_string(mt2bin);
+
   TString dir = TString(dir_str);
   TString fullhistname = dir + "/h_mt2bins";
   TString fullhistnameGenMet  = fullhistname+"_genmet";
@@ -130,9 +156,8 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     sr_number = stoi(sr_number_match[1].str());
     if (doSuperSignalRegions && sr_number < 20) return 0;
     else if (!doSuperSignalRegions && sr_number >= 20) return 0;
-  }
-  else {
-    cout << "WARNING: couldn't get signal region number for region: " << dir_str << endl;
+  } else {
+    if (verbose) cout << "WARNING: couldn't get signal region number for region: " << dir_str << endl;
   }
   
   TString signame(signal);
@@ -159,22 +184,15 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_alpha_renorm_DN(0.);
   double lostlep_MCExtrap(0.);
   double err_lostlep_mcstat(0.);
+  int lostlep_lastbin_hybrid(1);
+
   double n_zinv(0.);
   double n_zinv_cr(0.);
   double err_zinv_mcstat(0.);
   double zinv_ratio_zg(0.);
   double zinv_purity(0.);
   double err_zinv_purity(0.);
-  double n_qcd(0.);
-  double n_qcd_cr(0.);
-  double qcd_alpha(0.);
-  double err_qcd_alpha(0.);
-  double err_qcd_fjrb(0.);
-  double err_qcd_fitstat(0.);
-  double err_qcd_fitsyst(0.);
-  double n_bkg(0.);
-  double n_data(0.);
-  int lostlep_lastbin_hybrid(1);
+
   double n_zinvDY(0.);
   double n_zinvDY_cr(0.);
   double zinvDY_alpha(0.);
@@ -182,8 +200,18 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinvDY_purity(0.);
   double err_zinvDY_mcstat(0.);
   double err_zinvDY_purity(0.);
-  bool usingInclusiveTemplates(true);
   int zinvDY_lastbin_hybrid(1);
+
+  double n_qcd(0.);
+  double n_qcd_cr(0.);
+  double qcd_alpha(0.);
+  double err_qcd_alpha(0.);
+  double err_qcd_fjrb(0.);
+  double err_qcd_fitstat(0.);
+  double err_qcd_fitsyst(0.);
+
+  double n_bkg(0.);
+  double n_data(0.);
 
   double n_sig(0.);
   double n_sig_cor(0.);
@@ -210,6 +238,9 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TH1D* h_sig_btagsf_light_UP(0);
   TH1D* h_sig_lepeff_UP(0);
   TH1D* h_sig_isr_UP(0);
+
+  bool usingInclusiveTemplates(true);
+
   // pick point out of signal scan
   if (scanM1 >= 0 && scanM2 >= 0) {
     TH3D* h_sigscan = (TH3D*) f_sig->Get(fullhistnameScan);
@@ -687,6 +718,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double zinv_mcsyst = -1.;
   double zinv_shape = 1.;
 
+  if (zinv_alpha > 0.) last_zinv_transfer = zinv_alpha; // cache last good alpha value
+  else if (n_zinv == 0) zinv_alpha = 0;
+  else zinv_alpha = last_zinv_transfer;   // if alpha is 0: use alpha from previous (MT2) bin
+
   //zinv Estimate from DY nuisances
   // nuisances decorrelated across all bins
   TString name_zinvDY_alphaErr      = Form("zinvDY_alphaErr_%s"        , channel.c_str());
@@ -915,8 +950,10 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofile <<  Form("bin             %s   %s   %s   %s",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str()) << endl;
   ofile <<  "process          sig       zinv        llep      qcd"                                      << endl; 
   ofile <<  "process           0         1           2         3"                                      << endl;
-  if (doZinvFromDY) ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_cor_recogenaverage,n_zinvDY,n_lostlep,n_qcd) << endl;
-  else ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_cor_recogenaverage,n_zinv,n_lostlep,n_qcd) << endl;
+  if (doZinvFromDY)
+    ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_cor_recogenaverage,n_zinvDY,n_lostlep,n_qcd) << endl;
+  else
+    ofile <<  Form("rate            %.3f    %.3f      %.3f      %.3f",n_sig_cor_recogenaverage,n_zinv,n_lostlep,n_qcd) << endl;
   ofile <<  "------------"                                                                  << endl;
  
   // ---- sig systs
@@ -1015,6 +1052,14 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString tablename = Form("%s/table_%s.txt",output_dir.c_str(),channel.c_str());
   if (printTable && !FileExists(tablename)) {
     //calculate the stat error for each background based on poisson interval
+
+    double zinv_statUp, zinv_statDown;
+    RooHistError::instance().getPoissonInterval(n_zinv_cr,zinv_statDown,zinv_statUp,1.);
+    zinv_statUp   *= (n_zinv_cr>0) ? n_zinv/n_zinv_cr : (zinv_alpha>0) ?  zinv_alpha : last_zinv_transfer;
+    zinv_statDown *= (n_zinv_cr>0) ? n_zinv/n_zinv_cr : (zinv_alpha>0) ?  zinv_alpha : last_zinv_transfer;  
+    zinv_statUp    = abs(zinv_statUp - n_zinv);
+    zinv_statDown  = abs(zinv_statDown - n_zinv);
+
     double zinvDY_statUp, zinvDY_statDown;
     RooHistError::instance().getPoissonInterval(n_zinvDY_cr,zinvDY_statDown,zinvDY_statUp,1.);
     zinvDY_statUp   *= (n_zinvDY_cr>0) ? n_zinvDY/n_zinvDY_cr : (zinvDY_alpha>0) ?  zinvDY_alpha : last_zinvDY_transfer;
@@ -1043,6 +1088,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     }
     else zinvDY_syst = n_zinvDY*pow(pow(1-zinvDY_alphaErr,2)+pow(1-zinvDY_puritystat,2)+pow(1-zinvDY_rsfof,2),0.5);
 
+    double zinv_syst = n_zinv*pow(pow(1-zinv_alphaerr,2)+pow(1-zinv_puritysyst,2)+pow(1-zinv_purityerr,2)+pow(1-zinv_shape,2)+pow(1-zinv_zgamma,2)+pow(1-zinv_doubleRatioOffset,2),0.5);
     
     double lostlep_syst;
     if (n_mt2bins > 1 && mt2bin >= lostlep_lastbin_hybrid) {
@@ -1059,15 +1105,20 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     //write the table
     ofstream tablefile;
     tablefile.open(tablename);
-    tablefile <<  "### bg_name yield statUp statDown systUp systDown" << endl;
-    tablefile << Form("zinv  %.1f  %.1f  %.1f  %.1f  %.1f ",n_zinvDY, zinvDY_statUp, zinvDY_statDown, zinvDY_syst, zinvDY_syst) << endl;
-    tablefile << Form("llep  %.1f  %.1f  %.1f  %.1f  %.1f ",n_lostlep, lostlep_statUp, lostlep_statDown, lostlep_syst, lostlep_syst) << endl;
-    tablefile << Form("qcd  %.1f  %.1f  %.1f  %.1f  %.1f ",n_qcd, qcd_statUp, qcd_statDown, qcd_syst, qcd_syst) << endl;
-    tablefile << Form("data %.0f ", n_data) << endl;
-    tablefile << Form("zinv_nCR %.0f ", n_zinvDY_cr) << endl;
-    tablefile << Form("llep_nCR %.0f ", n_lostlep_cr) << endl;
-    tablefile << Form("qcd_nCR %.0f ", n_qcd_cr) << endl;
-    
+    tablefile <<  "# " << binname << " " << channel << endl;
+    tablefile <<  "# name " << setw(7) << "yield " << setw(9) << "statUp " << setw(9) << "statDown" << setw(9) << "systUp " << setw(9) << "systDown" << endl;
+    tablefile << setprecision(3);
+    // if (doZinvFromDY)
+    //   tablefile << "zinvDY  " << setw(4) << n_zinvDY << setw(9) << zinvDY_statUp << setw(9) << zinvDY_statDown << setw(9) << zinvDY_syst << setw(9) << zinvDY_syst << endl;
+    tablefile << "zinv    " << setw(4) << n_zinv << setw(9) << zinv_statUp << setw(9) << zinv_statDown << setw(9) << zinv_syst << setw(9) << zinv_syst << endl;
+    tablefile << "llep    " << setw(4) << n_lostlep << setw(9) << lostlep_statUp << setw(9) << lostlep_statDown << setw(9) << lostlep_syst << setw(9) << lostlep_syst << endl;
+    tablefile << "qcd     " << setw(4) << n_qcd << setw(9) << qcd_statUp << setw(9) << qcd_statDown << setw(9) << qcd_syst << setw(9) << qcd_syst << endl;
+    tablefile << "data    " << setw(4) << n_data << endl;
+
+    tablefile << "zinv_nCR" << setw(4) << n_zinvDY_cr << endl;
+    tablefile << "llep_nCR" << setw(4) << n_lostlep_cr << endl;
+    tablefile << "qcd_nCR " << setw(4) << n_qcd_cr << endl;
+
     tablefile.close();
     
     if (verbose) std::cout << "Wrote table: " << tablename << std::endl;
@@ -1122,11 +1173,13 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
   while ((k = (TKey *)it())) {
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
+      string sr_string = k->GetTitle();
+      // if (sr_string[2] < 'A' || sr_string[2] == 'b' || sr_string[2] == 'I') continue;
+      if (sr_string[2] != 'H') continue; // only one search at a time
       string mt2_hist_name = (k->GetTitle());
       mt2_hist_name += "/h_n_mt2bins";
-      TH1D* h_n_mt2bins = (TH1D*) f_sig->Get(TString(mt2_hist_name));
-      int n_mt2bins = h_n_mt2bins->GetBinContent(1);
-      for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) {//Make a separate card for each MT2 bin.
+      int n_mt2bins = getHistBin(f_sig, mt2_hist_name, 1, true);
+      for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) { // Make a separate card for each MT2 bin.
 	if (isScan) {
 	  int y_binwidth = 25;
 	  int y_max = 1600;
