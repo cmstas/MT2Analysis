@@ -1174,8 +1174,8 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       string sr_string = k->GetTitle();
-      // if (sr_string[2] < 'A' || sr_string[2] == 'b' || sr_string[2] == 'I') continue;
-      if (sr_string[2] != 'H') continue; // only one search at a time
+      if (sr_string[2] != 'H' && sr_string[2] != 'h' && sr_string[2] != 'Z') continue; // only one search at a time
+      string outdir = output_dir + "/" + sr_string[2] + "cand";
       string mt2_hist_name = (k->GetTitle());
       mt2_hist_name += "/h_n_mt2bins";
       int n_mt2bins = getHistBin(f_sig, mt2_hist_name, 1, true);
@@ -1190,13 +1190,13 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
 	  for (int im1 = 0; im1 <= 2300; im1 += 25) {
 	    for (int im2 = 0; im2 <= y_max; im2 += y_binwidth) {
 	      if (suppressUHmt2bin && TString(k->GetTitle()).Contains("UH") && imt2 == 1) continue;
-	      int result = printCard(k->GetTitle(), imt2, signal, output_dir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
+	      int result = printCard(k->GetTitle(), imt2, signal, outdir, im1, im2);   //MT2 and scan bins with no entries are handled by printCard function.
 	      if (result > 0) signal_points.insert( make_pair(im1,im2) ); 
 	    } // scanM2 loop
 	  } // scanM1 loop
 	} // if isScan
         else {
-	  printCard(k->GetTitle(), imt2, signal, output_dir);   //MT2 bins with no entries are handled by printCard function.
+	  printCard(k->GetTitle(), imt2, signal, outdir);   //MT2 bins with no entries are handled by printCard function.
 	}
       }
     }

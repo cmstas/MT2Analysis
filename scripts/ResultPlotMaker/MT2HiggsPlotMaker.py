@@ -51,7 +51,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
         g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down/tot_pred, tot_unc_up/tot_pred)
 
-        binLabels.append(mt2name)
+        binLabels.append(mt2name[1:])
 
     h_bkg_vec[0].SetFillColor(418)
     h_bkg_vec[1].SetFillColor(ROOT.kAzure+4)
@@ -283,7 +283,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         os.makedirs(outdir)
     except:
         pass
-    c.SaveAs(os.path.join(outdir,name+".pdf"))
+    c.SaveAs(os.path.join(outdir,name+"_"+srnames[0][:3]+".pdf"))
     # c.SaveAs(os.path.join(outdir,name+".png"))
     
     h_data.Delete()
