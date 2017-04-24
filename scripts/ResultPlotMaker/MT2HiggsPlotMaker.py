@@ -7,8 +7,6 @@ import ppmUtils
 def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     card_names = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[9:13]!="base"]
     card_names.sort()
-    # for x in card_names:
-    #     print x
 
     nBinsTotal = len(card_names)
     bkg_processes = ["zinv","llep","qcd"]
@@ -32,7 +30,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         ibin += 1
         mt2left = mt2name.split("to")[0][1:]
         mt2right = mt2name.split("to")[1]
-        if mt2right == "Inf": mt2right = "#infty" 
+        if mt2right == "Inf": mt2right = "#infty"
 
         # get yields. first entry is data, rest are background predictions
         procs = utils.GetEverythingFromTablecard(os.path.join(card_dir,cardname))
@@ -47,7 +45,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         h_pred.SetBinContent(ibin, tot_pred)
         thisPoint = g_unc.GetN()
         g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
-        g_unc.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down, tot_unc_up)            
+        g_unc.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down, tot_unc_up)
         g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
         g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down/tot_pred, tot_unc_up/tot_pred)
 
@@ -56,7 +54,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     h_bkg_vec[0].SetFillColor(418)
     h_bkg_vec[1].SetFillColor(ROOT.kAzure+4)
     h_bkg_vec[2].SetFillColor(401)
-                
+
     stack = ROOT.THStack("bkg_stack","")
     for j in range(nBkgs):
         h_bkg_vec[nBkgs-1-j].SetLineWidth(1)
@@ -93,11 +91,11 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     pads[0].cd()
 
     pads[0].SetLogy(1)
-    # pads[0].SetTickx(1)        
+    # pads[0].SetTickx(1)
     pads[1].SetTickx(1)
     pads[0].SetTicky(1)
     pads[1].SetTicky(1)
-    
+
     yMin = 1e-3
     if userMax!=None:
         yMax = userMax
@@ -118,7 +116,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
 
     # draw the backgrounds
     stack.Draw("SAME HIST")
-    
+
     # draw the prediction uncertainties
     g_unc.SetFillStyle(3244)
     g_unc.SetFillColor(ROOT.kGray+3)
@@ -131,10 +129,10 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     g_data.SetMarkerStyle(20)
     g_data.SetMarkerSize(1.2)
     g_data.SetLineWidth(1)
-    
+
     # draw the graph and then axes again on top
     if printData:
-        g_data.Draw("SAME P")      
+        g_data.Draw("SAME P")
         h_data.Draw("SAME AXIS")
 
     # save for later
@@ -155,7 +153,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         x = left + (ibin+0.5)*binWidth
         y = pads[0].GetBottomMargin()-0.009
         text.DrawLatex(x,y,binLabels[ibin])
-        
+
     # draw the "Pre-fit background" text
     text.SetTextAlign(13)
     text.SetTextFont(42)
@@ -208,7 +206,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         # text.DrawLatex(xcenter,y-text.GetTextSize()-0.001,lines[2:])
 
         x = left+binWidth*ibin
-        line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*0.85)        
+        line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*0.85)
         ibin += srcount[isr]
 
     # legend
@@ -225,7 +223,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     ####################
     #### RATIO PLOT ####
     ####################
-    
+
     if printData:
         pads[1].cd()
         h_ratio = h_bkg_vec[0].Clone("h_ratio") #h_ratio is just a dummy histogram to draw axes correctly
@@ -272,7 +270,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         ibin = 0
         for i in range(len(jbj_regs)-1):
             ibin += len(mt2bins[i])-1
-            line.DrawLine(ibin,0,ibin,2)        
+            line.DrawLine(ibin,0,ibin,2)
 
         h_ratio.Draw("SAME AXIS")
         g_ratio.Draw("SAME P0")
@@ -285,10 +283,68 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         pass
     c.SaveAs(os.path.join(outdir,name+"_"+srnames[0][:3]+".pdf"))
     # c.SaveAs(os.path.join(outdir,name+".png"))
-    
+
     h_data.Delete()
     g_data.Delete()
     # h_ratio.Delete()
     # g_ratio.Delete()
     for h in h_bkg_vec:
         h.Delete()
+
+
+def MakeTablesFromTablecards(card_dir, outdir, userMax=None, printData=True):
+    card_names = [f for f in os.listdir(card_dir) if f[:5]=="table"]
+    card_names.sort()
+
+    cardname = card_names[0]
+
+    table = printTableFromCard(card_dir, cardname)
+    print table
+
+
+def printTableFromCard(card_dir, cardname, printData=True):
+    content = ["zinv", "llep", "qcd"]
+    ncols = 1
+    text  = "\\begin{table}[!ht]\n"
+    text += "\\caption{"+"}\n"
+    text += "\\centering\n"
+    text += "\\begin{tabular}{r" + "|c"*ncols + "}\n"
+    text += "\\hline\n"
+
+    srname, htname, jbjname, mt2name = utils.GetRegsFromCardName(cardname)
+    procs = utils.GetEverythingFromTablecard(os.path.join(card_dir,cardname))
+
+    # title = srname + htname + jbjname
+    title = srname
+    binName = mt2name.split("to")[0][1:]+" $<$ mt2 $<$ "+mt2name.split("to")[1]
+
+    text += "\\hline \n"
+    text += "\\multicolumn{{{0}}}{{c}}{{{1}}} \\\\ \n".format(ncols+1, title)
+    text += "\\hline \n\\hline \n"
+    text += "Sample & "+binName+" \\\\ \n"
+
+    for bkg in content:
+        yields = procs[bkg][0]
+        stat_up = procs[bkg][1][0]
+        stat_dn = procs[bkg][1][1]
+        syst_up = procs[bkg][1][2]
+        syst_dn = procs[bkg][1][3]
+
+        text += bkg+" & "
+        text += "{0}".format(yields)
+        if stat_up == stat_dn:
+            text += "\\pm {0}(\\rm{{stat}})".format(stat_up)
+        else:
+            text += "^{{+{0}}}_{{-{1}}}(\\rm{{stat}})".format(stat_up, stat_dn)
+        if syst_up == syst_dn:
+            text += "\\pm {0}(\\rm{{syst}})".format(syst_up)
+        else:
+            text += "^{{+{0}}}_{{-{1}}}(\\rm{{syst}})".format(syst_up, syst_dn)
+        text += " \\\\ \n"
+
+    # text += "\\hline \n"
+    text += "\\hline \\hline \n"
+    text += "\end{tabular}\n"
+    text += "\end{table}\n"
+
+    return text

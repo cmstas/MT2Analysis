@@ -34,7 +34,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   float SRBase_mt2bins[4] = {200, 300, 500, 1000}; 
   SRBase.SetMT2Bins(3, SRBase_mt2bins);
 
-  SRBase.SetName("Incl2h");
+  SRBase.SetName("hIncl2h");
   SRBase.SetVarAll("nhcand", 2, -1);
   SRBase.SetVarAll("mbbmax", 0, -1);
   SRBase.SetVarAll("nZcand", 0, -1);

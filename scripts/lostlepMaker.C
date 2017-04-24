@@ -449,7 +449,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     for ( int ibin = 1; ibin <= pred->GetNbinsX(); ++ibin) {
       float val = pred->GetBinContent(ibin);
       if (val <= 0.) continue;
-      float err_mcstat = h_lostlepMC_sr_finebin->GetBinError(ibin)/h_lostlepMC_sr_finebin->GetBinContent(ibin);
+      float err_mcstat = histMap["h_lostlepMC_sr"]->GetBinError(ibin)/histMap["h_lostlepMC_sr"]->GetBinContent(ibin);
       float err_datastat = (data_cr_totalyield > 0) ? sqrt(data_cr_totalyield)/data_cr_totalyield : 0.; // should never get 0 data CR yield and nonzero pred
       float err_shape = 0.;
       if (n_mt2bins > 1) {
@@ -464,6 +464,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
         }
       }
       float quadrature = err_mcstat*err_mcstat + err_datastat*err_datastat + err_shape*err_shape;
+      // cout << ibin << " " << err_mcstat << " " << err_datastat << "  " << err_shape << endl;
       quadrature += 0.10 * 0.10;  // alphaerr
       quadrature += 0.15 * 0.15;  // lepeff
       quadrature += 0.03 * 0.03;  // mtcut
@@ -565,7 +566,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp", string dataname = "data_Run2016"){
+void lostlepMaker(string input_dir = "../MT2looper/output/temp", string dataname = "data_Run2016"){
 
   string output_name = input_dir+"/lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;

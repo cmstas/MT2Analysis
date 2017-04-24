@@ -3470,6 +3470,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
         int lower_edge = h_mt2bins->GetBinLowEdge(j);
         int upper_edge = h_mt2bins->GetBinLowEdge(j+1);
         label = string(dirsAll[i]).erase(0, sr.length()+1) + ": [" + to_string(lower_edge) + "," + ((upper_edge == 1500)? "#infty" : to_string(upper_edge)) + "]";
+        // cout << dirsAll[i].at(2) << label << endl;
       } else {
         cout << "In " << dirsAll[i] << " i = " << i << " the h_mt2bins hist is not found!!\n";
       }
@@ -3500,10 +3501,10 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
   leg->SetBorderSize(0);
   leg->SetTextSize(0.042);
   // leg->SetNColumns(2);
-  // leg->AddEntry(hSR_all, "original");
   if (hSR_stk->GetHists() == nullptr) { cout << "SR stack not getting histograms!\n"; return; }
   for (unsigned int i = 0; i < names.size(); ++i)
     leg->AddEntry(hSR_stk->GetHists()->At(i), names.at(i).c_str());
+  if (hSR_data) leg->AddEntry(hSR_data, "data");
   leg->Draw("same");
 
   TH1F* h_axis_ratio(0);
@@ -4122,11 +4123,11 @@ void plotMakerHcand() {
   vector<TFile*> samples4= getSamples(names4, input_dir);
   // names4 = vector<string>{"lostlep", "Zinv"};
 
-  makeSRyieldsHist(samples4, names4, "h", "", "H");
-  makeSRyieldsHist(samples4, names4, "h", "", "L");
-  makeSRyieldsHist(samples4, names4, "H", "", "", "U");
-  makeSRyieldsHist(samples4, names4, "H", "", "", "M");
-  makeSRyieldsHist(samples4, names4, "Z");
+  // makeSRyieldsHist(samples4, names4, "h", "", "H");
+  // makeSRyieldsHist(samples4, names4, "h", "", "L");
+  // makeSRyieldsHist(samples4, names4, "H", "", "", "U");
+  // makeSRyieldsHist(samples4, names4, "H", "", "", "M");
+  // makeSRyieldsHist(samples4, names4, "Z");
 
   // vector<string> names2 = {"qcdplusgjet", "wjets_ht", "top", "dyjetsll_ht", "zinv_ht", "data_Run2016"};
   vector<string> names2 = {"wjets_ht", "top", "dyjetsll_ht", "data_Run2016"};
@@ -4147,7 +4148,6 @@ void plotMakerHcand() {
   // makeSRyieldsHist(dy_samples, dy_names, "H", "", "", "M", "crdy");
   // makeSRyieldsHist(dy_samples, dy_names, "Z", "", "", "",  "crdy");
 
-
   vector<string> names3 = {"fakephoton", "qcdplusgjet", "data_Run2016"};
   // vector<string> names3 = {"qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples3= getSamples(names3, input_dir);
@@ -4161,7 +4161,7 @@ void plotMakerHcand() {
   dirsH.push_back("srhbase");
   dirsH.push_back("srHbase");
   dirsH.push_back("srZbase");
-  // printTable(samples, names, dirsH, "");
+  printTable(samples, names, dirsH, "");
   // printComparisonTable(samples, names, vector<string>{"original"}, dirsH, "srhbase");
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
