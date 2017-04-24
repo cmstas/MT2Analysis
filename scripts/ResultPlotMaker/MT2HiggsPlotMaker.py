@@ -1,8 +1,11 @@
 import ROOT
 import os
 import sys
+import math
+import collections
 import ResultPlotUtils as utils
 import ppmUtils
+
 
 def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     card_names = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[9:13]!="base"]
@@ -296,17 +299,36 @@ def MakeTablesFromTablecards(card_dir, outdir, userMax=None, printData=True):
     card_names = [f for f in os.listdir(card_dir) if f[:5]=="table"]
     card_names.sort()
 
-    cardname = card_names[0]
+    fn = outdir+"/table_"+card_names[0][8]+".tex"
+    f = open(fn, 'w')
+    print >> f, ""
+    print >> f, "\\documentclass[11pt]{article}"
+    print >> f, "\\usepackage{amsmath}"
+    print >> f, "\\usepackage{amssymb}"
+    print >> f, "\\usepackage{graphicx}"
+    print >> f, "\\usepackage[left=1in,top=1in,right=1in,bottom=1in,nohead]{geometry}"
+    print >> f, "\\usepackage{multirow}"
+    print >> f, "\\usepackage{float}"
+    print >> f, "\\newcommand{\\MET}{\\rm{MET}}"
+    print >> f, "\\newcommand{\\mttwo}{\\ensuremath{M_{\\rm{T2}}\\,}}"
+    print >> f, "\\begin{document}\n"
 
-    table = printTableFromCard(card_dir, cardname)
-    print table
+
+    for cardname in card_names:
+        table = printTableFromCard(card_dir, cardname)
+        print >> f, table
+
+    print >> f, "\\end{document}"
+
+    f.close()
 
 
 def printTableFromCard(card_dir, cardname, printData=True):
     content = ["zinv", "llep", "qcd"]
+    detected = ["zinv_nCR", "llep_nCR"]
     ncols = 1
-    text  = "\\begin{table}[!ht]\n"
-    text += "\\caption{"+"}\n"
+    text  = "\\begin{table}[H]\n"
+    # text += "\\caption{"+"}\n"
     text += "\\centering\n"
     text += "\\begin{tabular}{r" + "|c"*ncols + "}\n"
     text += "\\hline\n"
@@ -314,24 +336,35 @@ def printTableFromCard(card_dir, cardname, printData=True):
     srname, htname, jbjname, mt2name = utils.GetRegsFromCardName(cardname)
     procs = utils.GetEverythingFromTablecard(os.path.join(card_dir,cardname))
 
-    # title = srname + htname + jbjname
-    title = srname
+    title = srname[2:]+": "+htname+" "+jbjname.split("_")[0]+" "+jbjname.split("_")[1]
+    # title = srname
     binName = mt2name.split("to")[0][1:]+" $<$ mt2 $<$ "+mt2name.split("to")[1]
 
-    text += "\\hline \n"
+    text += "\\hline\n"
     text += "\\multicolumn{{{0}}}{{c}}{{{1}}} \\\\ \n".format(ncols+1, title)
-    text += "\\hline \n\\hline \n"
+    text += "\\hline\n\\hline \n"
     text += "Sample & "+binName+" \\\\ \n"
+    text += "\\hline\n"
 
+    tot_pred = 0.0
+    tot_stat_up = 0.0
+    tot_stat_dn = 0.0
+    tot_syst_up = 0.0
+    tot_syst_dn = 0.0
     for bkg in content:
         yields = procs[bkg][0]
         stat_up = procs[bkg][1][0]
         stat_dn = procs[bkg][1][1]
         syst_up = procs[bkg][1][2]
         syst_dn = procs[bkg][1][3]
+        tot_pred += yields
+        tot_stat_up += stat_up**2
+        tot_stat_dn += stat_dn**2
+        tot_syst_up += syst_up**2
+        tot_syst_dn += syst_dn**2
 
         text += bkg+" & "
-        text += "{0}".format(yields)
+        text += "${0}".format(yields)
         if stat_up == stat_dn:
             text += "\\pm {0}(\\rm{{stat}})".format(stat_up)
         else:
@@ -340,9 +373,31 @@ def printTableFromCard(card_dir, cardname, printData=True):
             text += "\\pm {0}(\\rm{{syst}})".format(syst_up)
         else:
             text += "^{{+{0}}}_{{-{1}}}(\\rm{{syst}})".format(syst_up, syst_dn)
-        text += " \\\\ \n"
+        text += "$ \\\\ \n"
+    text += "\\hline \n"
 
-    # text += "\\hline \n"
+    tot_stat_up = math.sqrt(tot_stat_up)
+    tot_stat_dn = math.sqrt(tot_stat_dn)
+    tot_syst_up = math.sqrt(tot_syst_up)
+    tot_syst_dn = math.sqrt(tot_syst_dn)
+    text += "Total & "
+    text += "${0}".format(tot_pred)
+    if tot_stat_up == tot_stat_dn:
+        text += "\\pm {0:.2f}(\\rm{{stat}})".format(tot_stat_up)
+    else:
+        text += "^{{+{0:.2f}}}_{{-{1:.2f}}}(\\rm{{stat}})".format(tot_stat_up, tot_stat_dn)
+    if tot_syst_up == tot_syst_dn:
+        text += "\\pm {0:.2f}(\\rm{{syst}})".format(tot_syst_up)
+    else:
+        text += "^{{+{0:.2f}}}_{{-{1:.2f}}}(\\rm{{syst}})".format(tot_syst_up, tot_syst_dn)
+    text += "$ \\\\ \n"
+    text += "\\hline\\hline \n"
+
+    for ncr in detected:
+        text += ncr[:-4]+" nCR & "
+        yields = procs[ncr][0]
+        text += "${0}$ \\\\ \n".format(int(yields))
+
     text += "\\hline \\hline \n"
     text += "\end{tabular}\n"
     text += "\end{table}\n"
