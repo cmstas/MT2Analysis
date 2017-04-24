@@ -30,6 +30,33 @@ def GetYieldsFromDatacard(datacard_fname, bkg_names):
 
     return [obs]+bkg_rates
 
+def GetEverythingFromTablecard(card_fname):
+    lines = open(card_fname).readlines()
+    procs = {}
+    for line in lines:
+        if line.startswith("#"): continue
+        line = line.split()
+        name = line[0]
+        rate = float(line[1])
+        errs = [float(x) for x in line[2:]]
+        procs[name] = [rate, errs]
+
+    return procs
+
+def GetTotalBackgroundNumbers(procs, bkg_names):
+    tot_pred = 0.0
+    tot_unc_up_sq = 0.0
+    tot_unc_down_sq = 0.0
+    for name in bkg_names:
+        if name in procs:
+            tot_pred += procs[name][0]
+            tot_unc_up_sq += procs[name][1][0]**2 + procs[name][1][2]**2
+            tot_unc_down_sq += procs[name][1][1]**2 + procs[name][1][3]**2
+        else:
+            raise RuntimeError("provided list of backgrounds does not match those in datacard!")
+
+    return tot_pred, math.sqrt(tot_unc_up_sq), math.sqrt(tot_unc_down_sq)
+
 ## returns a list of 2-tuples, one for each background.
 ## numbers are the upper and lower relative uncertainties
 ## for each background process
@@ -259,9 +286,21 @@ def GetHTtitle(ht_reg):
     if ht_reg == "HT575to1000": return "575 < H_{T} < 1000 GeV"
     if ht_reg == "HT1000to1500": return "1000 < H_{T} < 1500 GeV"
     if ht_reg == "HT1500toInf": return "H_{T} > 1500 GeV"
+    if ht_reg == "HT1000toInf": return "H_{T} > 1000 GeV"
     if ht_reg == "monojet": return "Monojet Region"
 
     return ht_reg
+
+def GetRegsFromCardName(cardname):
+    idfier = cardname.split("_")
+    if len(idfier) != 6: print "Wrong length!"
+    srname = idfier[1]
+    ht_reg = idfier[2]
+    jreg = idfier[3]
+    bjreg = idfier[4]
+    mt2bin = idfier[5][:-4]
+
+    return srname, ht_reg, jreg+"_"+bjreg, mt2bin
 
 def GetJBJtitle(jbj_reg):
     lines = ["",""]

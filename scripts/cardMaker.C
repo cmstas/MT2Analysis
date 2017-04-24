@@ -1049,7 +1049,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if (verbose) std::cout << "Wrote card: " << cardname << std::endl;
 
   //prints a table of background and CR yields, with systematic and statistical errors
-  TString tablename = Form("%s/table_%s.txt",output_dir.c_str(),channel.c_str());
+  TString tablename = Form("%s/table_%s_%s.txt",output_dir.c_str(),binname.c_str(),channel.c_str());
   if (printTable && !FileExists(tablename)) {
     //calculate the stat error for each background based on poisson interval
 
