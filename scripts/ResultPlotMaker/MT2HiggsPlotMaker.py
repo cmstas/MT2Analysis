@@ -7,9 +7,22 @@ import ResultPlotUtils as utils
 import ppmUtils
 
 
-def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
-    card_names = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[9:13]!="base"]
-    card_names.sort()
+def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
+    # card_names = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[9:13]!="base"]
+    card_names = []
+    temp = []
+    temp = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[10]=='V']
+    temp.sort()
+    card_names += temp
+    temp = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[10]=='L']
+    temp.sort()
+    card_names += temp
+    temp = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[10]=='M']
+    temp.sort()
+    card_names += temp
+    temp = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[10]=='H']
+    temp.sort()
+    card_names += temp
 
     nBinsTotal = len(card_names)
     bkg_processes = ["zinv","llep","qcd"]
@@ -74,7 +87,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     c = ROOT.TCanvas("c","c",900,600)
 
     pads = []
-    if printData:
+    if doData:
         pads.append(ROOT.TPad("1","1",0.0,0.18,1.0,1.0))
         pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.19))
     else:
@@ -134,7 +147,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     g_data.SetLineWidth(1)
 
     # draw the graph and then axes again on top
-    if printData:
+    if doData:
         g_data.Draw("SAME P")
         h_data.Draw("SAME AXIS")
 
@@ -169,7 +182,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     text.SetTextFont(62)
     text.SetTextAngle(0)
     text.SetTextSize(0.035)
-    text.DrawLatex(left+(1-right-left)*0.5, 1-top-0.01-0.04, srnames[0][:3])
+    text.DrawLatex(left+(1-right-left)*0.5, 1-top-0.01-0.04, srnames[0][2]+"-cand")
 
     # Draw the CMS and luminosity text
     ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
@@ -216,7 +229,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     leg = ROOT.TLegend(1-right-0.175,1-top-0.23,1-right-0.02,1-top-0.01)
     leg.SetBorderSize(1)
     leg.SetCornerRadius(0.3)
-    if printData:
+    if doData:
         leg.AddEntry(g_data,"Data","lp")
     for i in range(nBkgs):
         leg.AddEntry(h_bkg_vec[i], utils.GetLegendName(bkg_processes[i]),'f')
@@ -227,7 +240,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
     #### RATIO PLOT ####
     ####################
 
-    if printData:
+    if doData:
         pads[1].cd()
         h_ratio = h_bkg_vec[0].Clone("h_ratio") #h_ratio is just a dummy histogram to draw axes correctly
         h_ratio.Reset()
@@ -295,7 +308,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, printData=True):
         h.Delete()
 
 
-def MakeTablesFromTablecards(card_dir, outdir, userMax=None, printData=True):
+def MakeTablesFromTablecards(card_dir, outdir, userMax=None, doData=True):
     card_names = [f for f in os.listdir(card_dir) if f[:5]=="table"]
     card_names.sort()
 
@@ -323,7 +336,7 @@ def MakeTablesFromTablecards(card_dir, outdir, userMax=None, printData=True):
     f.close()
 
 
-def printTableFromCard(card_dir, cardname, printData=True):
+def printTableFromCard(card_dir, cardname, doData=True):
     content = ["zinv", "llep", "qcd"]
     detected = ["zinv_nCR", "llep_nCR"]
     ncols = 1

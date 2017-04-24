@@ -23,14 +23,14 @@ utils.lumi = 36.8
 # monojet is handled specially, just use "monojet" as the ht region name
 # MakePlot("monojet",datacard_dir, datacard_name, outdir, userMax=7e7)
 
-MakePlotFromTablecards(datacard_dir+"/hcand", outdir, printData=False)
-MakePlotFromTablecards(datacard_dir+"/Hcand", outdir, printData=False)
-MakePlotFromTablecards(datacard_dir+"/Zcand", outdir, printData=False)
+MakePlotFromTablecards(datacard_dir+"/hcand", outdir, doData=False)
+MakePlotFromTablecards(datacard_dir+"/Hcand", outdir, doData=False)
+MakePlotFromTablecards(datacard_dir+"/Zcand", outdir, doData=False)
 
 outdir = "table_test"
-MakeTablesFromTablecards(datacard_dir+"/hcand", outdir, printData=False)
-MakeTablesFromTablecards(datacard_dir+"/Hcand", outdir, printData=False)
-MakeTablesFromTablecards(datacard_dir+"/Zcand", outdir, printData=False)
+MakeTablesFromTablecards(datacard_dir+"/hcand", outdir, doData=False)
+MakeTablesFromTablecards(datacard_dir+"/Hcand", outdir, doData=False)
+MakeTablesFromTablecards(datacard_dir+"/Zcand", outdir, doData=False)
 
 # datacard_dir_eth = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/cards_test_eth"
 # datacard_name_eth = "datacard_{0}_{1}_{2}.txt"
