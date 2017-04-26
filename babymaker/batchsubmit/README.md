@@ -1,4 +1,3 @@
-
 # Running MT2 Looper In Batch Mode and Processing Babies
 
 ## Environment setup
@@ -152,37 +151,34 @@ And we have a wrapper bash script to run this on multiple samples:
 The directory also contains other skimming scripts for specific purposes.
 
 
+#  Instructions for running MT2 baby making within the AutoTwopler framework   #
 
+> Currently the private samples has to be published in order to be tupled by the AutoTwopler.
 
-
-#################################################################################
-#                                                                               #
-#   Instructions for running MT2 baby making within the AutoTwopler framework   #
-#                                                                               #
-#################################################################################
-
-1. Need to checkout NtupleTools inside of MT2Analysis
+## 1. Need to checkout NtupleTools inside of MT2Analysis
 ``` bash
 git clone git@github.com:cmstas/NtupleTools.git
 ```
 
-2. Run setup script (in NtupleTools/AutoTwopler) - this needs to be done in every session
+## 2. Run setup script for `AutoTwopler` - this needs to be done in every session
 ``` bash
+cd NtupleTools/AutoTwopler
 . setup.sh
 ```
 
-3. Prepare input files for job submission (in MT2Analysis/babymaker/batchsubmit)
+## 3. Prepare input files for job submission (in MT2Analysis/babymaker/batchsubmit)
+From the  `batchsubmit` folder, 
 ``` bash
 . make_job_inputs.sh
 ```
 
-4. Job submission
+## 4. Job submission
 
-User interaction primarily happens with mt2.py and ducks.py, both inside of MT2Analysis/babymaker/batchsubmit.
+User interaction primarily happens with `mt2.py` and `ducks.py`, both inside of `MT2Analysis/babymaker/batchsubmit`.
 The file mt2.py should only need to be touched rarely.  It contains dataset --> shortname mapping for samples and default mt2 configuration parameters.
-Most interaction is through ducks.py, which is also where parameters from mt2.py can (and should) be overridden, like the ntuple tag.
+Most interaction is through `ducks.py`, which is also where parameters from `mt2.py` can (and should) be overridden, like the ntuple tag.
 
-5. Launching jobs
+## 5. Launching jobs
 ``` bash
 python ducks.py
 ```

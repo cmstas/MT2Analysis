@@ -10,37 +10,6 @@ cd MT2Analysis
 git checkout mt2higgs
 source setup.sh
 ```
-
-## The mt2higgs Branch Workflow
-The mt2higgs studies can directly run on the babies genenrated by the standard MT2 search.
-### 1. Run on the MT2looper
-Before runing, check the signal regions definition at `MT2CORE/sigSelectionsMT2Higgs.cc`
-``` bash
-cd MT2looper
-. do.sh
-```
-### 2. Do the data-driven Estimates
-This step will also combined the output files to a more compact format
-``` bash
-cd scripts
-. makeDataDrivenEstimates.sh
-```
-### 3. Do the SRyieldsHist and SR yields Tables
-Choose the desired SRs and the proper funcion in the file and then run
-``` bash
-edit plotMakerHcand.C
-root -b -q plotMakerHcand.C
-```
-the output of plots will be in the folder `plots/` and the tables will be in the file `tables/table.tex`
-
-### 4. Make kinematic plots
-Though kinematic plots can also be made by the plotMaker in previous step, a nicer version can be made by the `pyPlotMaker`
-``` bash
-cd CRplotMaker
-edit do.py
-python do.py
-```
-
 ## Babymaker
 ### For a test run
 ``` bash
@@ -53,18 +22,12 @@ See further instructions in the `README.md` in folder
 babymaker/batchsubmit
 ```
 
-## Laptop setup to run on MT2babies
-(this assumes you already have root setup)
-``` bash
-git clone git@github.com:cmstas/MT2Analysis.git
-cd MT2Analysis/MT2looper
-make
-```
-
-## Executing main analysis
+## Executing main analysis for mt2higgs
 Starting from the (skimmed) babies:
+Note: The mt2higgs studies can directly run on the babies genenrated by the standard MT2 search.
 
 ### Run MT2looper to produce root histogram files
+Before runing, check the signal regions definition at `MT2CORE/sigSelectionsMT2Higgs.cc`.
 Go to `MT2looper` and modify `INDIR`, `OUTDIR`, and `Samples` in `do.sh`, then do:
 ``` bash
 . do.sh
@@ -73,6 +36,13 @@ Go to `MT2looper` and modify `INDIR`, `OUTDIR`, and `Samples` in `do.sh`, then d
 Go to `scripts` and modify `INDIR` in `makeDataDrivenEstimates.sh` to point to the output dir from `MT2looper`.  Then do:
 ``` bash
 . makeDataDrivenEstimates.sh
+```
+
+### Make kinematic plots
+Though kinematic plots can also be made by the plotMaker in previous step, a nicer version can be made by the `pyPlotMaker`. 
+In the folder, edit the `do.py` with correct information, then do:
+``` bash
+python do.py
 ```
 
 ### Merge histograms for signal scans, if necessary
@@ -88,6 +58,13 @@ Go to `scripts` and modify `INDIR`, `OUTDIR`, `DOFULLSCAN`, and `samples` in `ma
 root -b -q cardMaker.C+  # to compile
 . makeAllCards.sh
 ```
+### Do the SRyieldsHist and SR yields Tables
+When making the datacards, turn on the flag `printTable` and the tablecards summarizing the backgrounds and their uncertainties for each bin will be print in the same folder as the datacards.
+Then go to `ResultPlotMaker` and edit the `do.py` with the datacards/tablecards dir. Then do:
+``` bash
+python do.py
+```
+the output of plots and tables will be in the folder `plots/` and `tables/` subfolders.
 
 ### Run limits
 See instructions in `README` inside the `limits/batchsubmit` subdirectory.
