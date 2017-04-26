@@ -195,6 +195,14 @@ d_ds2name = {
         "/SMS-T2cc_genHT-160_genMET-80_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"  : "T2cc",
         "/SMS-T2bW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"           : "T2bW",
         "/SMS-T2bt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"           : "T2bt",
+    },
+    # -- MT2higgs private samples --
+    "private": {
+        "/T2ttZH_mStop-800_mLSP-1_mChi-200/namin-T2ttZH_mStop-800_mLSP-1_mChi-200_MINIAOD-ee14cf5d2abb146b2c2e6d14e223ce63/USER"       : "T2ttZH_800_200",
+        "/T2ttZH_mStop-800_mLSP-1_mChi-400/namin-T2ttZH_mStop-800_mLSP-1_mChi-400_MINIAOD-ee14cf5d2abb146b2c2e6d14e223ce63/USER"       : "T2ttZH_800_400",
+        "/T5qqqqWH_mGl-1100_mLSP-750_mChi-950/namin-T5qqqqWH_mGl-1100_mLSP-750_mChi-950_MINIAOD-ee14cf5d2abb146b2c2e6d14e223ce63/USER" : "T5qqqqWH_1100_950",
+        "/T5qqqqWH_mGl-1400_mLSP-1_mChi-200/namin-T5qqqqWH_mGl-1400_mLSP-1_mChi-200_MINIAOD-ee14cf5d2abb146b2c2e6d14e223ce63/USER"     : "T5qqqqWH_1400_200",
+        "/T5qqqqWH_mGl-1400_mLSP-1_mChi-700/namin-T5qqqqWH_mGl-1400_mLSP-1_mChi-700_MINIAOD-ee14cf5d2abb146b2c2e6d14e223ce63/USER"     : "T5qqqqWH_1400_700",
     }
 }
 
