@@ -23,6 +23,9 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     temp = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[10]=='H']
     temp.sort()
     card_names += temp
+    temp = [f for f in os.listdir(card_dir) if f[:5]=="table" and f[9]=='I']
+    temp.sort()
+    card_names += temp
 
     nBinsTotal = len(card_names)
     bkg_processes = ["zinv","llep","qcd"]

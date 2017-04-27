@@ -3367,7 +3367,7 @@ void makeSRyieldsHist(vector<TFile*> samples, vector<string> names, string prefi
     if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { // it is a signal region
       string sr_string = k->GetTitle();
-      if (bmetsuf != "" && *(sr_string.end()-1) != bmetsuf) continue;
+      if (bmetsuf != "" && *(sr_string.end()-1) != bmetsuf && sr_string != sr+"hIncl2h") continue;
       if (mbbsuf != "" && sr_string[3+sr.length()] != mbbsuf && sr_string != sr+"H1L") continue;
       dirsAll.push_back(sr_string);
       TH1F* nsrbin_hist = (TH1F*) samp->Get((sr_string + "/h_n_mt2bins").c_str());

@@ -31,18 +31,14 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   SRBase.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBase.SetVarCRQCD("deltaPhiMin", 0, 0.3);
   // SRBase.SetVarCRQCD("nbjets", 0, -1);
-  float SRBase_mt2bins[4] = {200, 300, 500, 1000}; 
-  SRBase.SetMT2Bins(3, SRBase_mt2bins);
-
-  SRBase.SetName("hIncl2h");
-  SRBase.SetVarAll("nhcand", 2, -1);
-  SRBase.SetVarAll("mbbmax", 0, -1);
-  SRBase.SetVarAll("nZcand", 0, -1);
-  SRVec.push_back(SRBase);
+  float SRBase_mt2bins[6] = {200, 300, 400, 500, 700, 1500}; 
+  SRBase.SetMT2Bins(5, SRBase_mt2bins);
 
   SRBase.SetName("hbase");
   SRBase.SetVarAll("njets", 0, -1);
   SRBase.SetVarAll("nhcand", 1, -1);
+  SRBase.SetVarAll("mbbmax", 0, -1);
+  SRBase.SetVarAll("nZcand", 0, -1);
   SRVec.insert(SRVec.begin(), SRBase);
 
   SRBase.SetName("Zbase");
@@ -54,6 +50,16 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   SRBase.SetVarAll("nZcand", 0, -1);
   SRBase.SetVarAll("mbbmax", 300, -1);
   SRVec.insert(SRVec.begin()+2, SRBase);
+
+  SRBase.SetName("hIncl2h");
+  SRBase.SetVarAll("njets", 4, -1);
+  SRBase.SetVarAll("nbjets", 4, -1);
+  SRBase.SetVarAll("nhcand", 2, -1);
+  SRBase.SetVarAll("mbbmax", 0, -1);
+  SRBase.SetVarAll("nZcand", 0, -1);
+  float Incl2h_mt2bins[3] = {200, 300, 1500};
+  SRBase.SetMT2Bins(2, Incl2h_mt2bins);
+  SRVec.push_back(SRBase);
 
   return SRVec;
 }
