@@ -1132,7 +1132,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         // fix for private 80x signal samples made with xsec = 1 pb
         if (stringsample.Contains("T5qqqqWH_1400")) evtweight_ *= 0.02530;
         else if (stringsample.Contains("T5qqqqWH_1100")) evtweight_ *= 0.1635;
-        else if (stringsample.Contains("T2ttZH_800")) evtweight_ *= 0.2884;
+        else if (stringsample.Contains("T2ttZH_800")) evtweight_ *= 0.02833;
 
       } // !isData
 
