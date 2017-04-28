@@ -293,12 +293,14 @@ def GetHTtitle(ht_reg):
 
 def GetRegsFromCardName(cardname):
     idfier = cardname.split("_")
-    if len(idfier) != 6: print "Wrong length!"
+    if len(idfier) != 8: print "Wrong length!"
     srname = idfier[1]
     ht_reg = idfier[2]
     jreg = idfier[3]
     bjreg = idfier[4]
-    mt2bin = idfier[5][:-4]
+    mt2bin = idfier[5]
+    mbb = idfier[6]
+    mMTbmet = idfier[7][:-4]
 
     return srname, ht_reg, jreg+"_"+bjreg, mt2bin
 

@@ -329,19 +329,26 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if(nbjets_HI != -1) nbjets_HI_mod--;
   if(njets_HI != -1) njets_HI_mod--;
 
+  int minMTbmet_LOW = getHistBin(f_sig, dir+"/h_minMTbmet_LOW", 1);
+  int mbb_LOW = getHistBin(f_sig, dir+"/h_mbbmax_LOW", 1);
+  int mbb_HI = getHistBin(f_sig, dir+"/h_mbbmax_HI", 1);
+
   std::string ht_str = "HT" + to_string(ht_LOW) + "to" + to_string(ht_HI);
   std::string jet_str = (njets_HI_mod == njets_LOW) ? "j" + to_string(njets_LOW) : "j" + to_string(njets_LOW) + "to" + to_string(njets_HI_mod);
   std::string bjet_str = (nbjets_HI_mod == nbjets_LOW) ? "b" + to_string(nbjets_LOW) : "b" + to_string(nbjets_LOW) + "to" + to_string(nbjets_HI_mod);
   std::string mt2_str = "m" + to_string(mt2_LOW) + "to" + to_string(mt2_HI);
+  std::string mbb_str = "mbb" + to_string(mbb_LOW) + "to" + to_string(mbb_HI);
+  std::string mmt_str = (minMTbmet_LOW < 100)? "mMTL" : "mMTH";
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
   ReplaceString(ht_str, "-1", "Inf");
   ReplaceString(jet_str, "-1", "Inf");
   ReplaceString(bjet_str, "-1", "Inf");
   ReplaceString(mt2_str, "-1", "Inf");
+  ReplaceString(mbb_str, "-1", "Inf");
 
-  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str;
-  std::string topologicalR = ht_str + "_" + jet_str + "_" + bjet_str;
+  std::string channel = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mt2_str + "_" + mbb_str + "_" + mmt_str;
+  std::string topologicalR = ht_str + "_" + jet_str + "_" + bjet_str + "_" + mbb_str + "_" + mmt_str;
   
   // bin boundaries for CRSL, for lostlep systematic correlations
   TH1D* h_ht_LOW_crsl = (TH1D*) f_lostlep->Get(dir+"/h_ht_LOW");
@@ -364,14 +371,22 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   if(nbjets_HI_crsl != -1) nbjets_HI_crsl_mod--;
   if(njets_HI_crsl != -1) njets_HI_crsl_mod--;
 
+  int minMTbmet_crsl_LOW = getHistBin(f_lostlep, dir+"/h_minMTbmet_LOW", 1);
+  int mbb_crsl_LOW = getHistBin(f_lostlep, dir+"/h_mbbmax_LOW", 1);
+  int mbb_crsl_HI = getHistBin(f_lostlep, dir+"/h_mbbmax_HI", 1);
+
   std::string ht_str_crsl = "HT" + to_string(ht_LOW_crsl) + "to" + to_string(ht_HI_crsl);
   std::string jet_str_crsl = (njets_HI_crsl_mod == njets_LOW_crsl) ? "j" + to_string(njets_LOW_crsl) : "j" + to_string(njets_LOW_crsl) + "to" + to_string(njets_HI_crsl_mod);
   std::string bjet_str_crsl = (nbjets_HI_crsl_mod == nbjets_LOW_crsl) ? "b" + to_string(nbjets_LOW_crsl) : "b" + to_string(nbjets_LOW_crsl) + "to" + to_string(nbjets_HI_crsl_mod);
+  std::string mbb_str_crsl = "mbb" + to_string(mbb_crsl_LOW) + "to" + to_string(mbb_crsl_HI);
+  std::string mmt_str_crsl = (minMTbmet_crsl_LOW < 100)? "mMTL" : "mMTH";
   
   //Replace instances of "-1" with "inf" for variables with no upper bound.
   ReplaceString(ht_str_crsl, "-1", "Inf");
   ReplaceString(jet_str_crsl, "-1", "Inf");
   ReplaceString(bjet_str_crsl, "-1", "Inf");
+  ReplaceString(mbb_str_crsl, "-1", "Inf");
+  std::string topologicalR_crsl = ht_str_crsl + "_" + jet_str_crsl + "_" + bjet_str_crsl + "_" + mbb_str_crsl + "_" + mmt_str_crsl;
 
   TString cardname = Form("%s/datacard_%s_%s.txt",output_dir.c_str(),channel.c_str(),signame.Data());
 
@@ -638,19 +653,19 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   double lostlep_alphaerr = 1. + 0.10; // only used if doSimpleLostlepNuisances
  
   // nuisances decorrelated depending on extrapolation in hybrid method
-  TString name_lostlep_shape      = Form("llep_shape_%s_%s_%s"   , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_crstat     = Form("llep_CRstat_%s_%s_%s"  , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str());
-  TString name_lostlep_alphaerr = Form("llep_alpha_%s_%s_%s"     , ht_str_crsl.c_str(), jet_str_crsl.c_str(), bjet_str_crsl.c_str()); // only used if doSimpleLostlepNuisances
+  TString name_lostlep_shape    = Form("llep_shape_%s"  , topologicalR.c_str());
+  TString name_lostlep_crstat   = Form("llep_CRstat_%s" , topologicalR.c_str());
+  TString name_lostlep_alphaerr = Form("llep_alpha_%s"  , topologicalR.c_str());
   if (n_mt2bins > 1 && mt2bin >= lostlep_lastbin_hybrid) {
     // extrapolation: need shape uncertainty
     n_syst++;  // lostlep_shape
   } else {
     // bin-by-bin is used: no shape uncertainty, decorrelated CR uncertainty
-    name_lostlep_crstat     = Form("llep_CRstat_%s"  , channel.c_str());
+    name_lostlep_crstat = Form("llep_CRstat_%s", channel.c_str());
   }
 
   // nuisances decorrelated across all bins
-  TString name_lostlep_mcstat     = Form("llep_MCstat_%s"        , channel.c_str());
+  TString name_lostlep_mcstat = Form("llep_MCstat_%s" , channel.c_str());
 
   // nuisances correlated across all bins
   TString name_lostlep_lepeff     = Form("lep_eff");
