@@ -210,7 +210,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   // get susy xsec file
   TH1F* h_sig_xsec(0);
-  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos) || (baby_name.find("T5") != std::string::npos) || (baby_name.find("T6") != std::string::npos)) {
+  if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T2") != std::string::npos) || (baby_name.find("T5") != std::string::npos) || (baby_name.find("T6") != std::string::npos) || (baby_name.find("TChi") != std::string::npos)) {
     // determine which susy particle is being produced
     TString sparticle = "";
     if ((baby_name.find("T1") != std::string::npos) || (baby_name.find("T5") != std::string::npos)) sparticle = "gluino";
@@ -219,7 +219,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     else if (baby_name.find("T2tb") != std::string::npos) sparticle = "stop";
     else if (baby_name.find("T2qq") != std::string::npos) sparticle = "squark";
     else if (baby_name.find("T6") != std::string::npos) sparticle = "squark";
-    //else if (baby_name.find("TChi") != std::string::npos) sparticle = "chargino";
+    else if (baby_name.find("TChiW") != std::string::npos) sparticle = "c1c1";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
 
     TFile* f_xsec = new TFile("data/xsec_susy_13tev.root");
@@ -636,7 +636,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         if (verbose) cout << "before sparm values" << endl;
 
 	// assume that first sparm value is parent mass, second is LSP mass
-	if (evt_id >= 1000 && evt_id < 1200) {
+	if (evt_id >= 1000 && evt_id < 1300) {
 	  if (sparm_values().size() == 2) {
 	    GenSusyMScan1 = sparm_values().at(0);
 	    GenSusyMScan2 = sparm_values().at(1);
