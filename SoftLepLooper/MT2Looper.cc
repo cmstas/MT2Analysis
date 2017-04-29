@@ -2314,6 +2314,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 100, 0, 1000);
     plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 100, 0, 1000);
+    plot1D("h_J2pt"+s,       t.jet_pt[2], evtweight_, h_1d, ";p_{T}(jet3) [GeV]", 100, 0, 1000);
     plot1D("h_BJetpt"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
     plot1D("h_BJetptshort"+s,  bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 100);
     if (t.jet_btagCSV[0]>0.89) plot1D("h_BJetptLead"+s,       bjetPt_,   evtweight_, h_1d, ";p_{T}(bjet1) [GeV]", 100, 0, 1000);
