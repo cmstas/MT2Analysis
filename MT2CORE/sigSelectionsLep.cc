@@ -1065,60 +1065,125 @@ std::vector<SR> getSignalRegionsLep5withLepPt(){
   SR baseSR;
   
   //first set binning in HT-MET plane
+  //very low ht, 250-600
   sr.SetName("1"); 
-  sr.SetVar("met", 300, 600);
+  sr.SetVar("met", 250, 350);
+  sr.SetVar("ht", 250, 600);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("2"); 
+  sr.SetVar("met", 350, 450);
+  sr.SetVar("ht", 250, 600);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("3");
+  sr.SetVar("met", 450, 600);
+  sr.SetVar("ht", 250, 600);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("4"); 
+  sr.SetVar("met", 600, -1);
+  sr.SetVar("ht", 250, 600);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+
+  //low ht, 600-1000
+  sr.SetName("5"); 
+  sr.SetVar("met", 250, 350);
   sr.SetVar("ht", 600, 1000);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("2");
+  sr.SetName("6"); 
+  sr.SetVar("met", 350, 450);
+  sr.SetVar("ht", 600, 1000);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("7");
+  sr.SetVar("met", 450, 600);
+  sr.SetVar("ht", 600, 1000);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("8"); 
   sr.SetVar("met", 600, -1);
   sr.SetVar("ht", 600, 1000);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("3");
-  sr.SetVar("met", 300, 600);
+  //med ht, 1000-1500
+  sr.SetName("9"); 
+  sr.SetVar("met", 250, 350);
   sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("4");
+  sr.SetName("10"); 
+  sr.SetVar("met", 350, 450);
+  sr.SetVar("ht", 1000, 1500);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("11");
+  sr.SetVar("met", 450, 600);
+  sr.SetVar("ht", 1000, 1500);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("12");
   sr.SetVar("met", 600, 800);
   sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("5");
+  sr.SetName("13");
   sr.SetVar("met", 800, 1000);
   sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
 
-  sr.SetName("6");
-  sr.SetVar("met", 300, 600);
-  sr.SetVar("ht", 1500, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("7");
-  sr.SetVar("met", 600, 800);
-  sr.SetVar("ht", 1500, -1);
-  temp_SR_vec.push_back(sr);
-
-  sr.SetName("8");
-  sr.SetVar("met", 800, 1000);
-  sr.SetVar("ht", 1500, -1);
-  temp_SR_vec.push_back(sr);
-  sr.Clear();
-
-  sr.SetName("9");
+  sr.SetName("14");
   sr.SetVar("met", 1000, -1);
   sr.SetVar("ht", 1000, 1500);
   temp_SR_vec.push_back(sr);
   sr.Clear();
+  
+  //high ht, 1500+
+  sr.SetName("15"); 
+  sr.SetVar("met", 250, 350);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
 
-  sr.SetName("10");
+  sr.SetName("16"); 
+  sr.SetVar("met", 350, 450);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("17");
+  sr.SetVar("met", 450, 600);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("18");
+  sr.SetVar("met", 600, 800);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+
+  sr.SetName("19");
+  sr.SetVar("met", 800, 1000);
+  sr.SetVar("ht", 1500, -1);
+  temp_SR_vec.push_back(sr);
+  sr.Clear();
+
+  sr.SetName("20");
   sr.SetVar("met", 1000, -1);
   sr.SetVar("ht", 1500, -1);
   temp_SR_vec.push_back(sr);
