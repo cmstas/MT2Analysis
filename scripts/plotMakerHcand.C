@@ -49,6 +49,28 @@ float err_mult(float A, float B, float errA, float errB, float C) {
   return sqrt(C*C*(pow(errA/A,2) + pow(errB/B,2)));
 }
 
+inline double getHistBin(TFile* file, const TString hname, const int ibin = 1, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+  return (hist)? hist->GetBinContent(ibin) : 0.;
+}
+
+inline double getHistBinAndErr(TFile* file, const TString hname, const int ibin, double& err, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) {
+    cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+    return 0.;
+  }
+  err = hist->GetBinError(ibin);
+  return hist->GetBinContent(ibin);
+}
+
+inline double getHistIntegral(TFile* file, const TString hname, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+  return (hist)? hist->Integral(0, -1) : 0.;
+}
+
 void addOverflow(TH1* h) {
   Double_t err = 0;
   float lastBinPlusOverflow = h->IntegralAndError(h->GetXaxis()->GetNbins(), -1, err);
@@ -1614,7 +1636,7 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
   string sr = "sr";
   string cr = "crsl";
 
-  if (nselecs < 2) cout << "Use printTable instead!\n";
+  // if (nselecs < 2) cout << "Use printTable instead!\n";
 
   if (caption == "Detailed") { // temporary
     caption = dirs[0] + ": ";
@@ -1623,6 +1645,7 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
     caption += getMETTableLabel(samples.at(0), dirs[0]);
     caption += ", MT2 $>$ 200 GeV";
   }
+  caption = "DD Est. = DataCR * TF * k(mt2)";
 
   // vector<string> dirs_all = dirs;
   vector<vector<string>> dirsVec;
@@ -1812,14 +1835,15 @@ void printComparisonTableCRSL(vector<TFile*> samples, vector<string> names, vect
   return;
 }
 
-/*
-void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
+void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vector<string> dirs, string caption = "", bool dataMCratio = false, int colorReduction = 0, int mt2bin = -1) {
 
   // read off yields from h_mt2bins hist in each topological region
 
+  unsigned int n = samples.size();
   unsigned int ndirs = dirs.size();
 
-  if (nselecs < 2) cout << "Use printTable instead!\n";
+  string sr = "sr";
+  string cr = "crgj";
 
   if (caption == "Detailed") { // temporary
     caption = dirs[0] + ": ";
@@ -1827,12 +1851,14 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
     caption += getHTTableLabel(samples.at(0), dirs[0]) + ", ";
     caption += getMETTableLabel(samples.at(0), dirs[0]);
     caption += ", MT2 $>$ 200 GeV";
+  } else {
+    caption = "DD Est. = DataCR * ZGratio * Purity * 0.92 (Direct/AllPrompt) * 0.93 (R(Z/G) corrections)";
   }
 
   // vector<string> dirs_all = dirs;
   vector<vector<string>> dirsVec;
-  int nTabulars = ndirs*nselecs/8;
-  if ((ndirs*nselecs)%8 > 0) ++nTabulars;
+  int nTabulars = ndirs/8;
+  if ((ndirs)%8 > 0) ++nTabulars;
   int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
   auto it = dirs.begin();
   for (int i = 0; i < nTabulars; ++i) {
@@ -1851,29 +1877,18 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
     dirs = dirsVec[itab];
     ndirs = dirs.size();
 
-    vector<double> bgtot_cr(ndirs*nselecs, 0);
-    vector<double> bgerr_cr(ndirs*nselecs, 0);
-    vector<double> bgtot_sr(ndirs*nselecs, 0);
-    vector<double> bgerr_sr(ndirs*nselecs, 0);
+    vector<double> bgtot_cr(ndirs, 0);
+    vector<double> bgerr_cr(ndirs, 0);
+    vector<double> bgtot_sr(ndirs, 0);
+    vector<double> bgerr_sr(ndirs, 0);
 
     ofile << "\\begin{tabular}{r";
-    for (unsigned int idir=0; idir < ndirs*nselecs; ++idir) ofile << "|c";
+    for (unsigned int idir=0; idir < ndirs; ++idir) ofile << "|c";
     ofile << "}" << std::endl;
     ofile << "\\hline\\hline" << endl;
-    // ofile << "\\multirow{2}{*}{Sample}";
-    // for (unsigned int idir = 0; idir < ndirs; ++idir)
-    //   ofile << " & \\multicolumn{" << nselecs << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ "
-    //         // << " SR: " << getJetBJetTableLabel(samples.at(0), string(dirs.at(idir)).replace(0,5,"srh")) << ", 0 lep. "
-    //         // << " CR: " << getJetBJetTableLabel(samples.at(0), dirs.at(idir)) << ", 1 lep ($M_{\\rm{T}} < 100$)."
-    //         << " }";
-    // ofile << " \\\\" << endl
-    //       << "\\cline{2-" << ndirs*nselecs+1 << "}" << endl;
     ofile << "Sample";
     for (unsigned int idir = 0; idir < ndirs; ++idir)
       ofile << "  &  " << dirs.at(idir);
-    // for (unsigned int i = 0; i < ndirs; ++i)
-    //   for (auto it = selecs.begin(); it != selecs.end(); ++it)
-    //     ofile << " & " << *it;
     ofile << " \\\\" << endl;
     ofile << "\\hline\\hline" << endl;
 
@@ -1884,18 +1899,16 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
       if ( TString(names.at(i)).Contains("lostlepFromCRs") ) continue;
       if ( !TString(names.at(i)).Contains("zinvDataDriven") ) continue;
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
-          // TString fullhistnameCR = Form("%s/h_mt2bins", (cr+dirs.at(idir)).c_str());
-          // TString fullhistnameSR = Form("%s/h_mt2bins", (sr+dirs.at(idir)).c_str());
-          TString fullhistnameCR = Form("%s/h_mt2binsCRyield", (sr+dirs.at(idir)).c_str());
-          TString fullhistnameSR = Form("%s/h_mt2binsMCyield", (sr+dirs.at(idir)).c_str());
+        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+          TString fullhistnameCR = Form("%s/h_mt2binsGJyield", (sr+dirs.at(idir)).c_str());
+          TString fullhistnameSR = Form("%s/h_mt2binsMCyield",  (sr+dirs.at(idir)).c_str());
           TH1D* h_cr = (TH1D*) samples.at(i)->Get(fullhistnameCR);
           TH1D* h_sr = (TH1D*) samples.at(i)->Get(fullhistnameSR);
           double yield_cr = 0.;
           double err_cr = 0.;
           double yield_sr = 0.;
           double err_sr = 0.;
-          int idx = idir*nselecs + isel;
+          int idx = idir*1 + isel;
           if (h_cr) {
             // use all bins
             yield_cr = h_cr->IntegralAndError(0,-1,err_cr);
@@ -1913,7 +1926,7 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
     } // loop over samples
 
     // print bg_sr totals
-    ofile << "GJets SR";
+    ofile << "Zinv MC SR";
     for ( unsigned int idx = 0; idx < bgtot_sr.size(); ++idx ) {
       double yield = bgtot_sr.at(idx);
       double err = bgerr_sr.at(idx);
@@ -1924,10 +1937,10 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
         ofile << Form("%.2f $\\pm$ %.2f", yield, err);
     }
     ofile << " \\\\" << endl;
-    ofile << "\\hline" << endl;
+    // ofile << "\\hline" << endl;
 
     // print bg_cr totals
-    ofile << "GJets CR";
+    ofile << "GJets MC CR";
     for ( unsigned int idx = 0; idx < bgtot_cr.size(); ++idx ) {
       double yield = bgtot_cr.at(idx);
       double err = bgerr_cr.at(idx);
@@ -1947,7 +1960,7 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
       found_data = true;
       ofile << "Data CR";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+        for ( unsigned int isel = 0; isel < 1; ++isel ) {
           TString fullhistname = Form("%s/h_mt2bins", (cr+dirs.at(idir)).c_str());
           TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
@@ -1981,12 +1994,48 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
     }
 
     for( unsigned int i = 0 ; i < n ; i++ ){
-      if (!TString(names.at(i)).Contains("lostlepFromCRs") &&
-          !TString(names.at(i)).Contains("zinvDataDriven")) continue;
+      if (!TString(names.at(i)).Contains("zinvDataDriven")) continue;
+      ofile << "\\hline" << endl;
+      ofile << "ZG Ratio";
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2binsRatioInt", (sr+dirs.at(idir)).c_str());
+          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          double yield = 0.;
+          double err = 0.;
+          if (h) {
+            yield = h->IntegralAndError(0, -1, err);
+          }
+          ofile << "  &  ";
+          if (yield > 10.)
+            ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+          else
+            ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+        }
+      }
+      ofile << " \\\\" << endl;
+      ofile << "Purity";
+      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
+        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+          TString fullhistname = Form("%s/h_mt2binspurityIntFailSieieData", (sr+dirs.at(idir)).c_str());
+          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          double yield = 0.;
+          double err = 0.;
+          if (h) {
+            yield = h->IntegralAndError(0, -1, err);
+          }
+          ofile << "  &  ";
+          if (yield > 10.)
+            ofile << Form("%.1f $\\pm$ %.1f", yield, err);
+          else
+            ofile << Form("%.2f $\\pm$ %.2f", yield, err);
+        }
+      }
+      ofile << " \\\\" << endl;
       ofile << "\\hline" << endl;
       ofile << "DD Estimates";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < nselecs; ++isel ) {
+        for ( unsigned int isel = 0; isel < 1; ++isel ) {
           TString fullhistname = Form("%s/h_mt2bins", (sr+dirs.at(idir)).c_str());
           TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
@@ -2006,7 +2055,7 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
     } // loop over samples
 
     if (itab == nTabulars-1) ofile << "\\hline" << std::endl;
-    else ofile << "\\multicolumn{" << ndirs*nselecs+1 << "}{c}{} \\\\" << endl;
+    else ofile << "\\multicolumn{" << ndirs*1+1 << "}{c}{} \\\\" << endl;
     ofile << "\\end{tabular}" << std::endl;
   }
 
@@ -2015,7 +2064,7 @@ void printComparisonTableCRGJ(TFile* f_zinvdd, vector<string> dirs, string capti
   ofile << endl;
   return;
 }
-*/
+
 
 //_______________________________________________________________________________
 void printComparisonRatioTable(vector<vector<TFile*>> samplesVec, vector<string> names, vector<string> selecs, vector<string> dirs, string caption = "", int colorReduction = 0, int mt2bin = -1) {
@@ -2906,9 +2955,9 @@ void printDetailedTableDataDriven(vector<TFile*> samplesMC, vector<string> names
             return;
           }
         }
-        if (yield > 10.) 
+        if (yield > 10.)
           ofile << "  &  " << Form("%.1f $\\pm$ %.1f", yield, err);
-        else 
+        else
           ofile << "  &  " << Form("%.2f $\\pm$ %.2f", yield, err);
       }
     }
@@ -2921,9 +2970,9 @@ void printDetailedTableDataDriven(vector<TFile*> samplesMC, vector<string> names
   for (int icol = 0; icol < ncols; ++icol) {
     double yield = bgtot.at(icol);
     double err = bgerr.at(icol);
-    if (yield > 10.) 
+    if (yield > 10.)
       ofile << "  &  " << Form("%.1f $\\pm$ %.1f", yield, err);
-    else 
+    else
       ofile << "  &  " << Form("%.2f $\\pm$ %.2f", yield, err);
   }
   ofile << " \\\\" << endl;
@@ -2964,9 +3013,9 @@ void printDetailedTableDataDriven(vector<TFile*> samplesMC, vector<string> names
             return;
           }
         }
-        if (yield > 10.) 
+        if (yield > 10.)
           ofile << "  &  " << Form("%.1f $\\pm$ %.1f", yield, err);
-        else 
+        else
           ofile << "  &  " << Form("%.2f $\\pm$ %.2f", yield, err);
       }
     }
@@ -2979,9 +3028,9 @@ void printDetailedTableDataDriven(vector<TFile*> samplesMC, vector<string> names
   for (int icol = 0; icol < ncols; ++icol ) {
     double yield = bgtot.at(icol);
     double err = bgerr.at(icol);
-    if (yield > 10.) 
+    if (yield > 10.)
       ofile << "  &  " << Form("%.1f $\\pm$ %.1f", yield, err);
-    else 
+    else
       ofile << "  &  " << Form("%.2f $\\pm$ %.2f", yield, err);
   }
   ofile << " \\\\" << endl;
@@ -3778,7 +3827,7 @@ void makeSigYieldsComparisonHist(vector<TFile*> samples, vector<TFile*> sigs, ve
   // TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, bmetsuf, "_original", n_srbins);
   TH1F* hSR_org = fillSRYieldsPlot(samples, dirsAll, selec, n_srbins);
   hSR_org->SetName("h_SRyields_org");
-  // Only works for having only 1 signal for now. Should be using individual 
+  // Only works for having only 1 signal for now. Should be using individual
   TH1F* hSR_mMT = fillSRYieldsPlot(sigs, dirsAll, selec, n_srbins);
   TH1F* hRatio = (TH1F*) hSR_mMT->Clone("h_ratio");
 
@@ -3996,7 +4045,8 @@ void plotMakerHcand() {
   // vector<string> names = {"ttsl", "ttdl", "wjets_ht", "2015zinv_ht", "2015qcd_ht", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1400_200"};
   // vector<string> names = {"zinvDataDriven", "lostlepFromCRs", "qcd_ht", "data_Run2016"};
   // vector<string> names = {"top", "wjets_ht", "zinv_ht", "qcdplusgjet", "dyjetsll_ht", "data_Run2016"};
-  vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "data_Run2016"};
+  // vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "data_Run2016"};
+  vector<string> names = {"qcd_ht", "wjets_ht", "zinv_ht", "top", "sig_T5qqqqWH_1400_700", "sig_T5qqqqWH_1100_950", "sig_T2ttZH_800_400", "sig_T2ttZH_800_200"};
   // vector<string> names = {"fakephoton", "qcdplusgjet", "data_Run2016"};
   vector<TFile*> samples = getSamples(names, input_dir);
 
@@ -4005,7 +4055,7 @@ void plotMakerHcand() {
   // ----------------------------------------
 
   float scalesig = -1.;
-  // float scalesig = 30;
+  // float scalesig = 10;
   // printplots = true;
   // bool doRatio = false;
   bool doRatio = true;
@@ -4021,7 +4071,7 @@ void plotMakerHcand() {
       // if (strncmp (k->GetTitle(), sr_skip.c_str(), sr_skip.length()) == 0) continue; //skip signal regions and srbase
       std::string dir_name = k->GetTitle();
       // if (dir_name == "") continue;
-      if (dir_name != "srHbase") continue; //to do only this dir
+      if (dir_name != "srhbase") continue; //to do only this dir
       // if (dir_name != "crgjhbase" && dir_name != "crslhbase" && dir_name != "crdyhbase" &&
       //     dir_name != "crgjHbase" && dir_name != "crslHbase" && dir_name != "crdyHbase" &&
       //     dir_name != "crgjZbase" && dir_name != "crslZbase" && dir_name != "crdyZbase") continue; //to do only these dirs
@@ -4041,9 +4091,9 @@ void plotMakerHcand() {
 
       // makePlot( samples , names , dir_name , "h_hcand_mt2"+s , "M_{T2} [GeV]" , "Events / 50 GeV" , 0 , 1000 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_minMTbmet"+s , "min(M_{T}^{bMET}) [GeV]" , "Events" , 0 , 600 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_MbbMax_MbbCRall"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 350 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_MbbMax_MbbCRall"+s , "max(M(bb)) [GeV]" , "Events" , 0 , 350 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_Mbbhcand"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 800 , 1 , false, printplots, scalesig, doRatio, scaleBGtoData );
-      makePlot( samples , names , dir_name , "h_Mbbhcand_MbbCRall"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 350 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
+      // makePlot( samples , names , dir_name , "h_Mbbhcand_MbbCRall"+s , "M(bb) (Hcand) [GeV]" , "Events" , 0 , 350 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_MbbZcand"+s , "M(bb) (Zcand) [GeV]" , "Events" , 0 , 1000 , 3 , true, printplots, scalesig, doRatio, scaleBGtoData );
       // makePlot( samples , names , dir_name , "h_nHcand"+s , "num H cands" , "Events" , 0 , 6 , 1 , true, printplots, scalesig, doRatio, scaleBGtoData );
 
@@ -4336,21 +4386,17 @@ void plotMakerHcand() {
   printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
   dirsH.clear();
 
-  dirsH.push_back("h1VLH");
-  dirsH.push_back("h1LH");
-  dirsH.push_back("h1MH");
-  dirsH.push_back("h3MH");
-  dirsH.push_back("h1HH");
-  dirsH.push_back("h3HH");
-  dirsH.push_back("h1VLL");
-  dirsH.push_back("h1LL");
-  dirsH.push_back("h1ML");
-  dirsH.push_back("h3ML");
-  dirsH.push_back("h1HL");
-  dirsH.push_back("h3HL");
+  dirsH.push_back("Z1VL");
+  dirsH.push_back("Z1L");
+  dirsH.push_back("Z1M");
+  dirsH.push_back("Z3M");
+  dirsH.push_back("Z1H");
+  dirsH.push_back("Z3H");
   printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
   dirsH.clear();
 
+  ofile << "\\newpage\n";
+
   dirsH.push_back("h1VLH");
   dirsH.push_back("h1LH");
   dirsH.push_back("h1MH");
@@ -4363,11 +4409,35 @@ void plotMakerHcand() {
   dirsH.push_back("h3ML");
   dirsH.push_back("h1HL");
   dirsH.push_back("h3HL");
-  // printComparisonTableCRGJ(gj_samples, gj_names, vector<string>{""}, dirsH, "", true);
+  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
+  dirsH.clear();
+
+  dirsH.push_back("H1L");
+  dirsH.push_back("H1MU");
+  dirsH.push_back("H3MU");
+  dirsH.push_back("H1HUH");
+  dirsH.push_back("H1HUL");
+  dirsH.push_back("H3HUH");
+  dirsH.push_back("H3HUL");
+  dirsH.push_back("H1MM");
+  dirsH.push_back("H3MM");
+  dirsH.push_back("H1HMH");
+  dirsH.push_back("H1HML");
+  dirsH.push_back("H3HMH");
+  dirsH.push_back("H3HML");
+  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
+  dirsH.clear();
+
+  dirsH.push_back("Z1VL");
+  dirsH.push_back("Z1L");
+  dirsH.push_back("Z1M");
+  dirsH.push_back("Z3M");
+  dirsH.push_back("Z1H");
+  dirsH.push_back("Z3H");
+  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
   dirsH.clear();
 
   ofile << "\\newpage\n";       // Here start the CR yields for MbbMax
-
   // dirsH.push_back("H1L");
   // dirsH.push_back("H1MH");
   // dirsH.push_back("H3MH");

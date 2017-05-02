@@ -53,11 +53,11 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
 
     TH1D* h_zinv_gjetyield = (TH1D*) f_zinv->Get(fullhistnameCRyield);
     TH1D* h_zinv_cryield = (TH1D*) f_purity->Get(fullhistname);
-    TH1D* h_zinv_mcstat = (TH1D*) f_zinv->Get(fullhistnameRatio);
+    TH1D* h_zinv_zgratio = (TH1D*) f_zinv->Get(fullhistnameRatio);
     TH1D* h_zinv_purity = (TH1D*) f_purity->Get(fullhistnamePurity);
     // When using the integrated estimate (over MT2), should use the integrated purity.
     if (integratedZinvEstimate) {
-      h_zinv_mcstat = (TH1D*) f_zinv->Get(fullhistnameRatioInt);
+      h_zinv_zgratio = (TH1D*) f_zinv->Get(fullhistnameRatioInt);
       h_zinv_purity = (TH1D*) f_purity->Get(fullhistnamePurityInt);
     }
 
@@ -69,10 +69,10 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     }
     dir->cd();
 
-    if (!h_zinv_mcstat) cout << "Cannot find histogram: " << fullhistnameRatio << endl;
+    if (!h_zinv_zgratio) cout << "Cannot find histogram: " << fullhistnameRatio << endl;
     if (!h_zinv_purity) cout << "Cannot find histogram: " << fullhistnamePurity << endl;
     if (!h_zinv_cryield) cout << "Cannot find CR yields histogram in purity.root: " << fullhistname << endl;
-    if (!h_zinv_cryield && !h_zinv_purity && !h_zinv_mcstat) continue;
+    if (!h_zinv_cryield && !h_zinv_purity && !h_zinv_zgratio) continue;
 
     TH1D* h_n_mt2bins = new TH1D("h_n_mt2bins", "n_mt2bins", 1, 0, 2);
     h_n_mt2bins->SetBinContent(1, n_mt2bins);
@@ -86,8 +86,8 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     else h_gjyield = new TH1D("h_mt2binsGJyield", "", n_mt2bins, 0, 1500);
 
     TH1D* h_ratio;
-    if (h_zinv_mcstat) {
-      h_ratio = (TH1D*) h_zinv_mcstat->Clone();
+    if (h_zinv_zgratio) {
+      h_ratio = (TH1D*) h_zinv_zgratio->Clone();
       // h_ratio->SetBinError(1, h_ratio->GetBinError(1)/h_ratio->GetBinContent(1));
     } else {
       h_ratio = new TH1D(fullhistnameRatioInt, "Ratio From Last bin", 1, 0, 1);
@@ -112,18 +112,18 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       double n_zinv(0.);
       double n_zinv_cr(0.);
       double err_zinv_crstat(0.);
-      double err_zinv_mcstat(0.);
+      double err_zinv_ratio_ag(0.);
       double zinv_ratio_zg(0.);
       double zinv_purity(1.);
       double err_zinv_purity(0.);
 
       n_zinv = h_zinv->GetBinContent(mt2bin);
-      if (h_zinv_mcstat && h_zinv_mcstat->GetBinContent(mt2bin) != 0) {
-        err_zinv_mcstat = h_zinv_mcstat->GetBinError(mt2bin)/h_zinv_mcstat->GetBinContent(mt2bin);
-        zinv_ratio_zg = h_zinv_mcstat->GetBinContent(mt2bin);
+      if (h_zinv_zgratio && h_zinv_zgratio->GetBinContent(mt2bin) != 0) {
+        err_zinv_ratio_ag = h_zinv_zgratio->GetBinError(mt2bin)/h_zinv_zgratio->GetBinContent(mt2bin);
+        zinv_ratio_zg = h_zinv_zgratio->GetBinContent(mt2bin);
         last_zinv_ratio = zinv_ratio_zg;
       } else { // catch zeroes (shouldn't be any)
-        err_zinv_mcstat = 1.;
+        err_zinv_ratio_ag = 1.;
         zinv_ratio_zg = last_zinv_ratio;
       }
       if (h_zinv_cryield) {
@@ -148,7 +148,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       double err_shape = 0.;
 
       if (integratedZinvEstimate /* && nbjets >= 2 */) {
-        // err_zinv_mcstat, zinv_ratio_zg, n_zinv_cr
+        // err_zinv_, zinv_ratio_zg, n_zinv_cr
         zinv_alpha = zinv_ratio_zg * zinv_purity * 0.92; // 0.92 is a fixed factor for "f = GJetPrompt / (GJetPrompt+QCDPrompt)"
         zinv_alpha *= 0.93; // data-driven correction, based on the double-ratio R(Zll/Gamma)
         if (zinv_alpha > 0.5) zinv_alpha = 0.5; // Hard bound to avoid statistical fluctuations
@@ -177,7 +177,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       // filling the histogram
       if (n_zinv > 0) {
         pred->SetBinContent(mt2bin, n_zinv);
-        double err_zinv_squares = err_zinv_mcstat*err_zinv_mcstat + err_zinv_purity*err_zinv_purity + 0.20*0.20 + 0.10*0.10 + 0.11*0.11 + err_zinv_crstat*err_zinv_crstat;
+        double err_zinv_squares = err_zinv_*err_zinv_ + err_zinv_purity*err_zinv_purity + 0.20*0.20 + 0.10*0.10 + 0.11*0.11 + err_zinv_crstat*err_zinv_crstat;
 	pred->SetBinError(mt2bin, n_zinv*sqrt(err_zinv_squares));
       } else {
         pred->SetBinContent(mt2bin, 0.);
