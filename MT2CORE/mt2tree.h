@@ -363,6 +363,7 @@ public :
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
+   Int_t           jet_hadronFlavour[100];   //[njet]
    Float_t         jet_qgl[100];   //[njet]
    Float_t         jet_area[100];   //[njet]
    Int_t           jet_id[100];   //[njet]
@@ -755,6 +756,7 @@ public :
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
    TBranch        *b_jet_mcFlavour;   //!
+   TBranch        *b_jet_hadronFlavour;   //!
    TBranch        *b_jet_qgl;   //!
    TBranch        *b_jet_area;   //!
    TBranch        *b_jet_id;   //!
@@ -1205,6 +1207,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
    fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);
+   fChain->SetBranchAddress("jet_hadronFlavour", jet_hadronFlavour, &b_jet_hadronFlavour);
    fChain->SetBranchAddress("jet_qgl", jet_qgl, &b_jet_qgl);
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
    fChain->SetBranchAddress("jet_id", jet_id, &b_jet_id);

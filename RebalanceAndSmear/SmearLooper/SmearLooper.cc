@@ -111,7 +111,7 @@ SmearLooper::SmearLooper() :
   coreScale_(1.),
   tailScale_(1.),
   meanShift_(0.),
-  CUT_LEVEL_(1)
+  CUT_LEVEL_(1) 
 {
   
   // set up signal binning
@@ -485,7 +485,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   reader.SetMeanShift(meanShift_);
   reader.UseRawHistograms(useRawHists_);
   reader.Init("JetResponseTemplates.root");
-  
+
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
@@ -701,13 +701,16 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       if(doRebalanceAndSmear_ && t.rebal_status == -1) continue;
       
+      // this is necessary for doing a normalization check. Want to run the same 
+      //set of events through R&S and non-R&S.
+      if(!doRebalanceAndSmear_ && t.rebal_status == -1 && CUT_LEVEL_==3) continue;
+
       if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
       
       if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht) || t.jet_pt[0] > 13000.) continue;
       
       if (t.nVert == 0) continue;
-      if (doRebalanceAndSmear_ && t.njet < 2) continue;
-      if (!doRebalanceAndSmear_){
+      if (!doRebalanceAndSmear_ && CUT_LEVEL_<4){
         if(t.nJet30 < 2) continue;
         if(t.ht < 250.0 && (t.nlep!=2 || t.zll_ht < 250)) continue;
         if(t.ht < 1000.0 && t.met_pt < 30.0 && (t.nlep!=2 || (t.zll_ht<1000 && t.zll_met_pt<30))) continue;
@@ -729,7 +732,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
       if (!t.Flag_badChargedHadronFilter) continue;
 
-      if (!doRebalanceAndSmear_) 
+      if (!doRebalanceAndSmear_ && CUT_LEVEL_<4) 
         if (t.met_miniaodPt / t.met_caloPt > 5.0) continue;
 
       // flag signal samples
@@ -756,7 +759,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
       // note: this will double count some leptons, since reco leptons can appear as PFcands
       nlepveto_ = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT;
-      if(doRebalanceAndSmear_ && nlepveto_ > 0) continue;
+      if(doRebalanceAndSmear_ && nlepveto_ > 0 && CUT_LEVEL_<4) continue;
 
       // count number of forward jets
       nJet30Eta3_ = 0;
@@ -771,6 +774,17 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
       // if (t.nJet30FailId && !doRebalanceAndSmear_) continue;
       if (t.nJet30FailId) continue;
       
+
+      //re-compute nBJet20 since the babymaker filled with wrong working point
+      int nbjet = 0;
+      for(int i=0; i<t.njet; i++){
+          if(t.jet_pt[i] < 20)
+              break;
+          if(t.jet_btagCSV[i] >= 0.8484)
+              nbjet++;
+      }
+      t.nBJet20 = nbjet;
+
       ////////////////////////////////////
       /// done with overall selection  /// 
       ////////////////////////////////////
@@ -804,6 +818,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         a_met_pt             = t.met_pt;
         a_met_phi            = t.met_phi;
       }
+
+      // // REMOVE THIS
+      // if(t.ht < 1000)
+      //     continue;
             
       if(doRebalanceAndSmear_){
 
@@ -838,6 +856,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         bool dojet = true;
         int jetCounter = -1;                
         float rf = -999;
+        r_ht = 0;
         for(int i=0; i<t.njet; i++){
 
           new_met_x += t.jet_pt[i]*cos(t.jet_phi[i]);
@@ -905,7 +924,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           std::vector<float> jet_pt_smeared = jet_pt;
 
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
-            float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>0.800) : false, (bool)t.isData);
+              float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>0.8484) : false, t.isData);
             plot1D("h_smear",      smear,   evtweight_, h_1d_global, ";smear", 10000, 0, 10);
             jet_pt_smeared.at(i) *= smear;
           }
@@ -940,7 +959,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             jet_y += (jet_pt_smeared.at(i))*sin(jet_phi.at(i));
             if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.5) ) ht += jet_pt_smeared.at(i);
             if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.5) ) nJet30++;
-            if( (jet_pt_smeared.at(i) > 20.0) && (fabs(jet_eta.at(i)) < 2.5) && (jet_btagCSV.at(i) > 0.800) ) nBJet20++;
+            if( (jet_pt_smeared.at(i) > 20.0) && (fabs(jet_eta.at(i)) < 2.5) && (jet_btagCSV.at(i) > 0.8484) ) nBJet20++;
           }
           for(unsigned int i=0; i<PU_passes_id_jet_pt.size(); i++){
             new_met_x -= PU_passes_id_jet_pt.at(i)*cos(PU_passes_id_jet_phi.at(i));
@@ -949,7 +968,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             jet_y += (PU_passes_id_jet_pt.at(i))*sin(PU_passes_id_jet_phi.at(i));
             if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) ) ht += PU_passes_id_jet_pt.at(i);
             if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) ) nJet30++;
-            if( (PU_passes_id_jet_pt.at(i) > 20.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) && (PU_passes_id_jet_btagCSV.at(i) > 0.800) ) nBJet20++;
+            if( (PU_passes_id_jet_pt.at(i) > 20.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) && (PU_passes_id_jet_btagCSV.at(i) > 0.8484) ) nBJet20++;
           }
           for(unsigned int i=0; i<PU_fails_id_jet_pt.size(); i++){
             new_met_x -= PU_fails_id_jet_pt.at(i)*cos(PU_fails_id_jet_phi.at(i));
@@ -995,7 +1014,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             if(ip4 < 4) deltaPhiMin = min(deltaPhiMin, DeltaPhi( met_phi, p4sForDphi.at(ip4).phi() ));
           }
 
-          // if(deltaPhiMin < 0.3) continue;
+          // if(deltaPhiMin < 0.3 && CUT_LEVEL_<2) continue;
 
           std::vector<LorentzVector> p4sForHems;
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){

@@ -2668,7 +2668,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       if (verbose) cout << "before fill" << endl;
 
-      // do the rebalancing (only MC for now)
+      // do the rebalancing
       if(doRebal){
           nRebalJets = 0;
           if(njet < 2){
@@ -2681,15 +2681,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               float jet_x = 0;
               float jet_y = 0;
               for(int iJet=0; iJet<njet; iJet++){
+                  // only consider jets with pt>10
                   if(jet_pt[iJet] < 10.0){
                       rebal_useJet[iJet] = 0;
                       continue;
                   }
 
+                  // don't rebalance jet if it fails pileup-ID and has pt<100
                   if(jet_pt[iJet] < 100.0 && jet_puId[iJet] < 1){
                       rebal_useJet[iJet] = 0;
-                      met_x += (jet_pt[iJet])*cos(jet_phi[iJet]);//FIXME
-                      met_y += (jet_pt[iJet])*sin(jet_phi[iJet]);//FIXME
+                      // remove jets that fail pileup-ID from MET calculation
+                      met_x += (jet_pt[iJet])*cos(jet_phi[iJet]);
+                      met_y += (jet_pt[iJet])*sin(jet_phi[iJet]);
                       continue;
                   }
 
@@ -2707,6 +2710,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
                   rebal_status = -1;
               }else{
 
+                  // pt-soft should be sum of jet pt from jets with pt<10
                   rebal_pt_soft_x = -met_x - jet_x;
                   rebal_pt_soft_y = -met_y - jet_y;
                   rebal_status = 1;
@@ -2774,6 +2778,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
                       jet_x += (rebal_jetpt[i])*cos(rebal_jetphi[i]);
                       jet_y += (rebal_jetpt[i])*sin(rebal_jetphi[i]);
                   }
+                  // new met is negative sum of original jet pt for jets w/ pt<10 and new rebalanced pt for other jets
                   float new_met_x = -rebal_pt_soft_x - jet_x;
                   float new_met_y = -rebal_pt_soft_y - jet_y;
                   rebal_met_pt = sqrt(new_met_x*new_met_x + new_met_y*new_met_y);

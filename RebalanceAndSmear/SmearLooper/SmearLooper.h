@@ -13,8 +13,6 @@
 #include "TH1D.h"
 #include "Math/LorentzVector.h"
 
-#include "RooDataSet.h"
-
 //MT2
 #include "../../MT2CORE/mt2tree.h"
 #include "../../MT2CORE/RebalSmear/sigSelections_RebalSmear.h"
@@ -68,7 +66,7 @@ class SmearLooper {
   void SetCoreScale (float coreScale) {coreScale_ = coreScale;}
   void SetTailScale (float tailScale) {tailScale_ = tailScale;}
   void SetMeanShift (float meanShift) {meanShift_ = meanShift;}
-  void SetCutLevel(int cut_level) {CUT_LEVEL_ = cut_level;}       // 1=analysis cuts, 2=weaker HT cuts for closure plots, 3=no cuts at all
+  void SetCutLevel(int cut_level) {CUT_LEVEL_ = cut_level;}       // 1=analysis cuts, 2=weaker HT cuts for closure plots, 3=no cuts at smearing step, but still event selection before, 4=no cuts at all
   void UseRawHists () {useRawHists_ = true;}
   void UseBjetResponse (bool use) {useBjetResponse_ = use;}
   bool passesTrigger ();

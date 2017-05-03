@@ -8,6 +8,10 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 
+// stupid c++11
+constexpr float JRTreader::pt_bins[];
+constexpr float JRTreader::eta_bins[];
+
 JRTreader::JRTreader(const char *fname){
     fits_b = NULL;
     fits_nonb = NULL;
@@ -16,31 +20,29 @@ JRTreader::JRTreader(const char *fname){
     }
 }
 
+void JRTreader::DeleteFitVec(vector< vector<TH1D*>* > *fits)
+{
+     if(fits != NULL){
+        for(int i=0; i<N_PT_BINS; i++){
+            if(fits->at(i) != NULL){
+                for(int j=0; j<N_ETA_BINS; j++){
+                    if(fits->at(i)->at(j) != NULL)
+                        delete fits->at(i)->at(j);
+                }
+                delete fits->at(i);
+            }
+        }
+        delete fits;
+    }
+}
+
 JRTreader::~JRTreader(){
-    if(fits_b != NULL){
-        for(int i=0; i<N_PT_BINS; i++){
-            if(fits_b->at(i) != NULL){
-                for(int j=0; j<N_ETA_BINS; j++){
-                    if(fits_b->at(i)->at(j) != NULL)
-                        delete fits_b->at(i)->at(j);
-                }
-                delete fits_b->at(i);
-            }
-        }
-        delete fits_b;
-    }
-    if(fits_nonb != NULL){
-        for(int i=0; i<N_PT_BINS; i++){
-            if(fits_nonb->at(i) != NULL){
-                for(int j=0; j<N_ETA_BINS; j++){
-                    if(fits_nonb->at(i)->at(j) != NULL)
-                        delete fits_nonb->at(i)->at(j);
-                }
-                delete fits_nonb->at(i);
-            }
-        }
-        delete fits_nonb;
-    }
+    DeleteFitVec(fits_b);
+    DeleteFitVec(fits_b_core);
+    DeleteFitVec(fits_b_tail);
+    DeleteFitVec(fits_nonb);
+    DeleteFitVec(fits_nonb_core);
+    DeleteFitVec(fits_nonb_tail);
 }
 
 int JRTreader::Init(const char *fname){
@@ -49,7 +51,11 @@ int JRTreader::Init(const char *fname){
         return 0;
 
     fits_b = new vector< vector<TH1D*>* >;
+    fits_b_core = new vector< vector<TH1D*>* >;
+    fits_b_tail = new vector< vector<TH1D*>* >;
     fits_nonb = new vector< vector<TH1D*>* >;
+    fits_nonb_core = new vector< vector<TH1D*>* >;
+    fits_nonb_tail = new vector< vector<TH1D*>* >;
 
     TString prefix = "fit";
     if(!useFits)
@@ -59,35 +65,55 @@ int JRTreader::Init(const char *fname){
 
     for(int ipt=0; ipt<N_PT_BINS; ipt++){
         fits_b->push_back(new vector<TH1D*>);
+        fits_b_core->push_back(new vector<TH1D*>);
+        fits_b_tail->push_back(new vector<TH1D*>);
         fits_nonb->push_back(new vector<TH1D*>);
+        fits_nonb_core->push_back(new vector<TH1D*>);
+        fits_nonb_tail->push_back(new vector<TH1D*>);
         for(int ieta=0; ieta<N_ETA_BINS; ieta++){
             TString fitname;
             fitname = Form("pt%d/pt%d_eta%d/%s_pt%d_eta%d_bjet",ipt,ipt,ieta,prefix.Data(),ipt,ieta);
             fit = (TH1D*)f->Get(fitname);
             if(fit != NULL) {
                 fits_b->at(ipt)->push_back((TH1D*)fit->Clone(Form("%s_pt%d_eta%d_bjet",prefix.Data(),ipt,ieta)));
+                fits_b->at(ipt)->at(ieta)->SetDirectory(0);
                 if(useFits){
                     core = (TH1D*)f->Get(fitname+"_core");
                     tail = (TH1D*)f->Get(fitname+"_tail");
-                    TransformFit(fits_b->at(ipt)->at(ieta), core, tail);
+                    fits_b_core->at(ipt)->push_back(core);
+                    fits_b_tail->at(ipt)->push_back(tail);
+                    fits_b_core->at(ipt)->at(ieta)->SetDirectory(0);
+                    fits_b_tail->at(ipt)->at(ieta)->SetDirectory(0);
+                }else{
+                    fits_b_core->at(ipt)->push_back(NULL);
+                    fits_b_tail->at(ipt)->push_back(NULL);
                 }
-               fits_b->at(ipt)->at(ieta)->SetDirectory(0);
             }else{
                 fits_b->at(ipt)->push_back(NULL);
+                fits_b_core->at(ipt)->push_back(NULL);
+                fits_b_tail->at(ipt)->push_back(NULL);
             }
 
             fitname = Form("pt%d/pt%d_eta%d/%s_pt%d_eta%d_nonbjet",ipt,ipt,ieta,prefix.Data(),ipt,ieta);
             fit = (TH1D*)f->Get(fitname);
             if(fit != NULL){
                 fits_nonb->at(ipt)->push_back((TH1D*)fit->Clone(Form("%s_pt%d_eta%d_nonbjet",prefix.Data(),ipt,ieta)));
+                fits_nonb->at(ipt)->at(ieta)->SetDirectory(0);
                 if(useFits){
                     core = (TH1D*)f->Get(fitname+"_core");
                     tail = (TH1D*)f->Get(fitname+"_tail");
-                    TransformFit(fits_nonb->at(ipt)->at(ieta), core, tail);
+                    fits_nonb_core->at(ipt)->push_back(core);
+                    fits_nonb_tail->at(ipt)->push_back(tail);
+                    fits_nonb_core->at(ipt)->at(ieta)->SetDirectory(0);
+                    fits_nonb_tail->at(ipt)->at(ieta)->SetDirectory(0);
+                }else{
+                    fits_nonb_core->at(ipt)->push_back(NULL);
+                    fits_nonb_tail->at(ipt)->push_back(NULL);
                 }
-                fits_nonb->at(ipt)->at(ieta)->SetDirectory(0);
             }else{
                 fits_nonb->at(ipt)->push_back(NULL);
+                fits_nonb_core->at(ipt)->push_back(NULL);
+                fits_nonb_tail->at(ipt)->push_back(NULL);
             }
 
         }
@@ -107,28 +133,44 @@ float JRTreader::GetRandomResponse(float pt, float eta, bool isBjet, bool correc
     int ptbin, etabin;
     JRTreader::GetModifiedBins(ptbin_orig, etabin_orig, isBjet, &ptbin, &etabin);
 
-    TH1D *fit;
-    if(isBjet)
-        fit = fits_b->at(ptbin)->at(etabin);
-    else
-        fit = fits_nonb->at(ptbin)->at(etabin);
+    TH1D *fit, *core, *tail;
+    if(isBjet){
+        fit  = fits_b->at(ptbin)->at(etabin);
+        core = fits_b_core->at(ptbin)->at(etabin);
+        tail = fits_b_tail->at(ptbin)->at(etabin);
+    }else{
+        fit  = fits_nonb->at(ptbin)->at(etabin);
+        core = fits_nonb_core->at(ptbin)->at(etabin);
+        tail = fits_nonb_tail->at(ptbin)->at(etabin);
+    }
 
     if(fit==NULL){
         cout << "WARNING: could not find fit histogram for bins pt=" << ptbin << " eta=" << etabin << endl;
         return 1.;
-    }
-
-    float response = fit->GetRandom();
-
-    float correctedSmear;
-    if(correctDataResolution){
-        float corrFac = JRTreader::GetJERCorrection(eta);
-        correctedSmear = (response-1)*corrFac + 1;
     }else{
-        correctedSmear = response;
+        // so we don't transform the actual histogram
+        fit = (TH1D*)fit->Clone();
     }
 
-    return correctedSmear;
+    float corr = 1.0;
+    if(correctDataResolution)
+        corr = GetJERCorrection(eta);
+
+    if(useFits){
+        coreScale *= corr;
+        TransformFit(fit, core, tail);
+        coreScale /= corr;
+    }
+
+    // TString fname = Form("JRTplots/fits/nonbjets_dataJER/pt%02d_eta%02d_nonbjets",ptbin,etabin);
+    // string fname2 = string(fname.Data());
+    // Draw(0,0,fit,fname2);
+    
+    float response = fit->GetRandom();
+    
+    delete fit;
+
+    return response;
 }
 
 float JRTreader::GetValue(float pt, float eta, bool isBjet, float smearfact, bool correctDataResolution){
@@ -140,27 +182,38 @@ float JRTreader::GetValue(float pt, float eta, bool isBjet, float smearfact, boo
     JRTreader::GetModifiedBins(ptbin_orig, etabin_orig, isBjet, &ptbin, &etabin);
 
 
-    TH1D *fit;
-    if(isBjet)
+    TH1D *fit, *core, *tail;
+    if(isBjet){
         fit = fits_b->at(ptbin)->at(etabin);
-    else
+        core = fits_b_core->at(ptbin)->at(etabin);
+        tail = fits_b_tail->at(ptbin)->at(etabin);
+    }else{
         fit = fits_nonb->at(ptbin)->at(etabin);
+        core = fits_nonb_core->at(ptbin)->at(etabin);
+        tail = fits_nonb_tail->at(ptbin)->at(etabin);
+    }
 
     if(fit==NULL){
         cout << "WARNING: could not find fit histogram for bins pt=" << ptbin << " eta=" << etabin << endl;
         return 1.;
-    }
-
-    float correctedSmear, corrFac;
-    if(correctDataResolution){
-        corrFac = JRTreader::GetJERCorrection(eta);
-        correctedSmear = (smearfact-1)/corrFac + 1;
     }else{
-        corrFac = 1.0;
-        correctedSmear = smearfact;
+        fit = (TH1D*)fit->Clone();
     }
 
-    float response = fit->GetBinContent(fit->FindBin(correctedSmear))/corrFac;
+    float corr = 1.0;
+    if(correctDataResolution)
+        corr = GetJERCorrection(eta);
+
+    if(useFits){
+        coreScale *= corr;
+        TransformFit(fit, core, tail);
+        coreScale /= corr;
+    }
+
+    float response = fit->GetBinContent(smearfact);
+
+    delete fit;
+
     return response;
 }
 
@@ -172,20 +225,21 @@ float JRTreader::GetJERCorrection(float eta){
     // jet-energy resolution is larger in data than MC by the following 
     // eta-dependent factors.
     // We broaden the JRT around 1 by the same factor for data
+    // numbers from: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 
-    if (eta >= 0.0 && eta < 0.5) return 1.122;
-    else if (eta >= 0.5 && eta < 0.8) return 1.167;
-    else if (eta >= 0.8 && eta < 1.1) return 1.168;
-    else  if (eta >= 1.1 && eta < 1.3) return 1.029;
-    else if (eta >= 1.3 && eta < 1.7) return 1.115;
-    else if (eta >= 1.7 && eta < 1.9) return 1.041;
-    else if (eta >= 1.9 && eta < 2.1) return 1.167;
-    else if (eta >= 2.1 && eta < 2.3) return 1.094;
-    else if (eta >= 2.3 && eta < 2.5) return 1.168;
-    else if (eta >= 2.5 && eta < 2.8) return 1.266;
-    else if (eta >= 2.8 && eta < 3.0) return 1.595;
-    else if (eta >= 3.0 && eta < 0.5) return 0.998;
-    else return 1.226;
+    if      (eta >= 0.0 && eta < 0.5) return 1.109;
+    else if (eta >= 0.5 && eta < 0.8) return 1.138;
+    else if (eta >= 0.8 && eta < 1.1) return 1.114;
+    else if (eta >= 1.1 && eta < 1.3) return 1.123;
+    else if (eta >= 1.3 && eta < 1.7) return 1.084;
+    else if (eta >= 1.7 && eta < 1.9) return 1.082;
+    else if (eta >= 1.9 && eta < 2.1) return 1.140;
+    else if (eta >= 2.1 && eta < 2.3) return 1.067;
+    else if (eta >= 2.3 && eta < 2.5) return 1.177;
+    else if (eta >= 2.5 && eta < 2.8) return 1.364;
+    else if (eta >= 2.8 && eta < 3.0) return 1.857;
+    else if (eta >= 3.0 && eta < 3.2) return 0.328;
+    else                              return 1.160;
 
 }
 
@@ -242,27 +296,23 @@ void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptb
 }
 
 int JRTreader::GetPtBin(float pt){
-    float pt_bins[] = {0,20,30,50,80,120,170,230,300,380,470,570,680,800,1000,1300,1700,2200,2800,3500,4300,5200,6500};
-    int n_pt_bins = 23;
 
-    for(int i=0; i<n_pt_bins-1; i++){
-        if(pt >= pt_bins[i] && pt < pt_bins[i+1])
+    for(int i=0; i<JRTreader::n_pt_bins-1; i++){
+        if(pt >= JRTreader::pt_bins[i] && pt < JRTreader::pt_bins[i+1])
             return i;
     }
 
-    return n_pt_bins-1;
+    return JRTreader::n_pt_bins-1;
 }
 
 int JRTreader::GetEtaBin(float eta){
-    float eta_bins[] = {0,0.3,0.5,0.8,1.1,1.4,1.7,2.3,2.8,3.2,4.1,5.0,-1};
-    int n_eta_bins = 12;
 
-    for(int i=0; i<n_eta_bins-1; i++){
-        if(eta >= eta_bins[i] && eta < eta_bins[i+1])
+    for(int i=0; i<JRTreader::n_eta_bins-1; i++){
+        if(eta >= JRTreader::eta_bins[i] && eta < JRTreader::eta_bins[i+1])
             return i;
     }
 
-    return n_eta_bins-1;
+    return JRTreader::n_eta_bins-1;
 }
 
 void JRTreader::SetBinWidth(float width){
@@ -270,24 +320,19 @@ void JRTreader::SetBinWidth(float width){
 }
 
 void JRTreader::SetCoreScale(float scale){
-    if(fits_nonb != NULL)
-        cout << "[JRTreader] WARNING: setting core scale after initialization. Will have no effect!" << endl;
     coreScale = scale;
 }
 
 void JRTreader::SetTailScale(float scale){
-    if(fits_nonb != NULL)
-        cout << "[JRTreader] WARNING: setting tail scale after initialization. Will have no effect!" << endl;
     tailScale = scale;
 }
 
 void JRTreader::SetMeanShift(float shift){
-    if(fits_nonb != NULL)
-        cout << "[JRTreader] WARNING: setting mean shift after initialization. Will have no effect!" << endl;
     meanShift = shift;
 }
 
 void JRTreader::TransformFit(TH1D *fit, TH1D *core, TH1D *tail){
+
 
     for(int ibin=1; ibin <= fit->GetNbinsX(); ibin++){
 
@@ -305,18 +350,25 @@ void JRTreader::TransformFit(TH1D *fit, TH1D *core, TH1D *tail){
 
     }
 
-    fit->Scale(1.0/fit->Integral());
+    fit->Scale(1.0/(fit->Integral()*fit->GetBinWidth(1)));
 
 }
 
-void JRTreader::Draw(int ipt, int ieta)
+void JRTreader::Draw(int ipt, int ieta, TH1D* usethis, string tag)
 {
     //for debugging purposes
 
     TCanvas *c = new TCanvas();
 
-    fits_nonb->at(ipt)->at(ieta)->Draw("L");
+    TH1D* h;
+    if(usethis != NULL)
+        h = usethis;
+    else
+        h = fits_nonb->at(ipt)->at(ieta);
 
-    c->SaveAs("/home/users/bemarsh/public_html/test.pdf");
+    h->Draw("L");
+
+    c->SaveAs(("/home/users/bemarsh/public_html/"+tag+".png").c_str());
+    c->SaveAs(("/home/users/bemarsh/public_html/"+tag+".pdf").c_str());
 
 }
