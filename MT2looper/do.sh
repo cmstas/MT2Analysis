@@ -38,7 +38,6 @@ for SAMPLE in ${Samples[@]}; do
 done
 
 #signal
-# INDIR=/nfs-6/userdata/mt2/V00-08-16_skim_base_mt2gt200_ZinvV6_JECs/
 INDIR=/nfs-6/userdata/mt2/V00-08-15-private_skim_rphi
 # declare -a Samples=(T2ttZH_800_200 T2ttZH_800_400 T5qqqqWH_1100_950 T5qqqqWH_1400_200 T5qqqqWH_1400_700)
 declare -a Samples=(T2ttZH_800_200 T2ttZH_800_400 T5qqqqWH_1100_950 T5qqqqWH_1400_700)
@@ -48,17 +47,11 @@ for SAMPLE in ${Samples[@]}; do
     eval "nohup nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
 done
 
-# for SAMPLE in ${Samples2[@]}; do
-#     echo ./runLooper ${INDIR2} ${SAMPLE} ${OUTDIR}
-#     eval "nohup ./runLooper ${INDIR2} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
-# done
+# #signal for std mt2
+# INDIR=/nfs-6/userdata/mt2/V00-08-16_skim_base_mt2gt200_ZinvV6_JECs/
+# declare -a Samples=(T2bb T2tt)
 
-# for SAMPLE in ${Samples3[@]}; do
-#     echo ./runLooper ${INDIR3} ${SAMPLE} ${OUTDIR}
-#     eval "nohup ./runLooper ${INDIR3} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
-# done
-
-# for SAMPLE in ${Samples4[@]}; do
-#     echo ./runLooper ${INDIR4} ${SAMPLE} ${OUTDIR}
-#     eval "nohup ./runLooper ${INDIR4} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
+# for SAMPLE in ${Samples[@]}; do
+#     echo nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
+#     eval "nohup nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} >& ${LOGDIR}/log_${SAMPLE}.txt &"
 # done

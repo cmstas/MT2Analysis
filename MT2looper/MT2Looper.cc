@@ -163,6 +163,14 @@ void MT2Looper::SetSignalRegions(){
   SRVec = getSignalRegions2016(); //adds 2 bins at UH HT, for 3b
   SRVecMonojet = getSignalRegionsMonojet2016(); // first pass of monojet regions
   SRVecHcand = getSignalRegionsMT2Higgs();
+  std::vector<SR> tempSRVec = getSignalRegionsHcand();
+  for (auto it = tempSRVec.begin(); it != tempSRVec.end(); ++it) {
+    it->SetName((it->GetName()).replace(0,1,"CR"));
+    it->SetVarAll("nhcand", 0, 1);
+    it->SetVarAll("nZcand", 0, 1);
+    it->SetVarAll("mbbmax", 0, 300);
+    SRVecHcand.push_back(*it);
+  }
   if (fasterRuntime) SRVecMonojet.clear(); // for faster runtime in mt2higgs
   // ** the full list of SRVec might be needed in the purity calculation -- check later
   if (synchronizing) {
@@ -1354,7 +1362,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // bool doMinMTBMet = false;
       // bool ivMinMTBMet = false;
       // bool doMbbMax200 = false;
-      bool doMbbMax300 = false;
+      // bool doMbbMax300 = false;
       bool isHcand     = false;
       bool isZcand     = false;
       // bool doMbbCRlo   = false;
@@ -1471,7 +1479,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       // else if (doMT2Higgs) ivMinMTBMet = true;
       // if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
-      if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
+      // if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
       // if (doMT2Higgs && mbbhcand_ < 100) doMbbCRlo = true;
       // if (doMT2Higgs && mbbhcand_ > 150) doMbbCRhi = true;
       // if (!doMT2Higgs) continue; // For faster runtime
@@ -1719,7 +1727,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs) {
         fillHistosSRMT2Higgs("sr");
         fillHistosSRMT2Higgs("sr", "_allMbb");
-        if (!doMbbMax300 && !isHcand && !isZcand) fillHistosSRMT2Higgs("sr", "_MbbCRs");
+        // if (!doMbbMax300 && !isHcand && !isZcand) fillHistosSRMT2Higgs("sr", "_MbbCRs");
         // if (isHcand) fillHistosSRMT2Higgs("sr");
         // if (!isHcand) fillHistosSRMT2Higgs("sr"); // Looking at Hcand CR
         // if (true)           fillHistosSRMT2Higgs("sr", "_original");
@@ -1847,7 +1855,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   for (unsigned int srN = 0; srN < SRVecHcand.size(); srN++){
     if (!SRVecHcand.at(srN).srHistMap.empty())
       savePlotsDir(SRVecHcand.at(srN).srHistMap, outfile_, ("sr"+SRVecHcand.at(srN).GetName()).c_str());
-
     if (!SRVecHcand.at(srN).crslHistMap.empty())
       savePlotsDir(SRVecHcand.at(srN).crslHistMap, outfile_, ("crsl"+SRVecHcand.at(srN).GetName()).c_str());
     if (!SRVecHcand.at(srN).crgjHistMap.empty())
@@ -3209,10 +3216,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 }
 
 void MT2Looper::fillHistosMT2Higgs(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins, const std::string& dirname, const std::string& s) {
-  TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
-  if (dir == 0) {
-    dir = outfile_->mkdir(dirname.c_str());
-  }
+  TDirectory* dir = (TDirectory*) outfile_->Get(dirname.c_str());
+  if (dir == 0) dir = outfile_->mkdir(dirname.c_str());
   dir->cd();
 
   // plot1D("h_nhcand"+s,             t.nHiggs_cand,        evtweight_, h_1d, ";n HiggsCand",   10, 0, 10);
