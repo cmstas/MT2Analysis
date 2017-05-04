@@ -89,19 +89,19 @@ def GetSubtitles(dirname):
         return ["p_{T}(jet1) > 250 GeV", "N(jet) = 2"]
 
     if dirname[-4:]=="Incl":
-        return ["H_{T} > 250 GeV", "MET > 250 GeV (1j)", "M_{T2} > 200 GeV (#geq 2j)"]
+        return ["H_{T} > 250 GeV", "MET > 250 GeV (1j)", "M_{T2} > 200 GeV (#geq 4j)"]
     if dirname[-1:]=="J":
         return ["H_{T} > 250 GeV", "1j"]
     if dirname[-2:]=="VL":
-        return ["250 < H_{T} < 450 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["250 < H_{T} < 450 GeV","M_{T2} > 200 GeV", "#geq 4j"]
     if dirname[-1:]=="L":
-        return ["450 < H_{T} < 575 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["450 < H_{T} < 575 GeV","M_{T2} > 200 GeV", "#geq 4j"]
     if dirname[-1:]=="M":
-        return ["575 < H_{T} < 1000 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["575 < H_{T} < 1000 GeV","M_{T2} > 200 GeV", "#geq 4j"]
     if dirname[-2:]=="UH":
-        return ["H_{T} > 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["H_{T} > 1500 GeV","M_{T2} > 200 GeV", "#geq 4j"]
     if dirname[-1:]=="H":
-        return ["1000 < H_{T} < 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["1000 < H_{T} < 1500 GeV","M_{T2} > 200 GeV", "#geq 4j"]
 
     return ["H_{T} > 250 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 

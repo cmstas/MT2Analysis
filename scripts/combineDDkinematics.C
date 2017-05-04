@@ -1,9 +1,9 @@
 // -*- C++ -*-
-// The code is stealed from the cardMaker.C with only the zinv data driven part
 
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -33,7 +33,7 @@ void combineSRkinematics(TFile* f_in, TFile* f_out, string sr = "") {
   kineHistMap["MbbMax"]    = nullptr;
 
   // Make directory and plot(s) in the output file
-  string outname = sr + "allIncl";
+  string outname = "mbbCRallIncl";
   TDirectory* dir = (TDirectory*) f_out->mkdir(outname.c_str());
   dir->cd();
 
@@ -50,6 +50,7 @@ void combineSRkinematics(TFile* f_in, TFile* f_out, string sr = "") {
       // sr_string.erase(0, 2);    // remove "sr" from front of string
       if (sr_string.find(sr) == string::npos) continue;
       // dirs.push_back(sr_string);
+      cout << "Looking at: " << sr_string << endl;
       for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
         TH1D* temphist = (TH1D*) f_in->Get(Form("%s/h_%s", sr_string.c_str(), it->first.c_str()));
         if (temphist == nullptr) { cout << "The hist " << Form("%s/h_%s", sr_string.c_str(), it->first.c_str()) <<  " is not found!\n"; continue; }

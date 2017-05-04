@@ -94,6 +94,9 @@ root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrive
 echo "root -b -q zinvDDMaker.C+(\"${INDIR}\")"
 root -b -q "zinvDDMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 
+echo "root -b -q combineDDkinematics.C(\"${INDIR}\")"
+root -b -q "combineDDkinematics.C(\"${INDIR}\")" >> dataDrivenEstimates.log
+
 # echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
 # root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log
 echo "done"
