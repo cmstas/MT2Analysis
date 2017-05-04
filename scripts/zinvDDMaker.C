@@ -21,7 +21,7 @@ using namespace std;
 
 
 //_______________________________________________________________________________
-void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , vector<string> dirs, string output_name, bool integratedZinvEstimate = true, float kFactorGJetForRatio = 1.0 ) {
+void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFile* f_zinvMC, vector<string> dirs, string output_name, bool integratedZinvEstimate = true, float kFactorGJetForRatio = 1.0 ) {
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
 
@@ -69,6 +69,15 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     }
     dir->cd();
 
+    std::map<string, TH1D*> kineHistMap;
+    kineHistMap["mt2"]       = (TH1D*) f_zinvMC->Get(directory + "/h_mt2");
+    kineHistMap["met"]       = (TH1D*) f_zinvMC->Get(directory + "/h_met");
+    kineHistMap["ht"]        = (TH1D*) f_zinvMC->Get(directory + "/h_ht");
+    kineHistMap["njet"]      = (TH1D*) f_zinvMC->Get(directory + "/h_nJet30");
+    kineHistMap["nbjet"]     = (TH1D*) f_zinvMC->Get(directory + "/h_nBJet20");
+    kineHistMap["minMTbmet"] = (TH1D*) f_zinvMC->Get(directory + "/h_minMTbmet");
+    kineHistMap["mbb"]       = (TH1D*) f_zinvMC->Get(directory + "/h_MbbMax");
+
     if (!h_zinv_zgratio) cout << "Cannot find histogram: " << fullhistnameRatio << endl;
     if (!h_zinv_purity) cout << "Cannot find histogram: " << fullhistnamePurity << endl;
     if (!h_zinv_cryield) cout << "Cannot find CR yields histogram in purity.root: " << fullhistname << endl;
@@ -112,18 +121,18 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       double n_zinv(0.);
       double n_zinv_cr(0.);
       double err_zinv_crstat(0.);
-      double err_zinv_ratio_ag(0.);
+      double err_zinv_ratio_zg(0.);
       double zinv_ratio_zg(0.);
       double zinv_purity(1.);
       double err_zinv_purity(0.);
 
       n_zinv = h_zinv->GetBinContent(mt2bin);
       if (h_zinv_zgratio && h_zinv_zgratio->GetBinContent(mt2bin) != 0) {
-        err_zinv_ratio_ag = h_zinv_zgratio->GetBinError(mt2bin)/h_zinv_zgratio->GetBinContent(mt2bin);
+        err_zinv_ratio_zg = h_zinv_zgratio->GetBinError(mt2bin)/h_zinv_zgratio->GetBinContent(mt2bin);
         zinv_ratio_zg = h_zinv_zgratio->GetBinContent(mt2bin);
         last_zinv_ratio = zinv_ratio_zg;
       } else { // catch zeroes (shouldn't be any)
-        err_zinv_ratio_ag = 1.;
+        err_zinv_ratio_zg = 1.;
         zinv_ratio_zg = last_zinv_ratio;
       }
       if (h_zinv_cryield) {
@@ -148,7 +157,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       double err_shape = 0.;
 
       if (integratedZinvEstimate /* && nbjets >= 2 */) {
-        // err_zinv_, zinv_ratio_zg, n_zinv_cr
+        // err_zinv_ratio_zg, zinv_ratio_zg, n_zinv_cr
         zinv_alpha = zinv_ratio_zg * zinv_purity * 0.92; // 0.92 is a fixed factor for "f = GJetPrompt / (GJetPrompt+QCDPrompt)"
         zinv_alpha *= 0.93; // data-driven correction, based on the double-ratio R(Zll/Gamma)
         if (zinv_alpha > 0.5) zinv_alpha = 0.5; // Hard bound to avoid statistical fluctuations
@@ -167,6 +176,16 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
         }
       }
 
+      float norm = zinv_ratio_zg * zinv_purity * 0.92 * 0.93; // assumes integratedZinvEstimate
+      for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
+        if (it->second != nullptr) {
+          it->second = (TH1D*) it->second->Clone(Form("h_%sDD", it->first.c_str()));
+          it->second->Scale(norm);
+        } else {
+          cout << __LINE__ << ": Can't find hist " << it->first << endl;
+        }
+      }
+
       // 1: zinv_alphaerr (stat on ratio).
       // 2: 20% syst. gamma function, no Nuisances for now 
       // 3: xx% purity stat unc.
@@ -177,7 +196,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
       // filling the histogram
       if (n_zinv > 0) {
         pred->SetBinContent(mt2bin, n_zinv);
-        double err_zinv_squares = err_zinv_*err_zinv_ + err_zinv_purity*err_zinv_purity + 0.20*0.20 + 0.10*0.10 + 0.11*0.11 + err_zinv_crstat*err_zinv_crstat;
+        double err_zinv_squares = err_zinv_ratio_zg*err_zinv_ratio_zg + err_zinv_purity*err_zinv_purity + 0.20*0.20 + 0.10*0.10 + 0.11*0.11 + err_zinv_crstat*err_zinv_crstat;
 	pred->SetBinError(mt2bin, n_zinv*sqrt(err_zinv_squares));
       } else {
         pred->SetBinContent(mt2bin, 0.);
@@ -192,6 +211,9 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
     h_gjyield->Write();
     h_purity->Write();
     h_ratio->Write();
+    for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
+      if (it->second != nullptr) it->second->Write();
+    }
   } // loop over signal regions
 
   return;
@@ -199,7 +221,7 @@ void combineZinvDataDriven(TFile* f_zinv , TFile* f_purity , TFile* f_zgratio , 
 
 
 //_______________________________________________________________________________
-void zinvDDMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"){
+void zinvDDMaker(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp"){
 
   string output_name = input_dir+"/zinvDataDriven.root";
   // ----------------------------------------
@@ -212,6 +234,7 @@ void zinvDDMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/o
   TFile* f_zinv = new TFile(Form("%s/zinvFromGJ.root", input_dir.c_str()));
   TFile* f_purity = new TFile(Form("%s/purity.root", input_dir.c_str()));
   TFile* f_zgratio = new TFile(Form("%s/doubleRatio.root", input_dir.c_str()));
+  TFile* f_zinvMC = new TFile(Form("%s/zinv_ht.root", input_dir.c_str()));
 
   if(f_zinv->IsZombie() || f_zgratio->IsZombie() || f_purity->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
@@ -236,5 +259,5 @@ void zinvDDMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/o
     }
   }
 
-  combineZinvDataDriven(f_zinv, f_purity, f_zgratio, dirs, output_name);
+  combineZinvDataDriven(f_zinv, f_purity, f_zgratio, f_zinvMC, dirs, output_name);
 }
