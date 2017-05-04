@@ -1362,7 +1362,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // bool doMinMTBMet = false;
       // bool ivMinMTBMet = false;
       // bool doMbbMax200 = false;
-      // bool doMbbMax300 = false;
+      bool doMbbMax300 = false;
       bool isHcand     = false;
       bool isZcand     = false;
       // bool doMbbCRlo   = false;
@@ -1479,7 +1479,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // if (doMT2Higgs && minMTbmet_ > 200) doMinMTBMet = true;
       // else if (doMT2Higgs) ivMinMTBMet = true;
       // if (doMT2Higgs && mbbmax_ > 200) doMbbMax200 = true;
-      // if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
+      if (doMT2Higgs && mbbmax_ > 300) doMbbMax300 = true;
       // if (doMT2Higgs && mbbhcand_ < 100) doMbbCRlo = true;
       // if (doMT2Higgs && mbbhcand_ > 150) doMbbCRhi = true;
       // if (!doMT2Higgs) continue; // For faster runtime
@@ -1727,7 +1727,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (doMT2Higgs) {
         fillHistosSRMT2Higgs("sr");
         fillHistosSRMT2Higgs("sr", "_allMbb");
-        // if (!doMbbMax300 && !isHcand && !isZcand) fillHistosSRMT2Higgs("sr", "_MbbCRs");
+        if (!doMbbMax300 && !isHcand && !isZcand) fillHistosSRMT2Higgs("sr", "_MbbCRs");
         // if (isHcand) fillHistosSRMT2Higgs("sr");
         // if (!isHcand) fillHistosSRMT2Higgs("sr"); // Looking at Hcand CR
         // if (true)           fillHistosSRMT2Higgs("sr", "_original");

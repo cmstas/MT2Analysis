@@ -106,7 +106,7 @@ gamma_vars_only = [
 # -- mt2higgs --
 basic_plots = [
     ("ht",True,(250,1500),None,2),
-    ("met",True,(200,1000),None,2),
+    ("met",True,(0,1000),None,2),
     ("mt2",True,(200,1000),None,2),
     ("nJet30",True,(2,14),None),
     ("nBJet20",True,(2,7),None),
@@ -114,7 +114,7 @@ basic_plots = [
 
 hcand_xtra = [
     ("minMTbmet",True,(0,600),None),
-    ("Mbbhcand",True,(100,150),None),
+    ("Mbbhcand",True,(0,300),None),
     ("nhcand",False,None,None),
 ]
 
@@ -124,7 +124,7 @@ Hcand_xtra = [
 ]
 
 Zcand_xtra = [
-    ("MbbZcand",True,(0,1000),None,2),
+    ("MbbZcand",True,(0,200),None),
 ]
 
 rl_add = [
@@ -135,6 +135,8 @@ rl_add = [
 
 sl_add = [
     ("leppt",True,(0,400),None,2),
+    # ("lepeta",False,None,None),
+    # ("mt",True,(0,150),None),
 ]
 
 dy_add = [
@@ -193,7 +195,18 @@ mbbcr_plots = [
     ("mt2_MbbCRs",True,(200,1000),None,2),
     ("nJet30_MbbCRs",True,(0,14),None),
     ("nBJet20_MbbCRs",True,(0,6),None),
+    ("minMTbmet_MbbCRs",True,(0,600),None),
     ("MbbMax_MbbCRs",True,(0,300),None),
+]
+
+dd_plots = [
+    ("ht",True,(250,1500),None,2),
+    ("met",True,(200,1000),None,2),
+    ("mt2",True,(200,1000),None,2),
+    ("nJet30",True,(2,14),None),
+    ("nBJet20",True,(1,6),None),
+    ("minMTbmet",True,(0,600),None),
+    ("MbbMax",True,(0,300),None),
 ]
 
 # mbbcr_plots = [].append(x for x in basic_plots: x[0].append("_MbbCRall"))
