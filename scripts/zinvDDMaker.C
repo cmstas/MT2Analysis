@@ -4,6 +4,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "TROOT.h"
 #include "TLatex.h"
@@ -176,16 +177,6 @@ void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFi
         }
       }
 
-      float norm = zinv_ratio_zg * zinv_purity * 0.92 * 0.93; // assumes integratedZinvEstimate
-      for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
-        if (it->second != nullptr) {
-          it->second = (TH1D*) it->second->Clone(Form("h_%s", it->first.c_str()));
-          it->second->Scale(norm);
-        } else {
-          cout << __LINE__ << ": Can't find hist " << it->first << endl;
-        }
-      }
-
       // 1: zinv_alphaerr (stat on ratio).
       // 2: 20% syst. gamma function, no Nuisances for now 
       // 3: xx% purity stat unc.
@@ -201,6 +192,18 @@ void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFi
       } else {
         pred->SetBinContent(mt2bin, 0.);
         pred->SetBinError(mt2bin, h_zinv->GetBinContent(mt2bin));
+      }
+    }
+
+    float zinv_purity = h_zinv_purity->GetBinContent(1); // assumes integratedZinvEstimate
+    float zinv_ratio_zg = h_zinv_zgratio->Integral(0, -1);
+    float norm = zinv_ratio_zg * zinv_purity * 0.92 * 0.93;
+    for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
+      if (it->second != nullptr) {
+        it->second = (TH1D*) it->second->Clone(Form("h_%s", it->first.c_str()));
+        it->second->Scale(norm);
+      } else {
+        cout << __LINE__ << ": Can't find hist " << it->first << endl;
       }
     }
 

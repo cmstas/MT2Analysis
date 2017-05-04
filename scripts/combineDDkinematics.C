@@ -15,7 +15,7 @@
 using namespace std;
 
 
-void combineSRkinematics(TFile* f_in, TFile* f_out) {
+void combineSRkinematics(TFile* f_in, TFile* f_out, string sr = "") {
 
   if (f_in->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
@@ -33,7 +33,8 @@ void combineSRkinematics(TFile* f_in, TFile* f_out) {
   kineHistMap["MbbMax"]    = nullptr;
 
   // Make directory and plot(s) in the output file
-  TDirectory* dir = (TDirectory*) f_out->mkdir("mbbCRall");
+  string outname = sr + "allIncl";
+  TDirectory* dir = (TDirectory*) f_out->mkdir(outname.c_str());
   dir->cd();
 
   // Loop through list of every directory in the signal file.
@@ -47,7 +48,7 @@ void combineSRkinematics(TFile* f_in, TFile* f_out) {
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { // it is a signal region
       std::string sr_string = k->GetTitle();
       // sr_string.erase(0, 2);    // remove "sr" from front of string
-      if (sr_string.find("CR") == string::npos) continue;
+      if (sr_string.find(sr) == string::npos) continue;
       // dirs.push_back(sr_string);
       for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
         TH1D* temphist = (TH1D*) f_in->Get(Form("%s/h_%s", sr_string.c_str(), it->first.c_str()));
@@ -66,19 +67,19 @@ void combineSRkinematics(TFile* f_in, TFile* f_out) {
 
 }
 
-void mbbcrDDkinMaker(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp") {
+void combineDDkinematics(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp", string sr = "srCR") {
 
   // get input files
 
   TFile* f_in = new TFile(Form("%s/data_Run2016.root", input_dir.c_str()), "UPDATE");
   // TFile* f_out = new TFile(Form("%s/data_mbbcrDDkin.root", input_dir.c_str()), "RECREATE");
-  combineSRkinematics(f_in, f_in);
+  combineSRkinematics(f_in, f_in, sr);
 
   f_in = new TFile(Form("%s/zinvDataDriven.root", input_dir.c_str()), "UPDATE");
   // f_out = new TFile(Form("%s/zinv_mbbcrDDkin.root", input_dir.c_str()), "RECREATE");
-  combineSRkinematics(f_in, f_in);
+  combineSRkinematics(f_in, f_in, sr);
 
   f_in = new TFile(Form("%s/lostlepFromCRs.root", input_dir.c_str()), "UPDATE");
   // f_out = new TFile(Form("%s/lostlep_mbbcrDDkin.root", input_dir.c_str()), "RECREATE");
-  combineSRkinematics(f_in, f_in);
+  combineSRkinematics(f_in, f_in, sr);
 }
