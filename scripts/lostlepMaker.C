@@ -131,14 +131,15 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       // make empty histogram
       h_lostlepDD_sr_finebin = new TH1D("h_mt2SR", "h_mt2SR", 150, 0, 1500);
     }
+
     std::map<string, TH1D*> kineHistMap;
-    kineHistMap["mt2"]       = (TH1D*) f_lostlep->Get(fullhistnameFinebin);
+    // kineHistMap["mt2"]       = (TH1D*) f_lostlep->Get(fullhistnameFinebin);
     kineHistMap["met"]       = (TH1D*) f_lostlep->Get(met_name);
     kineHistMap["ht"]        = (TH1D*) f_lostlep->Get(ht_name);
-    kineHistMap["njet"]      = (TH1D*) f_lostlep->Get(njet_name);
-    kineHistMap["nbjet"]     = (TH1D*) f_lostlep->Get(nbjet_name);
+    kineHistMap["nJet30"]    = (TH1D*) f_lostlep->Get(njet_name);
+    kineHistMap["nBJet20"]   = (TH1D*) f_lostlep->Get(nbjet_name);
     kineHistMap["minMTbmet"] = (TH1D*) f_lostlep->Get(minMTbmet_name);
-    kineHistMap["mbb"]       = (TH1D*) f_lostlep->Get(mbb_name);
+    kineHistMap["MbbMax"]    = (TH1D*) f_lostlep->Get(mbb_name);
 
     std::map<string, TH1D*> histMapCR;
     for ( std::map<string, TH1D*>::iterator iter = histMap.begin(); iter != histMap.end(); ++iter ) {
@@ -352,7 +353,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 
     for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
       if (it->second != nullptr) {
-        it->second = (TH1D*) it->second->Clone(Form("h_%sDD", it->first.c_str()));
+        it->second = (TH1D*) it->second->Clone(Form("h_%s", it->first.c_str()));
         it->second->Scale(norm);
       }
     }

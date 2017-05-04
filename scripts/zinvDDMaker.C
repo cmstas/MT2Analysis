@@ -73,10 +73,10 @@ void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFi
     kineHistMap["mt2"]       = (TH1D*) f_zinvMC->Get(directory + "/h_mt2");
     kineHistMap["met"]       = (TH1D*) f_zinvMC->Get(directory + "/h_met");
     kineHistMap["ht"]        = (TH1D*) f_zinvMC->Get(directory + "/h_ht");
-    kineHistMap["njet"]      = (TH1D*) f_zinvMC->Get(directory + "/h_nJet30");
-    kineHistMap["nbjet"]     = (TH1D*) f_zinvMC->Get(directory + "/h_nBJet20");
+    kineHistMap["nJet30"]    = (TH1D*) f_zinvMC->Get(directory + "/h_nJet30");
+    kineHistMap["nBJet20"]   = (TH1D*) f_zinvMC->Get(directory + "/h_nBJet20");
     kineHistMap["minMTbmet"] = (TH1D*) f_zinvMC->Get(directory + "/h_minMTbmet");
-    kineHistMap["mbb"]       = (TH1D*) f_zinvMC->Get(directory + "/h_MbbMax");
+    kineHistMap["MbbMax"]    = (TH1D*) f_zinvMC->Get(directory + "/h_MbbMax");
 
     if (!h_zinv_zgratio) cout << "Cannot find histogram: " << fullhistnameRatio << endl;
     if (!h_zinv_purity) cout << "Cannot find histogram: " << fullhistnamePurity << endl;
@@ -179,7 +179,7 @@ void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFi
       float norm = zinv_ratio_zg * zinv_purity * 0.92 * 0.93; // assumes integratedZinvEstimate
       for (auto it = kineHistMap.begin(); it != kineHistMap.end(); ++it) {
         if (it->second != nullptr) {
-          it->second = (TH1D*) it->second->Clone(Form("h_%sDD", it->first.c_str()));
+          it->second = (TH1D*) it->second->Clone(Form("h_%s", it->first.c_str()));
           it->second->Scale(norm);
         } else {
           cout << __LINE__ << ": Can't find hist " << it->first << endl;
