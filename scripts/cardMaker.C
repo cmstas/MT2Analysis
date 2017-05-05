@@ -60,6 +60,8 @@ const bool doSimpleLostlepNuisances = false; //if true, reverts to ICHEP lostlep
 
 const bool printTable = true; //if true, prints additional .txt files with the data & bkg yields and uncertainties for plotmaking
 
+const bool appendSignal = true; //if true, append the signal yields to the table card printed 
+
 const bool suppressUHmt2bin = false; //if true, skips the lowest mt2bin in the UH HT region
 
 double last_zinv_ratio = 0.5;
@@ -319,8 +321,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   int njets_LOW = h_njets_LOW->GetBinContent(1);
   int njets_HI = h_njets_HI->GetBinContent(1);
 
-  int mt2_LOW = h_sig ? h_sig->GetBinLowEdge(mt2bin) : 0;
-  int mt2_HI = h_sig ? mt2_LOW + h_sig->GetBinWidth(mt2bin) : 1500;
+  // int mt2_LOW = h_sig ? h_sig->GetBinLowEdge(mt2bin) : 0;
+  // int mt2_HI = h_sig ? mt2_LOW + h_sig->GetBinWidth(mt2bin) : 1500;
+  TH1D* h_llep = (TH1D*) f_lostlep->Get(fullhistname);
+  int mt2_LOW = h_llep ? h_llep->GetBinLowEdge(mt2bin) : 0;
+  int mt2_HI = h_llep ? mt2_LOW + h_llep->GetBinWidth(mt2bin) : 1500;
   // hardcode the current edge of our highest bin..
   if ((mt2_HI == 1500) || (mt2_HI == 1800)) mt2_HI = -1;
 
@@ -1138,7 +1143,17 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     
     if (verbose) std::cout << "Wrote table: " << tablename << std::endl;
   }//if printTable
-  
+
+  if (appendSignal) {
+    // append signal yields to table
+    ofstream tablefile;
+    tablefile.open(tablename, std::ofstream::app);
+    tablefile << setw(18) << std::left << signal << setw(9) << setprecision(3) <<  n_sig_cor_recogenaverage << endl;
+    tablefile.close();
+
+    if (verbose) std::cout << "Append signal " << signal << " to table: " << tablename << std::endl;
+  }
+
   return 1;
 }
 
@@ -1191,8 +1206,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
       string sr_string = k->GetTitle();
       if (sr_string[2] != 'H' && sr_string[2] != 'h' && sr_string[2] != 'Z') continue; // only one search at a time
       string outdir = output_dir + "/" + sr_string[2] + "cand";
-      string mt2_hist_name = (k->GetTitle());
-      mt2_hist_name += "/h_n_mt2bins";
+      string mt2_hist_name = sr_string + "/h_n_mt2bins";
       int n_mt2bins = getHistBin(f_sig, mt2_hist_name, 1, true);
       for (int imt2 = 1; imt2 <= n_mt2bins; ++imt2) { // Make a separate card for each MT2 bin.
 	if (isScan) {

@@ -30,6 +30,9 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     nBinsTotal = len(card_names)
     bkg_processes = ["zinv","llep","qcd"]
     nBkgs = len(bkg_processes)
+    # sig_samples = ["T2ttZH_800_200","T2ttZH_800_400","T5qqqqWH_1400_700","T5qqqqWH_1100_950"]
+    sig_samples = ["T2ttZH_800_200","T5qqqqWH_1100_950"]
+    nSigs = len(sig_samples)
 
     ## setup histograms
     h_data = ROOT.TH1D("h_data","",nBinsTotal,0,nBinsTotal)
@@ -37,6 +40,9 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     h_bkg_vec = []
     for i,proc in enumerate(bkg_processes):
         h_bkg_vec.append(ROOT.TH1D("h_"+proc,"",nBinsTotal,0,nBinsTotal))
+    h_sig_vec = []
+    for i,samp in enumerate(sig_samples):
+        h_sig_vec.append(ROOT.TH1D("h_"+samp,"",nBinsTotal,0,nBinsTotal))
     g_unc = ROOT.TGraphAsymmErrors() # graph to store prediction uncertainties
     g_unc_ratio = ROOT.TGraphAsymmErrors() # graph to store prediction uncertainties
 
@@ -58,6 +64,8 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
             h_data.SetBinContent(ibin, procs["data"][0])
         for j in range(nBkgs):
             h_bkg_vec[j].SetBinContent(ibin, procs[bkg_processes[j]][0])
+        for i in range(nSigs):
+            h_sig_vec[i].SetBinContent(ibin, procs[sig_samples[i]][0])
 
         # get uncertainties
         tot_pred, tot_unc_up, tot_unc_down = utils.GetTotalBackgroundNumbers(procs, bkg_processes)
@@ -73,6 +81,11 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     h_bkg_vec[0].SetFillColor(418)
     h_bkg_vec[1].SetFillColor(ROOT.kAzure+4)
     h_bkg_vec[2].SetFillColor(401)
+
+    h_sig_vec[0].SetLineColor(ROOT.kPink)
+    # h_sig_vec[1].SetLineColor(ROOT.kPink+7)
+    h_sig_vec[1].SetLineColor(ROOT.kTeal)
+    # h_sig_vec[3].SetLineColor(ROOT.kTeal+2)
 
     stack = ROOT.THStack("bkg_stack","")
     for j in range(nBkgs):
@@ -135,6 +148,12 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
 
     # draw the backgrounds
     stack.Draw("SAME HIST")
+
+    # draw all the signals
+    for sig in h_sig_vec:
+        # sig.SetFillStyle(4050)
+        # sig.SetLineWidth(2)
+        sig.Draw("HIST SAME")
 
     # draw the prediction uncertainties
     g_unc.SetFillStyle(3244)
@@ -236,6 +255,8 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
         leg.AddEntry(g_data,"Data","lp")
     for i in range(nBkgs):
         leg.AddEntry(h_bkg_vec[i], utils.GetLegendName(bkg_processes[i]),'f')
+    for i in range(nSigs):
+        leg.AddEntry(h_sig_vec[i], sig_samples[i],'f')
     leg.Draw()
 
 
