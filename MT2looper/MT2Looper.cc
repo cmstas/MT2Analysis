@@ -170,6 +170,12 @@ void MT2Looper::SetSignalRegions(){
     it->SetVarAll("nZcand", 0, 1);
     it->SetVarAll("mbbmax", 0, 300);
     SRVecHcand.push_back(*it);
+    // it->SetName((it->GetName()).replace(0,1,"CL"));
+    // it->SetVarAll("mbbmax", 0, 70);
+    // SRVecHcand.push_back(*it);
+    // it->SetName((it->GetName()).replace(0,1,"CM"));
+    // it->SetVarAll("mbbmax", 150, 300);
+    // SRVecHcand.push_back(*it);
   }
   if (fasterRuntime) SRVecMonojet.clear(); // for faster runtime in mt2higgs
   // ** the full list of SRVec might be needed in the purity calculation -- check later
@@ -1726,7 +1732,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       if (doMT2Higgs) {
         fillHistosSRMT2Higgs("sr");
-        fillHistosSRMT2Higgs("sr", "_allMbb");
+        // fillHistosSRMT2Higgs("sr", "_allMbb");
         if (!doMbbMax300 && !isHcand && !isZcand) fillHistosSRMT2Higgs("sr", "_MbbCRs");
         // if (isHcand) fillHistosSRMT2Higgs("sr");
         // if (!isHcand) fillHistosSRMT2Higgs("sr"); // Looking at Hcand CR
@@ -2063,6 +2069,12 @@ void MT2Looper::fillHistosSRMT2Higgs(const std::string& prefix, const std::strin
     values["nhcand"] = 1;
     values["nZcand"] = 1;
   }
+  else if (suffix == "_allMbb") {
+    values["mbbmax"] = 314;
+    values["nhcand"] = 1;
+    values["nZcand"] = 1;
+  }
+
   if (synchronizing) values["mt2"] = mt2_; // debug: for sync testing
 
   std::map<std::string, float> valuesCRSL = values;

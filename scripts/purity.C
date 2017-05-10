@@ -669,7 +669,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 }
 
 
-void purity(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp", string dataname = "data_Run2016")
+void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp", string dataname = "data_Run2016")
 {
   
   //load signal regions
@@ -682,6 +682,12 @@ void purity(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output
     it->SetVarAll("nZcand", 0, 1);
     it->SetVarAll("mbbmax", 0, 300);
     SRVec.push_back(*it);
+    // it->SetName((it->GetName()).replace(0,1,"CL"));
+    // it->SetVarAll("mbbmax", 0, 70);
+    // SRVec.push_back(*it);
+    // it->SetName((it->GetName()).replace(0,1,"CM"));
+    // it->SetVarAll("mbbmax", 150, 300);
+    // SRVec.push_back(*it);
   }
   vector<SR> SRVec2 = getSignalRegions2016(); //adds 2 bins at UH HT, for 3b;
   for (auto it = SRVec2.begin(); it != SRVec2.end(); ++it) {         // debug
