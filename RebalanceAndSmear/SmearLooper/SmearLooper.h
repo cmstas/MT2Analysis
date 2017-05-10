@@ -69,6 +69,7 @@ class SmearLooper {
   void SetCutLevel(int cut_level) {CUT_LEVEL_ = cut_level;}       // 1=analysis cuts, 2=weaker HT cuts for closure plots, 3=no cuts at smearing step, but still event selection before, 4=no cuts at all
   void UseRawHists () {useRawHists_ = true;}
   void UseBjetResponse (bool use) {useBjetResponse_ = use;}
+  void SetIsData(bool isData) { isData_ = isData; }
   bool passesTrigger ();
   float getTriggerPrescale ();
   
@@ -120,6 +121,7 @@ class SmearLooper {
   bool makeSmearBaby_;
   bool useRawHists_;
   bool useBjetResponse_;
+  bool isData_;
   
   float coreScale_;
   float tailScale_;

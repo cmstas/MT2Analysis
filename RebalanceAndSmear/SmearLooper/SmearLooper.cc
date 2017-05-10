@@ -108,6 +108,7 @@ SmearLooper::SmearLooper() :
   makeSmearBaby_(false),
   useRawHists_(false),
   useBjetResponse_(true),
+  isData_(false),
   coreScale_(1.),
   tailScale_(1.),
   meanShift_(0.),
@@ -484,7 +485,15 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
   reader.SetTailScale(tailScale_);
   reader.SetMeanShift(meanShift_);
   reader.UseRawHistograms(useRawHists_);
-  reader.Init("JetResponseTemplates.root");
+  reader.Init("JetResponseTemplates.root",isData_);
+  
+  // draw all of the templates for debugging. Uncomment the drawing code in JRTreader.cc:GetRandomResponse
+  // for(int ipt=0; ipt<23; ipt++){
+  //     for(int ieta=0; ieta<17; ieta++){
+  //         reader.GetRandomResponse(JRTreader::pt_bins[ipt]+0.01, JRTreader::eta_bins[ieta]+0.01, false);
+  //     }
+  // }
+  // return;
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -924,7 +933,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
           std::vector<float> jet_pt_smeared = jet_pt;
 
           for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
-              float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>0.8484) : false, t.isData);
+              float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>0.8484) : false);
             plot1D("h_smear",      smear,   evtweight_, h_1d_global, ";smear", 10000, 0, 10);
             jet_pt_smeared.at(i) *= smear;
           }

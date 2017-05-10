@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
   int rflag = 0;
   int tflag = 0;
   int wflag = 0;
+  int dflag = 0;
   int max_events = -1;
   float core_scale = 1.;
   float tail_scale = 1.;
@@ -47,7 +48,7 @@ int main(int argc, char **argv) {
   int cut_level = 1;
 
   int c;
-  while ((c = getopt(argc, argv, "bc:hjl:m:n:rt:w")) != -1) {
+  while ((c = getopt(argc, argv, "bc:dhjl:m:n:rt:w")) != -1) {
     switch (c) {
     case 'b':
       bflag = 1;
@@ -82,6 +83,10 @@ int main(int argc, char **argv) {
       break;
     case 'w':
       wflag = 1;            
+      break;
+    case 'd':
+      dflag = 1;            
+      break;
     case '?':
       if (isprint(optopt))
         fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -119,7 +124,8 @@ int main(int argc, char **argv) {
   if (tflag) looper->SetTailScale(tail_scale);
   if (wflag) looper->ApplyWeights();
   if (lflag) looper->SetCutLevel(cut_level);
-  
+  if (dflag) looper->SetIsData(true);
+
   looper->loop(ch, output_dir + "/" + samples.at(0) + ".root", max_events);
   return 0;
 }

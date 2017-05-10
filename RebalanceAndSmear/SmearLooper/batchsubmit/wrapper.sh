@@ -4,9 +4,11 @@
 # parse command line options
 #
 OPTIONS=""
-while getopts "bc:hm:n:rt:w" opt; do
+while getopts "bc:dhm:n:rt:wl:" opt; do
     case "$opt" in
         b) OPTIONS+="-b "
+           ;;
+        d) OPTIONS+="-d "
            ;;
         h) OPTIONS+="-h "
            ;;
@@ -16,13 +18,15 @@ while getopts "bc:hm:n:rt:w" opt; do
            ;;
         w) OPTIONS+="-w "
            ;;
-        c) OPTIONS+="-c ${OPTARG}"
+        c) OPTIONS+="-c ${OPTARG} "
            ;;
-        m) OPTIONS+="-m ${OPTARG}"
+        m) OPTIONS+="-m ${OPTARG} "
            ;;
-        n) OPTIONS+="-n ${OPTARG}"
+        n) OPTIONS+="-n ${OPTARG} "
            ;;
-        t) OPTIONS+="-t ${OPTARG}"
+        l) OPTIONS+="-l ${OPTARG} "
+           ;;
+        t) OPTIONS+="-t ${OPTARG} "
            ;;
         esac
 done
@@ -163,9 +167,9 @@ for outfile in "${OUTPUT[@]}";
 do
     if [[ ${outfile} =~ .*baby.* ]]
     then
-        gfal-copy -p -f -t 4200 --verbose file:`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/smearbaby/${outfile}
+        gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/smearbaby/${outfile}
     else
-        gfal-copy -p -f -t 4200 --verbose file:`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${outfile}        
+        gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${outfile}        
     fi
 done
                

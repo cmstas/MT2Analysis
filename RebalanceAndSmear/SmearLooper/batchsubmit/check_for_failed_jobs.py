@@ -20,6 +20,9 @@ def GetExpectedOutputFiles (infile):
     if match:
       fname = match.group().split()[1].split(',')[0]+'.root'
       fpath = match.group().split()[2]
+      if not os.path.isfile(os.path.join(fpath,fname)):
+        print match.group().split()[0]
+        print '\n'.join(match.group().split()[1].split(','))
       list_of_files.append(os.path.join(fpath,fname))
       list_of_args.append(line)    
   f.close()
@@ -46,13 +49,11 @@ def main (args):
 
     fid = open(args[1].replace('.cmd','_resubmit.cmd'), 'w')
     fid.write("""
-    universe=grid
-    Grid_Resource=condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu
+    universe=Vanilla
     when_to_transfer_output = ON_EXIT
-    #the actual executable to run is not transfered by its name.
-    #In fact, some sites may do weird things like renaming it and such.
     transfer_input_files=wrapper.sh, job_input{0}/input.tar.gz
     +DESIRED_Sites="T2_US_UCSD"
+    +remote_DESIRED_Sites="T2_US_UCSD"
     +Owner = undefined
     log=/data/tmp/{1}/condor_submit_logs/smearing/condor_12_01_16.log
     output=/data/tmp/{1}/condor_job_logs/smearing/1e.$(Cluster).$(Process).out
