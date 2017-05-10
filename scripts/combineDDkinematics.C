@@ -33,7 +33,9 @@ void combineSRkinematics(TFile* f_in, TFile* f_out, string sr = "") {
   kineHistMap["MbbMax"]    = nullptr;
 
   // Make directory and plot(s) in the output file
-  string outname = "mbbCRallIncl";
+  string outname = sr + "allIncl";
+  outname.replace(0, 2, "mbb");
+  if (f_out->Get(outname.c_str())) f_out->rmdir(outname.c_str());
   TDirectory* dir = (TDirectory*) f_out->mkdir(outname.c_str());
   dir->cd();
 
@@ -82,5 +84,8 @@ void combineDDkinematics(string input_dir = "/home/users/sicheng/working/MT2Anal
 
   f_in = new TFile(Form("%s/lostlepFromCRs.root", input_dir.c_str()), "UPDATE");
   // f_out = new TFile(Form("%s/lostlep_mbbcrDDkin.root", input_dir.c_str()), "RECREATE");
+  combineSRkinematics(f_in, f_in, sr);
+
+  f_in = new TFile(Form("%s/qcd_ht.root", input_dir.c_str()), "UPDATE");
   combineSRkinematics(f_in, f_in, sr);
 }

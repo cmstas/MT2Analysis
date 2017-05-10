@@ -122,7 +122,10 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         unit = utils.GetUnit(vn)
         subtitles = utils.GetSubtitles(dirname)
         if h_data[i]!=None:
-            subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+            if scaleMC:
+                subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+            else:
+                subLegText = ["# Data events: {ndata}"]
         else:
             subLegText = None
         # subLegText = None

@@ -31,7 +31,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     bkg_processes = ["zinv","llep","qcd"]
     nBkgs = len(bkg_processes)
     # sig_samples = ["T2ttZH_800_200","T2ttZH_800_400","T5qqqqWH_1400_700","T5qqqqWH_1100_950"]
-    sig_samples = ["T2ttZH_800_200","T5qqqqWH_1100_950"]
+    sig_samples = []
     nSigs = len(sig_samples)
 
     ## setup histograms
@@ -50,7 +50,7 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     ## fill histograms
     binLabels = []
     for ibin, cardname in enumerate(card_names):
-        sr_name, ht_name, jbj_name, mt2name = utils.GetRegsFromCardName(cardname)
+        sr_name, ht_name, jbj_name, mt2name = utils.GetRegsFromCardName(cardname)[:4]
         srnames.append(sr_name)
         ibin += 1
         mt2left = mt2name.split("to")[0][1:]
@@ -82,9 +82,9 @@ def MakePlotFromTablecards(card_dir, outdir, userMax=None, doData=True):
     h_bkg_vec[1].SetFillColor(ROOT.kAzure+4)
     h_bkg_vec[2].SetFillColor(401)
 
-    h_sig_vec[0].SetLineColor(ROOT.kPink)
+    # h_sig_vec[0].SetLineColor(ROOT.kPink)
     # h_sig_vec[1].SetLineColor(ROOT.kPink+7)
-    h_sig_vec[1].SetLineColor(ROOT.kTeal)
+    # h_sig_vec[1].SetLineColor(ROOT.kTeal)
     # h_sig_vec[3].SetLineColor(ROOT.kTeal+2)
 
     stack = ROOT.THStack("bkg_stack","")
@@ -370,10 +370,10 @@ def printTableFromCard(card_dir, cardname, doData=True):
     text += "\\begin{tabular}{r" + "|c"*ncols + "}\n"
     text += "\\hline\n"
 
-    srname, htname, jbjname, mt2name = utils.GetRegsFromCardName(cardname)
+    srname, htname, jbjname, mt2name, mbb, mMTbmet = utils.GetRegsFromCardName(cardname)
     procs = utils.GetEverythingFromTablecard(os.path.join(card_dir,cardname))
 
-    title = srname[2:]+": "+htname+" "+jbjname.split("_")[0]+" "+jbjname.split("_")[1]
+    title = srname[2:]+": "+htname+" "+jbjname.split("_")[0]+" "+jbjname.split("_")[1]+" "+mbb+" "+mMTbmet
     # title = srname
     binName = mt2name.split("to")[0][1:]+" $<$ mt2 $<$ "+mt2name.split("to")[1]
 

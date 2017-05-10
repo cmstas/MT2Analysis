@@ -302,7 +302,7 @@ def GetRegsFromCardName(cardname):
     mbb = idfier[6]
     mMTbmet = idfier[7][:-4]
 
-    return srname, ht_reg, jreg+"_"+bjreg, mt2bin
+    return srname, ht_reg, jreg+"_"+bjreg, mt2bin, mbb, mMTbmet
 
 def GetJBJtitle(jbj_reg):
     lines = ["",""]

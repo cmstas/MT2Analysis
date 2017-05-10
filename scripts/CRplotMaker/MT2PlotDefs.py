@@ -199,6 +199,17 @@ mbbcr_plots = [
     ("MbbMax_MbbCRs",True,(0,300),None),
 ]
 
+allmbb_plots = [
+    ("ht_allMbb",True,(250,1500),None,2),
+    ("met_allMbb",True,(200,1000),None,2),
+    ("mt2Standrd_allMbb",True,(200,1000),None,2),
+    ("mt2_allMbb",True,(200,1000),None,2),
+    ("nJet30_allMbb",True,(0,14),None),
+    ("nBJet20_allMbb",True,(0,6),None),
+    ("minMTbmet_allMbb",False,(0,600),None),
+    ("MbbMax_allMbb",False,(0,1000),None),
+]
+
 dd_plots = [
     ("ht",True,(250,1500),None,2),
     ("met",True,(200,1000),None,2),
@@ -206,7 +217,7 @@ dd_plots = [
     ("nJet30",True,(2,14),None),
     ("nBJet20",True,(1,6),None),
     ("minMTbmet",True,(0,600),None),
-    ("MbbMax",True,(0,300),None),
+    ("MbbMax",True,(0,400),None),
 ]
 
 # mbbcr_plots = [].append(x for x in basic_plots: x[0].append("_MbbCRall"))
