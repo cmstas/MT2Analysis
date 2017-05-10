@@ -135,7 +135,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       rebal_reader.SetCoreScale(1.0);
       rebal_reader.SetTailScale(1.0);
       rebal_reader.SetMeanShift(0.0);
-      rebal_reader.Init("rebal/JetResponseTemplates.root");
+      rebal_reader.Init("rebal/JetResponseTemplates.root", isDataFromFileName);
   }
 
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
@@ -3815,7 +3815,7 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
     float min_prob = 1E-20;
     for(int i=0; i < t->nRebalJets; i++){
         bool isBjet = (t->rebal_jetbtagcsv[i] > 0.8484);
-        float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i], t->isData);
+        float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
         prob = max(prob, min_prob);
         likelihood += log(prob);
         pt_constrained_x -= (t->rebal_jetpt[i])*cos(t->rebal_jetphi[i])/par[i];
