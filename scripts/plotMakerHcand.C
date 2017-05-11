@@ -71,6 +71,12 @@ inline double getHistIntegral(TFile* file, const TString hname, bool warning = f
   return (hist)? hist->Integral(0, -1) : 0.;
 }
 
+inline double getHistIntegralAndErr(TFile* file, const TString hname, double& err, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+  return (hist)? hist->IntegralAndError(0, -1, err) : 0.;
+}
+
 void addOverflow(TH1* h) {
   Double_t err = 0;
   float lastBinPlusOverflow = h->IntegralAndError(h->GetXaxis()->GetNbins(), -1, err);
@@ -1855,72 +1861,97 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
     caption = "DD Est. = DataCR * ZGratio * Purity * 0.92 (Direct/AllPrompt) * 0.93 (R(Z/G) corrections)";
   }
 
-  // vector<string> dirs_all = dirs;
-  vector<vector<string>> dirsVec;
-  int nTabulars = ndirs/8;
-  if ((ndirs)%8 > 0) ++nTabulars;
-  int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
-  auto it = dirs.begin();
-  for (int i = 0; i < nTabulars; ++i) {
-    vector<string> temp_dirs;
-    for (int j = 0; j < ndir_line && it != dirs.end(); ++j, ++it)
-      temp_dirs.push_back(*it);
-    dirsVec.push_back(temp_dirs);
+  vector<int> ncols_dir;
+  int ncols_tot = 0;
+  for (unsigned i = 0; i < n; i++) {
+    if (!TString(names.at(i)).Contains("zinvDataDriven")) continue;
+    for (auto it = dirs.begin(); it != dirs.end(); ++it) {
+      int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+(*it)).c_str()), 1);
+      ncols_dir.push_back(ncol);
+      ncols_tot += ncol;
+    }
   }
+  vector<vector<string>> dirsVec;
+  // if ((ncols_tot)%8 > 0) ++nTabulars;
+  // int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
+  vector<string> temp_dirs;
+  for (int i = 0, j = 0; i < ncols_dir.size(); ++i) {
+    if (ncols_dir[i] + j <= 8) {
+      temp_dirs.push_back(dirs.at(i));
+      j += ncols_dir[i];
+    } else {
+      dirsVec.push_back(temp_dirs);
+      temp_dirs.clear();
+      temp_dirs.push_back(dirs.at(i));
+      j = ncols_dir[i];
+    }
+  }
+  int nTabulars = dirsVec.size();
 
   ofile << "\\begin{table}[H]" << std::endl;
   ofile << "\\scriptsize" << std::endl;
   ofile << "\\centering" << std::endl;
   ofile << "\\caption{" << caption << "}" << std::endl;
 
-  for (int itab = 0; itab < nTabulars; ++itab) {
+  for (int itab = 0, basen = 0; itab < nTabulars; ++itab, basen += ndirs) {
     dirs = dirsVec[itab];
     ndirs = dirs.size();
+    int ntot_cols = 0;
+    for (int i = 0; i < ndirs; ++i) ntot_cols += ncols_dir.at(basen + i);
 
-    vector<double> bgtot_cr(ndirs, 0);
-    vector<double> bgerr_cr(ndirs, 0);
-    vector<double> bgtot_sr(ndirs, 0);
-    vector<double> bgerr_sr(ndirs, 0);
+    vector<double> bgtot_cr;
+    vector<double> bgerr_cr;
+    vector<double> bgtot_sr;
+    vector<double> bgerr_sr;
 
-    ofile << "\\begin{tabular}{r";
-    for (unsigned int idir=0; idir < ndirs; ++idir) ofile << "|c";
-    ofile << "}" << std::endl;
-    ofile << "\\hline\\hline" << endl;
-    ofile << "Sample";
-    for (unsigned int idir = 0; idir < ndirs; ++idir)
-      ofile << "  &  " << dirs.at(idir);
-    ofile << " \\\\" << endl;
-    ofile << "\\hline\\hline" << endl;
-
-    // backgrounds first -- loop backwards
     for ( int i = n-1 ; i >= 0 ; --i ) {
+      // backgrounds first -- loop backwards
       if ( TString(names.at(i)).Contains("data") ) {found_data = true; continue;}
       if ( TString(names.at(i)).Contains("sig") ) continue;
       if ( TString(names.at(i)).Contains("lostlepFromCRs") ) continue;
       if ( !TString(names.at(i)).Contains("zinvDataDriven") ) continue;
-      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+
+      ofile << "\\begin{tabular}{r";
+      for (unsigned int idir=0; idir < ntot_cols; ++idir) ofile << "|c";
+      ofile << "}" << std::endl;
+      ofile << "\\hline\\hline" << endl;
+      ofile << "\\multirow{2}{*}{Sample}";
+      for (unsigned int idir = 0; idir < ndirs; ++idir) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        ofile << " & \\multicolumn{" << ncol << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << dirs.at(idir) << ": " << getJetBJetTableLabel(samples.at(0), sr+dirs.at(idir)) << " }";
+      }
+      ofile << " \\\\" << endl << "\\cline{2-" << ntot_cols+1 << "}" << endl;
+      for (unsigned int idir = 0; idir < ndirs; ++idir) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        TH1D* h_mt2bins = (TH1D*) samples.at(i)->Get(Form("%s/h_mt2bins", (sr+dirs.at(idir)).c_str()));
+        // ofile << " & \\multicolumn{" << ncol << "}{c" << ((idir == ndirs-1)? "" : "|") << "}{ " << getJetBJetTableLabel(samples.at(0), sr+dirs.at(idir)) << " }";
+        for (int icol = 1; icol <= ncol; ++icol) {
+          ofile << " & ";
+          if (icol == ncol)
+            ofile << " $>$ " << (int) h_mt2bins->GetXaxis()->GetBinLowEdge(ncol) << " GeV";
+          else
+            ofile << (int) h_mt2bins->GetXaxis()->GetBinLowEdge(icol) << " - " << (int) h_mt2bins->GetXaxis()->GetBinLowEdge(icol+1) << " ";
+        }
+      }
+      ofile << " \\\\" << endl;
+      ofile << "\\hline\\hline" << endl;
+      for (int idir = 0; idir < ndirs; ++idir) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        for (int icol = 1; icol <= ncol; ++icol) {
           TString fullhistnameCR = Form("%s/h_mt2binsGJyield", (sr+dirs.at(idir)).c_str());
           TString fullhistnameSR = Form("%s/h_mt2binsMCyield",  (sr+dirs.at(idir)).c_str());
-          TH1D* h_cr = (TH1D*) samples.at(i)->Get(fullhistnameCR);
-          TH1D* h_sr = (TH1D*) samples.at(i)->Get(fullhistnameSR);
+          // TH1D* h_cr = (TH1D*) samples.at(i)->Get(fullhistnameCR);
+          // TH1D* h_sr = (TH1D*) samples.at(i)->Get(fullhistnameSR);
           double yield_cr = 0.;
           double err_cr = 0.;
           double yield_sr = 0.;
           double err_sr = 0.;
-          int idx = idir*1 + isel;
-          if (h_cr) {
-            // use all bins
-            yield_cr = h_cr->IntegralAndError(0,-1,err_cr);
-            bgtot_cr.at(idx) += yield_cr;
-            bgerr_cr.at(idx) = sqrt(pow(bgerr_cr.at(idx),2) + pow(err_cr,2));
-          }
-          if (h_sr) {
-            // use all bins
-            yield_sr = h_sr->IntegralAndError(0,-1,err_sr);
-            bgtot_sr.at(idx) += yield_sr;
-            bgerr_sr.at(idx) = sqrt(pow(bgerr_sr.at(idx),2) + pow(err_sr,2));
-          }
+          yield_cr = getHistBinAndErr(samples.at(i), fullhistnameCR, icol, err_cr);
+          yield_sr = getHistBinAndErr(samples.at(i), fullhistnameSR, icol, err_sr);
+          bgtot_cr.push_back(yield_cr);
+          bgerr_cr.push_back(err_cr);
+          bgtot_sr.push_back(yield_sr);
+          bgerr_sr.push_back(err_sr);
         }
       }
     } // loop over samples
@@ -1959,15 +1990,13 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
       if( !TString(names.at(i)).Contains("data") ) continue;
       found_data = true;
       ofile << "Data CR";
-      for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+      for (unsigned int idir = 0; idir < ndirs; ++idir) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        for (int icol = 1; icol <= ncol; ++icol) {
           TString fullhistname = Form("%s/h_mt2bins", (cr+dirs.at(idir)).c_str());
           TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
-          double yield = 0.;
-          if (h) {
-            // use all bins
-            yield = round(h->Integral(0,-1)); // deal with weird rounding errors
-          }
+          double yield = getHistBin(samples.at(i), fullhistname, icol);
+          // if (h) yield = round(h->Integral(0,-1)); // deal with weird rounding errors
           ofile << "  &  " << Form("%d",(int)yield);
           if (dataMCratio) datatot.push_back(yield);
         }
@@ -1998,14 +2027,13 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
       ofile << "\\hline" << endl;
       ofile << "ZG Ratio";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        for (int icol = 1; icol <= ncol; ++icol) {
           TString fullhistname = Form("%s/h_mt2binsRatioInt", (sr+dirs.at(idir)).c_str());
-          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          // TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
           double err = 0.;
-          if (h) {
-            yield = h->IntegralAndError(0, -1, err);
-          }
+          yield = getHistIntegralAndErr(samples.at(i), fullhistname, err);
           ofile << "  &  ";
           if (yield > 10.)
             ofile << Form("%.1f $\\pm$ %.1f", yield, err);
@@ -2016,14 +2044,13 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
       ofile << " \\\\" << endl;
       ofile << "Purity";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        for (int icol = 1; icol <= ncol; ++icol) {
           TString fullhistname = Form("%s/h_mt2binspurityIntFailSieieData", (sr+dirs.at(idir)).c_str());
-          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          // TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
           double err = 0.;
-          if (h) {
-            yield = h->IntegralAndError(0, -1, err);
-          }
+          yield = getHistIntegralAndErr(samples.at(i), fullhistname, err);
           ofile << "  &  ";
           if (yield > 10.)
             ofile << Form("%.1f $\\pm$ %.1f", yield, err);
@@ -2035,14 +2062,13 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
       ofile << "\\hline" << endl;
       ofile << "DD Estimates";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
-        for ( unsigned int isel = 0; isel < 1; ++isel ) {
+        int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
+        for (int icol = 1; icol <= ncol; ++icol) {
           TString fullhistname = Form("%s/h_mt2bins", (sr+dirs.at(idir)).c_str());
-          TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
+          // TH1D* h = (TH1D*) samples.at(i)->Get(fullhistname);
           double yield = 0.;
           double err = 0.;
-          if (h) {
-            yield = h->IntegralAndError(0, -1, err);
-          }
+          yield = getHistBinAndErr(samples.at(i), fullhistname, icol, err);
           ofile << "  &  ";
           if (yield > 10.)
             ofile << Form("%.1f $\\pm$ %.1f", yield, err);
@@ -4211,7 +4237,7 @@ void plotMakerHcand() {
   dirsH.push_back("srhbase");
   dirsH.push_back("srHbase");
   dirsH.push_back("srZbase");
-  printTable(samples, names, dirsH, "");
+  // printTable(samples, names, dirsH, "");
   // printComparisonTable(samples, names, vector<string>{"original"}, dirsH, "srhbase");
   // printComparisonRatioTable(samplesVec, names, selecs, dirsH, "srbase");
   dirsH.clear();
@@ -4245,107 +4271,107 @@ void plotMakerHcand() {
   // printDetailedTableDataDriven(dd_samples, dd_names, dirsH);
   // dirsH.clear();
 
-  dirsH.push_back("srh1VLH");
-  dirsH.push_back("srh1LH");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1VLH");
+  // dirsH.push_back("srh1LH");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srh1MH");
-  dirsH.push_back("srh3MH");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1MH");
+  // dirsH.push_back("srh3MH");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srh1HH");
-  dirsH.push_back("srh3HH");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-
-  dirsH.push_back("srh1VLL");
-  dirsH.push_back("srh1LL");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srh1ML");
-  dirsH.push_back("srh3ML");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srh1HL");
-  dirsH.push_back("srh3HL");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  ofile << "\\newpage\n";       // Here start the MbbMax (srH) regions
-
-  dirsH.push_back("srH1L");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srH1MM");
-  dirsH.push_back("srH3MM");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srH1MU");
-  dirsH.push_back("srH3MU");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srH1HML");
-  dirsH.push_back("srH3HML");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srH1HMH");
-  dirsH.push_back("srH3HMH");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srH1HUL");
-  dirsH.push_back("srH3HUL");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
-
-  dirsH.push_back("srH1HUH");
-  dirsH.push_back("srH3HUH");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1HH");
+  // dirsH.push_back("srh3HH");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
 
-  ofile << "\\newpage\n";       // Here start the Zcand (srZ) regions
+  // dirsH.push_back("srh1VLL");
+  // dirsH.push_back("srh1LL");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srZ1VL");
-  dirsH.push_back("srZ1L");
-  dirsH.push_back("srZ3L");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1ML");
+  // dirsH.push_back("srh3ML");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srZ1M");
-  dirsH.push_back("srZ3M");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
+  // dirsH.push_back("srh1HL");
+  // dirsH.push_back("srh3HL");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
-  dirsH.push_back("srZ1H");
-  dirsH.push_back("srZ3H");
-  // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
-  printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
-  dirsH.clear();
+  // ofile << "\\newpage\n";       // Here start the MbbMax (srH) regions
+
+  // dirsH.push_back("srH1L");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srH1MM");
+  // dirsH.push_back("srH3MM");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srH1MU");
+  // dirsH.push_back("srH3MU");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srH1HML");
+  // dirsH.push_back("srH3HML");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srH1HMH");
+  // dirsH.push_back("srH3HMH");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srH1HUL");
+  // dirsH.push_back("srH3HUL");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srH1HUH");
+  // dirsH.push_back("srH3HUH");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+
+  // ofile << "\\newpage\n";       // Here start the Zcand (srZ) regions
+
+  // dirsH.push_back("srZ1VL");
+  // dirsH.push_back("srZ1L");
+  // dirsH.push_back("srZ3L");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srZ1M");
+  // dirsH.push_back("srZ3M");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
+
+  // dirsH.push_back("srZ1H");
+  // dirsH.push_back("srZ3H");
+  // // printDetailedTableDataDriven(samples, names, dd_samples, dd_names, dirsH);
+  // printDetailedTableDataDriven(mc_samples, mc_names, dd_samples, dd_names, dirsH);
+  // dirsH.clear();
 
   vector<string> sl_names = {"lostlepFromCRs", "lostlep", "data_Run2016"};
   vector<TFile*> sl_samples = getSamples(sl_names, input_dir);
@@ -4355,87 +4381,181 @@ void plotMakerHcand() {
 
   // ofile << "\\newpage\n";       // Here start the CR yields for hcand
 
-  dirsH.push_back("h1VLH");
-  dirsH.push_back("h1LH");
-  dirsH.push_back("h1MH");
-  dirsH.push_back("h3MH");
-  dirsH.push_back("h1HH");
-  dirsH.push_back("h3HH");
-  dirsH.push_back("h1VLL");
-  dirsH.push_back("h1LL");
-  dirsH.push_back("h1ML");
-  dirsH.push_back("h3ML");
-  dirsH.push_back("h1HL");
-  dirsH.push_back("h3HL");
+  dirsH.push_back("CR1VLH");
+  dirsH.push_back("CR1LH");
+  dirsH.push_back("CR1MH");
+  dirsH.push_back("CR3MH");
+  dirsH.push_back("CR1HH");
+  dirsH.push_back("CR3HH");
+  dirsH.push_back("CR1VLL");
+  dirsH.push_back("CR1LL");
+  dirsH.push_back("CR1ML");
+  dirsH.push_back("CR3ML");
+  dirsH.push_back("CR1HL");
+  dirsH.push_back("CR3HL");
   printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
   dirsH.clear();
 
-  dirsH.push_back("H1L");
-  dirsH.push_back("H1MU");
-  dirsH.push_back("H3MU");
-  dirsH.push_back("H1HUH");
-  dirsH.push_back("H1HUL");
-  dirsH.push_back("H3HUH");
-  dirsH.push_back("H3HUL");
-  dirsH.push_back("H1MM");
-  dirsH.push_back("H3MM");
-  dirsH.push_back("H1HMH");
-  dirsH.push_back("H1HML");
-  dirsH.push_back("H3HMH");
-  dirsH.push_back("H3HML");
+  dirsH.push_back("CM1VLH");
+  dirsH.push_back("CM1LH");
+  dirsH.push_back("CM1MH");
+  dirsH.push_back("CM3MH");
+  dirsH.push_back("CM1HH");
+  dirsH.push_back("CM3HH");
+  dirsH.push_back("CM1VLL");
+  dirsH.push_back("CM1LL");
+  dirsH.push_back("CM1ML");
+  dirsH.push_back("CM3ML");
+  dirsH.push_back("CM1HL");
+  dirsH.push_back("CM3HL");
   printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
   dirsH.clear();
 
-  dirsH.push_back("Z1VL");
-  dirsH.push_back("Z1L");
-  dirsH.push_back("Z1M");
-  dirsH.push_back("Z3M");
-  dirsH.push_back("Z1H");
-  dirsH.push_back("Z3H");
+  dirsH.push_back("CL1VLH");
+  dirsH.push_back("CL1LH");
+  dirsH.push_back("CL1MH");
+  dirsH.push_back("CL3MH");
+  dirsH.push_back("CL1HH");
+  dirsH.push_back("CL3HH");
+  dirsH.push_back("CL1VLL");
+  dirsH.push_back("CL1LL");
+  dirsH.push_back("CL1ML");
+  dirsH.push_back("CL3ML");
+  dirsH.push_back("CL1HL");
+  dirsH.push_back("CL3HL");
   printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
   dirsH.clear();
+
+  ofile << "\\newpage\n";       // GJ
+
+  dirsH.push_back("CR1VLH");
+  dirsH.push_back("CR1LH");
+  dirsH.push_back("CR1MH");
+  dirsH.push_back("CR3MH");
+  dirsH.push_back("CR1HH");
+  dirsH.push_back("CR3HH");
+  dirsH.push_back("CR1VLL");
+  dirsH.push_back("CR1LL");
+  dirsH.push_back("CR1ML");
+  dirsH.push_back("CR3ML");
+  dirsH.push_back("CR1HL");
+  dirsH.push_back("CR3HL");
+  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "", true);
+  dirsH.clear();
+
+  dirsH.push_back("CM1VLH");
+  dirsH.push_back("CM1LH");
+  dirsH.push_back("CM1MH");
+  dirsH.push_back("CM3MH");
+  dirsH.push_back("CM1HH");
+  dirsH.push_back("CM3HH");
+  dirsH.push_back("CM1VLL");
+  dirsH.push_back("CM1LL");
+  dirsH.push_back("CM1ML");
+  dirsH.push_back("CM3ML");
+  dirsH.push_back("CM1HL");
+  dirsH.push_back("CM3HL");
+  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "", true);
+  dirsH.clear();
+
+  dirsH.push_back("CL1VLH");
+  dirsH.push_back("CL1LH");
+  dirsH.push_back("CL1MH");
+  dirsH.push_back("CL3MH");
+  dirsH.push_back("CL1HH");
+  dirsH.push_back("CL3HH");
+  dirsH.push_back("CL1VLL");
+  dirsH.push_back("CL1LL");
+  dirsH.push_back("CL1ML");
+  dirsH.push_back("CL3ML");
+  dirsH.push_back("CL1HL");
+  dirsH.push_back("CL3HL");
+  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "", true);
+  dirsH.clear();
+
+  // ofile << "\\newpage\n";       // Here start the CR yields for hcand
+
+  // dirsH.push_back("h1VLH");
+  // dirsH.push_back("h1LH");
+  // dirsH.push_back("h1MH");
+  // dirsH.push_back("h3MH");
+  // dirsH.push_back("h1HH");
+  // dirsH.push_back("h3HH");
+  // dirsH.push_back("h1VLL");
+  // dirsH.push_back("h1LL");
+  // dirsH.push_back("h1ML");
+  // dirsH.push_back("h3ML");
+  // dirsH.push_back("h1HL");
+  // dirsH.push_back("h3HL");
+  // printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
+  // dirsH.clear();
+
+  // dirsH.push_back("H1L");
+  // dirsH.push_back("H1MU");
+  // dirsH.push_back("H3MU");
+  // dirsH.push_back("H1HUH");
+  // dirsH.push_back("H1HUL");
+  // dirsH.push_back("H3HUH");
+  // dirsH.push_back("H3HUL");
+  // dirsH.push_back("H1MM");
+  // dirsH.push_back("H3MM");
+  // dirsH.push_back("H1HMH");
+  // dirsH.push_back("H1HML");
+  // dirsH.push_back("H3HMH");
+  // dirsH.push_back("H3HML");
+  // printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
+  // dirsH.clear();
+
+  // dirsH.push_back("Z1VL");
+  // dirsH.push_back("Z1L");
+  // dirsH.push_back("Z1M");
+  // dirsH.push_back("Z3M");
+  // dirsH.push_back("Z1H");
+  // dirsH.push_back("Z3H");
+  // printComparisonTableCRSL(sl_samples, sl_names, vector<string>{""}, dirsH, "", true);
+  // dirsH.clear();
 
   ofile << "\\newpage\n";
 
-  dirsH.push_back("h1VLH");
-  dirsH.push_back("h1LH");
-  dirsH.push_back("h1MH");
-  dirsH.push_back("h3MH");
-  dirsH.push_back("h1HH");
-  dirsH.push_back("h3HH");
-  dirsH.push_back("h1VLL");
-  dirsH.push_back("h1LL");
-  dirsH.push_back("h1ML");
-  dirsH.push_back("h3ML");
-  dirsH.push_back("h1HL");
-  dirsH.push_back("h3HL");
-  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
-  dirsH.clear();
+  // dirsH.push_back("h1VLH");
+  // dirsH.push_back("h1LH");
+  // dirsH.push_back("h1MH");
+  // dirsH.push_back("h3MH");
+  // dirsH.push_back("h1HH");
+  // dirsH.push_back("h3HH");
+  // dirsH.push_back("h1VLL");
+  // dirsH.push_back("h1LL");
+  // dirsH.push_back("h1ML");
+  // dirsH.push_back("h3ML");
+  // dirsH.push_back("h1HL");
+  // dirsH.push_back("h3HL");
+  // printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
+  // dirsH.clear();
 
-  dirsH.push_back("H1L");
-  dirsH.push_back("H1MU");
-  dirsH.push_back("H3MU");
-  dirsH.push_back("H1HUH");
-  dirsH.push_back("H1HUL");
-  dirsH.push_back("H3HUH");
-  dirsH.push_back("H3HUL");
-  dirsH.push_back("H1MM");
-  dirsH.push_back("H3MM");
-  dirsH.push_back("H1HMH");
-  dirsH.push_back("H1HML");
-  dirsH.push_back("H3HMH");
-  dirsH.push_back("H3HML");
-  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
-  dirsH.clear();
+  // dirsH.push_back("H1L");
+  // dirsH.push_back("H1MU");
+  // dirsH.push_back("H3MU");
+  // dirsH.push_back("H1HUH");
+  // dirsH.push_back("H1HUL");
+  // dirsH.push_back("H3HUH");
+  // dirsH.push_back("H3HUL");
+  // dirsH.push_back("H1MM");
+  // dirsH.push_back("H3MM");
+  // dirsH.push_back("H1HMH");
+  // dirsH.push_back("H1HML");
+  // dirsH.push_back("H3HMH");
+  // dirsH.push_back("H3HML");
+  // printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
+  // dirsH.clear();
 
-  dirsH.push_back("Z1VL");
-  dirsH.push_back("Z1L");
-  dirsH.push_back("Z1M");
-  dirsH.push_back("Z3M");
-  dirsH.push_back("Z1H");
-  dirsH.push_back("Z3H");
-  printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
-  dirsH.clear();
+  // dirsH.push_back("Z1VL");
+  // dirsH.push_back("Z1L");
+  // dirsH.push_back("Z1M");
+  // dirsH.push_back("Z3M");
+  // dirsH.push_back("Z1H");
+  // dirsH.push_back("Z3H");
+  // printComparisonTableCRGJ(gj_samples, gj_names, dirsH, "");
+  // dirsH.clear();
 
   ofile << "\\newpage\n";       // Here start the CR yields for MbbMax
   // dirsH.push_back("H1L");
