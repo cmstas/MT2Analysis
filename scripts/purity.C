@@ -411,7 +411,6 @@ void makePredOneBinFR(TFile* f_out, TFile* f_in, TFile* f_qcd, TFile* f_gjet, TS
 
 
 void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TFile* f_zinv, TFile* f_zOrig, TString sr, TString FR_type, TString plotname = "mt2bins")
-
 {
   if (verbose) cout<<__LINE__<<" Making plots for region "<<sr<<", FR_type "<<FR_type<<", plotname "<<plotname<<" **************************"<<endl;
   //get hists
@@ -682,10 +681,10 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
     it->SetVarAll("nZcand", 0, 1);
     it->SetVarAll("mbbmax", 0, 300);
     SRVec.push_back(*it);
-    // it->SetName((it->GetName()).replace(0,1,"CL"));
+    // it->SetName((it->GetName()).replace(0,2,"CL"));
     // it->SetVarAll("mbbmax", 0, 70);
     // SRVec.push_back(*it);
-    // it->SetName((it->GetName()).replace(0,1,"CM"));
+    // it->SetName((it->GetName()).replace(0,2,"CM"));
     // it->SetVarAll("mbbmax", 150, 300);
     // SRVec.push_back(*it);
   }
@@ -869,20 +868,21 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
     purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   vector<TString> additionalPlots;
-  // additionalPlots.push_back("htbins");
-  // additionalPlots.push_back("htbins2");
-  // additionalPlots.push_back("njbins");
-  // additionalPlots.push_back("nbjbins");
-  // // additionalPlots.push_back("bosonptbins");
-  for(int i = 0; i< (int) additionalPlots.size(); i++){
-    srName = "base";
-    TString plot = additionalPlots.at(i);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "", plot);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "", plot);
-    purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
-    purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+  additionalPlots.push_back("htbins");
+  additionalPlots.push_back("htbins2");
+  additionalPlots.push_back("njbins");
+  additionalPlots.push_back("nbjbins");
+  //  additionalPlots.push_back("bosonptbins");
+  for (string srName : {"hbase", "Hbase", "Zbase"}) {
+    for(int i = 0; i< (int) additionalPlots.size(); i++){
+      TString plot = additionalPlots.at(i);
+      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "", plot);
+      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+      purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "", plot);
+      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+      purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+    }
   }
   purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, "baseIncl", "", "bosonptbins"); // This needs to be done last (it overwrites previous histograms) 
   purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, "baseIncl", "FailSieieData", "bosonptbins"); // This needs to be done last (it overwrites previous histograms)   

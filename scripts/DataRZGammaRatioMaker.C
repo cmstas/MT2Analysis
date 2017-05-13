@@ -19,7 +19,7 @@ using namespace std;
 bool isData = false;
 
 //_______________________________________________________________________________
-void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_name, float kFactorGJetForRatio = 1.0 ) {
+void makeDataRatio(TFile* fData , TFile* fPurity , TFile* fTop, TFile* outfile, TString sr = "h", float kFactorGJetForRatio = 1.0 ) {
 
   // Generate histogram file with Zinv prediction based on GJetsData * R(Zinv/GJ)
   
@@ -30,8 +30,8 @@ void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_n
   //       top.root for top subtraction
 
 
-  TFile * outfile = new TFile(output_name.c_str(),"RECREATE") ; 
-  outfile->cd();
+  TDirectory* dir = (TDirectory*) outfile->mkdir("sr"+sr+"base");
+  dir->cd();
   
   // Do the inclusive ones
   vector<TString> inclPlots;
@@ -43,10 +43,10 @@ void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_n
 
   for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
     
-    TH1D* hGJetStat  = (TH1D*) fData->Get("crgjbaseIncl/"+inclPlots[incl]);
-    TH1D* hZllStat   = (TH1D*) fData->Get("crdybaseIncl/"+inclPlots[incl]);
-    TH1D* hGJetYield = (TH1D*) fPurity->Get("srbaseIncl/"+inclPlots[incl]+"photonestimateFailSieieData");
-    TH1D* hTop       = (TH1D*) fTop->Get("crdybaseIncl/"+inclPlots[incl]);
+    TH1D* hGJetStat  = (TH1D*) fData->Get("crgj"+sr+"base/"+inclPlots[incl]);
+    TH1D* hZllStat   = (TH1D*) fData->Get("crdy"+sr+"base/"+inclPlots[incl]);
+    TH1D* hGJetYield = (TH1D*) fPurity->Get("sr"+sr+"base/"+inclPlots[incl]+"photonestimateFailSieieData");
+    TH1D* hTop       = (TH1D*) fTop ->Get("crdy"+sr+"base/"+inclPlots[incl]);
     if(!hGJetStat || !hGJetYield || !hZllStat || !hTop){
       cout<<"could not find histogram "<<inclPlots[incl]<<endl;
       continue;
@@ -55,7 +55,7 @@ void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_n
       cout<<"different binning for histograms "<<inclPlots[incl]<<endl;
       continue;
     }
-    outfile->cd();
+    // outfile->cd();
 
     if (!isData) hGJetYield->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
 
@@ -78,8 +78,7 @@ void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_n
       float rest = ratioInclWithPurityUnc->GetBinError(ibin);
       ratioInclWithPurityUnc->SetBinError(ibin, sqrt (rest*rest + tenpercent*tenpercent));
     }
-    
-    
+
     //    hGJetStat->Print("all");
     //    hGJetYield->Print("all");
     //    hZllStat->Print("all");
@@ -90,15 +89,13 @@ void makeDataRatio( TFile* fData , TFile* fPurity , TFile* fTop, string output_n
 
   } // end of inclusive plots
 
+  outfile->cd();
   return;
 }
 
 
-
-
 //_______________________________________________________________________________
-void DataRZGammaRatioMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/", string dataname = "data"){
-
+void DataRZGammaRatioMaker(string input_dir = "../MT2looper/output/temp/", string dataname = "data_Run2016"){
 
   string output_name = input_dir+"/doubleRatio.root";
   // ----------------------------------------
@@ -120,8 +117,10 @@ void DataRZGammaRatioMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis
     return;
   }
 
+  TFile* outfile = new TFile(output_name.c_str(),"RECREATE");
+  outfile->cd();
 
-  makeDataRatio( f_data , f_purity , f_top , output_name, 1.23 );
-
+  for (TString sr : {"h", "H", "Z"})
+    makeDataRatio( f_data , f_purity , f_top , outfile, sr, 1.23 );
 
 }

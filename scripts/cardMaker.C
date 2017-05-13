@@ -36,7 +36,7 @@ const bool verbose = false;
 
 const bool suppressZeroBins = false;
 
-const bool suppressZeroTRs = false;
+const bool suppressZeroTRs = true;
 
 const bool doSuperSignalRegions = false;
 
@@ -1205,6 +1205,7 @@ void cardMaker(string signal, string input_dir, string output_dir, bool isScan =
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       string sr_string = k->GetTitle();
       if (sr_string[2] != 'H' && sr_string[2] != 'h' && sr_string[2] != 'Z') continue; // only one search at a time
+      if (sr_string.find("base") != string::npos) continue; // ignore the base regions
       string outdir = output_dir + "/" + sr_string[2] + "cand";
       string mt2_hist_name = sr_string + "/h_n_mt2bins";
       int n_mt2bins = getHistBin(f_sig, mt2_hist_name, 1, true);

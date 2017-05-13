@@ -1877,7 +1877,7 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
   // int ndir_line = (ndirs%nTabulars == 0)? ndirs/nTabulars : ndirs/nTabulars+1;
   vector<string> temp_dirs;
   for (int i = 0, j = 0; i < ncols_dir.size(); ++i) {
-    if (ncols_dir[i] + j <= 8) {
+    if (ncols_dir[i] + j <= 9) {
       temp_dirs.push_back(dirs.at(i));
       j += ncols_dir[i];
     } else {
@@ -2045,7 +2045,8 @@ void printComparisonTableCRGJ(vector<TFile*> samples, vector<string> names, vect
     for( unsigned int i = 0 ; i < n ; i++ ){
       if (!TString(names.at(i)).Contains("zinvDataDriven")) continue;
       ofile << "\\hline" << endl;
-      ofile << "ZG Ratio";
+      // ofile << "ZG Ratio";
+      ofile << "R(Z/GInt)";
       for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
         int ncol = getHistBin(samples.at(i), Form("%s/h_n_mt2bins", (sr+dirs.at(idir)).c_str()), 1);
         for (int icol = 1; icol <= ncol; ++icol) {
