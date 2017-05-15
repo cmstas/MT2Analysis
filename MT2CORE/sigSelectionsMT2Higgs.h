@@ -11,6 +11,7 @@ std::vector<SR> getSignalRegionsMT2Higgs();
 std::vector<SR> getSignalRegionsHcand();
 std::vector<SR> getSignalRegionsZcand();
 std::vector<SR> getSignalRegionsMbbMax();
+std::vector<SR> getTestRegionsMT2Higgs();
 
 } // namespace mt2
 

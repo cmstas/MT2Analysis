@@ -1,4 +1,17 @@
-TH1F* getRatios(TFile* sample, vector<string> dirs, string suffix = "") {
+// C++
+// #include <vector>
+
+inline double getHistBinAndErr(TFile* file, const TString hname, const int ibin, double& err, bool warning = false) {
+  TH1D* hist = (TH1D*) file->Get(hname);
+  if (warning && hist == 0) {
+    cout << __LINE__ << ": The histogram " << hname << " does not exist!\n";
+    return 0.;
+  }
+  err = hist->GetBinError(ibin);
+  return hist->GetBinContent(ibin);
+}
+
+TH1F* getPurityRatios(TFile* sample, vector<string> dirs, string suffix = "") {
 
   int n_srbins = 10;            // for now
 
@@ -36,11 +49,77 @@ TH1F* getRatios(TFile* sample, vector<string> dirs, string suffix = "") {
   return hist;
 }
 
+TH1F* getZGRatios(TFile* sample, vector<string> dirs, string suffix = "") {
+  vector<double> bgtot;
+  vector<double> bgerr;
+
+  int n_srbins = dirs.size();
+
+  for (string dir : dirs) {
+    TString fullhistname = "sr" + dir + "/h_mt2binsRatioInt";
+    double err = 0.;
+    double yield = getHistBinAndErr(sample, fullhistname, 1, err);
+    bgtot.push_back(yield);
+    bgerr.push_back(err);
+    cout << " & " << dir;
+  } // loop over all samples
+  cout << endl;
+
+  TH1F* hist = new TH1F(Form("h_%s", suffix.c_str()), "R(Z/#gamma) Ratio Hist", n_srbins, 0, n_srbins);
+
+  for (int ibin = 0; ibin < n_srbins; ++ibin) {
+    hist->SetBinContent(ibin+1, bgtot[ibin]);
+    hist->SetBinError(ibin+1, bgerr[ibin]);
+    string label = dirs.at(ibin);
+    label.erase(0, 8);
+    hist->GetXaxis()->SetBinLabel(ibin+1, label.c_str());
+    cout << " & " << setprecision(2) << bgtot[ibin] << " \\pm " << setprecision(1) << bgerr[ibin];
+  }
+  cout << endl;
+
+  return hist;
+}
+
+int ZGRatioDependencyCheck(TString indir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/dep_test") {
+
+  TFile* f_zinv = new TFile(indir + "/zinvFromGJ.root");
+  TFile* outfile = new TFile(indir + "/deptest.root", "RECREATE");
+
+  vector<vector<string>> list_dirs;
+  list_dirs.push_back({"hAllIncl2b", "hAllIncl3b", "hAllInclgeq4b"});
+  list_dirs.push_back({"hAllIncl2j", "hAllIncl3j", "hAllIncl4j", "hAllIncl5to6j", "hAllInclgeq7j"});
+  list_dirs.push_back({"hAllInclhtVL", "hAllInclhtL", "hAllInclhtM", "hAllInclhtH", "hAllInclhtUH"});
+  list_dirs.push_back({"hAllInclmetVL", "hAllInclmetL", "hAllInclmetM", "hAllInclmetH"});
+
+  // TIter it(f_zinv->GetListOfKeys());
+  // TKey* k;
+  // while ((k = (TKey*)it())) {
+  //   string sr_string = k->GetTitle();
+  //   // sr_string.erase(0, 2);    //remove "sr" from front of string
+  //   if (sr_string[0] < 'A' || sr_string[0] == 'b' || sr_string[0] == 'I') continue; // don't want the standard mt2 regions
+  //   dirs.push_back(sr_string);
+  // }
+  outfile->cd();
+  for (auto dirs : list_dirs) {
+    string type = dirs[0];
+    type.erase(0, 8);
+    TH1F* h_dep = getZGRatios(f_zinv, dirs, type);
+    h_dep->SetTitle((h_dep->GetTitle() + type).c_str());
+    h_dep->Write();
+  }
+  TH1F* h_mt2bins = (TH1F*) f_zinv->Get("srhAllInclmt2/h_mt2binsRatio");
+  h_mt2bins->Write();
+
+  return 0;
+}
 
 int ZGRatioComparison()
 {
   // TFile* f_tight = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/mMTnHcand/zinvFromGJ.root");
   // TFile* f_loose = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet/zinvFromGJ.root");
+
+  ZGRatioDependencyCheck();
+  return 0;
 
   TFile* f_tight = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/temp/purity.root");
   TFile* f_loose = new TFile("/home/users/sicheng/MT2Analysis/MT2looper/output/minMTbmet/purity.root");
@@ -51,8 +130,8 @@ int ZGRatioComparison()
 
   int n_srbins = 10;
 
-  TH1F* h_tight = getRatios(f_tight, dirs, "tight");
-  TH1F* h_loose = getRatios(f_loose, dirs, "loose");
+  TH1F* h_tight = getPurityRatios(f_tight, dirs, "tight");
+  TH1F* h_loose = getPurityRatios(f_loose, dirs, "loose");
 
   TCanvas* c0 = new TCanvas("c0", "c0", 800, 600);
   gStyle->SetOptStat("");

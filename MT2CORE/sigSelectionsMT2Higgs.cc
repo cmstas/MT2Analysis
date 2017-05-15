@@ -31,8 +31,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   SRBase.SetVarCRSL("deltaPhiMin", 0.3, -1);
   SRBase.SetVarCRQCD("deltaPhiMin", 0, 0.3);
   // SRBase.SetVarCRQCD("nbjets", 0, -1);
-  float SRBase_mt2bins[6] = {200, 300, 400, 500, 700, 1500}; 
-  SRBase.SetMT2Bins(5, SRBase_mt2bins);
+  SRBase.SetMT2Bins({200, 300, 400, 500, 700, 1500});
 
   SRBase.SetName("hbase");
   // SRBase.SetVarAll("njets", 0, -1);
@@ -74,6 +73,7 @@ std::vector<SR> getSignalRegionsMT2Higgs() {
   float Incl2h_mt2bins[3] = {200, 300, 1500};
   SRBase.SetMT2Bins(2, Incl2h_mt2bins);
   SRVec.push_back(SRBase);
+
 
   return SRVec;
 }
@@ -555,6 +555,219 @@ std::vector<SR> getSignalRegionsZcand() {
       SRVec.at(i).SetVarCRQCD(varsCRQCD.at(j), baseSR.GetLowerBoundCRQCD(varsCRQCD.at(j)), baseSR.GetUpperBoundCRQCD(varsCRQCD.at(j)));
     }
   }
+
+  return SRVec;
+}
+
+
+std::vector<SR> getTestRegionsMT2Higgs() {
+
+  std::vector<SR> SRVec;
+
+  SR SRBase;
+  SRBase.SetVarAll("j1pt", 30, -1);
+  SRBase.SetVarAll("j2pt", 30, -1);
+  SRBase.SetVarAll("diffMetMhtOverMet", 0, 0.5);
+  SRBase.SetVarAll("njets", 2, -1);
+  SRBase.SetVarAll("nbjets", 2, -1);
+  SRBase.SetVarAll("passesHtMet", 1, 2);
+  SRBase.SetVarAll("ht", 250, -1);
+  SRBase.SetVarAll("met", 30, -1);
+
+  SRBase.SetVar("nlep", 0, 1);
+  SRBase.SetVarCRSL("nlep", 1, 2);
+  SRBase.SetVarCRQCD("nlep", 0, 1);
+  SRBase.SetVar("mt2", 200, -1);
+  SRBase.SetVarCRSL("mt2", 200, -1);
+  SRBase.SetVarCRQCD("mt2", 0, 200);
+  SRBase.SetVar("deltaPhiMin", 0.3, -1);
+  SRBase.SetVarCRSL("deltaPhiMin", 0.3, -1);
+  SRBase.SetVarCRQCD("deltaPhiMin", 0, 0.3);
+  SRBase.SetMT2Bins({200, 300, 400, 500, 700, 1500});
+
+  SRBase.SetVarAll("nhcand", 0, -1);
+  SRBase.SetVarAll("mbbmax", 0, -1);
+  SRBase.SetVarAll("nZcand", 0, -1);
+  SRBase.SetVarAll("minMTbmet", 0, -1);
+
+  // -- variable dependency checks --
+  std::vector<SR> temp_test_vec;
+  SRBase.SetName("hAllIncl2b");
+  SRBase.SetVarAll("nbjets", 2, 3);
+  SRBase.SetMT2Bins({200, 1500});
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllIncl3b");
+  SRBase.SetVarAll("nbjets", 3, 4);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclgeq4b");
+  SRBase.SetVarAll("nbjets", 4, -1);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "h"));
+    sr.SetVarAll("nhcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "H"));
+    sr.SetVarAll("mbbmax", 300, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "Z"));
+    sr.SetVarAll("nZcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+
+  temp_test_vec.clear();
+  SRBase.SetVarAll("nbjets", 2, -1);
+
+  SRBase.SetName("hAllIncl2j");
+  SRBase.SetVarAll("njets", 2, 3);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllIncl3j");
+  SRBase.SetVarAll("njets", 3, 4);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllIncl4j");
+  SRBase.SetVarAll("njets", 4, 5);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllIncl5to6j");
+  SRBase.SetVarAll("njets", 5, 7);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclgeq7j");
+  SRBase.SetVarAll("njets", 7, -1);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "h"));
+    sr.SetVarAll("nhcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "H"));
+    sr.SetVarAll("mbbmax", 300, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "Z"));
+    sr.SetVarAll("nZcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+
+  temp_test_vec.clear();
+  SRBase.SetVarAll("njets", 2, -1);
+  SRBase.SetVarAll("met", 250, -1);
+
+  SRBase.SetName("hAllInclht");
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclhtVL");
+  SRBase.SetVarAll("ht", 250, 450);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclhtL");
+  SRBase.SetVarAll("ht", 450, 575);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclhtM");
+  SRBase.SetVarAll("ht", 575, 1000);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclhtH");
+  SRBase.SetVarAll("ht", 1000, 1500);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclhtUH");
+  SRBase.SetVarAll("ht", 1500, -1);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "h"));
+    sr.SetVarAll("nhcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "H"));
+    sr.SetVarAll("mbbmax", 300, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "Z"));
+    sr.SetVarAll("nZcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+
+  temp_test_vec.clear();
+  SRBase.SetVarAll("ht", 250, -1);
+  SRBase.SetVarAll("passesHtMet", 0, 2);
+
+  SRBase.SetName("hAllInclmet");
+  SRBase.SetVarAll("met", 30, -1);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclmetVL");
+  SRBase.SetVarAll("met", 30, 250);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclmetL");
+  SRBase.SetVarAll("met", 250, 300);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclmetM");
+  SRBase.SetVarAll("met", 300, 400);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+  SRBase.SetName("hAllInclmetH");
+  SRBase.SetVarAll("met", 400, -1);
+  SRVec.push_back(SRBase);
+  temp_test_vec.push_back(SRBase);
+
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "h"));
+    sr.SetVarAll("nhcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "H"));
+    sr.SetVarAll("mbbmax", 300, -1);
+    SRVec.push_back(sr);
+  }
+  for (SR sr : temp_test_vec) {
+    sr.SetName(sr.GetName().replace(0, 4, "Z"));
+    sr.SetVarAll("nZcand", 1, -1);
+    SRVec.push_back(sr);
+  }
+
+  temp_test_vec.clear();
+  SRBase.SetVarAll("passesHtMet", 1, 2);
+  SRBase.SetVarAll("met", 30, -1);
+  SRBase.SetName("hAllInclmt2");
+  SRBase.SetMT2Bins({0, 30, 100, 200, 300, 400, 500, 700, 1500});
+  SRVec.push_back(SRBase);
+
+  SRBase.SetName("hInclmt2");
+  SRBase.SetVarAll("nhcand", 1, -1);
+  SRVec.push_back(SRBase);
+
+  SRBase.SetName("HInclmt2");
+  SRBase.SetVarAll("nhcand", 0, -1);
+  SRBase.SetVarAll("mbbmax", 300, -1);
+  SRVec.push_back(SRBase);
+
+  SRBase.SetName("ZInclmt2");
+  SRBase.SetVarAll("mbbmax", 0, -1);
+  SRBase.SetVarAll("nZcand", 1, -1);
+  SRVec.push_back(SRBase);
+
 
   return SRVec;
 }
