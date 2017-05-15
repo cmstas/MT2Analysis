@@ -47,6 +47,14 @@ void SR::SetMT2Bins(int nbins, float* bins){
   }
 }
 
+void SR::SetMT2Bins(std::vector<float> bins){
+  n_mt2bins_ = bins.size()-1;
+  mt2bins_ = new float [n_mt2bins_+1];
+  for(int i=0; i<=n_mt2bins_; i++){
+    mt2bins_[i] = bins[i];
+  }
+}
+
 void SR::SetAllowingDummyVars(bool val){
   kAllowDummyVars_ = val;
 }
