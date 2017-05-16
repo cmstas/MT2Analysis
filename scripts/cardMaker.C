@@ -591,11 +591,11 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   TString notFound = "";
   if (fourNuisancesPerBinZGratio) {
     // Load NJ, NB, HT, MT2 histograms of R(Z/Gamma)
-    TH1D* h_zllgamma_nj  = (TH1D*) f_zgratio->Get("h_njbinsRatio");
-    TH1D* h_zllgamma_nb  = (TH1D*) f_zgratio->Get("h_nbjbinsRatio");
-    TH1D* h_zllgamma_ht  = (TH1D*) f_zgratio->Get("h_htbinsRatio");
-    TH1D* h_zllgamma_ht2  = (TH1D*) f_zgratio->Get("h_htbins2Ratio");
-    TH1D* h_zllgamma_mt2 = (TH1D*) f_zgratio->Get("h_mt2binsRatio");
+    TH1D* h_zllgamma_nj  = (TH1D*) f_zgratio->Get("h_njbinsDGRatio");
+    TH1D* h_zllgamma_nb  = (TH1D*) f_zgratio->Get("h_nbjbinsDGRatio");
+    TH1D* h_zllgamma_ht  = (TH1D*) f_zgratio->Get("h_htbinsDGRatio");
+    TH1D* h_zllgamma_ht2  = (TH1D*) f_zgratio->Get("h_htbins2DGRatio");
+    TH1D* h_zllgamma_mt2 = (TH1D*) f_zgratio->Get("h_mt2binsDGRatio");
     // Extract values corresponding to this bin
     if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_ht2 == 0 || h_zllgamma_mt2 == 0) {
       cout<<"Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"<<endl;

@@ -31,7 +31,7 @@
 using namespace std;
 using namespace mt2;
 
-bool verbose = true;
+bool verbose = false;
 bool realData = false;
 
 
@@ -439,7 +439,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 //  }
   TH1F* h_ratio = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname+"Ratio");
   if (!plotname.Contains("mt2bins")) {
-    h_ratio = (TH1F*) f_zinv->Get("h_"+plotname+"Ratio");
+    h_ratio = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname+"DGRatio");
   }
   if (!h_ratio) {cout<<"Ratio not found for plot. GIVING UP FOR THIS REGION. "<<plotname<<endl; return; }
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
@@ -448,7 +448,6 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
     cout<<"Forget about Zinv here, could not find the plot. Do the rest."<<endl;
     foundZinv = false;
   }
-
 
   if (verbose && h_gjet) cout<<__LINE__<<" f_gjet:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_gjet->Integral()<<endl;
   if (verbose && h_gjet) cout<<__LINE__<<" f_full:crgj"<<sr<<"/h_"<<plotname<<" has integral "<<h_full->Integral()<<endl;
@@ -487,7 +486,7 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
   
   //do FR purity: full - predFakes / full
   TH1F* h_numFR = (TH1F*) h_full->Clone("h_numFR"); h_numFR->SetName("h_numFR");
-  TH1F* h_denFR = (TH1F*) h_full->Clone("h_denFR"); h_denFR->SetName("h_mt2bins"); // this is our "DATA", later picked up by cardMaker!!
+  TH1F* h_denFR = (TH1F*) h_full->Clone("h_denFR"); h_denFR->SetName("h_"+plotname); // this is our "DATA", later picked up by cardMaker!!
   TH1F* h_purityFR = (TH1F*) h_full->Clone("h_"+plotname+"purity"+FR_type); h_purityFR->SetName("h_"+plotname+"purity"+FR_type);
   if (FR_type.Contains("Poisson")) {
     h_numFR->GetSumw2()->Set(0); h_numFR->Sumw2(); // reset sumw2
@@ -562,10 +561,10 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
       int ht_LOW = h_ht_LOW ? h_ht_LOW->GetBinContent(1) : 200;
       int nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
       int njets_LOW = h_njets_LOW->GetBinContent(1);
-      TH1D* h_zllgamma_nj  = (TH1D*) f_zinv->Get("h_njbinsRatio");
-      TH1D* h_zllgamma_nb  = (TH1D*) f_zinv->Get("h_nbjbinsRatio");
-      TH1D* h_zllgamma_ht  = (TH1D*) f_zinv->Get("h_htbinsRatio");
-      TH1D* h_zllgamma_mt2 = (TH1D*) f_zinv->Get("h_mt2binsRatio");
+      TH1D* h_zllgamma_nj  = (TH1D*) f_zinv->Get("h_njbinsDGRatio");
+      TH1D* h_zllgamma_nb  = (TH1D*) f_zinv->Get("h_nbjbinsDGRatio");
+      TH1D* h_zllgamma_ht  = (TH1D*) f_zinv->Get("h_htbinsDGRatio");
+      TH1D* h_zllgamma_mt2 = (TH1D*) f_zinv->Get("h_mt2binsDGRatio");
       if (h_zllgamma_nj == 0 || h_zllgamma_nb == 0 || h_zllgamma_ht == 0 || h_zllgamma_mt2 == 0) {
         cout<<"Trying fourNuisancesPerBinZGratio, but could not find inclusive Zll/Gamma ratio plots for nuisance parameters"<<endl;
       }
@@ -622,7 +621,6 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
     
     h_trueZinvScaled->Write();
   }
-
   
   //write hists to output file
   h_purityFR->Write();
@@ -681,16 +679,16 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
     it->SetVarAll("nZcand", 0, 1);
     it->SetVarAll("mbbmax", 0, 300);
     SRVec.push_back(*it);
-    // it->SetName((it->GetName()).replace(0,2,"CL"));
-    // it->SetVarAll("mbbmax", 0, 70);
-    // SRVec.push_back(*it);
-    // it->SetName((it->GetName()).replace(0,2,"CM"));
-    // it->SetVarAll("mbbmax", 150, 300);
-    // SRVec.push_back(*it);
+    it->SetName((it->GetName()).replace(0,2,"CL"));
+    it->SetVarAll("mbbmax", 0, 70);
+    SRVec.push_back(*it);
+    it->SetName((it->GetName()).replace(0,2,"CM"));
+    it->SetVarAll("mbbmax", 150, 300);
+    SRVec.push_back(*it);
   }
   vector<SR> SRVec2 = getSignalRegions2016(); //adds 2 bins at UH HT, for 3b;
   for (auto it = SRVec2.begin(); it != SRVec2.end(); ++it) {         // debug
-    cout << it-SRVec2.begin() << "  "<< it->GetName() << endl;      // debug
+    // cout << it-SRVec2.begin() << "  "<< it->GetName() << endl;      // debug
     if (it->GetLowerBound("nbjets") < 2 || it->GetLowerBoundCRSL("nbjets") < 2 || it->GetLowerBoundCRDY("nbjets") < 2) {
       SRVec2.erase(it--);                                           // for faster runtime
       continue;
@@ -699,6 +697,9 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
     sr.SetName("Sync" + sr.GetName());
     SRVec.push_back(sr);
   }
+
+  // // -- dependency test --
+  // SRVec.clear();
 
   //open files
   // get input files -- default to faking data with same MC file
@@ -819,6 +820,7 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "nbjbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   makePredOneBinFR(f_out, f_gq, f_q, f_g, srName+"Incl", h_FRFailSieie, 0, "FailSieie", "bosonptbins"); //FR using !passSieie, LooseNotTight Fakes + 0 qcdPrompt, Data
   vector<TString> additionalRegions;
+  additionalRegions.push_back("base");
   // additionalRegions.push_back("baseJ");
   // additionalRegions.push_back("baseVL");
   // additionalRegions.push_back("baseL");
@@ -853,7 +855,7 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
     purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData"); // This needs to be done last (it overwrites previous histograms)
   }
   additionalRegions.clear();
-  // additionalRegions.push_back("base");
+  additionalRegions.push_back("base");
   // additionalRegions.push_back("baseJ");
   // additionalRegions.push_back("baseVL");
   // additionalRegions.push_back("baseL");
@@ -873,15 +875,15 @@ void purity(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2loope
   additionalPlots.push_back("njbins");
   additionalPlots.push_back("nbjbins");
   //  additionalPlots.push_back("bosonptbins");
-  for (string srName : {"hbase", "Hbase", "Zbase"}) {
+  for (string srName : {"hbase", "Hbase", "Zbase", "base"}) {
     for(int i = 0; i< (int) additionalPlots.size(); i++){
       TString plot = additionalPlots.at(i);
-      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "", plot);
-      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+      // purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "", plot);
+      // purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName, "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
       purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName, "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
-      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "", plot);
-      purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
-      purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
+      // purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "", plot);
+      // purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieie", plot); // This needs to be done last (it overwrites previous histograms)
+      // purityPlotsNew(f_out, f_data, f_g, f_q, f_z, f_zOrig, srName+"Incl", "FailSieieData", plot); // This needs to be done last (it overwrites previous histograms)
     }
   }
   purityPlotsNew(f_out, f_gq, f_g, f_q, f_z, f_zOrig, "baseIncl", "", "bosonptbins"); // This needs to be done last (it overwrites previous histograms) 

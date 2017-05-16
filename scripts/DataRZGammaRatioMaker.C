@@ -59,7 +59,7 @@ void makeDataRatio(TFile* fData , TFile* fPurity , TFile* fTop, TFile* outfile, 
 
     if (!isData) hGJetYield->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
 
-    TH1D* ratioIncl = (TH1D*) hZllStat->Clone(inclPlots[incl]+"Ratio");
+    TH1D* ratioIncl = (TH1D*) hZllStat->Clone(inclPlots[incl]+"DGRatio");
     ratioIncl->Add(hTop, -1.);
     ratioIncl->Divide(hGJetYield);
     for ( int ibin = 0; ibin <= ratioIncl->GetNbinsX(); ++ibin) {
@@ -72,7 +72,7 @@ void makeDataRatio(TFile* fData , TFile* fPurity , TFile* fTop, TFile* outfile, 
       }
       else ratioIncl->SetBinError(ibin, 0.);
     }
-    TH1D* ratioInclWithPurityUnc = (TH1D*) ratioIncl->Clone(inclPlots[incl]+"RatioWithPurityUnc");
+    TH1D* ratioInclWithPurityUnc = (TH1D*) ratioIncl->Clone(inclPlots[incl]+"DGRatioWithPurityUnc");
     for ( int ibin = 0; ibin <= ratioInclWithPurityUnc->GetNbinsX(); ++ibin) {
       float tenpercent = 0.1 * ratioInclWithPurityUnc->GetBinContent(ibin);
       float rest = ratioInclWithPurityUnc->GetBinError(ibin);
@@ -111,6 +111,7 @@ void DataRZGammaRatioMaker(string input_dir = "../MT2looper/output/temp/", strin
   TFile* f_data = new TFile(Form("%s/%s.root",input_dir.c_str(),dataname.c_str())); //data or qcd+gjets file
   TFile* f_purity = new TFile(Form("%s/purity.root",input_dir.c_str()));
   TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str()));
 
   if(f_data->IsZombie() || f_purity->IsZombie() || f_top->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
@@ -120,7 +121,7 @@ void DataRZGammaRatioMaker(string input_dir = "../MT2looper/output/temp/", strin
   TFile* outfile = new TFile(output_name.c_str(),"RECREATE");
   outfile->cd();
 
-  for (TString sr : {"h", "H", "Z"})
+  for (TString sr : {"h", "H", "Z", ""})
     makeDataRatio( f_data , f_purity , f_top , outfile, sr, 1.23 );
 
 }

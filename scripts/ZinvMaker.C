@@ -301,32 +301,38 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
   inclPlots.push_back("h_mt2bins");
   inclPlots.push_back("h_bosonptbins");
 
-  for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
+  for (TString dir : dirs) {
+    if (!dir.Contains("base")) continue;
 
-    TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgjbaseIncl/"+inclPlots[incl])->Clone();
-    TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdybaseIncl/"+inclPlots[incl])->Clone();
+    TDirectory* tdir = (TDirectory*) outfile->mkdir("sr"+dir);
+    tdir->cd();
 
-    if(!hGJetIncl || !hZllIncl){
-      cout<<"could not find histogram "<<inclPlots[incl]<<endl;
-      continue;
-    }
-    if (hGJetIncl->GetNbinsX() != hZllIncl->GetNbinsX() ) {
-      cout<<"different binning for histograms "<<inclPlots[incl]<<endl;
-      continue;
-    }
-    outfile->cd();
+    for ( unsigned int incl = 0; incl < inclPlots.size(); ++incl ) {
 
-    hGJetIncl->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
+      TH1D* hGJetIncl = (TH1D*) fGJet->Get("crgj"+dir+"/"+inclPlots[incl]);
+      TH1D* hZllIncl  = (TH1D*)  fZll->Get("crdy"+dir+"/"+inclPlots[incl]);
 
-    // Since we're working on MC, let's set poissionian errors by hand
-    hZllIncl->Sumw2(0); hZllIncl->Sumw2(1);
-    hGJetIncl->Sumw2(0); hGJetIncl->Sumw2(1);
-    TH1D* ratioIncl = (TH1D*) hZllIncl->Clone(inclPlots[incl]+"Ratio");
-    ratioIncl->Divide(hGJetIncl);
+      if(!hGJetIncl || !hZllIncl){
+        cout<<"could not find histogram "<<inclPlots[incl]<<endl;
+        continue;
+      }
+      if (hGJetIncl->GetNbinsX() != hZllIncl->GetNbinsX() ) {
+        cout<<"different binning for histograms "<<inclPlots[incl]<<endl;
+        continue;
+      }
 
-    ratioIncl->Write();
+      hGJetIncl->Scale(kFactorGJetForRatio); // The goal is LO(Z) / LO(gamma)
 
-  } // end of inclusive plots
+      // Since we're working on MC, let's set poissionian errors by hand
+      hZllIncl->Sumw2(0); hZllIncl->Sumw2(1);
+      hGJetIncl->Sumw2(0); hGJetIncl->Sumw2(1);
+      TH1D* ratioIncl = (TH1D*) hZllIncl->Clone(inclPlots[incl]+"DGRatio");
+      ratioIncl->Divide(hGJetIncl);
+
+      ratioIncl->Write();
+
+    } // end of inclusive plots
+  }
 
   for ( unsigned int idir = 0; idir < ndirs; ++idir ) {
 
@@ -815,7 +821,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
 
 //_______________________________________________________________________________
-void ZinvMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp"){
+void ZinvMaker(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2looper/output/temp"){
 
   // input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/output/temp/";
   // string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
@@ -855,7 +861,7 @@ void ZinvMaker(string input_dir = "/home/users/sicheng/MT2Analysis/MT2looper/out
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) {//it is a signal region
       std::string sr_string = k->GetTitle();
       sr_string.erase(0, 2);    //remove "sr" from front of string
-      if (sr_string[0] < 'A' || sr_string[0] == 'b') continue; // don't want the standard mt2 regions
+      if (sr_string[0] < 'A') continue; // don't want the standard mt2 regions
       dirs.push_back(sr_string);
     }
   }

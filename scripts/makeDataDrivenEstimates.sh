@@ -88,14 +88,19 @@ root -b -q "purity.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 # echo "root -b -q purityRL.C+(${INDIR}, ${RLFILE})"
 # root -b -q "purityRL.C+(\"${INDIR}\",\"${RLFILE}\")" >> dataDrivenEstimates.log
 
-echo "root -b -q DataRZGammaRatioMaker.C+(${INDIR})"
-root -b -q "DataRZGammaRatioMaker.C+(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
+echo "root -b -q DataRZGammaRatioMaker.C(${INDIR})"
+root -b -q "DataRZGammaRatioMaker.C(\"${INDIR}\",\"${GJETFILE}\")" >> dataDrivenEstimates.log
 
 echo "root -b -q zinvDDMaker.C+(\"${INDIR}\")"
 root -b -q "zinvDDMaker.C+(\"${INDIR}\")" >> dataDrivenEstimates.log
 
-echo "root -b -q combineDDkinematics.C(\"${INDIR}\")"
-root -b -q "combineDDkinematics.C(\"${INDIR}\")" >> dataDrivenEstimates.log
+echo "root -b -q combineDDkinematics.C(\"${INDIR}\",\"srCR\")"
+root -b -q "combineDDkinematics.C(\"${INDIR}\",\"srCR\")" >> dataDrivenEstimates.log
+
+echo "root -b -q combineDDkinematics.C(\"${INDIR}\",\"srCM\")"
+root -b -q "combineDDkinematics.C(\"${INDIR}\",\"srCM\")" >> dataDrivenEstimates.log
+echo "root -b -q combineDDkinematics.C(\"${INDIR}\",\"srCL\")"
+root -b -q "combineDDkinematics.C(\"${INDIR}\",\"srCL\")" >> dataDrivenEstimates.log
 
 # echo "root -b -q qcdRphiMaker.C+(${INDIR},${QCDFILE})"
 # root -b -q "qcdRphiMaker.C+(\"${INDIR}\",\"${QCDFILE}\")" >> dataDrivenEstimates.log

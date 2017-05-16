@@ -62,9 +62,9 @@ const float htbins[n_htbins+1] = {250, 450., 575., 1000., 1500., 3000.};
 const int n_htbins2 = 6;
 const float htbins2[n_htbins2+1] = {250., 350., 450., 575., 700., 1000., 3000.};
 const int n_njbins = 4;
-const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
-const int n_nbjbins = 4;
-const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
+const float njbins[n_njbins+1] = {2, 3, 4, 7, 12};
+const int n_nbjbins = 3;
+const float nbjbins[n_nbjbins+1] = {2, 3, 4, 7};
 const int n_mt2bins_SRBase = 8;
 const float SRBase_mt2bins[n_mt2bins_SRBase+1] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1800}; 
 const int n_ptVbins = 19;
@@ -170,14 +170,18 @@ void MT2Looper::SetSignalRegions(){
     it->SetVarAll("nZcand", 0, 1);
     it->SetVarAll("mbbmax", 0, 300);
     SRVecHcand.push_back(*it);
-    // it->SetName((it->GetName()).replace(0,1,"CL"));
-    // it->SetVarAll("mbbmax", 0, 70);
-    // SRVecHcand.push_back(*it);
-    // it->SetName((it->GetName()).replace(0,1,"CM"));
-    // it->SetVarAll("mbbmax", 150, 300);
-    // SRVecHcand.push_back(*it);
+    it->SetName((it->GetName()).replace(0,2,"CL"));
+    it->SetVarAll("mbbmax", 0, 70);
+    SRVecHcand.push_back(*it);
+    it->SetName((it->GetName()).replace(0,2,"CM"));
+    it->SetVarAll("mbbmax", 150, 300);
+    SRVecHcand.push_back(*it);
   }
   if (fasterRuntime) SRVecMonojet.clear(); // for faster runtime in mt2higgs
+  if (fasterRuntime) SRVec.clear();        // for faster runtime in mt2higgs
+  // // Test on the dependencies
+  // SRVecHcand = getTestRegionsMT2Higgs();
+
   // ** the full list of SRVec might be needed in the purity calculation -- check later
   if (synchronizing) {
     for (auto it = SRVec.begin(); it != SRVec.end(); ++it) {
@@ -1660,6 +1664,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // // --- end of gen matching ---
 
       // -- end of mt2higgs --
+      if (synchronizing) fasterRuntime = false;
+      if (fasterRuntime && !doMT2Higgs) continue; // for faster runtime
 
       ////////////////////////////////////
       /// done with overall selection  /// 
@@ -1709,8 +1715,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
         // if (doMinMTBMetGJ && doMbbMax300GJ) fillHistosCRGJMT2Higgs("", "_mMTnMbb300" + sufadd);
 
       }
-      if (synchronizing) fasterRuntime = false;
-      if (fasterRuntime && !doMT2Higgs) continue; // for faster runtime
       // -- end of mt2higgs crgj filling
 
       if (!passJetID) continue;
