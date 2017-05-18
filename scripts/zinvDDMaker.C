@@ -20,6 +20,7 @@
 
 using namespace std;
 
+TFile* f_data = nullptr;
 
 //_______________________________________________________________________________
 void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFile* f_zinvMC, vector<string> dirs, string output_name, bool integratedZinvEstimate = true, float kFactorGJetForRatio = 1.0 ) {
@@ -71,13 +72,13 @@ void combineZinvDataDriven(TFile* f_zinv, TFile* f_purity, TFile* f_zgratio, TFi
     dir->cd();
 
     std::map<string, TH1D*> kineHistMap;
-    kineHistMap["mt2"]       = (TH1D*) f_zinvMC->Get(directory + "/h_mt2");
-    kineHistMap["met"]       = (TH1D*) f_zinvMC->Get(directory + "/h_met");
-    kineHistMap["ht"]        = (TH1D*) f_zinvMC->Get(directory + "/h_ht");
-    kineHistMap["nJet30"]    = (TH1D*) f_zinvMC->Get(directory + "/h_nJet30");
-    kineHistMap["nBJet20"]   = (TH1D*) f_zinvMC->Get(directory + "/h_nBJet20");
-    kineHistMap["minMTbmet"] = (TH1D*) f_zinvMC->Get(directory + "/h_minMTbmet");
-    kineHistMap["MbbMax"]    = (TH1D*) f_zinvMC->Get(directory + "/h_MbbMax");
+    kineHistMap["mt2"]       = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_mt2").c_str());
+    kineHistMap["met"]       = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_met").c_str());
+    kineHistMap["ht"]        = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_ht").c_str());
+    kineHistMap["nJet30"]    = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_nJet30").c_str());
+    kineHistMap["nBJet20"]   = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_nBJet20").c_str());
+    kineHistMap["minMTbmet"] = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_minMTbmet").c_str());
+    kineHistMap["MbbMax"]    = (TH1D*) f_data->Get(("crgj" + dirs.at(idir) + "/h_MbbMax").c_str());
 
     if (!h_zinv_zgratio) cout << "Cannot find histogram: " << fullhistnameRatio << endl;
     if (!h_zinv_purity) cout << "Cannot find histogram: " << fullhistnamePurity << endl;
@@ -238,6 +239,8 @@ void zinvDDMaker(string input_dir = "/home/users/sicheng/working/MT2Analysis/MT2
   TFile* f_purity = new TFile(Form("%s/purity.root", input_dir.c_str()));
   TFile* f_zgratio = new TFile(Form("%s/doubleRatio.root", input_dir.c_str()));
   TFile* f_zinvMC = new TFile(Form("%s/zinv_ht.root", input_dir.c_str()));
+
+  f_data = new TFile(Form("%s/data_Run2016.root", input_dir.c_str()));
 
   if(f_zinv->IsZombie() || f_zgratio->IsZombie() || f_purity->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;

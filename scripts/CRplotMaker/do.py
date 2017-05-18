@@ -137,9 +137,13 @@ output_dir = "mbbCRplots"
 # MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], "data_Run2016", "srhbase2", pd.mbbcr_plots, output_dir, exts)
 # MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcdplusgjet"], None, "srHbase", pd.allmbb_plots, output_dir, exts)
 
+# MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcd_ht"], "data_Run2016", "mbbCRallIncl", pd.dd_plots, output_dir, exts)
+# MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcd_ht"], "data_Run2016", "mbbCLallIncl", pd.dd_plots, output_dir, exts)
+# MT2PlotMaker(input_dir, ["top", "wjets_ht", "zinv_ht", "qcd_ht"], "data_Run2016", "mbbCMallIncl", pd.dd_plots, output_dir, exts)
+
 # Data-driven plots
 output_dir = "ddplots"
 # MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven"], None, "srHbase", pd.dd_plots, output_dir, exts)
-MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven", "qcd_ht"], "data_Run2016", "mbbCRallIncl", pd.dd_plots, output_dir, exts, scaleMC=False)
-# MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven", "qcd_ht"], "data_Run2016", "mbbCLallIncl", pd.dd_plots, output_dir, exts, scaleMC=True)
-# MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven", "qcd_ht"], "data_Run2016", "mbbCMallIncl", pd.dd_plots, output_dir, exts, scaleMC=True)
+MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven", "qcd_ht" ], "data_Run2016", "mbbCRallIncl", pd.dd_plots, output_dir, exts, scaleMC=False)
+MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven", "qcd_ht" ], "data_Run2016", "mbbCLallIncl", pd.dd_plots, output_dir, exts, scaleMC=True)
+MT2PlotMaker(input_dir, ["lostlepFromCRs", "zinvDataDriven", "qcd_ht" ], "data_Run2016", "mbbCMallIncl", pd.dd_plots, output_dir, exts, scaleMC=True)
