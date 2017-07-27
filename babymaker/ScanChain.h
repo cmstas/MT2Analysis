@@ -221,11 +221,14 @@ class babyMaker {
 //----- TRIGGER 
   Int_t           HLT_PFHT800;   
   Int_t           HLT_PFHT900;   
+  Int_t           HLT_PFHT1050;   
   Int_t           HLT_PFMET170;
   Int_t           HLT_PFHT300_PFMET100;   
   Int_t           HLT_PFHT300_PFMET110;   
   Int_t           HLT_PFHT350_PFMET100;   
   Int_t           HLT_PFHT350_PFMET120;   
+  Int_t           HLT_PFHT500_PFMET100_PFMHT100;   
+  Int_t           HLT_PFHT800_PFMET75_PFMHT75;   
   Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
   Int_t           HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90;
   Int_t           HLT_PFMETNoMu100_PFMHTNoMu100;
@@ -251,6 +254,7 @@ class babyMaker {
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_DoubleMu_NonIso;   
   Int_t           HLT_Photon120;   
+  Int_t           HLT_Photon200;   
   Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_Photon250_NoHE;   
   Int_t           HLT_PFHT125_Prescale;   

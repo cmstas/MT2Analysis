@@ -69,9 +69,9 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // for merging prompt reco 2015 with reMINIAOD (default true)
-const bool removeEarlyPromptReco = true;
+const bool removeEarlyPromptReco = false;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
@@ -125,7 +125,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_294927-299042_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -298,7 +298,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
 	}
-	else if (currentFileName.Contains("2016H")) {
+	else if (currentFileName.Contains("2016H") || currentFileName.Contains("2017")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L1FastJet_AK4PFchs.txt"   );
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L2Relative_AK4PFchs.txt"  );
@@ -383,17 +383,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       int small_cms3_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
       bool recent_cms3_version = true;
       if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
+      bool isCMS4 = cms3_version.Contains("CMS4");
       
+
       if (verbose) cout << "before trigger" << endl;
 
       //TRIGGER - check first to enable cuts
       HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
       HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_PFHT1050        = passHLTTriggerPattern("HLT_PFHT1050_v");
       HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
       HLT_PFHT300_PFMET100  = passHLTTriggerPattern("HLT_PFHT300_PFMET100_v"); 
       HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); 
       HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
+      HLT_PFHT500_PFMET100_PFMHT100 = passHLTTriggerPattern("HLT_PFHT500_PFMET100_PFMHT100_IDTight_v");
+      HLT_PFHT800_PFMET75_PFMHT75 = passHLTTriggerPattern("HLT_PFHT800_PFMET75_PFMHT75_IDTight_v");
       HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_PFMETNoMu100_PFMHTNoMu100 = passHLTTriggerPattern("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v");
@@ -406,11 +411,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v");
       HLT_PFJet500        = passHLTTriggerPattern("HLT_PFJet500_v");
       HLT_ECALHT800       = passHLTTriggerPattern("HLT_ECALHT800_v");
-
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoTkMu20_v") || passHLTTriggerPattern("HLT_IsoTkMu20_eta2p1_v") ||
-        passHLTTriggerPattern("HLT_IsoMu24_v") || passHLTTriggerPattern("HLT_IsoTkMu24_v") ||
+        passHLTTriggerPattern("HLT_IsoMu24_v") || passHLTTriggerPattern("HLT_IsoTkMu24_v") || passHLTTriggerPattern("HLT_IsoMu24_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu27_v") || passHLTTriggerPattern("HLT_IsoTkMu27_v");
       HLT_SingleMu_NonIso     = passHLTTriggerPattern("HLT_Mu50_v") || passHLTTriggerPattern("HLT_TkMu50_v") ||
 	passHLTTriggerPattern("HLT_Mu55_v");
@@ -421,17 +425,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_Gsf_v") ||
 	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") ||
 	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPTight_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+	passHLTTriggerPattern("HLT_Ele32_eta2p1_WPTight_Gsf_v") ||
+	passHLTTriggerPattern("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v");
       HLT_SingleEl_NonIso     = passHLTTriggerPattern("HLT_Ele105_CaloIdVT_GsfTrkIdT_v") ||
 	passHLTTriggerPattern("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");
       HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
       HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") ||
-	passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v");
-      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-        passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
+	passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_MW_v");
+      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") || 
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+          passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_v") ||
         passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
         passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");
       HLT_Mu30_Ele30_NonIso = passHLTTriggerPattern("HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v");
@@ -443,6 +448,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
       HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu30_TkMu11_v") || passHLTTriggerPattern("HLT_Mu40_TkMu11_v");
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
+      HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
       HLT_Photon250_NoHE = passHLTTriggerPattern("HLT_Photon250_NoHE_v"); 
       HLT_PFHT125_Prescale  = passHLTTriggerPattern("HLT_PFHT125_v") ? HLT_prescale(triggerName("HLT_PFHT125_v")) : 0; 
@@ -592,19 +598,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
 	// inputs for badMuonFilters in latest cms3 tags
-	if (recent_cms3_version) {
+	if (recent_cms3_version || isCMS4) {
 	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
 	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
-          Flag_badMuonFilter                            = badMuonFilter();
-          Flag_badMuonFilterV2                          = badMuonFilterV2();
-	  if (small_cms3_version >= 18) {
-	    Flag_badMuons                                 = cms3.filt_badMuons();
-	    Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
-	    Flag_noBadMuons                               = cms3.filt_noBadMuons();
-	  }
-          Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
+          // Flag_badMuonFilter                            = badMuonFilter();
+          // Flag_badMuonFilterV2                          = badMuonFilterV2();
+	  // if (small_cms3_version >= 18) {
+	  //   Flag_badMuons                                 = cms3.filt_badMuons();
+	  //   Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
+	  //   Flag_noBadMuons                               = cms3.filt_noBadMuons();
+	  // }
+          // Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
 	}
-	Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
+	// Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
 	// necessary?
 	Flag_METFilters                               = cms3.filt_metfilter();
       }
@@ -1064,7 +1070,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
         vec_lep_eta.push_back ( cms3.els_p4().at(iEl).eta()); //save eta, even though we use SCeta for ID
         vec_lep_phi.push_back ( cms3.els_p4().at(iEl).phi());
-        vec_lep_mass.push_back ( cms3.els_mass().at(iEl));
+        vec_lep_mass.push_back ( cms3.els_p4().at(iEl).M());
         vec_lep_charge.push_back ( cms3.els_charge().at(iEl));
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
@@ -1142,7 +1148,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_pt.push_back ( cms3.mus_p4().at(iMu).pt());
         vec_lep_eta.push_back ( cms3.mus_p4().at(iMu).eta());
         vec_lep_phi.push_back ( cms3.mus_p4().at(iMu).phi());
-        vec_lep_mass.push_back ( cms3.mus_mass().at(iMu));
+        vec_lep_mass.push_back ( cms3.mus_p4().at(iMu).M());
         vec_lep_charge.push_back ( cms3.mus_charge().at(iMu));
         vec_lep_pdgId.push_back ( (-13)*cms3.mus_charge().at(iMu));
         vec_lep_dxy.push_back ( cms3.mus_dxyPV().at(iMu)); // this uses the silicon track. should we use best track instead?
@@ -1625,7 +1631,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_gamma_pt.push_back ( pt );
         vec_gamma_eta.push_back ( eta );
         vec_gamma_phi.push_back ( phi );
-        vec_gamma_mass.push_back ( cms3.photons_mass().at(iGamma) );
+        vec_gamma_mass.push_back ( cms3.photons_p4().at(iGamma).M() );
         vec_gamma_sigmaIetaIeta.push_back ( cms3.photons_full5x5_sigmaIEtaIEta().at(iGamma) );
         vec_gamma_chHadIso.push_back ( photons_recoChargedHadronIso().at(iGamma) );
         vec_gamma_neuHadIso.push_back ( photons_recoNeutralHadronIso().at(iGamma) );
@@ -1984,7 +1990,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  const float jet_etaUP =  p4sCorrJetsUP.at(iJet).eta();
 	  const float jet_ptDN  =  p4sCorrJetsDN.at(iJet).pt();
 	  const float jet_etaDN =  p4sCorrJetsDN.at(iJet).eta();
-          jet_mass[njet] = cms3.pfjets_mass().at(iJet);
+          jet_mass[njet] = cms3.pfjets_p4().at(iJet).M();
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
@@ -2634,7 +2640,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         tau_pt[ntau]   = cms3.taus_pf_p4().at(iTau).pt();
         tau_eta[ntau]  = cms3.taus_pf_p4().at(iTau).eta();
         tau_phi[ntau]  = cms3.taus_pf_p4().at(iTau).phi();
-        tau_mass[ntau] = cms3.taus_pf_mass().at(iTau);
+        tau_mass[ntau] = cms3.taus_pf_p4().at(iTau).M();
         tau_charge[ntau] = cms3.taus_pf_charge().at(iTau);
         tau_dxy[ntau] = 0; // could use the tau->dxy() function instead, but not sure what it does
         tau_dz[ntau] = 0; // not sure how to get this. 
@@ -2974,6 +2980,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
     BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
     BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
+    BabyTree_->Branch("HLT_PFHT500_PFMET100_PFMHT100", &HLT_PFHT500_PFMET100_PFMHT100 ); 
+    BabyTree_->Branch("HLT_PFHT800_PFMET75_PFMHT75", &HLT_PFHT800_PFMET75_PFMHT75 );
     BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
     BabyTree_->Branch("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100 );
     BabyTree_->Branch("HLT_PFHT300_PFMET110", &HLT_PFHT300_PFMET110 );
@@ -3004,6 +3012,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
     BabyTree_->Branch("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso );
     BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
+    BabyTree_->Branch("HLT_Photon200", &HLT_Photon200 );
     BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
     BabyTree_->Branch("HLT_Photon250_NoHE", &HLT_Photon250_NoHE );
     BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
@@ -3416,6 +3425,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     Flag_METFilters = -999;
     HLT_PFHT800 = -999;
     HLT_PFHT900 = -999;
+    HLT_PFHT500_PFMET100_PFMHT100 = -999;
+    HLT_PFHT800_PFMET75_PFMHT75 = -999;
     HLT_PFMET170 = -999;
     HLT_PFHT300_PFMET100 = -999;
     HLT_PFHT300_PFMET110 = -999;
@@ -3446,6 +3457,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_DoubleMu = -999;   
     HLT_DoubleMu_NonIso = -999;   
     HLT_Photon120 = -999;   
+    HLT_Photon200 = -999;   
     HLT_Photon165_HE10 = -999;   
     HLT_Photon250_NoHE = -999;   
     HLT_PFHT125_Prescale = -999;

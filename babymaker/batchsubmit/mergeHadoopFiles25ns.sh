@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-08-08_nojson
+TAG=2017_test_v3
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -19,25 +19,45 @@ chmod -R a+wrx $OUTPUTDIR
 # DATA
 #
 
-# run data_Run2016B_JetHT_PromptReco
-# run data_Run2016B_MET_PromptReco
-# run data_Run2016B_HTMHT_PromptReco
-# run data_Run2016B_SingleElectron_PromptReco
-# run data_Run2016B_SingleMuon_PromptReco
-# run data_Run2016B_SinglePhoton_PromptReco
-# run data_Run2016B_DoubleEG_PromptReco
-# run data_Run2016B_DoubleMuon_PromptReco
-# run data_Run2016B_MuonEG_PromptReco
+run data_Run2017A_JetHT_PromptReco-v3
+run data_Run2017A_MET_PromptReco-v3
+run data_Run2017A_HTMHT_PromptReco-v3
+run data_Run2017A_SingleElectron_PromptReco-v3
+run data_Run2017A_SingleMuon_PromptReco-v3
+run data_Run2017A_SinglePhoton_PromptReco-v3
+run data_Run2017A_DoubleEG_PromptReco-v3
+run data_Run2017A_DoubleMuon_PromptReco-v3
+run data_Run2017A_MuonEG_PromptReco-v3
 
-# run data_Run2016C_JetHT_PromptReco
-# run data_Run2016C_MET_PromptReco
-# run data_Run2016C_HTMHT_PromptReco
-# run data_Run2016C_SingleElectron_PromptReco
-# run data_Run2016C_SingleMuon_PromptReco
-# run data_Run2016C_SinglePhoton_PromptReco
-# run data_Run2016C_DoubleEG_PromptReco
-# run data_Run2016C_DoubleMuon_PromptReco
-# run data_Run2016C_MuonEG_PromptReco
+run data_Run2017B_JetHT_PromptReco-v1
+run data_Run2017B_MET_PromptReco-v1
+run data_Run2017B_HTMHT_PromptReco-v1
+run data_Run2017B_SingleElectron_PromptReco-v1
+run data_Run2017B_SingleMuon_PromptReco-v1
+run data_Run2017B_SinglePhoton_PromptReco-v1
+run data_Run2017B_DoubleEG_PromptReco-v1
+run data_Run2017B_DoubleMuon_PromptReco-v1
+run data_Run2017B_MuonEG_PromptReco-v1
+
+run data_Run2017B_JetHT_PromptReco-v2
+run data_Run2017B_MET_PromptReco-v2
+run data_Run2017B_HTMHT_PromptReco-v2
+run data_Run2017B_SingleElectron_PromptReco-v2
+run data_Run2017B_SingleMuon_PromptReco-v2
+run data_Run2017B_SinglePhoton_PromptReco-v2
+run data_Run2017B_DoubleEG_PromptReco-v2
+run data_Run2017B_DoubleMuon_PromptReco-v2
+run data_Run2017B_MuonEG_PromptReco-v2
+
+run data_Run2017C_JetHT_PromptReco-v1
+run data_Run2017C_MET_PromptReco-v1
+run data_Run2017C_HTMHT_PromptReco-v1
+run data_Run2017C_SingleElectron_PromptReco-v1
+run data_Run2017C_SingleMuon_PromptReco-v1
+run data_Run2017C_SinglePhoton_PromptReco-v1
+run data_Run2017C_DoubleEG_PromptReco-v1
+run data_Run2017C_DoubleMuon_PromptReco-v1
+run data_Run2017C_MuonEG_PromptReco-v1
 
 # run data_Run2016D_JetHT_PromptReco
 # run data_Run2016D_MET_PromptReco
@@ -207,10 +227,10 @@ chmod -R a+wrx $OUTPUTDIR
 #
 
 # run ttg_amcatnlo
-# #run ttw_lnu_amcatnlo
-# #run ttw_qq_amcatnlo
-# #run ttz_nunu_amcatnlo
-# #run ttz_qq_amcatnlo
+# run ttw_lnu_amcatnlo
+# run ttw_qq_amcatnlo
+# run ttz_nunu_amcatnlo
+# # run ttz_qq_amcatnlo
 
 # run ttw_mg_lo
 # run ttz_mg_lo
@@ -243,7 +263,7 @@ chmod -R a+wrx $OUTPUTDIR
 # run qcd_pt470to600_ext1
 # run qcd_pt600to800_ext1
 
-# # run qcd_ht200to300
+# run qcd_ht200to300
 # run qcd_ht300to500
 # run qcd_ht500to700
 # run qcd_ht700to1000
@@ -251,7 +271,7 @@ chmod -R a+wrx $OUTPUTDIR
 # run qcd_ht1500to2000
 # run qcd_ht2000toInf
 
-# # run qcd_ht200to300_ext1
+# run qcd_ht200to300_ext1
 # run qcd_ht300to500_ext1
 # run qcd_ht500to700_ext1
 # run qcd_ht700to1000_ext1

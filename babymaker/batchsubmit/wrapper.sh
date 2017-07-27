@@ -15,7 +15,7 @@ echo "[wrapper] COPYDIR   = " ${COPYDIR}
 #
 # set up environment
 #
-CMSSW_VERSION=CMSSW_8_0_5
+CMSSW_VERSION=CMSSW_9_2_4
 
 ###version using cvmfs install of CMSSW
 echo "[wrapper] setting env"
@@ -107,7 +107,7 @@ if [ ! -d "${COPYDIR}" ]; then
     mkdir ${COPYDIR}
 fi
 
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${OUTPUT}
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/${OUTPUT}
 
 echo "[wrapper] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done
