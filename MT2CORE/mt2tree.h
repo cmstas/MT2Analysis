@@ -137,6 +137,9 @@ public :
    Int_t           Flag_badChargedHadronFilterV2;
    Int_t           HLT_PFHT800;
    Int_t           HLT_PFHT900;
+   Int_t           HLT_PFHT1050;
+   Int_t           HLT_PFHT800_PFMET75_PFMHT75;
+   Int_t           HLT_PFHT500_PFMET100_PFMHT100;
    Int_t           HLT_PFMET170;
    Int_t           HLT_PFMETNoMu90_PFMHTNoMu90;
    Int_t           HLT_PFMETNoMu100_PFMHTNoMu100;
@@ -164,15 +167,17 @@ public :
    Int_t           HLT_SingleEl_NonIso;   
    Int_t           HLT_DoubleEl;   
    Int_t           HLT_DoubleEl33;   
-   Int_t           HLT_MuEG;   
+   Int_t           HLT_MuEG;    
    Int_t           HLT_MuX_Ele12;   
    Int_t           HLT_Mu8_EleX;   
+   Int_t           HLT_Mu12_EleX;   
    Int_t           HLT_Mu30_Ele30_NonIso;   
    Int_t           HLT_Mu33_Ele33_NonIso;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_DoubleMu_NonIso;   
    Int_t           HLT_Photons;   
    Int_t           HLT_Photon120;   
+   Int_t           HLT_Photon200;   
    Int_t           HLT_Photon165_HE10;   
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   

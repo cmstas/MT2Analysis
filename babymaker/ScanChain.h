@@ -249,6 +249,7 @@ class babyMaker {
   Int_t           HLT_DoubleEl33;   
   Int_t           HLT_MuX_Ele12;   
   Int_t           HLT_Mu8_EleX;   
+  Int_t           HLT_Mu12_EleX;   
   Int_t           HLT_Mu30_Ele30_NonIso;   
   Int_t           HLT_Mu33_Ele33_NonIso;   
   Int_t           HLT_DoubleMu;   
