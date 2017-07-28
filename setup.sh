@@ -7,8 +7,8 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 # git clone git@github.com:cmstas/MT2Analysis.git
 # cd MT2Analysis
 # git checkout cmssw80x
-cmsrel CMSSW_8_0_5
-cd CMSSW_8_0_5/src
+cmsrel CMSSW_9_2_4
+cd CMSSW_9_2_4/src
 cmsenv
 cd ../..
 # git clone git@github.com:cmstas/CORE.git
