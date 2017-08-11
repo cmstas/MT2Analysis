@@ -85,7 +85,7 @@ const bool doRebal = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 
-babyMaker *t; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
+babyMaker *thisBabyMaker; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
 //--------------------------------------------------------------------
 
@@ -2724,7 +2724,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
                   rebal_pt_soft_y = -met_y - jet_y;
                   rebal_status = 1;
 
-                  t = this;
+                  thisBabyMaker = this;
                   TMinuit* minimizer = new TMinuit(nRebalJets);
                   minimizer->SetFCN(minuitFunction);
                   int iflag = 0;
@@ -3826,6 +3826,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
   }
 
 void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double par[], int flg) {
+    babyMaker *t = thisBabyMaker;
     float likelihood = 0;
     float pt_constrained_x = 0.0;
     float pt_constrained_y = 0.0;

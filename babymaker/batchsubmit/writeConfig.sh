@@ -8,8 +8,8 @@ done
 DATADIR=$1
 COPYDIRBASE=$2
 
-UNIVERSE="grid"
-#UNIVERSE="vanilla"
+# UNIVERSE="grid"
+UNIVERSE="vanilla"
 EXE="wrapper.sh"
 INPUT="wrapper.sh, job_input/input.tar.gz"
 # can add other US sites here if desired
@@ -63,12 +63,12 @@ fi
 Grid_Resource="condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu"
 echo "
 universe=${UNIVERSE}
-Grid_Resource=${Grid_Resource}
 when_to_transfer_output = ON_EXIT
 #the actual executable to run is not transfered by its name.
 #In fact, some sites may do weird things like renaming it and such.
 transfer_input_files=${INPUT}
 +DESIRED_Sites=\"${SITE}\"
++remote_DESIRED_Sites=\"T2_US_UCSD\"
 +Owner = undefined
 log=${LOG}
 output=${OUT}
