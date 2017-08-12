@@ -571,6 +571,7 @@ public :
    TBranch        *b_HLT_DoubleMu_NonIso;   //!
    TBranch        *b_HLT_Photons;   //!
    TBranch        *b_HLT_Photon120;   //!
+   TBranch        *b_HLT_Photon200;   //!
    TBranch        *b_HLT_Photon165_HE10;   //!
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
@@ -1022,6 +1023,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso, &b_HLT_DoubleMu_NonIso);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
    fChain->SetBranchAddress("HLT_Photon120", &HLT_Photon120, &b_HLT_Photon120);
+   fChain->SetBranchAddress("HLT_Photon200", &HLT_Photon200, &b_HLT_Photon200);
    fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
