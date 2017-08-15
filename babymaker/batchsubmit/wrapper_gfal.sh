@@ -96,7 +96,7 @@ ls
 #
 echo "[wrapper] running: ./processBaby ${FILEID} ${FILE}"
 
-./processBaby ${FILEID} ${FILE} 100
+./processBaby ${FILEID} ${FILE}
 
 #
 # do something with output
