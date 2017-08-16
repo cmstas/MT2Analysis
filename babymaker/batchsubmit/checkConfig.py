@@ -71,7 +71,7 @@ else:
     new_config_dir = input_file.split('/')[0]+'_resubmit'
     if not os.path.exists(new_config_dir):
         os.mkdir(new_config_dir)
-    resubmit_filename = new_config_dir + '/' + input_file.split('/')[1].replace('.cmd','_resubmit.cmd')
+    resubmit_filename = new_config_dir + '/' + input_file.split('/')[-1].replace('.cmd','_resubmit.cmd')
 
     # if missing files, make a resubmission config
     outf = open(resubmit_filename,'w')
