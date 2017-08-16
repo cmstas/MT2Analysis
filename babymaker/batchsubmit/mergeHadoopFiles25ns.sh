@@ -5,7 +5,7 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=2017_test_v3
+TAG=V00-09-00
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
 OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
@@ -18,16 +18,6 @@ chmod -R a+wrx $OUTPUTDIR
 #
 # DATA
 #
-
-run data_Run2017A_JetHT_PromptReco-v3
-run data_Run2017A_MET_PromptReco-v3
-run data_Run2017A_HTMHT_PromptReco-v3
-run data_Run2017A_SingleElectron_PromptReco-v3
-run data_Run2017A_SingleMuon_PromptReco-v3
-run data_Run2017A_SinglePhoton_PromptReco-v3
-run data_Run2017A_DoubleEG_PromptReco-v3
-run data_Run2017A_DoubleMuon_PromptReco-v3
-run data_Run2017A_MuonEG_PromptReco-v3
 
 run data_Run2017B_JetHT_PromptReco-v1
 run data_Run2017B_MET_PromptReco-v1
@@ -58,6 +48,16 @@ run data_Run2017C_SinglePhoton_PromptReco-v1
 run data_Run2017C_DoubleEG_PromptReco-v1
 run data_Run2017C_DoubleMuon_PromptReco-v1
 run data_Run2017C_MuonEG_PromptReco-v1
+
+run data_Run2017C_JetHT_PromptReco-v2
+run data_Run2017C_MET_PromptReco-v2
+run data_Run2017C_HTMHT_PromptReco-v2
+run data_Run2017C_SingleElectron_PromptReco-v2
+run data_Run2017C_SingleMuon_PromptReco-v2
+run data_Run2017C_SinglePhoton_PromptReco-v2
+run data_Run2017C_DoubleEG_PromptReco-v2
+run data_Run2017C_DoubleMuon_PromptReco-v2
+run data_Run2017C_MuonEG_PromptReco-v2
 
 # run data_Run2016D_JetHT_PromptReco
 # run data_Run2016D_MET_PromptReco

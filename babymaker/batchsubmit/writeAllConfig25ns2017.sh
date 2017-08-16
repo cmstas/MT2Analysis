@@ -10,15 +10,15 @@ TAG="V00-09-00"
 # DATA
 #
 
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/JetHT_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_JetHT_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/MET_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_MET_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/HTMHT_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_HTMHT_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/SingleMuon_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_SingleMuon_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/SingleElectron_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_SingleElectron_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/SinglePhoton_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_SinglePhoton_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/DoubleMuon_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_DoubleMuon_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/DoubleEG_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_DoubleEG_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/MuonEG_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_MuonEG_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/JetHT_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_JetHT_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/MET_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_MET_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/HTMHT_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_HTMHT_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/SingleMuon_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_SingleMuon_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/SingleElectron_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_SingleElectron_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/SinglePhoton_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_SinglePhoton_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/DoubleMuon_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_DoubleMuon_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/DoubleEG_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_DoubleEG_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/MuonEG_Run2017A-PromptReco-v3_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017A_MuonEG_PromptReco-v3
 
 ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/JetHT_Run2017B-PromptReco-v1_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017B_JetHT_PromptReco-v1
 ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/MET_Run2017B-PromptReco-v1_MINIAOD_CMS4_V00-00-03 ${TAG}_data_Run2017B_MET_PromptReco-v1

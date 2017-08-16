@@ -550,7 +550,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   // 2017 data
-  const char* json_file = "../babymaker/jsons/Cert_294927-299420_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_294927-300575_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   // // full 2016 dataset json, 36.26/fb:
   // const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   // to reproduce ICHEP, 12.9/fb:
@@ -929,7 +929,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       outfile_->cd();
       // const float lumi = 12.9; //ICHEP 2016
       // const float lumi = 35.867; // full 2016
-      const float lumi = 4.89; // 2017
+      const float lumi = 8.32; // 2017
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -1199,6 +1199,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 	}
       } // nlep == 2
+
+      // if(!doDYplots && !doOFplots)
+      //     continue;
       
       // Variables for Removed single lepton (RL) region
       //muon only
@@ -2010,12 +2013,16 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
+  // valuesBase["deltaPhiMin"] = 1.0;
   valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  // valuesBase["diffMetMhtOverMet"]  = 0.0;
   valuesBase["nlep"]        = 0; // dummy value
   valuesBase["j1pt"]        = jet1_pt_;
   valuesBase["j2pt"]        = jet2_pt_;
   valuesBase["mt2"]         = t.zll_mt2;
+  // valuesBase["mt2"]         = 1000.;
   valuesBase["passesHtMet"] = ( (t.zll_ht > 250. && t.zll_met_pt > 250.) || (t.zll_ht > 1200. && t.zll_met_pt > 30) );
+  valuesBase["passesHtMet"] = 1;
   bool passBase = SRBase.PassesSelection(valuesBase);
 
   std::map<std::string, float> valuesBase_monojet;
@@ -2757,6 +2764,9 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot2D("h2d_ht_met"+s,  t.zll_ht, t.zll_met_pt, evtweight_, h_1d, ";H_{T} [GeV];MET [GeV]",48,0,1200,48,0,1200);
     plot2D("h2d_ht_j1pt"+s, t.zll_ht, jet1_pt_, evtweight_, h_1d, ";H_{T} [GeV];p_{T}(jet1) [GeV]",48,0,1200,48,0,1200);
     plot2D("h2d_ht_j2pt"+s, t.zll_ht, jet2_pt_, evtweight_, h_1d, ";H_{T} [GeV];p_{T}(jet2) [GeV]",48,0,1200,48,0,1200);
+    plot2D("h2d_ht_j1eta"+s, t.zll_ht, t.jet_eta[0], evtweight_, h_1d, ";H_{T} [GeV];eta(jet2)",48,0,1200,48,-3,3);
+    if(t.zll_ht > 900 && t.zll_ht < 1000)
+        plot1D("h_j1eta"+s,      t.jet_eta[0],   evtweight_, h_1d, ";eta(jet1)", 48, -3, 3);
 
 
   }
