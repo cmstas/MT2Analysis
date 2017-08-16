@@ -219,8 +219,6 @@ class babyMaker {
   Int_t           Flag_METFilters;  
 
 //----- TRIGGER 
-  Int_t           HLT_PFHT800;   
-  Int_t           HLT_PFHT900;   
   Int_t           HLT_PFHT1050;   
   Int_t           HLT_PFMET170;
   Int_t           HLT_PFHT300_PFMET100;   
@@ -258,12 +256,15 @@ class babyMaker {
   Int_t           HLT_Photon200;   
   Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_Photon250_NoHE;   
-  Int_t           HLT_PFHT125_Prescale;   
-  Int_t           HLT_PFHT200_Prescale;   
-  Int_t           HLT_PFHT300_Prescale;   
-  Int_t           HLT_PFHT350_Prescale;   
-  Int_t           HLT_PFHT475_Prescale;   
-  Int_t           HLT_PFHT600_Prescale;   
+  Int_t           HLT_PFHT180_Prescale;   
+  Int_t           HLT_PFHT250_Prescale;   
+  Int_t           HLT_PFHT370_Prescale;   
+  Int_t           HLT_PFHT430_Prescale;   
+  Int_t           HLT_PFHT510_Prescale;   
+  Int_t           HLT_PFHT590_Prescale;   
+  Int_t           HLT_PFHT680_Prescale;   
+  Int_t           HLT_PFHT780_Prescale;   
+  Int_t           HLT_PFHT890_Prescale;   
   Int_t           HLT_DiCentralPFJet70_PFMET120;
   Int_t           HLT_DiCentralPFJet55_PFMET110;
 

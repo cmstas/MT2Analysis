@@ -181,7 +181,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       TH2D* h_btag_eff_udsg_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_udsg");
       h_btag_eff_b_fastsim = (TH2D*) h_btag_eff_b_fastsim_temp->Clone("h_btag_eff_b_fastsim");
       h_btag_eff_b_fastsim->SetDirectory(rootdir);
-      h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
+     h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
       h_btag_eff_c_fastsim->SetDirectory(rootdir);
       h_btag_eff_udsg_fastsim = (TH2D*) h_btag_eff_udsg_fastsim_temp->Clone("h_btag_eff_udsg_fastsim");
       h_btag_eff_udsg_fastsim->SetDirectory(rootdir);
@@ -389,8 +389,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       if (verbose) cout << "before trigger" << endl;
 
       //TRIGGER - check first to enable cuts
-      HLT_PFHT800        = passHLTTriggerPattern("HLT_PFHT800_v");
-      HLT_PFHT900        = passHLTTriggerPattern("HLT_PFHT900_v");
       HLT_PFHT1050        = passHLTTriggerPattern("HLT_PFHT1050_v");
       HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
       HLT_PFHT300_PFMET100  = passHLTTriggerPattern("HLT_PFHT300_PFMET100_v"); 
@@ -454,16 +452,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
       HLT_Photon250_NoHE = passHLTTriggerPattern("HLT_Photon250_NoHE_v"); 
-      HLT_PFHT125_Prescale  = passHLTTriggerPattern("HLT_PFHT125_v") ? HLT_prescale(triggerName("HLT_PFHT125_v")) : 0; 
-      HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0; 
-      HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0; 
-      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v") ? HLT_prescale(triggerName("HLT_PFHT350_v")) : 0; 
-      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v") ? HLT_prescale(triggerName("HLT_PFHT475_v")) : 0; 
-      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v") ? HLT_prescale(triggerName("HLT_PFHT600_v")) : 0; 
+      HLT_PFHT180_Prescale  = passHLTTriggerPattern("HLT_PFHT180_v") ? HLT_prescale(triggerName("HLT_PFHT180_v")) : 0; 
+      HLT_PFHT250_Prescale  = passHLTTriggerPattern("HLT_PFHT250_v") ? HLT_prescale(triggerName("HLT_PFHT250_v")) : 0; 
+      HLT_PFHT370_Prescale  = passHLTTriggerPattern("HLT_PFHT370_v") ? HLT_prescale(triggerName("HLT_PFHT370_v")) : 0; 
+      HLT_PFHT430_Prescale  = passHLTTriggerPattern("HLT_PFHT430_v") ? HLT_prescale(triggerName("HLT_PFHT430_v")) : 0; 
+      HLT_PFHT510_Prescale  = passHLTTriggerPattern("HLT_PFHT510_v") ? HLT_prescale(triggerName("HLT_PFHT510_v")) : 0; 
+      HLT_PFHT590_Prescale  = passHLTTriggerPattern("HLT_PFHT590_v") ? HLT_prescale(triggerName("HLT_PFHT590_v")) : 0; 
+      HLT_PFHT680_Prescale  = passHLTTriggerPattern("HLT_PFHT680_v") ? HLT_prescale(triggerName("HLT_PFHT680_v")) : 0; 
+      HLT_PFHT780_Prescale  = passHLTTriggerPattern("HLT_PFHT780_v") ? HLT_prescale(triggerName("HLT_PFHT780_v")) : 0; 
+      HLT_PFHT890_Prescale  = passHLTTriggerPattern("HLT_PFHT890_v") ? HLT_prescale(triggerName("HLT_PFHT890_v")) : 0; 
       HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
       HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
 
-      if (!isData && applyTriggerCuts && !(HLT_PFHT900 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
+      if (!isData && applyTriggerCuts && !(HLT_PFHT1050 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
             || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
 
       run  = cms3.evt_run();
@@ -2981,8 +2982,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter );
     BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
-    BabyTree_->Branch("HLT_PFHT800", &HLT_PFHT800 );
-    BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
+    BabyTree_->Branch("HLT_PFHT1050", &HLT_PFHT1050 );
     BabyTree_->Branch("HLT_PFHT500_PFMET100_PFMHT100", &HLT_PFHT500_PFMET100_PFMHT100 ); 
     BabyTree_->Branch("HLT_PFHT800_PFMET75_PFMHT75", &HLT_PFHT800_PFMET75_PFMHT75 );
     BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
@@ -3019,12 +3019,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("HLT_Photon200", &HLT_Photon200 );
     BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
     BabyTree_->Branch("HLT_Photon250_NoHE", &HLT_Photon250_NoHE );
-    BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
-    BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
-    BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
-    BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
-    BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
-    BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+    BabyTree_->Branch("HLT_PFHT180_Prescale", &HLT_PFHT180_Prescale );
+    BabyTree_->Branch("HLT_PFHT250_Prescale", &HLT_PFHT250_Prescale );
+    BabyTree_->Branch("HLT_PFHT370_Prescale", &HLT_PFHT370_Prescale );
+    BabyTree_->Branch("HLT_PFHT430_Prescale", &HLT_PFHT430_Prescale );
+    BabyTree_->Branch("HLT_PFHT510_Prescale", &HLT_PFHT510_Prescale );
+    BabyTree_->Branch("HLT_PFHT590_Prescale", &HLT_PFHT590_Prescale );
+    BabyTree_->Branch("HLT_PFHT680_Prescale", &HLT_PFHT680_Prescale );
+    BabyTree_->Branch("HLT_PFHT780_Prescale", &HLT_PFHT780_Prescale );
+    BabyTree_->Branch("HLT_PFHT890_Prescale", &HLT_PFHT890_Prescale );
     BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
     BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
     BabyTree_->Branch("nlep", &nlep, "nlep/I" );
@@ -3427,8 +3430,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     Flag_badChargedHadronFilter = -999;
     Flag_badChargedHadronFilterV2 = -999;    
     Flag_METFilters = -999;
-    HLT_PFHT800 = -999;
-    HLT_PFHT900 = -999;
+    HLT_PFHT1050 = -999;
     HLT_PFHT500_PFMET100_PFMHT100 = -999;
     HLT_PFHT800_PFMET75_PFMHT75 = -999;
     HLT_PFMET170 = -999;
@@ -3465,12 +3467,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_Photon200 = -999;   
     HLT_Photon165_HE10 = -999;   
     HLT_Photon250_NoHE = -999;   
-    HLT_PFHT125_Prescale = -999;
-    HLT_PFHT200_Prescale = -999;
-    HLT_PFHT300_Prescale = -999;
-    HLT_PFHT350_Prescale = -999;
-    HLT_PFHT475_Prescale = -999;
-    HLT_PFHT600_Prescale = -999;
+    HLT_PFHT180_Prescale = -999;
+    HLT_PFHT250_Prescale = -999;
+    HLT_PFHT370_Prescale = -999;
+    HLT_PFHT430_Prescale = -999;
+    HLT_PFHT510_Prescale = -999;
+    HLT_PFHT590_Prescale = -999;
+    HLT_PFHT680_Prescale = -999;
+    HLT_PFHT780_Prescale = -999;
+    HLT_PFHT890_Prescale = -999;
     HLT_DiCentralPFJet70_PFMET120 = -999;
     HLT_DiCentralPFJet55_PFMET110 = -999;
     nlep = -999;
