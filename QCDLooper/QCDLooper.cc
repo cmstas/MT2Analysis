@@ -35,6 +35,7 @@ bool applyJSON = true;
 
 const float lumi = 27.70;
 
+// FOR 2016
 // input effective prescales for PFHT125, PFHT350, PFHT475
 // 4/fb
 // double eff_prescales[3] = {2564., 294.9, 73.9};
@@ -43,9 +44,14 @@ const float lumi = 27.70;
 // 12.9/fb
 // double eff_prescales[3] = {4748., 377.5, 94.6};
 // 27.66/fb
-double eff_prescales[3] = {7900., 440.6, 110.2};
+// double eff_prescales[3] = {7900., 440.6, 110.2};
 // 36.46/fb
 // double eff_prescales[3] = {9200., 460.6, 115.2};
+
+// FOR 2017
+// input effective prescales for PFHT180, 250, 370, 430, 510, 590, 680, 780, 890
+// 8.32/fb
+double eff_prescales[9] = {1316., 1824., 707., 307., 145., 67.4, 47.4, 29.5, 17.1};
 
 //_______________________________________
 QCDLooper::QCDLooper(){
@@ -58,8 +64,8 @@ QCDLooper::~QCDLooper(){
 //_______________________________________
 void QCDLooper::SetSignalRegions(){
 
-  string HTnames[6] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf","ht1000toInf"};
-    double HTcuts[6] = {250,450,575,1000,1500,-1};
+  string HTnames[6] = {"ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"};
+    double HTcuts[6] = {250,450,575,1200,1500,-1};
     for(unsigned int i=0; i<5; i++){
         SR sr;
         sr.SetName("rphi_"+HTnames[i]);
@@ -83,7 +89,7 @@ void QCDLooper::SetSignalRegions(){
     //
     SR sr;
     sr.SetName("rphi_"+HTnames[5]);
-    sr.SetVar("ht",1000,-1);
+    sr.SetVar("ht",1200,-1);
     sr.SetVar("njets",2,-1);
     sr.SetVar("mt2",50,-1);
     sr.SetVar("deltaPhiMin",0,-1);
@@ -91,7 +97,7 @@ void QCDLooper::SetSignalRegions(){
     outfile_->mkdir(sr.GetName().c_str());
 
     sr.SetName("fj_"+HTnames[5]);
-    sr.SetVar("ht",1000,-1);
+    sr.SetVar("ht",1200,-1);
     sr.SetVar("njets",2,-1);
     sr.SetVar("mt2",100,200);
     sr.SetVar("deltaPhiMin",0,0.3);
@@ -104,7 +110,7 @@ void QCDLooper::SetSignalRegions(){
     for(unsigned int i=0; i<6; i++){
         SR sr;
         sr.SetName("rb_"+NJnames[i]);
-        sr.SetVar("ht",1000,-1); // put cut at ht 1000 to allow use of unprescaled trigger PFHT800
+        sr.SetVar("ht",1200,-1); // put cut at ht 1200 to allow use of unprescaled trigger PFHT1050
         if (i < 3)
           sr.SetVar("njets",NJcuts[i],NJcuts[i+1]);
         else if (i == 3)
@@ -130,7 +136,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_294927-300575_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -158,9 +164,6 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
     
-    // Use this to speed things up when not looking at genParticles
-    //tree->SetBranchStatus("genPart_*", 0); 
-
     t.Init(tree);
 
     // Event Loop
@@ -209,15 +212,15 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       
       // MET filters (first 2 data only)
       if (t.isData) {
-        if (!t.Flag_globalTightHalo2016Filter) continue; 
-        if (!t.Flag_badMuonFilter) continue;
+        if (!t.Flag_globalSuperTightHalo2016Filter) continue; 
+        // if (!t.Flag_badMuonFilter) continue;
       }
       if (!t.Flag_goodVertices) continue;
       if (!t.Flag_eeBadScFilter) continue;
       if (!t.Flag_HBHENoiseFilter) continue;
       if (!t.Flag_HBHENoiseIsoFilter) continue;
       if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-      if (!t.Flag_badChargedHadronFilter) continue;
+      // if (!t.Flag_badChargedHadronFilter) continue;
       
 
       // some simple baseline selections
@@ -229,6 +232,10 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       if(t.diffMetMht/t.met_pt > 0.5) continue;
       if(t.nJet30FailId!=0) continue;
       if(t.nJet30 < 2) continue;
+
+      prescale_ = getTriggerPrescale();
+      if(prescale_ < 0)
+          continue;
 
       // //-------------------
       // // "spike rejection"
@@ -252,8 +259,9 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
       if (!t.isData) {
 	evtweight_ = t.evt_scale1fb * lumi;
       } // !isData
-
       
+      plot1D("h_ht_prescaleCheck", t.ht, evtweight_*prescale_, h_1d_global_, ";H_{T} [GeV]", 100, 0, 2000);
+
       //---------------------------
       // fill histograms
       //---------------------------
@@ -318,18 +326,14 @@ void QCDLooper::fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::str
     } 
     dir->cd();
 
-    double prescale = getTriggerPrescale(dirname);
-    if(prescale < 0)
-        return;
-    
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
-    plot1D("h_Events_w"+s,  1,   evtweight_*prescale, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_Events_w"+s,  1,   evtweight_*prescale_, h_1d, ";Events, Weighted", 1, 0, 2);
     if(t.deltaPhiMin>=0.3){
-        plot1D("h_mt2_num"+s,        t.mt2,   evtweight_*prescale, h_1d, ";M_{T2} [GeV]",300,0,1500);
+        plot1D("h_mt2_num"+s,        t.mt2,   evtweight_*prescale_, h_1d, ";M_{T2} [GeV]",300,0,1500);
     }else{
-        plot1D("h_mt2_den"+s,        t.mt2,   evtweight_*prescale, h_1d, ";M_{T2} [GeV]",300,0,1500);
+        plot1D("h_mt2_den"+s,        t.mt2,   evtweight_*prescale_, h_1d, ";M_{T2} [GeV]",300,0,1500);
     }
-    plot1D("h_pfmetOverCalomet"+s, t.met_pt/t.met_caloPt, evtweight_*prescale, h_1d, ";pfMet/caloMet",60,0,6);
+    plot1D("h_pfmetOverCalomet"+s, t.met_pt/t.met_caloPt, evtweight_*prescale_, h_1d, ";pfMet/caloMet",60,0,6);
     
     outfile_->cd();
     return;
@@ -344,13 +348,9 @@ void QCDLooper::fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::strin
     } 
     dir->cd();
     
-    double prescale = getTriggerPrescale(dirname);
-    if(prescale < 0)
-        return;
-
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
-    plot1D("h_Events_w"+s,  1,   evtweight_*prescale, h_1d, ";Events, Weighted", 1, 0, 2);
-    plot1D("h_njets"+s,        t.nJet30,   evtweight_*prescale, h_1d, "N(jet)",9,2,11);
+    plot1D("h_Events_w"+s,  1,   evtweight_*prescale_, h_1d, ";Events, Weighted", 1, 0, 2);
+    plot1D("h_njets"+s,        t.nJet30,   evtweight_*prescale_, h_1d, "N(jet)",9,2,11);
     
     outfile_->cd();
     return;
@@ -364,7 +364,7 @@ void QCDLooper::fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::strin
     } 
     dir->cd();
 
-    if (t.isData && !t.HLT_PFHT900 && !t.HLT_PFJet450)
+    if (t.isData && !t.HLT_PFHT1050 && !t.HLT_PFJet500)
         return;
 
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -379,24 +379,66 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
     if(!t.isData)
         return 1;
 
-    if(strstr(dirname.c_str(),"ht250to450") != NULL){
-        return t.HLT_PFHT125_Prescale==0 ? -1 : eff_prescales[0];
-    }
-    if(strstr(dirname.c_str(),"ht450to575") != NULL){
-        return t.HLT_PFHT350_Prescale==0 ? -1 : eff_prescales[1];
-    }
-    if(strstr(dirname.c_str(),"ht575to1000") != NULL){
-        return t.HLT_PFHT475_Prescale==0 ? -1 : eff_prescales[2];
-    }
-    if(strstr(dirname.c_str(),"ht1000to1500") != NULL){
-      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
-    }
-    if(strstr(dirname.c_str(),"ht1500toInf") != NULL){
-      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
-    }
-    if(strstr(dirname.c_str(),"ht1000toInf") != NULL){
-      return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
-    }
+    // if(strstr(dirname.c_str(),"ht250to450") != NULL){
+    //     return t.HLT_PFHT125_Prescale==0 ? -1 : eff_prescales[0];
+    // }
+    // if(strstr(dirname.c_str(),"ht450to575") != NULL){
+    //     return t.HLT_PFHT350_Prescale==0 ? -1 : eff_prescales[1];
+    // }
+    // if(strstr(dirname.c_str(),"ht575to1000") != NULL){
+    //     return t.HLT_PFHT475_Prescale==0 ? -1 : eff_prescales[2];
+    // }
+    // if(strstr(dirname.c_str(),"ht1000to1500") != NULL){
+    //   return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
+    // }
+    // if(strstr(dirname.c_str(),"ht1500toInf") != NULL){
+    //   return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
+    // }
+    // if(strstr(dirname.c_str(),"ht1000toInf") != NULL){
+    //   return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
+    // }
+
+    // if(t.ht < 250)
+    //     return -1;
+    // if(t.ht >= 250 && t.ht < 440)
+    //     return t.HLT_PFHT180_Prescale==0? -1 : eff_prescales[0];
+    // if(t.ht >= 440 && t.ht < 520)
+    //     return t.HLT_PFHT370_Prescale==0? -1 : eff_prescales[2];
+    // if(t.ht >= 520 && t.ht < 620)
+    //     return t.HLT_PFHT430_Prescale==0? -1 : eff_prescales[3];
+    // if(t.ht >= 620 && t.ht < 700)
+    //     return t.HLT_PFHT510_Prescale==0? -1 : eff_prescales[4];
+    // if(t.ht >= 700 && t.ht < 800)
+    //     return t.HLT_PFHT590_Prescale==0? -1 : eff_prescales[5];
+    // if(t.ht >= 800 && t.ht < 900)
+    //     return t.HLT_PFHT680_Prescale==0? -1 : eff_prescales[6];
+    // if(t.ht >= 900 && t.ht < 1000)
+    //     return t.HLT_PFHT780_Prescale==0? -1 : eff_prescales[7];
+    // if(t.ht >= 1000 && t.ht < 1200)
+    //     return t.HLT_PFHT890_Prescale==0? -1 : eff_prescales[8];
+    // if(t.ht >= 1200)
+    //     return (t.HLT_PFHT1050 || t.HLT_PFJet500)==0 ? -1 : 1;
+
+    if(t.ht < 250)
+        return -1;
+    if(t.ht >= 250 && t.ht < 440)
+        return t.HLT_PFHT180_Prescale==0? -1 : t.HLT_PFHT180_Prescale;
+    if(t.ht >= 440 && t.ht < 520)
+        return t.HLT_PFHT370_Prescale==0? -1 : t.HLT_PFHT370_Prescale;
+    if(t.ht >= 520 && t.ht < 620)
+        return t.HLT_PFHT430_Prescale==0? -1 : t.HLT_PFHT430_Prescale;
+    if(t.ht >= 620 && t.ht < 700)
+        return t.HLT_PFHT510_Prescale==0? -1 : t.HLT_PFHT510_Prescale;
+    if(t.ht >= 700 && t.ht < 800)
+        return t.HLT_PFHT590_Prescale==0? -1 : t.HLT_PFHT590_Prescale;
+    if(t.ht >= 800 && t.ht < 900)
+        return t.HLT_PFHT680_Prescale==0? -1 : t.HLT_PFHT680_Prescale;
+    if(t.ht >= 900 && t.ht < 1000)
+        return t.HLT_PFHT780_Prescale==0? -1 : t.HLT_PFHT780_Prescale;
+    if(t.ht >= 1000 && t.ht < 1200)
+        return t.HLT_PFHT890_Prescale==0? -1 : t.HLT_PFHT890_Prescale;
+    if(t.ht >= 1200)
+        return (t.HLT_PFHT1050 || t.HLT_PFJet500)==0 ? -1 : 1;
 
     std::cerr << "ERROR [getTriggerPrescale]: did not recognize dirname " << dirname << std::endl;
 

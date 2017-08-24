@@ -24,27 +24,28 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 using namespace mt2;
 class QCDLooper {
 
- public:
+public:
 
-  QCDLooper();
-  ~QCDLooper();
+    QCDLooper();
+    ~QCDLooper();
 
-  void SetSignalRegions();
-  void loop(TChain* chain, std::string output_name = "test.root");
-  void fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
-  void fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
-  void fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
-  double getTriggerPrescale(std::string dirname);
+    void SetSignalRegions();
+    void loop(TChain* chain, std::string output_name = "test.root");
+    void fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+    void fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+    void fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
+    double getTriggerPrescale(std::string dirname="");
 
- private:
+private:
 
-  TFile * outfile_;
-  mt2tree t;
-  float evtweight_;
-  std::vector<SR> SRVec_rphi;
-  std::vector<SR> SRVec_fj;
-  std::vector<SR> SRVec_rb;
-      
+    TFile * outfile_;
+    mt2tree t;
+    float evtweight_;
+    float prescale_;
+    std::vector<SR> SRVec_rphi;
+    std::vector<SR> SRVec_fj;
+    std::vector<SR> SRVec_rb;
+    std::map<std::string, TH1*> h_1d_global_;
 
 };
 
