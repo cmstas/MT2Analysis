@@ -182,12 +182,15 @@ public :
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
    Int_t           HLT_ht600prescale;   
-   Int_t           HLT_PFHT125_Prescale;   
-   Int_t           HLT_PFHT200_Prescale;   
-   Int_t           HLT_PFHT300_Prescale;   
-   Int_t           HLT_PFHT350_Prescale;   
-   Int_t           HLT_PFHT475_Prescale;   
-   Int_t           HLT_PFHT600_Prescale;   
+   Int_t           HLT_PFHT180_Prescale;   
+   Int_t           HLT_PFHT250_Prescale;   
+   Int_t           HLT_PFHT370_Prescale;   
+   Int_t           HLT_PFHT430_Prescale;   
+   Int_t           HLT_PFHT510_Prescale;   
+   Int_t           HLT_PFHT590_Prescale;   
+   Int_t           HLT_PFHT680_Prescale;   
+   Int_t           HLT_PFHT780_Prescale;   
+   Int_t           HLT_PFHT890_Prescale;   
    Int_t           HLT_DiCentralPFJet70_PFMET120;   
    Int_t           HLT_DiCentralPFJet55_PFMET110;   
    Int_t           nlep;
@@ -576,12 +579,15 @@ public :
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
    TBranch        *b_HLT_ht600prescale;   //!
-   TBranch        *b_HLT_PFHT125_Prescale;   //!
-   TBranch        *b_HLT_PFHT200_Prescale;   //!
-   TBranch        *b_HLT_PFHT300_Prescale;   //!
-   TBranch        *b_HLT_PFHT350_Prescale;   //!
-   TBranch        *b_HLT_PFHT475_Prescale;   //!
-   TBranch        *b_HLT_PFHT600_Prescale;   //!
+   TBranch        *b_HLT_PFHT180_Prescale;   //!
+   TBranch        *b_HLT_PFHT250_Prescale;   //!
+   TBranch        *b_HLT_PFHT370_Prescale;   //!
+   TBranch        *b_HLT_PFHT430_Prescale;   //!
+   TBranch        *b_HLT_PFHT510_Prescale;   //!
+   TBranch        *b_HLT_PFHT590_Prescale;   //!
+   TBranch        *b_HLT_PFHT680_Prescale;   //!
+   TBranch        *b_HLT_PFHT780_Prescale;   //!
+   TBranch        *b_HLT_PFHT890_Prescale;   //!
    TBranch        *b_HLT_DiCentralPFJet70_PFMET120;   //!
    TBranch        *b_HLT_DiCentralPFJet55_PFMET110;   //!
    TBranch        *b_nlep;   //!
@@ -1028,12 +1034,15 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
    fChain->SetBranchAddress("HLT_ht600prescale", &HLT_ht600prescale, &b_HLT_ht600prescale);
-   fChain->SetBranchAddress("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale, &b_HLT_PFHT125_Prescale);
-   fChain->SetBranchAddress("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale, &b_HLT_PFHT200_Prescale);
-   fChain->SetBranchAddress("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale, &b_HLT_PFHT300_Prescale);
-   fChain->SetBranchAddress("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale, &b_HLT_PFHT350_Prescale);
-   fChain->SetBranchAddress("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale, &b_HLT_PFHT475_Prescale);
-   fChain->SetBranchAddress("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale, &b_HLT_PFHT600_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT180_Prescale", &HLT_PFHT180_Prescale, &b_HLT_PFHT180_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT250_Prescale", &HLT_PFHT250_Prescale, &b_HLT_PFHT250_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT370_Prescale", &HLT_PFHT370_Prescale, &b_HLT_PFHT370_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT430_Prescale", &HLT_PFHT430_Prescale, &b_HLT_PFHT430_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT510_Prescale", &HLT_PFHT510_Prescale, &b_HLT_PFHT510_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT590_Prescale", &HLT_PFHT590_Prescale, &b_HLT_PFHT590_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT680_Prescale", &HLT_PFHT680_Prescale, &b_HLT_PFHT680_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT780_Prescale", &HLT_PFHT780_Prescale, &b_HLT_PFHT780_Prescale);
+   fChain->SetBranchAddress("HLT_PFHT890_Prescale", &HLT_PFHT890_Prescale, &b_HLT_PFHT890_Prescale);
    fChain->SetBranchAddress("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120, &b_HLT_DiCentralPFJet70_PFMET120);
    fChain->SetBranchAddress("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110, &b_HLT_DiCentralPFJet55_PFMET110);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
