@@ -125,7 +125,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_294927-300575_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_294927-301567_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -384,7 +384,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       bool recent_cms3_version = true;
       if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
       bool isCMS4 = cms3_version.Contains("CMS4");
-      
 
       if (verbose) cout << "before trigger" << endl;
 
@@ -456,8 +455,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFHT250_Prescale  = passHLTTriggerPattern("HLT_PFHT250_v") ? HLT_prescale(triggerName("HLT_PFHT250_v"), true) : 0; 
       HLT_PFHT370_Prescale  = passHLTTriggerPattern("HLT_PFHT370_v") ? HLT_prescale(triggerName("HLT_PFHT370_v"), true) : 0; 
       HLT_PFHT430_Prescale  = passHLTTriggerPattern("HLT_PFHT430_v") ? HLT_prescale(triggerName("HLT_PFHT430_v"), true) : 0; 
-      HLT_PFHT510_Prescale  = passHLTTriggerPattern("HLT_PFHT510_v") ? HLT_prescale(triggerName("HLT_PFHT510_v"), false) : 0; 
-      HLT_PFHT590_Prescale  = passHLTTriggerPattern("HLT_PFHT590_v") ? HLT_prescale(triggerName("HLT_PFHT590_v"), false) : 0; 
+      HLT_PFHT510_Prescale  = passHLTTriggerPattern("HLT_PFHT510_v") ? HLT_prescale(triggerName("HLT_PFHT510_v"), false) : 0; // PFHT510 and up have broken hlt_l1prescales for Run2017C.
+      HLT_PFHT590_Prescale  = passHLTTriggerPattern("HLT_PFHT590_v") ? HLT_prescale(triggerName("HLT_PFHT590_v"), false) : 0; // this will work as long as they have unprescaled L1 
       HLT_PFHT680_Prescale  = passHLTTriggerPattern("HLT_PFHT680_v") ? HLT_prescale(triggerName("HLT_PFHT680_v"), false) : 0; 
       HLT_PFHT780_Prescale  = passHLTTriggerPattern("HLT_PFHT780_v") ? HLT_prescale(triggerName("HLT_PFHT780_v"), false) : 0; 
       HLT_PFHT890_Prescale  = passHLTTriggerPattern("HLT_PFHT890_v") ? HLT_prescale(triggerName("HLT_PFHT890_v"), false) : 0; 
@@ -1030,7 +1029,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<float>vec_lep_relIso03;
       vector<float>vec_lep_relIso04;
       vector<float>vec_lep_miniRelIso;
-      vector<float>vec_lep_relIsoAn04;
+      // vector<float>vec_lep_relIsoAn04;
       vector<int>  vec_lep_mcMatchId;
       vector<int>  vec_lep_lostHits;
       vector<int>  vec_lep_convVeto;
@@ -1087,7 +1086,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
         vec_lep_relIso04.push_back ( 0);
         vec_lep_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,1) );
-        vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
+        // vec_lep_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
         if (!isData && cms3.els_mc3dr().size() > 0 && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
           vec_lep_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
@@ -1172,7 +1171,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_lep_relIso03.push_back ( muRelIso03(iMu,analysis_t::HAD) );
         vec_lep_relIso04.push_back ( muRelIso04(iMu,analysis_t::HAD) );
         vec_lep_miniRelIso.push_back ( muMiniRelIsoCMS3_EA(iMu,1) );
-        vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
+        // vec_lep_relIsoAn04.push_back ( muRelIsoAn04(iMu) );
         if (!isData && cms3.mus_mc3dr().size() > 0 && cms3.mus_mc3dr().at(iMu) < 0.2 && cms3.mus_mc3idx().at(iMu) != -9999 && abs(cms3.mus_mc3_id().at(iMu)) == 13) { // matched to a prunedGenParticle electron?
           int momid =  abs(genPart_motherId[cms3.mus_mc3idx().at(iMu)]);
           vec_lep_mcMatchId.push_back ( momid != 13 ? momid : genPart_grandmotherId[cms3.mus_mc3idx().at(iMu)]); // if mother is different store mother, otherwise store grandmother
@@ -1243,7 +1242,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         lep_relIso03[i]    = vec_lep_relIso03.at(it->first);
         lep_relIso04[i]    = vec_lep_relIso04.at(it->first);
         lep_miniRelIso[i]  = vec_lep_miniRelIso.at(it->first);
-        lep_relIsoAn04[i]  = vec_lep_relIsoAn04.at(it->first);
+        // lep_relIsoAn04[i]  = vec_lep_relIsoAn04.at(it->first);
         lep_mcMatchId[i]   = vec_lep_mcMatchId.at(it->first);
         lep_lostHits[i]    = vec_lep_lostHits.at(it->first);
         lep_convVeto[i]    = vec_lep_convVeto.at(it->first);
@@ -1351,7 +1350,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<float>vec_isoTrack_phi;
       vector<float>vec_isoTrack_mass;
       vector<float>vec_isoTrack_absIso;
-      vector<float>vec_isoTrack_relIsoAn04;
+      // vector<float>vec_isoTrack_relIsoAn04;
       vector<float>vec_isoTrack_dz;
       vector<int>  vec_isoTrack_pdgId;
       vector<int>  vec_isoTrack_mcMatchId;
@@ -1360,7 +1359,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       nPFLep5LowMT = 0;
       nPFHad10LowMT = 0;
       nPFCHCand3 = 0;
-      for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+      for (unsigned int ipf = 0; ipf < cms3.pfcands_p4().size(); ipf++) {
 
         if(cms3.pfcands_charge().at(ipf) == 0) continue;
         if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
@@ -1370,12 +1369,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         if(cand_pt > 3) ++nPFCHCand3;
         if(cand_pt < 5) continue;
 
-        float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
+        float absiso  = cms3.pfcands_trackIso().at(ipf);
         if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
         float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
         int pdgId = abs(cms3.pfcands_particleId().at(ipf));
-        float an04 = PFCandRelIsoAn04(ipf);
+        // float an04 = PFCandRelIsoAn04(ipf);
 
         if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
           ++nPFLep5LowMT;
@@ -1427,7 +1426,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         vec_isoTrack_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
         vec_isoTrack_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
         vec_isoTrack_absIso.push_back( absiso                           );
-        vec_isoTrack_relIsoAn04.push_back( an04                         );
+        // vec_isoTrack_relIsoAn04.push_back( an04                         );
         vec_isoTrack_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
         vec_isoTrack_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
         vec_isoTrack_mcMatchId.push_back ( 0 );
@@ -1450,7 +1449,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         isoTrack_phi[i]    = vec_isoTrack_phi.at(it->first);
         isoTrack_mass[i]   = vec_isoTrack_mass.at(it->first);
         isoTrack_absIso[i] = vec_isoTrack_absIso.at(it->first);
-        isoTrack_relIsoAn04[i] = vec_isoTrack_relIsoAn04.at(it->first);
+        // isoTrack_relIsoAn04[i] = vec_isoTrack_relIsoAn04.at(it->first);
         isoTrack_dz[i]     = vec_isoTrack_dz.at(it->first);
         isoTrack_pdgId[i]  = vec_isoTrack_pdgId.at(it->first);
         isoTrack_mcMatchId[i]  = vec_isoTrack_mcMatchId.at(it->first);
@@ -1468,20 +1467,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	vector<float>vec_highPtPFcands_phi;
 	vector<float>vec_highPtPFcands_mass;
 	vector<float>vec_highPtPFcands_absIso;
-	vector<float>vec_highPtPFcands_relIsoAn04;
+	// vector<float>vec_highPtPFcands_relIsoAn04;
 	vector<float>vec_highPtPFcands_dz;
 	vector<int>  vec_highPtPFcands_pdgId;
 	vector<int>  vec_highPtPFcands_mcMatchId;
 	
 	nhighPtPFcands = 0;
-	for (unsigned int ipf = 0; ipf < pfcands_p4().size(); ipf++) {
+	for (unsigned int ipf = 0; ipf < cms3.pfcands_p4().size(); ipf++) {
 	  
 	  float cand_pt = cms3.pfcands_p4().at(ipf).pt();
 	  if(cand_pt < 50) continue;
 	  if(cand_pt < 300 && !(abs(cms3.pfcands_particleId().at(ipf)) == 13) ) continue;
 	  
-	  float absiso  = TrackIso(ipf, 0.3, 0.0, true, false);
-	  float an04 = PFCandRelIsoAn04(ipf);
+	  float absiso  = cms3.pfcands_trackIso().at(ipf);
+	  // float an04 = PFCandRelIsoAn04(ipf);
 	  
 	  pf_pt_ordering.push_back(std::pair<int,float>(nhighPtPFcands,cand_pt));
 	  
@@ -1490,7 +1489,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  vec_highPtPFcands_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
 	  vec_highPtPFcands_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
 	  vec_highPtPFcands_absIso.push_back( absiso                           );
-	  vec_highPtPFcands_relIsoAn04.push_back( an04                         );
+	  // vec_highPtPFcands_relIsoAn04.push_back( an04                         );
 	  vec_highPtPFcands_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
 	  vec_highPtPFcands_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
 	  vec_highPtPFcands_mcMatchId.push_back ( 0 );
@@ -1513,7 +1512,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  highPtPFcands_phi[i]    = vec_highPtPFcands_phi.at(it->first);
 	  highPtPFcands_mass[i]   = vec_highPtPFcands_mass.at(it->first);
 	  highPtPFcands_absIso[i] = vec_highPtPFcands_absIso.at(it->first);
-	  highPtPFcands_relIsoAn04[i] = vec_highPtPFcands_relIsoAn04.at(it->first);
+	  // highPtPFcands_relIsoAn04[i] = vec_highPtPFcands_relIsoAn04.at(it->first);
 	  highPtPFcands_dz[i]     = vec_highPtPFcands_dz.at(it->first);
 	  highPtPFcands_pdgId[i]  = vec_highPtPFcands_pdgId.at(it->first);
 	  highPtPFcands_mcMatchId[i]  = vec_highPtPFcands_mcMatchId.at(it->first);
@@ -3047,7 +3046,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
     BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
     BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
-    BabyTree_->Branch("lep_relIsoAn04", lep_relIsoAn04, "lep_relIsoAn04[nlep]/F" );
+    // BabyTree_->Branch("lep_relIsoAn04", lep_relIsoAn04, "lep_relIsoAn04[nlep]/F" );
     BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
     BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
     BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
@@ -3058,7 +3057,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_relIsoAn04", isoTrack_relIsoAn04, "isoTrack_relIsoAn04[nisoTrack]/F" );
+    // BabyTree_->Branch("isoTrack_relIsoAn04", isoTrack_relIsoAn04, "isoTrack_relIsoAn04[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
     BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
@@ -3068,7 +3067,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("highPtPFcands_phi", highPtPFcands_phi, "highPtPFcands_phi[nhighPtPFcands]/F" );
     BabyTree_->Branch("highPtPFcands_mass", highPtPFcands_mass, "highPtPFcands_mass[nhighPtPFcands]/F" );
     BabyTree_->Branch("highPtPFcands_absIso", highPtPFcands_absIso, "highPtPFcands_absIso[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_relIsoAn04", highPtPFcands_relIsoAn04, "highPtPFcands_relIsoAn04[nhighPtPFcands]/F" );
+    // BabyTree_->Branch("highPtPFcands_relIsoAn04", highPtPFcands_relIsoAn04, "highPtPFcands_relIsoAn04[nhighPtPFcands]/F" );
     BabyTree_->Branch("highPtPFcands_dz", highPtPFcands_dz, "highPtPFcands_dz[nhighPtPFcands]/F" );
     BabyTree_->Branch("highPtPFcands_pdgId", highPtPFcands_pdgId, "highPtPFcands_pdgId[nhighPtPFcands]/I" );
     BabyTree_->Branch("highPtPFcands_mcMatchId", highPtPFcands_mcMatchId, "highPtPFcands_mcMatchId[nhighPtPFcands]/I" );
@@ -3616,7 +3615,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       lep_relIso03[i] = -999;
       lep_relIso04[i] = -999;
       lep_miniRelIso[i] = -999;
-      lep_relIsoAn04[i] = -999;
+      // lep_relIsoAn04[i] = -999;
       lep_mcMatchId[i] = -999;
       lep_lostHits[i] = -999;
       lep_convVeto[i] = -999;
@@ -3629,7 +3628,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       isoTrack_phi[i] = -999;
       isoTrack_mass[i] = -999;
       isoTrack_absIso[i] = -999;
-      isoTrack_relIsoAn04[i] = -999;
+      // isoTrack_relIsoAn04[i] = -999;
       isoTrack_dz[i] = -999;
       isoTrack_pdgId[i] = -999;
       isoTrack_mcMatchId[i] = -999;
@@ -3641,7 +3640,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       highPtPFcands_phi[i] = -999;
       highPtPFcands_mass[i] = -999;
       highPtPFcands_absIso[i] = -999;
-      highPtPFcands_relIsoAn04[i] = -999;
+      // highPtPFcands_relIsoAn04[i] = -999;
       highPtPFcands_dz[i] = -999;
       highPtPFcands_pdgId[i] = -999;
       highPtPFcands_mcMatchId[i] = -999;
