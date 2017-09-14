@@ -32,8 +32,9 @@ class SR;
 
 // turn on to apply json file to data
 bool applyJSON = true;
+bool prescalesByEvent = true;
 
-const float lumi = 27.70;
+const float lumi = 13.88;
 
 // FOR 2016
 // input effective prescales for PFHT125, PFHT350, PFHT475
@@ -136,7 +137,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_294927-300575_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_294927-301997_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -398,47 +399,51 @@ double QCDLooper::getTriggerPrescale(std::string dirname) {
     //   return (t.HLT_PFHT900 || t.HLT_PFJet450)==0 ? -1 : 1;
     // }
 
-    // if(t.ht < 250)
-    //     return -1;
-    // if(t.ht >= 250 && t.ht < 440)
-    //     return t.HLT_PFHT180_Prescale==0? -1 : eff_prescales[0];
-    // if(t.ht >= 440 && t.ht < 520)
-    //     return t.HLT_PFHT370_Prescale==0? -1 : eff_prescales[2];
-    // if(t.ht >= 520 && t.ht < 620)
-    //     return t.HLT_PFHT430_Prescale==0? -1 : eff_prescales[3];
-    // if(t.ht >= 620 && t.ht < 700)
-    //     return t.HLT_PFHT510_Prescale==0? -1 : eff_prescales[4];
-    // if(t.ht >= 700 && t.ht < 800)
-    //     return t.HLT_PFHT590_Prescale==0? -1 : eff_prescales[5];
-    // if(t.ht >= 800 && t.ht < 900)
-    //     return t.HLT_PFHT680_Prescale==0? -1 : eff_prescales[6];
-    // if(t.ht >= 900 && t.ht < 1000)
-    //     return t.HLT_PFHT780_Prescale==0? -1 : eff_prescales[7];
-    // if(t.ht >= 1000 && t.ht < 1200)
-    //     return t.HLT_PFHT890_Prescale==0? -1 : eff_prescales[8];
-    // if(t.ht >= 1200)
-    //     return (t.HLT_PFHT1050 || t.HLT_PFJet500)==0 ? -1 : 1;
+    if(!prescalesByEvent){
+        if(t.ht < 250)
+            return -1;
+        if(t.ht >= 250 && t.ht < 440)
+            return t.HLT_PFHT180_Prescale==0? -1 : eff_prescales[0];
+        if(t.ht >= 440 && t.ht < 520)
+            return t.HLT_PFHT370_Prescale==0? -1 : eff_prescales[2];
+        if(t.ht >= 520 && t.ht < 620)
+            return t.HLT_PFHT430_Prescale==0? -1 : eff_prescales[3];
+        if(t.ht >= 620 && t.ht < 700)
+            return t.HLT_PFHT510_Prescale==0? -1 : eff_prescales[4];
+        if(t.ht >= 700 && t.ht < 800)
+            return t.HLT_PFHT590_Prescale==0? -1 : eff_prescales[5];
+        if(t.ht >= 800 && t.ht < 900)
+            return t.HLT_PFHT680_Prescale==0? -1 : eff_prescales[6];
+        if(t.ht >= 900 && t.ht < 1000)
+            return t.HLT_PFHT780_Prescale==0? -1 : eff_prescales[7];
+        if(t.ht >= 1000 && t.ht < 1200)
+            return t.HLT_PFHT890_Prescale==0? -1 : eff_prescales[8];
+        if(t.ht >= 1200)
+            return (t.HLT_PFHT1050 || t.HLT_PFJet500)==0 ? -1 : 1;
+    }
 
-    if(t.ht < 250)
-        return -1;
-    if(t.ht >= 250 && t.ht < 440)
-        return t.HLT_PFHT180_Prescale==0? -1 : t.HLT_PFHT180_Prescale;
-    if(t.ht >= 440 && t.ht < 520)
-        return t.HLT_PFHT370_Prescale==0? -1 : t.HLT_PFHT370_Prescale;
-    if(t.ht >= 520 && t.ht < 620)
-        return t.HLT_PFHT430_Prescale==0? -1 : t.HLT_PFHT430_Prescale;
-    if(t.ht >= 620 && t.ht < 700)
-        return t.HLT_PFHT510_Prescale==0? -1 : t.HLT_PFHT510_Prescale;
-    if(t.ht >= 700 && t.ht < 800)
-        return t.HLT_PFHT590_Prescale==0? -1 : t.HLT_PFHT590_Prescale;
-    if(t.ht >= 800 && t.ht < 900)
-        return t.HLT_PFHT680_Prescale==0? -1 : t.HLT_PFHT680_Prescale;
-    if(t.ht >= 900 && t.ht < 1000)
-        return t.HLT_PFHT780_Prescale==0? -1 : t.HLT_PFHT780_Prescale;
-    if(t.ht >= 1000 && t.ht < 1200)
-        return t.HLT_PFHT890_Prescale==0? -1 : t.HLT_PFHT890_Prescale;
-    if(t.ht >= 1200)
-        return (t.HLT_PFHT1050 || t.HLT_PFJet500)==0 ? -1 : 1;
+    if(prescalesByEvent){
+        if(t.ht < 250)
+            return -1;
+        if(t.ht >= 250 && t.ht < 440)
+            return t.HLT_PFHT180_Prescale==0? -1 : t.HLT_PFHT180_Prescale;
+        if(t.ht >= 440 && t.ht < 520)
+            return t.HLT_PFHT370_Prescale==0? -1 : t.HLT_PFHT370_Prescale;
+        if(t.ht >= 520 && t.ht < 620)
+            return t.HLT_PFHT430_Prescale==0? -1 : t.HLT_PFHT430_Prescale;
+        if(t.ht >= 620 && t.ht < 700)
+            return t.HLT_PFHT510_Prescale==0? -1 : t.HLT_PFHT510_Prescale;
+        if(t.ht >= 700 && t.ht < 800)
+            return t.HLT_PFHT590_Prescale==0? -1 : t.HLT_PFHT590_Prescale;
+        if(t.ht >= 800 && t.ht < 900)
+            return t.HLT_PFHT680_Prescale==0? -1 : t.HLT_PFHT680_Prescale;
+        if(t.ht >= 900 && t.ht < 1000)
+            return t.HLT_PFHT780_Prescale==0? -1 : t.HLT_PFHT780_Prescale;
+        if(t.ht >= 1000 && t.ht < 1200)
+            return t.HLT_PFHT890_Prescale==0? -1 : t.HLT_PFHT890_Prescale;
+        if(t.ht >= 1200)
+            return (t.HLT_PFHT1050 || t.HLT_PFJet500)==0 ? -1 : 1;
+    }
 
     std::cerr << "ERROR [getTriggerPrescale]: did not recognize dirname " << dirname << std::endl;
 

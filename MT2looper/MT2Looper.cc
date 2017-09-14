@@ -550,7 +550,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   // 2017 data
-  const char* json_file = "../babymaker/jsons/Cert_294927-301141_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_294927-301997_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   // // full 2016 dataset json, 36.26/fb:
   // const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   // to reproduce ICHEP, 12.9/fb:
@@ -929,7 +929,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       outfile_->cd();
       // const float lumi = 12.9; //ICHEP 2016
       // const float lumi = 35.867; // full 2016
-      const float lumi = 10.09; // 2017
+      const float lumi = 13.88; // 2017
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;

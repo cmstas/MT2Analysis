@@ -1,13 +1,13 @@
 import ROOT
 
-justplot = True
+justplot = False
 
 if not justplot:
 
   ROOT.gROOT.SetBatch(1)
 
   c = ROOT.TChain("mt2")
-  c.Add("/nfs-6/userdata/mt2/V00-09-01_v2/data_Run2017*JetHT*.root")
+  c.Add("/nfs-6/userdata/mt2/RebalanceAndSmear_V00-09-02_json_294927-301997_PromptReco_13p88fb/*Run2017*JetHT*.root")
   c.SetBranchStatus("*",0)
   c.SetBranchStatus("HLT_PFHT*",1)
   c.SetBranchStatus("isGolden",1)
@@ -207,7 +207,8 @@ fit_510_370.SetLineWidth(2)
 fit_510_250.SetLineWidth(2)
 fit_510_180.SetLineWidth(2)
 
-h_PFHT1050over890.GetYaxis().SetRangeUser(0.001,1000)
+h_PFHT1050over890.GetXaxis().SetRangeUser(300, 2000)
+h_PFHT1050over890.GetYaxis().SetRangeUser(1e-2,4e2)
 h_PFHT1050over890.Draw("E0")
 h_PFHT1050over780.Draw("E0 SAME")
 h_PFHT1050over680.Draw("E0 SAME")
@@ -237,7 +238,7 @@ ratio1050over250err = ROOT.TMath.Sqrt((fit_1050_510.GetParameter(0)*fit_510_250.
 ratio1050over180 = fit_1050_510.GetParameter(0) * fit_510_180.GetParameter(0)
 ratio1050over180err = ROOT.TMath.Sqrt((fit_1050_510.GetParameter(0)*fit_510_180.GetParError(0))**2 + (fit_510_180.GetParameter(0)*fit_1050_510.GetParError(0))**2)
 
-leg = ROOT.TLegend(0.4,0.12,0.9,0.40)
+leg = ROOT.TLegend(0.45,0.12,0.9,0.43)
 leg.SetTextFont(62)
 
 leg.AddEntry(fit_1050_890, "PFHT1050/890: {0:.1f} #pm {1:.1f}".format(fit_1050_890.GetParameter(0), fit_1050_890.GetParError(0)),'l')

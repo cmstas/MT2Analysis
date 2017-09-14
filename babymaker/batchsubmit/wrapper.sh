@@ -55,17 +55,20 @@ if [ $? -ne 0 ]; then
     FILESHORT=${FILE#/hadoop/cms}
     xrdfs xrootd.t2.ucsd.edu ls ${FILESHORT}
     if [ $? -ne 0 ]; then
-	echo "[wrapper] could not find input file with xrootd either, exiting"
-	exit 1
+        echo "[wrapper] could not find input file with xrootd either, exiting"
+        exit 1
     else
-	echo "[wrapper] found file with xrootd, will proceed"
-	FILE="root://xrootd.t2.ucsd.edu/"${FILESHORT}
+        echo "[wrapper] found file with xrootd, will proceed"
+        FILE="root://xrootd.t2.ucsd.edu/"${FILESHORT}
     fi
 fi
 
 #
 # untar input sandbox
 #
+
+echo "[wrapper] current directory is:"
+pwd
 
 echo "[wrapper] extracting input sandbox"
 tar -zxf input.tar.gz
@@ -112,4 +115,5 @@ gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT} gsiftp://gftp.t2.ucsd.e
 echo "[wrapper] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done
 echo "[wrapper] cleaned up"
+pwd
 ls

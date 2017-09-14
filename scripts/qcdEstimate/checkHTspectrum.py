@@ -7,15 +7,15 @@ justPlot = False
 
 ## method = 1 will used hard-coded effective prescale values (enter these below)
 ## method = 2 will use the prescale values stored in the babies on an event-by-event basis
-method = 1
+method = 2
 
 triggers = ["PFHT180_Prescale", "PFHT370_Prescale", "PFHT430_Prescale", "PFHT510_Prescale", "PFHT590_Prescale", "PFHT680_Prescale", "PFHT780_Prescale", "PFHT890_Prescale", "PFHT1050"]
 ht_cuts = [240, 440, 520, 620, 700, 800, 900, 1000, 1200, 1000000]
-eff_prescales = [1316, 707, 307, 145, 67.4, 47.4, 29.5, 17.1, 1]
+eff_prescales = [1961, 770, 331, 152, 74.3, 47.3, 27.6, 15.2, 1]
 
 if not justPlot:
     c = ROOT.TChain("mt2")
-    c.Add("/nfs-6/userdata/mt2/V00-09-01_v2/*Run2017*JetHT*.root")
+    c.Add("/nfs-6/userdata/mt2/RebalanceAndSmear_V00-09-02_json_294927-301997_PromptReco_13p88fb/*Run2017*JetHT*.root")
     
     hs = [ROOT.TH1D("h_"+s,"",100,0,2000) for s in triggers]
     
