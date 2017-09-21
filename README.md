@@ -2,7 +2,7 @@
 ## Setup:
 To simply setup on UAF, do
 ``` bash
-git clone https://github.com/cmstas/MT2Analysis.git
+git clone git@github.com:cmstas/MT2Analysis.git
 ```
 and then 
 ``` bash
