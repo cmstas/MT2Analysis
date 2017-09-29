@@ -212,6 +212,26 @@ public :
    Int_t           lep_lostHits[50];   //[nlep]
    Int_t           lep_convVeto[50];   //[nlep]
    Int_t           lep_tightCharge[50];   //[nlep]
+   Int_t           nEl50noID;
+   Float_t         El50noID_pt[50];   //[nEl50noID]
+   Float_t         El50noID_eta[50];   //[nEl50noID]
+   Float_t         El50noID_phi[50];   //[nEl50noID]
+   Float_t         El50noID_mass[50];   //[nEl50noID]
+   Int_t           El50noID_charge[50];   //[nEl50noID]
+   Int_t           El50noID_pdgId[50];   //[nEl50noID]
+   Float_t         El50noID_dxy[50];   //[nEl50noID]
+   Float_t         El50noID_dz[50];   //[nEl50noID]
+   //   Int_t           El50noID_tightId[50];   //[nEl50noID]
+   Int_t           El50noID_heepId[50];   //[nEl50noID]
+   Float_t         El50noID_relIso03[50];   //[nEl50noID]
+   Float_t         El50noID_relIso04[50];   //[nEl50noID]
+   Float_t         El50noID_miniRelIso[50];   //[nEl50noID]
+   Float_t         El50noID_relIsoAn04[50];   //[nEl50noID]
+   Int_t           El50noID_mcMatchId[50];   //[nEl50noID]
+   Int_t           El50noID_lostHits[50];   //[nEl50noID]
+   Int_t           El50noID_convVeto[50];   //[nEl50noID]
+   Int_t           El50noID_tightCharge[50];   //[nEl50noID]
+
    Int_t           nisoTrack;
    Float_t         isoTrack_pt[50];   //[nisoTrack]
    Float_t         isoTrack_eta[50];   //[nisoTrack]
@@ -234,6 +254,9 @@ public :
    Float_t         tau_dz[50];   //[ntau]
    Float_t         tau_isoMVA2[50];   //[ntau]
    Int_t           tau_idCI3hit[50];   //[ntau]
+   Int_t           tau_idMVAnoConeOld[50];   //[ntau]
+   Int_t           tau_idMVAnoConeNew[50];   //[ntau]
+   Int_t           tau_idMVAConeOld[50];   //[ntau]
    Float_t         tau_isoCI3hit[50];   //[ntau]
    Int_t           tau_idMVA2[50];   //[ntau]
    Int_t           tau_mcMatchId[50];   //[ntau]
@@ -366,6 +389,7 @@ public :
    Float_t         jet_eta[100];   //[njet]
    Float_t         jet_phi[100];   //[njet]
    Float_t         jet_mass[100];   //[njet]
+   Float_t         jet_btagDeepCSV[100]; //[njet]
    Float_t         jet_btagCSV[100];   //[njet]
    Float_t         jet_btagMVA[100];   //[njet]
    Float_t         jet_rawPt[100];   //[njet]
@@ -376,6 +400,12 @@ public :
    Float_t         jet_area[100];   //[njet]
    Int_t           jet_id[100];   //[njet]
    Int_t           jet_puId[100];   //[njet]
+   Float_t         jet_CHEF[100]; //[njet]
+   Float_t         jet_NHEF[100]; //[njet]
+   Float_t         jet_CEEF[100]; //[njet]
+   Float_t         jet_NEEF[100]; //[njet]
+   Int_t           jet_CM[100]; //[njet]
+   Int_t           jet_NM[100]; //[njet]
    Int_t           GenSusyMScan1;
    Int_t           GenSusyMScan2;
    Int_t           GenSusyMScan3;
@@ -415,6 +445,7 @@ public :
    Float_t         rebal_jetpt[100];
    Float_t         rebal_jeteta[100];
    Float_t         rebal_jetphi[100];
+   Float_t         rebal_jetbtagdeepcsv[100];
    Float_t         rebal_jetbtagcsv[100];
    Float_t         rebal_factors[100];
    Float_t         rebal_met_pt;
@@ -452,6 +483,7 @@ public :
    TBranch        *b_nBJet20JECup;   //!
    TBranch        *b_nBJet20JECdn;   //!
    TBranch        *b_nBJet20csv;   //!
+   TBranch        *b_nBJet20deepcsv; //!
    TBranch        *b_nBJet20mva;   //!
    TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet30;   //!
@@ -612,6 +644,25 @@ public :
    TBranch        *b_lep_lostHits;   //!
    TBranch        *b_lep_convVeto;   //!
    TBranch        *b_lep_tightCharge;   //!
+   TBranch        *b_nEl50noID;   //!
+   TBranch        *b_El50noID_pt;   //!
+   TBranch        *b_El50noID_eta;   //!
+   TBranch        *b_El50noID_phi;   //!
+   TBranch        *b_El50noID_mass;   //!
+   TBranch        *b_El50noID_charge;   //!
+   TBranch        *b_El50noID_pdgId;   //!
+   TBranch        *b_El50noID_dxy;   //!
+   TBranch        *b_El50noID_dz;   //!
+   //   TBranch        *b_El50noID_tightId;   //!
+   TBranch        *b_El50noID_heepId;   //!
+   TBranch        *b_El50noID_relIso03;   //!
+   TBranch        *b_El50noID_relIso04;   //!
+   TBranch        *b_El50noID_miniRelIso;   //!
+   TBranch        *b_El50noID_relIsoAn04;   //!
+   TBranch        *b_El50noID_mcMatchId;   //!
+   TBranch        *b_El50noID_lostHits;   //!
+   TBranch        *b_El50noID_convVeto;   //!
+   TBranch        *b_El50noID_tightCharge;   //!
    TBranch        *b_nisoTrack;   //!
    TBranch        *b_isoTrack_pt;   //!
    TBranch        *b_isoTrack_eta;   //!
@@ -634,6 +685,10 @@ public :
    TBranch        *b_tau_dz;   //!
    TBranch        *b_tau_isoMVA2;   //!
    TBranch        *b_tau_idCI3hit;   //!
+   TBranch        *b_tau_idMVAnoConeOld;   //!
+   TBranch        *b_tau_idMVAnoConeNew;   //!
+   TBranch        *b_tau_idCutConeOld;   //!
+   TBranch        *b_tau_idMVAConeOld;   //!
    TBranch        *b_tau_isoCI3hit;   //!
    TBranch        *b_tau_idMVA2;   //!
    TBranch        *b_tau_mcMatchId;   //!
@@ -767,6 +822,7 @@ public :
    TBranch        *b_jet_phi;   //!
    TBranch        *b_jet_mass;   //!
    TBranch        *b_jet_btagCSV;   //!
+   TBranch        *b_jet_btagDeepCSV;  //!
    TBranch        *b_jet_btagMVA;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
@@ -776,6 +832,12 @@ public :
    TBranch        *b_jet_area;   //!
    TBranch        *b_jet_id;   //!
    TBranch        *b_jet_puId;   //!
+   TBranch        *b_jet_CHEF; //!
+   TBranch        *b_jet_NHEF; //!
+   TBranch        *b_jet_CEEF; //!
+   TBranch        *b_jet_NEEF; //!
+   TBranch        *b_jet_CM; //!
+   TBranch        *b_jet_NM; //!
    TBranch        *b_GenSusyMScan1;   //!
    TBranch        *b_GenSusyMScan2;   //!
    TBranch        *b_GenSusyMScan3;   //!
@@ -815,6 +877,7 @@ public :
    TBranch        *b_rebal_jeteta;
    TBranch        *b_rebal_jetphi;
    TBranch        *b_rebal_jetbtagcsv;
+   TBranch        *b_rebal_jetbtagdeepcsv;
    TBranch        *b_rebal_factors;
    TBranch        *b_rebal_met_pt;
    TBranch        *b_rebal_met_phi;
@@ -910,6 +973,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("nBJet20JECup", &nBJet20JECup, &b_nBJet20JECup);
    fChain->SetBranchAddress("nBJet20JECdn", &nBJet20JECdn, &b_nBJet20JECdn);
    fChain->SetBranchAddress("nBJet20csv", &nBJet20csv, &b_nBJet20csv);
+   fChain->SetBranchAddress("nBJet20deepcsv", &nBJet20deepcsv, &b_nBJet20deepcsv);
    fChain->SetBranchAddress("nBJet20mva", &nBJet20mva, &b_nBJet20mva);
    fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    fChain->SetBranchAddress("nBJet30", &nBJet30, &b_nBJet30);
@@ -1070,6 +1134,25 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_lostHits", lep_lostHits, &b_lep_lostHits);
    fChain->SetBranchAddress("lep_convVeto", lep_convVeto, &b_lep_convVeto);
    fChain->SetBranchAddress("lep_tightCharge", lep_tightCharge, &b_lep_tightCharge);
+   fChain->SetBranchAddress("nEl50noID", &nEl50noID, &b_nEl50noID);
+   fChain->SetBranchAddress("El50noID_pt", El50noID_pt, &b_El50noID_pt);
+   fChain->SetBranchAddress("El50noID_eta", El50noID_eta, &b_El50noID_eta);
+   fChain->SetBranchAddress("El50noID_phi", El50noID_phi, &b_El50noID_phi);
+   fChain->SetBranchAddress("El50noID_mass", El50noID_mass, &b_El50noID_mass);
+   fChain->SetBranchAddress("El50noID_charge", El50noID_charge, &b_El50noID_charge);
+   fChain->SetBranchAddress("El50noID_pdgId", El50noID_pdgId, &b_El50noID_pdgId);
+   fChain->SetBranchAddress("El50noID_dxy", El50noID_dxy, &b_El50noID_dxy);
+   fChain->SetBranchAddress("El50noID_dz", El50noID_dz, &b_El50noID_dz);
+   fChain->SetBranchAddress("El50noID_tightId", El50noID_tightId, &b_El50noID_tightId);
+   fChain->SetBranchAddress("El50noID_heepId", El50noID_heepId, &b_El50noID_heepId);
+   fChain->SetBranchAddress("El50noID_relIso03", El50noID_relIso03, &b_El50noID_relIso03);
+   fChain->SetBranchAddress("El50noID_relIso04", El50noID_relIso04, &b_El50noID_relIso04);
+   fChain->SetBranchAddress("El50noID_miniRelIso", El50noID_miniRelIso, &b_El50noID_miniRelIso);
+   fChain->SetBranchAddress("El50noID_relIsoAn04", El50noID_relIsoAn04, &b_El50noID_relIsoAn04);
+   fChain->SetBranchAddress("El50noID_mcMatchId", El50noID_mcMatchId, &b_El50noID_mcMatchId);
+   fChain->SetBranchAddress("El50noID_lostHits", El50noID_lostHits, &b_El50noID_lostHits);
+   fChain->SetBranchAddress("El50noID_convVeto", El50noID_convVeto, &b_El50noID_convVeto);
+   fChain->SetBranchAddress("El50noID_tightCharge", El50noID_tightCharge, &b_El50noID_tightCharge);
    fChain->SetBranchAddress("nisoTrack", &nisoTrack, &b_nisoTrack);
    fChain->SetBranchAddress("isoTrack_pt", isoTrack_pt, &b_isoTrack_pt);
    fChain->SetBranchAddress("isoTrack_eta", isoTrack_eta, &b_isoTrack_eta);
@@ -1092,6 +1175,9 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("tau_dz", tau_dz, &b_tau_dz);
    fChain->SetBranchAddress("tau_isoMVA2", tau_isoMVA2, &b_tau_isoMVA2);
    fChain->SetBranchAddress("tau_idCI3hit", tau_idCI3hit, &b_tau_idCI3hit);
+   fChain->SetBranchAddress("tau_idMVAnoConeOld", tau_idMVAnoConeOld, &b_tau_idMVAnoConeOld);
+   fChain->SetBranchAddress("tau_idMVAnoConeNew", tau_idMVAnoConeNew, &b_tau_idMVAnoConeNew);
+   fChain->SetBranchAddress("tau_idMVAConeOld", tau_idMVAConeOld, &b_tau_idMVAConeOld);
    fChain->SetBranchAddress("tau_isoCI3hit", tau_isoCI3hit, &b_tau_isoCI3hit);
    fChain->SetBranchAddress("tau_idMVA2", tau_idMVA2, &b_tau_idMVA2);
    fChain->SetBranchAddress("tau_mcMatchId", tau_mcMatchId, &b_tau_mcMatchId);
@@ -1225,6 +1311,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_phi", jet_phi, &b_jet_phi);
    fChain->SetBranchAddress("jet_mass", jet_mass, &b_jet_mass);
    fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
+   fChain->SetBranchAddress("jet_btagDeepCSV", jet_btagDeepCSV, &b_jet_btagDeepCSV);
    fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
@@ -1234,6 +1321,12 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
    fChain->SetBranchAddress("jet_id", jet_id, &b_jet_id);
    fChain->SetBranchAddress("jet_puId", jet_puId, &b_jet_puId);
+   fChain->SetBranchAddress("jet_CHEF", jet_CHEF, &b_jet_CHEF);
+   fChain->SetBranchAddress("jet_NHEF", jet_NHEF, &b_jet_NHEF);
+   fChain->SetBranchAddress("jet_CEEF", jet_CEEF, &b_jet_CEEF);
+   fChain->SetBranchAddress("jet_NEEF", jet_NEEF, &b_jet_NEEF);
+   fChain->SetBranchAddress("jet_CM", jet_CM, &b_jet_CM);
+   fChain->SetBranchAddress("jet_NM", jet_NM, &b_jet_NM);
    fChain->SetBranchAddress("GenSusyMScan1", &GenSusyMScan1, &b_GenSusyMScan1);
    fChain->SetBranchAddress("GenSusyMScan2", &GenSusyMScan2, &b_GenSusyMScan2);
    fChain->SetBranchAddress("GenSusyMScan3", &GenSusyMScan3, &b_GenSusyMScan3);
@@ -1272,6 +1365,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rebal_jetpt", rebal_jetpt, &b_rebal_jetpt);
    fChain->SetBranchAddress("rebal_jeteta", rebal_jeteta, &b_rebal_jeteta);
    fChain->SetBranchAddress("rebal_jetphi", rebal_jetphi, &b_rebal_jetphi);
+   fChain->SetBranchAddress("rebal_jetbtagdeepcsv", rebal_jetbtagdeepcsv, &b_rebal_jetbtagdeepcsv);
    fChain->SetBranchAddress("rebal_jetbtagcsv", rebal_jetbtagcsv, &b_rebal_jetbtagcsv);
    fChain->SetBranchAddress("rebal_factors", rebal_factors, &b_rebal_factors);
    fChain->SetBranchAddress("rebal_met_pt", &rebal_met_pt, &b_rebal_met_pt);
