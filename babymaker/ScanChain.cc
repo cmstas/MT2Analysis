@@ -1884,10 +1884,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       nBJet25 = 0;
       nBJet30 = 0;
       nBJet40 = 0;
-      nBJet20csv = 0;    // counters for 2 different algorithms
+      nBJet20csv = 0;    // counters for 3 different algorithms (deepcsv added in 2017)
       nBJet20mva = 0;
-      nBJet30csv = 0;    // counters for 2 different algorithms
+      nBJet20deepcsv = 0;
+      nBJet30csv = 0;    // counters for 3 different algorithms
       nBJet30mva = 0;
+      nBJet30deepcsv = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
       nJet20BadFastsim = 0;
@@ -1908,6 +1910,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       gamma_nBJet20 = 0;
       gamma_nBJet20csv = 0;
       gamma_nBJet20mva = 0;
+      gamma_nBJet20deepcsv = 0;
       gamma_nBJet25 = 0;
       gamma_nBJet30 = 0;
       gamma_nBJet40 = 0;
@@ -1997,6 +2000,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
+
+	  // New in 2017
+	  // DeepCSV is sum of b and bb discriminators
+	  jet_btagDeepCSV[njet] = cms3.getbtagvalue("pfDeepCSVJetTags:probb",iJet) + cms3.getbtagvalue("pfDeepCSVJetTags:probbb",iJet);
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -2148,6 +2155,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 		btagprob_heavy_DN *= (1. - weight_DN * eff);
               }
             } // fail med btag
+	    // New in 2017
+	    // DeepCSV M > 0.6324
+	    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+	    if (jet_btagDeepCSV[njet] >= 0.6324) {
+	      nBJet20deepcsv++;
+	      if (jet_pt[njet] > 30.0) nBJet30deepcsv++;
+	    } // pass DeepCSV M 
+	    // End new in 2017
+
           } // pt 20 eta 2.4
           // accept jets out to eta 4.7 for dphi
           else if ( (jet_pt[njet] > 30.0) && (fabs(jet_eta[njet]) < 4.7) ) {
@@ -2175,6 +2191,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             if(jet_btagCSV[njet] >= 0.8484) {
               nBJet20JECup++;
             } // pass med btag
+	    // New in 2017
+	    if (jet_btagDeepCSV[njet] >= 0.6324) {
+	      gamma_nBJet20deepcsv++;
+	      // if (jet_pt[njet] > 30.0) gamma_nBJet30deepcsv++;
+	    } // pass DeepCSV M
+	    // End new in 2017
+
           } // pt 20 eta 2.5
 	  // accept jets out to eta 4.7 for dphi
           else if ( (jet_ptUP > 30.0) && (fabs(jet_etaUP) < 4.7) ) {
@@ -2653,6 +2676,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         if (cms3.passTauID("byMediumCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 2;
         if (cms3.passTauID("byTightCombinedIsolationDeltaBetaCorr3Hits", iTau)) temp = 3;
         tau_idCI3hit[ntau] = temp;
+	// New IDs for 2017
+	temp = 0;
+	if (cms3.passTauID("byVLooseIsolationMVArun2v1DBoldDMwLT", iTau)) temp = 1;
+	if (cms3.passTauID("byLooseIsolationMVArun2v1DBoldDMwLT", iTau)) temp = 2;
+	if (cms3.passTauID("byMediumIsolationMVArun2v1DBoldDMwLT", iTau)) temp = 3;
+	if (cms3.passTauID("byTightIsolationMVArun2v1DBoldDMwLT", iTau)) temp = 4;
+	if (cms3.passTauID("byVTightIsolationMVArun2v1DBoldDMwLT", iTau)) temp = 5;
+	tau_idMVAnoConeOld[ntau] = temp;
+	temp = 0;
+	if (cms3.passTauID("byVLooseIsolationMVArun2v1DBnewDMwLT", iTau)) temp = 1;
+	if (cms3.passTauID("byLooseIsolationMVArun2v1DBnewDMwLT", iTau)) temp = 2;
+	if (cms3.passTauID("byMediumIsolationMVArun2v1DBnewDMwLT", iTau)) temp = 3;
+	if (cms3.passTauID("byTightIsolationMVArun2v1DBnewDMwLT", iTau)) temp = 4;
+	if (cms3.passTauID("byVTightIsolationMVArun2v1DBnewDMwLT", iTau)) temp = 5;
+	tau_idMVAnoConeNew[ntau] = temp;
+	temp = 0;
+	if (cms3.passTauID("byVLooseIsolationMVArun2v1DBdR03oldDMwLT", iTau)) temp = 1;
+	if (cms3.passTauID("byLooseIsolationMVArun2v1DBdR03oldDMwLT", iTau)) temp = 2;
+	if (cms3.passTauID("byMediumIsolationMVArun2v1DBdR03oldDMwLT", iTau)) temp = 3;
+	if (cms3.passTauID("byTightIsolationMVArun2v1DBdR03oldDMwLT", iTau)) temp = 4;
+	if (cms3.passTauID("byVTightIsolationMVArun2v1DBdR03oldDMwLT", iTau)) temp = 5;
+	tau_idMVAConeOld[ntau] = temp;
+	// End new IDs for 2017
+
         if(tau_pt[ntau] > 20) nTaus20++;
         //tau_mcMatchId[ntau] = ; // Have to do this by hand unless we want to add tau_mc branches in CMS3 through the CandToGenAssMaker
 
@@ -2712,6 +2759,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
                   rebal_jeteta[nRebalJets] = jet_eta[iJet];
                   rebal_jetphi[nRebalJets] = jet_phi[iJet];
                   rebal_jetbtagcsv[nRebalJets] = jet_btagCSV[iJet];
+		  // New in 2017
+		  rebal_jetbtagdeepcsv[nRebalJets] = jet_btagDeepCSV[iJet];
+		  // End new in 2017
                   nRebalJets++;                  
               }
 
@@ -2881,12 +2931,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("nBJet20", &nBJet20 );
     BabyTree_->Branch("nBJet20csv", &nBJet20csv );
     BabyTree_->Branch("nBJet20mva", &nBJet20mva );
+    BabyTree_->Branch("nBJet20deepcsv", &nBJet20deepcsv );
     BabyTree_->Branch("nBJet20JECup", &nBJet20JECup );
     BabyTree_->Branch("nBJet20JECdn", &nBJet20JECdn );
     BabyTree_->Branch("nBJet25", &nBJet25 );
     BabyTree_->Branch("nBJet30", &nBJet30 );
     BabyTree_->Branch("nBJet30csv", &nBJet30csv );
     BabyTree_->Branch("nBJet30mva", &nBJet30mva );
+    BabyTree_->Branch("nBJet30deepcsv", &nBJet30deepcsv );
     BabyTree_->Branch("nBJet40", &nBJet40 );
     BabyTree_->Branch("nJet30FailId", &nJet30FailId );
     BabyTree_->Branch("nJet100FailId", &nJet100FailId );
@@ -3082,6 +3134,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("tau_dxy", tau_dxy, "tau_dxy[ntau]/F" );
     BabyTree_->Branch("tau_dz", tau_dz, "tau_dz[ntau]/F" );
     BabyTree_->Branch("tau_idCI3hit", tau_idCI3hit, "tau_idCI3hit[ntau]/I" );
+    // New IDs for 2017
+    BabyTree_->Branch("tau_idMVAnoConeOld", tau_idMVAnoConeOld, "tau_idMVAnoConeOld[ntau]/I" );
+    BabyTree_->Branch("tau_idMVAnoConeNew", tau_idMVAnoConeNew, "tau_idMVAnoConeNew[ntau]/I" ); 
+    BabyTree_->Branch("tau_idMVAConeOld", tau_idMVAConeOld, "tau_idMVAConeOld[ntau]/I" );
+    // End new IDs for 2017
     BabyTree_->Branch("tau_isoCI3hit", tau_isoCI3hit, "tau_isoCI3hit[ntau]/F" );
     BabyTree_->Branch("tau_mcMatchId", tau_mcMatchId, "tau_mcMatchId[ntau]/I" );
     BabyTree_->Branch("ngamma", &ngamma, "ngamma/I" );
@@ -3107,7 +3164,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
     BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
     BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
-    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
+    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva )
+    BabyTree_->Branch("gamma_nBJet20deepcsv", &gamma_nBJet20deepcsv );
     BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
     BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
     BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
@@ -3244,6 +3302,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
     BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
+    BabyTree_->Branch("jet_btagDeepCSV", jet_btagDeepCSV, "jet_btagDeepCSV[njet]/F" );
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
@@ -3292,6 +3351,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         BabyTree_->Branch("rebal_jeteta", rebal_jeteta, "rebal_jeteta[nRebalJets]/F");
         BabyTree_->Branch("rebal_jetphi", rebal_jetphi, "rebal_jetphi[nRebalJets]/F");
         BabyTree_->Branch("rebal_jetbtagcsv", rebal_jetbtagcsv, "rebal_jetbtagcsv[nRebalJets]/F");
+        BabyTree_->Branch("rebal_jetbtagdeepcsv", rebal_jetbtagcsv, "rebal_jetbtagdeepcsv[nRebalJets]/F");
         BabyTree_->Branch("rebal_factors", rebal_factors, "rebal_factors[nRebalJets]/F");
         BabyTree_->Branch("rebal_met_pt", &rebal_met_pt);
         BabyTree_->Branch("rebal_met_phi", &rebal_met_phi);
@@ -3328,12 +3388,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     nBJet20 = -999;
     nBJet20csv = -999;
     nBJet20mva = -999;
+    nBJet20deepcsv = -999; // New in 2017
     nBJet20JECup = -999;
     nBJet20JECdn = -999;
     nBJet25 = -999;
     nBJet30 = -999;
     nBJet30csv = -999;
     nBJet30mva = -999;
+    nBJet30deepcsv = -999; // New in 2017
     nBJet40 = -999;
     nJet30FailId = -999;
     nJet100FailId = -999;
@@ -3503,6 +3565,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     gamma_nBJet20 = -999;
     gamma_nBJet20csv = -999;
     gamma_nBJet20mva = -999;
+    gamma_nBJet20deepcsv = -999;
     gamma_nBJet25 = -999;
     gamma_nBJet30 = -999;
     gamma_nBJet40 = -999;
@@ -3655,6 +3718,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       tau_dxy[i] = -999;
       tau_dz[i] = -999;
       tau_idCI3hit[i] = -999;
+      // New in 2017
+      tau_idMVAnoConeOld[i] = -999;
+      tau_idMVAnoConeNew[i] = -999;
+      tau_idMVAConeOld[i] = -999;
+      // End new in 2017
       tau_isoCI3hit[i] = -999;
       tau_mcMatchId[i] = -999;
     }
@@ -3752,6 +3820,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       jet_mass[i] = -999;
       jet_btagCSV[i] = -999;
       jet_btagMVA[i] = -999;
+      jet_btagDeepCSV[i] = -999; // New in 2017
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;
@@ -3773,6 +3842,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         rebal_jeteta[i] = -999;
         rebal_jetphi[i] = -999;
         rebal_jetbtagcsv[i] = -999;
+	rebal_jetbtagdeepcsv[i] = -999; // New in 2017
         rebal_factors[i] = -999;
     }
 

@@ -84,6 +84,57 @@ class babyMaker {
 
   //baby ntuple variables
 
+  // *********
+  // Additions for 2017
+
+  // DeepCSV  
+  Int_t           nBJet20deepcsv;
+  Int_t           nBJet30deepcsv;
+  Int_t           gamma_nBJet20deepcsv;
+  Float_t         jet_btagDeepCSV[max_njet]; //[njet]
+  Float_t         rebal_jetbtagcsv[max_njet];
+  Float_t         rebal_jetbtagdeepcsv[max_njet];
+
+  // Hard electrons with no ID requirement
+  static const int max_nEl50noID = 10;
+  Int_t           nEl50noID;
+  Float_t         El50noID_pt[max_nEl50noID];
+  Float_t         El50noID_eta[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_phi[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_mass[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_charge[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_pdgId[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_dxy[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_dz[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_tightId[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_heepId[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_highPtFit_pt[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_highPtFit_eta[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_highPtFit_phi[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_relIso03[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_relIso04[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_miniRelIso[max_nEl50noID];   //[nEl50noID]
+  Float_t         El50noID_relIsoAn04[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_mcMatchId[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_lostHits[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_convVeto[max_nEl50noID];   //[nEl50noID]
+  Int_t           El50noID_tightCharge[max_nEl50noID];   //[nEl50noID]
+  
+  // New Tau IDs
+  Int_t           tau_idMVAnoConeOld[max_ntau];   //[ntau]
+  Int_t           tau_idMVAnoConeNew[max_ntau];   //[ntau]
+  Int_t           tau_idMVAConeOld[max_ntau];   //[ntau]
+
+  // Jet Energy Fractions
+  static const int max_njet = 100;
+  Float_t         jet_CHEF[max_njet]; //[njet]
+  Float_t         jet_NHEF[max_njet]; //[njet]
+  Float_t         jet_CEEF[max_njet]; //[njet]
+  Float_t         jet_NEEF[max_njet]; //[njet]
+
+  // End Addtions for 2017
+  // **********
+
   Int_t           run;
   Int_t           lumi;
   ULong64_t       evt;
@@ -507,7 +558,7 @@ class babyMaker {
   Int_t           genLepFromTau_sourceId[max_ngenLepFromTau];   //[ngenLepFromTau]
 
 //----- JETS
-  static const int max_njet = 100;
+//  static const int max_njet = 100; // placed above for JEFs in 2017 update
   Int_t           njet;
   Float_t         jet_pt[max_njet];   //[njet]
   Float_t         jet_eta[max_njet];   //[njet]
