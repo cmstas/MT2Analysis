@@ -1057,14 +1057,74 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       vector<LorentzVector> p4sForDphiZllMT;
       vector<LorentzVector> p4sForDphiRl;
 
+      // Added in 2017: No ID or Iso requirement on electrons with pt > 50
+      std::vector<std::pair<int, float> > El50noID_pt_ordering;
+      vector<float>vec_El50noID_pt;
+      vector<float>vec_El50noID_eta;
+      vector<float>vec_El50noID_phi;
+      vector<float>vec_El50noID_mass;
+      vector<float>vec_El50noID_charge;
+      vector<int>  vec_El50noID_pdgId;
+      vector<float>vec_El50noID_dxy;
+      vector<float>vec_El50noID_dz;
+      vector<int>  vec_El50noID_tightId;
+      vector<int>  vec_El50noID_heepId;
+      vector<float>vec_El50noID_highPtFit_pt;
+      vector<float>vec_El50noID_highPtFit_eta;
+      vector<float>vec_El50noID_highPtFit_phi;
+      vector<float>vec_El50noID_relIso03;
+      vector<float>vec_El50noID_relIso04;
+      vector<float>vec_El50noID_miniRelIso;
+      // vector<float>vec_El50noID_relIsoAn04;
+      vector<int>  vec_El50noID_mcMatchId;
+      vector<int>  vec_El50noID_lostHits;
+      vector<int>  vec_El50noID_convVeto;
+      vector<int>  vec_El50noID_tightCharge;
+
+
       if (verbose) cout << "before electrons" << endl;
 
       //ELECTRONS
       nlep = 0;
       nElectrons10 = 0;
+      nEl50noID = 0;
       for(unsigned int iEl = 0; iEl < cms3.els_p4().size(); iEl++){
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
+
+	// No ID or Iso check for electrons with pt > 50
+	if (cms3.els_p4().at(iEl).pt() > 50.0) {
+	  El50noID_pt_ordering.push_back( std::pair<int,float>(nEl50noID,cms3.els_p4().at(iEl).pt())) ;
+	  vec_El50noID_pt.push_back( cms3.els_p4().at(iEl).pt());
+	  vec_El50noID_eta.push_back( cms3.els_p4().at(iEl).eta());
+	  vec_El50noID_phi.push_back( cms3.els_p4().at(iEl).phi());
+	  vec_El50noID_mass.push_back ( cms3.els_p4().at(iEl).M());
+	  vec_El50noID_charge.push_back ( cms3.els_charge().at(iEl));
+	  vec_El50noID_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
+	  vec_El50noID_dxy.push_back ( cms3.els_dxyPV().at(iEl));
+	  vec_El50noID_dz.push_back ( cms3.els_dzPV().at(iEl));
+	  //	  vec_El50noID_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,4) );
+	  vec_El50noID_heepId.push_back ( isHEEPV60(iEl) );
+	  vec_El50noID_highPtFit_pt.push_back ( -1. );
+	  vec_El50noID_highPtFit_eta.push_back ( -1. );
+	  vec_El50noID_highPtFit_phi.push_back ( -1. );
+	  vec_El50noID_relIso03.push_back (  eleRelIso03(iEl,analysis_t::HAD));
+	  vec_El50noID_relIso04.push_back ( 0);
+	  vec_El50noID_miniRelIso.push_back ( elMiniRelIsoCMS3_EA(iEl,1) );
+	  // vec_El50noID_relIsoAn04.push_back ( elRelIsoAn04(iEl) );
+	  if (!isData && cms3.els_mc3dr().size() > 0 && cms3.els_mc3dr().at(iEl) < 0.2 && cms3.els_mc3idx().at(iEl) != -9999 && abs(cms3.els_mc3_id().at(iEl)) == 11) { // matched to a prunedGenParticle electron?
+	    int momid =  abs(genPart_motherId[cms3.els_mc3idx().at(iEl)]);
+	    vec_El50noID_mcMatchId.push_back ( momid != 11 ? momid : genPart_grandmotherId[cms3.els_mc3idx().at(iEl)]); // if mother is different store mother, otherwise store grandmother
+	  }
+	  else vec_El50noID_mcMatchId.push_back (0);
+	  
+	  vec_El50noID_lostHits.push_back ( cms3.els_exp_innerlayers().at(iEl)); //cms3.els_lost_pixelhits().at(iEl);
+	  vec_El50noID_convVeto.push_back ( !cms3.els_conv_vtx_flag().at(iEl));
+	  vec_El50noID_tightCharge.push_back ( tightChargeEle(iEl));
+	  
+	  nEl50noID++;
+	}
+
         // first check ID then iso
         if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
         bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4);
@@ -2004,6 +2064,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  // New in 2017
 	  // DeepCSV is sum of b and bb discriminators
 	  jet_btagDeepCSV[njet] = cms3.getbtagvalue("pfDeepCSVJetTags:probb",iJet) + cms3.getbtagvalue("pfDeepCSVJetTags:probbb",iJet);
+	  // See JetSelections.cc for these energy fraction definitions
+	  // and jet ID variables
+	  jet_CHEF[njet] = pfjets_chargedHadronE()[njet] / (pfjets_undoJEC().at(njet)*pfjets_p4()[njet].energy());
+	  jet_NHEF[njet] = pfjets_neutralHadronE()[njet] / (pfjets_undoJEC().at(njet)*pfjets_p4()[njet].energy());
+	  jet_CEEF[njet] = pfjets_chargedEmE()[njet] / (pfjets_undoJEC().at(njet)*pfjets_p4()[njet].energy());
+	  jet_NEEF[njet] = pfjets_neutralEmE()[pfJetIdx] / (pfjets_undoJEC().at(pfJetIdx)*pfjets_p4()[pfJetIdx].energy());
+	  jet_CM[njet] = pfjets_chargedMultiplicity()[njet];
+	  jet_NM[njet] = pfjets_neutralMultiplicity()[njet];
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -3103,6 +3171,32 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
     BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
     BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
+
+    // New in 2017
+    BabyTree_->Branch("nEl50noID", &nEl50noID, "nEl50noID/I" );
+    BabyTree_->Branch("El50noID_pt", El50noID_pt, "El50noID_pt[nEl50noID]/F");
+    BabyTree_->Branch("El50noID_eta", El50noID_eta, "El50noID_eta[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_phi", El50noID_phi, "El50noID_phi[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_mass", El50noID_mass, "El50noID_mass[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_charge", El50noID_charge, "El50noID_charge[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_pdgId", El50noID_pdgId, "El50noID_pdgId[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_dxy", El50noID_dxy, "El50noID_dxy[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_dz", El50noID_dz, "El50noID_dz[nEl50noID]/F" );
+    //    BabyTree_->Branch("El50noID_tightId", El50noID_tightId, "El50noID_tightId[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_heepId", El50noID_heepId, "El50noID_heepId[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_highPtFit_pt", El50noID_highPtFit_pt, "El50noID_highPtFit_pt[nEl50noID]/F");
+    BabyTree_->Branch("El50noID_highPtFit_eta", El50noID_highPtFit_eta, "El50noID_highPtFit_eta[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_highPtFit_phi", El50noID_highPtFit_phi, "El50noID_highPtFit_phi[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_relIso03", El50noID_relIso03, "El50noID_relIso03[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_relIso04", El50noID_relIso04, "El50noID_relIso04[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_miniRelIso", El50noID_miniRelIso, "El50noID_miniRelIso[nEl50noID]/F" );
+    // BabyTree_->Branch("El50noID_relIsoAn04", El50noID_relIsoAn04, "El50noID_relIsoAn04[nEl50noID]/F" );
+    BabyTree_->Branch("El50noID_mcMatchId", El50noID_mcMatchId, "El50noID_mcMatchId[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_lostHits", El50noID_lostHits, "El50noID_lostHits[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_convVeto", El50noID_convVeto, "El50noID_convVeto[nEl50noID]/I" );
+    BabyTree_->Branch("El50noID_tightCharge", El50noID_tightCharge, "El50noID_tightCharge[nEl50noID]/I" );
+    // End new in 2017
+
     BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
     BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
     BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
@@ -3302,7 +3396,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
     BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
+    // 2017
     BabyTree_->Branch("jet_btagDeepCSV", jet_btagDeepCSV, "jet_btagDeepCSV[njet]/F" );
+    BabyTree_->Branch("jet_CHEF", jet_CHEF, "jet_CHEF[njet]/F" );
+    BabyTree_->Branch("jet_NHEF", jet_NHEF, "jet_NHEF[njet]/F" );
+    BabyTree_->Branch("jet_CEEF", jet_CEEF, "jet_CEEF[njet]/F" );
+    BabyTree_->Branch("jet_NEEF", jet_NEEF, "jet_NEEF[njet]/F" );
+    BabyTree_->Branch("jet_CM", jet_CM, "jet_CM[njet]/F" );
+    BabyTree_->Branch("jet_NM", jet_NM, "jet_NM[njet]/F" );
+    // End 2017
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
@@ -3660,7 +3762,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     weight_pol_L = -999;
     weight_pol_R = -999;
     nisrMatch = -999;
-
+    // New in 2017
+    for(int i=0; i < max_nEl50noID; i++){
+      El50noID_pt[i] = -999;
+      El50noID_eta[i] = -999;
+      El50noID_phi[i] = -999;
+      El50noID_mass[i] = -999;
+      El50noID_charge[i] = -999;
+      El50noID_pdgId[i] = -999;
+      El50noID_dxy[i] = -999;
+      El50noID_dz[i] = -999;
+      //      El50noID_tightId[i] = -999;
+      El50noID_heepId[i] = -999;
+      El50noID_highPtFit_pt[i] = -999;
+      El50noID_highPtFit_eta[i] = -999;
+      El50noID_highPtFit_phi[i] = -999;
+      El50noID_relIso03[i] = -999;
+      El50noID_relIso04[i] = -999;
+      El50noID_miniRelIso[i] = -999;
+      // El50noID_relIsoAn04[i] = -999;
+      El50noID_mcMatchId[i] = -999;
+      El50noID_lostHits[i] = -999;
+      El50noID_convVeto[i] = -999;
+      El50noID_tightCharge[i] = -999;
+    } // End new in 2017
     for(int i=0; i < max_nlep; i++){
       lep_pt[i] = -999;
       lep_eta[i] = -999;
@@ -3820,7 +3945,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       jet_mass[i] = -999;
       jet_btagCSV[i] = -999;
       jet_btagMVA[i] = -999;
-      jet_btagDeepCSV[i] = -999; // New in 2017
+      // New in 2017
+      jet_btagDeepCSV[i] = -999; 
+      jet_CHEF[i] = -999;
+      jet_NHEF[i] = -999;
+      jet_CEEF[i] = -999;
+      jet_NEEF[i] = -999;
+      jet_CM[i] = -999;
+      jet_NM[i] = -999;
+      // End 2017
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;

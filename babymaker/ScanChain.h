@@ -91,9 +91,9 @@ class babyMaker {
   Int_t           nBJet20deepcsv;
   Int_t           nBJet30deepcsv;
   Int_t           gamma_nBJet20deepcsv;
+  static const int max_njet = 100;
   Float_t         jet_btagDeepCSV[max_njet]; //[njet]
-  Float_t         rebal_jetbtagcsv[max_njet];
-  Float_t         rebal_jetbtagdeepcsv[max_njet];
+  Float_t         rebal_jetbtagdeepcsv[max_njet]; //[njet]
 
   // Hard electrons with no ID requirement
   static const int max_nEl50noID = 10;
@@ -106,7 +106,7 @@ class babyMaker {
   Int_t           El50noID_pdgId[max_nEl50noID];   //[nEl50noID]
   Float_t         El50noID_dxy[max_nEl50noID];   //[nEl50noID]
   Float_t         El50noID_dz[max_nEl50noID];   //[nEl50noID]
-  Int_t           El50noID_tightId[max_nEl50noID];   //[nEl50noID]
+  //  Int_t           El50noID_tightId[max_nEl50noID];   //[nEl50noID]
   Int_t           El50noID_heepId[max_nEl50noID];   //[nEl50noID]
   Float_t         El50noID_highPtFit_pt[max_nEl50noID];   //[nEl50noID]
   Float_t         El50noID_highPtFit_eta[max_nEl50noID];   //[nEl50noID]
@@ -126,13 +126,16 @@ class babyMaker {
   Int_t           tau_idMVAConeOld[max_ntau];   //[ntau]
 
   // Jet Energy Fractions
-  static const int max_njet = 100;
   Float_t         jet_CHEF[max_njet]; //[njet]
   Float_t         jet_NHEF[max_njet]; //[njet]
   Float_t         jet_CEEF[max_njet]; //[njet]
   Float_t         jet_NEEF[max_njet]; //[njet]
 
-  // End Addtions for 2017
+  // Other variables for Jet IDs
+  Int_t           jet_CM[max_njet]; //[njet]
+  Int_t           jet_NM[max_njet]; //[njet]
+
+  // End Additions for 2017
   // **********
 
   Int_t           run;
