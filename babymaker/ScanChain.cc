@@ -1310,6 +1310,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         i++;
       }
 
+      i = 0;
+      std::sort(El50noID_pt_ordering.begin(), El50noID_pt_ordering.end(), sortByValue);
+      for (std::vector<std::pair<int, float> >::iterator it = El50noID_pt_ordering.begin(); it != El50noID_pt_ordering.end(); ++it) {
+        El50noID_pt[i]     = vec_El50noID_pt.at(it->first);
+        El50noID_eta[i]    = vec_El50noID_eta.at(it->first);
+        El50noID_phi[i]    = vec_El50noID_phi.at(it->first);
+        El50noID_mass[i]   = vec_El50noID_mass.at(it->first);
+        El50noID_charge[i] = vec_El50noID_charge.at(it->first);
+        El50noID_pdgId[i]  = vec_El50noID_pdgId.at(it->first);
+        El50noID_dz[i]     = vec_El50noID_dz.at(it->first);
+        El50noID_dxy[i]    = vec_El50noID_dxy.at(it->first);
+	//        El50noID_tightId[i]     = vec_El50noID_tightId.at(it->first);
+        El50noID_heepId[i]      = vec_El50noID_heepId.at(it->first);
+        El50noID_highPtFit_pt[i]     = vec_El50noID_highPtFit_pt.at(it->first);
+        El50noID_highPtFit_eta[i]    = vec_El50noID_highPtFit_eta.at(it->first);
+        El50noID_highPtFit_phi[i]    = vec_El50noID_highPtFit_phi.at(it->first);
+        El50noID_relIso03[i]    = vec_El50noID_relIso03.at(it->first);
+        El50noID_relIso04[i]    = vec_El50noID_relIso04.at(it->first);
+        El50noID_miniRelIso[i]  = vec_El50noID_miniRelIso.at(it->first);
+        // El50noID_relIsoAn04[i]  = vec_El50noID_relIsoAn04.at(it->first);
+        El50noID_mcMatchId[i]   = vec_El50noID_mcMatchId.at(it->first);
+        El50noID_lostHits[i]    = vec_El50noID_lostHits.at(it->first);
+        El50noID_convVeto[i]    = vec_El50noID_convVeto.at(it->first);
+        El50noID_tightCharge[i] = vec_El50noID_tightCharge.at(it->first);
+	i++;
+      }
+
       // for Z-->ll control regions 
       // (use two leading leptons regardless of flavor, charge, ID)
       if (nlep == 2) {
@@ -2066,12 +2093,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  jet_btagDeepCSV[njet] = cms3.getbtagvalue("pfDeepCSVJetTags:probb",iJet) + cms3.getbtagvalue("pfDeepCSVJetTags:probbb",iJet);
 	  // See JetSelections.cc for these energy fraction definitions
 	  // and jet ID variables
-	  jet_CHEF[njet] = pfjets_chargedHadronE()[njet] / (pfjets_undoJEC().at(njet)*pfjets_p4()[njet].energy());
-	  jet_NHEF[njet] = pfjets_neutralHadronE()[njet] / (pfjets_undoJEC().at(njet)*pfjets_p4()[njet].energy());
-	  jet_CEEF[njet] = pfjets_chargedEmE()[njet] / (pfjets_undoJEC().at(njet)*pfjets_p4()[njet].energy());
-	  jet_NEEF[njet] = pfjets_neutralEmE()[pfJetIdx] / (pfjets_undoJEC().at(pfJetIdx)*pfjets_p4()[pfJetIdx].energy());
-	  jet_CM[njet] = pfjets_chargedMultiplicity()[njet];
-	  jet_NM[njet] = pfjets_neutralMultiplicity()[njet];
+	  jet_CHEF[njet] = cms3.pfjets_chargedHadronE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+	  jet_NHEF[njet] = cms3.pfjets_neutralHadronE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+	  jet_CEEF[njet] = cms3.pfjets_chargedEmE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+	  jet_NEEF[njet] = cms3.pfjets_neutralEmE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+	  jet_CM[njet] = cms3.pfjets_chargedMultiplicity()[iJet];
+	  jet_NM[njet] = cms3.pfjets_neutralMultiplicity()[iJet];
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -3258,7 +3285,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
     BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
     BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
-    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva )
+    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
     BabyTree_->Branch("gamma_nBJet20deepcsv", &gamma_nBJet20deepcsv );
     BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
     BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );

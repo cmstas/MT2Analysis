@@ -121,6 +121,7 @@ class babyMaker {
   Int_t           El50noID_tightCharge[max_nEl50noID];   //[nEl50noID]
   
   // New Tau IDs
+  static const int max_ntau = 50;
   Int_t           tau_idMVAnoConeOld[max_ntau];   //[ntau]
   Int_t           tau_idMVAnoConeNew[max_ntau];   //[ntau]
   Int_t           tau_idMVAConeOld[max_ntau];   //[ntau]
@@ -377,7 +378,7 @@ class babyMaker {
   Int_t             highPtPFcands_mcMatchId[max_nhighPtPFcands];
 
 //----- TAUS
-  static const int max_ntau = 50;
+//  static const int max_ntau = 50;
   Int_t           ntau;
   Float_t         tau_pt[max_ntau];   //[ntau]
   Float_t         tau_eta[max_ntau];   //[ntau]

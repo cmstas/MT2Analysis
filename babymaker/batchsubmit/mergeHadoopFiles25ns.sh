@@ -5,10 +5,10 @@ function run () {
     nohup nice -n 19 root -b -q mergeHadoopFiles.C\(\"${HADOOPDIR}/${TAG}_$1/\",\"${OUTPUTDIR}/$1.root\"\) >& ${LOGDIR}/log_merge_${TAG}_$1.txt &
 }
 
-TAG=V00-09-00
+TAG=V00-09-02_json_294927-301997_PromptReco_13p88fb
 
 HADOOPDIR=/hadoop/cms/store/user/${USER}/mt2babies/
-OUTPUTDIR=/nfs-6/userdata/mt2/$TAG/
+OUTPUTDIR=/nfs-6/userdata/dpgilber/$TAG/
 LOGDIR=mergeLogs
 
 mkdir -p $OUTPUTDIR

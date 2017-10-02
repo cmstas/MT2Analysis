@@ -51,6 +51,7 @@ public :
    Int_t           nBJet20JECup;
    Int_t           nBJet20JECdn;
    Int_t           nBJet20csv;
+   Int_t           nBJet20deepcsv;
    Int_t           nBJet20mva;
    Int_t           nBJet25;
    Int_t           nBJet30;
@@ -1143,7 +1144,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("El50noID_pdgId", El50noID_pdgId, &b_El50noID_pdgId);
    fChain->SetBranchAddress("El50noID_dxy", El50noID_dxy, &b_El50noID_dxy);
    fChain->SetBranchAddress("El50noID_dz", El50noID_dz, &b_El50noID_dz);
-   fChain->SetBranchAddress("El50noID_tightId", El50noID_tightId, &b_El50noID_tightId);
+   //   fChain->SetBranchAddress("El50noID_tightId", El50noID_tightId, &b_El50noID_tightId);
    fChain->SetBranchAddress("El50noID_heepId", El50noID_heepId, &b_El50noID_heepId);
    fChain->SetBranchAddress("El50noID_relIso03", El50noID_relIso03, &b_El50noID_relIso03);
    fChain->SetBranchAddress("El50noID_relIso04", El50noID_relIso04, &b_El50noID_relIso04);

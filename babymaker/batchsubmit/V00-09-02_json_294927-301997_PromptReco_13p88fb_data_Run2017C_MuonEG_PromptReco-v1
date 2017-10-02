@@ -1,0 +1,3 @@
+[writeConfig] running on dataset /hadoop/cms/store/user/namin/ProjectMetis/MuonEG_Run2017C-PromptReco-v1_MINIAOD_CMS4_V00-00-06
+[writeConfig] copying output to /hadoop/cms/store/user/dpgilber/mt2babies/
+[writeConfig] wrote condor_.cmd

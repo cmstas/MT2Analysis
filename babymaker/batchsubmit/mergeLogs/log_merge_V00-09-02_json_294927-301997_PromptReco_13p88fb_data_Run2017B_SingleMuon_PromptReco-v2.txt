@@ -1,0 +1,24 @@
+   ------------------------------------------------------------
+  | Welcome to ROOT 6.08/07                http://root.cern.ch |
+  |                               (c) 1995-2017, The ROOT Team |
+  | Built for linuxx8664gcc                                    |
+  | From tag , 2 March 2017                                    |
+  | Try '.help', '.demo', '.license', '.credits', '.quit'/'.q' |
+   ------------------------------------------------------------
+
+****************************
+* Welcome to ROOT v6.08/07 *
+****************************
+Loading libFWCoreFWLite.so from /home/users/dpgilber/2017/MT2AnalysisUpdate/CMSSW_9_2_4.
+WARNING: AutoLibraryloader::enable() and AutoLibraryLoader.h are deprecated.
+Use FWLiteEnabler::enable() and FWLiteEnabler.h instead
+
+Processing mergeHadoopFiles.C("/hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017B_SingleMuon_PromptReco-v2/","/nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_SingleMuon_PromptReco-v2.root")...
+Merging files from dir: /hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017B_SingleMuon_PromptReco-v2/
+Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_SingleMuon_PromptReco-v2.root
+Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_SingleMuon_PromptReco-v2_1.root
+Total events merged: 14511094
+------------------------------
+CPU  Time:	29.2 s
+Real Time:	2747.6 s
+

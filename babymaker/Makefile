@@ -123,6 +123,9 @@ clean:
         ../MT2CORE/Plotting/*.o \
         ../MT2CORE/Plotting/*.d \
         ../MT2CORE/Plotting/*.so \
+	../MT2CORE/RebalSmear/*.o \
+	../MT2CORE/RebalSmear/*.d \
+	../MT2CORE/RebalSmear/*.so \
         ../CORE/Tools/*.o \
 	../CORE/Tools/*.d \
         ../CORE/Tools/*.so \
