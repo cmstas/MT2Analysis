@@ -253,6 +253,7 @@ class babyMaker {
   Int_t           HLT_DoubleMu;   
   Int_t           HLT_DoubleMu_NonIso;   
   Int_t           HLT_Photon120;   
+  Int_t           HLT_Photon175_Prescale;   
   Int_t           HLT_Photon200;   
   Int_t           HLT_Photon165_HE10;   
   Int_t           HLT_Photon250_NoHE;   

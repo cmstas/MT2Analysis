@@ -125,7 +125,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_294927-301997_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_294927-302663_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -449,6 +449,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu30_TkMu11_v") || passHLTTriggerPattern("HLT_Mu40_TkMu11_v");
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
       HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
+      HLT_Photon175_Prescale = passHLTTriggerPattern("HLT_Photon175_v") ? HLT_prescale(triggerName("HLT_Photon175_v"), false) : 0; 
       HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
       HLT_Photon250_NoHE = passHLTTriggerPattern("HLT_Photon250_NoHE_v"); 
       HLT_PFHT180_Prescale  = passHLTTriggerPattern("HLT_PFHT180_v") ? HLT_prescale(triggerName("HLT_PFHT180_v"), true) : 0; 
@@ -569,9 +570,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
       met_caloPt  = cms3.evt_calomet();
       met_caloPhi = cms3.evt_calometPhi();
-      metStruct trkmet = trackerMET(0.1);
-      met_trkPt = trkmet.met;
-      met_trkPhi = trkmet.metphi;
+      // metStruct trkmet = trackerMET(0.1);
+      // met_trkPt = trkmet.met;
+      // met_trkPhi = trkmet.metphi;
       if (useMuEGCleanedMet){
 	met_miniaodPt  = cms3.evt_muegclean_pfmet();
 	met_miniaodPhi = cms3.evt_muegclean_pfmetPhi();
@@ -3016,6 +3017,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso );
     BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
     BabyTree_->Branch("HLT_Photon200", &HLT_Photon200 );
+    BabyTree_->Branch("HLT_Photon175_Prescale", &HLT_Photon175_Prescale );
     BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
     BabyTree_->Branch("HLT_Photon250_NoHE", &HLT_Photon250_NoHE );
     BabyTree_->Branch("HLT_PFHT180_Prescale", &HLT_PFHT180_Prescale );
@@ -3464,6 +3466,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_DoubleMu_NonIso = -999;   
     HLT_Photon120 = -999;   
     HLT_Photon200 = -999;   
+    HLT_Photon175_Prescale = -999;   
     HLT_Photon165_HE10 = -999;   
     HLT_Photon250_NoHE = -999;   
     HLT_PFHT180_Prescale = -999;

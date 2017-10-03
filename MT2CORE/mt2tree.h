@@ -178,6 +178,7 @@ public :
    Int_t           HLT_Photons;   
    Int_t           HLT_Photon120;   
    Int_t           HLT_Photon200;   
+   Int_t           HLT_Photon175_Prescale;   
    Int_t           HLT_Photon165_HE10;   
    Int_t           HLT_ht350prescale;   
    Int_t           HLT_ht475prescale;   
@@ -578,6 +579,7 @@ public :
    TBranch        *b_HLT_Photons;   //!
    TBranch        *b_HLT_Photon120;   //!
    TBranch        *b_HLT_Photon200;   //!
+   TBranch        *b_HLT_Photon175_Prescale;   //!
    TBranch        *b_HLT_Photon165_HE10;   //!
    TBranch        *b_HLT_ht350prescale;   //!
    TBranch        *b_HLT_ht475prescale;   //!
@@ -1036,6 +1038,7 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
    fChain->SetBranchAddress("HLT_Photon120", &HLT_Photon120, &b_HLT_Photon120);
    fChain->SetBranchAddress("HLT_Photon200", &HLT_Photon200, &b_HLT_Photon200);
+   fChain->SetBranchAddress("HLT_Photon175_Prescale", &HLT_Photon175_Prescale, &b_HLT_Photon175_Prescale);
    fChain->SetBranchAddress("HLT_Photon165_HE10", &HLT_Photon165_HE10, &b_HLT_Photon165_HE10);
    fChain->SetBranchAddress("HLT_ht350prescale", &HLT_ht350prescale, &b_HLT_ht350prescale);
    fChain->SetBranchAddress("HLT_ht475prescale", &HLT_ht475prescale, &b_HLT_ht475prescale);
