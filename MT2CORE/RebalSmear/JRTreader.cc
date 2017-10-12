@@ -198,28 +198,32 @@ float JRTreader::GetJERCorrection(float eta){
 void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin){
 
     if(isBjet){
-        if(ptbin > 19) ptbin = 19;
+        if(ptbin > 20) ptbin = 20;
 
-        if(ptbin>=0 && ptbin<=1)
+        if(ptbin>=0 && ptbin<=0)
             ;
-        if(ptbin>=2 && ptbin<=4)
+        if(ptbin>=1 && ptbin<=4)
             if(etabin >= 16) etabin = 15;
         if(ptbin>=5 && ptbin<=7)
-            if(etabin >= 15) etabin = 13;
+            if(etabin >= 15) etabin = 14;
         if(ptbin>=8 && ptbin<=9)
             if(etabin >= 14) etabin = 13;
         if(ptbin>=10 && ptbin<=12)
             if(etabin >= 12) etabin = 11;
         if(ptbin>=13 && ptbin<=15)
             if(etabin >= 10) etabin = 9;
-        if(ptbin>=16 && ptbin<=17)
-            if(etabin >= 6) etabin = 5;
-        if(ptbin>=18 && ptbin<=19)
+        if(ptbin>=16 && ptbin<=16)
+            if(etabin >= 7) etabin = 6;
+        if(ptbin>=17 && ptbin<=18)
+            if(etabin >=6) etabin = 5;
+        if(ptbin>=19 && ptbin<=19)
             if(etabin >=4) etabin = 3;
+        if(ptbin>=20 && ptbin<=20)
+            if(etabin >=2) etabin = 1;
 
     }
     if(!isBjet){
-        if(ptbin > 19) ptbin = 19;
+        if(ptbin > 20) ptbin = 20;
 
         if(ptbin>=0 && ptbin<=3)
             ;
@@ -227,18 +231,20 @@ void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptb
             if(etabin >= 16) etabin = 15;
         if(ptbin>=6 && ptbin<=8)
             if(etabin >= 15) etabin = 14;
-        if(ptbin>=9 && ptbin<=10)
+        if(ptbin>=9 && ptbin<=11)
             if(etabin >=14) etabin = 13;
-        if(ptbin>=11 && ptbin<=13)
+        if(ptbin>=12 && ptbin<=13)
             if(etabin >= 12) etabin = 11;
-        if(ptbin>=14 && ptbin<=15)
-            if(etabin >= 10) etabin = 8;
-        if(ptbin>=16 && ptbin<=17)
+        if(ptbin>=14 && ptbin<=16)
+            if(etabin >= 10) etabin = 9;
+        if(ptbin>=17 && ptbin<=17)
             if(etabin >= 7) etabin = 6;
         if(ptbin>=18 && ptbin<=18)
-            if(etabin >=6) etabin = 5;
+            if(etabin >=5) etabin = 4;
         if(ptbin>=19 && ptbin<=19)
             if(etabin >=4) etabin = 3;
+        if(ptbin>=20 && ptbin<=20)
+            if(etabin >=3) etabin = 2;
 
     }
 

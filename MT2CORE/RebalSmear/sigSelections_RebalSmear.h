@@ -10,6 +10,7 @@ namespace mt2
 
 std::vector<SRRS> getSignalRegionsMonojet_RS();
 std::vector<SRRS> getSignalRegionsICHEP_RS();
+std::vector<SRRS> getSignalRegions2017_RS();
 
 } // namespace mt2
 
