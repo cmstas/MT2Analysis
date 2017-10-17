@@ -551,7 +551,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  // full 2016 dataset json, 36.26/fb:
+  // full 2016 dataset json, 36.5/fb:
   const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   // to reproduce ICHEP, 12.9/fb:
   //  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
@@ -623,7 +623,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   h_sig_avgweight_isr_DN_ = 0;
   if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
     std::string scan_name = sample;
-    if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
+    if (sample.find("T1qqqq") != std::string::npos && sample.find("ctau") != std::string::npos) scan_name = sample;
+    else if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
     TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
@@ -928,7 +929,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       //---------------------
       outfile_->cd();
       // const float lumi = 12.9; //ICHEP 2016
-      const float lumi = 35.867; // full 2016
+      const float lumi = 36.5; // full 2016
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -938,6 +939,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
+
+          /// only for bad evt_filter vals in LLgluino samples
+          if (sample.find("T1qqqq") != std::string::npos && sample.find("ctau") != std::string::npos)
+              t.evt_filter=1;
+
 	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
 	} else {
 	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
