@@ -1,12 +1,14 @@
 import ROOT
 import math
+import os
 
 lumi = 7.7
 
 ## returns a list of yields, where the first is the data observation
 ## and the rest are background yields from the processes specified
 ## in bkg_names
-def GetYieldsFromDatacard(datacard_fname, bkg_names):
+## if doSignal==True, the last entry will be the signal yield
+def GetYieldsFromDatacard(datacard_fname, bkg_names, doSignal=False):
     lines = open(datacard_fname).readlines()
     
     names = []
@@ -16,9 +18,9 @@ def GetYieldsFromDatacard(datacard_fname, bkg_names):
         if line.startswith("observation"):
             obs = int(float(line.split()[1]))
         if line.startswith("process") and len(names)==0:
-            names = line.split()[2:]
+            names = line.split()[1:]
         if line.startswith("rate"):
-            rates = [float(x) for x in line.split()[2:]]
+            rates = [float(x) for x in line.split()[1:]]
 
     bkg_rates = []
     for name in bkg_names:
@@ -28,12 +30,25 @@ def GetYieldsFromDatacard(datacard_fname, bkg_names):
             raise RuntimeError("provided list of backgrounds does not match those in datacard!")
         bkg_rates.append(rates[ind])
 
-    return [obs]+bkg_rates
+    sigyield = []
+    if doSignal:
+        try:
+            ind = names.index("sig")
+        except:
+            raise RuntimeError("can't find signal yield in datacard!")
+        sigyield = [rates[ind]]
+
+    return [obs]+bkg_rates+sigyield
 
 ## returns a list of 2-tuples, one for each background.
 ## numbers are the upper and lower relative uncertainties
 ## for each background process
-def GetUncertaintiesFromDatacard(datacard_fname, bkg_names):
+## if doSignal=True, last entry will be signal yield uncertainty
+def GetUncertaintiesFromDatacard(datacard_fname, bkg_names, doSignal=False):
+
+    if doSignal:
+        bkg_names = list(bkg_names) + ["sig"]
+
     lines = open(datacard_fname).readlines()
 
     tot_err_up = [0 for i in bkg_names]
@@ -83,8 +98,6 @@ def GetUncertaintiesFromDatacard(datacard_fname, bkg_names):
     tot_err_up = [ROOT.TMath.Sqrt(x) for x in tot_err_up]
     tot_err_down = [ROOT.TMath.Sqrt(x) for x in tot_err_down]
     return zip(tot_err_up, tot_err_down)
-
-
 
 def GetJBJregions(ht_reg):
 
@@ -143,6 +156,47 @@ def GetMT2bins(ht_reg):
         mt2bins.append(bins)
 
     return mt2bins
+
+def GetInclusiveRegions():
+    regions = []
+
+    # handle monojet
+    jbj_mj = GetJBJregions("monojet")
+    mt2bins_mj = GetMT2bins("monojet")
+    for jbj, mt2bins in zip(jbj_mj, mt2bins_mj):
+        for i in range(len(mt2bins)-1):
+            binname = "HT{0}to{1}_{2}".format(mt2bins[i], mt2bins[i+1], jbj)
+            binname = binname.replace("-1","Inf")
+            regions.append(binname)
+
+    ht_regs = ["HT250to450", "HT450to575", "HT575to1000", "HT1000to1500", "HT1500toInf"]
+
+    for ht_reg in ht_regs:
+        jbj_regs = GetJBJregions(ht_reg)
+        for jbj_reg in jbj_regs:
+            regname = "{0}_{1}".format(ht_reg, jbj_reg)
+            regions.append(regname)
+
+    return regions
+
+def GetInclusiveDatacards(datacard_dir, datacard_name, regions):
+    datacards = []
+    for reg in regions:
+        ht_reg = reg.split("_")[0]
+        jbj_reg = reg[reg.find("_")+1:]
+        if "j1" in reg:
+            dname = os.path.join(datacard_dir, datacard_name).format(ht_reg, jbj_reg, "m0toInf")
+            datacards.append([dname])
+        else:
+            mt2bins = GetMT2binsFull(reg)
+            dnames = []
+            for i in range(len(mt2bins)-1):
+                mt2bin = "m{0}to{1}".format(mt2bins[i], mt2bins[i+1]).replace("1800","Inf")
+                dname = os.path.join(datacard_dir, datacard_name).format(ht_reg, jbj_reg, mt2bin)
+                dnames.append(dname)
+            datacards.append(dnames)
+
+    return datacards
 
 def GetMacroregions(macro_reg):
 
@@ -214,8 +268,6 @@ def GetMacroregionTitle(macro_reg):
 
 def GetMT2binsFull(topo_reg):
 
-    #return ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2","j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
-
     bins = []
     if "HT250to450" in topo_reg :         bins = [200,300,400]
     if "HT450to575" in topo_reg :         
@@ -243,7 +295,8 @@ def GetMT2binsFull(topo_reg):
         elif "j7toInf_b0" in topo_reg:    bins = [400,600,800,1000]
         elif "j7toInf_b1" in topo_reg:    bins = [400,600,800]
         elif "j7toInf_b2" in topo_reg:    bins = [400,600,800]
-        elif "j7toInf_b3" in topo_reg:    bins = [400,600,800]
+        elif "j7toInf_b3" in topo_reg:    bins = [400]
+        elif "j2to6_b3" in topo_reg:       bins = [400,600]
         else:                             bins = [400]
 
     if bins==[]:
@@ -269,7 +322,9 @@ def GetJBJtitle(jbj_reg):
     if jreg=="j2to3":   lines[0] = "2-3j"
     elif jreg=="j4to6": lines[0] = "4-6j"
     elif jreg=="j2to6": lines[0] = "2-6j"
-    elif jreg=="j7toInf": lines[0] = "#geq7j"
+    elif jreg=="j2toInf": lines[0] = "#geq2j"
+    elif jreg=="j4toInf": lines[0] = "#geq4j"
+    elif jreg=="j7toInf": lines[0] = "#geq7j" 
     elif jreg=="j1": lines[0] = "1j"
     else: lines[0] = jreg
 
@@ -293,6 +348,21 @@ def GetMT2label(left, right):
         return "[{0}, {1}]".format(left,right)
     else:
         return "> {0}".format(left)
+
+def GetInclusiveBinLabel(reg):
+    if "j1" in reg:
+        ht_reg = reg.split("_")[0]
+        pos = ht_reg.find("t")
+        low = ht_reg[2:pos]
+        high = ht_reg[pos+2:]
+        if high=="Inf":
+            return "> {0}".format(low)
+        else:
+            return "[{0},{1}]".format(low,high)
+    else:
+        jbj_reg = reg[reg.find("_")+1:]
+        jbj_title = GetJBJtitle(jbj_reg)
+        return "{0}, {1}".format(jbj_title[0], jbj_title[1])
 
 def GetLegendName(proc):
     if proc=="zinv": return "Z#rightarrow#nu#bar{#nu}"
@@ -355,10 +425,8 @@ def fillNuisanceDictGMN( dict_nuis_up, dict_nuis_dn, nuis_name, cr_yield, alpha 
 
 #__________________________________________________
 # reads in a list of input datacard files and prints integrated yields with uncertainties
-def getMacroRegionUncertainties( region, datacard_list ):
+def getMacroRegionUncertainties( region, datacard_list, doSignal=False ):
     
-    doSignal = False
-
     # for each background:
     # - sum up central values
     # - make up/dn dicts of {nuisance : absunc}.  For correlated uncertainties, just add on to the existing total
@@ -377,6 +445,8 @@ def getMacroRegionUncertainties( region, datacard_list ):
     dict_llep_nuisances_dn = {}
     dict_qcd_nuisances_up = {}
     dict_qcd_nuisances_dn = {}
+    dict_sig_nuisances_up = {}
+    dict_sig_nuisances_dn = {}
 
     for datacard_name in datacard_list:
         #print '  checking card:',datacard_name
@@ -419,13 +489,15 @@ def getMacroRegionUncertainties( region, datacard_list ):
 
             # lines for nuisances
             # 'zinv_ZGratio_nj_j2to3      lnN    -   1.028    -    -'
-            elif line.startswith('zinv') or line.startswith('llep') or line.startswith('qcd'):
+            elif line.startswith('zinv') or line.startswith('llep') or line.startswith('qcd') or line.startswith('sig'):
                 nuis_tokens = line.split()
                 if len(nuis_tokens) < 3:
                     continue
                 nuis_name = nuis_tokens[0]
                 nuis_type = nuis_tokens[1]
                 if nuis_type == 'lnN':
+                    if nuis_name.startswith('sig'):
+                        fillNuisanceDictLNN( dict_sig_nuisances_up, dict_sig_nuisances_dn, nuis_name, nuis_tokens[2], val_sig )
                     if nuis_name.startswith('zinv'):
                         fillNuisanceDictLNN( dict_zinv_nuisances_up, dict_zinv_nuisances_dn, nuis_name, nuis_tokens[3], val_zinv )
                     elif nuis_name.startswith('llep'):
@@ -436,6 +508,9 @@ def getMacroRegionUncertainties( region, datacard_list ):
                 # 'zinv_CRstat_HT1000to1500_j2to3_b0     gmN 105    -  0.06888   -   -'
                 elif nuis_type == 'gmN':
                     cr_yield = int(nuis_tokens[2])
+                    if nuis_name.startswith('sig'):
+                        alpha = float(nuis_tokens[3])
+                        fillNuisanceDictLNN( dict_sig_nuisances_up, dict_sig_nuisances_dn, nuis_name, cr_yield, alpha )
                     if nuis_name.startswith('zinv'):
                         alpha = float(nuis_tokens[4])
                         fillNuisanceDictGMN( dict_zinv_nuisances_up, dict_zinv_nuisances_dn, nuis_name, cr_yield, alpha )
@@ -454,6 +529,8 @@ def getMacroRegionUncertainties( region, datacard_list ):
     abserr_sum_llep_dn = 0.
     abserr_sum_qcd_up = 0.
     abserr_sum_qcd_dn = 0.
+    abserr_sum_sig_up = 0.
+    abserr_sum_sig_dn = 0.
 
     for nuis_abserr in dict_zinv_nuisances_up.itervalues():
         abserr_sum_zinv_up += nuis_abserr*nuis_abserr
@@ -479,8 +556,19 @@ def getMacroRegionUncertainties( region, datacard_list ):
         abserr_sum_qcd_dn += nuis_abserr*nuis_abserr
     abserr_sum_qcd_dn = math.sqrt(abserr_sum_qcd_dn)
 
+    for nuis_abserr in dict_sig_nuisances_up.itervalues():
+        abserr_sum_sig_up += nuis_abserr*nuis_abserr
+    abserr_sum_sig_up = math.sqrt(abserr_sum_sig_up)
+
+    for nuis_abserr in dict_sig_nuisances_dn.itervalues():
+        abserr_sum_sig_dn += nuis_abserr*nuis_abserr
+    abserr_sum_sig_dn = math.sqrt(abserr_sum_sig_dn)
+
     n_bkg = n_zinv + n_llep + n_qcd
     abserr_sum_bkg_up = math.sqrt(abserr_sum_zinv_up*abserr_sum_zinv_up + abserr_sum_llep_up*abserr_sum_llep_up + abserr_sum_qcd_up*abserr_sum_qcd_up)
     abserr_sum_bkg_dn = math.sqrt(abserr_sum_zinv_dn*abserr_sum_zinv_dn + abserr_sum_llep_dn*abserr_sum_llep_dn + abserr_sum_qcd_dn*abserr_sum_qcd_dn)
 
-    return max(abserr_sum_bkg_up, abserr_sum_bkg_dn)
+    if not doSignal:
+        return max(abserr_sum_bkg_up, abserr_sum_bkg_dn)
+    else:
+        return max(abserr_sum_bkg_up, abserr_sum_bkg_dn), max(abserr_sum_sig_up, abserr_sum_sig_dn)
