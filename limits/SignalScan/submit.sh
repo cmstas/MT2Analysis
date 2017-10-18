@@ -47,8 +47,7 @@ else
 fi
 
 echo "
-universe=grid
-Grid_Resource=condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu
+universe=vanilla
 when_to_transfer_output = ON_EXIT
 transfer_input_files=${INPUT}
 transfer_output_files = /dev/null
