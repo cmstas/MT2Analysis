@@ -34,7 +34,7 @@ class SR;
 bool applyJSON = true;
 bool prescalesByEvent = true;
 
-const float lumi = 13.88;
+const float lumi = 21.15;
 
 // FOR 2016
 // input effective prescales for PFHT125, PFHT350, PFHT475
@@ -137,7 +137,7 @@ void QCDLooper::loop(TChain* chain, std::string output_name){
 
   outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-  const char* json_file = "../babymaker/jsons/Cert_294927-301997_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_294927-304120_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);

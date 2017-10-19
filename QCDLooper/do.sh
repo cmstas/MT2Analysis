@@ -2,7 +2,7 @@
 
 make -j 8
 
-OUTDIR=output/V00-09-02_13p88fb
+OUTDIR=output/V00-09-02_21p15fb
 
 LOGDIR=logs
 
@@ -21,9 +21,9 @@ declare -a Samples=(qcd_ht ttsl ttdl singletop ttw_mg_lo ttz_mg_lo ttg dyjetsll_
 # done
 
 #except most recent run2016H
-INDIR=/nfs-6/userdata/mt2/V00-09-02_json_294927-301997_PromptReco_13p88fb_qcd_skim
+INDIR=/nfs-6/userdata/mt2/V00-09-02_json_294927-304120_PromptReco_21p15fb_qcd_skim
 
-declare -a Samples=(data_Run2017B data_Run2017C)
+declare -a Samples=(data_Run2017B data_Run2017C data_Run2017D data_Run2017E)
 
 for SAMPLE in ${Samples[@]};
   do echo ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}

@@ -125,7 +125,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_294927-302663_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_294927-304120_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -135,7 +135,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       rebal_reader.SetCoreScale(1.0);
       rebal_reader.SetTailScale(1.0);
       rebal_reader.SetMeanShift(0.0);
-      rebal_reader.Init("rebal/JetResponseTemplates.root", isDataFromFileName);
+      rebal_reader.Init("rebal/JetResponseTemplates_ptBinned_92x_DCBfit.root", isDataFromFileName);
   }
 
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
@@ -440,13 +440,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");
       HLT_Mu30_Ele30_NonIso = passHLTTriggerPattern("HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v");
       HLT_Mu33_Ele33_NonIso = passHLTTriggerPattern("HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v");
+      HLT_Mu37_Ele27_NonIso = passHLTTriggerPattern("HLT_Mu37_Ele27_CaloIdL_MW_v");
+      HLT_Mu27_Ele37_NonIso = passHLTTriggerPattern("HLT_Mu27_Ele37_CaloIdL_MW_v");
       HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
         passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
         passHLTTriggerPattern("HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") ||
         passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-      HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu30_TkMu11_v") || passHLTTriggerPattern("HLT_Mu40_TkMu11_v");
+      HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu37_TkMu27_v");
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
       HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
       HLT_Photon175_Prescale = passHLTTriggerPattern("HLT_Photon175_v") ? HLT_prescale(triggerName("HLT_Photon175_v"), false) : 0; 
@@ -3013,6 +3015,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("HLT_Mu12_EleX", &HLT_Mu12_EleX );
     BabyTree_->Branch("HLT_Mu30_Ele30_NonIso", &HLT_Mu30_Ele30_NonIso );
     BabyTree_->Branch("HLT_Mu33_Ele33_NonIso", &HLT_Mu33_Ele33_NonIso );
+    BabyTree_->Branch("HLT_Mu37_Ele27_NonIso", &HLT_Mu37_Ele27_NonIso );
+    BabyTree_->Branch("HLT_Mu27_Ele37_NonIso", &HLT_Mu27_Ele37_NonIso );
     BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
     BabyTree_->Branch("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso );
     BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
@@ -3462,6 +3466,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_Mu12_EleX = -999;   
     HLT_Mu30_Ele30_NonIso = -999;   
     HLT_Mu33_Ele33_NonIso = -999;   
+    HLT_Mu37_Ele27_NonIso = -999;   
+    HLT_Mu27_Ele37_NonIso = -999;   
     HLT_DoubleMu = -999;   
     HLT_DoubleMu_NonIso = -999;   
     HLT_Photon120 = -999;   

@@ -173,6 +173,8 @@ public :
    Int_t           HLT_Mu12_EleX;   
    Int_t           HLT_Mu30_Ele30_NonIso;   
    Int_t           HLT_Mu33_Ele33_NonIso;   
+   Int_t           HLT_Mu37_Ele27_NonIso;   
+   Int_t           HLT_Mu27_Ele37_NonIso;   
    Int_t           HLT_DoubleMu;   
    Int_t           HLT_DoubleMu_NonIso;   
    Int_t           HLT_Photons;   
@@ -574,6 +576,8 @@ public :
    TBranch        *b_HLT_Mu8_EleX;   //!
    TBranch        *b_HLT_Mu30_Ele30_NonIso;   //!
    TBranch        *b_HLT_Mu33_Ele33_NonIso;   //!
+   TBranch        *b_HLT_Mu37_Ele27_NonIso;   //!
+   TBranch        *b_HLT_Mu27_Ele37_NonIso;   //!
    TBranch        *b_HLT_DoubleMu;   //!
    TBranch        *b_HLT_DoubleMu_NonIso;   //!
    TBranch        *b_HLT_Photons;   //!
@@ -1033,6 +1037,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Mu8_EleX", &HLT_Mu8_EleX, &b_HLT_Mu8_EleX);
    fChain->SetBranchAddress("HLT_Mu30_Ele30_NonIso", &HLT_Mu30_Ele30_NonIso, &b_HLT_Mu30_Ele30_NonIso);
    fChain->SetBranchAddress("HLT_Mu33_Ele33_NonIso", &HLT_Mu33_Ele33_NonIso, &b_HLT_Mu33_Ele33_NonIso);
+   fChain->SetBranchAddress("HLT_Mu37_Ele27_NonIso", &HLT_Mu37_Ele27_NonIso, &b_HLT_Mu37_Ele27_NonIso);
+   fChain->SetBranchAddress("HLT_Mu27_Ele37_NonIso", &HLT_Mu27_Ele37_NonIso, &b_HLT_Mu27_Ele37_NonIso);
    fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
    fChain->SetBranchAddress("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso, &b_HLT_DoubleMu_NonIso);
    fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
