@@ -84,6 +84,7 @@ const bool saveLHEweightsScaleOnly = true;
 const bool doRebal = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
+const bool savePFphotons = true;
 
 babyMaker *thisBabyMaker; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
@@ -125,7 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_294927-304120_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_294927-304507_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -1462,7 +1463,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       //--
       if (verbose) cout << "before highPtPFcands" << endl;
 
-      if (saveHighPtPFcands) {
+      if (saveHighPtPFcands || savePFphotons) {
+
 	//HIGH-PT PF CANDS
 	std::vector<std::pair<int, float> > pf_pt_ordering;
 	vector<float>vec_highPtPFcands_pt;
@@ -1474,13 +1476,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	vector<float>vec_highPtPFcands_dz;
 	vector<int>  vec_highPtPFcands_pdgId;
 	vector<int>  vec_highPtPFcands_mcMatchId;
+
+        //PF photons
+	std::vector<std::pair<int, float> > pfPhot_pt_ordering;
+	vector<float>vec_pfPhoton_pt;
+	vector<float>vec_pfPhoton_eta;
+	vector<float>vec_pfPhoton_phi;
 	
 	nhighPtPFcands = 0;
+        npfPhoton = 0;
 	for (unsigned int ipf = 0; ipf < cms3.pfcands_p4().size(); ipf++) {
 	  
 	  float cand_pt = cms3.pfcands_p4().at(ipf).pt();
+          int cand_pdgId = cms3.pfcands_particleId().at(ipf);
+
+          if(cand_pdgId==22){
+              pfPhot_pt_ordering.push_back(std::pair<int,float>(npfPhoton,cand_pt));
+              npfPhoton++;
+              vec_pfPhoton_pt.push_back(cand_pt);
+              vec_pfPhoton_eta.push_back(cms3.pfcands_p4().at(ipf).eta());
+              vec_pfPhoton_phi.push_back(cms3.pfcands_p4().at(ipf).phi());
+          }
+
 	  if(cand_pt < 50) continue;
-	  if(cand_pt < 300 && !(abs(cms3.pfcands_particleId().at(ipf)) == 13) ) continue;
+	  if(cand_pt < 300 && !(abs(cand_pdgId) == 13) ) continue;
 	  
 	  float absiso  = cms3.pfcands_trackIso().at(ipf);
 	  // float an04 = PFCandRelIsoAn04(ipf);
@@ -1494,35 +1513,53 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  vec_highPtPFcands_absIso.push_back( absiso                           );
 	  // vec_highPtPFcands_relIsoAn04.push_back( an04                         );
 	  vec_highPtPFcands_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
-	  vec_highPtPFcands_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
+	  vec_highPtPFcands_pdgId.push_back ( cand_pdgId );
 	  vec_highPtPFcands_mcMatchId.push_back ( 0 );
 	  
 	  nhighPtPFcands++;
 	}  
 	
 	//now fill arrays from vectors, pf cands with largest pt first
-	i = 0;
-	std::sort(pf_pt_ordering.begin(), pf_pt_ordering.end(), sortByValue);
-	for(std::vector<std::pair<int, float> >::iterator it = pf_pt_ordering.begin(); it!= pf_pt_ordering.end(); ++it){
+        if(saveHighPtPFcands){
+            i = 0;
+            std::sort(pf_pt_ordering.begin(), pf_pt_ordering.end(), sortByValue);
+            for(std::vector<std::pair<int, float> >::iterator it = pf_pt_ordering.begin(); it!= pf_pt_ordering.end(); ++it){
 	  
-	  if (i >= max_nhighPtPFcands) {
-	    std::cout << "WARNING: attempted to fill more than " << max_nhighPtPFcands << " iso tracks" << std::endl;
-	    break;
-	  }
+                if (i >= max_nhighPtPFcands) {
+                    std::cout << "WARNING: attempted to fill more than " << max_nhighPtPFcands << " iso tracks" << std::endl;
+                    break;
+                }
 
-	  highPtPFcands_pt[i]     = vec_highPtPFcands_pt.at(it->first);
-	  highPtPFcands_eta[i]    = vec_highPtPFcands_eta.at(it->first);
-	  highPtPFcands_phi[i]    = vec_highPtPFcands_phi.at(it->first);
-	  highPtPFcands_mass[i]   = vec_highPtPFcands_mass.at(it->first);
-	  highPtPFcands_absIso[i] = vec_highPtPFcands_absIso.at(it->first);
-	  // highPtPFcands_relIsoAn04[i] = vec_highPtPFcands_relIsoAn04.at(it->first);
-	  highPtPFcands_dz[i]     = vec_highPtPFcands_dz.at(it->first);
-	  highPtPFcands_pdgId[i]  = vec_highPtPFcands_pdgId.at(it->first);
-	  highPtPFcands_mcMatchId[i]  = vec_highPtPFcands_mcMatchId.at(it->first);
-	  i++;
-	}
+                highPtPFcands_pt[i]     = vec_highPtPFcands_pt.at(it->first);
+                highPtPFcands_eta[i]    = vec_highPtPFcands_eta.at(it->first);
+                highPtPFcands_phi[i]    = vec_highPtPFcands_phi.at(it->first);
+                highPtPFcands_mass[i]   = vec_highPtPFcands_mass.at(it->first);
+                highPtPFcands_absIso[i] = vec_highPtPFcands_absIso.at(it->first);
+                // highPtPFcands_relIsoAn04[i] = vec_highPtPFcands_relIsoAn04.at(it->first);
+                highPtPFcands_dz[i]     = vec_highPtPFcands_dz.at(it->first);
+                highPtPFcands_pdgId[i]  = vec_highPtPFcands_pdgId.at(it->first);
+                highPtPFcands_mcMatchId[i]  = vec_highPtPFcands_mcMatchId.at(it->first);
+                i++;
+            }
+        }else{ nhighPtPFcands = 0; }
 
-      }//saveHighPtPFcands
+        if(savePFphotons){
+            i = 0;
+            std::sort(pfPhot_pt_ordering.begin(), pfPhot_pt_ordering.end(), sortByValue);
+            for(std::vector<std::pair<int, float> >::iterator it = pfPhot_pt_ordering.begin(); it!= pfPhot_pt_ordering.end(); ++it){
+	  
+                if (i >= max_ngamma) {
+                    std::cout << "WARNING: attempted to fill more than " << max_ngamma << " pf photons" << std::endl;
+                    break;
+                }
+
+                pfPhoton_pt[i]     = vec_pfPhoton_pt.at(it->first);
+                pfPhoton_eta[i]    = vec_pfPhoton_eta.at(it->first);
+                pfPhoton_phi[i]    = vec_pfPhoton_phi.at(it->first);
+                i++;
+            }
+        }else{ npfPhoton = 0; }
+      }//saveHighPtPFcands||savePFphotons
       
       // count number of unique lowMT leptons (e/mu)
       //  same collection as those used for jet/lepton overlap, but require MT < 100 explicitly
@@ -3124,6 +3161,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("gamma_mht_phi", &gamma_mht_phi );
     BabyTree_->Branch("gamma_met_pt", &gamma_met_pt );
     BabyTree_->Branch("gamma_met_phi", &gamma_met_phi );
+    BabyTree_->Branch("npfPhoton", &npfPhoton, "npfPhoton/I" );
+    BabyTree_->Branch("pfPhoton_pt", pfPhoton_pt, "pfPhoton_pt[npfPhoton]/F" );
+    BabyTree_->Branch("pfPhoton_eta", pfPhoton_eta, "pfPhoton_eta[npfPhoton]/F" );
+    BabyTree_->Branch("pfPhoton_phi", pfPhoton_phi, "pfPhoton_phi[npfPhoton]/F" );
     BabyTree_->Branch("zll_mt2", &zll_mt2 );
     BabyTree_->Branch("zll_deltaPhiMin", &zll_deltaPhiMin );
     BabyTree_->Branch("zll_diffMetMht", &zll_diffMetMht );
@@ -3492,6 +3533,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     nPFLep5LowMT = -999;
     nPFHad10LowMT = -999;
     ntau = -999;
+    npfPhoton = -999;
     ngamma = -999;
     ngenPart = -999;
     ngenLep = -999;
@@ -3684,6 +3726,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       gamma_hOverE[i] = -999;
       gamma_hOverE015[i] = -999;
       gamma_idCutBased[i] = -999;
+      pfPhoton_pt[i] = -999;
+      pfPhoton_eta[i] = -999;
+      pfPhoton_phi[i] = -999;
     }
 
     if (saveGenParticles) {

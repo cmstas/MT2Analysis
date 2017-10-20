@@ -240,6 +240,10 @@ public :
    Float_t         tau_isoCI3hit[50];   //[ntau]
    Int_t           tau_idMVA2[50];   //[ntau]
    Int_t           tau_mcMatchId[50];   //[ntau]
+   Int_t           npfPhoton;
+   Float_t         pfPhoton_pt[50];   //[npfPhoton]
+   Float_t         pfPhoton_eta[50];   //[npfPhoton]
+   Float_t         pfPhoton_phi[50];   //[npfPhoton]
    Int_t           ngamma;
    Float_t         gamma_pt[50];   //[ngamma]
    Float_t         gamma_eta[50];   //[ngamma]
@@ -643,6 +647,10 @@ public :
    TBranch        *b_tau_isoCI3hit;   //!
    TBranch        *b_tau_idMVA2;   //!
    TBranch        *b_tau_mcMatchId;   //!
+   TBranch        *b_npfPhoton;   //!
+   TBranch        *b_pfPhoton_pt;   //!
+   TBranch        *b_pfPhoton_eta;   //!
+   TBranch        *b_pfPhoton_phi;   //!
    TBranch        *b_ngamma;   //!
    TBranch        *b_gamma_pt;   //!
    TBranch        *b_gamma_eta;   //!
@@ -1104,6 +1112,10 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("tau_isoCI3hit", tau_isoCI3hit, &b_tau_isoCI3hit);
    fChain->SetBranchAddress("tau_idMVA2", tau_idMVA2, &b_tau_idMVA2);
    fChain->SetBranchAddress("tau_mcMatchId", tau_mcMatchId, &b_tau_mcMatchId);
+   fChain->SetBranchAddress("npfPhoton", &npfPhoton, &b_npfPhoton);
+   fChain->SetBranchAddress("pfPhoton_pt", pfPhoton_pt, &b_pfPhoton_pt);
+   fChain->SetBranchAddress("pfPhoton_eta", pfPhoton_eta, &b_pfPhoton_eta);
+   fChain->SetBranchAddress("pfPhoton_phi", pfPhoton_phi, &b_pfPhoton_phi);
    fChain->SetBranchAddress("ngamma", &ngamma, &b_ngamma);
    fChain->SetBranchAddress("gamma_pt", gamma_pt, &b_gamma_pt);
    fChain->SetBranchAddress("gamma_eta", gamma_eta, &b_gamma_eta);

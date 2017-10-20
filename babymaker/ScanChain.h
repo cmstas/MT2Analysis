@@ -357,6 +357,11 @@ class babyMaker {
   Float_t         gamma_hOverE[max_ngamma];   //[ngamma]
   Float_t         gamma_hOverE015[max_ngamma];   //[ngamma]
   Int_t           gamma_idCutBased[max_ngamma];   //[ngamma]
+  Int_t           npfPhoton;
+  Float_t         pfPhoton_pt[max_ngamma];   //[ngamma]
+  Float_t         pfPhoton_eta[max_ngamma];   //[ngamma]
+  Float_t         pfPhoton_phi[max_ngamma];   //[ngamma]
+  
 
   // event level vars recalculated for photon+jets control region
   Float_t         gamma_mt2;
