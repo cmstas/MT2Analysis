@@ -100,11 +100,11 @@ def GetSubtitles(dirname):
     if dirname[-1:]=="L":
         return ["450 < H_{T} < 575 GeV","M_{T2} > 200 GeV", "#geq 2j"]
     if dirname[-1:]=="M":
-        return ["575 < H_{T} < 1000 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["575 < H_{T} < 1200 GeV","M_{T2} > 200 GeV", "#geq 2j"]
     if dirname[-2:]=="UH":
         return ["H_{T} > 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
     if dirname[-1:]=="H":
-        return ["1000 < H_{T} < 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
+        return ["1200 < H_{T} < 1500 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 
     return ["H_{T} > 250 GeV","M_{T2} > 200 GeV", "#geq 2j"]
 
@@ -113,7 +113,9 @@ def Rebin(h_bkg_vec, h_data, r, h_sig_vec=[]):
         h.Rebin(r)
     for h in h_sig_vec:
         h.Rebin(r)
-    if h_data!=None:
-        h_data.Rebin(r)
+    for h in h_data:
+        if h != None:
+            h.Rebin(r)
+
 
 

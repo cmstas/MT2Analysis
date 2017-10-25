@@ -5,7 +5,7 @@ import pyRootPlotMaker as ppm
 import MT2PlotUtils as utils
 import MT2PlotDefs as pd
 
-def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag="", signals=[], opts=""):
+def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag="", signals=[], dataNames=["Data"], opts=""):
     # rootdir contains output of MT2Looper, samples are names of the .root files,
     # data is the name of the data file, dirname is the directory within the root file
     # to extract plots from, plots are a list of plot definitions from MT2PlotDefs
@@ -13,8 +13,16 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
     # note that dirname can be a '+' separated string of directories to add together
 
     h_bkg_vecs = [[] for x in plots]
-    h_data = []
     h_sig_vecs = [[] for x in plots]
+
+    # handle multiple sets of data histograms
+    # pass a list of strings
+    if data==None:
+        h_data_vec = [[None for x in plots]]
+    else:
+        if type(data) != type([]):
+            data = [data]
+        h_data_vec = [[] for x in plots]
 
     dirnames = [s.strip() for s in dirname.split("+")]
 
@@ -66,7 +74,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
         fid.Close()
 
-    ## get background histograms
+    ## get signal histograms
     for isig in range(len(signals)):
 
         # get the root file for the given sample. This assumes that frag/fake photons come from qcd_ht.root
@@ -110,23 +118,22 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
 
     
     ## get data histograms
-    if data==None:
-        h_data = [None for i in plots]
-    else:
-        data_file = os.path.join(rootdir, data+".root")
-        fid = ROOT.TFile(data_file)
-        for pl in plots:
-            vn = pl[0]
-            if suffix != None:
-                vn += suffix
-            h_data.append( fid.Get(dirnames[0]+"/h_"+vn) )
-            if type(h_data[-1])==type(ROOT.TObject()):
-                raise Exception("No {0}/h_{1} histogram for {2}!".format(dirname, vn, data))
-            h_data[-1].SetDirectory(0)
-            # handle the case with more than one directory
-            for idir in range(1, len(dirnames)):
-                h_data[-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
-        fid.Close()
+    if data != None:
+        for ip,pl in enumerate(plots):
+            for id,dname in enumerate(data):
+                data_file = os.path.join(rootdir, dname+".root")
+                fid = ROOT.TFile(data_file)
+                vn = pl[0]
+                if suffix != None:
+                    vn += suffix
+                h_data_vec[ip].append( fid.Get(dirnames[0]+"/h_"+vn) )
+                if type(h_data_vec[ip][-1])==type(ROOT.TObject()):
+                    raise Exception("No {0}/h_{1} histogram for {2}!".format(dirname, vn, dname))
+                h_data_vec[ip][-1].SetDirectory(0)
+                # handle the case with more than one directory
+                for idir in range(1, len(dirnames)):
+                    h_data_vec[ip][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+            fid.Close()
 
     # make the output directory if it doesn't exist
     if not os.path.isdir(os.path.join(output_dir,dirname+tag)):
@@ -140,7 +147,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             userMin = plots[i][3][0]
             userMax = plots[i][3][1]
         if len(plots[i]) >= 5:
-            utils.Rebin(h_bkg_vecs[i], h_data[i], plots[i][4], h_sig_vec=h_sig_vecs[i])
+            utils.Rebin(h_bkg_vecs[i], h_data_vec[i], plots[i][4], h_sig_vec=h_sig_vecs[i])
         doOverflow = True
         if len(plots[i]) >= 6:
             doOverflow = plots[i][5]
@@ -152,20 +159,24 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         subtitles = utils.GetSubtitles(dirname)
         if "noSubtitles" in opts:
             subtitles=None
-        if h_data[i]!=None:
+        if h_data_vec[0]!=None:
             subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
         else:
             subLegText = None
         # subLegText = None
+        drawZeros = False
+        if plots[i][0] in ["mt2bins","htEle","htMu","jetpt1","jetpt2"]:
+            drawZeros = True
         sns = [utils.GetSampleName(s) for s in samples]
+
         for ext in exts:
             saveAs = os.path.join(output_dir,dirname+tag,"{0}_{1}.{2}".format(dirname,vn,ext))
-            ppm.plotDataMC(h_bkg_vecs[i], sns, h_data[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
-                           title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
+            ppm.plotDataMC(h_bkg_vecs[i], sns, h_data_vec[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
+                           dataTitle=dataNames, title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
                            scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, doMT2Colors=True, 
                            markerSize=markerSize, titleSize=0.035, subtitleSize=0.033, legCoords=(0.60,0.70,0.87,0.895),
                            subLegText=subLegText, subLegTextSize=0.036, doBkgError=True, doOverflow=doOverflow, cmsTextSize=0.04,
-                           convertToPoisson=True, drawZeros=False, h_sig_vec=h_sig_vecs[i], sig_names=signals)
+                           convertToPoisson=True, drawZeros=drawZeros, h_sig_vec=h_sig_vecs[i], sig_names=signals, ratioType=1)
             
 
 
@@ -296,6 +307,8 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
     except:
         pass
 
+    last, lastvar = 0., 0.
+
     #loop over sets of regions (0b, >=1b, inclusive)
     for iregs,regs in enumerate(regions):
         h_mt2binsAll_mc_cr_vec = [None for s in samples]
@@ -314,12 +327,20 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
                 
                 # form the aggregated histograms
                 for i in range(len(fmc)):
+                    h_mt2binsAll_mc_cr_temp = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_"+str(i))
+                    h_mt2binsAll_mc_cr_var_temp = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybridExtrapErr".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_var_"+str(i))
+                    for j in range(1,h_mt2binsAll_mc_cr_temp.GetNbinsX()+1):
+                        c1 = h_mt2binsAll_mc_cr_temp.GetBinContent(j)
+                        c2 = h_mt2binsAll_mc_cr_var_temp.GetBinContent(j)
+                        if c2 < c1:
+                            c2 = c1+(c1-c2)
+                            h_mt2binsAll_mc_cr_var_temp.SetBinContent(j, c2)
                     if h_mt2binsAll_mc_cr_vec[i] == None:
-                        h_mt2binsAll_mc_cr_vec[i] = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_"+str(i))
-                        h_mt2binsAll_mc_cr_var_vec[i] = fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybridExtrapErr".format(sr,ht_reg)).Clone("h_mt2binsAll_mc_cr_var_"+str(i))
+                        h_mt2binsAll_mc_cr_vec[i] = h_mt2binsAll_mc_cr_temp
+                        h_mt2binsAll_mc_cr_var_vec[i] = h_mt2binsAll_mc_cr_var_temp
                     else:
-                        h_mt2binsAll_mc_cr_vec[i].Add(fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybrid".format(sr,ht_reg)))
-                        h_mt2binsAll_mc_cr_var_vec[i].Add(fmc[i].Get("sr{0}{1}/h_mt2binsAllCRMChybridExtrapErr".format(sr,ht_reg)))
+                        h_mt2binsAll_mc_cr_vec[i].Add(h_mt2binsAll_mc_cr_temp)
+                        h_mt2binsAll_mc_cr_var_vec[i].Add(h_mt2binsAll_mc_cr_var_temp)
 
                 # somtimes 0 events in data CR
                 try:
@@ -338,7 +359,7 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
             for h_nom,h_var in zip(h_mt2binsAll_mc_cr_vec,h_mt2binsAll_mc_cr_var_vec):
                 nom_val += h_nom.GetBinContent(i+1)
                 var_val += h_var.GetBinContent(i+1)
-            if (nom_val > 0.01): systs[i] = abs(1. - var_val / nom_val)
+            if (nom_val > 0.00001): systs[i] = abs(1. - var_val / nom_val)
 
         # ## systematic just based on number of bins
         # incr = 0

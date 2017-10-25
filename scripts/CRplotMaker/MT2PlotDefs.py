@@ -31,12 +31,13 @@ sl_plots = [
 
 dy_plots = [
     ("ht",True,(250,1500),None,2),
-    ("met",True,(200,1000),None,2),
-    ("mt2",True,(200,1000),None,2),
+    ("met",True,(100,1000),None,2),
+    ("mt2",True,(100,1000),None,2),
     ("mt2bins",True,None,None),
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
     ("zllmass",True,(70,120),None),
+    ("zllpt",True,(0,1000),None,2),
     ("nlepveto",False,None,None),
     ("htemu",True,(250,1500),None,2),
     ("metemu",True,(200,1000),None,2),
@@ -46,11 +47,17 @@ dy_plots = [
     ("nBJet20emu",True,(0,6),None),
     ("zllmassemu",True,(70,120),None),
     ("nlepvetoemu",False,None,None),
-    # add zllpt plots once added to MT2looper
+    ("jetpt1",True,(200,1200),None),
+    ("jetpt2",True,(200,1200),None),    
+    ("leppt1",True,(0,500),None),
+    ("leppt2",True,(0,500),None),    
+    ("htEle",True,(250,1500),None),
+    ("htMu",True,(250,1500),None),
 ]
 
 gj_plots = [
     ("ht",True,(250,1500),None,2),
+    # ("simpleht",True,(250,2000),None,2),
     ("met",True,(200,1000),None,2),
     ("mt2",True,(200,1000),None,2),
     ("mt2bins",True,None,None),
@@ -66,9 +73,9 @@ gj_plots = [
     ("chisoEELooseSieieSB",True,(0,10),None),
     ("chisoEBLooseSieieSB",True,(0,10),None),
     ("drMinParton",False,None,None),
-    ("drMinParton_ht250to450",False,None,None),
-    ("drMinParton_ht450to1000",False,None,None),
-    ("drMinParton_ht1000toInf",False,None,None),
+    # ("drMinParton_ht250to450",False,None,None),
+    # ("drMinParton_ht450to1000",False,None,None),
+    # ("drMinParton_ht1000toInf",False,None,None),
     ("SigmaIetaIetaEBLooseAllSieie",False,(0.0075,0.015),None),
     ("SigmaIetaIetaEELooseAllSieie",False,(0.02,0.0345),None,2),
 ]
@@ -80,6 +87,15 @@ qcdJ_plots = [
 mt2_only = [
     ("mt2bins",True,None,None),
     ("mt2",True,(200,1000),None,2)
+]
+
+basic_kinematic = [
+    ("ht",True,(250,1500),None,2),
+    ("met",True,(200,1000),None,2),
+    ("mt2",True,(200,1000),None,2),
+    ("mt2bins",True,None,None),
+    ("nJet30",True,(0,14),None),
+    ("nBJet20",True,(0,6),None),
 ]
 
 ht_njet_plots = [
@@ -100,4 +116,6 @@ ht_njet_extraNB_plots = [
 gamma_vars_only = [
     ("gammaPt",True,None,None,4),
     ("gammaEta",False,None,None),
+    ("gammaPhi",False,None,None),
+    # ("simpleht",True,(250,2000),None,2),
 ]
