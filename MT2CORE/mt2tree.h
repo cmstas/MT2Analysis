@@ -150,6 +150,8 @@ public :
    Int_t           HLT_PFMET100_PFMHT100;
    Int_t           HLT_PFMET110_PFMHT110;
    Int_t           HLT_PFMET120_PFMHT120;
+   Int_t           HLT_PFMET100_PFMHT100_PFHT60;
+   Int_t           HLT_PFMET120_PFMHT120_PFHT60;
    Int_t           HLT_HT800;
    Int_t           HLT_HT900;
    Int_t           HLT_MET170;
@@ -561,6 +563,8 @@ public :
    TBranch        *b_HLT_PFMET100_PFMHT100;   //!
    TBranch        *b_HLT_PFMET110_PFMHT110;   //!
    TBranch        *b_HLT_PFMET120_PFMHT120;   //!
+   TBranch        *b_HLT_PFMET100_PFMHT100_PFHT60;   //!
+   TBranch        *b_HLT_PFMET120_PFMHT120_PFHT60;   //!
    TBranch        *b_HLT_ht350met100;   //!
    TBranch        *b_HLT_ht350met120;   //!
    TBranch        *b_HLT_PFHT300_PFMET100;   //!
@@ -1026,6 +1030,8 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100, &b_HLT_PFMET100_PFMHT100);
    fChain->SetBranchAddress("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110, &b_HLT_PFMET110_PFMHT110);
    fChain->SetBranchAddress("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120, &b_HLT_PFMET120_PFMHT120);
+   fChain->SetBranchAddress("HLT_PFMET100_PFMHT100_PFHT60", &HLT_PFMET100_PFMHT100_PFHT60, &b_HLT_PFMET100_PFMHT100_PFHT60);
+   fChain->SetBranchAddress("HLT_PFMET120_PFMHT120_PFHT60", &HLT_PFMET120_PFMHT120_PFHT60, &b_HLT_PFMET120_PFMHT120_PFHT60);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
    fChain->SetBranchAddress("HLT_ht350met120", &HLT_ht350met120, &b_HLT_ht350met120);
    fChain->SetBranchAddress("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100, &b_HLT_PFHT300_PFMET100);

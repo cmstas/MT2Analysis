@@ -406,6 +406,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFMET100_PFMHT100         = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_v");
       HLT_PFMET110_PFMHT110         = passHLTTriggerPattern("HLT_PFMET110_PFMHT110_IDTight_v");
       HLT_PFMET120_PFMHT120         = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_v");
+      HLT_PFMET100_PFMHT100_PFHT60  = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_PFHT60_v");
+      HLT_PFMET120_PFMHT120_PFHT60  = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v");
       HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v");
       HLT_PFJet500        = passHLTTriggerPattern("HLT_PFJet500_v");
       HLT_ECALHT800       = passHLTTriggerPattern("HLT_ECALHT800_v");
@@ -3038,6 +3040,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
     BabyTree_->Branch("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110 );
     BabyTree_->Branch("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120 );
+    BabyTree_->Branch("HLT_PFMET100_PFMHT100_PFHT60", &HLT_PFMET100_PFMHT100_PFHT60 );
+    BabyTree_->Branch("HLT_PFMET120_PFMHT120_PFHT60", &HLT_PFMET120_PFMHT120_PFHT60 );
     BabyTree_->Branch("HLT_PFJet450", &HLT_PFJet450 );
     BabyTree_->Branch("HLT_PFJet500", &HLT_PFJet500 );
     BabyTree_->Branch("HLT_ECALHT800", &HLT_ECALHT800 );
@@ -3493,6 +3497,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_PFMET100_PFMHT100 = -999;
     HLT_PFMET110_PFMHT110 = -999;
     HLT_PFMET120_PFMHT120 = -999;
+    HLT_PFMET100_PFMHT100_PFHT60 = -999;
+    HLT_PFMET120_PFMHT120_PFHT60 = -999;
     HLT_PFJet450 = -999;
     HLT_PFJet500 = -999;
     HLT_ECALHT800 = -999;
