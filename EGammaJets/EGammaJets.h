@@ -7,6 +7,8 @@
 #include <cmath>
 
 #include "TH1.h"
+#include "TH2.h"
+#include "TProfile.h"
 
 #include "../CORE/Tools/utils.h"
 #include "../CORE/Tools/goodrun.h"

@@ -16,8 +16,8 @@ Use FWLiteEnabler::enable() and FWLiteEnabler.h instead
 Processing mergeHadoopFiles.C("/hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017B_JetHT_PromptReco-v2/","/nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_JetHT_PromptReco-v2.root")...
 Merging files from dir: /hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017B_JetHT_PromptReco-v2/
 Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_JetHT_PromptReco-v2.root
-Total events merged: 5126117
+Total events merged: 4754466
 ------------------------------
-CPU  Time:	11.5 s
-Real Time:	1320.8 s
+CPU  Time:	8.2 s
+Real Time:	1128.6 s
 

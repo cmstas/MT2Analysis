@@ -16,14 +16,8 @@ Use FWLiteEnabler::enable() and FWLiteEnabler.h instead
 Processing mergeHadoopFiles.C("/hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017C_SingleMuon_PromptReco-v2/","/nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2.root")...
 Merging files from dir: /hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017C_SingleMuon_PromptReco-v2/
 Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2.root
-Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2_1.root
-Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2_2.root
-Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2_3.root
-Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2_4.root
-Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2_5.root
-Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v2_6.root
-Total events merged: 68237429
+Total events merged: 7809747
 ------------------------------
-CPU  Time:	139.3 s
-Real Time:	6091.6 s
+CPU  Time:	12.4 s
+Real Time:	1669.2 s
 

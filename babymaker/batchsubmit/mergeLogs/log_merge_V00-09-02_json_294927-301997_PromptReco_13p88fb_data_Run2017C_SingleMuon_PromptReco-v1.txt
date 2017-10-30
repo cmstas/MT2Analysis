@@ -18,8 +18,8 @@ Merging files from dir: /hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_jso
 Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v1.root
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v1_1.root
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_SingleMuon_PromptReco-v1_2.root
-Total events merged: 23492748
+Total events merged: 23559851
 ------------------------------
-CPU  Time:	51.0 s
-Real Time:	3603.2 s
+CPU  Time:	34.8 s
+Real Time:	3118.7 s
 

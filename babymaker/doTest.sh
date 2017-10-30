@@ -19,4 +19,4 @@ make -j 8 || return $?
 
 # ./processBaby test_T2tt_rpv /hadoop/cms/store/group/snt/run2_moriond17/SMS-T2tt_RPV_SMS_T2tt_mStop-700_Private80X-TEST-v1/V08-00-16/merged_ntuple_1.root
 
-./processBaby data_Run2017B_JetHT /hadoop/cms/store/user/namin/ProjectMetis/JetHT_Run2017B-PromptReco-v2_MINIAOD_CMS4_V00-00-03/merged_ntuple_1.root 10000
+./processBaby data_Run2017B_JetHT /hadoop/cms/store/user/namin/ProjectMetis/JetHT_Run2017B-PromptReco-v2_MINIAOD_CMS4_V00-00-03/merged_ntuple_1.root 100

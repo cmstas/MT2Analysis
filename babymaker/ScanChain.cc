@@ -69,7 +69,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = false;
 // turn on to remove jets overlapping with leptons (default true)
@@ -489,10 +489,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       if (!removePostProcVars) {
         evt_nEvts = cms3.evt_nEvts();
-        evt_scale1fb = cms3.evt_scale1fb();
-        evt_xsec = cms3.evt_xsec_incl();
         evt_kfactor = cms3.evt_kfactor();
         evt_filter = cms3.evt_filt_eff();
+	evt_scale1fb = cms3.evt_scale1fb();	  
+	evt_xsec = evt_xsec_incl();
       }
       if (!isData) {
         genWeight = cms3.genps_weight();
@@ -2097,8 +2097,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  jet_NHEF[njet] = cms3.pfjets_neutralHadronE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 	  jet_CEEF[njet] = cms3.pfjets_chargedEmE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 	  jet_NEEF[njet] = cms3.pfjets_neutralEmE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
-	  jet_CM[njet] = cms3.pfjets_chargedMultiplicity()[iJet];
-	  jet_NM[njet] = cms3.pfjets_neutralMultiplicity()[iJet];
+	  jet_CM[njet] = cms3.pfjets_chargedMultiplicity().at(iJet);
+	  jet_NM[njet] = cms3.pfjets_neutralMultiplicity().at(iJet);
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -3429,8 +3429,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("jet_NHEF", jet_NHEF, "jet_NHEF[njet]/F" );
     BabyTree_->Branch("jet_CEEF", jet_CEEF, "jet_CEEF[njet]/F" );
     BabyTree_->Branch("jet_NEEF", jet_NEEF, "jet_NEEF[njet]/F" );
-    BabyTree_->Branch("jet_CM", jet_CM, "jet_CM[njet]/F" );
-    BabyTree_->Branch("jet_NM", jet_NM, "jet_NM[njet]/F" );
+    BabyTree_->Branch("jet_CM", jet_CM, "jet_CM[njet]/I" );
+    BabyTree_->Branch("jet_NM", jet_NM, "jet_NM[njet]/I" );
     // End 2017
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );

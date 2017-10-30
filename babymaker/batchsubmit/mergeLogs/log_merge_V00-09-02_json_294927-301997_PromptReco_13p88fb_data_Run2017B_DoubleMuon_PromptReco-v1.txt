@@ -19,6 +19,6 @@ Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_1
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_DoubleMuon_PromptReco-v1_1.root
 Total events merged: 12384383
 ------------------------------
-CPU  Time:	29.6 s
-Real Time:	2396.9 s
+CPU  Time:	20.8 s
+Real Time:	2168.5 s
 

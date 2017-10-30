@@ -19,5 +19,5 @@ Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_1
 Total events merged: 0
 ------------------------------
 CPU  Time:	0.1 s
-Real Time:	4.9 s
+Real Time:	0.8 s
 

@@ -17,8 +17,8 @@ Processing mergeHadoopFiles.C("/hadoop/cms/store/user/dpgilber/mt2babies//V00-09
 Merging files from dir: /hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_json_294927-301997_PromptReco_13p88fb_data_Run2017C_DoubleMuon_PromptReco-v2/
 Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_DoubleMuon_PromptReco-v2.root
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017C_DoubleMuon_PromptReco-v2_1.root
-Total events merged: 20115738
+Total events merged: 20022329
 ------------------------------
-CPU  Time:	45.5 s
-Real Time:	3325.2 s
+CPU  Time:	31.5 s
+Real Time:	3028.1 s
 

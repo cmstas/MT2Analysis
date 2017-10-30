@@ -18,6 +18,6 @@ Merging files from dir: /hadoop/cms/store/user/dpgilber/mt2babies//V00-09-02_jso
 Ouputting to: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_HTMHT_PromptReco-v2.root
 Total events merged: 428315
 ------------------------------
-CPU  Time:	1.3 s
-Real Time:	137.1 s
+CPU  Time:	1.0 s
+Real Time:	130.3 s
 

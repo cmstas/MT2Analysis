@@ -57,6 +57,7 @@ class babyMaker {
 
   bool isDataFromFileName;
   bool isPromptReco;
+  bool isLLGluino;
   bool doRecomputeRawPFMET_;
 
   // for btag SFs

@@ -21,8 +21,8 @@ Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-3019
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_JetHT_PromptReco-v1_3.root
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_JetHT_PromptReco-v1_4.root
 Fill: Switching to new file: /nfs-6/userdata/dpgilber/V00-09-02_json_294927-301997_PromptReco_13p88fb//data_Run2017B_JetHT_PromptReco-v1_5.root
-Total events merged: 58244725
+Total events merged: 58272452
 ------------------------------
-CPU  Time:	120.6 s
-Real Time:	5666.5 s
+CPU  Time:	79.5 s
+Real Time:	4497.5 s
 

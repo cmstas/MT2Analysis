@@ -12,7 +12,7 @@ int main (int argc, char ** argv)
 {
   if (argc < 4)
     {
-      cout << "Usage: ./QCDskim <input_directory> <sample> <output_directory>" << endl;
+      cout << "Usage: ./EGammaJetsSkim <input_directory> <sample> <output_directory>" << endl;
       return 0;
     }
 
