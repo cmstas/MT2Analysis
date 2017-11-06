@@ -113,8 +113,8 @@ def Rebin(h_bkg_vec, h_data, r, h_sig_vec=[]):
         h.Rebin(r)
     for h in h_sig_vec:
         h.Rebin(r)
-    for h in h_data:
-        if h != None:
+    if h_data != None:
+        for h in h_data:
             h.Rebin(r)
 
 
