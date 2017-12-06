@@ -564,7 +564,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   // 2017 data
-  const char* json_file = "../babymaker/jsons/Cert_294927-304120_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   // const char* json_file = "../babymaker/jsons/Cert_294927-300575_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   // // full 2016 dataset json, 36.26/fb:
   // const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
@@ -944,7 +944,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       outfile_->cd();
       // const float lumi = 12.9; //ICHEP 2016
       // const float lumi = 35.867; // full 2016
-      const float lumi = 21.15; // 2017
+      const float lumi = 41.96; // 2017
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -1191,14 +1191,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       bool doOFplots = false;
       bool doLowPtOFplots = false;
       if (t.nlep == 2 && !isSignal_) {
-	bool passSFtrig = (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon200 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33);
-	bool passOFtrig =  (!t.isData || t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu12_EleX || 
-                            t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Mu37_Ele27_NonIso || t.HLT_Mu27_Ele37_NonIso || 
-                            t.HLT_Photon200 || t.HLT_SingleMu_NonIso);
+        bool passSFtrig = passTriggerDilepSF();
+	bool passOFtrig = passTriggerDilepOF();
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 30               ) {
+	     && t.lep_pt[0] > 100 && t.lep_pt[1] > 35               ) {
 	  // no additional explicit lepton veto
 	  // i.e. implicitly allow 3rd PF lepton or hadron
 	  //nlepveto_ = 0; 
@@ -1216,9 +1214,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	  }
 	}
       } // nlep == 2
-
-      // if(!doDYplots && !doOFplots)
-      //     continue;
       
       // Variables for Removed single lepton (RL) region
       //muon only
@@ -1228,14 +1223,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if ( t.nlep == 1 && !isSignal_) {
 	if ( t.lep_pt[0] > 30 && fabs(t.lep_eta[0])<2.5 && nBJet20_ == 0) { // raise threshold to avoid Ele23 in MC
 	  if (abs(t.lep_pdgId[0])==13) { // muons
-            if ( !t.isData || t.HLT_SingleMu || t.HLT_SingleMu_NonIso )  doRLMUplots = true;
+              if ( passTriggerSingleMu() )  doRLMUplots = true;
           }
 	  if (abs(t.lep_pdgId[0])==11) { // electrons
-            if ( (!t.isData || t.HLT_SingleEl || t.HLT_SingleEl_NonIso )   // Ele23 trigger not present in MC. Need to keep lepton threshold high
-                 && t.lep_relIso03[0]<0.1 // tighter selection for electrons
-		 && t.lep_relIso03[0]*t.lep_pt[0]<5 // tighter selection for electrons
-		 && t.lep_tightId[0]>2
-		 && fabs(t.lep_eta[0])<2.1
+              if ( passTriggerSingleEl()   // Ele23 trigger not present in MC. Need to keep lepton threshold high
+                  && t.lep_relIso03[0]<0.1 // tighter selection for electrons
+                      && t.lep_relIso03[0]*t.lep_pt[0]<5 // tighter selection for electrons
+                      && t.lep_tightId[0]>2
+                      && fabs(t.lep_eta[0])<2.1
               ) 
 	      doRLELplots = true;
 	  }
@@ -1460,8 +1455,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
 void MT2Looper::fillHistosSRBase() {
 
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+  if(!passTriggerSR()) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1487,7 +1481,7 @@ void MT2Looper::fillHistosSRBase() {
 
   // do monojet SRs
   bool passMonojet = false;
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) {
+  if (passMonojetId_){
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = deltaPhiMin_;
     values_monojet["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
@@ -1515,8 +1509,7 @@ void MT2Looper::fillHistosSRBase() {
 
 void MT2Looper::fillHistosInclusive() {
 
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+  if(!passTriggerSR()) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1550,9 +1543,8 @@ void MT2Looper::fillHistosInclusive() {
 
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
-  
+  if(!passTriggerSR()) return;  
+
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
   // ad-hoc RA2/b filter
@@ -1581,7 +1573,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   }
   
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) {
+  if (passMonojetId_){
     std::map<std::string, float> values_monojet;
     values_monojet["deltaPhiMin"] = deltaPhiMin_;
     values_monojet["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
@@ -1651,8 +1643,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
-  // trigger requirement on data
-  if (t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+  if(!passTriggerSR()) return;
   
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1731,7 +1722,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   }
 
   // do monojet SRs
-  if (passMonojetId_ && (!t.isData || t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) {
+  if (passMonojetId_){
 
     // first fill base region
     std::map<std::string, float> valuesBase_monojet;
@@ -1829,8 +1820,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (t.ngamma==0) return;
 
   // trigger requirement
-  if ( ( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon200) return;
-  // if ( ( t.isData || stringsample.Contains("2015")) && !t.HLT_Photon175_Prescale) return;
+  if (!passTriggerPhoton()) return;
 
   // // additional cleaning for fakes and HLT-emulation (2016)
   // if (fabs(t.gamma_eta[0])>2.4 || t.gamma_hOverE015[0]>0.1 ) return;
@@ -2031,16 +2021,12 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.zll_deltaPhiMin;
-  // valuesBase["deltaPhiMin"] = 1.0;
   valuesBase["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
-  // valuesBase["diffMetMhtOverMet"]  = 0.0;
   valuesBase["nlep"]        = 0; // dummy value
   valuesBase["j1pt"]        = jet1_pt_;
   valuesBase["j2pt"]        = jet2_pt_;
   valuesBase["mt2"]         = t.zll_mt2;
-  // valuesBase["mt2"]         = 1000.;
   valuesBase["passesHtMet"] = ( (t.zll_ht > 250. && t.zll_met_pt > 250.) || (t.zll_ht > 1200. && t.zll_met_pt > 30) );
-  // valuesBase["passesHtMet"] = 1;
   bool passBase = SRBase.PassesSelection(valuesBase);
 
   std::map<std::string, float> valuesBase_monojet;
@@ -2207,8 +2193,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 // hists for single lepton control region
 void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
-  // trigger requirement on data (also require to come from JetHT, HTMHT, or MET PD to match ETH)
-  if (t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+  if(!passTriggerSR()) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -2647,6 +2632,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     plot1D("h_gammaPhi"+s,       t.gamma_phi[0],   evtweight_, h_1d, ";gamma #phi", 50, -3.1416, 3.1416);
     if (t.HLT_Photons) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+    plot1D("h_simpleht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_nJet30"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nBJet20"+s,      t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
@@ -2664,10 +2650,10 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     // make drMinParton plot for separate ht regions
     if(t.gamma_ht >= 250 && t.gamma_ht < 450){
       plot1D("h_drMinParton_ht250to450"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
-    }else if(t.gamma_ht >= 450 && t.gamma_ht < 1000){
-      plot1D("h_drMinParton_ht450to1000"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
-    }else if(t.gamma_ht >= 1000){
-      plot1D("h_drMinParton_ht1000toInf"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
+    }else if(t.gamma_ht >= 450 && t.gamma_ht < 1200){
+      plot1D("h_drMinParton_ht450to1200"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
+    }else if(t.gamma_ht >= 1200){
+      plot1D("h_drMinParton_ht1200toInf"+s,   t.gamma_drMinParton[0],   evtweight_, h_1d, ";DRmin(photon, parton)", 100, 0, 5);
     }
 
     if (t.gamma_ht > 250) 
@@ -2688,6 +2674,8 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     dir = outfile_->mkdir(dirname.c_str());
   } 
   dir->cd();
+
+  plot2D("h_ZpT_met"+s, t.zll_pt, t.zll_met_pt, evtweight_, h_1d, ";Z pt; met", 48, 0, 1200, 48, 0, 1200);
 
   // workaround for monojet bins
   float zll_mt2_temp = t.zll_mt2;
@@ -2908,7 +2896,7 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
     int ht_ind = 0;
     if(t.ht>=450) ht_ind = 1;
     if(t.ht>=575) ht_ind = 2;
-    if(t.ht>=1000) ht_ind = 3;
+    if(t.ht>=1200) ht_ind = 3;
     if(t.ht>=1500) ht_ind = 4;
 
     vector<TF1*>* fits = &rphi_fits_data;
@@ -3090,3 +3078,72 @@ float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
   return 1.;
 }
 
+bool MT2Looper::passTriggerSR() {
+    
+    if(!t.isData) return true;
+
+    if (t.HLT_PFHT1050 || 
+        t.HLT_PFHT800_PFMET75_PFMHT75 || 
+        t.HLT_PFHT500_PFMET100_PFMHT100 || 
+        t.HLT_PFMET120_PFMHT120 || 
+        t.HLT_PFMETNoMu120_PFMHTNoMu120)
+        return true;
+
+    return false;
+   
+}
+
+bool MT2Looper::passTriggerDilepSF() {
+    
+    if(!t.isData) return true;
+
+    if(t.HLT_DoubleEl || 
+       t.HLT_DoubleMu || 
+       t.HLT_Photon200 || 
+       t.HLT_DoubleMu_NonIso || 
+       t.HLT_SingleMu_NonIso || 
+       t.HLT_DoubleEl33)
+        return true;
+
+    return false;
+}
+
+bool MT2Looper::passTriggerDilepOF() {
+    
+    if(!t.isData) return true;
+
+    if(t.HLT_MuX_Ele12 || 
+       t.HLT_Mu8_EleX || 
+       t.HLT_Mu12_EleX || 
+       t.HLT_Mu30_Ele30_NonIso || 
+       t.HLT_Mu33_Ele33_NonIso || 
+       t.HLT_Mu37_Ele27_NonIso || 
+       t.HLT_Mu27_Ele37_NonIso || 
+       t.HLT_Photon200 || 
+       t.HLT_SingleMu_NonIso);
+        return true;
+
+    return false;
+}
+
+bool MT2Looper::passTriggerSingleMu() { 
+    if(!t.isData) return true;
+    if(t.HLT_SingleMu || t.HLT_SingleMu_NonIso)
+        return true;
+    return false;
+}
+
+bool MT2Looper::passTriggerSingleEl() { 
+    if(!t.isData) return true;
+    if(t.HLT_SingleEl || t.HLT_SingleEl_NonIso)
+        return true;
+    return false;
+}
+           
+bool MT2Looper::passTriggerPhoton() { 
+    if(!t.isData) return true;
+    if(t.HLT_Photon200)
+        return true;
+    return false;
+}
+           

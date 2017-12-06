@@ -126,7 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_294927-304507_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -136,7 +136,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       rebal_reader.SetCoreScale(1.0);
       rebal_reader.SetTailScale(1.0);
       rebal_reader.SetMeanShift(0.0);
-      rebal_reader.Init("rebal/JetResponseTemplates_ptBinned_92x_DCBfit.root", isDataFromFileName);
+      // don't want to widen cores for rebalancing, so treat as MC always
+      rebal_reader.Init("rebal/JetResponseTemplates_ptBinned_92x_DCBfit.root", false);      
   }
 
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
@@ -605,7 +606,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
-	Flag_HBHENoiseIsoFilter                       = isData ? cms3.filt_hbheNoiseIso() : hbheIsoNoiseFilter();
+	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();
 	// inputs for badMuonFilters in latest cms3 tags
 	if (recent_cms3_version || isCMS4) {
 	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
@@ -672,7 +673,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           genPart_pt[ngenPart] = cms3.genps_p4().at(iGen).pt();
           genPart_eta[ngenPart] = cms3.genps_p4().at(iGen).eta();
           genPart_phi[ngenPart] = cms3.genps_p4().at(iGen).phi();
-          genPart_mass[ngenPart] = cms3.genps_mass().at(iGen);
+          genPart_mass[ngenPart] = cms3.genps_p4().at(iGen).M();
           genPart_pdgId[ngenPart] = cms3.genps_id().at(iGen);
           genPart_status[ngenPart] = cms3.genps_status().at(iGen);
           genPart_charge[ngenPart] = cms3.genps_charge().at(iGen);
@@ -757,7 +758,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genStat23_pt[ngenStat23] = cms3.genps_p4().at(iGen).pt();
             genStat23_eta[ngenStat23] = cms3.genps_p4().at(iGen).eta();
             genStat23_phi[ngenStat23] = cms3.genps_p4().at(iGen).phi();
-            genStat23_mass[ngenStat23] = cms3.genps_mass().at(iGen);
+            genStat23_mass[ngenStat23] = cms3.genps_p4().at(iGen).M();
             genStat23_pdgId[ngenStat23] = cms3.genps_id().at(iGen);
             genStat23_status[ngenStat23] = cms3.genps_status().at(iGen);
             genStat23_charge[ngenStat23] = cms3.genps_charge().at(iGen);
@@ -891,7 +892,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genLep_pt[ngenLep] = cms3.genps_p4().at(iGen).pt();
             genLep_eta[ngenLep] = cms3.genps_p4().at(iGen).eta();
             genLep_phi[ngenLep] = cms3.genps_p4().at(iGen).phi();
-            genLep_mass[ngenLep] = cms3.genps_mass().at(iGen);
+            genLep_mass[ngenLep] = cms3.genps_p4().at(iGen).M();
             genLep_pdgId[ngenLep] = cms3.genps_id().at(iGen);
             genLep_status[ngenLep] = cms3.genps_status().at(iGen);
             genLep_charge[ngenLep] = cms3.genps_charge().at(iGen);
@@ -904,7 +905,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genTau_pt[ngenTau] = cms3.genps_p4().at(iGen).pt();
             genTau_eta[ngenTau] = cms3.genps_p4().at(iGen).eta();
             genTau_phi[ngenTau] = cms3.genps_p4().at(iGen).phi();
-            genTau_mass[ngenTau] = cms3.genps_mass().at(iGen);
+            genTau_mass[ngenTau] = cms3.genps_p4().at(iGen).M();
             genTau_pdgId[ngenTau] = cms3.genps_id().at(iGen);
             genTau_status[ngenTau] = cms3.genps_status().at(iGen);
             genTau_charge[ngenTau] = cms3.genps_charge().at(iGen);
@@ -922,7 +923,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
             genLepFromTau_pt[ngenLepFromTau] = cms3.genps_p4().at(iGen).pt();
             genLepFromTau_eta[ngenLepFromTau] = cms3.genps_p4().at(iGen).eta();
             genLepFromTau_phi[ngenLepFromTau] = cms3.genps_p4().at(iGen).phi();
-            genLepFromTau_mass[ngenLepFromTau] = cms3.genps_mass().at(iGen);
+            genLepFromTau_mass[ngenLepFromTau] = cms3.genps_p4().at(iGen).M();
             genLepFromTau_pdgId[ngenLepFromTau] = cms3.genps_id().at(iGen);
             genLepFromTau_status[ngenLepFromTau] = cms3.genps_status().at(iGen);
             genLepFromTau_charge[ngenLepFromTau] = cms3.genps_charge().at(iGen);
@@ -2040,6 +2041,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
 
+          jet_chFrac[njet] = cms3.pfjets_chargedHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+          jet_nhFrac[njet] = cms3.pfjets_neutralHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+          jet_cemFrac[njet] = cms3.pfjets_chargedEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+          jet_nemFrac[njet] = cms3.pfjets_neutralEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+          jet_muFrac[njet] = cms3.pfjets_muonE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+
           if (!isData) {
 	    jet_mcPt[njet] = -1;
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
@@ -2776,33 +2783,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
                   minimizer->SetPrintLevel(-1);
                   minimizer->mnexcm("SET NOWarnings",0,0,iflag);
 
-                  arglist[0] = -1;
-                  minimizer->mnexcm("SET PRI", arglist, 1, iflag);
-
-                  arglist[0] = 1;
+                  arglist[0] = 0;
                   minimizer->mnexcm("SET STRATEGY", arglist, 1, iflag);
 
                   minimizer->SetErrorDef(0.5);
 
                   for(int i=0; i<nRebalJets; i++){
                       std::string name = Form("c%d", i);
-                      minimizer->mnparm(i,name,1.0,0.05,0.2,5,iflag);
+                      minimizer->mnparm(i,name,1.0,0.05,0.1,3,iflag);
                   }
 
                   arglist[0] = 10000;
                   arglist[1] = 1.0;
 
                   minimizer->mnexcm("MIGRAD", arglist, 2, iflag);
-                  std::cout << "MIGRAD iflag = " << iflag << std::endl;
+                  if (verbose) std::cout << "MIGRAD iflag = " << iflag << std::endl;
                   rebal_status = iflag;
       
                   if(iflag !=0){
                       arglist[1] = 10.0;//easier threshold for convergence
                       minimizer->mnexcm("MIGRAD", arglist, 2, iflag);
-                      std::cout << "second MIGRAD iflag = " << iflag << std::endl;
+                      if(verbose) std::cout << "second MIGRAD iflag = " << iflag << std::endl;
                       rebal_status = iflag;
                   }
-
+      
                   arglist[0] = 5000;
                   arglist[1] = 0;
                   arglist[2] = 1;
@@ -3295,6 +3299,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
     BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
+    BabyTree_->Branch("jet_chFrac", jet_chFrac, "jet_chFrac[njet]/F" );
+    BabyTree_->Branch("jet_nhFrac", jet_nhFrac, "jet_nhFrac[njet]/F" );
+    BabyTree_->Branch("jet_cemFrac", jet_cemFrac, "jet_cemFrac[njet]/F" );
+    BabyTree_->Branch("jet_nemFrac", jet_nemFrac, "jet_nemFrac[njet]/F" );
+    BabyTree_->Branch("jet_muFrac", jet_muFrac, "jet_muFrac[njet]/F" );
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
@@ -3812,6 +3821,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       jet_mass[i] = -999;
       jet_btagCSV[i] = -999;
       jet_btagMVA[i] = -999;
+      jet_chFrac[i] = -999;
+      jet_nhFrac[i] = -999;
+      jet_cemFrac[i] = -999;
+      jet_nemFrac[i] = -999;
+      jet_muFrac[i] = -999;
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;
@@ -3896,7 +3910,7 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
     float pt_constrained_y = 0.0;
     float min_prob = 1E-20;
     for(int i=0; i < t->nRebalJets; i++){
-        bool isBjet = (t->rebal_jetbtagcsv[i] > 0.8484);
+        bool isBjet = (t->rebal_jetbtagcsv[i] > 0.8484);        
         float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
         prob = max(prob, min_prob);
         likelihood += log(prob);

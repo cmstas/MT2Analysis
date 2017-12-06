@@ -377,6 +377,11 @@ public :
    Float_t         jet_mass[100];   //[njet]
    Float_t         jet_btagCSV[100];   //[njet]
    Float_t         jet_btagMVA[100];   //[njet]
+   Float_t         jet_chFrac[100];  //[njet]
+   Float_t         jet_nhFrac[100];  //[njet]
+   Float_t         jet_cemFrac[100];  //[njet]
+   Float_t         jet_nemFrac[100];  //[njet]
+   Float_t         jet_muFrac[100];  //[njet]
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
@@ -786,6 +791,11 @@ public :
    TBranch        *b_jet_mass;   //!
    TBranch        *b_jet_btagCSV;   //!
    TBranch        *b_jet_btagMVA;   //!
+   TBranch        *b_jet_chFrac;   //!
+   TBranch        *b_jet_nhFrac;   //!
+   TBranch        *b_jet_cemFrac;   //!
+   TBranch        *b_jet_nemFrac;   //!
+   TBranch        *b_jet_muFrac;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
    TBranch        *b_jet_mcFlavour;   //!
@@ -1253,6 +1263,11 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_mass", jet_mass, &b_jet_mass);
    fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
    fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
+   fChain->SetBranchAddress("jet_chFrac", jet_chFrac, &b_jet_chFrac);
+   fChain->SetBranchAddress("jet_nhFrac", jet_nhFrac, &b_jet_nhFrac);
+   fChain->SetBranchAddress("jet_nemFrac", jet_cemFrac, &b_jet_cemFrac);
+   fChain->SetBranchAddress("jet_cemFrac", jet_nemFrac, &b_jet_nemFrac);
+   fChain->SetBranchAddress("jet_muFrac", jet_muFrac, &b_jet_muFrac);
    fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
    fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);

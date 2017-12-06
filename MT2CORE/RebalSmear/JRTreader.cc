@@ -96,7 +96,7 @@ int JRTreader::Init(const char *fname, bool correctDataResponse){
                 }
                 // if(ipt<=19)
                 //     DrawComp(fit_before, fits_nonb->at(ipt)->at(ieta), 
-                //              Form("JRTplots/fits_comp/nonbjets/pt%02d_eta%02d_nonbjets",ipt,ieta));
+                //              Form("JRTplots/fits_comp/nonbjets_test/pt%02d_eta%02d_nonbjets",ipt,ieta));
                 // delete fit_before;
             }else{
                 fits_nonb->at(ipt)->push_back(NULL);
@@ -160,7 +160,17 @@ float JRTreader::GetValue(float pt, float eta, bool isBjet, float smearfact){
         return 1.;
     }
 
-    float response = fit->GetBinContent(smearfact);
+    float response;
+    int bin = fit->FindBin(smearfact);
+    float value = fit->GetBinContent(bin);
+    float center = fit->GetBinCenter(bin);
+    float width = fit->GetBinWidth(bin);
+    if(smearfact > center && bin < fit->GetNbinsX())
+        response = value + (fit->GetBinContent(bin+1) - value)/width * (smearfact - center);
+    else if(smearfact < center && bin > 1)
+        response = value + (fit->GetBinContent(bin-1) - value)/width * (center - smearfact);
+    else
+        response = value;
 
     return response;
 }
@@ -340,8 +350,8 @@ void JRTreader::DrawComp(TH1D* h1, TH1D *h2, TString tag)
     h1->SetLineColor(kRed);
     h2->SetLineColor(kBlue);
 
-    h1->Draw("L");
-    h2->Draw("L SAME");
+    h1->Draw("L HIST");
+    h2->Draw("L HIST SAME");
 
     TLatex text;
     text.SetNDC(1);
