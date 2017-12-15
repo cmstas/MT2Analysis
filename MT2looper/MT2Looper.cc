@@ -133,7 +133,7 @@ bool print_qcd_event_list = false;
 
 // load rphi fits to perform r_effective calculation.
 bool doReffCalculation = false;
-string rphi_file_name = "/home/users/fgolf/mt2/devel/MT2Analysis/scripts/qcdEstimate/output/full2016/qcdHistos.root";
+string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/V00-09-04_41p96fb/qcdHistos.root";
 TFile* rphi_file;
 vector<TF1*> rphi_fits_data;
 vector<TF1*> rphi_fits_mc;
@@ -261,6 +261,7 @@ void MT2Looper::SetSignalRegions(){
 
   SRBase.SetName("srbase");
   SRBase.SetVar("mt2", 200, -1);
+  // SRBase.SetVar("mt2", 0, -1);
   SRBase.SetVar("j1pt", 30, -1);
   SRBase.SetVar("j2pt", 30, -1);
   SRBase.SetVar("deltaPhiMin", 0.3, -1);
@@ -268,6 +269,7 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVar("nlep", 0, 1);
   SRBase.SetVar("passesHtMet", 1, 2);
   SRBase.SetVarCRSL("mt2", 200, -1);
+  // SRBase.SetVarCRSL("mt2", 0, -1);
   SRBase.SetVarCRSL("j1pt", 30, -1);
   SRBase.SetVarCRSL("j2pt", 30, -1);
   SRBase.SetVarCRSL("deltaPhiMin", 0.3, -1);
@@ -3086,6 +3088,7 @@ bool MT2Looper::passTriggerSR() {
         t.HLT_PFHT800_PFMET75_PFMHT75 || 
         t.HLT_PFHT500_PFMET100_PFMHT100 || 
         t.HLT_PFMET120_PFMHT120 || 
+        t.HLT_PFMET120_PFMHT120_PFHT60 ||
         t.HLT_PFMETNoMu120_PFMHTNoMu120)
         return true;
 
@@ -3120,7 +3123,7 @@ bool MT2Looper::passTriggerDilepOF() {
        t.HLT_Mu37_Ele27_NonIso || 
        t.HLT_Mu27_Ele37_NonIso || 
        t.HLT_Photon200 || 
-       t.HLT_SingleMu_NonIso);
+       t.HLT_SingleMu_NonIso)
         return true;
 
     return false;

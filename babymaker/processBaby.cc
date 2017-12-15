@@ -194,6 +194,11 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2017D") && infile.Contains("PromptReco"))                 sample = Form("data_Run2017D_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2017E") && infile.Contains("PromptReco"))                 sample = Form("data_Run2017E_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2017F") && infile.Contains("PromptReco"))                 sample = Form("data_Run2017F_PromptReco_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017B") && infile.Contains("17Nov2017"))                 sample = Form("data_Run2017B_17Nov2017_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017C") && infile.Contains("17Nov2017"))                 sample = Form("data_Run2017C_17Nov2017_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017D") && infile.Contains("17Nov2017"))                 sample = Form("data_Run2017D_17Nov2017_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017E") && infile.Contains("17Nov2017"))                 sample = Form("data_Run2017E_17Nov2017_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017F") && infile.Contains("17Nov2017"))                 sample = Form("data_Run2017F_17Nov2017_%s" , outfileid.Data());
 
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());

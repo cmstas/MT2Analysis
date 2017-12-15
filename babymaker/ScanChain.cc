@@ -403,6 +403,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFMETNoMu100_PFMHTNoMu100 = passHLTTriggerPattern("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v");
       HLT_PFMETNoMu110_PFMHTNoMu110 = passHLTTriggerPattern("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v");
       HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");
+      HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 = passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v");
       HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v") || passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDLoose_v");
       HLT_PFMET100_PFMHT100         = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_v");
       HLT_PFMET110_PFMHT110         = passHLTTriggerPattern("HLT_PFMET110_PFMHT110_IDTight_v");
@@ -1493,6 +1494,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  float cand_pt = cms3.pfcands_p4().at(ipf).pt();
           int cand_pdgId = cms3.pfcands_particleId().at(ipf);
 
+	  if(cand_pt < 5) continue;
+
           if(cand_pdgId==22){
               pfPhot_pt_ordering.push_back(std::pair<int,float>(npfPhoton,cand_pt));
               npfPhoton++;
@@ -1501,7 +1504,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               vec_pfPhoton_phi.push_back(cms3.pfcands_p4().at(ipf).phi());
           }
 
-	  if(cand_pt < 50) continue;
 	  if(cand_pt < 300 && !(abs(cand_pdgId) == 13) ) continue;
 	  
 	  float absiso  = cms3.pfcands_trackIso().at(ipf);
