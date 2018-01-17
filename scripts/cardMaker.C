@@ -479,7 +479,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   // won't happen for default n_mt2bins and zinv_lastbin_hybrid values.
   TH1D* h_zinv(0); 
   if (dir_zinv != 0) {
-    h_zinv = = (TH1D*) f_zinv->Get(fullhistname);
+    h_zinv = (TH1D*) f_zinv->Get(fullhistname);
     if (h_zinv != 0) n_zinv = h_zinv->GetBinContent(mt2bin);
     if (h_zinv != 0) n_mt2bins = h_zinv->GetNbinsX();    
     // MC stat unc based on #Z/#g
@@ -945,8 +945,18 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   ofstream ofile;
   ofile.open(cardname);
 
+  // Uncorrelate error if nonzero CR events and zero SR events
+  bool uncorr_zinvDY = n_zinvDY_cr > 0 && n_zinvDY == 0;
+  bool uncorr_lostlep = n_lostlep_cr > 0 && n_lostlep == 0;
+  bool uncorr_qcd = n_qcd_cr > 0 && n_qcd == 0;
+
+  // Set alpha to 2.0 if zero cr events and zero alpha
+  bool zero_zinvDY = zinvDY_alpha == 0.0 && n_zinvDY_cr == 0.0;
+  bool zero_lostlep = lostlep_alpha == 0.0 && n_lostlep_cr == 0.0;
+  bool zero_qcd = qcd_crstat == 0.0 && n_qcd_cr == 0.0;
+
   // Allow ad hoc modification of counts and alphas by setting scale parameters.
-  // Set alphas = 0 to 2.0 (ad hoc) in cases with 0 control region counts for uncertainty calculation purposes.
+  // Set alphas = 0 to 2.0 (ad hoc) in certain cases 
   float sig_scale = 1.0;
   float n_sig_cor_recogenaverage_towrite=sig_scale * n_sig_cor_recogenaverage;
   float scale = 1.0;
@@ -954,9 +964,25 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   float n_lostlep_towrite=scale*n_lostlep;
   float n_qcd_towrite=scale*n_qcd;
   // If alpha is 0 then set it to 2.0
-  float zinvDY_alpha_towrite = ( (zinvDY_alpha > 0.0 || n_zinvDY_cr > 0) ? zinvDY_alpha : 2.0) * scale;
-  float lostlep_alpha_towrite = ( (lostlep_alpha > 0.0 || n_lostlep_cr > 0) ? lostlep_alpha : 2.0) * scale;
-  float qcd_crstat_towrite = ( (qcd_crstat > 0.0 || n_qcd_cr > 0) ? qcd_crstat : 2.0) * scale;
+  float zinvDY_alpha_towrite = ( (uncorr_zinvDY || zero_zinvDY) ? 2.0 : zinvDY_alpha) * scale;
+  float lostlep_alpha_towrite = ( (uncorr_lostlep || zero_lostlep) ? 2.0 : lostlep_alpha) * scale;
+  float qcd_crstat_towrite = ( (uncorr_qcd || zero_qcd) ? 2.0 : qcd_crstat) * scale;
+
+  float n_zinvDY_cr_towrite = n_zinvDY_cr;  
+  if (uncorr_zinvDY) {
+    name_zinvDY_crstat += "_" + mt2_str;
+    n_zinvDY_cr_towrite = 0;
+  }
+  float n_lostlep_cr_towrite = n_lostlep_cr;  
+  if (uncorr_lostlep) {
+    name_lostlep_crstat += "_" + mt2_str;
+    n_lostlep_cr_towrite = 0;
+  }
+  float n_qcd_cr_towrite = n_qcd_cr;  
+  if (uncorr_qcd) {
+    name_qcd_crstat += "_" + mt2_str;
+    n_qcd_cr_towrite = 0;
+  }
 
 
   ofile <<  "imax 1  number of channels"                                                    << endl;
@@ -991,7 +1017,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
 
   // ---- Zinv systs
   if (doZinvFromDY) {
-    ofile <<  Form("%s        gmN %.0f    -   %.5f   -   - ",name_zinvDY_crstat.Data(),n_zinvDY_cr,zinvDY_alpha_towrite)  << endl;
+    ofile <<  Form("%s        gmN %.0f    -   %.5f   -   - ",name_zinvDY_crstat.Data(),n_zinvDY_cr_towrite,zinvDY_alpha_towrite)  << endl;
     ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_alphaErr.Data(),zinvDY_alphaErr)  << endl;
     ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_purity.Data(),zinvDY_puritystat)  << endl;
     ofile <<  Form("%s        lnN    -   %.3f   -   - ",name_zinvDY_rsfof.Data(),zinvDY_rsfof)  << endl;
@@ -1035,7 +1061,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
     if (!doZinvFromDY) ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_jec.Data(),lostlep_jec)  << endl;
     ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_renorm.Data(),lostlep_renorm)  << endl;
   }
-  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr,lostlep_alpha_towrite)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    %.5f     - ",name_lostlep_crstat.Data(),n_lostlep_cr_towrite,lostlep_alpha_towrite)  << endl;
   ofile <<  Form("%s        lnN    -    -    %.3f    - ",name_lostlep_mcstat.Data(),lostlep_mcstat)  << endl;
   if (n_mt2bins > 1 && mt2bin >= lostlep_lastbin_hybrid)
     ofile <<  Form("%s    lnN    -    -   %.3f     - ",name_lostlep_shape.Data(),lostlep_shape)  << endl;
@@ -1052,7 +1078,7 @@ int printCard( string dir_str , int mt2bin , string signal, string output_dir, i
   }
   
   // ---- QCD systs
-  ofile <<  Form("%s        gmN %.0f    -    -    -   %.5f",name_qcd_crstat.Data(),n_qcd_cr,qcd_crstat_towrite)  << endl;
+  ofile <<  Form("%s        gmN %.0f    -    -    -   %.5f",name_qcd_crstat.Data(),n_qcd_cr_towrite,qcd_crstat_towrite)  << endl;
   if (njets_LOW == 1) {
     ofile <<  Form("%s        lnN    -    -    -   %.3f",name_qcd_alphaerr.Data(),qcd_alphaerr)  << endl;
   } else {
