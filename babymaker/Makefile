@@ -38,7 +38,7 @@ SOURCES = $(wildcard *.cc)
 OBJECTS = $(SOURCES:.cc=.o)
 LIB = libScanChain.so
 
-CORESOURCES = $(wildcard ../CORE/*.cc) $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc)  $(wildcard ../CORE/Tools/btagsf/*.cc)
+CORESOURCES = $(wildcard ../CORE/*.cc) $(wildcard ../CORE/Tools/*.cc) $(wildcard ../CORE/Tools/MT2/*.cc)  $(wildcard ../CORE/Tools/btagsf/*.cc) $(wildcard ../CORE/Tools/datasetinfo/*.cc)
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = libBabymakerCORE.so
 

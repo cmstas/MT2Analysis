@@ -81,10 +81,11 @@ int main(int argc, char **argv) {
   else if (infile.Contains("QCD_Pt-2400to3200") || infile.Contains("QCD_Pt_2400to3200")) sample = Form("qcd_pt2400to3200_%s"         , outfileid.Data());
   else if (infile.Contains("QCD_Pt-3200") || infile.Contains("QCD_Pt_3200"))             sample = Form("qcd_pt3200_%s"               , outfileid.Data());
   else if (infile.Contains("GJet_Pt-15to3000"))                                          sample = Form("gjet_pt15to3000_%s"          , outfileid.Data());
-  else if (infile.Contains("GJets_HT-100to200"))                                         sample = Form("gjet_ht100to200_%s"          , outfileid.Data());
-  else if (infile.Contains("GJets_HT-200to400"))                                         sample = Form("gjet_ht200to400_%s"          , outfileid.Data());
-  else if (infile.Contains("GJets_HT-400to600"))                                         sample = Form("gjet_ht400to600_%s"          , outfileid.Data());
-  else if (infile.Contains("GJets_HT-600toInf"))                                         sample = Form("gjet_ht600toInf_%s"          , outfileid.Data());
+  else if (infile.Contains("GJets_HT-40To100"))                                         sample = Form("gjet_ht100to200_%s"          , outfileid.Data());
+  else if (infile.Contains("GJets_HT-100To200"))                                         sample = Form("gjet_ht100to200_%s"          , outfileid.Data());
+  else if (infile.Contains("GJets_HT-200To400"))                                         sample = Form("gjet_ht200to400_%s"          , outfileid.Data());
+  else if (infile.Contains("GJets_HT-400To600"))                                         sample = Form("gjet_ht400to600_%s"          , outfileid.Data());
+  else if (infile.Contains("GJets_HT-600ToInf"))                                         sample = Form("gjet_ht600toInf_%s"          , outfileid.Data());
   else if (infile.Contains("TBarToDilepton_tW-channel"))                                 sample = Form("singletop_tbarWchanb_2l_%s"  , outfileid.Data());
   else if (infile.Contains("TBarToLeptons_s-channel"))                                   sample = Form("singletop_tbarschan_l_%s"    , outfileid.Data());
   else if (infile.Contains("TBarToLeptons_t-channel"))                                   sample = Form("singletop_tbartchan_l_%s"    , outfileid.Data());

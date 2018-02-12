@@ -37,6 +37,7 @@
 #include "../CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.icc"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/btagsf/BTagCalibrationStandalone.h"
+#include "../CORE/Tools/datasetinfo/getDatasetInfo.h"
 
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
@@ -69,7 +70,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // for merging prompt reco 2015 with reMINIAOD (default true)
 const bool removeEarlyPromptReco = false;
 // turn on to remove jets overlapping with leptons (default true)
@@ -85,6 +86,8 @@ const bool doRebal = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = true;
+
+DatasetInfoFromFile datasetInfoFromFile;
 
 babyMaker *thisBabyMaker; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
@@ -319,13 +322,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L2Relative_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L3Absolute_AK4PFchs.txt");
 	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV6_MC_Uncertainty_AK4PFchs.txt";
-      } else { // default: Summer16 corrections (Moriond 2017)
+      } else if (currentFileName.Contains("Summer16")) { // Summer16 corrections (Moriond 2017)
 	jetcorr_filenames_pfL1FastJetL2L3.clear();
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt");
 	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt");
 	jetcorr_uncertainty_filename = "jetCorrections/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt";
+      } else { // default: Fall17 corrections 
+        jetcorr_filenames_pfL1FastJetL2L3.clear();
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017_V4_MC_L1FastJet_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017_V4_MC_L2Relative_AK4PFchs.txt");
+	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017_V4_MC_L3Absolute_AK4PFchs.txt");
+	jetcorr_uncertainty_filename = "jetCorrections/Fall17_17Nov2017_V4_MC_Uncertainty_AK4PFchs.txt";
       }
+
 
       cout << "applying JEC from the following files:" << endl;
       for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
@@ -496,11 +506,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
 
       if (!removePostProcVars) {
-        evt_nEvts = cms3.evt_nEvts();
-        evt_scale1fb = cms3.evt_scale1fb();
-        evt_xsec = cms3.evt_xsec_incl();
-        evt_kfactor = cms3.evt_kfactor();
-        evt_filter = cms3.evt_filt_eff();
+        if(isCMS4){
+          if(!isData){
+            const string dataset_name = cms3.evt_dataset().at(0).Data();
+            evt_scale1fb = datasetInfoFromFile.getScale1fbFromFile(dataset_name, cms3_version.Data());
+            evt_nEvts    = datasetInfoFromFile.getnEventsTotalFromFile(dataset_name, cms3_version.Data());
+            evt_xsec     = datasetInfoFromFile.getXsecFromFile(dataset_name, cms3_version.Data());
+            evt_kfactor = 1.0;
+            evt_filter = 1.0;
+          }else{
+            evt_nEvts = 0;
+            evt_scale1fb = 1.0;
+            evt_xsec = 0.;
+            evt_kfactor = 1.;
+            evt_filter = 1.;
+          }
+
+        }else{
+          evt_nEvts = cms3.evt_nEvts();
+          evt_scale1fb = cms3.evt_scale1fb();
+          evt_xsec = cms3.evt_xsec_incl();
+          evt_kfactor = cms3.evt_kfactor();
+          evt_filter = cms3.evt_filt_eff();
+        }
       }
       if (!isData) {
         genWeight = cms3.genps_weight();
