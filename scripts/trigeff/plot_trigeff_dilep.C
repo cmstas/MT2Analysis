@@ -6,6 +6,7 @@
 #include "TString.h"
 #include "TCanvas.h"
 #include "TCut.h"
+#include "TLatex.h"
 #include "TEfficiency.h"
 #include "TStyle.h"
 
@@ -23,25 +24,51 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_json_271036-284044_23Sep2016ReReco_36p26fb/skim_dilep/") {
+void drawBinText(TCanvas *c, TH2D *num, TH2D *den){
+    c->cd();
+    TLatex text;
+    text.SetTextAlign(22);
+    text.SetTextFont(42);
+    text.SetTextSize(0.02);
+    text.SetTextColor(kBlack);
+    for(int i=1; i <= num->GetNbinsX(); i++){
+        for(int j=1; j <= num->GetNbinsY(); j++){
+            int N = (int) den->GetBinContent(i, j);
+            int k = (int) num->GetBinContent(i, j);
+            if(N==0)
+                continue;
+            double p = (double)k/N;
+            double errup = TEfficiency::ClopperPearson(N, k, 0.682689, 1) - p;
+            double errdn = p - TEfficiency::ClopperPearson(N, k, 0.682689, 0);
+            double binx = num->GetXaxis()->GetBinCenter(i);
+            double biny = num->GetYaxis()->GetBinCenter(j);
+            // cout << binx << " " << c->XtoPixel(binx) << endl;
+            text.DrawLatex(binx, biny, Form("%.2f+%.2f-%.2f (%d/%d)", p, errup, errdn, k, N));
+        }
+    }
+
+}
+
+void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-09-04_json_294927-306462_PromptReco_41p96fb_dilep_skim/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "36.5 fb^{-1}";
+  lumi_13TeV = "42.0 fb^{-1}";
   //  lumi_13TeV = "Period 2016H";
   
+  gStyle->SetOptStat(0);
   gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.12);
-  gStyle->SetPadLeftMargin(0.15);
-  gStyle->SetPadRightMargin(0.05);
+  gStyle->SetPadLeftMargin(0.10);
+  gStyle->SetPadRightMargin(0.10);
 
   gStyle->SetPaintTextFormat(".2f");  
 
   TH1::SetDefaultSumw2();
   
-  TString suffix = "_36p5fb_nologx";
+  TString suffix = "_41p96fb";
   
   TChain* t_ht = new TChain("mt2");
   TChain* t_met = new TChain("mt2");
@@ -49,23 +76,23 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   // t_ht->Add(Form("%s/*Run2016H*JetHT*.root", indir.Data()));
   // t_met->Add(Form("%s/*Run2016H*MET*.root", indir.Data()));
 
-  t_ht->Add(Form("%s/*Run2016*JetHT*.root", indir.Data()));
-  t_met->Add(Form("%s/*Run2016*MET*.root", indir.Data()));
+  t_ht->Add(Form("%s/*Run2017*JetHT*.root", indir.Data()));
+  t_met->Add(Form("%s/*Run2017*MET*.root", indir.Data()));
 
   TFile* f_out = new TFile(Form("trigeff_dilep%s.root",suffix.Data()),"RECREATE");
 
-  TCut base = "nVert > 0 && nJet30 >= 1 && Flag_globalTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && Flag_badMuonFilter && Flag_badChargedHadronFilter && isGolden";
+  TCut base = "nVert > 0 && nJet30 >= 1 && Flag_globalSuperTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && isGolden";
   TCut dilep = base + "nlep == 2 && lep_charge[0] * lep_charge[1] == -1 && (abs(lep_pdgId[0]) == 13 ||  lep_tightId[0] > 0 ) && (abs(lep_pdgId[1]) == 13 ||  lep_tightId[1] > 0 ) && lep_pt[1] > 20.";
   TCut ee = dilep + "abs(lep_pdgId[0]) == 11 && abs(lep_pdgId[1]) == 11";
   TCut mm = dilep + "abs(lep_pdgId[0]) == 13 && abs(lep_pdgId[1]) == 13";
   TCut em = dilep + "abs(lep_pdgId[0]) != abs(lep_pdgId[1])";
 
-  TCut trigs_ht = "HLT_PFHT900 || HLT_PFHT800 || HLT_PFHT600_Prescale || HLT_PFHT475_Prescale || HLT_PFHT350_Prescale || HLT_PFHT300_Prescale || HLT_PFHT200_Prescale || HLT_PFHT125_Prescale";
-  TCut trigs_met = "HLT_PFMETNoMu90_PFMHTNoMu90 || HLT_PFMETNoMu100_PFMHTNoMu100 || HLT_PFMETNoMu110_PFMHTNoMu110 || HLT_PFMETNoMu120_PFMHTNoMu120 || HLT_PFMET90_PFMHT90 || HLT_PFMET100_PFMHT100 || HLT_PFMET110_PFMHT110 || HLT_PFMET120_PFMHT120";
-  TCut trigs_ee = "HLT_DoubleEl || HLT_Photon165_HE10 || HLT_DoubleEl33";
+  TCut trigs_ht = "HLT_PFHT1050 || HLT_PFHT890_Prescale || HLT_PFHT780_Prescale || HLT_PFHT680_Prescale || HLT_PFHT590_Prescale || HLT_PFHT510_Prescale || HLT_PFHT430_Prescale || HLT_PFHT370_Prescale || HLT_PFHT250_Prescale || HLT_PFHT180_Prescale";
+  TCut trigs_met = "HLT_PFMETNoMu120_PFMHTNoMu120 || HLT_PFMET120_PFMHT120";
+  TCut trigs_ee = "HLT_DoubleEl || HLT_Photon200 || HLT_DoubleEl33";
   TCut trigs_mm = "HLT_DoubleMu || HLT_DoubleMu_NonIso || HLT_SingleMu_NonIso";
   //  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu8_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso";
-  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu8_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso || HLT_SingleMu_NonIso || HLT_Photon165_HE10";
+  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu12_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso || HLT_SingleMu_NonIso || HLT_Photon200";
   
   // const int nbins_lead = 12;
   // const Double_t bins_lead[nbins+1] = {20, 25, 30, 35, 40, 
@@ -73,11 +100,11 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   // const int nbins_subl = 12;
   // const Double_t bins_subl[nbins+1] = {20, 25, 30, 35, 40, 
   // 				       50, 60, 80, 100, 120, 150, 200, 300};
-  const int nbins_lead = 2;
-  const Double_t bins_lead[nbins_lead+1] = {100, 180, 300};
+  const int nbins_lead = 4;
+  const Double_t bins_lead[nbins_lead+1] = {100, 140, 180, 240, 300};
   
-  const int nbins_subl = 4;
-  const Double_t bins_subl[nbins_subl+1] = {30, 35, 100, 180, 300};
+  const int nbins_subl = 8;
+  const Double_t bins_subl[nbins_subl+1] = {35, 45, 55, 75, 100, 140, 180, 240, 300};
   
   // TH1D* h_ee_leadpt_denom_ht = new TH1D("h_ee_leadpt_denom_ht",";lead p_{T} [GeV]",nbins, bins);
   // TH1D* h_ee_leadpt_num_ht = (TH1D*) h_ee_leadpt_denom_ht->Clone("h_ee_leadpt_num_ht");
@@ -174,12 +201,12 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   h_ee_pt_2d_eff_ht->Divide(h_ee_pt_2d_denom_ht);
   h_ee_pt_2d_eff_ht->GetXaxis()->SetMoreLogLabels();
   h_ee_pt_2d_eff_ht->GetYaxis()->SetMoreLogLabels();
-  h_ee_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.0);
-  h_ee_pt_2d_eff_ht->Draw("col texte");
+  h_ee_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.4);
+  h_ee_pt_2d_eff_ht->Draw("colz");
+  drawBinText(c_ee_2d_ht, h_ee_pt_2d_num_ht, h_ee_pt_2d_denom_ht);
   
   CMS_lumi( c_ee_2d_ht, iPeriod, iPos );
   c_ee_2d_ht->SaveAs(Form("trigeff_dilep_ee_2d_ht%s.pdf",suffix.Data()));
-  c_ee_2d_ht->SaveAs(Form("trigeff_dilep_ee_2d_ht%s.eps",suffix.Data()));
   c_ee_2d_ht->SaveAs(Form("trigeff_dilep_ee_2d_ht%s.png",suffix.Data()));
 
   // TCanvas* c_ee_2d_met = new TCanvas("c_ee_2d_met","c_ee_2d_met");
@@ -218,12 +245,12 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   h_mm_pt_2d_eff_ht->Divide(h_mm_pt_2d_denom_ht);
   h_mm_pt_2d_eff_ht->GetXaxis()->SetMoreLogLabels();
   h_mm_pt_2d_eff_ht->GetYaxis()->SetMoreLogLabels();
-  h_mm_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.0);
-  h_mm_pt_2d_eff_ht->Draw("col texte");
+  h_mm_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.4);
+  h_mm_pt_2d_eff_ht->Draw("colz");
+  drawBinText(c_mm_2d_ht, h_mm_pt_2d_num_ht, h_mm_pt_2d_denom_ht);
   
   CMS_lumi( c_mm_2d_ht, iPeriod, iPos );
   c_mm_2d_ht->SaveAs(Form("trigeff_dilep_mm_2d_ht%s.pdf",suffix.Data()));
-  c_mm_2d_ht->SaveAs(Form("trigeff_dilep_mm_2d_ht%s.eps",suffix.Data()));
   c_mm_2d_ht->SaveAs(Form("trigeff_dilep_mm_2d_ht%s.png",suffix.Data()));
 
   // TCanvas* c_mm_2d_met = new TCanvas("c_mm_2d_met","c_mm_2d_met");
@@ -261,8 +288,9 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-08-12_j
   h_em_pt_2d_eff_ht->Divide(h_em_pt_2d_denom_ht);
   h_em_pt_2d_eff_ht->GetXaxis()->SetMoreLogLabels();
   h_em_pt_2d_eff_ht->GetYaxis()->SetMoreLogLabels();
-  h_em_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.0);
-  h_em_pt_2d_eff_ht->Draw("col texte");
+  h_em_pt_2d_eff_ht->GetYaxis()->SetTitleOffset(1.4);
+  h_em_pt_2d_eff_ht->Draw("colz");
+  drawBinText(c_em_2d_ht, h_em_pt_2d_num_ht, h_em_pt_2d_denom_ht);
   
   CMS_lumi( c_em_2d_ht, iPeriod, iPos );
   c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.pdf",suffix.Data()));

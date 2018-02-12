@@ -18,7 +18,7 @@ using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 50.;
-float rSFOF = 1.12;
+float rSFOF = 0.86;
 float rSFOFerr = 0.15;
 bool verbose = true;
 
@@ -575,11 +575,11 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       
       //Determine which inclusive template to use. If none works, this reverts to HybridSimple, taking template from its own TopoRegion 
       // Start from the Aggregate Regions (hardcoded, since they can partially overlap with the standard regions)
-      if (srname == "20") inclusiveTemplateName = "crdy20/h_mt2bins";  // self (2j, HT1000)
+      if (srname == "20") inclusiveTemplateName = "crdy20/h_mt2bins";  // self (2j, HT1200)
       else if (srname == "21") inclusiveTemplateName = "crdy21/h_mt2bins"; // self (2j, HT1500)
-      else if (srname == "22") inclusiveTemplateName = "crdy22/h_mt2bins"; // self (4j, HT1000)
+      else if (srname == "22") inclusiveTemplateName = "crdy22/h_mt2bins"; // self (4j, HT1200)
       else if (srname == "23") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21 
-      else if (srname == "24") inclusiveTemplateName = "crdy24/h_mt2bins"; // self (7J, HT1000)
+      else if (srname == "24") inclusiveTemplateName = "crdy24/h_mt2bins"; // self (7J, HT1200)
       else if (srname == "25") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
       else if (srname == "26") inclusiveTemplateName = "crdy20/h_mt2bins"; // from 20
       else if (srname == "27") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
@@ -609,7 +609,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseM/h_mt2bins46J"; 
 	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseM/h_mt2bins7J"; 
       }
-      else if (ht_LOW == 1000) {
+      else if (ht_LOW == 1200) {
 	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseH/h_mt2bins36J"; 
 	else if (njets_LOW == 2 && njets_HI==7)  inclusiveTemplateName = "crdybaseH/h_mt2bins26J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseH/h_mt2bins23J";
@@ -816,7 +816,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
 
 //_______________________________________________________________________________
-void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/"){
+void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-09-02_21p15fb"){
 
   //  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
   //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
@@ -829,7 +829,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
-  TFile* f_data = new TFile(Form("%s/data_Run2016.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2017.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
@@ -862,7 +862,7 @@ void ZinvMaker(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/o
   }
 
   //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
-  makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
+  // makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
    output_name = input_dir+"/zinvFromDY.root";
 

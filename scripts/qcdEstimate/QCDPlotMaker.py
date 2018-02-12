@@ -56,10 +56,10 @@ def makeRbPlot(h_mc, h_data, nj_reg, outfile):
     
 
 def makeFjPlot(h_mc, h_data, ht_reg, outfile):
-    ht_reg = ["ht250to450","ht450to575","ht575to1000",
-              "ht1000to1500","ht1500toInf","ht1000toInf"].index(ht_reg)
+    ht_reg = ["ht250to450","ht450to575","ht575to1200",
+              "ht1200to1500","ht1500toInf","ht1200toInf"].index(ht_reg)
 
-    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf"),(1000,"Inf")]
+    ht_bounds = [(250,450),(450,575),(575,1200),(1200,1500),(1500,"Inf"),(1200,"Inf")]
 
     h_mcerr = h_mc.Clone("h_mcerr")
 
@@ -107,10 +107,10 @@ def makeFjPlot(h_mc, h_data, ht_reg, outfile):
     
 
 def makeRphiPlot(h_all, h_qcd, fit, ht_reg, isData, outfile, fit_systUp=None, fit_systDown=None):
-    ht_reg = ["ht250to450","ht450to575","ht575to1000",
-              "ht1000to1500","ht1500toInf","ht1000toInf"].index(ht_reg)
+    ht_reg = ["ht250to450","ht450to575","ht575to1200",
+              "ht1200to1500","ht1500toInf","ht1200toInf"].index(ht_reg)
 
-    ht_bounds = [(250,450),(450,575),(575,1000),(1000,1500),(1500,"Inf"),(1000,"Inf")]
+    ht_bounds = [(250,450),(450,575),(575,1200),(1200,1500),(1500,"Inf"),(1200,"Inf")]
 
     # h_errBand = ROOT.TH1D("h_errBand","",294,30,1500)
     # h_errBand.SetFillColor(ROOT.kGray)
@@ -206,7 +206,7 @@ def drawHeaders(canvas, isData):
         text.SetTextAlign(31)
         text.SetTextSize(0.035)
         text.SetTextFont(42)
-        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(12.9, 'fb', 13))
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(42.0, 'fb', 13))
         cmsText = "CMS Preliminary"
     #CMS text
     text.SetTextSize(0.035)

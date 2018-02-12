@@ -3089,7 +3089,8 @@ bool MT2Looper::passTriggerSR() {
         t.HLT_PFHT500_PFMET100_PFMHT100 || 
         t.HLT_PFMET120_PFMHT120 || 
         t.HLT_PFMET120_PFMHT120_PFHT60 ||
-        t.HLT_PFMETNoMu120_PFMHTNoMu120)
+        t.HLT_PFMETNoMu120_PFMHTNoMu120 || 
+        t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60)
         return true;
 
     return false;

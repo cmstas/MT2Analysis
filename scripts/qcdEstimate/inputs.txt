@@ -1,2 +1,3 @@
-/home/users/fgolf/mt2/devel/MT2Analysis/QCDLooper/output/full2016
-/home/users/fgolf/mt2/devel/MT2Analysis/MT2looper/output/full2016
+/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/V00-09-04_41p96fb
+/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-09-04_41p96fb
+

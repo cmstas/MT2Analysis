@@ -24,7 +24,7 @@ const float hybrid_nevent_threshold = 50.;
 const float last_bin_relerr = 0.4; // relative extrapolation error in last bin
 
 const int n_htbins = 5;
-const float htbins[n_htbins+1] = {200, 450., 575., 1000., 1500., 3000.};
+const float htbins[n_htbins+1] = {200, 450., 575., 1200., 1500., 3000.};
 const int n_njbins = 4;
 const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
 const int n_nbjbins = 4;
@@ -90,7 +90,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     }
     
     TH1D* h_n_mt2bins = (TH1D*) f_lostlep->Get(n_mt2bins_name);
-    const int n_mt2bins = h_n_mt2bins->GetBinContent(1);
+    const int n_mt2bins = histMap["h_lostlepMC_sr"]->GetNbinsX();
     float* mt2bins = new float[n_mt2bins+1];
     for(int i=0; i<=(n_mt2bins); i++){
       //std::cout << "bin edge = " << h_lostlep_sr->GetBinLowEdge(i+1) << std::endl;
@@ -311,10 +311,11 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     // ------------------------------------------
 
     // only needed if we have to create an empty histogram for the prediction
-    delete mt2bins;
+    delete[] mt2bins;
 
     if (h_lostlepDD_sr->GetNbinsX() != h_lostlepDD_cr->GetNbinsX() ) {
       cout<<"WARNING: different binning for histograms "<<fullhistname<<endl;
+      cout << h_lostlepDD_sr->GetNbinsX() << " " << h_lostlepDD_cr->GetNbinsX() << " " << n_mt2bins << endl;;
       continue;
     }
     
@@ -481,7 +482,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
     for (int ibin = 1; ibin <= h_lostlepMC_cr_allbins->GetNbinsX(); ++ibin) {
       // scale by relative error from the standard MT2 binning plot
       int sig_mt2bin = pred->FindBin(h_lostlepMC_cr_allbins->GetBinLowEdge(ibin));
-      float relvar = (pred->GetBinContent(sig_mt2bin) > 0.) ? (MCExtrap->GetBinContent(sig_mt2bin) / pred->GetBinContent(sig_mt2bin)) : 0.;
+      float relvar = (pred->GetBinContent(sig_mt2bin) != 0.) ? (MCExtrap->GetBinContent(sig_mt2bin) / pred->GetBinContent(sig_mt2bin)) : 0.;
       h_lostlepMC_rescaled_cr_allbins_MCExtrapErr->SetBinContent( ibin, h_lostlepMC_rescaled_cr_allbins->GetBinContent(ibin) * relvar );
     }
     
@@ -534,7 +535,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(string input_dir = "/home/users/jgran/temp/update/MT2Analysis/MT2looper/output/V00-00-12/", string dataname = "lostlep"){
+void lostlepMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-09-04_41p96fb", string dataname = "data_Run2017"){
 
   string output_name = input_dir+"/lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;

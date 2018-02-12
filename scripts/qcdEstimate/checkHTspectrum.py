@@ -3,19 +3,19 @@
 
 import ROOT
 
-justPlot = False
+justPlot = True
 
 ## method = 1 will used hard-coded effective prescale values (enter these below)
 ## method = 2 will use the prescale values stored in the babies on an event-by-event basis
 method = 2
 
-triggers = ["PFHT180_Prescale", "PFHT370_Prescale", "PFHT430_Prescale", "PFHT510_Prescale", "PFHT590_Prescale", "PFHT680_Prescale", "PFHT780_Prescale", "PFHT890_Prescale", "PFHT1050"]
-ht_cuts = [240, 440, 520, 620, 700, 800, 900, 1000, 1200, 1000000]
-eff_prescales = [1961, 770, 331, 152, 74.3, 47.3, 27.6, 15.2, 1]
+triggers = ["PFHT180_Prescale", "PFHT250_Prescale", "PFHT370_Prescale", "PFHT430_Prescale", "PFHT510_Prescale", "PFHT590_Prescale", "PFHT680_Prescale", "PFHT780_Prescale", "PFHT890_Prescale", "PFHT1050"]
+ht_cuts = [240, 320, 440, 520, 620, 700, 800, 900, 1000, 1200, 1000000]
+eff_prescales = [2377, 2299, 772, 293, 158, 77.5, 46.5, 26.0, 13.9, 1]
 
 if not justPlot:
     c = ROOT.TChain("mt2")
-    c.Add("/nfs-6/userdata/mt2/RebalanceAndSmear_V00-09-02_json_294927-301997_PromptReco_13p88fb/*Run2017*JetHT*.root")
+    c.Add("/nfs-6/userdata/mt2/V00-09-04_json_294927-306462_PromptReco_41p96fb/*Run2017*JetHT*.root")
     
     hs = [ROOT.TH1D("h_"+s,"",100,0,2000) for s in triggers]
     
@@ -42,7 +42,7 @@ fin = ROOT.TFile("htSpect_meth{0}.root".format(method))
 
 hs = [fin.Get("h_"+s) for s in triggers]
 
-cols = [ROOT.kAzure+7, ROOT.kRed-7, ROOT.kSpring-5, ROOT.kOrange-2, ROOT.kMagenta-4, ROOT.kCyan-7, ROOT.kOrange+7, ROOT.kTeal+3, ROOT.kGray]
+cols = [ROOT.kAzure+7, ROOT.kRed-7, ROOT.kSpring-5, ROOT.kOrange-2, ROOT.kMagenta-4, ROOT.kCyan-7, ROOT.kOrange+7, ROOT.kTeal+3, ROOT.kMagenta+3, ROOT.kGray, ]
 
 c = ROOT.TCanvas()
 c.SetLogy()
@@ -51,7 +51,7 @@ if method==1:
     hs[0].SetTitle("effective prescales")
 if method==2:
     hs[0].SetTitle("prescales vals from cms4")
-hs[0].GetYaxis().SetRangeUser(1e4, 1e9)
+hs[0].GetYaxis().SetRangeUser(1e4, 6e9)
 hs[0].GetXaxis().SetNdivisions(510,0)
 hs[0].GetXaxis().SetTitle("H_{T} [GeV]")
 hs[0].GetYaxis().SetTitle("Events / 20 GeV")

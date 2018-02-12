@@ -7,7 +7,7 @@ if not justplot:
   ROOT.gROOT.SetBatch(1)
 
   c = ROOT.TChain("mt2")
-  c.Add("/nfs-6/userdata/mt2/RebalanceAndSmear_V00-09-02_json_294927-301997_PromptReco_13p88fb/*Run2017*JetHT*.root")
+  c.Add("/nfs-6/userdata/mt2/V00-09-04_json_294927-306462_PromptReco_41p96fb/*Run2017*JetHT*.root")
   c.SetBranchStatus("*",0)
   c.SetBranchStatus("HLT_PFHT*",1)
   c.SetBranchStatus("isGolden",1)
@@ -254,8 +254,8 @@ leg.SetFillStyle(0)
 leg.SetBorderSize(0)
 leg.Draw()
 
-c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2017_v2.pdf")
-c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2017_v2.png")
+c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2017.pdf")
+c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2017.png")
 
 raw_input()
 
