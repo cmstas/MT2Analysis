@@ -10,6 +10,13 @@ cd MT2Analysis
 source setup.sh
 ```
 
+or, to get the short track spinoff analysis instead
+``` bash
+cd MT2Analysis
+git checkout ShortTrack
+source setup.sh
+```
+
 ## Babymaker
 ### For a test run
 ``` bash
