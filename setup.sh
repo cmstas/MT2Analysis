@@ -4,8 +4,6 @@
 export SCRAM_ARCH=slc6_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-HOMEDIR=$(pwd)
-
 echo "[setup] Checking out CMSSW_8_0_26"
 cmsrel CMSSW_8_0_26
 cd CMSSW_8_0_26/src
