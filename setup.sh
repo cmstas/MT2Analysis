@@ -4,6 +4,8 @@
 export SCRAM_ARCH=slc6_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
+HOMEDIR=$(pwd)
+
 echo "[setup] Checking out CMSSW_8_0_26"
 cmsrel CMSSW_8_0_26
 cd CMSSW_8_0_26/src
@@ -15,10 +17,8 @@ cd ShortTrackNtuplizer
 git checkout dpg
 cd HistoAnalyzer
 scram b
-ln  $(pwd)/../../../.. MT2AnalysisHome
 
-cd MT2AnalysisHome
-ln $(pwd)/CMSSW_8_0_26/src/ShortTrackNtuplizer babymakerST
+cd ../../../..
 
 echo "Checking for CORE..."
 if [ -d /home/users/$USER/CORE ]
