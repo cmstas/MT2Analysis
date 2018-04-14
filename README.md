@@ -10,7 +10,7 @@ cd MT2Analysis
 source setup.sh
 ```
 
-## Babymaker
+## MT2 Babymaker
 ### For a test run
 ``` bash
 cd babymaker
@@ -60,3 +60,8 @@ root -b -q cardMaker.C+  # to compile
 
 ### Run limits
 See instructions in `README` inside the `limits/batchsubmit` subdirectory.
+
+### ShortTrack Babymaker and Friending
+This needs to run on AOD in 2016, so the workflow is a little different. 
+Additionally, the babies need to be sorted and merged with MT2 babies.
+Use the babymakerST link installed by setup.sh to go to the Short Track babymaker installation and follow the README there.

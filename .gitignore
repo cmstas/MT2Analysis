@@ -18,3 +18,5 @@ CMSSW_8*/*
 scripts/cards*
 *.eps
 *.png
+babymaker/batchsubmit/job_input/*
+babymaker/batchsubmit/babies/*
