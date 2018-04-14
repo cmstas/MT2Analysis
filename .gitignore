@@ -20,3 +20,5 @@ scripts/cards*
 *.png
 babymaker/batchsubmit/job_input/*
 babymaker/batchsubmit/babies/*
+CORE
+babymakerST

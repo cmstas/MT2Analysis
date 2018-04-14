@@ -10,9 +10,8 @@ cd CMSSW_8_0_26/src
 cmsenv
 
 echo "[setup] Installing Short Track Babymaker"
-mkdir -p ShortTrackNtuplizer
+git clone https://github.com/mmasciov/shortTrackNtuplizer.git ShortTrackNtuplizer
 cd ShortTrackNtuplizer
-git clone https://github.com/mmasciov/shortTrackNtuplizer.git
 git checkout dpg
 cd HistoAnalyzer
 scram b
