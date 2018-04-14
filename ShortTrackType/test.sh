@@ -16,9 +16,9 @@ INDIR_UNSKIMMED=/nfs-6/userdata/dpgilber/MT2_ST_Friends
 # 0 = SR, 1 = CRQCD, 2 = CRSL, 3 = CRDY
 #REGION=1
 
-declare -a REGIONS=(1)
-declare -a SELECTIONS=(00001)
-declare -a Samples=(ttsl_fromT ttsl_fromTbar)
+declare -a REGIONS=(2)
+declare -a SELECTIONS=(10000)
+declare -a Samples=(ttdl)
 
 for SELECTION in ${SELECTIONS[@]}; do
     for REGION in ${REGIONS[@]}; do

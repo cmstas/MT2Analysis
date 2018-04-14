@@ -2,6 +2,12 @@ import os
 import sys
 
 d_ds2name = {
+    "corrupted" : {
+        "/DoubleEG/Run2016B-03Feb2017_ver2-v2/MINIAOD"        : "data_Run2016B_DoubleEG_03Feb2017",        
+        "/MuonEG/Run2016B-03Feb2017_ver2-v2/MINIAOD"          : "data_Run2016B_MuonEG_03Feb2017",
+        "/SingleMuon/Run2016B-03Feb2017_ver2-v2/MINIAOD"      : "data_Run2016B_SingleMuon_03Feb2017",        
+        "/DoubleEG/Run2016H-03Feb2017_ver2-v1/MINIAOD"       : "data_Run2016H_DoubleEG_03Feb2017_ver2-v1",
+},
     "backgrounds": {
 ### Wjets
         "/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"                         : "wjets_incl",

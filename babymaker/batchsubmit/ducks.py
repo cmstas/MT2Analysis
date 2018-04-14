@@ -5,7 +5,8 @@ import params as p
 import mt2 as mt2
 
 # set tag
-mt2.tag = "V00-08-15"
+#mt2.tag = "V00-08-15"
+mt2.tag = "V00-08-18_remake"
 
 # make instructions
 instructions = []
@@ -13,7 +14,8 @@ instructions = []
 ##
 ## make instructions by class of sample
 ##
-samples_types = ["backgrounds", "data", "scans"]
+samples_types = ["corrupted"]
+#samples_types = ["backgrounds", "data", "scans"]
 #samples_types = ["scans"]
 for stype in samples_types:
     for ds in mt2.d_ds2name[stype].keys():
@@ -36,6 +38,9 @@ p.merging_scripts = mt2.merging_scripts
 p.baby_merged_dir = mt2.baby_merged_dir
 p.merge_babies_on_condor = mt2.merge_babies_on_condor
 p.exit_when_done = True
+
+p.data2016_nebraska = True
+p.do_cms3 = True
 
 run.main(instructions=instructions, params=p)
 

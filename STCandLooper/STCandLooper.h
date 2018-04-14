@@ -1,12 +1,11 @@
-#ifndef SHORTTRACKTYPE_H
-#define SHORTTRACKTYPE_H
+#ifndef STCANDLOOPER_H
+#define STCANDLOOPER_H
 
 // C++
 #include <iostream>
 #include <cmath>
 #include <sstream>
 #include <string>
-#include <sstream>
 #include <stdlib.h>
 #include <vector>
 
@@ -16,19 +15,17 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TChain.h"
-#include "TString.h"
 
 #include "../CORE/Tools/utils.h"
 
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sttree.h"
 
-class ShortTrackType {
+class STCandLooper {
  public:
-  ShortTrackType();
-  ~ShortTrackType();
-  std::string StringSelection(int selection, int region, bool isWjetsIncl, bool isDYjetsIncl);
-  int loop(char* indir, char* sample, char* unskimmed_dir, int selection, int region);
+  STCandLooper();
+  ~STCandLooper();
+  int loop(char* indir, char* sample, int selectionMode, int vetoMode);
 };
 
 #endif

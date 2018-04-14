@@ -7,7 +7,7 @@ LOGDIR=logs
 
 mkdir -p ${LOGDIR}
 
-# bitwise: <doNt><doEta><doNj><doLep><doMT2><doDphiDiff><doHTMET><doHT>
+# bitwise: <doWpt><doNt><doEta><doNj><doLep><doMT2><doDphiDiff><doHTMET><doHT>
 # if any bits are high, do Nj > 0
 #SELECTION=000000 # Inclusive
 #SELECTION=000001 # HT
@@ -29,7 +29,10 @@ mkdir -p ${LOGDIR}
 #declare -a SELECTIONS=(1010001) # HTLepEta
 #declare -a SELECTIONS=(0 0010001 1 0010011) # HTMETLep HTLep HT
 #declare -a SELECTIONS=(0 00010001) # HTLep
-declare -a SELECTIONS=(0 00010001 10001 1) # HTLep, Lep, HT
+#declare -a SELECTIONS=(0 10001 10000 1 100000000 100000001 100010001) # HTLep, Lep, HT, Wpt, HTLepWpt
+#declare -a SELECTIONS=(10000 0) # uaf10
+#declare -a SELECTIONS=(1) # uaf7
+declare -a SELECTIONS=(10001) # uaf4
 declare -a Samples=(ttsl_fromT ttsl_fromTbar wjets_incl zinv_zpt100to200 zinv_zpt200toInf qcd_ht300to500 qcd_ht500to700 qcd_ht700to1000 qcd_ht1000to1500 qcd_ht1500to2000_ext1 qcd_ht2000toInf dyjetstoll_incl_ext1 ttdl)
 #declare -a Samples=(ttdl)
 #declare -a Samples=(wjets_incl)

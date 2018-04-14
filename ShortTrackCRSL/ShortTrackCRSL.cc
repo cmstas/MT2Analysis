@@ -17,6 +17,7 @@ const int maskLep = 1<<4;
 const int maskNj = 1<<5;
 const int maskEta = 1<<6;
 const int maskNt = 1<<7;
+const int maskWZpt = 1<<8;
 
 bool doIncl = false;
 bool doNj = false;
@@ -27,6 +28,7 @@ bool doMT2 = false;
 bool doLep = false;
 bool doEta = false;
 bool doNt = false;
+bool doWZpt = false;
 
 int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   doIncl = selection == 0;
@@ -38,6 +40,7 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   doNj = maskNj & selection;
   doEta = maskEta & selection;
   doNt = maskNt & selection;
+  doWZpt = maskWZpt & selection;
 
   string outdir = "";
   if (doIncl) outdir = "incl";
@@ -50,6 +53,7 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
     if (doNj) outdir += "Nj";
     if (doEta) outdir += "Eta";
     if (doNt) outdir += "Nt";
+    if (doWZpt) outdir += "WZpt";
   }
 
   string mkdir = "mkdir -p output_CRSL/" + outdir;
@@ -71,6 +75,7 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   string wjets_incl = "wjets_incl";
   string sample_str = sample;
   bool isWjetsIncl = ! wjets_incl.compare(sample_str);
+  //  bool isDYjetsIncl = ! wjets_incl.compare(sample_str);
 
   // sttree is a subtype of mt2tree. mt2tree functions can be called on an sttree, but not the reverse.
   // This line incorporates branches from tree_mt2 into tree_st.
@@ -94,6 +99,10 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   TH1::SetDefaultSumw2(true);
   TH1F h_unskimmed("h_unskimmed","Events in Unskimmed File",1,0,1);
 
+  TH1F h_unskimmed_byNt("h_unskimmed_byNt","Number of Short Track Candidates (Incl in N_{ST})",5,0,5);
+  TH1F h_el_byNt("h_el_byNt","Number of Short Track Candidates (N_{ST} > 0, Electrons Matched)",5,0,5);
+  TH1F h_fake_byNt("h_fake_byNt","Number of Short Track Candidates (N_{ST} > 0, Fakes Only)",5,0,5);
+
   // all
   TH1F h_el_pix("h_el_pix","Electron STs, Pixel Layers",2,2,4);
   TH1F h_el_ext("h_el_ext","Electron STs, Non-Pixel Layers",8,0,8);
@@ -112,23 +121,23 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   TH1F h_fake_nt("h_fake_nt","N_{t}",10,0,10);
 
   // isshort
-  TH1F h_el_pix_s("h_el_pix_s","Electron STs, Pixel Layers",2,2,4);
-  TH1F h_el_ext_s("h_el_ext_s","Electron STs, Non-Pixel Layers",8,0,8);
-  TH1F h_el_tot_s("h_el_tot_s","Electron STs, Total Layers",11,0,11);
-  TH1F h_fake_pix_s("h_fake_pix_s","(Mostly) Fake STs, Pixel Layers",2,2,4);
-  TH1F h_fake_ext_s("h_fake_ext_s","(Mostly) Fake STs, Non-Pixel Layers",8,0,8);
-  TH1F h_fake_tot_s("h_fake_tot_s","(Mostly) Fake STs, Total Layers",11,0,11);
-  TH2F h_el_etaphi_s("h_el_etaphi_s","Electron STs, #eta and #phi",1200,-2.4,2.4,1200,-3.14,3.14);
-  TH2F h_fake_etaphi_s("h_fake_etaphi_s","(Mostly) Fake STs, #eta and #phi",1200,-2.4,2.4,1200,-3.14,3.14);
-  TH1F h_el_ratio_s("h_el_ratio_s","Gen e / ST p_T Ratio",15,0.5,2.0);
-  TH1F h_el_met_s("h_el_met_s","Electron STs, MET",20,0,300);
-  TH1F h_fake_met_s("h_fake_met_s","(Mostly) Fake STs, MET",20,0,300);
+  TH1F h_el_pix_p("h_el_pix_p","Electron STs, Pixel Layers",2,2,4);
+  TH1F h_el_ext_p("h_el_ext_p","Electron STs, Non-Pixel Layers",8,0,8);
+  TH1F h_el_tot_p("h_el_tot_p","Electron STs, Total Layers",11,0,11);
+  TH1F h_fake_pix_p("h_fake_pix_p","(Mostly) Fake STs, Pixel Layers",2,2,4);
+  TH1F h_fake_ext_p("h_fake_ext_p","(Mostly) Fake STs, Non-Pixel Layers",8,0,8);
+  TH1F h_fake_tot_p("h_fake_tot_p","(Mostly) Fake STs, Total Layers",11,0,11);
+  TH2F h_el_etaphi_p("h_el_etaphi_p","Electron STs, #eta and #phi",1200,-2.4,2.4,1200,-3.14,3.14);
+  TH2F h_fake_etaphi_p("h_fake_etaphi_p","(Mostly) Fake STs, #eta and #phi",1200,-2.4,2.4,1200,-3.14,3.14);
+  TH1F h_el_ratio_p("h_el_ratio_p","Gen e / ST p_T Ratio",15,0.5,2.0);
+  TH1F h_el_met_p("h_el_met_p","Electron STs, MET",20,0,300);
+  TH1F h_fake_met_p("h_fake_met_p","(Mostly) Fake STs, MET",20,0,300);
 
-  TH1F h_all_chDR_s("h_all_chDR_s","All STs, Nearest Charged DR",20,0,1.0);
-  TH1F h_all_anyDR_s("h_all_anyDR_s","All STs, Nearest DR",20,0,1.0);
-  TH1F h_all_chID_s("h_all_chID_s","All STs, Nearest Charged pdgID",250,0,250);
-  TH1F h_all_anyID_s("h_all_anyID_s","All STs, Nearest pdgID",250,0,250);
-  TH1F h_all_nearby_s("h_all_nearby_s","All STs, #DeltaR of Nearest Long Track",20,0,1.0);
+  TH1F h_all_chDR_p("h_all_chDR_p","All STs, Nearest Charged DR",20,0,1.0);
+  TH1F h_all_anyDR_p("h_all_anyDR_p","All STs, Nearest DR",20,0,1.0);
+  TH1F h_all_chID_p("h_all_chID_p","All STs, Nearest Charged pdgID",250,0,250);
+  TH1F h_all_anyID_p("h_all_anyID_p","All STs, Nearest pdgID",250,0,250);
+  TH1F h_all_nearby_p("h_all_nearby_p","All STs, #DeltaR of Nearest Long Track",20,0,1.0);
 
   // istrkshort
   TH1F h_el_pix_ts("h_el_pix_ts","Electron STs, Pixel Layers",2,2,4);
@@ -157,6 +166,8 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   TH1F h_fake_met_tl("h_fake_met_tl","(Mostly) Fake STs, MET",20,0,300);
 
   for( unsigned int event = 0; event < nEventsTree; ++event) {
+
+    if (event % 100000 == 0) cout << (float) event / nEventsTree * 100 << "%" << endl;
     
     // AddFriend above makes this pull both mt2 and st branches for the same event, assuming the trees were properly (identically) sorted. 
     t.GetEntry(event); 
@@ -184,7 +195,7 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
       continue;
     }
 
-    if (isWjetsIncl) {
+    if (isWjetsIncl && doWZpt) {
       bool foundGoodW = false;
       for (int i = 0; i < t.ngenStat23 && ! foundGoodW; i++) {
 	if (abs(t.genStat23_pdgId[i]) != 24) continue;
@@ -220,9 +231,93 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
     int i_lowMT_trk = -1;
     int i_lowMT_lep = -1;
     if (doLep && t.nLepLowMT != 1) continue;
+    // Find the lowMT lep
+    float lmt_phi = -999;
+    float lmt_eta = -999;
+    float met_pt = t.met_pt;
+    float met_phi = t.met_phi;      
+    for (int ilep = 0; ilep < t.nlep; ilep++) {
+      float lep_pt = t.lep_pt[ilep];
+      float lep_phi = t.lep_phi[ilep];
+      float lep_eta = t.lep_eta[ilep];
+      float mt = MT(lep_pt,lep_phi,met_pt,met_phi);
+      if (mt < 100) {
+	// This guy is the LowMT lepton.
+	lmt_phi = lep_phi;
+	lmt_eta = lep_eta;
+	i_lowMT_lep = ilep;
+	break;
+      }
+    }
+    float smallestDR = 10;       
+    for (int itrk = 0; itrk < t.ntracks; itrk++) {
+      float trk_eta = t.track_eta[itrk];
+      float trk_phi = t.track_phi[itrk];
+      float thisDR = DeltaR(lmt_eta,lmt_phi,trk_eta,trk_phi);
+      if (thisDR < smallestDR) {
+	smallestDR = thisDR;
+	i_lowMT_trk = itrk;	      
+      }
+    }
 
     // This event passes all non-short track selections
     h_unskimmed.Fill(0.5,w_);
+
+    // The LowMT lepton's track can be as soft as 5 GeV, but we only store tracks > 10 GeV (and short tracks need 15 GeV)
+    // So, there is a chance, but not guaranteed, that the lowMT lepton's track is contributing to our 10 GeV track count.
+    // Subtract it if so.
+    /*
+    int ntracks = t.ntracks;
+    if (doLep) {
+      float trk_eta = t.track_eta[i_lowMT_trk];
+      float trk_phi = t.track_phi[i_lowMT_trk];
+      float lep_eta = t.lep_phi[i_lowMT_lep];
+      float lep_phi = t.lep_phi[i_lowMT_lep];
+      float DR = DeltaR(trk_eta,trk_phi,lep_eta,lep_phi);
+      if (DR < 0.1) {
+	ntracks--; // If the lowMT lep is matched to a track in the collection, remove from ntracks
+	// check for plausibility
+	if (t.lep_pt[i_lowMT_lep] < 10) {
+	  cout << "Track removed from count despite LowMT lepton having pT < 10 GeV" << endl;
+	  cout << "Track had pT = " << t.track_pt[i_lowMT_trk] << endl;
+	}
+	
+      }
+      }*/
+    
+    int nShortTrackCandidates = 0;
+    for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
+      if (t.track_pt[i_trk]>10 && fabs(t.track_eta[i_trk])<2.4 && fabs(t.track_dxy[i_trk])<0.03 && fabs(t.track_dz[i_trk])<0.06 
+	  && (t.track_sumNeuH0p05[i_trk]+t.track_sumPh0p05[i_trk])<15 && (t.track_sumNeuH0p05[i_trk]+t.track_sumPh0p05[i_trk])/t.track_pt[i_trk]<0.2 
+	  && t.track_sumChP[i_trk]<15 && t.track_sumChP[i_trk]/t.track_pt[i_trk]<0.2 && !(t.track_pfDR[i_trk]<0.1 && (abs(t.track_pfPdgId[i_trk])==11 || abs(t.track_pfPdgId[i_trk])==13))
+	  && t.track_reliso[i_trk]<0.4 && t.track_iso[i_trk]<15.0 && t.track_ptErr[i_trk]/(t.track_pt[i_trk]*t.track_pt[i_trk])<0.2 && t.track_highPurity[i_trk]) {
+
+	bool lepOverlap = false;
+	// Check reco leps
+	for (int i_lep = 0; i_lep < t.nlep; i_lep++) {
+	  if (DeltaR(t.lep_eta[i_lep],t.lep_phi[i_lep],t.track_eta[i_trk],t.track_phi[i_trk]) < 0.1) {
+	    lepOverlap = true;
+	    break;
+	  }
+	}
+	if (lepOverlap) continue; // short track candidates can't overlap with leptons
+	// If we get here, no reco leps overlapped. Now check PF leps
+	for (int i_isoT = 0; i_isoT < t.nlep; i_isoT++) {
+	  int pdgId = abs(t.isoTrack_pdgId[i_isoT]);
+	  if (pdgId != 11 && pdgId != 13) continue;
+	  if (DeltaR(t.isoTrack_eta[i_isoT],t.isoTrack_phi[i_isoT],t.track_eta[i_trk],t.track_phi[i_trk]) < 0.1) {
+	    lepOverlap = true;
+	    break;
+	  }
+	}
+	if (lepOverlap) continue;
+	nShortTrackCandidates++;
+      }
+    }
+    
+    
+    h_unskimmed_byNt.Fill(nShortTrackCandidates,w_);
+
     if (t.nshorttracks == 0) continue;
 
     // From here on, there's a short track in this event
@@ -259,40 +354,34 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
       return 3;
     }
     
-    // Now we need to exclude the event if its short track is the LowMT lepton's track
-    float lmt_phi = -999;
-    float lmt_eta = -999;
-    float met_pt = t.met_pt;
-    float met_phi = t.met_phi;      
-    for (int ilep = 0; ilep < t.nlep; ilep++) {
-      float lep_pt = t.lep_pt[ilep];
-      float lep_phi = t.lep_phi[ilep];
-      float lep_eta = t.lep_eta[ilep];
-      float mt = MT(lep_pt,lep_phi,met_pt,met_phi);
-      if (mt < 100) {
-	// This guy is the LowMT lepton.
-	lmt_phi = lep_phi;
-	lmt_eta = lep_eta;
-	i_lowMT_lep = ilep;
+    bool lepOverlap = false;
+    for (int i_lep = 0; i_lep < t.nlep; i_lep++) {
+      if (DeltaR(t.lep_eta[i_lep],t.lep_phi[i_lep],st_eta,st_phi) < 0.1) {
+	lepOverlap = true;
 	break;
       }
     }
-    // If the closest track is the short track, don't count this event as a short track event
-    float smallestDR = 10;       
-    for (int itrk = 0; itrk < t.ntracks; itrk++) {
-      float trk_eta = t.track_eta[itrk];
-      float trk_phi = t.track_phi[itrk];
-      float thisDR = DeltaR(lmt_eta,lmt_phi,trk_eta,trk_phi);
-      if (thisDR < smallestDR) {
-	smallestDR = thisDR;
-	i_lowMT_trk = itrk;	      
+    if (lepOverlap) continue; // short track candidates can't overlap with leptons
+    // If we get here, no reco leps overlapped. Now check PF leps
+    for (int i_isoT = 0; i_isoT < t.nlep; i_isoT++) {
+      int pdgId = abs(t.isoTrack_pdgId[i_isoT]);
+      if (pdgId != 11 && pdgId != 13) continue;
+      if (DeltaR(t.isoTrack_eta[i_isoT],t.isoTrack_phi[i_isoT],st_eta,st_phi) < 0.1) {
+	lepOverlap = true;
+	break;
       }
     }
+    if (lepOverlap) continue;
+
+    /*    
+    // Now we need to exclude the event if its short track is the LowMT lepton's track.
+    // If the closest track is the short track, don't count this event as a short track event
     if (i_lowMT_trk == st_idx) {
       cout << "Disqualifed short track: Low MT lepton." << endl;
       continue; // Best match is the short track, disqualified!
     }
-    
+    */    
+
     // Search for disappearing electron close to track.
     // Else assume track is fake since we don't have non-lep gen particles in babies.
     bool e_match = false;
@@ -309,11 +398,11 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
       break;
     }
 
-    if (t.track_isshort[st_idx]) {
-      h_all_chDR_s.Fill(abs(t.track_pfDR[st_idx]),w_);
-      h_all_anyDR_s.Fill(abs(t.track_anypfDR[st_idx]),w_);
-      h_all_chID_s.Fill(abs(t.track_pfPdgId[st_idx]),w_);
-      h_all_anyID_s.Fill(abs(t.track_anypfPdgId[st_idx]),w_);
+    if (t.track_ispixelonly[st_idx]) {
+      h_all_chDR_p.Fill(abs(t.track_pfDR[st_idx]),w_);
+      h_all_anyDR_p.Fill(abs(t.track_anypfDR[st_idx]),w_);
+      h_all_chID_p.Fill(abs(t.track_pfPdgId[st_idx]),w_);
+      h_all_anyID_p.Fill(abs(t.track_anypfPdgId[st_idx]),w_);
       float nearestDR = 10;
       for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
 	if (t.track_isshort[i_trk]) continue;
@@ -324,7 +413,7 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
 	  nearestDR = DR;
 	}
       }
-      h_all_nearby_s.Fill(nearestDR,w_);
+      h_all_nearby_p.Fill(nearestDR,w_);
     }
 
     if (e_match) {
@@ -332,13 +421,16 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
       h_el_ext.Fill(st_ext,w_);
       h_el_tot.Fill(st_tot,w_);
       h_el_etaphi.Fill(st_eta,st_phi,w_);
-      h_el_met.Fill(t.met_pt);
+      h_el_met.Fill(t.met_pt,w_);
+
+      h_el_byNt.Fill(nShortTrackCandidates,w_);
+
       if (t.track_isshort[st_idx]) {
-	h_el_pix_s.Fill(st_pix,w_);
-	h_el_ext_s.Fill(st_ext,w_);
-	h_el_tot_s.Fill(st_tot,w_);
-	h_el_etaphi_s.Fill(st_eta,st_phi,w_);
-	h_el_met_s.Fill(t.met_pt);
+	h_el_pix_p.Fill(st_pix,w_);
+	h_el_ext_p.Fill(st_ext,w_);
+	h_el_tot_p.Fill(st_tot,w_);
+	h_el_etaphi_p.Fill(st_eta,st_phi,w_);
+	h_el_met_p.Fill(t.met_pt);
       }
       else if (t.track_istrkshort[st_idx]) {
 	h_el_pix_ts.Fill(st_pix,w_);
@@ -364,36 +456,17 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
       h_fake_tot.Fill(st_tot,w_);
       h_fake_etaphi.Fill(st_eta,st_phi,w_);
       h_fake_met.Fill(t.met_pt);
-      
-      // The LowMT lepton's track can be as soft as 5 GeV, but we only store tracks > 10 GeV (and short tracks need 15 GeV)
-      // So, there is a chance, but not guaranteed, that the lowMT lepton's track is contributing to our 10 GeV track count.
-      // Subtract it if so.
-      int ntracks = t.ntracks;
-      if (doLep) {
-	float trk_eta = t.track_eta[i_lowMT_trk];
-	float trk_phi = t.track_phi[i_lowMT_trk];
-	float lep_eta = t.lep_phi[i_lowMT_lep];
-	float lep_phi = t.lep_phi[i_lowMT_lep];
-	float DR = DeltaR(trk_eta,trk_phi,lep_eta,lep_phi);
-	if (DR < 0.1) {
-	  ntracks--; // If the lowMT lep is matched to a track in the collection, remove from ntracks
-	  // check for plausibility
-	  if (t.lep_pt[i_lowMT_lep] < 10) {
-	    cout << "Track removed from count despite LowMT lepton having pT < 10 GeV" << endl;
-	    cout << "Track had pT = " << t.track_pt[i_lowMT_trk] << endl;
-	  }
-	  
-	}
-      } // Shouldn't need to adjust CRDY since its leptons ("nlep") are pT > 10 GeV
 
-      h_fake_nt.Fill(ntracks);
+      //      h_fake_nt.Fill(ntracks);
 
-      if (t.track_isshort[st_idx]) {
-	h_fake_pix_s.Fill(st_pix,w_);
-	h_fake_ext_s.Fill(st_ext,w_);
-	h_fake_tot_s.Fill(st_tot,w_);
-	h_fake_etaphi_s.Fill(st_eta,st_phi,w_);
-	h_fake_met_s.Fill(t.met_pt);
+      h_fake_byNt.Fill(nShortTrackCandidates,w_);
+
+      if (t.track_ispixelonly[st_idx]) {
+	h_fake_pix_p.Fill(st_pix,w_);
+	h_fake_ext_p.Fill(st_ext,w_);
+	h_fake_tot_p.Fill(st_tot,w_);
+	h_fake_etaphi_p.Fill(st_eta,st_phi,w_);
+	h_fake_met_p.Fill(t.met_pt);
       }
       else if (t.track_istrkshort[st_idx]) {
 	h_fake_pix_ts.Fill(st_pix,w_);
@@ -420,6 +493,10 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   TFile outfile_(output_name,"RECREATE"); 
   h_unskimmed.Write();
 
+  h_unskimmed_byNt.Write();
+  h_el_byNt.Write();
+  h_fake_byNt.Write();
+
   h_el_pix.Write();
   h_el_ext.Write();
   h_el_tot.Write();
@@ -436,23 +513,23 @@ int ShortTrackCRSL::loop (char * indir, char * sample, int selection) {
   h_el_nt.Write();
   h_fake_nt.Write();
 
-  h_el_pix_s.Write();
-  h_el_ext_s.Write();
-  h_el_tot_s.Write();
-  h_el_etaphi_s.Write();
-  h_el_ratio_s.Write();
-  h_fake_pix_s.Write();
-  h_fake_ext_s.Write();
-  h_fake_tot_s.Write();
-  h_fake_etaphi_s.Write();
-  h_el_met_s.Write();
-  h_fake_met_s.Write();
+  h_el_pix_p.Write();
+  h_el_ext_p.Write();
+  h_el_tot_p.Write();
+  h_el_etaphi_p.Write();
+  h_el_ratio_p.Write();
+  h_fake_pix_p.Write();
+  h_fake_ext_p.Write();
+  h_fake_tot_p.Write();
+  h_fake_etaphi_p.Write();
+  h_el_met_p.Write();
+  h_fake_met_p.Write();
 
-  h_all_chDR_s.Write();
-  h_all_anyDR_s.Write();
-  h_all_chID_s.Write();
-  h_all_anyID_s.Write();
-  h_all_nearby_s.Write();
+  h_all_chDR_p.Write();
+  h_all_anyDR_p.Write();
+  h_all_chID_p.Write();
+  h_all_anyID_p.Write();
+  h_all_nearby_p.Write();
 
   h_el_pix_ts.Write();
   h_el_ext_ts.Write();
@@ -494,8 +571,8 @@ int main (int argc, char ** argv) {
 
   const int selection = strtol(argv[3],NULL,2);
   cout << "selection: " << selection << endl;
-  ShortTrackCRSL * stt = new ShortTrackCRSL();
-  stt->loop(argv[1],argv[2],selection);
+  ShortTrackCRSL * stc = new ShortTrackCRSL();
+  stc->loop(argv[1],argv[2],selection);
   return 0;
 }
 

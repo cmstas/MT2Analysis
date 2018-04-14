@@ -1,0 +1,750 @@
+{
+    "last_updated": 1523356290, 
+    "log": "[2018-04-09 01:06:04,964] [BABY_DoubleEG_Run2016H-03...] backup doesn't exist. you probably just put in new samples, so ignore this if so.\n[2018-04-09 01:06:04,965] [BABY_DoubleEG_Run2016B-03...] backup doesn't exist. you probably just put in new samples, so ignore this if so.\n[2018-04-09 01:06:04,965] [BABY_SingleMuon_Run2016B-...] backup doesn't exist. you probably just put in new samples, so ignore this if so.\n[2018-04-09 01:06:04,965] [BABY_MuonEG_Run2016B-03Fe...] backup doesn't exist. you probably just put in new samples, so ignore this if so.", 
+    "samples": [
+        {
+            "baby": {
+                "analysis": "MT2", 
+                "baby_tag": "V00-08-18_remake", 
+                "cmsswver": "CMSSW_8_0_21", 
+                "condor_done": 0, 
+                "dataset": "/DoubleEG/Run2016H-03Feb2017_ver2-v1/MINIAOD", 
+                "exe_args": [
+                    ""
+                ], 
+                "exe_args_nosplit": "", 
+                "executable_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/baby_ducks.sh", 
+                "finaldir": "/hadoop/cms/store/user/dpgilber/AutoTwopler_babies/MT2_V00-08-18_remake/DoubleEG_Run2016H-03Feb2017_ver2-v1/", 
+                "idle": 0, 
+                "merging_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/merging_script.sh", 
+                "nevents": -1, 
+                "output_names": [
+                    "output.root", 
+                    "skim.root", 
+                    "skim_rphi.root"
+                ], 
+                "output_names_nosplit": "output.root,skim.root,skim_rphi.root", 
+                "package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/package.tar.gz", 
+                "running": 0, 
+                "scramarch": "slc6_amd64_gcc530", 
+                "sweepRoot_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/sweepRoot.sh", 
+                "sweepRooted": 0, 
+                "total": 0, 
+                "user_executable": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/wrapper_auto.sh", 
+                "user_package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/package.tar.gz"
+            }, 
+            "basedir": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/", 
+            "crab": {
+                "requestname": "DoubleEG_Run2016H-03Feb2017_ver2-v1", 
+                "taskdir": "babies/babies_DoubleEG_Run2016H-03Feb2017_ver2-v1_V00-08-18_remake"
+            }, 
+            "dataset": "/DoubleEG/Run2016H-03Feb2017_ver2-v1/MINIAOD", 
+            "shortname": "DoubleEG_Run2016H-03Feb2017_ver2-v1", 
+            "status": "condor", 
+            "type": "BABY", 
+            "user": "dpgilber"
+        }, 
+        {
+            "baby": {
+                "analysis": "MT2", 
+                "baby_tag": "V00-08-18_remake", 
+                "cmsswver": "CMSSW_8_0_21", 
+                "condor_done": 0, 
+                "dataset": "/DoubleEG/Run2016B-03Feb2017_ver2-v2/MINIAOD", 
+                "exe_args": [
+                    ""
+                ], 
+                "exe_args_nosplit": "", 
+                "executable_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/baby_ducks.sh", 
+                "finaldir": "/hadoop/cms/store/user/dpgilber/AutoTwopler_babies/MT2_V00-08-18_remake/DoubleEG_Run2016B-03Feb2017_ver2-v2/", 
+                "idle": 0, 
+                "merging_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/merging_script.sh", 
+                "nevents": -1, 
+                "output_names": [
+                    "output.root", 
+                    "skim.root", 
+                    "skim_rphi.root"
+                ], 
+                "output_names_nosplit": "output.root,skim.root,skim_rphi.root", 
+                "package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/package.tar.gz", 
+                "running": 0, 
+                "scramarch": "slc6_amd64_gcc530", 
+                "sweepRoot_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/sweepRoot.sh", 
+                "sweepRooted": 0, 
+                "total": 0, 
+                "user_executable": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/wrapper_auto.sh", 
+                "user_package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/package.tar.gz"
+            }, 
+            "basedir": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/", 
+            "crab": {
+                "requestname": "DoubleEG_Run2016B-03Feb2017_ver2-v2", 
+                "taskdir": "babies/babies_DoubleEG_Run2016B-03Feb2017_ver2-v2_V00-08-18_remake"
+            }, 
+            "dataset": "/DoubleEG/Run2016B-03Feb2017_ver2-v2/MINIAOD", 
+            "shortname": "DoubleEG_Run2016B-03Feb2017_ver2-v2", 
+            "status": "condor", 
+            "type": "BABY", 
+            "user": "dpgilber"
+        }, 
+        {
+            "baby": {
+                "analysis": "MT2", 
+                "baby_tag": "V00-08-18_remake", 
+                "cmsswver": "CMSSW_8_0_21", 
+                "condor_done": 0, 
+                "dataset": "/SingleMuon/Run2016B-03Feb2017_ver2-v2/MINIAOD", 
+                "exe_args": [
+                    ""
+                ], 
+                "exe_args_nosplit": "", 
+                "executable_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/baby_ducks.sh", 
+                "finaldir": "/hadoop/cms/store/user/dpgilber/AutoTwopler_babies/MT2_V00-08-18_remake/SingleMuon_Run2016B-03Feb2017_ver2-v2/", 
+                "idle": 0, 
+                "merging_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/merging_script.sh", 
+                "nevents": -1, 
+                "output_names": [
+                    "output.root", 
+                    "skim.root", 
+                    "skim_rphi.root"
+                ], 
+                "output_names_nosplit": "output.root,skim.root,skim_rphi.root", 
+                "package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/package.tar.gz", 
+                "running": 0, 
+                "scramarch": "slc6_amd64_gcc530", 
+                "sweepRoot_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/sweepRoot.sh", 
+                "sweepRooted": 0, 
+                "total": 0, 
+                "user_executable": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/wrapper_auto.sh", 
+                "user_package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/package.tar.gz"
+            }, 
+            "basedir": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/", 
+            "crab": {
+                "requestname": "SingleMuon_Run2016B-03Feb2017_ver2-v2", 
+                "taskdir": "babies/babies_SingleMuon_Run2016B-03Feb2017_ver2-v2_V00-08-18_remake"
+            }, 
+            "dataset": "/SingleMuon/Run2016B-03Feb2017_ver2-v2/MINIAOD", 
+            "shortname": "SingleMuon_Run2016B-03Feb2017_ver2-v2", 
+            "status": "condor", 
+            "type": "BABY", 
+            "user": "dpgilber"
+        }, 
+        {
+            "baby": {
+                "analysis": "MT2", 
+                "baby_tag": "V00-08-18_remake", 
+                "cmsswver": "CMSSW_8_0_21", 
+                "condor_done": 0, 
+                "dataset": "/MuonEG/Run2016B-03Feb2017_ver2-v2/MINIAOD", 
+                "exe_args": [
+                    ""
+                ], 
+                "exe_args_nosplit": "", 
+                "executable_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/baby_ducks.sh", 
+                "finaldir": "/hadoop/cms/store/user/dpgilber/AutoTwopler_babies/MT2_V00-08-18_remake/MuonEG_Run2016B-03Feb2017_ver2-v2/", 
+                "idle": 0, 
+                "merging_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/merging_script.sh", 
+                "nevents": -1, 
+                "output_names": [
+                    "output.root", 
+                    "skim.root", 
+                    "skim_rphi.root"
+                ], 
+                "output_names_nosplit": "output.root,skim.root,skim_rphi.root", 
+                "package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/package.tar.gz", 
+                "running": 0, 
+                "scramarch": "slc6_amd64_gcc530", 
+                "sweepRoot_script": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit//babies/sweepRoot.sh", 
+                "sweepRooted": 0, 
+                "total": 0, 
+                "user_executable": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/wrapper_auto.sh", 
+                "user_package": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/job_input/package.tar.gz"
+            }, 
+            "basedir": "/home/users/dpgilber/MT2AnalysisFinal16/babymaker/batchsubmit/", 
+            "crab": {
+                "requestname": "MuonEG_Run2016B-03Feb2017_ver2-v2", 
+                "taskdir": "babies/babies_MuonEG_Run2016B-03Feb2017_ver2-v2_V00-08-18_remake"
+            }, 
+            "dataset": "/MuonEG/Run2016B-03Feb2017_ver2-v2/MINIAOD", 
+            "shortname": "MuonEG_Run2016B-03Feb2017_ver2-v2", 
+            "status": "condor", 
+            "type": "BABY", 
+            "user": "dpgilber"
+        }
+    ], 
+    "time_stats": [
+        [
+            1523261170, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523261231, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523261292, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523262494, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523263696, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523264898, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523266100, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523267302, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523268507, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523269711, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523270913, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523272115, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523273317, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523274519, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523275721, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523276923, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523278126, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523279328, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523280530, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523281732, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523282935, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523284137, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523285339, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523286541, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523287743, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523288946, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523290148, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523291350, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523292552, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523293754, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523294956, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523296158, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523297360, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523298581, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523299783, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523300985, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523302187, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523303427, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523304629, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523305831, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523307033, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523308235, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523309437, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523310639, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523311845, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523313051, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523314257, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523315462, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523316668, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523317872, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523319075, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523320278, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523321480, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523322683, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523323885, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523325087, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523326289, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523327491, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523328693, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523329895, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523331099, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523332301, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523333503, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523334705, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523335907, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523337109, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523338311, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523339514, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523340716, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523341917, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523343119, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523344321, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523345523, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523346725, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523347927, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523349129, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523350331, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523351533, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523352735, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523353939, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523355141, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ], 
+        [
+            1523356290, 
+            {
+                "running_babies": 0, 
+                "sweepRooted_babies": 0
+            }
+        ]
+    ]
+}
