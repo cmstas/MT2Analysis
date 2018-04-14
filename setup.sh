@@ -15,10 +15,10 @@ cd ShortTrackNtuplizer
 git checkout dpg
 cd HistoAnalyzer
 scram b
-ln ../../../.. MT2AnalysisHome
+ln  $(pwd)/../../../.. MT2AnalysisHome
 
 cd MT2AnalysisHome
-ln CMSSW_8_0_26/src/ShortTrackNtuplizer babymakerST
+ln $(pwd)/CMSSW_8_0_26/src/ShortTrackNtuplizer babymakerST
 
 echo "Checking for CORE..."
 if [ -d /home/users/$USER/CORE ]
