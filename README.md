@@ -1,15 +1,3 @@
-# MT2 Analysis
-## Setup:
-To simply setup on UAF, do
-``` bash
-git clone https://github.com/cmstas/MT2Analysis.git
-```
-and then 
-``` bash
-cd MT2Analysis
-source setup.sh
-```
-
 ## MT2 Babymaker
 ### For a test run
 ``` bash
@@ -64,4 +52,4 @@ See instructions in `README` inside the `limits/batchsubmit` subdirectory.
 ### ShortTrack Babymaker and Friending
 This needs to run on AOD in 2016, so the workflow is a little different. 
 Additionally, the babies need to be sorted and merged with MT2 babies.
-Use the babymakerST link installed by setup.sh to go to the Short Track babymaker installation and follow the README there.
+Go to CMSSW_8_0_26/src/ShortTrackNtuplizer and follow the README there
