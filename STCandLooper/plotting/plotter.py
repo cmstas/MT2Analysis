@@ -50,6 +50,7 @@ trklensuffixes = ["","_p","_s","_l"] #,"_li"]
 parentheticals = ["(All)","(Pixel-Only)","(Short, Outside Pixel)","(Long)"]
 getParen = dict(zip(trklensuffixes,parentheticals))
 samples = ["ttsl","ttdl","DY","Wjets","qcd300to500","qcd500to700","qcd700to1000","qcd1000to1500","qcd1500to2000","qcd2000toInf","zinv100to200","zinv200toInf"]
+#samples = ["ttsl","ttdl","Wjets","qcd300to500","qcd500to700","qcd700to1000","qcd1000to1500","qcd1500to2000","qcd2000toInf","zinv100to200","zinv200toInf"]
 colors = [ROOT.kGreen,ROOT.kGreen+2,ROOT.kCyan,ROOT.kBlue,ROOT.kRed-9,ROOT.kRed-7,ROOT.kRed,ROOT.kRed+2,ROOT.kRed+3,ROOT.kRed-1,ROOT.kMagenta,ROOT.kMagenta+2]
 if (len(samples) > len(colors)):
     print str(len(samples)) + " samples and only " + str(len(colors)) + " colors"
@@ -125,6 +126,7 @@ if f_dy.IsZombie():
     exit(1)
 
 files = [f_ttsl,f_ttdl,f_dy,f_wjets,f_qcd300to500,f_qcd500to700,f_qcd700to1000,f_qcd1000to1500,f_qcd1500to2000,f_qcd2000toInf,f_zpt100to200,f_zpt200toInf]
+#files = [f_ttsl,f_ttdl,f_wjets,f_qcd300to500,f_qcd500to700,f_qcd700to1000,f_qcd1000to1500,f_qcd1500to2000,f_qcd2000toInf,f_zpt100to200,f_zpt200toInf]
 filedict = dict(zip(samples,files))
 
 incllist = [f.Get("h_inclusive").GetBinContent(1) for f in files]

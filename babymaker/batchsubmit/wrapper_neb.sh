@@ -53,13 +53,13 @@ ls -alrth ${FILE}
 if [ $? -ne 0 ]; then
     echo "[wrapper] could not find input file, trying xrootd instead"
     FILESHORT=${FILE#/hadoop/cms}
-    xrdfs xrootd.unl.edu ls ${FILESHORT}
+    xrdfs xrootd-local.unl.edu ls ${FILESHORT}
     if [ $? -ne 0 ]; then
 	echo "[wrapper] could not find input file with xrootd either, exiting"
 	exit 1
     else
 	echo "[wrapper] found file with xrootd, will proceed"
-	FILE="root://xrootd.unl.edu/"${FILESHORT}
+	FILE="root://xrootd-local.unl.edu/"${FILESHORT}
     fi
 fi
 

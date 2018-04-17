@@ -92,6 +92,7 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
     return 2;
   }
 
+  // For short track
   const float pt_min_st = 15;
   const float dxy_max_st = 0.02;
   const float dz_max_st = 0.05;
@@ -101,32 +102,54 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   const float chiso_max_st = 10;
   const float nreliso_max_st = 0.1;
   const float chreliso_max_st = 0.1;
+  // For cands
+  const float pt_min = 15;
+  const float dxy_max = 0.02;
+  const float dz_max = 0.05;
+  const float iso_max = 15;
+  const float reliso_max = 0.3;
+  const float niso_max = 15;
+  const float chiso_max = 15;
+  const float nreliso_max = 0.15;
+  const float chreliso_max = 0.15;
 
   // Book Histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
   TH1F h_stc("h_stc","Short Track Candidate Count (All Selections)",4,0,4);
   TH1F h_st("h_st","True Short Track Count (All Selections)",4,0,4);
 
-  TH2F h_etaphi("h_etaphi","All Tracks by #eta and #phi",1000,-2.4,2.4,1000,0,3.14159);
-  TH2F h_st_etaphi("h_st_etaphi","All Short Tracks by #eta and #phi",1000,-2.4,2.4,1000,0,3.14159);
+  TH2F h_etaphi_bar("h_etaphi_bar","All Tracks by #eta and #phi",180,-1.4,1.4,360,0,3.14159);
+  TH2F h_st_etaphi_bar("h_st_etaphi_bar","All Short Tracks by #eta and #phi",180,-1.4,1.4,360,0,3.14159);
+  TH2F h_etaphi_ecn("h_etaphi_ecn","All Tracks by #eta and #phi",180,-2.4,-1.4,360,0,3.14159);
+  TH2F h_st_etaphi_ecn("h_st_etaphi_ecn","All Short Tracks by #eta and #phi",180,-2.4,-1.4,360,0,3.14159);
+  TH2F h_etaphi_ecp("h_etaphi_ecp","All Tracks by #eta and #phi",180,1.4,2.4,360,0,3.14159);
+  TH2F h_st_etaphi_ecp("h_st_etaphi_ecp","All Short Tracks by #eta and #phi",180,1.4,2.4,360,0,3.14159);
 
   TH1F h_inclusive("h_inclusive","Total Events in Sample",1,0,1);
 
-  const int pt_n = 30; const float pt_min = 15; const float pt_max = 80;
+  TH1F h_el_dr("h_el_dr","Nearest Lepton #DeltaR (e)",50,0,0.5);
+  TH1F h_mu_dr("h_mu_dr","Nearest Lepton #DeltaR (#mu)",50,0,0.5);
+  TH1F h_tau_dr("h_tau_dr","Nearest Lepton #DeltaR (#tau)",50,0,0.5);
+
+  TH1F h_el_ptr("h_el_ptr","#Deltap_{T}/p_{T}^{trk} (e)",10,-1,1);
+  TH1F h_mu_ptr("h_mu_ptr","#Deltap_{T}/p_{T}^{trk} (#mu)",10,-1,1);
+  TH1F h_tau_ptr("h_tau_ptr","#Deltap_{T}/p_{T}^{trk} (#tau)",10,-1,1);
+
+  const int pt_n = 30;  const float pt_max = 80;
   TH1F h_pt("h_pt","Distribution of Track p_{T}s",pt_n,pt_min,pt_max);
   TH1F h_pt_p("h_pt_p","Distribution of Track p_{T}s (pixel-only)",pt_n,pt_min,pt_max);
   TH1F h_pt_s("h_pt_s","Distribution of Track p_{T}s (not pixel-only, < 7 layers)",pt_n,pt_min,pt_max);
   TH1F h_pt_l("h_pt_l","Distribution of Track p_{T}s (>= 7 layers, > 1 lost outer hits)",pt_n,pt_min,pt_max);
   //TH1F h_pt_li("h_pt_li","Distribution of Track p_{T}s (>=7 layers)",pt_n,pt_min,pt_max);
 
-  const int dxy_n = 40; const float dxy_min = 0; const float dxy_max = 0.2;
+  const int dxy_n = 40; const float dxy_min = 0;
   TH1F h_bardxy("h_bardxy","Distribution of Barrel Track dxy",dxy_n,dxy_min,dxy_max);
   TH1F h_bardxy_p("h_bardxy_p","Distribution of Barrel Track dxy (pixel-only)",dxy_n,dxy_min,dxy_max);
   TH1F h_bardxy_s("h_bardxy_s","Distribution of Barrel Track dxy (not pixel-only, < 7 layers)",dxy_n,dxy_min,dxy_max);
   TH1F h_bardxy_l("h_bardxy_l","Distribution of Barrel Track dxy (>= 7 layers, > 1 lost outer hits)",dxy_n,dxy_min,dxy_max);
   //TH1F h_bardxy_li("h_bardxy_li","Distribution of Barrel Track dxy (>=7 layers)",dxy_n,dxy_min,dxy_max);
 
-  const int dz_n = 30; const float dz_min = 0; const float dz_max = 0.5;
+  const int dz_n = 30; const float dz_min = 0; 
   TH1F h_bardz("h_bardz","Distribution of Barrel Track dz",dz_n,dz_min,dz_max);
   TH1F h_bardz_p("h_bardz_p","Distribution of Barrel Track dz (pixel-only)",dz_n,dz_min,dz_max);
   TH1F h_bardz_s("h_bardz_s","Distribution of Barrel Track dz (not pixel-only, < 7 layers)",dz_n,dz_min,dz_max);
@@ -145,42 +168,42 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   TH1F h_ecdz_l("h_ecdz_l","Distribution of Endcap Track dz (>= 7 layers, > 1 lost outer hits)",dz_n,dz_min,dz_max);
   //TH1F h_ecdz_li("h_ecdz_li","Distribution of Endcap Track dz (>=7 layers)",dz_n,dz_min,dz_max);
 
-  const int iso_n = 30; const float iso_min = 0; const float iso_max = 50;
+  const int iso_n = 30; const float iso_min = 0;
   TH1F h_iso("h_iso","Distribution of Track Isolation",iso_n,iso_min,iso_max);
   TH1F h_iso_p("h_iso_p","Distribution of Track Isolation (pixel-only)",iso_n,iso_min,iso_max);
   TH1F h_iso_s("h_iso_s","Distribution of Track Isolation (not pixel-only, < 7 layers)",iso_n,iso_min,iso_max);
   TH1F h_iso_l("h_iso_l","Distribution of Track Isolation (>= 7 layers, > 1 lost outer hits)",iso_n,iso_min,iso_max);
   //TH1F h_iso_li("h_iso_li","Distribution of Track Isolation (>=7 layers)",iso_n,iso_min,iso_max);
 
-  const int niso_n = 30; const float niso_min = 0; const float niso_max = 50;
+  const int niso_n = 30; const float niso_min = 0;
   TH1F h_niso("h_niso","Distribution of Track NeutIso (#DeltaR < 0.05)",niso_n,niso_min,niso_max);
   TH1F h_niso_p("h_niso_p","Distribution of Track NeutIso (#DeltaR < 0.05) (pixel-only)",niso_n,niso_min,niso_max);
   TH1F h_niso_s("h_niso_s","Distribution of Track NeutIso (#DeltaR < 0.05) (not pixel-only, < 7 layers)",niso_n,niso_min,niso_max);
   TH1F h_niso_l("h_niso_l","Distribution of Track NeutIso (#DeltaR < 0.05) (>= 7 layers, > 1 lost outer hits)",niso_n,niso_min,niso_max);
   //TH1F h_niso_li("h_niso_li","Distribution of Track NeutIso (#DeltaR < 0.05) (>=7 layers)",niso_n,niso_min,niso_max);
 
-  const int chiso_n = 20; const float chiso_min = 0; const float chiso_max = 50;
+  const int chiso_n = 20; const float chiso_min = 0;
   TH1F h_chiso("h_chiso","Distribution of Track ChIso (#DeltaR < 0.01)",chiso_n,chiso_min,chiso_max);
   TH1F h_chiso_p("h_chiso_p","Distribution of Track ChIso (#DeltaR < 0.01) (pixel-only)",chiso_n,chiso_min,chiso_max);
   TH1F h_chiso_s("h_chiso_s","Distribution of Track ChIso (#DeltaR < 0.01) (not pixel-only, < 7 layers)",chiso_n,chiso_min,chiso_max);
   TH1F h_chiso_l("h_chiso_l","Distribution of Track ChIso (#DeltaR < 0.01) (>= 7 layers, > 1 lost outer hits)",chiso_n,chiso_min,chiso_max);
   //TH1F h_chiso_li("h_chiso_li","Distribution of Track ChIso (#DeltaR < 0.01) (>=7 layers)",chiso_n,chiso_min,chiso_max);
 
-  const int reliso_n = 30; const float reliso_min = 0; const float reliso_max = 0.8;
+  const int reliso_n = 30; const float reliso_min = 0;
   TH1F h_reliso("h_reliso","Distribution of Track Relative Isolation",reliso_n,reliso_min,reliso_max);
   TH1F h_reliso_p("h_reliso_p","Distribution of Track Relative Isolation (pixel-only)",reliso_n,reliso_min,reliso_max);
   TH1F h_reliso_s("h_reliso_s","Distribution of Track Relative Isolation (not pixel-only, < 7 layers)",reliso_n,reliso_min,reliso_max);
   TH1F h_reliso_l("h_reliso_l","Distribution of Track Relative Isolation (>= 7 layers, > 1 lost outer hits)",reliso_n,reliso_min,reliso_max);
   //TH1F h_reliso_li("h_reliso_li","Distribution of Track Relative Isolation (>=7 layers)",reliso_n,reliso_min,reliso_max);
 
-  const int chreliso_n = 30; const float chreliso_min = 0; const float chreliso_max = 0.5;
+  const int chreliso_n = 30; const float chreliso_min = 0;
   TH1F h_chreliso("h_chreliso","Distribution of Track Ch Rel Iso",chreliso_n,chreliso_min,chreliso_max);
   TH1F h_chreliso_p("h_chreliso_p","Distribution of Track Ch Rel Iso (pixel-only)",chreliso_n,chreliso_min,chreliso_max);
   TH1F h_chreliso_s("h_chreliso_s","Distribution of Track Ch Rel Iso (not pixel-only, < 7 layers)",chreliso_n,chreliso_min,chreliso_max);
   TH1F h_chreliso_l("h_chreliso_l","Distribution of Track Ch Rel Iso (>= 7 layers, > 1 lost outer hits)",chreliso_n,chreliso_min,chreliso_max);
   //TH1F h_chreliso_li("h_chreliso_li","Distribution of Track Ch Rel Iso (>=7 layers)",chreliso_n,chreliso_min,chreliso_max);
 
-  const int nreliso_n = 30; const float nreliso_min = 0; const float nreliso_max = 0.5;
+  const int nreliso_n = 30; const float nreliso_min = 0;
   TH1F h_nreliso("h_nreliso","Distribution of Track Neut Rel Iso",nreliso_n,nreliso_min,nreliso_max);
   TH1F h_nreliso_p("h_nreliso_p","Distribution of Track Neut Rel Iso (pixel-only)",nreliso_n,nreliso_min,nreliso_max);
   TH1F h_nreliso_s("h_nreliso_s","Distribution of Track Neut Rel Iso (not pixel-only, < 7 layers)",nreliso_n,nreliso_min,nreliso_max);
@@ -318,16 +341,72 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
 
-      h_etaphi.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
-      if (t.track_isshort[i_trk]) {
-	h_st_etaphi.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
-      } 
+      // Lepton Veto
+      if (doGenVeto) {
+	float minDR = 100;
+	int minIndex = -1;
+	// Veto all lepton overlap tracks
+	for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
+	  float lep_eta = t.genLep_eta[i_lep];
+	  float lep_phi = t.genLep_phi[i_lep];
+	  float dr = DeltaR(lep_eta, lep_phi, t.track_eta[i_trk], t.track_phi[i_trk]);
+	  if (dr < minDR) {
+	    minDR = dr;
+	    minIndex = i_lep;
+	  }
+	}
+	float ratio_pt = t.genLep_pt[minIndex] / t.track_pt[i_trk] - 1;
+	int pdgId = fabs(t.genLep_pdgId[minIndex]);
+	if (pdgId == 11) {
+	  h_el_dr.Fill(minDR,w_);
+	  h_el_ptr.Fill(ratio_pt - 1,w_);
+	}
+	else if (pdgId == 13) {
+	  h_mu_dr.Fill(minDR,w_);
+	  h_mu_ptr.Fill(ratio_pt - 1,w_);
+	}
+	
+	//	if (minDR < 0.1) continue;
+	
+	// Veto all tau overlap tracks
+	minDR = 100;
+	minIndex = 0;
+	for (int i_tau = 0; i_tau < t.ngenTau; i_tau++) {
+	  float tau_eta = t.genTau_eta[i_tau];
+	  float tau_phi = t.genTau_phi[i_tau];
+	  float dr = DeltaR(tau_eta, tau_phi, t.track_eta[i_trk], t.track_phi[i_trk]);
+	  if (dr < minDR) {
+	    minDR = 100;
+	    minIndex = i_tau;
+	  }
+	}
+	ratio_pt = t.genLep_pt[minIndex] / t.track_pt[i_trk] - 1;
+	h_tau_dr.Fill(minDR,w_);
+	h_tau_ptr.Fill(ratio_pt-1,w_);
+	//	if (minDR < 0.1) continue;
+      }
+
+      if (fabs(t.track_eta[i_trk]) < 1.4) {
+	h_etaphi_bar.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
+	if (t.track_isshort[i_trk]) {
+	  h_st_etaphi_bar.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
+	} 
+      } else if (t.track_eta[i_trk] > 1.4) {
+	h_etaphi_ecp.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
+	if (t.track_isshort[i_trk]) {
+	  h_st_etaphi_ecp.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
+	} 
+      } else if (t.track_eta[i_trk] < 1.4) {
+	h_etaphi_ecn.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
+	if (t.track_isshort[i_trk]) {
+	  h_st_etaphi_ecn.Fill(t.track_eta[i_trk],t.track_phi[i_trk],1);
+	} 
+      }
 
       continue;
 
-      // Lepton Veto
-      bool lepOverlap = false;
       // Check reco leps
+      bool lepOverlap = false;
       for (int i_lep = 0; i_lep < t.nlep; i_lep++) {
 	if (DeltaR(t.lep_eta[i_lep],t.lep_phi[i_lep],t.track_eta[i_trk],t.track_phi[i_trk]) < 0.1) {
 	  lepOverlap = true;
@@ -345,53 +424,6 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	}
       }
       if (lepOverlap) continue; // short track candidates can't overlap with leptons
-
-      if (doGenVeto) {
-	// Veto all lepton overlap tracks
-	for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
-	  //	if (abs(t.genLep_pdgId[i_lep]) != 11) continue;
-	  float lep_eta = t.genLep_eta[i_lep];
-	  float lep_phi = t.genLep_phi[i_lep];
-	  if (DeltaR(lep_eta, lep_phi, t.track_eta[i_trk], t.track_phi[i_trk]) > 0.1 ) continue;
-	  float ratio_pt = t.genLep_pt[i_lep] / t.track_pt[i_trk];
-	  int sourceId = fabs(t.genLep_sourceId[i_lep]);
-	  if ( (ratio_pt < 0.5 || ratio_pt > 2.0) && t.track_isshort[i_trk] && (sourceId == 15 || sourceId == 23 || sourceId == 24) ) {
-	    string source = "Z";
-	    if (sourceId == 24) source = "W";
-	    else if (sourceId == 15) source = "tau";
-	    cout << "Gen lepton with large pt difference (" << ratio_pt << ") overlapped a short track. " 
-		 << run << ":" << lumi << ":" << evt 
-		 << " Track: " << i_trk << " Gen Lepton: " << i_lep << " Id: " << fabs(t.genLep_pdgId[i_lep]) << " Source: " << source
-		 << endl;
-	  }
-	  // Matched to gen lepton, probably disappearing. Don't have the calorimeter reading needed to confirm but...
-	  lepOverlap = true;
-	  break;
-	}
-	if (lepOverlap) continue;
-	
-	// Veto all tau overlap tracks
-	for (int i_tau = 0; i_tau < t.ngenTau; i_tau++) {
-	  float tau_eta = t.genTau_eta[i_tau];
-	  float tau_phi = t.genTau_phi[i_tau];
-	  if (DeltaR(tau_eta, tau_phi, t.track_eta[i_trk], t.track_phi[i_trk]) > 0.1 ) continue;
-	  float ratio_pt = t.genTau_pt[i_tau] / t.track_pt[i_trk];
-	  int sourceId = fabs(t.genTau_sourceId[i_tau]);
-	  if ( (ratio_pt < 0.5 || ratio_pt > 2.0) && t.track_isshort[i_trk] && (sourceId == 15 || sourceId == 23 || sourceId == 24) ) {
-	    string source = "Z";
-	    if (sourceId == 24) source = "W";
-	    else if (sourceId == 15) source = "tau";
-	    cout << "Gen tauton with large pt difference (" << ratio_pt << ") overlapped a short track. " 
-		 << run << ":" << lumi << ":" << evt 
-		 << " Track: " << i_trk << " Gen Tau: " << i_tau << " Id: " << fabs(t.genTau_pdgId[i_tau]) << " Source: " << source
-		 << endl;
-	  }
-	  // Matched to gen tau, probably disappearing. Don't have the calorimeter reading needed to confirm but...
-	  lepOverlap = true;
-	  break;
-	}
-	if (lepOverlap) continue;
-      }
 
 
       const float eta = fabs(t.track_eta[i_trk]);
@@ -767,13 +799,29 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   
   cout << "About to write" << endl;
   
+  mkdir = "mkdir -p drHists" + output_suffix;
+  system(mkdir.c_str());
+
+  TFile drfile(Form("drHists%s/%s.root",output_suffix.c_str(),sample),"RECREATE");
+  h_el_dr.Write();
+  h_mu_dr.Write();
+  h_tau_dr.Write();
+  h_el_ptr.Write();
+  h_mu_ptr.Write();
+  h_tau_ptr.Write();
+  drfile.Close();
+
   mkdir = "mkdir -p vetoHists" + output_suffix;
   system(mkdir.c_str());
 
   TFile vetofile(Form("vetoHists%s/%s.root",output_suffix.c_str(),sample),"RECREATE");
   vetofile.cd();
-  h_etaphi.Write();
-  h_st_etaphi.Write();
+  h_etaphi_bar.Write();
+  h_st_etaphi_bar.Write();
+  h_etaphi_ecn.Write();
+  h_st_etaphi_ecn.Write();
+  h_etaphi_ecp.Write();
+  h_st_etaphi_ecp.Write();
   vetofile.Close();
     
   return 0;

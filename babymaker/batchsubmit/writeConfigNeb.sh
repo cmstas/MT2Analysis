@@ -1,18 +1,29 @@
 #!/bin/bash
 
+#!/bin/bash
+
 while  ! voms-proxy-info -exist
 do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
    voms-proxy-init -hours 168 -voms cms
 done
 
-#DATADIR=$1
-#COPYDIRBASE=$2
-COPYDIRBASE=$1
+DATADIR=$1
+COPYDIRBASE=$2
+
+#for i in {1..1144}; do
+#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016H_DoubleEG_MINIAOD_03Feb2017_ver2-v1/merged/V08-00-18/merged_ntuple_${i}.root"
+#for i in {1..1180}; do
+#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_03Feb2017_ver2-v2/merged/V08-00-18/merged_ntuple_${i}.root"
+# for i in {1..272}; do
+#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016B_MuonEG_MINIAOD_03Feb2017_ver2-v2/merged/V08-00-18/merged_ntuple_${i}.root"
+#for i in {1..972}; do
+#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016B_SingleMuon_MINIAOD_03Feb2017_ver2-v2/merged/V08-00-18/merged_ntuple_${i}.root"
+
 
 #UNIVERSE="grid"
 UNIVERSE="vanilla"
-EXE="wrapper.sh"
-INPUT="wrapper.sh, job_input/input.tar.gz"
+EXE="wrapper_neb.sh"
+INPUT="wrapper_neb.sh, job_input/input.tar.gz"
 # can add other US sites here if desired
 #SITE="T2_US_UCSD"
 SITE="T2_US_Nebraska"
@@ -86,20 +97,41 @@ x509userproxy=${PROXY}
 
 #    for FILE in `ls ${DATADIR}/*.root`; do
 
-for i in {1..1144}; do
-    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016H_DoubleEG_MINIAOD_03Feb2017_ver2-v1/merged/V08-00-18/merged_ntuple_${i}.root"
-#for i in {1..1180}; do
-#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_03Feb2017_ver2-v2/merged/V08-00-18/merged_ntuple_${i}.root"
-# for i in {1..272}; do
-#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016B_MuonEG_MINIAOD_03Feb2017_ver2-v2/merged/V08-00-18/merged_ntuple_${i}.root"
-#for i in {1..972}; do
-#    FILE="/hadoop/cms/store/group/snt/run2_data/Run2016B_SingleMuon_MINIAOD_03Feb2017_ver2-v2/merged/V08-00-18/merged_ntuple_${i}.root"
-        echo "
+# check if a list contains a given element
+containsElement () {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 1; done
+  return 0
+}
+
+echo "[writeConfig] seeking list of files to run on..."
+
+xrdfsout=`xrdfs xrootd-local.unl.edu ls ${DATADIR}`
+
+# xrdfs ... ls returns the same filenames multiple times, see: https://github.com/xrootd/xrootd/issues/541
+# once the second set of identical files begins, bug out
+echo "[writeConfig] assembling list of unique file names..."
+
+filearray=()
+for FILE in ${xrdfsout}; do
+    containsElement ${FILE} ${filearray[@]}
+    if [ $? -eq 0 ]; then
+	filearray+=(${FILE})
+    else break
+    fi
+done
+
+echo "[writeConfig] writing condor_${COPYDIRBASE##*/}.cmd" 
+
+for FILE in ${filearray[@]}; do
+    echo "Running on $FILE"
+    echo "
 executable=${EXE}
 transfer_executable=True
 arguments=`echo ${FILE##*/} | sed 's/\.root//g'` ${FILE} ${COPYDIR}
 queue
 " >> condor_${COPYDIRBASE##*/}.cmd
-    done
+done
 
 echo "[writeConfig] wrote condor_${COPYDIRBASE##*/}.cmd" 
