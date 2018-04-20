@@ -482,7 +482,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	jet_corrector_pfL1FastJetL2L3_current = jet_corrector_pfL1FastJetL2L3;
       }
 
-      if (!removePostProcVars) {
+      if (!removePostProcVars && !isData) {
 	// Edits:
 	//evt_nEvts = cms3.evt_nEvts();
         evt_scale1fb = cms3.evt_scale1fb();

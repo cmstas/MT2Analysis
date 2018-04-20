@@ -15,7 +15,7 @@ echo "[wrapper] COPYDIR   = " ${COPYDIR}
 #
 # set up environment
 #
-CMSSW_VERSION=CMSSW_8_0_26
+CMSSW_VERSION=CMSSW_9_4_1
 
 ###version using cvmfs install of CMSSW
 echo "[wrapper] setting env"

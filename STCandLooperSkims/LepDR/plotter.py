@@ -34,7 +34,7 @@ interpolate = False
 rebin = 5
 
 
-indir = "../drHists_CRSL_GV_EPV"
+indir = "../drHists_GV"
 
 if len(argv) == 3:
     indir = argv[1]

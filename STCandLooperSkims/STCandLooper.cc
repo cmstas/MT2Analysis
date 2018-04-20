@@ -144,11 +144,11 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 
   const float pi = TMath::Pi();
   TH2F h_etaphi_bar("h_etaphi_bar","All Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
-  TH2F h_st_etaphi_bar("h_st_etaphi_bar","All Short Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
+  TH2F h_st_etaphi_bar("h_st_etaphi_bar","Long Short Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
   TH2F h_etaphi_ecn("h_etaphi_ecn","All Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
-  TH2F h_st_etaphi_ecn("h_st_etaphi_ecn","All Short Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
+  TH2F h_st_etaphi_ecn("h_st_etaphi_ecn","Long Short Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
   TH2F h_etaphi_ecp("h_etaphi_ecp","All Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
-  TH2F h_st_etaphi_ecp("h_st_etaphi_ecp","All Short Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
+  TH2F h_st_etaphi_ecp("h_st_etaphi_ecp","Long Short Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
 
   TH1F h_inclusive("h_inclusive","Total Events in Sample",1,0,1);
 
@@ -463,6 +463,12 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
       minDR = 100;
       minIndex = -1;
       for (int i_tau = 0; i_tau < t.ngenTau; i_tau++) {
+	// Decay Mode == 1 means 1 prong
+	// 2 means 3 prong
+	// Else, pdgId of lepton
+	int decayMode = abs(t.genTau_decayMode[i_tau]);
+	if (decayMode > 3) continue; // Count leptons separately
+	if (decayMode > 0) continue; // No tau veto
 	float tau_eta = t.genTau_eta[i_tau];
 	float tau_phi = t.genTau_phi[i_tau];
 	float dr = DeltaR(tau_eta, t.track_eta[i_trk], tau_phi, t.track_phi[i_trk]);
