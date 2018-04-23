@@ -24,9 +24,9 @@ int main (int argc, char ** argv)
   tree_st->AddFriend(tree_mt2);
   tree_mt2->AddFriend(tree_st);
 
-  const char * selection_string = "Sum$(jet_pt) > 100";
+  const char * selection_string = "Sum$(jet_pt) > 100 && Sum$(track_pt > 15 && fabs(track_eta)<2.4 && track_iso < 100 && track_reliso < 1 && track_sumChP < 100 && track_sumNeuH0p05 + track_sumPh0p05 < 100 && track_sumChP / track_pt < 1 && (track_sumNeuH0p05 + track_sumPh0p05) / track_pt < 100) > 0";
   
-  TFile * outfile = TFile::Open( Form("/nfs-6/userdata/dpgilber/MT2ST_skim_HT100/%s.root",argv[2]) , "RECREATE" );
+  TFile * outfile = TFile::Open( Form("/nfs-6/userdata/dpgilber/MT2ST_skim_HT100LooseSTC/%s.root",argv[2]) , "RECREATE" );
 
   TTree * skimmed_mt2 = tree_mt2->CopyTree ( selection_string );
   TTree * skimmed_st = tree_st->CopyTree ( selection_string );

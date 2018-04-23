@@ -7,8 +7,8 @@ class sttree;
 
 TFile VetoFile("VetoEtaPhi/VetoHists.root");
 TH1F* veto_bar = (TH1F*) VetoFile.Get("h_VetoEtaPhi_bar");
-TH1F* veto_ecp = (TH1F*) VetoFile.Get("h_VetoEtaPhi_ecn");
-TH1F* veto_ecn = (TH1F*) VetoFile.Get("h_VetoEtaPhi_ecp");
+TH1F* veto_ecp = (TH1F*) VetoFile.Get("h_VetoEtaPhi_ecp");
+TH1F* veto_ecn = (TH1F*) VetoFile.Get("h_VetoEtaPhi_ecn");
 
 int STCandLooper::InEtaPhiVetoRegion(float eta, float phi) {
   if (fabs(eta) > 2.4) return -1;
@@ -141,6 +141,16 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
   TH1F h_stc("h_stc","Short Track Candidate Count (All Selections)",4,0,4);
   TH1F h_st("h_st","True Short Track Count (All Selections)",4,0,4);
+
+  // none, e, mu, taue, taumu, tau1, tau3, 
+  // ee, emu, etaue, etaumu, etau1, etau3, 
+  // mumu, mutaue, mutaumu, mutau1, mutau3, 
+  // tauetaue, tauetaumu, tauetau1, tauetau3, 
+  // taumutaumu, taumutau1, taumutau3, 
+  // tau1tau1, tau1tau3, 
+  // tau3tau3
+  TH1F h_lepType("h_lepType","Lepton Type",28,0,28);
+  TH1F h_ngenLep("h_ngenLep","ngenLep in N_{STC} > 0 Events",6,0,6);
 
   const float pi = TMath::Pi();
   TH2F h_etaphi_bar("h_etaphi_bar","All Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
@@ -378,7 +388,6 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
      */
     const int ntracks = t.ntracks;
     int nstc = 0; int nst = 0;
-
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
 
       // Veto tracks outside fiducial region
@@ -468,7 +477,7 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	// Else, pdgId of lepton
 	int decayMode = abs(t.genTau_decayMode[i_tau]);
 	if (decayMode > 3) continue; // Count leptons separately
-	if (decayMode > 0) continue; // No tau veto
+	//	if (decayMode > 0) continue; // No tau veto
 	float tau_eta = t.genTau_eta[i_tau];
 	float tau_phi = t.genTau_phi[i_tau];
 	float dr = DeltaR(tau_eta, t.track_eta[i_trk], tau_phi, t.track_phi[i_trk]);
@@ -507,6 +516,21 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	}
 	if (doGenVeto) continue;// Apply Gen veto
       } // End fills if gen lepton nearby
+
+      minDR = 100;
+      // Also check genStat23 for DR cases where genLeps not saved due to no Z
+      for (int i_s23 = 0; i_s23 < t.ngenStat23; i_s23++) {
+	int pdgId = abs(t.genStat23_pdgId[i_s23]);
+	if (pdgId != 15 && pdgId != 13 && pdgId != 11) continue;
+	float gen_eta = t.genStat23_eta[i_s23];
+	float gen_phi = t.genStat23_phi[i_s23];
+	float dr = DeltaR(gen_eta, t.track_eta[i_trk], gen_phi, t.track_phi[i_trk]);
+	if (dr < minDR) {
+	  minDR = dr;
+	  minIndex = i_s23;
+	}	
+      }
+      if (minDR < 0.1 && doGenVeto) continue;
 
       // Check reco leps
       bool lepOverlap = false;
@@ -729,6 +753,7 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 
       if (t.track_isshort[i_trk]) {
 	nst++;
+	cout << run << ":" << lumi << ":" << evt << " track: " << i_trk << endl;
       }
       
       /*
@@ -897,6 +922,83 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
     
     h_st.Fill(nst,w_);
     h_stc.Fill(nstc,w_);
+
+    if (nstc > 0) {
+      h_ngenLep.Fill(t.ngenLep + t.ngenTau,w_);
+    }
+    // Note, because we don't check stat23 (tau decay mode undefined) there's a ~5% error here for DY. Best to look at other dilep samples.
+    if (nst > 0) {
+      // none, e, mu, taue, taumu, tau1, tau3, 
+      // ee, emu, etaue, etaumu, etau1, etau3, 
+      // mumu, mutaue, mutaumu, mutau1, mutau3, 
+      // tauetaue, tauetaumu, tauetau1, tauetau3, 
+      // taumutaumu, taumutau1, taumutau3, 
+      // tau1tau1, tau1tau3, 
+      // tau3tau3      
+      bool founde = false;
+      bool foundmu = false;
+      bool foundtaue = false;
+      bool foundtaumu = false;
+      bool foundtau1 = false;
+      bool foundtau3 = false;
+      const int ngenLep = t.ngenLep + t.ngenTau;
+      for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
+	int pdgId = abs(t.genLep_pdgId[i_lep]);
+	if (pdgId == 11) founde = true;
+	else foundmu = true;
+      }
+      for (int i_tau = 0; i_tau < t.ngenTau; i_tau++) {
+	int decayMode = abs(t.genTau_decayMode[i_tau]);
+	if (decayMode == 11) foundtaue = true;
+	else if (decayMode == 13) foundtaumu = true;
+	else if (decayMode == 1) foundtau1 = true;
+	else foundtau3 = true;
+      }
+      int lep_type = 0;
+      if (ngenLep == 1) {
+	if (founde) lep_type = 1;
+	else if (foundmu) lep_type = 2;
+	else if (foundtaue) lep_type = 3;
+	else if (foundtaumu) lep_type = 4;
+	else if (foundtau1) lep_type = 5;
+	else lep_type = 6; // foundtau3
+      } else if (ngenLep == 2) {
+	if (founde) {
+	  if (foundmu) lep_type = 8;
+	  else if (foundtaue) lep_type = 9;
+	  else if (foundtaumu) lep_type = 10;
+	  else if (foundtau1) lep_type = 11;
+	  else if (foundtau3) lep_type = 12;
+	  else lep_type = 7; // founde was true twice
+	}
+	else if (foundmu) {
+	  if (foundtaue) lep_type = 14;
+	  else if (foundtaumu) lep_type = 15;
+	  else if (foundtau1) lep_type = 16;
+	  else if (foundtau3) lep_type = 17;
+	  else lep_type = 13; // foundmu twice
+	}
+	else if (foundtaue) {
+	  if (foundtaumu) lep_type = 19;
+	  else if (foundtau1) lep_type = 20;
+	  else if (foundtau3) lep_type = 21;
+	  else lep_type = 18; // foundtaue twice
+	}
+	else if (foundtaumu) {
+	  if (foundtau1) lep_type = 23;
+	  else if (foundtau3) lep_type = 24;
+	  else lep_type = 22; // foundtaumu twice
+	}
+	else if (foundtau1) {
+	  if (foundtau3) lep_type = 26;
+	  else lep_type = 25; // foundtau1 twice
+	}
+	else {
+	  lep_type = 27; // foundtau3 twice
+	}	
+      } // ngenLep + ngenTau == 2
+      h_lepType.Fill(lep_type,w_);
+    } // if nst > 0
       
   }//end loop on events in a file
   
@@ -935,6 +1037,8 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
     
   TFile outfile_(output_name,"RECREATE"); 
   outfile_.cd();
+
+  h_lepType.Write();
   
   h_st.Write();
   h_stc.Write();
@@ -1052,6 +1156,8 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   h_sh_nreliso_l.Write();  
   h_sh_chreliso_l.Write();  
 
+  h_ngenLep.Write();
+  
   outfile_.Close();
 
   cout << "Wrote everything" << endl;

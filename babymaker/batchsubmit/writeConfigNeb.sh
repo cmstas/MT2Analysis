@@ -25,8 +25,8 @@ UNIVERSE="vanilla"
 EXE="wrapper_neb.sh"
 INPUT="wrapper_neb.sh, job_input/input.tar.gz"
 # can add other US sites here if desired
-#SITE="T2_US_UCSD"
-SITE="T2_US_Nebraska"
+SITE="T2_US_UCSD"
+#SITE="T2_US_Nebraska"
 SUBMITLOGDIR="${PWD}/submit_logs"
 JOBLOGDIR="${PWD}/job_logs"
 PROXY=$(voms-proxy-info -path)
@@ -107,7 +107,7 @@ containsElement () {
 
 echo "[writeConfig] seeking list of files to run on..."
 
-xrdfsout=`xrdfs xrootd-local.unl.edu ls ${DATADIR}`
+xrdfsout=`xrdfs xrootd-local.unl.edu ls ${DATADIR#/hadoop/cms}`
 
 # xrdfs ... ls returns the same filenames multiple times, see: https://github.com/xrootd/xrootd/issues/541
 # once the second set of identical files begins, bug out

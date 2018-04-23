@@ -161,6 +161,90 @@ for varsuffix in varsuffixes:
         pads[0].cd()
         canvas.SaveAs("{0}/{1}{2}.png".format(outdir,varsuffix,trklensuffix))
 
+
+LT_histlist = []
+for sample in samples[0:4]:
+    h_LT = (utils.GetUnderOverHist(filedict[sample],"h_lepType",color=sample_colors[sample])).Clone("h_lepType"+sample)
+    h_LT.Scale(1/h_LT.Integral())
+    h_LT.SetLineWidth(3)
+    LT_histlist.append(h_LT)
+
+LT_histlist[0].SetMaximum( 0.6 )
+LT_histlist[0].SetMinimum(0)
+LT_histlist[0].SetTitle("Prompt Leptons in Events Passing All Selections")
+LTbinlabels = ["No leps","e","#mu","#tau_{e}","#tau_{#mu}","#tau_{1}","#tau_{3}",
+               "ee","e#mu","e#tau_{e}","e#tau_{#mu}","e#tau_{1}","e#tau_{3}",
+               "#mu#mu","#mu#tau_{e}","#mu#tau_{#mu}","#mu#tau_{1}","#mu#tau_{3}",
+               "#tau_{e}#tau_{e}","#tau_{e}#tau_{#mu}","#tau_{e}#tau_{1}","#tau_{e}#tau_{3}",
+               "#tau_{#mu}#tau_{#mu}","#tau_{#mu}#tau_{1}","#tau_{#mu}#tau_{3}",
+               "#tau_{1}#tau_{1}","#tau_{1}#tau_{3}",
+               "#tau_{3}#tau_{3}"]
+for bin in xrange(1,LT_histlist[0].GetNbinsX() + 1):
+    LT_histlist[0].GetXaxis().SetBinLabel(bin, LTbinlabels[bin-1])
+
+LT_histlist[0].Draw()
+for h in LT_histlist[1:]:
+    h.Draw("same")
+pads[1].cd()
+tl.Draw()
+canvas.SaveAs("{0}/h_LT.png".format(outdir))
+pads[0].cd()
+
+LT_exp = LT_histlist[0].Clone("LT_exp")
+LT_expDY = LT_exp.Clone("LT_expDY")
+taul = 0.1785 # each of mu and e
+tau1 = 0.531
+tau3 = 0.117
+exp_bin_content = [1, 1/3., 1/3., taul/3., taul/3., tau1/3., tau3/3.,
+                   1/9., 2/9., 2*taul/9., 2*taul/9., 2*tau1/9., 2*tau3/9.,
+                   1/9., 2*taul/9., 2*taul/9., 2*tau1/9., 2*tau3/9.,
+                   taul*taul/9., 2*taul*taul/9., 2*taul*tau1/9, 2*taul*tau3/9,
+                   taul*taul/9., 2*taul*tau1/9, 2*taul*tau3/9,
+                   tau1*tau1/9, 2*tau1*tau3/9,
+                   tau3*tau3/9]
+
+exp_bin_contentDY = [0, 0, 0, 0, 0, 0, 0,
+                   1/3., 0, 0, 0, 0, 0,
+                   1/3., 0, 0, 0, 0,
+                   taul*taul/3., 2*taul*taul/3, 2*taul*tau1/3, 2*taul*tau3/3,
+                   taul*taul/3, 2*taul*tau1/3,2*taul*tau3/3,
+                   tau1*tau1/3, 2*tau1*tau3/3,
+                   tau3*tau3/3]
+                   
+for bin in xrange(1,LT_histlist[0].GetNbinsX() + 1):
+    LT_exp.SetBinContent(bin,exp_bin_content[bin-1])
+    LT_exp.SetBinError(bin,0)
+for bin in xrange(1,LT_histlist[0].GetNbinsX() + 1):
+    LT_expDY.SetBinContent(bin,exp_bin_contentDY[bin-1])
+    LT_expDY.SetBinError(bin,0)
+
+
+for index,h in enumerate(LT_histlist):
+    if (index != 2):
+        h.Divide(LT_exp)
+    else:
+        h.Divide(LT_expDY)
+    for bin in xrange(1,LT_histlist[0].GetNbinsX() + 1):
+        bc = h.GetBinContent(bin)
+        if (bc == 0):
+            bc = 1
+        bc = bc - 1
+        if (bc < 0): 
+            bc = bc + 1
+            bc = (-1/bc) + 1
+        h.SetBinContent(bin, bc)
+
+LT_histlist[0].SetMaximum( 1.2 * max([ h.GetMaximum() for h in LT_histlist] ) )
+LT_histlist[0].SetMinimum( -1 * LT_histlist[0].GetMaximum() )
+LT_histlist[0].SetTitle("Prompt Leptons in Events Passing All Selections, Relative Enhancement")
+LT_histlist[0].Draw()
+for h in LT_histlist[1:]:
+    h.Draw("same")
+pads[1].cd()
+tl.Draw()
+canvas.SaveAs("{0}/h_LT_rel.png".format(outdir))
+
+
 h_factor_stc1 = ROOT.TH1F("h_factor_stc1","Reduction Factor: N_{STC} > 0",len(samples),0,len(samples));
 h_factor_stc2 = ROOT.TH1F("h_factor_stc2","Reduction Factor: N_{STC} > 1",len(samples),0,len(samples));
 h_factor_st1 = ROOT.TH1F("h_factor_st1","Reduction Factor: N_{ST} > 0 when N_{STC} > 0",len(samples),0,len(samples));
@@ -215,4 +299,4 @@ for hist in [h_factor_stc1,h_factor_stc2,h_factor_st1,h_factor_st2]:
     hist.SetLineWidth(3)
     hist.Draw("E")
     canvas2.SaveAs("{0}/{1}.png".format(outdir,hist.GetName()))
-
+    

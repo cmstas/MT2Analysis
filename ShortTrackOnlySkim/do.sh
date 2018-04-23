@@ -2,7 +2,7 @@
 
 make all
 
-INDIR=/nfs-6/userdata/dpgilber/MT2_ST_Friends
+INDIR=/nfs-6/userdata/dpgilber/MT2ST_skim_HT100/
 OUTDIR=output
 LOGDIR=logs
 

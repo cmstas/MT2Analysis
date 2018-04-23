@@ -33,11 +33,12 @@ verbose = False # Print more status messages
 interpolate = False
 rebin = 5
 
-
-indir = "../drHists_GV"
-
-if len(argv) == 3:
-    indir = argv[1]
+if len(argv) > 1:
+    indir = "../drHists_" + argv[1]
+    outdir = "drpngs_" + argv[1]
+else:
+    indir = "../drHists_GV" 
+    outdir = "drpngs_GV"
 
 print "Input is {0}/*.root, .pngs will be placed here in LepDR".format(indir)
 
@@ -75,7 +76,7 @@ for sample in samples:
 #    tle = tl.AddEntry(h_el_dr,"Taus ({0})".format(int(integral_tau)))
 #    tle.SetTextSize(0.1)
 #    tl.Draw()
-    canvas.SaveAs("{0}_dr.png".format(sample))
+    canvas.SaveAs("{0}/{1}_dr.png".format(outdir/sample))
 
     h_el_ptr = utils.GetUnderOverHist(f,"h_el_ptr") #.Clone(sample+"elptr")
     h_mu_ptr = utils.GetUnderOverHist(f,"h_mu_ptr",color=ROOT.kRed) #.Clone(sample+"muptr")
@@ -94,7 +95,7 @@ for sample in samples:
     h_el_ptr.Draw()
     h_mu_ptr.Draw("same")
     h_tau_ptr.Draw("same")
-    canvas.SaveAs("{0}_ptr.png".format(sample))
+    canvas.SaveAs("{0}/{1}_ptr.png".format(outdir,sample))
 
     h_sh_el_dr = utils.GetUnderOverHist(f,"h_sh_el_dr",over=False) #.Clone(sample+"eldr")
     h_sh_el_dr.Rebin(5)
@@ -123,7 +124,7 @@ for sample in samples:
 #    tle = tl.AddEntry(h_sh_el_dr,"Taus ({0})".format(int(integral_tau)))
 #    tle.SetTextSize(0.1)
 #    tl.Draw()
-    canvas.SaveAs("{0}_dr_sh.png".format(sample))
+    canvas.SaveAs("{0}/{1}_dr_sh.png".format(outdir,sample))
 
     h_sh_el_ptr = utils.GetUnderOverHist(f,"h_sh_el_ptr") #.Clone(sample+"elptr")
     h_sh_mu_ptr = utils.GetUnderOverHist(f,"h_sh_mu_ptr",color=ROOT.kRed) #.Clone(sample+"muptr")
@@ -142,4 +143,4 @@ for sample in samples:
     h_sh_el_ptr.Draw()
     h_sh_mu_ptr.Draw("same")
     h_sh_tau_ptr.Draw("same")
-    canvas.SaveAs("{0}_ptr_sh.png".format(sample))
+    canvas.SaveAs("{0}/{1}_ptr_sh.png".format(outdir,sample))
