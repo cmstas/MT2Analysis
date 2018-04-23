@@ -535,7 +535,7 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
       // Check reco leps
       bool lepOverlap = false;
       for (int i_lep = 0; i_lep < t.nlep; i_lep++) {
-	if (DeltaR(t.lep_eta[i_lep],t.track_eta[i_trk],t.track_phi[i_trk],t.track_phi[i_trk]) < 0.1) {
+	if (DeltaR(t.lep_eta[i_lep],t.track_eta[i_trk],t.lep_phi[i_trk],t.track_phi[i_trk]) < 0.1) {
 	  lepOverlap = true;
 	  break;
 	}
