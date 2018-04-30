@@ -740,7 +740,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           }
 
           int motherId = abs(cms3.genps_id_simplemother().at(iGen));
-	  //          int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
+          int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
 
           // save all status 22 or 23 gen particles
           if (status == 23 || status == 22) {
@@ -788,90 +788,80 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           bool goodLepFromTau = false;
           int sourceId = 0;
 
-          // electrons, muons: status 1 with (grand)mother W/Z/H/tau
-	  // taus occasionally produce status 51 leps, which in turn radiate FSR to produce status 1 leps. Need to allow tau grandmas. 
-	  // See event 82530 of /hadoop/cms/store/group/snt/run2_moriond17/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/V08-00-16/merged_ntuple_1.root
-	  int ultimateMotherId = abs(cms3.genps_id_mother().at(iGen));
-          if ( (pdgId == 11 || pdgId == 13) && (status == 1) ){
-	    // EDIT: save POST-FSR
-	    if (ultimateMotherId == 25 || ultimateMotherId == 24 || ultimateMotherId == 23) {
-	      goodLep = true;
-	      if (ultimateMotherId == 23) goodLepFromZ = true;
-	    }
-	    else if (ultimateMotherId == 15) { // Need to check that tau is not itself from hadron decay
-	      int tauUltimateMotherId = cms3.genps_id_mother().at(cms3.genps_idx_mother().at(iGen));
-	      if (tauUltimateMotherId == 25 || tauUltimateMotherId == 24 || tauUltimateMotherId == 23) goodLepFromTau = true;
-	    }	    
-
-	    // Easy case: there was no FSR and the stat 1 lep was produced immediately from mother's decay in the gen record, no stat 23 intermediate
-	    /*	    if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 15) {
-	      if (motherId == 15) goodLepFromTau = true;
-	      else {
-		goodLep = true;
-		if (motherId == 23) goodLepFromZ = true;
-	      }
-	    } // Immediate daughter of boson/tau
-	    else {
-	      // Hard case: may have been many intermediate FSR steps, but we need to be careful not to pick up fakes with sloppy checks. Many stat 1 leps from jets have
-	      // boson as distant ancestor, but not everybody came from boson promptly (ie had a stat 23 version).
-	      // Walk up ancestry and search for stat 23 self, then a boson, or a tau.
-	      int ancestor_id = pdgId;
-	      int ancestor_index = iGen;
-	      bool foundStat23 = false;
-	      int foundBoson = -1;
-	      bool foundTau = false;
-	      cout << evt << endl;
-	      // stop at hadrons (including original proton) or at heavy boson
-	      while (ancestor_id < 100 && foundBoson < 0) { 
-		ancestor_id = abs(cms3.genps_id_simplemother().at(ancestor_index));
-		ancestor_index = cms3.genps_idx_simplemother().at(ancestor_index);
-		if (ancestor_id == pdgId && cms3.genps_status().at(ancestor_index) == 23) foundStat23 = true;
-		else if (ancestor_id == 25 || ancestor_id == 24 || ancestor_id == 23) foundBoson = ancestor_id;	     
-		else if (ancestor_id == 15) foundTau = true;
-		cout << "aid " << ancestor_id << endl;
-		cout << "aidx " << ancestor_index << endl;
-		cout << "fs23 " << foundStat23 << endl;
-		cout << "fB " << foundBoson << endl;
-		cout << "fT " << foundTau << endl;
-	      }
-	      if (foundStat23 && foundBoson > 0) {
-		goodLep = true;
-		if (foundBoson == 23) goodLepFromZ = true;
-	      }
-	      else if (foundTau && foundBoson > 0) {
-		goodLepFromTau = true;
-	      }
-	      } // Not immediate daughter of boson/tau */
+          // electrons, muons: status 1 or 23 and mother W/Z/H or tau from W/Z/H
+          if ( (pdgId == 11 || pdgId == 13) && (status == 1 || status == 23) ) {
+            // save leptons pre-FSR: prefer status 23 over status 1
+            if (status == 1 && motherId == pdgId && (cms3.genps_status().at(cms3.genps_idx_simplemother().at(iGen)) == 23)) {
+              // don't save
+            }
+            // leptons from taus -- also allow gluon grandparants for ttZ etc
+	    //            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 21 || grandmotherId == 15)) {
+            else if (motherId == 15 && (grandmotherId == 25 || grandmotherId == 24 || grandmotherId == 23 || grandmotherId == 15)) {
+              goodLepFromTau = true;
+            } 
+            // leptons from W/Z/H -- also allow gluons for ttZ etc
+	    //            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
+            else if (motherId == 25 || motherId == 24 || motherId == 23) {
+              goodLep = true;
+	      // leptons in ttZ can have gluon mothers..
+	      //	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
+	      if (motherId == 23) goodLepFromZ = true;
+            } 
           } // status 1 e or mu
 
-          // taus: status 2, from W/Z/H
-          else if (pdgId == 15 && status == 2 && (ultimateMotherId == 25 || ultimateMotherId == 24 || ultimateMotherId == 23) ) {
-	    goodTau = true;
-	    // EDIT: TAKE POST-FSR
-	    if (motherId == 23) goodLepFromZ = true;
+          // taus: status 2 or 23, from W/Z/H
+          else if (pdgId == 15 && (status == 2 || status == 23)) {
+            // save leptons pre-FSR: prefer status 23 over status 2
+            if (status == 2 && motherId == pdgId && (cms3.genps_status().at(cms3.genps_idx_simplemother().at(iGen)) == 23)) {
+              // don't save
+            }
+            // leptons from W/Z/H -- also allow gluon grandparants for ttZ etc
+	    //            else if (motherId == 25 || motherId == 24 || motherId == 23 || motherId == 21) {
+            else if (motherId == 25 || motherId == 24 || motherId == 23) {
+              goodTau = true;
+	      // leptons in ttZ can have gluon mothers..
+	      //	      if (motherId == 23 || motherId == 21) goodLepFromZ = true;
+	      if (motherId == 23) goodLepFromZ = true;
+            }
+	    
 	    // find decay mode - only count charged daughters
-	    int tauIdx = iGen;
-	    for(unsigned int jGen = 0; jGen < cms3.genps_p4().size(); jGen++) {
-	      int id2 = abs(cms3.genps_id().at(jGen));
-	      if (cms3.genps_idx_mother().at(jGen) != tauIdx) continue;
-	      if ((cms3.genps_status().at(jGen) != 1) && (cms3.genps_status().at(jGen) != 2)) continue;
-	      // don't count duplicated taus as daughters
-	      if (id2 == 15) continue;
-	      if ( (id2 == 11) || (id2 == 13) ) {
-		decayMode = cms3.genps_id().at(jGen);
-		leadTrackPt = cms3.genps_p4().at(jGen).pt();
-		break;
+	    if (goodTau) {
+	      int tauIdx = iGen;
+	      // for status 23 taus: must find the status 2 taus for decays..
+	      if (status == 23) {
+		for(unsigned int jGen = 0; jGen < cms3.genps_p4().size(); jGen++) {
+		  if (abs(cms3.genps_id().at(jGen)) != 15) continue;
+		  if (abs(cms3.genps_id_simplemother().at(jGen)) != 15) continue;
+		  if ( (cms3.genps_idx_mother().at(jGen) != int(iGen)) && (cms3.genps_idx_mother().at(jGen) != cms3.genps_idx_mother().at(iGen)) ) continue;
+		  if (cms3.genps_status().at(jGen) != 2) continue;
+		  tauIdx = jGen;
+		  break;
+		}
 	      }
-	      // not a lepton: count number of prongs
-	      else if (abs(cms3.genps_charge().at(jGen)) == 1) {
-		++decayMode;
-		if (cms3.genps_p4().at(jGen).pt() > leadTrackPt) leadTrackPt = cms3.genps_p4().at(jGen).pt();
+	      for(unsigned int jGen = 0; jGen < cms3.genps_p4().size(); jGen++) {
+		int id2 = abs(cms3.genps_id().at(jGen));
+		if (cms3.genps_idx_mother().at(jGen) != int(tauIdx)) continue;
+		//if (cms3.genps_charge().at(jGen) == 0) continue;
+		if ((cms3.genps_status().at(jGen) != 1) && (cms3.genps_status().at(jGen) != 2)) continue;
+		// don't count duplicated taus as daughters
+		if (id2 == 15) continue;
+		if ( (id2 == 11) || (id2 == 13) ) {
+		  decayMode = cms3.genps_id().at(jGen);
+		  leadTrackPt = cms3.genps_p4().at(jGen).pt();
+		  break;
+		}
+		// not a lepton: count number of prongs
+		else if (abs(cms3.genps_charge().at(jGen)) == 1) {
+		  ++decayMode;
+		  if (cms3.genps_p4().at(jGen).pt() > leadTrackPt) leadTrackPt = cms3.genps_p4().at(jGen).pt();
+		}
+		// not charged: count neutral (non-neutrino) daughters
+		else if ((cms3.genps_charge().at(jGen) == 0) && (id2 != 12 && id2 != 14 && id2 != 16)) {
+		  ++neutralDaughters;
+		}
 	      }
-	      // not charged: count neutral (non-neutrino) daughters
-	      else if ((cms3.genps_charge().at(jGen) == 0) && (id2 != 12 && id2 != 14 && id2 != 16)) {
-		++neutralDaughters;
-	      }
-	    } // daughter loop
+	    } // if goodTau
+	    
           } // status 2 tau
 
 	  // neutrinos -- counting based on decays in NLO ttZ sample
@@ -2003,12 +1993,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
-
-	  jet_chFrac[njet] = cms3.pfjets_chargedHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_nhFrac[njet] = cms3.pfjets_neutralHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_cemFrac[njet] = cms3.pfjets_chargedEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_nemFrac[njet] = cms3.pfjets_neutralEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_muFrac[njet] = cms3.pfjets_muonE().at(iJet) / cms3.pfjets_p4()[iJet].E();
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -3245,11 +3229,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
     BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
-    BabyTree_->Branch("jet_chFrac", jet_chFrac, "jet_chFrac[njet]/F" );
-    BabyTree_->Branch("jet_nhFrac", jet_nhFrac, "jet_nhFrac[njet]/F" );
-    BabyTree_->Branch("jet_cemFrac", jet_cemFrac, "jet_cemFrac[njet]/F" );
-    BabyTree_->Branch("jet_nemFrac", jet_nemFrac, "jet_nemFrac[njet]/F" );
-    BabyTree_->Branch("jet_muFrac", jet_muFrac, "jet_muFrac[njet]/F" );
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
@@ -3752,11 +3731,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       jet_mass[i] = -999;
       jet_btagCSV[i] = -999;
       jet_btagMVA[i] = -999;
-      jet_chFrac[i] = -999;
-      jet_nhFrac[i] = -999;
-      jet_cemFrac[i] = -999;
-      jet_nemFrac[i] = -999;
-      jet_muFrac[i] = -999;
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;

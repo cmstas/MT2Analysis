@@ -207,5 +207,6 @@ int main(int argc, char **argv) {
   babyMaker *looper = new babyMaker();
   if (isBadMiniAodV1) looper->SetRecomputeRawPFMET(true);
   looper->ScanChain(chain, sample, isFastsim, max_events); 
+  delete chain;
   return 0;
 }

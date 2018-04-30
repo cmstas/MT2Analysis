@@ -2,7 +2,7 @@
 #define sttree_h
 
 #include "TROOT.h"
-#include "TChain.h"
+#include "TTree.h"
 #include "TFile.h"
 
 #include "mt2tree.h"
@@ -56,7 +56,7 @@ public :
    Int_t           track_ismatched[200]; //[ntracks]
    Int_t           track_gpidx[200]; //[ntracks]
    Int_t           track_gppdgid[200]; //[ntracks]
-   Int_t           track_gpdr[200]; //[ntracks]
+   Double_t           track_gpdr[200]; //[ntracks]
    Double_t         track_sumPUChP[200]; //[ntracks]
    Double_t         track_sumChP[200]; //[ntracks]
    Double_t         track_sumChP0p3[200]; //[ntracks]
@@ -187,7 +187,7 @@ public :
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init_ST(TTree *tree);
+   virtual void     Init(TTree *tree);
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
@@ -198,7 +198,8 @@ public :
 #ifdef sttree_cxx
 sttree::sttree(TTree *tree) : fChain(0) 
 {
-   Init_ST(tree);
+  mt2tree::Init(tree);
+  Init(tree);
 }
 
 sttree::~sttree()
@@ -221,12 +222,12 @@ Long64_t sttree::LoadTree(Long64_t entry)
    if (centry < 0) return centry;
    if (fChain->GetTreeNumber() != fCurrent) {
       fCurrent = fChain->GetTreeNumber();
-      Notify();
+     Notify();
    }
    return centry;
 }
 
-void sttree::Init_ST(TTree *tree)
+void sttree::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -240,7 +241,9 @@ void sttree::Init_ST(TTree *tree)
    if (!tree) return;
    fChain = tree;
    fCurrent = -1;
-   fChain->SetMakeClass(1);
+   //   fChain->SetMakeClass(1);
+
+   mt2tree::Init(tree);
 
    fChain->SetBranchAddress("ntracks", &ntracks, &b_ntracks);
    fChain->SetBranchAddress("nshorttracks", &nshorttracks, &b_nshorttracks);
@@ -327,7 +330,7 @@ void sttree::Init_ST(TTree *tree)
 Bool_t sttree::Notify()
 {
    // The Notify() function is called when a new file is opened. This
-   // can be either for a new TTree in a TChain or when when a new TTree
+   // can be either for a new TTree in a TTree or when when a new TTree
    // is started when using PROOF. It is normally not necessary to make changes
    // to the generated code, but the routine can be extended by the
    // user if needed. The return value is currently not used.

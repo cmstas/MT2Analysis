@@ -20,10 +20,10 @@ endif
 #	ROOFITINCLUDE = $(shell scramv1 tool info roofitcore | grep INCLUDE | sed 's/^INCLUDE=/-I/')
 #endif
 
-CC = g++
+CC = g++ 
 CMSROOT = ./
 INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
-CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
+CFLAGS = -std=c++17 -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
 COREDIR = CORE
 
@@ -80,7 +80,7 @@ LinkDef_out.cxx: LinkDef.h
 $(EXE):  $(LIBS)
 	$(QUIET) echo "Building $@"; \
 	echo "$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./"; \
-	$(CC) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./ 
+	$(CC) $(CFLAGS) -o $@ $(LIBS) $(ROOTLIBS) -Wl,-rpath,./ 
 
 %.o: 	%.cc %.h
 	$(QUIET) echo "Compiling $<"; \

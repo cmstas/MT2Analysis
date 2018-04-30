@@ -44,8 +44,10 @@ print "Input is {0}/*.root, .pngs will be placed here in LepDR".format(indir)
 
 print "Processing input..."
 
-samples = ["ttsl","ttdl","DY","Wjets","qcd300to500","qcd500to700","qcd700to1000","qcd1000to1500","qcd1500to2000","qcd2000toInf","zinv100to200","zinv200toInf","total"]
-filenames = ["ttsl","ttdl","dyjetstoll_incl_ext1","wjets_incl","qcd_ht300to500","qcd_ht500to700","qcd_ht700to1000","qcd_ht1000to1500","qcd_ht1500to2000_ext1","qcd_ht2000toInf","zinv_zpt100to200","zinv_zpt200toInf","total"]
+#samples = ["ttsl","ttdl","DY","Wjets","qcd300to500","qcd500to700","qcd700to1000","qcd1000to1500","qcd1500to2000","qcd2000toInf","zinv100to200","zinv200toInf","total"]
+samples = ["ttsl","ttdl"]
+#filenames = ["ttsl","ttdl","dyjetstoll_incl_ext1","wjets_incl","qcd_ht300to500","qcd_ht500to700","qcd_ht700to1000","qcd_ht1000to1500","qcd_ht1500to2000_ext1","qcd_ht2000toInf","zinv_zpt100to200","zinv_zpt200toInf","total"]
+filenames = ["ttsl","ttdl"]
 filedict = dict(zip(samples,filenames))
 
 for sample in samples:

@@ -9,9 +9,11 @@ import ppmUtils as utils
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
 
-h_bar = ROOT.TH2F("h_VetoEtaPhi_bar","#eta-#phi Veto Bins, Barrel",170,-1.4,1.4,360,0,3.14159)
-h_ecn = ROOT.TH2F("h_VetoEtaPhi_ecn","#eta-#phi Veto Bins, Neg Endcap",100,-2.4,-1.4,100,0,3.14159)
-h_ecp = ROOT.TH2F("h_VetoEtaPhi_ecp","#eta-#phi Veto Bins, Pos Endcap",100,1.4,2.4,100,0,3.14159)
+pi = ROOT.Math.Pi()
+
+h_bar = ROOT.TH2F("h_VetoEtaPhi_bar","#eta-#phi Veto Bins, Barrel",170,-1.4,1.4,360,-pi,pi)
+h_ecn = ROOT.TH2F("h_VetoEtaPhi_ecn","#eta-#phi Veto Bins, Neg Endcap",100,-2.4,-1.4,100,-pi,pi)
+h_ecp = ROOT.TH2F("h_VetoEtaPhi_ecp","#eta-#phi Veto Bins, Pos Endcap",100,1.4,2.4,100,-pi,pi)
 
 def BarVeto(x1, y1, x2, y2 ):
     for x in xrange(x1,x2+1):

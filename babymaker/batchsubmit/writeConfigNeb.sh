@@ -97,34 +97,36 @@ x509userproxy=${PROXY}
 
 #    for FILE in `ls ${DATADIR}/*.root`; do
 
-# check if a list contains a given element
-containsElement () {
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 1; done
-  return 0
-}
 
 echo "[writeConfig] seeking list of files to run on..."
 
-xrdfsout=`xrdfs xrootd-local.unl.edu ls ${DATADIR#/hadoop/cms}`
+xrdfsout=`xrdfs xrootd-local.unl.edu ls ${DATADIR#/hadoop/cms} | uniq`
+
+# I'm an idiot, just pipe xrdfsout through uniq...
 
 # xrdfs ... ls returns the same filenames multiple times, see: https://github.com/xrootd/xrootd/issues/541
 # once the second set of identical files begins, bug out
-echo "[writeConfig] assembling list of unique file names..."
+#echo "[writeConfig] assembling list of unique file names..."
 
-filearray=()
-for FILE in ${xrdfsout}; do
-    containsElement ${FILE} ${filearray[@]}
-    if [ $? -eq 0 ]; then
-	filearray+=(${FILE})
-    else break
-    fi
-done
+# check if a list contains a given element
+#containsElement () {
+#  local e match="$1"
+#  shift
+#  for e; do [[ "$e" == "$match" ]] && return 1; done
+#  return 0
+#}
+#filearray=()
+#for FILE in ${xrdfsout}; do
+#    containsElement ${FILE} ${filearray[@]}
+#    if [ $? -eq 0 ]; then
+#	filearray+=(${FILE})
+#    else break
+#    fi
+#done
 
 echo "[writeConfig] writing condor_${COPYDIRBASE##*/}.cmd" 
 
-for FILE in ${filearray[@]}; do
+for FILE in ${xrdfsout}; do
     echo "Running on $FILE"
     echo "
 executable=${EXE}

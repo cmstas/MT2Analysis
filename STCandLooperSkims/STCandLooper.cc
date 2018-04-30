@@ -25,19 +25,14 @@ int STCandLooper::InEtaPhiVetoRegion(float eta, float phi) {
   return 0;
 }
 
-int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, int vetoMode) {
+int STCandLooper::loop (char * indir, char * sample, int selectionMode, int vetoMode) {
 
-  bool doHT = selectionMode == 1;
-  bool doCRSL = selectionMode == 2;
-  bool doSR = selectionMode == 3;
+  const bool doHT = selectionMode == 1;
+  const bool doCRSL = selectionMode == 2;
+  const bool doSR = selectionMode == 3;
 
-  bool doGenVeto = vetoMode == 1;
-  bool doEtaPhiVeto = vetoMode == 2;
-
-  if (vetoMode < 0) {
-    doGenVeto = true;
-    doEtaPhiVeto = true;
-  }
+  const bool doGenVeto = vetoMode == 1 || vetoMode < 0;
+  const bool doEtaPhiVeto = vetoMode == 2 || vetoMode < 0;
 
   string output_suffix("");
   if (doHT) output_suffix = "_HT";
@@ -50,98 +45,114 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   string mkdir = "mkdir -p output" + output_suffix;
   system(mkdir.c_str());
   TString output_name = Form("output%s/%s.root",output_suffix.c_str(),sample);
-  //TString output_name = Form("output_test/%s.root",sample);
 
   // Containers for our trees
   TChain* ch_mt2 = new TChain("mt2st");
   TChain* ch_st = new TChain("st");
 
-  cout << "Input file: " << infile_name << endl;
-  ch_mt2->Add( infile_name ); // Load mt2 inputs
-  ch_st->Add( infile_name ); // Load short track inputs
+  cout << "Input directory: " << indir << endl;
 
-  // Get file Content
-  TTree *tree_mt2 = (TTree*)ch_mt2->Clone("mt2st");
-  TTree *tree_st = (TTree*)ch_st->Clone("st");
+  TString filestring = Form("%s/%s/*.root",indir,sample);
 
-  /*
-  tree_mt2->SetBranchStatus("*",0);
-  tree_mt2->SetBranchStatus("run",1);
-  tree_mt2->SetBranchStatus("lumi",1);
-  tree_mt2->SetBranchStatus("evt",1);
-  tree_mt2->SetBranchStatus("nVert",1);
-  tree_mt2->SetBranchStatus("met_pt",1);
-  tree_mt2->SetBranchStatus("ht",1);
-  tree_mt2->SetBranchStatus("lep_pt",1);
-  tree_mt2->SetBranchStatus("lep_eta",1);
-  tree_mt2->SetBranchStatus("lep_phi",1);
-  tree_mt2->SetBranchStatus("lep_pdgId",1);
-  tree_mt2->SetBranchStatus("genLep_pt",1);
-  tree_mt2->SetBranchStatus("genLep_eta",1);
-  tree_mt2->SetBranchStatus("genLep_phi",1);
-  tree_mt2->SetBranchStatus("genLep_pdgId",1);
-  tree_mt2->SetBranchStatus("genLep_sourceId",1);
-  tree_mt2->SetBranchStatus("genTau_pt",1);
-  tree_mt2->SetBranchStatus("genTau_eta",1);
-  tree_mt2->SetBranchStatus("genTau_phi",1);
-  tree_mt2->SetBranchStatus("genTau_pdgId",1);
-  tree_mt2->SetBranchStatus("genTau_sourceId",1);
-  tree_mt2->SetBranchStatus("isoTrack_pt",1);
-  tree_mt2->SetBranchStatus("isoTrack_eta",1);
-  tree_mt2->SetBranchStatus("isoTrack_phi",1);
-  tree_mt2->SetBranchStatus("isoTrack_pdgId",1);
-  tree_mt2->SetBranchStatus("jet_pt",1);
-  tree_mt2->SetBranchStatus("njet",1);
-  tree_mt2->SetBranchStatus("nLepLowMT",1);
-  tree_st->SetBranchStatus("*",0);
-  tree_st->SetBranchStatus("track_*",1);
-  tree_st->SetBranchStatus("ntracks",1);
-  */
+  cout << filestring.Data() << endl;
+  
+  ch_mt2->Add( filestring ); // Load mt2 inputs
+  ch_st->Add( filestring ); // Load short track inputs
 
   // sttree is a subtype of mt2tree. mt2tree functions can be called on an sttree, but not the reverse.
-  // This line incorporates branches from tree_mt2 into tree_st.
-  tree_st->AddFriend(tree_mt2);
+  // This line incorporates branches from ch_mt2 into ch_st.
+  ch_st->AddFriend(ch_mt2);
 
   sttree t; // See MT2CORE/sttree.h
 
   // Our baby tree is an sttree so that we can call both mt2 and st methods mindlessly.
-  t.Init(tree_st); // The Init function from mt2tree, for mt2 branches.
-  t.Init_ST(tree_st); // The Init function from sttree, for st branches.
+  t.Init(ch_st); // The Init function from sttree calls the Init function from mt2tree as well.
 
   // Event Loop
   // Sanity check:
-  const unsigned int nEventsTree = tree_mt2->GetEntries();
-  if (nEventsTree != tree_st->GetEntries()) {
+  const unsigned int nEventsTree = ch_mt2->GetEntries();
+  if (nEventsTree != ch_st->GetEntries()) {
     cout << "st and mt2 trees have different numbers of entries. This should not be possible if the input file was produced by treefriend.py and never edited. Aborting..." << endl;
     return 2;
   }
 
-  // For short track
-  const float pt_min_st = 15;
-  const float dxy_max_st = 0.02;
-  const float dz_max_st = 0.05;
-  const float iso_max_st = 10;
-  const float reliso_max_st = 0.2;
-  const float niso_max_st = 10;
-  const float chiso_max_st = 10;
-  const float nreliso_max_st = 0.1;
-  const float chreliso_max_st = 0.1;
   // For cands
-  const float pt_min = 15;
-  const float dxy_max = 0.06;
-  const float dz_max = 0.15;
-  const float iso_max = 30;
-  const float reliso_max = 0.6;
-  const float niso_max = 30;
-  const float chiso_max = 30;
-  const float nreliso_max = 0.3;
-  const float chreliso_max = 0.3;
+  const float pt_min = pt_min_st;
+  const float dxy_max = 3* dxy_max_st;
+  const float dz_max = 3* dz_max_st;
+  const float iso_max = 3* iso_max_st;
+  const float reliso_max = 3* reliso_max_st;
+  const float niso_max = 3* niso_max_st;
+  const float chiso_max = 3* chiso_max_st;
+  const float nreliso_max = 3* nreliso_max_st;
+  const float chreliso_max = 3* chreliso_max_st;
+  const float pterr_max = 3 * pterr_max_st;
+  const float pterr_max_s = 3 * pterr_max_st_s;
+  const float pterr_max_l = 3 *pterr_max_st_l;
+  const float genlepDR_min = genlepDR_min_st;
+  const float recolepDR_min = recolepDR_min_st;
 
+  const int pt_n = 30;  const float pt_max = 80;
+  const int dxy_n = 40; const float dxy_min = 0;
+  const int dz_n = 30; const float dz_min = 0; 
+  const int iso_n = 30; const float iso_min = 0;
+  const int niso_n = 30; const float niso_min = 0;
+  const int chiso_n = 20; const float chiso_min = 0;
+  const int reliso_n = 30; const float reliso_min = 0;
+  const int chreliso_n = 30; const float chreliso_min = 0;
+  const int nreliso_n = 30; const float nreliso_min = 0;
+  const int pterr_n = 20; const float pterr_min = 0;
+  const int genlepDR_n = 10; const float genlepDR_max = 1;
+  const int recolepDR_n = 10; const float recolepDR_max = 1;
+
+  map<TString,tuple<int,int,int> > vars;
+  vars["pt"] = make_tuple(pt_n,pt_min,pt_max);
+  vars["bardxy"] = make_tuple(dxy_n,dxy_min,dxy_max);
+  vars["bardz"] = make_tuple(dz_n,dz_min,dz_max);
+  vars["ecdxy"] = make_tuple(dxy_n,dxy_min,dxy_max);
+  vars["ecdz"] = make_tuple(dz_n,dz_min,dz_max);
+  vars["iso"] = make_tuple(iso_n,iso_min,iso_max);
+  vars["niso"] = make_tuple(niso_n,niso_min,niso_max);
+  vars["chiso"] = make_tuple(chiso_n,chiso_min,chiso_max);
+  vars["reliso"] = make_tuple(reliso_n,reliso_min,reliso_max);
+  vars["chreliso"] = make_tuple(chreliso_n,chreliso_min,chreliso_max);
+  vars["nreliso"] = make_tuple(nreliso_n,nreliso_min,nreliso_max);
+  vars["N"] = make_tuple(4,0,4);
+  vars["mu_genDR"] = make_tuple(genlepDR_n,0,genlepDR_max);
+  vars["mu_ptr"] = make_tuple(10,-1,1);
+  vars["el_genDR"] = make_tuple(genlepDR_n,0,genlepDR_max);
+  vars["el_ptr"] = make_tuple(10,-1,1);
+  vars["tau1_genDR"] = make_tuple(genlepDR_n,0,genlepDR_max);
+  vars["tau1_ptr"] = make_tuple(10,-1,1);
+  vars["tau3_genDR"] = make_tuple(genlepDR_n,0,genlepDR_max);
+  vars["tau3_ptr"] = make_tuple(10,-1,1);
+  vars["tauel_genDR"] = make_tuple(genlepDR_n,0,genlepDR_max);
+  vars["tauel_ptr"] = make_tuple(10,-1,1);
+  vars["taumu_genDR"] = make_tuple(genlepDR_n,0,genlepDR_max);
+  vars["taumu_ptr"] = make_tuple(10,-1,1);
+  vars["eta"] = make_tuple(6,0,2.4);
+  vars["pterr"] = make_tuple(pterr_n,pterr_min,pterr_max);
+  vars["purity"] = make_tuple(2,0,2);
+  vars["el_recoDR"] = make_tuple(recolepDR_n,0,recolepDR_max);
+  vars["mu_recoDR"] = make_tuple(recolepDR_n,0,recolepDR_max);
   // Book Histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
-  TH1F h_stc("h_stc","Short Track Candidate Count (All Selections)",4,0,4);
-  TH1F h_st("h_st","True Short Track Count (All Selections)",4,0,4);
-
+  map<TString,TH1*> hists;
+  // Add count hists, split by ht or length
+  const vector<TString> htsplit_vector = {"I","L","M","H"};
+  const vector<TString> lensplit_vector = {"i","p","s","l"};
+  const vector<TString> sh_vector = {"st","stc"};
+  for (const auto& htsplit : htsplit_vector) {
+    for (const auto& lensplit : lensplit_vector) {
+      for (const auto& sh : sh_vector) {
+	for (const auto& [var,limit_tuple] : vars) {
+	  TString name = sh+"_"+htsplit+"_"+lensplit+"_"+var;
+	  const auto& [n,min,max] = limit_tuple;
+	  hists[name] = new TH1F("h_"+name,Form("%s %s %s %s",sh.Data(), var.Data(), htsplit.Data(), lensplit.Data()),n,min,max);
+	}
+      }
+    }
+  }
   // none, e, mu, taue, taumu, tau1, tau3, 
   // ee, emu, etaue, etaumu, etau1, etau3, 
   // mumu, mutaue, mutaumu, mutau1, mutau3, 
@@ -149,189 +160,41 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
   // taumutaumu, taumutau1, taumutau3, 
   // tau1tau1, tau1tau3, 
   // tau3tau3
-  TH1F h_lepType("h_lepType","Lepton Type",28,0,28);
-  TH1F h_ngenLep("h_ngenLep","ngenLep in N_{STC} > 0 Events",6,0,6);
+  hists["nem"] = new TH1F("h_nem","NEM JEFs in Events with Gen Electrons",20,0,1);
+  hists["chem"] = new TH1F("h_chem","ChEM JEFs in Events with Gen Electrons",20,0,1);
+  hists["em"] = new TH1F("h_em","EM JEFs in Events with Gen Electrons",20,0,1);
+  hists["lepType"] = new TH1F("h_lepType","Lepton Type",28,0,28);
+  hists["lepTypePS"] = new TH1F("h_lepTypePS","Lepton Type (Pre_ST)",28,0,28);
+  hists["lep1DR"] = new TH1F("h_lep1DR","Electron 1 #DeltaR with ST",20,0,2);
+  hists["lep2DR"] = new TH1F("h_lep2DR","Electron 2 #DeltaR with ST",20,0,2);
+  hists["lep1ptr"] = new TH1F("h_lep1ptr","Electron 1 pt Ratio with ST",20,0,2);
+  hists["lep2ptr"] = new TH1F("h_lep2ptr","Electron 2 pt Ratio with ST",20,0,2);
+  hists["ngenLep"] = new TH1F ("h_ngenLep","ngenLep in N_{STC} > 0 Events",6,0,6);
 
   const float pi = TMath::Pi();
-  TH2F h_etaphi_bar("h_etaphi_bar","All Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
-  TH2F h_st_etaphi_bar("h_st_etaphi_bar","Long Short Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
-  TH2F h_etaphi_ecn("h_etaphi_ecn","All Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
-  TH2F h_st_etaphi_ecn("h_st_etaphi_ecn","Long Short Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
-  TH2F h_etaphi_ecp("h_etaphi_ecp","All Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
-  TH2F h_st_etaphi_ecp("h_st_etaphi_ecp","Long Short Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
+  hists["etaphi_bar"] = new TH2F("h_etaphi_bar","All Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
+  hists["st_etaphi_bar"] = new TH2F ("h_st_etaphi_bar","Long Short Tracks by #eta and #phi",170,-1.4,1.4,360,-pi,pi);
+  hists["etaphi_ecn"] = new TH2F("h_etaphi_ecn","All Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
+  hists["st_etaphi_ecn"] = new TH2F("h_st_etaphi_ecn","Long Short Tracks by #eta and #phi",100,-2.4,-1.4,100,-pi,pi);
+  hists["etaphi_ecp"] = new TH2F("h_etaphi_ecp","All Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
+  hists["st_etaphi_ecp"] = new TH2F("h_st_etaphi_ecp","Long Short Tracks by #eta and #phi",100,1.4,2.4,100,-pi,pi);
 
-  TH1F h_inclusive("h_inclusive","Total Events in Sample",1,0,1);
+  hists["inclusive"] = new TH1F("h_inclusive","Total Events in Sample",1,0,1);
 
-  TH1F h_el_dr("h_el_dr","Nearest Lepton #DeltaR (e)",50,0,1.0);
-  TH1F h_mu_dr("h_mu_dr","Nearest Lepton #DeltaR (#mu)",50,0,1.0);
-  TH1F h_tau_dr("h_tau_dr","Nearest Lepton #DeltaR (#tau)",50,0,1.0);
-
-  TH1F h_el_ptr("h_el_ptr","#Deltap_{T}/p_{T}^{trk} (e)",10,-1,1);
-  TH1F h_mu_ptr("h_mu_ptr","#Deltap_{T}/p_{T}^{trk} (#mu)",10,-1,1);
-  TH1F h_tau_ptr("h_tau_ptr","#Deltap_{T}/p_{T}^{trk} (#tau)",10,-1,1);
-
-  TH1F h_sh_el_dr("h_sh_el_dr","(ST) Nearest Lepton #DeltaR (e)",50,0,1.0);
-  TH1F h_sh_mu_dr("h_sh_mu_dr","(ST) Nearest Lepton #DeltaR (#mu)",50,0,1.0);
-  TH1F h_sh_tau_dr("h_sh_tau_dr","(ST) Nearest Lepton #DeltaR (#tau)",50,0,1.0);
-
-  TH1F h_sh_el_ptr("h_sh_el_ptr","(ST) #Deltap_{T}/p_{T}^{trk} (e)",10,-1,1);
-  TH1F h_sh_mu_ptr("h_sh_mu_ptr","(ST) #Deltap_{T}/p_{T}^{trk} (#mu)",10,-1,1);
-  TH1F h_sh_tau_ptr("h_sh_tau_ptr","(ST) #Deltap_{T}/p_{T}^{trk} (#tau)",10,-1,1);
-
-  const int pt_n = 30;  const float pt_max = 80;
-  TH1F h_pt("h_pt","Distribution of Track p_{T}s",pt_n,pt_min,pt_max);
-  TH1F h_pt_p("h_pt_p","Distribution of Track p_{T}s (pixel-only)",pt_n,pt_min,pt_max);
-  TH1F h_pt_s("h_pt_s","Distribution of Track p_{T}s (not pixel-only, < 7 layers)",pt_n,pt_min,pt_max);
-  TH1F h_pt_l("h_pt_l","Distribution of Track p_{T}s (>= 7 layers, > 1 lost outer hits)",pt_n,pt_min,pt_max);
-  //TH1F h_pt_li("h_pt_li","Distribution of Track p_{T}s (>=7 layers)",pt_n,pt_min,pt_max);
-
-  const int dxy_n = 40; const float dxy_min = 0;
-  TH1F h_bardxy("h_bardxy","Distribution of Barrel Track dxy",dxy_n,dxy_min,dxy_max);
-  TH1F h_bardxy_p("h_bardxy_p","Distribution of Barrel Track dxy (pixel-only)",dxy_n,dxy_min,dxy_max);
-  TH1F h_bardxy_s("h_bardxy_s","Distribution of Barrel Track dxy (not pixel-only, < 7 layers)",dxy_n,dxy_min,dxy_max);
-  TH1F h_bardxy_l("h_bardxy_l","Distribution of Barrel Track dxy (>= 7 layers, > 1 lost outer hits)",dxy_n,dxy_min,dxy_max);
-  //TH1F h_bardxy_li("h_bardxy_li","Distribution of Barrel Track dxy (>=7 layers)",dxy_n,dxy_min,dxy_max);
-
-  const int dz_n = 30; const float dz_min = 0; 
-  TH1F h_bardz("h_bardz","Distribution of Barrel Track dz",dz_n,dz_min,dz_max);
-  TH1F h_bardz_p("h_bardz_p","Distribution of Barrel Track dz (pixel-only)",dz_n,dz_min,dz_max);
-  TH1F h_bardz_s("h_bardz_s","Distribution of Barrel Track dz (not pixel-only, < 7 layers)",dz_n,dz_min,dz_max);
-  TH1F h_bardz_l("h_bardz_l","Distribution of Barrel Track dz (>= 7 layers, > 1 lost outer hits)",dz_n,dz_min,dz_max);
-  //TH1F h_bardz_li("h_ecdz_li","Distribution of Barrel Track dz (>=7 layers)",dz_n,dz_min,dz_max);
-
-  TH1F h_ecdxy("h_ecdxy","Distribution of Endcap Track dxy",dxy_n,dxy_min,dxy_max);
-  TH1F h_ecdxy_p("h_ecdxy_p","Distribution of Endcap Track dxy (pixel-only)",dxy_n,dxy_min,dxy_max);
-  TH1F h_ecdxy_s("h_ecdxy_s","Distribution of Endcap Track dxy (not pixel-only, < 7 layers)",dxy_n,dxy_min,dxy_max);
-  TH1F h_ecdxy_l("h_ecdxy_l","Distribution of Endcap Track dxy (>= 7 layers, > 1 lost outer hits)",dxy_n,dxy_min,dxy_max);
-  //TH1F h_ecdxy_li("h_ecdxy_li","Distribution of Endcap Track dxy (>=7 layers)",dxy_n,dxy_min,dxy_max);
-
-  TH1F h_ecdz("h_ecdz","Distribution of Endcap Track dz",dz_n,dz_min,dz_max);
-  TH1F h_ecdz_p("h_ecdz_p","Distribution of Endcap Track dz (pixel-only)",dz_n,dz_min,dz_max);
-  TH1F h_ecdz_s("h_ecdz_s","Distribution of Endcap Track dz (not pixel-only, < 7 layers)",dz_n,dz_min,dz_max);
-  TH1F h_ecdz_l("h_ecdz_l","Distribution of Endcap Track dz (>= 7 layers, > 1 lost outer hits)",dz_n,dz_min,dz_max);
-  //TH1F h_ecdz_li("h_ecdz_li","Distribution of Endcap Track dz (>=7 layers)",dz_n,dz_min,dz_max);
-
-  const int iso_n = 30; const float iso_min = 0;
-  TH1F h_iso("h_iso","Distribution of Track Isolation",iso_n,iso_min,iso_max);
-  TH1F h_iso_p("h_iso_p","Distribution of Track Isolation (pixel-only)",iso_n,iso_min,iso_max);
-  TH1F h_iso_s("h_iso_s","Distribution of Track Isolation (not pixel-only, < 7 layers)",iso_n,iso_min,iso_max);
-  TH1F h_iso_l("h_iso_l","Distribution of Track Isolation (>= 7 layers, > 1 lost outer hits)",iso_n,iso_min,iso_max);
-  //TH1F h_iso_li("h_iso_li","Distribution of Track Isolation (>=7 layers)",iso_n,iso_min,iso_max);
-
-  const int niso_n = 30; const float niso_min = 0;
-  TH1F h_niso("h_niso","Distribution of Track NeutIso (#DeltaR < 0.05)",niso_n,niso_min,niso_max);
-  TH1F h_niso_p("h_niso_p","Distribution of Track NeutIso (#DeltaR < 0.05) (pixel-only)",niso_n,niso_min,niso_max);
-  TH1F h_niso_s("h_niso_s","Distribution of Track NeutIso (#DeltaR < 0.05) (not pixel-only, < 7 layers)",niso_n,niso_min,niso_max);
-  TH1F h_niso_l("h_niso_l","Distribution of Track NeutIso (#DeltaR < 0.05) (>= 7 layers, > 1 lost outer hits)",niso_n,niso_min,niso_max);
-  //TH1F h_niso_li("h_niso_li","Distribution of Track NeutIso (#DeltaR < 0.05) (>=7 layers)",niso_n,niso_min,niso_max);
-
-  const int chiso_n = 20; const float chiso_min = 0;
-  TH1F h_chiso("h_chiso","Distribution of Track ChIso (#DeltaR < 0.01)",chiso_n,chiso_min,chiso_max);
-  TH1F h_chiso_p("h_chiso_p","Distribution of Track ChIso (#DeltaR < 0.01) (pixel-only)",chiso_n,chiso_min,chiso_max);
-  TH1F h_chiso_s("h_chiso_s","Distribution of Track ChIso (#DeltaR < 0.01) (not pixel-only, < 7 layers)",chiso_n,chiso_min,chiso_max);
-  TH1F h_chiso_l("h_chiso_l","Distribution of Track ChIso (#DeltaR < 0.01) (>= 7 layers, > 1 lost outer hits)",chiso_n,chiso_min,chiso_max);
-  //TH1F h_chiso_li("h_chiso_li","Distribution of Track ChIso (#DeltaR < 0.01) (>=7 layers)",chiso_n,chiso_min,chiso_max);
-
-  const int reliso_n = 30; const float reliso_min = 0;
-  TH1F h_reliso("h_reliso","Distribution of Track Relative Isolation",reliso_n,reliso_min,reliso_max);
-  TH1F h_reliso_p("h_reliso_p","Distribution of Track Relative Isolation (pixel-only)",reliso_n,reliso_min,reliso_max);
-  TH1F h_reliso_s("h_reliso_s","Distribution of Track Relative Isolation (not pixel-only, < 7 layers)",reliso_n,reliso_min,reliso_max);
-  TH1F h_reliso_l("h_reliso_l","Distribution of Track Relative Isolation (>= 7 layers, > 1 lost outer hits)",reliso_n,reliso_min,reliso_max);
-  //TH1F h_reliso_li("h_reliso_li","Distribution of Track Relative Isolation (>=7 layers)",reliso_n,reliso_min,reliso_max);
-
-  const int chreliso_n = 30; const float chreliso_min = 0;
-  TH1F h_chreliso("h_chreliso","Distribution of Track Ch Rel Iso",chreliso_n,chreliso_min,chreliso_max);
-  TH1F h_chreliso_p("h_chreliso_p","Distribution of Track Ch Rel Iso (pixel-only)",chreliso_n,chreliso_min,chreliso_max);
-  TH1F h_chreliso_s("h_chreliso_s","Distribution of Track Ch Rel Iso (not pixel-only, < 7 layers)",chreliso_n,chreliso_min,chreliso_max);
-  TH1F h_chreliso_l("h_chreliso_l","Distribution of Track Ch Rel Iso (>= 7 layers, > 1 lost outer hits)",chreliso_n,chreliso_min,chreliso_max);
-  //TH1F h_chreliso_li("h_chreliso_li","Distribution of Track Ch Rel Iso (>=7 layers)",chreliso_n,chreliso_min,chreliso_max);
-
-  const int nreliso_n = 30; const float nreliso_min = 0;
-  TH1F h_nreliso("h_nreliso","Distribution of Track Neut Rel Iso",nreliso_n,nreliso_min,nreliso_max);
-  TH1F h_nreliso_p("h_nreliso_p","Distribution of Track Neut Rel Iso (pixel-only)",nreliso_n,nreliso_min,nreliso_max);
-  TH1F h_nreliso_s("h_nreliso_s","Distribution of Track Neut Rel Iso (not pixel-only, < 7 layers)",nreliso_n,nreliso_min,nreliso_max);
-  TH1F h_nreliso_l("h_nreliso_l","Distribution of Track Neut Rel Iso (>= 7 layers, > 1 lost outer hits)",nreliso_n,nreliso_min,nreliso_max);
-  //TH1F h_nreliso_li("h_nreliso_li","Distribution of Track Neut Rel Iso (>=7 layers)",nreliso_n,nreliso_min,nreliso_max);
-
-  // Short Track versions
-  TH1F h_sh_pt("h_sh_pt","Distribution of Track p_{T}s",pt_n,pt_min,pt_max);
-  TH1F h_sh_pt_p("h_sh_pt_p","Distribution of Track p_{T}s (pixel-only)",pt_n,pt_min,pt_max);
-  TH1F h_sh_pt_s("h_sh_pt_s","Distribution of Track p_{T}s (not pixel-only, < 7 layers)",pt_n,pt_min,pt_max);
-  TH1F h_sh_pt_l("h_sh_pt_l","Distribution of Track p_{T}s (>= 7 layers, > 1 lost outer hits)",pt_n,pt_min,pt_max);
-  //TH1F h_sh_pt_li("h_sh_pt_li","Distribution of Track p_{T}s (>=7 layers)",pt_n,pt_min,pt_max);
-
-  TH1F h_sh_bardxy("h_sh_bardxy","Distribution of Barrel Track dxy",dxy_n,dxy_min,dxy_max);
-  TH1F h_sh_bardxy_p("h_sh_bardxy_p","Distribution of Barrel Track dxy (pixel-only)",dxy_n,dxy_min,dxy_max);
-  TH1F h_sh_bardxy_s("h_sh_bardxy_s","Distribution of Barrel Track dxy (not pixel-only, < 7 layers)",dxy_n,dxy_min,dxy_max);
-  TH1F h_sh_bardxy_l("h_sh_bardxy_l","Distribution of Barrel Track dxy (>= 7 layers, > 1 lost outer hits)",dxy_n,dxy_min,dxy_max);
-  //TH1F h_sh_bardxy_li("h_sh_bardxy_li","Distribution of Barrel Track dxy (>=7 layers)",dxy_n,dxy_min,dxy_max);
-
-  TH1F h_sh_bardz("h_sh_bardz","Distribution of Barrel Track dz",dz_n,dz_min,dz_max);
-  TH1F h_sh_bardz_p("h_sh_bardz_p","Distribution of Barrel Track dz (pixel-only)",dz_n,dz_min,dz_max);
-  TH1F h_sh_bardz_s("h_sh_bardz_s","Distribution of Barrel Track dz (not pixel-only, < 7 layers)",dz_n,dz_min,dz_max);
-  TH1F h_sh_bardz_l("h_sh_bardz_l","Distribution of Barrel Track dz (>= 7 layers, > 1 lost outer hits)",dz_n,dz_min,dz_max);
-  //TH1F h_sh_bardz_li("h_sh_ecdz_li","Distribution of Barrel Track dz (>=7 layers)",dz_n,dz_min,dz_max);
-
-  TH1F h_sh_ecdxy("h_sh_ecdxy","Distribution of Endcap Track dxy",dxy_n,dxy_min,dxy_max);
-  TH1F h_sh_ecdxy_p("h_sh_ecdxy_p","Distribution of Endcap Track dxy (pixel-only)",dxy_n,dxy_min,dxy_max);
-  TH1F h_sh_ecdxy_s("h_sh_ecdxy_s","Distribution of Endcap Track dxy (not pixel-only, < 7 layers)",dxy_n,dxy_min,dxy_max);
-  TH1F h_sh_ecdxy_l("h_sh_ecdxy_l","Distribution of Endcap Track dxy (>= 7 layers, > 1 lost outer hits)",dxy_n,dxy_min,dxy_max);
-  //TH1F h_sh_ecdxy_li("h_sh_ecdxy_li","Distribution of Endcap Track dxy (>=7 layers)",dxy_n,dxy_min,dxy_max);
-
-  TH1F h_sh_ecdz("h_sh_ecdz","Distribution of Endcap Track dz",dz_n,dz_min,dz_max);
-  TH1F h_sh_ecdz_p("h_sh_ecdz_p","Distribution of Endcap Track dz (pixel-only)",dz_n,dz_min,dz_max);
-  TH1F h_sh_ecdz_s("h_sh_ecdz_s","Distribution of Endcap Track dz (not pixel-only, < 7 layers)",dz_n,dz_min,dz_max);
-  TH1F h_sh_ecdz_l("h_sh_ecdz_l","Distribution of Endcap Track dz (>= 7 layers, > 1 lost outer hits)",dz_n,dz_min,dz_max);
-  //TH1F h_sh_ecdz_li("h_sh_ecdz_li","Distribution of Endcap Track dz (>=7 layers)",dz_n,dz_min,dz_max);
-
-  TH1F h_sh_iso("h_sh_iso","Distribution of Track Isolation",iso_n,iso_min,iso_max);
-  TH1F h_sh_iso_p("h_sh_iso_p","Distribution of Track Isolation (pixel-only)",iso_n,iso_min,iso_max);
-  TH1F h_sh_iso_s("h_sh_iso_s","Distribution of Track Isolation (not pixel-only, < 7 layers)",iso_n,iso_min,iso_max);
-  TH1F h_sh_iso_l("h_sh_iso_l","Distribution of Track Isolation (>= 7 layers, > 1 lost outer hits)",iso_n,iso_min,iso_max);
-  //TH1F h_sh_iso_li("h_sh_iso_li","Distribution of Track Isolation (>=7 layers)",iso_n,iso_min,iso_max);
-
-  TH1F h_sh_niso("h_sh_niso","Distribution of Track NeutIso (#DeltaR < 0.05)",niso_n,niso_min,niso_max);
-  TH1F h_sh_niso_p("h_sh_niso_p","Distribution of Track NeutIso (#DeltaR < 0.05) (pixel-only)",niso_n,niso_min,niso_max);
-  TH1F h_sh_niso_s("h_sh_niso_s","Distribution of Track NeutIso (#DeltaR < 0.05) (not pixel-only, < 7 layers)",niso_n,niso_min,niso_max);
-  TH1F h_sh_niso_l("h_sh_niso_l","Distribution of Track NeutIso (#DeltaR < 0.05) (>= 7 layers, > 1 lost outer hits)",niso_n,niso_min,niso_max);
-  //TH1F h_sh_niso_li("h_sh_niso_li","Distribution of Track NeutIso (#DeltaR < 0.05) (>=7 layers)",niso_n,niso_min,niso_max);
-
-  TH1F h_sh_chiso("h_sh_chiso","Distribution of Track ChIso (#DeltaR < 0.01)",chiso_n,chiso_min,chiso_max);
-  TH1F h_sh_chiso_p("h_sh_chiso_p","Distribution of Track ChIso (#DeltaR < 0.01) (pixel-only)",chiso_n,chiso_min,chiso_max);
-  TH1F h_sh_chiso_s("h_sh_chiso_s","Distribution of Track ChIso (#DeltaR < 0.01) (not pixel-only, < 7 layers)",chiso_n,chiso_min,chiso_max);
-  TH1F h_sh_chiso_l("h_sh_chiso_l","Distribution of Track ChIso (#DeltaR < 0.01) (>= 7 layers, > 1 lost outer hits)",chiso_n,chiso_min,chiso_max);
-  //TH1F h_sh_chiso_li("h_sh_chiso_li","Distribution of Track ChIso (#DeltaR < 0.01) (>=7 layers)",chiso_n,chiso_min,chiso_max);
-
-  TH1F h_sh_reliso("h_sh_reliso","Distribution of Track Relative Isolation",reliso_n,reliso_min,reliso_max);
-  TH1F h_sh_reliso_p("h_sh_reliso_p","Distribution of Track Relative Isolation (pixel-only)",reliso_n,reliso_min,reliso_max);
-  TH1F h_sh_reliso_s("h_sh_reliso_s","Distribution of Track Relative Isolation (not pixel-only, < 7 layers)",reliso_n,reliso_min,reliso_max);
-  TH1F h_sh_reliso_l("h_sh_reliso_l","Distribution of Track Relative Isolation (>= 7 layers, > 1 lost outer hits)",reliso_n,reliso_min,reliso_max);
-  //TH1F h_sh_reliso_li("h_sh_reliso_li","Distribution of Track Relative Isolation (>=7 layers)",reliso_n,reliso_min,reliso_max);
-
-  TH1F h_sh_chreliso("h_sh_chreliso","Distribution of Track Ch Rel Iso",chreliso_n,chreliso_min,chreliso_max);
-  TH1F h_sh_chreliso_p("h_sh_chreliso_p","Distribution of Track Ch Rel Iso (pixel-only)",chreliso_n,chreliso_min,chreliso_max);
-  TH1F h_sh_chreliso_s("h_sh_chreliso_s","Distribution of Track Ch Rel Iso (not pixel-only, < 7 layers)",chreliso_n,chreliso_min,chreliso_max);
-  TH1F h_sh_chreliso_l("h_sh_chreliso_l","Distribution of Track Ch Rel Iso (>= 7 layers, > 1 lost outer hits)",chreliso_n,chreliso_min,chreliso_max);
-  //TH1F h_sh_chreliso_li("h_sh_chreliso_li","Distribution of Track Ch Rel Iso (>=7 layers)",chreliso_n,chreliso_min,chreliso_max);
-
-  TH1F h_sh_nreliso("h_sh_nreliso","Distribution of Track Neut Rel Iso",nreliso_n,nreliso_min,nreliso_max);
-  TH1F h_sh_nreliso_p("h_sh_nreliso_p","Distribution of Track Neut Rel Iso (pixel-only)",nreliso_n,nreliso_min,nreliso_max);
-  TH1F h_sh_nreliso_s("h_sh_nreliso_s","Distribution of Track Neut Rel Iso (not pixel-only, < 7 layers)",nreliso_n,nreliso_min,nreliso_max);
-  TH1F h_sh_nreliso_l("h_sh_nreliso_l","Distribution of Track Neut Rel Iso (>= 7 layers, > 1 lost outer hits)",nreliso_n,nreliso_min,nreliso_max);
-  //TH1F h_sh_nreliso_li("h_sh_nreliso_li","Distribution of Track Neut Rel Iso (>=7 layers)",nreliso_n,nreliso_min,nreliso_max);
-
-  if (doCRSL) {
-    h_inclusive.Fill(0.5,ch_mt2->GetEntries("nLepLowMT == 1 && Sum$(jet_pt) > 100"));
+  // Apply region selections
+  /*  if (doCRSL) {
+    hists["inclusive"]->Fill(0.5,ch_mt2->GetEntries("nLepLowMT == 1 && Sum$(jet_pt) > 100"));
   } else if (doHT) {
-    h_inclusive.Fill(0.5,ch_mt2->GetEntries("Sum$(jet_pt) > 100"));
+    hists["inclusive"]->Fill(0.5,ch_mt2->GetEntries("Sum$(jet_pt) > 100"));
   } else if (doSR) {
-    h_inclusive.Fill(0.5,ch_mt2->GetEntries("nPFLep5LowMT + nMuons10 + nElectrons10 + nPFHad10LowMT == 0 && Sum$(jet_pt) > 100"));
+    hists["inclusive"]->Fill(0.5,ch_mt2->GetEntries("nPFLep5LowMT + nMuons10 + nElectrons10 + nPFHad10LowMT == 0 && Sum$(jet_pt) > 100"));
   }  else {
-    h_inclusive.Fill(0.5,nEventsTree);
-  }
+    hists["inclusive"]->Fill(0.5,nEventsTree);
+    }*/
 
-   for( unsigned int event = 0; event < nEventsTree; ++event) {    
-  //  for( unsigned int event = 0; event < 10; ++event) {
+
+  int nselected = 0;
+  for( unsigned int event = 0; event < nEventsTree; ++event) {    
     // AddFriend above makes this pull both mt2 and st branches for the same event, assuming the trees were properly (identically) sorted. 
     t.GetEntry(event); 
 
@@ -374,7 +237,6 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
     for (int i_jet = 0; i_jet < t.njet; i_jet++) {
       sumJet += t.jet_pt[i_jet];
     }
-
     if (doCRSL) {
       if (t.nLepLowMT != 1) continue;
       if (sumJet < 100) continue;
@@ -382,24 +244,76 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
       if (t.nPFLep5LowMT + t.nMuons10 + t.nElectrons10 + t.nPFHad10LowMT != 0) continue;
       if (sumJet < 100) continue;
     } else if (doHT && sumJet < 100) continue;
-    
+
+    nselected++;
+
+    TString HTsplit = "";
+    if (sumJet < 175) HTsplit = "L";
+    else if (sumJet < 250) HTsplit = "M";
+    else HTsplit = "H";
+
     /*
      * Track Loop
      */
     const int ntracks = t.ntracks;
-    int nstc = 0; int nst = 0;
+    int nstc = 0; int nstcp = 0; int nstcs = 0; int nstcl = 0;
+    int nst = 0; int nstp = 0; int nsts = 0; int nstl = 0;
+    int st_idx = -1;
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
 
       // Veto tracks outside fiducial region
       if (doEtaPhiVeto && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) != 0) continue;
+      // Veto if not high purity
+      if (t.track_highPurity[i_trk] != 1) continue;
+
+      map <TString,float> fillSTC;
+      map <TString,float> fillST;
+      for (const auto& KeyValue : vars) {
+	fillSTC[KeyValue.first] = -99;
+	fillST[KeyValue.first] = -99;
+      }
+
+      // Check reco leps
+      float minDR = 100;
+      float recolepDR = 100;
+      int recominDRID = -1;
+      float recolepPTR = 100;
+      int minIndex = -1;
+      for (int i_lep = 0; i_lep < t.nlep; i_lep++) {
+	float DR = DeltaR(t.lep_eta[i_lep],t.track_eta[i_trk],t.lep_phi[i_trk],t.track_phi[i_trk]);
+	if (DR < minDR) {
+	    minDR = DR;
+	    minIndex = i_lep;
+	  }
+      }
+      if (minIndex >= 0) {
+	recominDRID = abs(t.lep_pdgId[minIndex]);
+	recolepPTR = t.lep_pt[minIndex] / t.track_pt[i_trk] - 1;
+      }
+      minIndex = -1;
+      for (int i_isoT = 0; i_isoT < t.nlep; i_isoT++) {
+	int pdgId = abs(t.isoTrack_pdgId[i_isoT]);
+	if (pdgId != 11 && pdgId != 13) continue;
+	float DR = DeltaR(t.isoTrack_eta[i_isoT],t.track_eta[i_trk],t.isoTrack_phi[i_isoT],t.track_phi[i_trk]);
+	if (DR < minDR) {
+	  minDR = DR;
+	  minIndex = i_isoT;
+	}     
+      }
+      recolepDR = minDR;
+      if (minIndex >= 0) {	
+	recominDRID = abs(t.isoTrack_pdgId[minIndex]);
+	recolepPTR = t.isoTrack_pt[minIndex] / t.track_pt[i_trk] - 1;
+      }
+      TString RecoLepCat = recominDRID == 11 ? "el" : "mu";
 
       // Find nearest gen lepton
-      float minDR_tau = 100;
-      float minDR_lep = 100;
-      int minIndex = -1;
-      float minDR = 100;
-      float ratio_pt = 0;
-      int pdgId = 0;
+      float genlepDR = 100;
+      float genlepPTR = -1;
+      int genlepID = -1;
+
+      minDR = 100;
+      minIndex = -1;
       for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
 	float lep_eta = t.genLep_eta[i_lep];
 	float lep_phi = t.genLep_phi[i_lep];
@@ -410,28 +324,10 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	}
       } // End loop over genLeps to find closest to track
       if (minIndex >= 0) {
-	ratio_pt = t.genLep_pt[minIndex] / t.track_pt[i_trk] - 1;
-	pdgId = fabs(t.genLep_pdgId[minIndex]);
-	if (t.track_isshort[i_trk]) {
-	  if (pdgId == 11) {
-	    h_sh_el_dr.Fill(minDR,w_);
-	    h_sh_el_ptr.Fill(ratio_pt,w_);
-	  }
-	  else if (pdgId == 13) {
-	    h_sh_mu_dr.Fill(minDR,w_);
-	    h_sh_mu_ptr.Fill(ratio_pt,w_);
-	  }
-	} // End short track fills 
-	if (pdgId == 11) {
-	  h_el_dr.Fill(minDR,w_);
-	  h_el_ptr.Fill(ratio_pt,w_);
-	}
-	else if (pdgId == 13) {
-	  h_mu_dr.Fill(minDR,w_);
-	  h_mu_ptr.Fill(ratio_pt,w_);
-	}
-      } // End fills if lep was found
-      minDR_lep = minDR;
+	genlepPTR = t.genLep_pt[minIndex] / t.track_pt[i_trk] - 1;
+	genlepDR = minDR;
+	genlepID = abs(t.genLep_pdgId[minIndex]);
+      } 
       
       minDR = 100;
       minIndex = -1;
@@ -444,29 +340,11 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	  minIndex = i_lep;
 	}
       } // End loop over gen leps from tau decay looking for closest to track
-      if (minIndex >= 0) {
-	ratio_pt = t.genLepFromTau_pt[minIndex] / t.track_pt[i_trk] - 1;
-	pdgId = fabs(t.genLepFromTau_pdgId[minIndex]);
-	if (t.track_isshort[i_trk]) {
-	  if (pdgId == 11) {
-	    h_sh_el_dr.Fill(minDR,w_);
-	    h_sh_el_ptr.Fill(ratio_pt,w_);
-	  }
-	  else if (pdgId == 13) {
-	    h_sh_mu_dr.Fill(minDR,w_);
-	    h_sh_mu_ptr.Fill(ratio_pt,w_);
-	  }
-	} // End short track fills
-	if (pdgId == 11) {
-	  h_el_dr.Fill(minDR,w_);
-	  h_el_ptr.Fill(ratio_pt,w_);
-	}
-	else if (pdgId == 13) {
-	  h_mu_dr.Fill(minDR,w_);
-	  h_mu_ptr.Fill(ratio_pt,w_);
-	}
-      } // End fills if found a tau lep 
-      if (minDR < minDR_lep) minDR_lep = minDR;
+      if (minDR < genlepDR) {
+	genlepDR = minDR;
+	genlepID = abs(t.genLepFromTau_pdgId[minIndex]) + 1500;
+	genlepPTR = t.genLepFromTau_pt[minIndex] / t.track_pt[i_trk] - 1;
+      }
       
       // Find nearest gen tau
       minDR = 100;
@@ -477,7 +355,6 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	// Else, pdgId of lepton
 	int decayMode = abs(t.genTau_decayMode[i_tau]);
 	if (decayMode > 3) continue; // Count leptons separately
-	//	if (decayMode > 0) continue; // No tau veto
 	float tau_eta = t.genTau_eta[i_tau];
 	float tau_phi = t.genTau_phi[i_tau];
 	float dr = DeltaR(tau_eta, t.track_eta[i_trk], tau_phi, t.track_phi[i_trk]);
@@ -486,79 +363,69 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
 	  minIndex = i_tau;
 	}
       }
-      if (minIndex >= 0) {
-	ratio_pt = t.genTau_pt[minIndex] / t.track_pt[i_trk] - 1;
-	if (t.track_isshort[i_trk]) {
-	  h_sh_tau_dr.Fill(minDR,w_);
-	  h_sh_tau_ptr.Fill(ratio_pt,w_);
-	} // End fill if track is short
-	h_tau_dr.Fill(minDR,w_);
-	h_tau_ptr.Fill(ratio_pt,w_);
+      if (minDR < genlepDR) {
+	genlepDR = minDR;
+	genlepID = t.genTau_decayMode[minIndex];
+	genlepPTR = t.genTau_pt[minIndex] / t.track_pt[i_trk] - 1;;
       }
-      minDR_tau = minDR;
       
-      if (minDR_tau < 0.1 || minDR_lep < 0.1) { // Use Gen Veto to find short track hotspots
+      if (genlepDR < 0.1) { // Use Gen Veto to find short track hotspots
 	if (fabs(t.track_eta[i_trk]) < 1.4) {
-	  h_etaphi_bar.Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
+	  hists["etaphi_bar"]->Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
 	  if (t.track_isshort[i_trk]) {
-	    h_st_etaphi_bar.Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
+	    hists["st_etaphi_bar"]->Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
 	  } 
 	} else if (t.track_eta[i_trk] > 1.4) {
-	  h_etaphi_ecp.Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
+	  hists["etaphi_ecp"]->Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
 	  if (t.track_isshort[i_trk]) {
-	    h_st_etaphi_ecp.Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
+	    hists["st_etaphi_ecp"]->Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
 	  } 
 	} else if (t.track_eta[i_trk] < -1.4) {
-	  h_etaphi_ecn.Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
+	  hists["etaphi_ecn"]->Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
 	  if (t.track_isshort[i_trk]) {
-	    h_st_etaphi_ecn.Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
+	    hists["st_etaphi_ecn"]->Fill(t.track_eta[i_trk],t.track_phi[i_trk]);
 	  } 
 	}
-	if (doGenVeto) continue;// Apply Gen veto
-      } // End fills if gen lepton nearby
+      } // End etaphi fills if gen lepton nearby
 
-      minDR = 100;
+      TString GenLepCat = "";
+      if (genlepID == 11) GenLepCat = "el";
+      else if (genlepID == 13) GenLepCat = "mu";
+      else if (genlepID == 1) GenLepCat = "tau1";
+      else if (genlepID == 3) GenLepCat = "tau3";
+      else if (genlepID == 1511) GenLepCat = "taue";
+      else if (genlepID == 1513) GenLepCat = "taumu";
+
       // Also check genStat23 for DR cases where genLeps not saved due to no Z
-      for (int i_s23 = 0; i_s23 < t.ngenStat23; i_s23++) {
-	int pdgId = abs(t.genStat23_pdgId[i_s23]);
-	if (pdgId != 15 && pdgId != 13 && pdgId != 11) continue;
-	float gen_eta = t.genStat23_eta[i_s23];
-	float gen_phi = t.genStat23_phi[i_s23];
-	float dr = DeltaR(gen_eta, t.track_eta[i_trk], gen_phi, t.track_phi[i_trk]);
-	if (dr < minDR) {
-	  minDR = dr;
-	  minIndex = i_s23;
-	}	
-      }
-      if (minDR < 0.1 && doGenVeto) continue;
-
-      // Check reco leps
-      bool lepOverlap = false;
-      for (int i_lep = 0; i_lep < t.nlep; i_lep++) {
-	if (DeltaR(t.lep_eta[i_lep],t.track_eta[i_trk],t.lep_phi[i_trk],t.track_phi[i_trk]) < 0.1) {
-	  lepOverlap = true;
-	  break;
+      if (t.ngenLep + t.ngenTau == 0) {
+	minDR = 100;
+	for (int i_s23 = 0; i_s23 < t.ngenStat23; i_s23++) {
+	  int pdgId = abs(t.genStat23_pdgId[i_s23]);
+	  if (pdgId != 15 && pdgId != 13 && pdgId != 11) continue;
+	  float gen_eta = t.genStat23_eta[i_s23];
+	  float gen_phi = t.genStat23_phi[i_s23];
+	  float dr = DeltaR(gen_eta, t.track_eta[i_trk], gen_phi, t.track_phi[i_trk]);
+	  if (dr < minDR) {
+	    minDR = dr;
+	    minIndex = i_s23;
+	  }	
+	}
+	// Double cut size to be safe, since no FSR
+	if (minDR < 0.2) {
+	  continue; // Veto this track, but don't store its leps (no FSR, would be distortive, and no access to tau decay mode; small effect anyway, but don't want it throwing off DY)
 	}
       }
-      if (lepOverlap) continue; // short track candidates can't overlap with leptons
-      // If we get here, no reco leps overlapped. Now check PF leps
-      for (int i_isoT = 0; i_isoT < t.nlep; i_isoT++) {
-	int pdgId = abs(t.isoTrack_pdgId[i_isoT]);
-	if (pdgId != 11 && pdgId != 13) continue;
-	if (DeltaR(t.isoTrack_eta[i_isoT],t.track_eta[i_trk],t.isoTrack_phi[i_isoT],t.track_phi[i_trk]) < 0.1) {
-	  lepOverlap = true;
-	  break;
-	}
-      }
-      if (lepOverlap) continue; // short track candidates can't overlap with leptons
-
+      
       const float eta = fabs(t.track_eta[i_trk]);
-      if (eta > 2.4) continue;
+      
+      const float ptErr = t.track_ptErr[i_trk];
+      const float pt = t.track_pt[i_trk];
+      const float pt2 = pt*pt;
+      const float PtErrOverPt2 = ptErr / pt2;
 
       const int pixel_layers = t.track_pixelLayersWithMeasurement[i_trk];
-      if (pixel_layers < 2) continue;
+      if (pixel_layers < 2) continue; // STCs aren't allowed to be *this* fake
       const int total_layers = t.track_trackerLayersWithMeasurement[i_trk];
-      const float pt = t.track_pt[i_trk];
       const float dz = fabs(t.track_dz[i_trk]);
       const float dxy = fabs(t.track_dxy[i_trk]);
       const float iso = t.track_iso[i_trk];
@@ -569,598 +436,639 @@ int STCandLooper::loop (char * infile_name, char * sample, int selectionMode, in
       const float chreliso = chiso/pt;
       const int lostOuterHits = t.track_lostOuterHits[i_trk];
 
+      // Loose mutually exclusive length selections suitable for sorting STCs and STs for N-1 plots. (STCs will usually not pass any.)
       bool p = pixel_layers == total_layers;
-      bool s = total_layers < 7;
-      bool l = lostOuterHits >= 2;
+      bool s = total_layers < 7 && pixel_layers < total_layers && PtErrOverPt2 < pterr_max_s;
+      bool l = total_layers >= 7 && lostOuterHits >= 2 && PtErrOverPt2 < pterr_max_l;
 
-      if (pt > pt_min && dz < dz_max && dxy < dxy_max && iso < iso_max && niso < niso_max && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && pt > pt_min 
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max 
+	  && PtErrOverPt2 < pterr_max) {	 
 	nstc++;
+	fillSTC["eta"] = eta; // Always fill eta
+	if (p) nstcp++;
+	else if (s) nstcs++;
+	else if (l) nstcl++;
       }
       
       /*
        * N-1 short track candidate distributions
        */
+      // Gen Lep DR
+      if (pt > pt_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max 
+	  && PtErrOverPt2) {
+	fillSTC[GenLepCat+"_genDR"] = genlepDR;
+	fillSTC[GenLepCat+"_genPTR"] = genlepPTR;
+      }
+      // Reco Lep DR
+      if (genlepDR > genlepDR_min
+	  && pt > pt_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max 
+	  && PtErrOverPt2) {
+	fillSTC[RecoLepCat+"_recoDR"] = recolepDR;
+	fillSTC[RecoLepCat+"_recoPTR"] = recolepPTR;
+      }
       // pt
-      if (dz < dz_max && dxy < dxy_max && iso < iso_max && niso < niso_max && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
-	h_pt.Fill(pt,w_);
-	// pixel
-	if (p) {
-	  h_pt_p.Fill(pt,w_);
-	  // tracker short
-	} else if (s) {
-	  h_pt_s.Fill(pt,w_);
-	  // tracker long
-	} else if (l) {
-	  h_pt_l.Fill(pt,w_);
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max 
+	  && PtErrOverPt2) {
+	fillSTC["pt"] = pt;
       }
       // dz
-      if (pt > pt_min && dxy < dxy_max && iso < iso_max && niso < niso_max && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
-	if (eta < 1.5) {
-	  h_bardz.Fill(dz,w_);
-	  // pixel
-	  if (p) {
-	    h_bardz_p.Fill(dz,w_);
-	    // trkshort
-	  } else if (s) {
-	    h_bardz_s.Fill(dz,w_);
-	    // trklong
-	  } else if (l) {
-	    h_bardz_l.Fill(dz,w_);
-	  }  
-	}
-	else {
-	  h_ecdz.Fill(dz,w_);
-	  // pixel
-	  if (p) {
-	    h_ecdz_p.Fill(dz,w_);
-	    // trkshort
-	  } else if (s) {
-	    h_ecdz_s.Fill(dz,w_);
-	    // trklong
-	  } else if (l) {
-	    h_ecdz_l.Fill(dz,w_);
-	  }
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && pt > pt_min 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	if (eta > 1.4) fillSTC["ecdz"] = dz;
+	else fillSTC["bardz"] = dz;
       }
       // dxy
-      if (dz < dz_max && pt > pt_min && iso < iso_max && niso < niso_max && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
-	if (eta < 1.5) {
-	  h_bardxy.Fill(dxy,w_);
-	  // pixel
-	  if (p) {
-	    h_bardxy_p.Fill(dxy,w_);
-	    // trkshort
-	  } else if (s) {
-	    h_bardxy_s.Fill(dxy,w_);
-	  }
-	  // trklong
-	  else if (l) {
-	    h_bardxy_l.Fill(dxy,w_);
-	  }
-	}
-	else {
-	  h_ecdxy.Fill(dxy,w_);
-	  // pixel
-	  if (p) {
-	    h_ecdxy_p.Fill(dxy,w_);
-	    // trkshort
-	  } else if (s) {
-	    h_ecdxy_s.Fill(dxy,w_);
-	    // trklong
-	  } else if (l) {
-	    h_ecdxy_l.Fill(dxy,w_);
-	  }
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && pt > pt_min 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	if (eta > 1.4) fillSTC["ecdxy"] = dxy;
+	else fillSTC["bardxy"] = dxy;
       }
       // Abs Iso 0.3
-      if (dz < dz_max && dxy < dxy_max && pt > pt_min && niso < niso_max && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
-	h_iso.Fill(iso,w_);
-	// pixel
-	if (p) {
-	  h_iso_p.Fill(iso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_iso_s.Fill(iso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_iso_l.Fill(iso,w_);
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && pt > pt_min 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	fillSTC["iso"] = iso;
       }
       // Neut 0.05 Iso 
-      if (dz < dz_max && dxy < dxy_max && iso < iso_max && pt > pt_min && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
-	h_niso.Fill(niso,w_);
-	// pixel
-	if (p) {
-	  h_niso_p.Fill(niso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_niso_s.Fill(niso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_niso_l.Fill(niso,w_);
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && pt > pt_min 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	fillSTC["niso"] = niso;
       }
       // ChIso
-      if (dz < dz_max && dxy < dxy_max && iso < iso_max && niso < niso_max && pt > pt_min && reliso < reliso_max && nreliso < nreliso_max && chreliso < chreliso_max) {
-	h_chiso.Fill(chiso,w_);
-	// pixel
-	if (p) {
-	  h_chiso_p.Fill(chiso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_chiso_s.Fill(chiso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_chiso_l.Fill(chiso,w_);
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && pt > pt_min 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	fillSTC["chiso"] = chiso;
       }
       // RelIso 0.3
-      if (dz < dz_max && dxy < dxy_max && iso < iso_max && niso < niso_max && chiso < chiso_max && pt > pt_min && nreliso < nreliso_max && chreliso < chreliso_max) {
-	h_reliso.Fill(reliso,w_);
-	// pixel
-	if (p) {
-	  h_reliso_p.Fill(reliso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_reliso_s.Fill(reliso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_reliso_l.Fill(reliso,w_);
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && pt > pt_min 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	fillSTC["reliso"] = reliso;
       }
       // NeuRelIso 0.05
-      if (dz < dz_max && dxy < dxy_max && iso < iso_max && niso < niso_max && chiso < chiso_max && reliso < reliso_max && pt > pt_min && chreliso < chreliso_max) {
-	h_nreliso.Fill(nreliso,w_);
-	// pixel
-	if (p) {
-	  h_nreliso_p.Fill(nreliso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_nreliso_s.Fill(nreliso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_nreliso_l.Fill(nreliso,w_);
-	}
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && pt > pt_min 
+	  && chreliso < chreliso_max
+	  && PtErrOverPt2 < pterr_max) {
+	fillSTC["nreliso"] = nreliso;
       }
       // ChRelIso 0.05
-      if (dz < dz_max && dxy < dxy_max && iso < iso_max && niso < niso_max && chiso < chiso_max && reliso < reliso_max && nreliso < nreliso_max && pt > pt_min) {
-	h_chreliso.Fill(chreliso,w_);
-	// pixel
-	if (p) {
-	  h_chreliso_p.Fill(chreliso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_chreliso_s.Fill(chreliso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_chreliso_l.Fill(chreliso,w_);
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && pt > pt_min
+	  && PtErrOverPt2 < pterr_max) {
+	fillSTC["chreliso"] = chreliso;
+      }
+      // PtErrOverPt2
+      if (genlepDR > genlepDR_min
+	  && recolepDR > recolepDR_min
+	  && dz < dz_max 
+	  && dxy < dxy_max 
+	  && iso < iso_max 
+	  && niso < niso_max 
+	  && chiso < chiso_max 
+	  && reliso < reliso_max 
+	  && nreliso < nreliso_max 
+	  && chreliso < chreliso_max 
+	  && pt > pt_min) {
+	fillSTC["PtErrOverPt2"] = PtErrOverPt2;
+      }
+      
+    // A few selections that apply to all short tracks, and not candidates
+    if (t.track_lostInnerHits[i_trk] == 0 && t.track_lostInnerPixHits[i_trk] == 0) {
+
+      // Update length selections. These are for dxy N-1s
+      bool p_NoDxyTight = p && PtErrOverPt2 < pterr_max_st;
+      bool s_NoDxyTight = s && PtErrOverPt2 < pterr_max_st_s;
+      bool l_NoDxyTight = l && PtErrOverPt2 < pterr_max_st_l;
+      // Add the dxy tight selections in where appropriate
+      bool p_st = p_NoDxyTight;
+      bool s_st = s_NoDxyTight && dxy < 0.01;
+      bool l_st = l_NoDxyTight && dxy < 0.01;
+      // Also need separate selection for PtErrOverPt2
+      bool p_NoPtErrTight = p;
+      bool s_NoPtErrTight = s && dxy < 0.01;
+      bool l_NoPtErrTight = l && dxy < 0.01;
+
+      bool LengthSelectionST = p_st || s_st || l_st;
+      bool LengthSelectionST_RelaxedDxy = p_NoDxyTight || s_NoDxyTight || l_NoDxyTight;
+      bool LengthSelectionST_RelaxedPtErr = p_NoPtErrTight || s_NoPtErrTight || l_NoPtErrTight;
+
+      if (t.track_isshort[i_trk] ) {
+	nst++;
+	fillST["eta"] = eta; // Always fill eta
+	if (st_idx < 0) st_idx = i_trk; // save hardest short track index
+	if (t.track_ispixelonly[i_trk]) {
+	  nstp++;
+	}
+	else if (t.track_istrkshort[i_trk]) {
+	  nsts++;
+	}
+	else {
+	  nstl++;
 	}
       }
-      
-      // A few selections that apply to all short tracks, and not candidates
-      const float ptErr = t.track_ptErr[i_trk];
-      const float pt2 = pt*pt;
-      if (t.track_highPurity[i_trk] != 1) continue;
-      if (t.track_lostInnerHits[i_trk] != 0) continue;
-      if (t.track_lostInnerPixHits[i_trk] != 0) continue;
-      if (ptErr / pt2 > 0.02) continue;
-      // Update length selections
-      bool s_NoDxyTight = s && (ptErr / pt2 < 0.02);
-      bool l_NoDxyTight = l && (ptErr / pt2 < 0.005);
-      s =  s_NoDxyTight && dxy < 0.01;
-      l =  l_NoDxyTight && dxy < 0.01;
 
-      if (t.track_isshort[i_trk]) {
-	nst++;
-	cout << run << ":" << lumi << ":" << evt << " track: " << i_trk << endl;
-      }
-      
       /*
        * Short track N-1 plots
        */
+      // Gen Lep DR
+      if (pt > pt_min
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st
+	  && dxy < dxy_max_st
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st 
+	  && PtErrOverPt2) {
+	fillST[GenLepCat+"_genDR"] = genlepDR;
+	fillST[GenLepCat+"_genPTR"] = genlepPTR;
+      }
+      // Reco Lep DR
+      if (genlepDR > genlepDR_min_st
+	  && pt > pt_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st 
+	  && PtErrOverPt2) {
+	fillST[RecoLepCat+"_recoDR"] = recolepDR;
+	fillST[RecoLepCat+"_recoPTR"] = recolepPTR;
+      }
       // pt
-      if (dz < dz_max_st && dxy < dxy_max_st && iso < iso_max_st && niso < niso_max_st && chiso < chiso_max_st && reliso < reliso_max_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	h_sh_pt.Fill(pt,w_);
-	// pixel
-	if (p) {
-	  h_sh_pt_p.Fill(pt,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_pt_s.Fill(pt,w_);
-	  // tracker long
-	} else if (l) {
-	  h_sh_pt_l.Fill(pt,w_);
-	}
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	fillST["pt"] = pt;
       }
       // dz
-      if (pt > pt_min_st && dxy < dxy_max_st && iso < iso_max_st && niso < niso_max_st && chiso < chiso_max_st && reliso < reliso_max_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	if (eta < 1.5) {
-	  h_sh_bardz.Fill(dz,w_);
-	  // pixel
-	  if (p) {
-	    h_sh_bardz_p.Fill(dz,w_);
-	    // trkshort
-	  } else if (s) {
-	    h_sh_bardz_s.Fill(dz,w_);
-	  }
-	  // trklong
-	  else if (l) {
-	    h_sh_bardz_l.Fill(dz,w_);
-	  } 
-	}
-	else {
-	  h_sh_ecdz.Fill(dz,w_);
-	  // pixel
-	  if (p) {
-	    h_sh_ecdz_p.Fill(dz,w_);
-	    // trkshort
-	  } else if (s) {
-	    h_sh_ecdz_s.Fill(dz,w_);
-	    // trklong
-	  } else if (l) {
-	    h_sh_ecdz_l.Fill(dz,w_);
-	  }	 
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && pt > pt_min_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	if (eta > 1.4) {
+	  fillST["ecdz"] = dz;
+	} else {
+	fillST["bardz"] = dz;
 	}
       }
       // dxy
-      if (dz < dz_max_st && pt > pt_min_st && iso < iso_max_st && niso < niso_max_st && chiso < chiso_max_st && reliso < reliso_max_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	if (eta < 1.5) {
-	  h_sh_bardxy.Fill(dxy,w_);
-	  // pixel
-	  if (p) {
-	    h_sh_bardxy_p.Fill(dxy,w_);
-	    // trkshort
-	  } else if (s_NoDxyTight) {
-	    h_sh_bardxy_s.Fill(dxy,w_);
-	  }
-	  // trklong
-	  else if (l_NoDxyTight) {
-	    h_sh_bardxy_l.Fill(dxy,w_);
-	  }
-	}
-	else {
-	  h_sh_ecdxy.Fill(dxy,w_);
-	  // pixel
-	  if (p) {
-	    h_sh_ecdxy_p.Fill(dxy,w_);
-	    // trkshort
-	  } else if (s_NoDxyTight) {
-	    h_sh_ecdxy_s.Fill(dxy,w_);
-	    // trklong
-	  } else if (l_NoDxyTight) {
-	    h_sh_ecdxy_l.Fill(dxy,w_);
-	  }
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st
+	  && pt > pt_min_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST_RelaxedDxy) {
+	if (eta > 1.4) {
+	  fillST["ecdxy"] = dxy;
+	} else {
+	  fillST["bardxy"] = dxy;
 	}
       }
       // Abs Iso 0.3
-      if (dz < dz_max_st && dxy < dxy_max_st && pt > pt_min_st && niso < niso_max_st && chiso < chiso_max_st && reliso < reliso_max_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	h_sh_iso.Fill(iso,w_);
-	// pixel
-	if (p) {
-	  h_sh_iso_p.Fill(iso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_iso_s.Fill(iso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_sh_iso_l.Fill(iso,w_);
-	}
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && pt > pt_min_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	fillST["iso"] = iso;
       }
       // Neut 0.05 Iso 
-      if (dz < dz_max_st && dxy < dxy_max_st && iso < iso_max_st && pt > pt_min_st && chiso < chiso_max_st && reliso < reliso_max_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	h_sh_niso.Fill(niso,w_);
-	// pixel
-	if (p) {
-	  h_sh_niso_p.Fill(niso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_niso_s.Fill(niso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_sh_niso_l.Fill(niso,w_);
-	}
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && pt > pt_min_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	fillST["niso"] = niso;
       }
       // ChIso
-      if (dz < dz_max_st && dxy < dxy_max_st && iso < iso_max_st && niso < niso_max_st && pt > pt_min_st && reliso < reliso_max_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	h_sh_chiso.Fill(chiso,w_);
-	// pixel
-	if (p) {
-	  h_sh_chiso_p.Fill(chiso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_chiso_s.Fill(chiso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_sh_chiso_l.Fill(chiso,w_);
-	}
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && pt > pt_min_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+      fillST["chiso"] = chiso;
       }
       // RelIso 0.3
-      if (dz < dz_max_st && dxy < dxy_max_st && iso < iso_max_st && niso < niso_max_st && chiso < chiso_max_st && pt > pt_min_st && nreliso < nreliso_max_st && chreliso < chreliso_max_st) {
-	h_sh_reliso.Fill(reliso,w_);
-	// pixel
-	if (p) {
-	  h_sh_reliso_p.Fill(reliso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_reliso_s.Fill(reliso,w_);
-	  // tracker long
-	  } else if (l) {
-	  h_sh_reliso_l.Fill(reliso,w_);
-	}
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && pt > pt_min_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	fillST["reliso"] = reliso;
       }
       // NeuRelIso 0.05
-      if (dz < dz_max_st && dxy < dxy_max_st && iso < iso_max_st && niso < niso_max_st && chiso < chiso_max_st && reliso < reliso_max_st && pt > pt_min_st && chreliso < chreliso_max_st) {
-	h_sh_nreliso.Fill(nreliso,w_);
-	// pixel
-	if (p) {
-	  h_sh_nreliso_p.Fill(nreliso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_nreliso_s.Fill(nreliso,w_);
-	  // tracker long
-	  } else if (l) {
-	  h_sh_nreliso_l.Fill(nreliso,w_);
-	}
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && pt > pt_min_st 
+	  && chreliso < chreliso_max_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	fillST["nreliso"] = nreliso;
       }
       // ChRelIso 0.05
-      if (dz < dz_max_st && dxy < dxy_max_st && iso < iso_max_st && niso < niso_max_st && chiso < chiso_max_st && reliso < reliso_max_st && nreliso < nreliso_max_st && pt > pt_min_st) {
-	h_sh_chreliso.Fill(chreliso,w_);
-	// pixel
-	if (p) {
-	  h_sh_chreliso_p.Fill(chreliso,w_);
-	  // tracker short
-	} else if (s) {
-	  h_sh_chreliso_s.Fill(chreliso,w_);
-	  // tracker long
-	} else if (l) {
-	  h_sh_chreliso_l.Fill(chreliso,w_);
-	  }
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && pt > pt_min_st
+	  //	  && PtOverPt2 < pterr_max_st // Placeholder, but empty selection since it's already in LengthSelectionST
+	  && LengthSelectionST) {
+	fillST["chreliso"] = chreliso;
       }
+      // PtErrOverPt2
+      if (genlepDR > genlepDR_min_st
+	  && recolepDR > recolepDR_min_st
+	  && dz < dz_max_st 
+	  && dxy < dxy_max_st 
+	  && iso < iso_max_st 
+	  && niso < niso_max_st 
+	  && chiso < chiso_max_st 
+	  && reliso < reliso_max_st 
+	  && nreliso < nreliso_max_st 
+	  && chreliso < chreliso_max_st
+	  && pt > pt_min_st
+	  && LengthSelectionST_RelaxedPtErr) {
+	fillST["pterr"] = PtErrOverPt2;
+      }
+    } // End lostInnerHits (ST N-1) block
+
+    // Now we need to execute the fills
+    
+    // The STC length selections are strictly looser versions of the short track length selections, and they are mutually exclusive.
+    // A true short track will pass exactly one. Although this is not sufficient to be a short track, it's sufficient to sort tracks that may be short
+    // into their possible category. 
+    // Candidates may or may not pass one (no strict requirement on length for candidates).
+    TString lensplit = "";
+    if (p) lensplit = "p";
+    else if (s) lensplit = "s";
+    else if (l) lensplit = "l";
+    // format is: sh+"_"+htsplit+"_"+lensplit+"_"+var;
+    // Inclusive splits always apply
+    TString prefix_i = HTsplit+"_i_";
+    TString prefix_Ii = "I_i_";
+    vector<TString> fill_prefixes = {prefix_i,prefix_Ii};
+    // Not guaranteed to satisfy any length requirement. Only add these if we did.
+    if (lensplit.Length() > 0) {
+      TString prefix_I = "I_"+lensplit+"_";
+      fill_prefixes.push_back(prefix_I);
+      TString prefix_narrow = HTsplit+"_"+lensplit+"_";
+      fill_prefixes.push_back(prefix_narrow);
+    }
+    for (const auto& var : vars) {
+      const TString& varname = var.first;
+      const float& stval = fillST[varname];
+      const float& stcval = fillSTC[varname];
+      if (stval > -99) {
+	for (const auto& prefix : fill_prefixes) {
+	  const TString name_to_fill = "st_"+prefix+varname;
+	  hists[name_to_fill]->Fill(stval);
+	}	
+      }
+      if (stcval > -99) {
+	for (const auto& prefix : fill_prefixes) {
+	  const TString name_to_fill = "stc_"+prefix+varname;
+	  hists[name_to_fill]->Fill(stcval);
+	}		
+      }
+    }
       
     } // End loop on tracks
     
-    h_st.Fill(nst,w_);
-    h_stc.Fill(nstc,w_);
+    // none, e, mu, taue, taumu, tau1, tau3, 
+    // ee, emu, etaue, etaumu, etau1, etau3, 
+    // mumu, mutaue, mutaumu, mutau1, mutau3, 
+    // tauetaue, tauetaumu, tauetau1, tauetau3, 
+    // taumutaumu, taumutau1, taumutau3, 
+    // tau1tau1, tau1tau3, 
+    // tau3tau3      
+    bool founde = false;
+    bool foundmu = false;
+    bool foundtaue = false;
+    bool foundtaumu = false;
+    bool foundtau1 = false;
+    bool foundtau3 = false;
+    float ptA = -1; float ptB = -1;
+    float drA = -1; float drB = -1;
+    const int ngenLep = t.ngenLep + t.ngenTau;
+    for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
+      const int pdgId = abs(t.genLep_pdgId[i_lep]);
+      if (pdgId == 11) {
+	founde = true;
+      }
+      else foundmu = true;
+    }
+    for (int i_tau = 0; i_tau < t.ngenTau; i_tau++) {
+      const int decayMode = abs(t.genTau_decayMode[i_tau]);
+      if (decayMode == 11) foundtaue = true;
+      else if (decayMode == 13) foundtaumu = true;
+      else if (decayMode == 1) foundtau1 = true;
+      else foundtau3 = true;
+    }
+        
+    int lep_type = 0;
+    if (ngenLep == 1) {
+      if (founde) lep_type = 1;
+      else if (foundmu) lep_type = 2;
+      else if (foundtaue) lep_type = 3;
+      else if (foundtaumu) lep_type = 4;
+      else if (foundtau1) lep_type = 5;
+      else lep_type = 6; // foundtau3
+    } else if (ngenLep == 2) {
+      if (founde) {
+	if (foundmu) lep_type = 8;
+	else if (foundtaue) lep_type = 9;
+	else if (foundtaumu) lep_type = 10;
+	else if (foundtau1) lep_type = 11;
+	else if (foundtau3) lep_type = 12;
+	else lep_type = 7; // founde was true twice
+      }
+      else if (foundmu) {
+	if (foundtaue) lep_type = 14;
+	else if (foundtaumu) lep_type = 15;
+	else if (foundtau1) lep_type = 16;
+	else if (foundtau3) lep_type = 17;
+	else lep_type = 13; // foundmu twice
+      }
+      else if (foundtaue) {
+	if (foundtaumu) lep_type = 19;
+	else if (foundtau1) lep_type = 20;
+	else if (foundtau3) lep_type = 21;
+	else lep_type = 18; // foundtaue twice
+      }
+      else if (foundtaumu) {
+	if (foundtau1) lep_type = 23;
+	else if (foundtau3) lep_type = 24;
+	else lep_type = 22; // foundtaumu twice
+      }
+      else if (foundtau1) {
+	if (foundtau3) lep_type = 26;
+	else lep_type = 25; // foundtau1 twice
+      }
+      else {
+	lep_type = 27; // foundtau3 twice
+      }	
+    } // ngenLep + ngenTau == 2
+
 
     if (nstc > 0) {
-      h_ngenLep.Fill(t.ngenLep + t.ngenTau,w_);
+      hists["ngenLep"]->Fill(t.ngenLep + t.ngenTau,w_);
     }
-    // Note, because we don't check stat23 (tau decay mode undefined) there's a ~5% error here for DY. Best to look at other dilep samples.
+
+    hists["lepTypePS"]->Fill(lep_type,w_);
     if (nst > 0) {
-      // none, e, mu, taue, taumu, tau1, tau3, 
-      // ee, emu, etaue, etaumu, etau1, etau3, 
-      // mumu, mutaue, mutaumu, mutau1, mutau3, 
-      // tauetaue, tauetaumu, tauetau1, tauetau3, 
-      // taumutaumu, taumutau1, taumutau3, 
-      // tau1tau1, tau1tau3, 
-      // tau3tau3      
-      bool founde = false;
-      bool foundmu = false;
-      bool foundtaue = false;
-      bool foundtaumu = false;
-      bool foundtau1 = false;
-      bool foundtau3 = false;
-      const int ngenLep = t.ngenLep + t.ngenTau;
+      hists["lepType"]->Fill(lep_type,w_);
+      const float st_pt = t.track_pt[st_idx];
       for (int i_lep = 0; i_lep < t.ngenLep; i_lep++) {
-	int pdgId = abs(t.genLep_pdgId[i_lep]);
-	if (pdgId == 11) founde = true;
-	else foundmu = true;
+	const int pdgId = abs(t.genLep_pdgId[i_lep]);
+	if (pdgId == 11) {
+	  if (ptA > 0) {
+	    ptB = t.genLep_pt[i_lep] / st_pt;
+	    drB = DeltaR(t.genLep_eta[i_lep],t.track_eta[st_idx],t.genLep_phi[st_idx],t.track_eta[st_idx]);
+	  } else {
+	    ptA = t.genLep_pt[i_lep] / st_pt;
+	    drA = DeltaR(t.genLep_eta[i_lep],t.track_eta[st_idx],t.genLep_phi[st_idx],t.track_eta[st_idx]);
+	  }
+	}
       }
-      for (int i_tau = 0; i_tau < t.ngenTau; i_tau++) {
-	int decayMode = abs(t.genTau_decayMode[i_tau]);
-	if (decayMode == 11) foundtaue = true;
-	else if (decayMode == 13) foundtaumu = true;
-	else if (decayMode == 1) foundtau1 = true;
-	else foundtau3 = true;
+      for (int i_lep = 0; i_lep < t.ngenLepFromTau; i_lep++) {
+	const int pdgId = abs(t.genLep_pdgId[i_lep]);
+	if (pdgId == 11) {
+	  if (ptA > 0) {
+	    ptB = t.genLepFromTau_pt[i_lep] / st_pt;
+	    drB = DeltaR(t.genLepFromTau_eta[i_lep],t.track_eta[st_idx],t.genLepFromTau_phi[st_idx],t.track_eta[st_idx]);
+	  } else {
+	    ptA = t.genLepFromTau_pt[i_lep] / st_pt;
+	    drA = DeltaR(t.genLepFromTau_eta[i_lep],t.track_eta[st_idx],t.genLepFromTau_phi[st_idx],t.track_eta[st_idx]);
+	  }
+	}
       }
-      int lep_type = 0;
-      if (ngenLep == 1) {
-	if (founde) lep_type = 1;
-	else if (foundmu) lep_type = 2;
-	else if (foundtaue) lep_type = 3;
-	else if (foundtaumu) lep_type = 4;
-	else if (foundtau1) lep_type = 5;
-	else lep_type = 6; // foundtau3
-      } else if (ngenLep == 2) {
-	if (founde) {
-	  if (foundmu) lep_type = 8;
-	  else if (foundtaue) lep_type = 9;
-	  else if (foundtaumu) lep_type = 10;
-	  else if (foundtau1) lep_type = 11;
-	  else if (foundtau3) lep_type = 12;
-	  else lep_type = 7; // founde was true twice
-	}
-	else if (foundmu) {
-	  if (foundtaue) lep_type = 14;
-	  else if (foundtaumu) lep_type = 15;
-	  else if (foundtau1) lep_type = 16;
-	  else if (foundtau3) lep_type = 17;
-	  else lep_type = 13; // foundmu twice
-	}
-	else if (foundtaue) {
-	  if (foundtaumu) lep_type = 19;
-	  else if (foundtau1) lep_type = 20;
-	  else if (foundtau3) lep_type = 21;
-	  else lep_type = 18; // foundtaue twice
-	}
-	else if (foundtaumu) {
-	  if (foundtau1) lep_type = 23;
-	  else if (foundtau3) lep_type = 24;
-	  else lep_type = 22; // foundtaumu twice
-	}
-	else if (foundtau1) {
-	  if (foundtau3) lep_type = 26;
-	  else lep_type = 25; // foundtau1 twice
+      if (ptA > 0) {
+	if (ptA > ptB) {
+	  hists["lep1ptr"]->Fill(ptA,w_);
+	  hists["lep1DR"]->Fill(drA,w_);
+	  if (ptB > 0) {
+	    hists["lep2ptr"]->Fill(ptB,w_);
+	    hists["lep2DR"]->Fill(drB,w_);
+	  }
 	}
 	else {
-	  lep_type = 27; // foundtau3 twice
-	}	
-      } // ngenLep + ngenTau == 2
-      h_lepType.Fill(lep_type,w_);
+	  hists["lep1ptr"]->Fill(ptB,w_);
+	  hists["lep1DR"]->Fill(drB,w_);
+	  hists["lep2ptr"]->Fill(ptA,w_);
+	  hists["lep2DR"]->Fill(drA,w_);
+	}
+      }
     } // if nst > 0
+
+    if (false && founde) {
+      for (int ijet = 0; ijet < t.njet; ijet++) {
+	hists["chem"]->Fill(t.jet_cemFrac[ijet],w_);
+	hists["nem"]->Fill(t.jet_nemFrac[ijet],w_);
+	hists["em"]->Fill(t.jet_cemFrac[ijet] + t.jet_nemFrac[ijet],w_);
+      }
+    }
       
   }//end loop on events in a file
+
+  hists["inclusive"]->Fill(0.5,nselected);
   
   cout << "About to write" << endl;
   
-  mkdir = "mkdir -p drHists" + output_suffix;
-  system(mkdir.c_str());
+  //  mkdir = "mkdir -p drHists" + output_suffix;
+  //  system(mkdir.c_str());
 
-  TFile drfile(Form("drHists%s/%s.root",output_suffix.c_str(),sample),"RECREATE");
-  h_el_dr.Write();
-  h_mu_dr.Write();
-  h_tau_dr.Write();
-  h_el_ptr.Write();
-  h_mu_ptr.Write();
-  h_tau_ptr.Write();
-  h_sh_el_dr.Write();
-  h_sh_mu_dr.Write();
-  h_sh_tau_dr.Write();
-  h_sh_el_ptr.Write();
-  h_sh_mu_ptr.Write();
-  h_sh_tau_ptr.Write();
-  drfile.Close();
+  //  TFile drfile(Form("drHists%s/%s.root",output_suffix.c_str(),sample),"RECREATE");
 
-  mkdir = "mkdir -p vetoHists" + output_suffix;
-  system(mkdir.c_str());
+  //  mkdir = "mkdir -p vetoHists" + output_suffix;
+  //system(mkdir.c_str());
 
-  TFile vetofile(Form("vetoHists%s/%s.root",output_suffix.c_str(),sample),"RECREATE");
-  vetofile.cd();
-  h_etaphi_bar.Write();
-  h_st_etaphi_bar.Write();
-  h_etaphi_ecn.Write();
-  h_st_etaphi_ecn.Write();
-  h_etaphi_ecp.Write();
-  h_st_etaphi_ecp.Write();
-  vetofile.Close();
+  //TFile vetofile(Form("vetoHists%s/%s.root",output_suffix.c_str(),sample),"RECREATE");
     
   TFile outfile_(output_name,"RECREATE"); 
   outfile_.cd();
 
-  h_lepType.Write();
-  
-  h_st.Write();
-  h_stc.Write();
-  h_inclusive.Write();
-  
-  // STCands
-  h_pt.Write();
-  h_bardz.Write();
-  h_bardxy.Write();
-  h_ecdz.Write();
-  h_ecdxy.Write();
-  h_iso.Write();
-  h_niso.Write();
-  h_chiso.Write();
-  h_reliso.Write();
-  h_nreliso.Write();
-  h_chreliso.Write();
-  
-  h_pt_p.Write();
-  h_bardz_p.Write();
-  h_bardxy_p.Write();
-  h_ecdz_p.Write();
-  h_ecdxy_p.Write();
-  h_iso_p.Write();
-  h_niso_p.Write();
-  h_chiso_p.Write();
-  h_reliso_p.Write();
-  h_nreliso_p.Write();
-  h_chreliso_p.Write();
-  
-  h_pt_s.Write();
-  h_bardz_s.Write();
-  h_bardxy_s.Write();
-  h_ecdz_s.Write();
-  h_ecdxy_s.Write();
-  h_iso_s.Write();
-  h_niso_s.Write();
-  h_chiso_s.Write();
-  h_reliso_s.Write();
-  h_nreliso_s.Write();
-  h_chreliso_s.Write();
-  
-  h_pt_l.Write();
-  h_bardz_l.Write();
-  h_bardxy_l.Write();
-  h_ecdz_l.Write();
-  h_ecdxy_l.Write();
-  h_iso_l.Write();
-  h_niso_l.Write();
-  h_chiso_l.Write();
-  h_reliso_l.Write();  
-  h_nreliso_l.Write();  
-  h_chreliso_l.Write();  
-  
-  /*
-  h_pt_li.Write();
-  h_bardz_li.Write();
-  h_bardxy_li.Write();
-  h_ecdz_li.Write();
-  h_ecdxy_li.Write();
-  h_iso_li.Write();
-  h_niso_li.Write();
-  h_chiso_li.Write();
-  h_reliso_li.Write();  
-  h_nreliso_li.Write();  
-  h_chreliso_li.Write();  
-  */
-
-  // True Short Tracks
-  h_sh_pt.Write();
-  h_sh_bardz.Write();
-  h_sh_bardxy.Write();
-  h_sh_ecdz.Write();
-  h_sh_ecdxy.Write();
-  h_sh_iso.Write();
-  h_sh_niso.Write();
-  h_sh_chiso.Write();
-  h_sh_reliso.Write();
-  h_sh_nreliso.Write();
-  h_sh_chreliso.Write();
-
-  h_sh_pt_p.Write();
-  h_sh_bardz_p.Write();
-  h_sh_bardxy_p.Write();
-  h_sh_ecdz_p.Write();
-  h_sh_ecdxy_p.Write();
-  h_sh_iso_p.Write();
-  h_sh_niso_p.Write();
-  h_sh_chiso_p.Write();
-  h_sh_reliso_p.Write();
-  h_sh_nreliso_p.Write();
-  h_sh_chreliso_p.Write();
-
-  h_sh_pt_s.Write();
-  h_sh_bardz_s.Write();
-  h_sh_bardxy_s.Write();
-  h_sh_ecdz_s.Write();
-  h_sh_ecdxy_s.Write();
-  h_sh_iso_s.Write();
-  h_sh_niso_s.Write();
-  h_sh_chiso_s.Write();
-  h_sh_reliso_s.Write();
-  h_sh_nreliso_s.Write();
-  h_sh_chreliso_s.Write();
-
-  h_sh_pt_l.Write();
-  h_sh_bardz_l.Write();
-  h_sh_bardxy_l.Write();
-  h_sh_ecdz_l.Write();
-  h_sh_ecdxy_l.Write();
-  h_sh_iso_l.Write();
-  h_sh_niso_l.Write();
-  h_sh_chiso_l.Write();
-  h_sh_reliso_l.Write();  
-  h_sh_nreliso_l.Write();  
-  h_sh_chreliso_l.Write();  
-
-  h_ngenLep.Write();
-  
+  for (const auto& [name,hist] : hists) {
+    cout << "Writing " << name << endl;
+    hist->Write();
+  }
   outfile_.Close();
 
   cout << "Wrote everything" << endl;
+
+  delete ch_mt2;
+  delete ch_st;
   
   return 0;
 }

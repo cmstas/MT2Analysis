@@ -786,8 +786,7 @@ void ShortTrackLooper::loop(TChain* chain, std::string sample, std::string outpu
     tree_st->AddFriend(tree_mt2);
 
     // Our baby tree is an sttree so that we can call both mt2 and st methods mindlessly.
-    t.Init(tree_st); // The Init function from mt2tree, for mt2 branches.
-    t.Init_ST(tree_st); // The Init function from sttree, for st branches.
+    t.Init(tree_st); // The Init function from sttree calls the Init function from mt2tree as well
 
     // Event Loop
     unsigned int nEventsTree = tree_mt2->GetEntriesFast(); 
