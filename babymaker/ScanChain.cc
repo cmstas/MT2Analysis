@@ -141,6 +141,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       rebal_reader.SetMeanShift(0.0);
       // don't want to widen cores for rebalancing, so treat as MC always
       rebal_reader.Init("rebal/JetResponseTemplates_ptBinned_92x_DCBfit.root", false);      
+      cout << "Initialized rebal" << endl;
   }
 
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
@@ -540,11 +541,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         if(isCMS4){
           if(!isData){
             const string dataset_name = cms3.evt_dataset().at(0).Data();
-            evt_scale1fb = datasetInfoFromFile.getScale1fbFromFile(dataset_name, cms3_version.Data());
-            evt_nEvts    = datasetInfoFromFile.getnEventsTotalFromFile(dataset_name, cms3_version.Data());
-            evt_xsec     = datasetInfoFromFile.getXsecFromFile(dataset_name, cms3_version.Data());
-            evt_kfactor = 1.0;
-            evt_filter = 1.0;
+	    try {
+	      evt_scale1fb = datasetInfoFromFile.getScale1fbFromFile(dataset_name, cms3_version.Data());
+	      evt_nEvts    = datasetInfoFromFile.getnEventsTotalFromFile(dataset_name, cms3_version.Data());
+	      evt_xsec     = datasetInfoFromFile.getXsecFromFile(dataset_name, cms3_version.Data());
+	    } catch (const exception& e) {
+	      if (event == 0) {
+		cout << "WARNING: " << e.what() << endl;
+		cout << "WARNING: Setting evt_nEvts to 0, evt_scale1fb to 1.0, evt_xsec to 0" << endl;
+	      }
+	      evt_nEvts = 0;
+	      evt_scale1fb = 1.0;
+	      evt_xsec = 0.0;
+	    }
+	    evt_kfactor = 1.0;
+	    evt_filter = 1.0;
           }else{
             evt_nEvts = 0;
             evt_scale1fb = 1.0;
@@ -587,9 +598,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       //check CMS version to see if we want to use MuEGCleaned MET and turn off JEC corrections for reminiAOD data
       bool useMuEGCleanedMet = false;
       bool skipJECOnMet = false; //we are out of sync with ETH on MET unless we pull directly from reminiAOD
-      if (small_cms3_version >= 18) {
+      if (!isCMS4 && small_cms3_version >= 18) {
 	useMuEGCleanedMet = true;
 	skipJECOnMet = true;
+      }
+      if (verbose) {
+	if (useMuEGCleanedMet) cout << "Using mueg cleaned MET" << endl;
+	else cout << "Not using mueg cleaned MET" << endl;
       }
       
       if (applyJECfromFile && recomputeT1MET && !skipJECOnMet) {
