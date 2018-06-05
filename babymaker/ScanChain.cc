@@ -129,7 +129,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "jsons/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON_snt.txt";
   if (applyJSON) {
     cout << "Loading json file: " << json_file << endl;
     set_goodrun_file(json_file);
@@ -333,7 +333,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L2Relative_AK4PFchs.txt"  );
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L3Absolute_AK4PFchs.txt"  );
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L2L3Residual_AK4PFchs.txt");            
-	}else if (currentFileName.Contains("2017F")) {
+	}else if (currentFileName.Contains("2017F") || currentFileName.Contains("2018")) {
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017F_V6_DATA_L1FastJet_AK4PFchs.txt"   );
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017F_V6_DATA_L2Relative_AK4PFchs.txt"  );
@@ -437,17 +437,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
       HLT_PFHT500_PFMET100_PFMHT100 = passHLTTriggerPattern("HLT_PFHT500_PFMET100_PFMHT100_IDTight_v");
+      HLT_PFHT700_PFMET85_PFMHT85 = passHLTTriggerPattern("HLT_PFHT700_PFMET85_PFMHT85_IDTight_v");
       HLT_PFHT800_PFMET75_PFMHT75 = passHLTTriggerPattern("HLT_PFHT800_PFMET75_PFMHT75_IDTight_v");
       HLT_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90   = passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v") || passHLTTriggerPattern("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
       HLT_PFMETNoMu100_PFMHTNoMu100 = passHLTTriggerPattern("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v");
       HLT_PFMETNoMu110_PFMHTNoMu110 = passHLTTriggerPattern("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v");
       HLT_PFMETNoMu120_PFMHTNoMu120 = passHLTTriggerPattern("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");
+      HLT_PFMETNoMu130_PFMHTNoMu130 = passHLTTriggerPattern("HLT_PFMETNoMu130_JetIdCleaned_PFMHTNoMu130_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu130_NoiseCleaned_PFMHTNoMu130_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v");
+      HLT_PFMETNoMu140_PFMHTNoMu140 = passHLTTriggerPattern("HLT_PFMETNoMu140_JetIdCleaned_PFMHTNoMu140_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu140_NoiseCleaned_PFMHTNoMu140_IDTight_v") || passHLTTriggerPattern("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v");
       HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 = passHLTTriggerPattern("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v");
       HLT_PFMET90_PFMHT90           = passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDTight_v") || passHLTTriggerPattern("HLT_PFMET90_PFMHT90_IDLoose_v");
       HLT_PFMET100_PFMHT100         = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_v");
       HLT_PFMET110_PFMHT110         = passHLTTriggerPattern("HLT_PFMET110_PFMHT110_IDTight_v");
       HLT_PFMET120_PFMHT120         = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_v");
+      HLT_PFMET130_PFMHT130         = passHLTTriggerPattern("HLT_PFMET130_PFMHT130_IDTight_v");
+      HLT_PFMET140_PFMHT140         = passHLTTriggerPattern("HLT_PFMET140_PFMHT140_IDTight_v");
       HLT_PFMET100_PFMHT100_PFHT60  = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_PFHT60_v");
       HLT_PFMET120_PFMHT120_PFHT60  = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v");
       HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v");
@@ -460,14 +465,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         passHLTTriggerPattern("HLT_IsoMu27_v") || passHLTTriggerPattern("HLT_IsoTkMu27_v");
       HLT_SingleMu_NonIso     = passHLTTriggerPattern("HLT_Mu50_v") || passHLTTriggerPattern("HLT_TkMu50_v") ||
 	passHLTTriggerPattern("HLT_Mu55_v");
-      HLT_SingleEl     = passHLTTriggerPattern("HLT_Ele23_WPLoose_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele22_eta2p1_WPLoose_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele23_WP75_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele22_eta2p1_WP75_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele25_eta2p1_WPTight_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPLoose_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele27_eta2p1_WPTight_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele32_eta2p1_WPTight_Gsf_v") ||
+      HLT_SingleEl     = 
+        passHLTTriggerPattern("HLT_Ele27_WPTight_Gsf_v") ||
+        passHLTTriggerPattern("HLT_Ele32_WPTight_Gsf_v") ||
+        passHLTTriggerPattern("HLT_Ele35_WPTight_Gsf_v") ||
+        passHLTTriggerPattern("HLT_Ele38_WPTight_Gsf_v") ||
 	passHLTTriggerPattern("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v");
       HLT_SingleEl_NonIso     = passHLTTriggerPattern("HLT_Ele105_CaloIdVT_GsfTrkIdT_v") ||
 	passHLTTriggerPattern("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");
@@ -3088,6 +3090,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
     BabyTree_->Branch("HLT_PFHT1050", &HLT_PFHT1050 );
     BabyTree_->Branch("HLT_PFHT500_PFMET100_PFMHT100", &HLT_PFHT500_PFMET100_PFMHT100 ); 
+    BabyTree_->Branch("HLT_PFHT700_PFMET85_PFMHT85", &HLT_PFHT700_PFMET85_PFMHT85 );
     BabyTree_->Branch("HLT_PFHT800_PFMET75_PFMHT75", &HLT_PFHT800_PFMET75_PFMHT75 );
     BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
     BabyTree_->Branch("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100 );
@@ -3099,10 +3102,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("HLT_PFMETNoMu100_PFMHTNoMu100", &HLT_PFMETNoMu100_PFMHTNoMu100 );
     BabyTree_->Branch("HLT_PFMETNoMu110_PFMHTNoMu110", &HLT_PFMETNoMu110_PFMHTNoMu110 );
     BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
+    BabyTree_->Branch("HLT_PFMETNoMu130_PFMHTNoMu130", &HLT_PFMETNoMu130_PFMHTNoMu130 );
+    BabyTree_->Branch("HLT_PFMETNoMu140_PFMHTNoMu140", &HLT_PFMETNoMu140_PFMHTNoMu140 );
     BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
     BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
     BabyTree_->Branch("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110 );
     BabyTree_->Branch("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120 );
+    BabyTree_->Branch("HLT_PFMET130_PFMHT130", &HLT_PFMET130_PFMHT130 );
+    BabyTree_->Branch("HLT_PFMET140_PFMHT140", &HLT_PFMET140_PFMHT140 );
     BabyTree_->Branch("HLT_PFMET100_PFMHT100_PFHT60", &HLT_PFMET100_PFMHT100_PFHT60 );
     BabyTree_->Branch("HLT_PFMET120_PFMHT120_PFHT60", &HLT_PFMET120_PFMHT120_PFHT60 );
     BabyTree_->Branch("HLT_PFJet450", &HLT_PFJet450 );
@@ -3550,6 +3557,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     Flag_METFilters = -999;
     HLT_PFHT1050 = -999;
     HLT_PFHT500_PFMET100_PFMHT100 = -999;
+    HLT_PFHT700_PFMET85_PFMHT85 = -999;
     HLT_PFHT800_PFMET75_PFMHT75 = -999;
     HLT_PFMET170 = -999;
     HLT_PFHT300_PFMET100 = -999;
@@ -3561,10 +3569,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     HLT_PFMETNoMu100_PFMHTNoMu100 = -999;
     HLT_PFMETNoMu110_PFMHTNoMu110 = -999;
     HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
+    HLT_PFMETNoMu130_PFMHTNoMu130 = -999;
+    HLT_PFMETNoMu140_PFMHTNoMu140 = -999;
     HLT_PFMET90_PFMHT90 = -999;
     HLT_PFMET100_PFMHT100 = -999;
     HLT_PFMET110_PFMHT110 = -999;
     HLT_PFMET120_PFMHT120 = -999;
+    HLT_PFMET130_PFMHT130 = -999;
+    HLT_PFMET140_PFMHT140 = -999;
     HLT_PFMET100_PFMHT100_PFHT60 = -999;
     HLT_PFMET120_PFMHT120_PFHT60 = -999;
     HLT_PFJet450 = -999;
