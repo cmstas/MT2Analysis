@@ -135,6 +135,9 @@ clean:
         ../CORE/Tools/btagsf/*.o \
 	../CORE/Tools/btagsf/*.d \
         ../CORE/Tools/btagsf/*.so 
+	../CORE/Tools/datasetinfo/*.o
+	../CORE/Tools/datasetinfo/*.d
+	../CORE/Tools/datasetinfo/*.so
 
 localclean:
 	rm -f \

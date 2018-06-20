@@ -129,10 +129,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  const char* json_file = "jsons/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-  if (applyJSON) {
-    cout << "Loading json file: " << json_file << endl;
-    set_goodrun_file(json_file);
+  if (baby_name.find("data") != string::npos && applyJSON) {
+      string json_file;
+      if(baby_name.find("2017") != string::npos){
+          json_file = "jsons/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
+      }else if(baby_name.find("2018") != string::npos){
+          json_file = "jsons/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+      }else{
+          cout << "ERROR: couldn't decide which json to use!" << endl;
+          return;   
+      }
+      cout << "Loading json file: " << json_file << endl;
+      set_goodrun_file(json_file.c_str());
   }
 
   if(doRebal){
@@ -494,7 +502,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         passHLTTriggerPattern("HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
 	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") ||
+        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||
+        passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") ||
+	passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_v") ||
+	passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_v") ||
+        passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8_v");
       HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu37_TkMu27_v");
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
       HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
@@ -681,13 +694,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
-	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();
+	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
+        if(baby_name.find("2017") != string::npos || baby_name.find("2018") != string::npos){
+            Flag_ecalBadCalibFilter                         = cms3.filt_ecalBadCalibFilter();
+            Flag_badMuonFilter           = cms3.filt_BadPFMuonFilter();
+            Flag_badChargedCandidateFilter  = cms3.filt_BadChargedCandidateFilter();
+        }
 	// inputs for badMuonFilters in latest cms3 tags
 	if (recent_cms3_version || isCMS4) {
 	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
 	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
           // Flag_badMuonFilter                            = badMuonFilter();
-          // Flag_badMuonFilterV2                          = badMuonFilterV2();
+          // Flag_badMuonFilterV2                          = badMuonFilterV2();         
 	  // if (small_cms3_version >= 18) {
 	  //   Flag_badMuons                                 = cms3.filt_badMuons();
 	  //   Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
@@ -3080,11 +3098,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
     BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
+    BabyTree_->Branch("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter );
     BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
     BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 ); 
     BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
     BabyTree_->Branch("Flag_duplicateMuons", &Flag_duplicateMuons );   
     BabyTree_->Branch("Flag_noBadMuons", &Flag_noBadMuons );  
+    BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
     BabyTree_->Branch("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter );
     BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
@@ -3547,11 +3567,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     Flag_HBHENoiseIsoFilter = -999;
     Flag_goodVertices = -999;
     Flag_eeBadScFilter = -999;
+    Flag_ecalBadCalibFilter = -999;
     Flag_badMuonFilter = -999;
     Flag_badMuonFilterV2 = -999;    
     Flag_badMuons = -999;    
     Flag_duplicateMuons = -999;    
     Flag_noBadMuons = -999;    
+    Flag_badChargedCandidateFilter = -999;
     Flag_badChargedHadronFilter = -999;
     Flag_badChargedHadronFilterV2 = -999;    
     Flag_METFilters = -999;
