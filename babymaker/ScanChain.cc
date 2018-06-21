@@ -134,7 +134,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       if(baby_name.find("2017") != string::npos){
           json_file = "jsons/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
       }else if(baby_name.find("2018") != string::npos){
-          json_file = "jsons/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+          json_file = "jsons/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
       }else{
           cout << "ERROR: couldn't decide which json to use!" << endl;
           return;   
@@ -2113,7 +2113,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  if (isFastsim && isBadFastsimJet(iJet)) ++nJet20BadFastsim;
 	  
           // first check jet ID - count the number of jets that fail.  Don't apply for fastsim
-          if(!isLoosePFJet_50nsV1(iJet) && !isFastsim) {
+          if(!isTightPFJet_2017_v1(iJet) && !isFastsim) {
             if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
             if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
             if (!isOverlapJetGamma) {
