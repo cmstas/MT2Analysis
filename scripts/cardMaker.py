@@ -208,7 +208,15 @@ def makeTemplate(directory,imt2):
         h_sigscan = f_sig.Get(fullhistnameScan)
         # Bin 0 is guaranteed to exist, so it's suitable as a dummy projection.
         # Remember, we're not interested in the actual counts, just the bin edges.
-        h_sig = h_sigscan.ProjectionX("h_sig",0,0,0,0) 
+
+        # sigscan doesn't exist if region is empty, but regular h_mt2bins does (only need the bin edges).
+        # I believe this happens only when the entire region is empty for EVERY mass point.
+        if (h_sigscan == None): h_sig = f_sig.Get(fullhistname)
+        else: h_sig = h_sigscan.ProjectionX("h_sig",0,0,0,0) 
+        # Monojet regions don't even have h_mt2bins.
+        # In this case, just return. Maybe we are ignoring this bin anyway (suppressZero).
+        if (h_sig == None):
+            return [None]*4
     else:
         h_sig = f_sig.Get(fullhistname)
 
@@ -987,8 +995,14 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     if (im1 >= 0 and im2 >= 0): # Full scan
         h_sigscan = f_sig.Get(fullhistnameScan)
         if (h_sigscan == None):
-            print "Tried to extra ({0},{1}) from the full scan, but no such histogram exists.\n".format(str(im1),str(im2))
-            return False # Can't do a full scan if we can't find h_sigscan
+            print "Tried to extract ({0},{1}) from the full scan, but no such histogram exists.\n".format(str(im1),str(im2))
+            # Can't do a full scan if we can't find h_sigscan. If suppressZeroBins or suppressZeroTRs, it's fine to exit here.
+            if suppressZeroBins or suppressZeroTRs: 
+                print "Suppressing zeroes anyway, so just don't produce a card here."
+                return False 
+            else : 
+                print "Not suppressing zeroes, but cannot continue without a histogram. Aborting."
+                exit(1)
         bin1 = h_sigscan.GetYaxis().FindBin(im1)
         bin2 = h_sigscan.GetZaxis().FindBin(im2)
         h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
@@ -1165,7 +1179,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     outfile.close()
     return True
 
-signal_points = [] # This list of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
+signal_points = set() # This set of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
 iterator = f_sig.GetListOfKeys()
 keep = "sr"
 skip = "srbase"
@@ -1190,6 +1204,13 @@ for key in iterator:
         for imt2 in range(1,n_mt2_bins+1):
             # Make a template for this bin containing the common background components of the card, with placeholders for signal.
             template,channel,lostlep_alpha,lostlep_lastbin_hybrid = makeTemplate(directory,imt2) 
+            if template == None: # This happens when the signal count is zero for EVERY mass point in monojet bins, as far as I can tell
+                if not (suppressZeroBins or suppressZeroTRs):
+                    print "Template could not be formed due to missing histograms in bin {0} of directory {1}, but we're not suppressing zero bins. Aborting.".format(imt2,directory)
+                    exit(1)
+                else:
+                    print "Template could not be formed due to missing histograms in bin {0} of directory {1}, but we're suppressing zero bins anyway. Continuing.".format(imt2,directory)
+                    continue
             # If we're doing a full scan, loop over mass points and replace placeholders in the template with appropriate signal values for each point.
             if (doScan):
                 y_binwidth = 25
@@ -1204,7 +1225,7 @@ for key in iterator:
                         success = makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1,im2)
                         # If no histograms are found for that mass point, don't add it to the list of processed points
                         if success:
-                            signal_points.append( (im1,im2) )
+                            signal_points.add( (im1,im2) )
             else:
                 makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2)
 
