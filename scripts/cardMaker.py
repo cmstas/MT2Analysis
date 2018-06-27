@@ -11,8 +11,8 @@ import os
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = True # Print more error messages
-suppressZeroBins = False # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
-suppressZeroTRs = True # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
+suppressZeroBins = True # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
+suppressZeroTRs = False # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
 doSuperSignalRegions = False # Print cards for super signal regions
 dummy_alpha = 1
 uncorrelatedZGratio = False 
@@ -30,6 +30,10 @@ suppressUHmt2bin = True # The first MT2 bin in UH regions has a large QCD contri
 last_zinv_ratio = 0.5 
 last_lostlep_transfer = 2.0
 last_zinvDY_transfer = 2.0
+
+# We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
+n_zero = 1e-3
+alpha_zero = 1e-5
 
 if len(argv) < 3:
     print "Usage: {0} [signal file name] [input directory] [output directory] [doScan = True] [doData = True]".format(argv[0])
@@ -216,7 +220,7 @@ def makeTemplate(directory,imt2):
         # Monojet regions don't even have h_mt2bins.
         # In this case, just return. Maybe we are ignoring this bin anyway (suppressZero).
         if (h_sig == None):
-            return [None]*4
+            return [None]*5
     else:
         h_sig = f_sig.Get(fullhistname)
 
@@ -821,10 +825,6 @@ def makeTemplate(directory,imt2):
     else:
         n_data = n_bkg
 
-    # We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
-    n_zero = 1e-3
-    alpha_zero = 1e-5
-
     # If the number of control region counts is nonzero but the number of predicted counts in the signal region is zero, decorrelate the error.
     uncorr_zinvDY = n_zinvDY_cr >= n_zero and n_zinvDY < n_zero
     uncorr_lostlep = n_lostlep_cr >= n_zero and n_lostlep < n_zero
@@ -950,9 +950,9 @@ def makeTemplate(directory,imt2):
     # The template contains background information used for all signal mass points.
     # channel is needed to name the output file produced in makeCard.
     # lostlep_alpha and lastbin_hybrid are needed for signal contamination subtraction.
-    return template,channel,lostlep_alpha,lostlep_lastbin_hybrid
+    return template,channel,lostlep_alpha,lostlep_lastbin_hybrid,n_bkg
 
-def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1=-1,im2=-1):
+def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,n_bkg,im1=-1,im2=-1):
 
     cardname = "{0}/datacard_{1}_{2}_{3}_{4}.txt".format(outdir,channel,signal,im1,im2)
 
@@ -1000,7 +1000,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
             if suppressZeroBins or suppressZeroTRs: 
                 print "Suppressing zeroes anyway, so just don't produce a card here."
                 return False 
-            else : 
+            else: 
                 print "Not suppressing zeroes, but cannot continue without a histogram. Aborting."
                 exit(1)
         bin1 = h_sigscan.GetYaxis().FindBin(im1)
@@ -1042,24 +1042,30 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
             h_sig_crsl = f_sig.Get(fullhistnameCRSL)
             h_sig_crsl_genmet = f_sig.Get(fullhistnameCRSLGenMet)
     
-    if (h_sig == None):
+    # Suppress for missing reco histograms even if gen histogram exists
+    if (h_sig == None or h_sig_genmet == None):
+        if (h_sig_genmet == None):
+            print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper.".format(cardname)
+            exit(1)
         if (suppressZeroBins or suppressZeroTRs):
-            return False
-    elif (h_sig.Integral(0,-1) == 0):
+            if verbose: print "{0}_{1}_{2}_{3} suppressed due to missing histogram".format(channel,signal,im1,im2)
+            return False        
+    # The number we actually write is based on recogenaverage, so determine whether to suppress based on that number.
+    elif ( (h_sig.Integral(0,-1) + h_sig_genmet.Integral(0,-1)) / 2 < n_zero):
         if (suppressZeroBins or suppressZeroTRs):
+            if verbose: print "{0}_{1}_{2}_{3} suppressed due to 0 integral (suppressZeroBins or TRs)".format(channel,signal,im1,im2)
             return False
-    elif (h_sig.GetBinContent(imt2) == 0):
-        if (suppressZeroBins):
-            return False
-        n_sig = 0
-        n_sig_TR = h_sig.Integral(0,-1)
     else:
         n_sig = h_sig.GetBinContent(imt2)
         n_sig_TR = h_sig.Integral(0,-1)
         err_sig_mcstat = h_sig.GetBinError(imt2)
         # part of sig_mcstat calculation; if n_sig is 0, default value is applied
-        err_sig_mcstat_rel = err_sig_mcstat / n_sig
+        if n_sig > 0: err_sig_mcstat_rel = err_sig_mcstat / n_sig
     del h_sig
+
+#    if (suppressZeroBins and ((n_sig < 0.1) or (n_sig / n_bkg < 0.02))):
+#        if verbose: print "Background >> Signal, or signal very small, card not printed (suppressZeroBins): {0}\n".format(cardname)
+#        return False
 
     if (not h_sig_genmet == None):
         n_sig_genmet = h_sig_genmet.GetBinContent(imt2)
@@ -1076,10 +1082,6 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     if (not h_sig_isr_UP == None):
         n_sig_isr_UP = h_sig_isr_UP.GetBinContent(imt2)
         del h_sig_isr_UP
-
-    if (suppressZeroBins and ((n_sig < 0.1) or (n_sig / n_bkg < 0.02))):
-        if (verbose): print "Zero signal, card not printed: {0}\n".format(cardname)
-        return False
 
     n_sig_recogenaverage = (n_sig_genmet+n_sig) / 2.0
     # Part of sig_genmet calculation; if n_sig_recogenaverage == 0, default value is used
@@ -1110,11 +1112,18 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
             err_sig_recogenaverage = 0.0
             if (n_sig_cor_recogenaverage > 0.0):
                 err_sig_recogenaverage = abs(n_sig_cor-n_sig_cor_genmet) / 2.0 / n_sig_cor_recogenaverage
-        else:
+        elif verbose or isSignalWithLeptons:
             print "Tried to subtract signal contamination but couldn't find h_sig_crsl\n"
-            if (not isSignalWithLeptons):
+            if not isSignalWithLeptons:
                 print "This signal appears not to contain leptons, so that is not unusual.\n"
             
+    sig_scale = 1.0
+    n_sig_cor_recogenaverage_towrite = sig_scale * n_sig_cor_recogenaverage
+    # The final suppression check: is the number we actually write for this bin (equivalent to) zero?
+    if suppressZeroBins and n_sig_cor_recogenaverage_towrite < n_zero:
+        if verbose: "Suppressed {0} due to 0 bin content (suppressZeroBins)".format(cardname)
+        return False
+
     sig_syst = 1.10
     sig_lumi = 1.026
     sig_pu = 1.046
@@ -1141,9 +1150,6 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     name_sig_btagsf_heavy = "sig_bTagHeavySyst"
     name_sig_btagsf_light = "sig_bTagLightSyst"
     name_sig_lepeff = "sig_lepEffSyst"
-
-    sig_scale = 1.0
-    n_sig_cor_recogenaverage_towrite = sig_scale * n_sig_cor_recogenaverage
 
     to_print = template
 
@@ -1203,7 +1209,7 @@ for key in iterator:
         # Loop over MT2 bins in this signal region
         for imt2 in range(1,n_mt2_bins+1):
             # Make a template for this bin containing the common background components of the card, with placeholders for signal.
-            template,channel,lostlep_alpha,lostlep_lastbin_hybrid = makeTemplate(directory,imt2) 
+            template,channel,lostlep_alpha,lostlep_lastbin_hybrid,n_bkg = makeTemplate(directory,imt2) 
             if template == None: # This happens when the signal count is zero for EVERY mass point in monojet bins, as far as I can tell
                 if not (suppressZeroBins or suppressZeroTRs):
                     print "Template could not be formed due to missing histograms in bin {0} of directory {1}, but we're not suppressing zero bins. Aborting.".format(imt2,directory)
@@ -1222,12 +1228,12 @@ for key in iterator:
                     for im2 in range(0,y_max+1,y_binwidth):
                         if (suppressUHmt2bin and directory.find("UH") != -1 and imt2 == 1): continue
                         # Replace signal placeholders and print the card
-                        success = makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,im1,im2)
+                        success = makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,n_bkg,im1,im2)
                         # If no histograms are found for that mass point, don't add it to the list of processed points
                         if success:
                             signal_points.add( (im1,im2) )
             else:
-                makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2)
+                makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,n_bkg)
 
             # The 'del's throughout this script remove the python interpreter's reference to the object, which would normally cause an object
             # to be garbage collected. Unfortunately, only TObjects created by constructors are owned by python; all others are owned by ROOT. 
