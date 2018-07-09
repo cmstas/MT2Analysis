@@ -128,11 +128,13 @@ public :
    Int_t           Flag_HBHENoiseIsoFilter;
    Int_t           Flag_goodVertices;
    Int_t           Flag_eeBadScFilter;
+   Int_t           Flag_ecalBadCalibFilter;
    Int_t           Flag_METFilters;
    Int_t           Flag_globalTightHalo2016Filter;
    Int_t           Flag_globalSuperTightHalo2016Filter;
    Int_t           Flag_badMuonFilter;
    Int_t           Flag_badMuonFilterV2;
+   Int_t           Flag_badChargedCandidateFilter;
    Int_t           Flag_badChargedHadronFilter;
    Int_t           Flag_badChargedHadronFilterV2;
    Int_t           HLT_PFHT800;
@@ -544,11 +546,13 @@ public :
    TBranch        *b_Flag_HBHENoiseIsoFilter;   //!
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
+   TBranch        *b_Flag_ecalBadCalibFilter;   //!
    TBranch        *b_Flag_METFilters;   //!
    TBranch        *b_Flag_globalTightHalo2016Filter;   //!
    TBranch        *b_Flag_globalSuperTightHalo2016Filter;   //!
    TBranch        *b_Flag_badMuonFilter;   //!
    TBranch        *b_Flag_badMuonFilterV2;   //!
+   TBranch        *b_Flag_badChargedCandidateFilter;   //!
    TBranch        *b_Flag_badChargedHadronFilter;   //!
    TBranch        *b_Flag_badChargedHadronFilterV2;   //!
    TBranch        *b_HLT_HT800;   //!
@@ -1017,11 +1021,13 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter, &b_Flag_HBHENoiseIsoFilter);
    fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
+   fChain->SetBranchAddress("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter, &b_Flag_ecalBadCalibFilter);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
    fChain->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter, &b_Flag_globalTightHalo2016Filter);
    fChain->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter, &b_Flag_globalSuperTightHalo2016Filter);
    fChain->SetBranchAddress("Flag_badMuonFilter", &Flag_badMuonFilter, &b_Flag_badMuonFilter);
    fChain->SetBranchAddress("Flag_badMuonFilterV2", &Flag_badMuonFilterV2, &b_Flag_badMuonFilterV2);
+   fChain->SetBranchAddress("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter, &b_Flag_badChargedCandidateFilter);
    fChain->SetBranchAddress("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter, &b_Flag_badChargedHadronFilter);
    fChain->SetBranchAddress("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2, &b_Flag_badChargedHadronFilterV2);
    fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);

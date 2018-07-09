@@ -566,8 +566,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   // 2017 data
-  const char* json_file = "../babymaker/jsons/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
-  // const char* json_file = "../babymaker/jsons/Cert_294927-300575_13TeV_PromptReco_Collisions17_JSON_snt.txt";
+  const char* json_file = "../babymaker/jsons/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+  // // 2017 dataset, 41.96/fb
+  // const char* json_file = "../babymaker/jsons/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
   // // full 2016 dataset json, 36.26/fb:
   // const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
   // to reproduce ICHEP, 12.9/fb:
@@ -810,10 +811,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 
       // MET filters (first 2 only in data)
       if (t.isData) {
-        if (!t.Flag_globalSuperTightHalo2016Filter) continue; 
+        if (!t.Flag_globalTightHalo2016Filter) continue; 
         if (verbose) cout<<__LINE__<<endl;
-        // if (!t.Flag_badMuonFilterV2) continue;
-	// if (verbose) cout<<__LINE__<<endl;
+        if (!t.Flag_badMuonFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_eeBadScFilter) continue; 
 	if (verbose) cout<<__LINE__<<endl;
       }
@@ -826,8 +827,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (verbose) cout<<__LINE__<<endl;
 	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
 	if (verbose) cout<<__LINE__<<endl;
-	// if (!t.Flag_badChargedHadronFilterV2) continue; 
-	// if (verbose) cout<<__LINE__<<endl;
+	if (!t.Flag_badChargedCandidateFilter) continue; 
+	if (verbose) cout<<__LINE__<<endl;
+        if (!t.Flag_ecalBadCalibFilter) continue;
+	if (verbose) cout<<__LINE__<<endl;
       }
 
       // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
@@ -946,7 +949,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       outfile_->cd();
       // const float lumi = 12.9; //ICHEP 2016
       // const float lumi = 35.867; // full 2016
-      const float lumi = 41.96; // 2017
+      // const float lumi = 41.96; // 2017
+      const float lumi = 10.33; // 2018
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -1664,6 +1668,9 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 
   if (SRBase.PassesSelectionCRSL(valuesBase)) {
     if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
+    if(prefix=="crsl" && mt2_>700 && mt2_<800){
+        cout << endl << "FOUNDEVENT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+    }
     else if(prefix=="crslmu") fillHistosSingleLepton(SRBase.crslmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslmubase", suffix);
     else if(prefix=="crslel") fillHistosSingleLepton(SRBase.crslelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslelbase", suffix);
 
@@ -3089,8 +3096,7 @@ bool MT2Looper::passTriggerSR() {
         t.HLT_PFHT500_PFMET100_PFMHT100 || 
         t.HLT_PFMET120_PFMHT120 || 
         t.HLT_PFMET120_PFMHT120_PFHT60 ||
-        t.HLT_PFMETNoMu120_PFMHTNoMu120 || 
-        t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60)
+        t.HLT_PFMETNoMu120_PFMHTNoMu120)
         return true;
 
     return false;
