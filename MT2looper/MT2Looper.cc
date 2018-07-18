@@ -553,7 +553,7 @@ void MT2Looper::SetSignalRegions(){
 }
 
 
-void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
+void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, std::string output_dir){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -563,19 +563,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
   TString output_name = Form("%s/%s.root",output_dir.c_str(),sample.c_str());
   cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
 
+  MT2Configuration config = GetMT2Config(config_tag);
+
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
-  // 2017 data
-  const char* json_file = "../babymaker/jsons/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-  // // 2017 dataset, 41.96/fb
-  // const char* json_file = "../babymaker/jsons/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
-  // // full 2016 dataset json, 36.26/fb:
-  // const char* json_file = "../babymaker/jsons/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
-  // to reproduce ICHEP, 12.9/fb:
-  //  const char* json_file = "../babymaker/jsons/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_snt.txt";
-  if (applyJSON) {
-    cout << "Loading json file: " << json_file << endl;
-    set_goodrun_file(json_file);
+  if (applyJSON && config.json != "") {
+    cout << "Loading json file: " << config.json << endl;
+    set_goodrun_file(("../babymaker/jsons/"+config.json).c_str());
   }
 
   // store the fits in a vector if we are doing r_eff calculation
@@ -597,17 +591,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       
   }
 
-  eventFilter metFilterTxt;
-  stringsample = sample;
-  if (stringsample.Contains("data")) {
-    cout<<"Loading bad event files ..."<<endl;
-    // updated lists for full dataset
-    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/csc2015_Dec01.txt");
-    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/ecalscn1043093_Dec01.txt");
-    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/badResolutionTrack_Jan13.txt");
-    metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/muonBadTrack_Jan13.txt");
-    cout<<" ... finished!"<<endl;
-  }
+  // eventFilter metFilterTxt;
+  // stringsample = sample;
+  // if (stringsample.Contains("data")) {
+  //   cout<<"Loading bad event files ..."<<endl;
+  //   // updated lists for full dataset
+  //   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/csc2015_Dec01.txt");
+  //   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/ecalscn1043093_Dec01.txt");
+  //   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/badResolutionTrack_Jan13.txt");
+  //   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/muonBadTrack_Jan13.txt");
+  //   cout<<" ... finished!"<<endl;
+  // }
 
   h_nvtx_weights_ = 0;
   if (doNvtxReweight) {
@@ -807,31 +801,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       if (verbose) cout<<__LINE__<<endl;
 
       if (t.nVert == 0) continue;
-      if (verbose) cout<<__LINE__<<endl;
 
-      // MET filters (first 2 only in data)
-      if (t.isData) {
-        if (!t.Flag_globalTightHalo2016Filter) continue; 
-        if (verbose) cout<<__LINE__<<endl;
-        if (!t.Flag_badMuonFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_eeBadScFilter) continue; 
-	if (verbose) cout<<__LINE__<<endl;
-      }
-      if (!stringsample.Contains("2015")) { // several filters are not in 2015 MC
-	if (!t.Flag_goodVertices) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_HBHENoiseFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_HBHENoiseIsoFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-	if (!t.Flag_badChargedCandidateFilter) continue; 
-	if (verbose) cout<<__LINE__<<endl;
-        if (!t.Flag_ecalBadCalibFilter) continue;
-	if (verbose) cout<<__LINE__<<endl;
-      }
+      if (config.filters["eeBadSc"] && !t.Flag_eeBadScFilter) continue; 
+      if (config.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+      if (config.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+      if (config.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+      if (config.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+      if (config.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+      if (config.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      if (config.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+      if (config.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+      if (config.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+      if (config.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+      if (config.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
 
       // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
       if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
@@ -947,10 +929,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      // const float lumi = 12.9; //ICHEP 2016
-      // const float lumi = 35.867; // full 2016
-      // const float lumi = 41.96; // 2017
-      const float lumi = 10.33; // 2018
+      const float lumi = config.lumi;
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -1028,18 +1007,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string output_dir){
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
-
-        // fix for 2015 dyjets xsecs
-        if(stringsample.Contains("2015dyjetsll")){
-          if(t.evt_id == 702) evtweight_ *= 1.0573;
-          if(t.evt_id == 703) evtweight_ *= 0.9588;
-          if(t.evt_id == 704) evtweight_ *= 1.0329;
-          if(t.evt_id == 705) evtweight_ *= 0.9945;
-        }
-        // fix for 2015 wjets xsecs
-        if(stringsample.Contains("2015wjets")){
-          if(t.evt_id == 505) evtweight_ *= 12.05 / 18.77;
-        }
 
       } // !isData
 
@@ -1668,9 +1635,6 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
 
   if (SRBase.PassesSelectionCRSL(valuesBase)) {
     if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
-    if(prefix=="crsl" && mt2_>700 && mt2_<800){
-        cout << endl << "FOUNDEVENT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
-    }
     else if(prefix=="crslmu") fillHistosSingleLepton(SRBase.crslmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslmubase", suffix);
     else if(prefix=="crslel") fillHistosSingleLepton(SRBase.crslelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslelbase", suffix);
 

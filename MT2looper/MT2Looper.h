@@ -20,6 +20,7 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
 #include "../MT2CORE/SR.h"
+#include "../MT2CORE/configurations.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 using namespace mt2;
@@ -40,7 +41,7 @@ class MT2Looper {
   ~MT2Looper();
 
   void SetSignalRegions();
-  void loop(TChain* chain, std::string sample, std::string output_dir);
+  void loop(TChain* chain, std::string sample, std::string config_tag, std::string output_dir);
   void fillHistosSRBase();
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
