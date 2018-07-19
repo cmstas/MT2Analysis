@@ -15,7 +15,6 @@
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
-// TODO: add this file and get everything working
 #include "../MT2CORE/RebalSmear/JRTreader.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
@@ -28,13 +27,13 @@ class babyMaker {
 
  public:
 
-  babyMaker() : doRecomputeRawPFMET_(false) {};
+   babyMaker() : doRecomputeRawPFMET_(false), doRebal(false) {};
   ~babyMaker() {
     delete BabyFile_;
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample", bool isFastsim = false, int max_events = -1);
+  void ScanChain(TChain*, std::string, std::string config_tag, bool isFastsim = false, int max_events = -1);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -42,7 +41,9 @@ class babyMaker {
   void CloseBabyNtuple();
 
   void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
-
+  void SetDoRebal(bool flag) {doRebal = flag;}
+    
+  //functiuon to minimize for rebalancing
   static void minuitFunction(int& nDim, double* gout, double& result, double par[], int flg);
   JRTreader rebal_reader;
 
@@ -58,6 +59,7 @@ class babyMaker {
   bool isDataFromFileName;
   bool isPromptReco;
   bool doRecomputeRawPFMET_;
+  bool doRebal;
 
   // for btag SFs
   BTagCalibration* calib;
@@ -526,6 +528,7 @@ class babyMaker {
   Float_t         jet_mass[max_njet];   //[njet]
   Float_t         jet_btagCSV[max_njet];   //[njet] 
   Float_t         jet_btagMVA[max_njet];   //[njet]
+  Float_t         jet_btagDeepCSV[max_njet];   //[njet]
   Float_t         jet_chFrac[max_njet];   //[njet]
   Float_t         jet_nhFrac[max_njet];   //[njet]
   Float_t         jet_cemFrac[max_njet];   //[njet]

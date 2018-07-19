@@ -10,7 +10,7 @@
 int main(int argc, char **argv) {
 
   if (argc < 3) {
-    std::cout << "USAGE: processBaby <tag> <filename> [<max_num_events>]" << std::endl;
+    std::cout << "USAGE: processBaby <tag> <filename> [<max_num_events>] [<doRebal> (0,1)]" << std::endl;
     return 1;
   }
 
@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
   if (argc >= 4) max_events = atoi(argv[3]);
   std::cout << "set max number of events to: " << max_events << std::endl;
   
+  bool doRebal = false;
+  if (argc >= 5) doRebal = (bool)atoi(argv[4]);
+  std::cout << "Doing rebalancing? " << (doRebal ? "yes" : "no") << std::endl;
+
   TChain *chain = new TChain("Events");
   chain->Add(infile.Data());
   if (chain->GetEntries() == 0) std::cout << "WARNING: no entries in chain. filename was: " << infile << std::endl;
@@ -201,6 +205,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2017E") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017E_31Mar2018_%s" , outfileid.Data());
   else if (infile.Contains("Run2017F") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017F_31Mar2018_%s" , outfileid.Data());
   else if (infile.Contains("Run2018A") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018A_PromptReco_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018B_PromptReco_%s" , outfileid.Data());
 
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
@@ -209,15 +214,25 @@ int main(int argc, char **argv) {
 
   bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast"));
 
-  bool isBadMiniAodV1 = bool(infile.Contains("V07-04-12_miniaodv1_FS"));
-  
+  string config_tag = "";
+  if(infile.Contains("Run2016") && infile.Contains("03Feb2017"))       config_tag = "data_2016_Moriond17";
+  else if(infile.Contains("Run2017") && infile.Contains("PromptReco")) config_tag = "data_2017_Prompt";
+  else if(infile.Contains("Run2017") && infile.Contains("31Mar2018"))  config_tag = "data_2017_31Mar2018";
+  else if(infile.Contains("Run2018") && infile.Contains("PromptReco")) config_tag = "data_2018_Prompt";
+  else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Moriond17";
+  else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";
+  else{
+      std::cout << "[processBaby] ERROR! could not determine correct configuration to use" << std::endl;
+      return 1;
+  }
+
   //--------------------------------
   // run
   //--------------------------------
   
   babyMaker *looper = new babyMaker();
-  if (isBadMiniAodV1) looper->SetRecomputeRawPFMET(true);
-  looper->ScanChain(chain, sample, isFastsim, max_events); 
+  looper->SetDoRebal(doRebal);
+  looper->ScanChain(chain, sample, config_tag, isFastsim, max_events); 
   delete chain;
   return 0;
 }
