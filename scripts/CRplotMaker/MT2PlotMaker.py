@@ -160,7 +160,9 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         if "noSubtitles" in opts:
             subtitles=None
         if h_data_vec[0]!=None:
-            subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+            subLegText = ["MC scaled by {datamcsf}"]
+            for ih in range(len(h_data_vec[0])):
+                subLegText.append("# Data{0} events: {{ndata{0}}}".format("" if len(h_data_vec[0])==1 else ih+1))
         else:
             subLegText = None
         # subLegText = None
