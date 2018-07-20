@@ -179,9 +179,9 @@ if __name__=="__main__":
                   "EcalDeadCellTriggerPrimitiveFilter",
                   "ecalBadCalibFilter",
                   "badMuonFilter",
-                  "badChargedCandidateFilter"
+                  "badChargedCandidateFilter",
                   "badMuonFilterV2",
-                  "badChargedHadronFilterV2"
+                  "badChargedHadronFilterV2",
                   ]
 
 
@@ -231,6 +231,8 @@ MT2Configuration GetMT2Config(std::string tag){
         for jec in c[tag]["JECs"]:
             fout.write("        c.JECs.push_back(std::pair<std::string, std::string> (\"{0}\", \"{1}\"));\n".format(jec[0], jec[1]))
         for filter in c[tag]["filters"]:
+            if filter not in allfilters:
+                raise Exception("ERROR: filter {0} not in list of all filters!".format(filter))
             fout.write("        c.filters[\"{0}\"] = true;\n".format(filter))
 
     fout.write("""

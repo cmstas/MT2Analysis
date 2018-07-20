@@ -7,6 +7,7 @@ If you want to edit a configuration, update configurations.py and run:
 python configurations.py
 
 *********************************************************************/
+
 #include <iostream>
 #include <string>
 #include <utility>
@@ -32,7 +33,8 @@ MT2Configuration GetMT2Config(std::string tag){
     c.filters["EcalDeadCellTriggerPrimitiveFilter"] = false;
     c.filters["ecalBadCalibFilter"] = false;
     c.filters["badMuonFilter"] = false;
-    c.filters["badChargedCandidateFilterbadMuonFilterV2"] = false;
+    c.filters["badChargedCandidateFilter"] = false;
+    c.filters["badMuonFilterV2"] = false;
     c.filters["badChargedHadronFilterV2"] = false;
 
     if(tag == "data_2016_Moriond17"){

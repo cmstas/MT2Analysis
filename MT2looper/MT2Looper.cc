@@ -564,6 +564,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
 
   MT2Configuration config = GetMT2Config(config_tag);
+  cout << "[MT2Looper::loop] using configuration tag: " << config_tag << endl;
+  cout << "                  JSON: " << config.json << endl;
+  cout << "                  lumi: " << config.lumi << " fb-1" << endl;
 
   outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
@@ -802,7 +805,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
       if (t.nVert == 0) continue;
 
-      if (config.filters["eeBadSc"] && !t.Flag_eeBadScFilter) continue; 
+      if (config.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
       if (config.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
       if (config.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
       if (config.filters["goodVertices"] && !t.Flag_goodVertices) continue;
@@ -824,7 +827,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
       // catch events with unphysical jet pt
       if(t.jet_pt[0] > 13000.){
-	cout << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
+          cout << endl << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
 	     << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
         continue;
       }
