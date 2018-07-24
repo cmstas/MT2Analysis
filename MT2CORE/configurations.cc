@@ -24,6 +24,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     c.json = "";
     c.lumi = 1.0;
+    c.triggers = std::map<std::string, std::vector<std::string> > ();
     c.filters["eeBadScFilter"] = false;
     c.filters["globalTightHalo2016Filter"] = false;
     c.filters["globalSuperTightHalo2016Filter"] = false;
@@ -58,6 +59,34 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilterV2"] = true;
         c.filters["badChargedHadronFilterV2"] = true;
+        c.triggers["SR"] = std::vector<std::string> ();
+        c.triggers["SR"].push_back("PFHT900");
+        c.triggers["SR"].push_back("PFJet450");
+        c.triggers["SR"].push_back("PFHT300_PFMET110");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120");
+        c.triggers["Photon"] = std::vector<std::string> ();
+        c.triggers["Photon"].push_back("Photon165_HE10");
+        c.triggers["DilepSF"] = std::vector<std::string> ();
+        c.triggers["DilepSF"].push_back("DoubleEl");
+        c.triggers["DilepSF"].push_back("DoubleMu");
+        c.triggers["DilepSF"].push_back("Photon165_HE10");
+        c.triggers["DilepSF"].push_back("DoubleMu_NonIso");
+        c.triggers["DilepSF"].push_back("SingleMu_NonIso");
+        c.triggers["DilepSF"].push_back("DoubleEl33");
+        c.triggers["SingleMu"] = std::vector<std::string> ();
+        c.triggers["SingleMu"].push_back("SingleMu");
+        c.triggers["SingleMu"].push_back("SingleMu_NonIso");
+        c.triggers["SingleEl"] = std::vector<std::string> ();
+        c.triggers["SingleEl"].push_back("SingleEl");
+        c.triggers["SingleEl"].push_back("SingleEl_NonIso");
+        c.triggers["DilepOF"] = std::vector<std::string> ();
+        c.triggers["DilepOF"].push_back("MuX_Ele12");
+        c.triggers["DilepOF"].push_back("Mu8_EleX");
+        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
+        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
+        c.triggers["DilepOF"].push_back("Photon165_HE10");
+        c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
     }else if(tag == "data_2017_31Mar2018"){
 
@@ -79,6 +108,39 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["ecalBadCalibFilter"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
+        c.triggers["SR"] = std::vector<std::string> ();
+        c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
+        c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120_PFHT60");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120_PFHT60");
+        c.triggers["Photon"] = std::vector<std::string> ();
+        c.triggers["Photon"].push_back("Photon200");
+        c.triggers["DilepSF"] = std::vector<std::string> ();
+        c.triggers["DilepSF"].push_back("DoubleEl");
+        c.triggers["DilepSF"].push_back("DoubleMu");
+        c.triggers["DilepSF"].push_back("Photon200");
+        c.triggers["DilepSF"].push_back("DoubleMu_NonIso");
+        c.triggers["DilepSF"].push_back("SingleMu_NonIso");
+        c.triggers["DilepSF"].push_back("DoubleEl33");
+        c.triggers["SingleMu"] = std::vector<std::string> ();
+        c.triggers["SingleMu"].push_back("SingleMu");
+        c.triggers["SingleMu"].push_back("SingleMu_NonIso");
+        c.triggers["SingleEl"] = std::vector<std::string> ();
+        c.triggers["SingleEl"].push_back("SingleEl");
+        c.triggers["SingleEl"].push_back("SingleEl_NonIso");
+        c.triggers["DilepOF"] = std::vector<std::string> ();
+        c.triggers["DilepOF"].push_back("MuX_Ele12");
+        c.triggers["DilepOF"].push_back("Mu8_EleX");
+        c.triggers["DilepOF"].push_back("Mu12_EleX");
+        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
+        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
+        c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
+        c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
+        c.triggers["DilepOF"].push_back("Photon200");
+        c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
     }else if(tag == "data_2017_Prompt"){
 
@@ -93,6 +155,39 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.triggers["SR"] = std::vector<std::string> ();
+        c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
+        c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120_PFHT60");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120_PFHT60");
+        c.triggers["Photon"] = std::vector<std::string> ();
+        c.triggers["Photon"].push_back("Photon200");
+        c.triggers["DilepSF"] = std::vector<std::string> ();
+        c.triggers["DilepSF"].push_back("DoubleEl");
+        c.triggers["DilepSF"].push_back("DoubleMu");
+        c.triggers["DilepSF"].push_back("Photon200");
+        c.triggers["DilepSF"].push_back("DoubleMu_NonIso");
+        c.triggers["DilepSF"].push_back("SingleMu_NonIso");
+        c.triggers["DilepSF"].push_back("DoubleEl33");
+        c.triggers["SingleMu"] = std::vector<std::string> ();
+        c.triggers["SingleMu"].push_back("SingleMu");
+        c.triggers["SingleMu"].push_back("SingleMu_NonIso");
+        c.triggers["SingleEl"] = std::vector<std::string> ();
+        c.triggers["SingleEl"].push_back("SingleEl");
+        c.triggers["SingleEl"].push_back("SingleEl_NonIso");
+        c.triggers["DilepOF"] = std::vector<std::string> ();
+        c.triggers["DilepOF"].push_back("MuX_Ele12");
+        c.triggers["DilepOF"].push_back("Mu8_EleX");
+        c.triggers["DilepOF"].push_back("Mu12_EleX");
+        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
+        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
+        c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
+        c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
+        c.triggers["DilepOF"].push_back("Photon200");
+        c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
     }else if(tag == "data_2018_Prompt"){
 
@@ -110,6 +205,39 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["ecalBadCalibFilter"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
+        c.triggers["SR"] = std::vector<std::string> ();
+        c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
+        c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120_PFHT60");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120_PFHT60");
+        c.triggers["Photon"] = std::vector<std::string> ();
+        c.triggers["Photon"].push_back("Photon200");
+        c.triggers["DilepSF"] = std::vector<std::string> ();
+        c.triggers["DilepSF"].push_back("DoubleEl");
+        c.triggers["DilepSF"].push_back("DoubleMu");
+        c.triggers["DilepSF"].push_back("Photon200");
+        c.triggers["DilepSF"].push_back("DoubleMu_NonIso");
+        c.triggers["DilepSF"].push_back("SingleMu_NonIso");
+        c.triggers["DilepSF"].push_back("DoubleEl33");
+        c.triggers["SingleMu"] = std::vector<std::string> ();
+        c.triggers["SingleMu"].push_back("SingleMu");
+        c.triggers["SingleMu"].push_back("SingleMu_NonIso");
+        c.triggers["SingleEl"] = std::vector<std::string> ();
+        c.triggers["SingleEl"].push_back("SingleEl");
+        c.triggers["SingleEl"].push_back("SingleEl_NonIso");
+        c.triggers["DilepOF"] = std::vector<std::string> ();
+        c.triggers["DilepOF"].push_back("MuX_Ele12");
+        c.triggers["DilepOF"].push_back("Mu8_EleX");
+        c.triggers["DilepOF"].push_back("Mu12_EleX");
+        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
+        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
+        c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
+        c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
+        c.triggers["DilepOF"].push_back("Photon200");
+        c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
     }else if(tag == "mc_80x_Moriond17"){
 

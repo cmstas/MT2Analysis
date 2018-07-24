@@ -563,17 +563,59 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   TString output_name = Form("%s/%s.root",output_dir.c_str(),sample.c_str());
   cout << "[MT2Looper::loop] creating output file: " << output_name << endl;
 
-  MT2Configuration config = GetMT2Config(config_tag);
+  // Load the configuration and output to screen
+  config_ = GetMT2Config(config_tag);
   cout << "[MT2Looper::loop] using configuration tag: " << config_tag << endl;
-  cout << "                  JSON: " << config.json << endl;
-  cout << "                  lumi: " << config.lumi << " fb-1" << endl;
-
-  outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
-
-  if (applyJSON && config.json != "") {
-    cout << "Loading json file: " << config.json << endl;
-    set_goodrun_file(("../babymaker/jsons/"+config.json).c_str());
+  cout << "                  JSON: " << config_.json << endl;
+  cout << "                  lumi: " << config_.lumi << " fb-1" << endl;
+  cout << "                  Filters applied:" << endl;
+  for(map<string,bool>::iterator it=config_.filters.begin(); it!=config_.filters.end(); it++){
+      if(it->second)
+          cout << "                      " << it->first << endl;
   }
+  // initialize trigger vectors
+  if(config_.triggers.size() > 0){
+      if( config_.triggers.find("SR")       == config_.triggers.end() || 
+          config_.triggers.find("Photon")   == config_.triggers.end() || 
+          config_.triggers.find("DilepSF")  == config_.triggers.end() || 
+          config_.triggers.find("DilepOF")  == config_.triggers.end() || 
+          config_.triggers.find("SingleMu") == config_.triggers.end() || 
+          config_.triggers.find("SingleEl") == config_.triggers.end() ){
+          cout << "[MT2Looper::loop] ERROR: invalid trigger map in configuration '" << config_tag << "'!" << endl;
+          cout << "                         Make sure you have trigger vectors for 'SR', 'Photon', 'DilepSF', 'DilepOF', 'SingleMu', 'SingleEl'" << endl;
+          return;
+      }
+      cout << "                  Triggers:" << endl;
+      for(map<string,vector<string> >::iterator it=config_.triggers.begin(); it!=config_.triggers.end(); it++){
+          cout << "                    " << it->first << ":" << endl;
+          for(uint i=0; i<it->second.size(); i++){
+              if(i==0)
+                  cout << "                      " << it->second.at(i);
+              else
+                  cout << " || " << it->second.at(i);
+          }
+          cout << endl;
+      }
+      fillTriggerVectors(trigs_SR_,       config_.triggers["SR"]);
+      fillTriggerVectors(trigs_Photon_,   config_.triggers["Photon"]);
+      fillTriggerVectors(trigs_DilepSF_,  config_.triggers["DilepSF"]);
+      fillTriggerVectors(trigs_DilepOF_,  config_.triggers["DilepOF"]);
+      fillTriggerVectors(trigs_SingleMu_, config_.triggers["SingleMu"]);
+      fillTriggerVectors(trigs_SingleEl_, config_.triggers["SingleEl"]);
+  }else{
+      cout << "                  No triggers provided (OK if this is MC)" << endl;
+      if(config_tag.find("data") != string::npos){
+          cout << "[MT2Looper::loop] WARNING! it looks like you are using data and didn't supply any triggers in the configuration." <<
+              "\n                  Every event is going to fail the trigger selection!" << endl;
+      }
+  }
+
+  if (applyJSON && config_.json != "") {
+    cout << "[MT2Looper::loop] Loading json file: " << config_.json << endl;
+    set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
+  }
+  
+  outfile_ = new TFile(output_name.Data(),"RECREATE") ; 
 
   // store the fits in a vector if we are doing r_eff calculation
   if(doReffCalculation){
@@ -757,6 +799,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
     t.Init(tree);
 
+    
+
     // Event Loop
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
@@ -805,18 +849,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
       if (t.nVert == 0) continue;
 
-      if (config.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
-      if (config.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
-      if (config.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
-      if (config.filters["goodVertices"] && !t.Flag_goodVertices) continue;
-      if (config.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
-      if (config.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
-      if (config.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-      if (config.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
-      if (config.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
-      if (config.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
-      if (config.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
-      if (config.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+      if (config_.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
+      if (config_.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+      if (config_.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+      if (config_.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+      if (config_.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+      if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+      if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+      if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+      if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+      if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+      if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+      if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
 
       // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
       if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
@@ -932,7 +976,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = config.lumi;
+      const float lumi = config_.lumi;
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -1167,8 +1211,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       bool doOFplots = false;
       bool doLowPtOFplots = false;
       if (t.nlep == 2 && !isSignal_) {
-        bool passSFtrig = passTriggerDilepSF();
-	bool passOFtrig = passTriggerDilepOF();
+        bool passSFtrig = passTrigger(trigs_DilepSF_);
+	bool passOFtrig = passTrigger(trigs_DilepOF_);
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
              && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
              && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
@@ -1192,17 +1236,16 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       } // nlep == 2
       
       // Variables for Removed single lepton (RL) region
-      //muon only
       bool doRLplots = false;
       bool doRLMUplots = false;
       bool doRLELplots = false;
       if ( t.nlep == 1 && !isSignal_) {
 	if ( t.lep_pt[0] > 30 && fabs(t.lep_eta[0])<2.5 && nBJet20_ == 0) { // raise threshold to avoid Ele23 in MC
 	  if (abs(t.lep_pdgId[0])==13) { // muons
-              if ( passTriggerSingleMu() )  doRLMUplots = true;
+              if ( passTrigger(trigs_SingleMu_) )  doRLMUplots = true;
           }
 	  if (abs(t.lep_pdgId[0])==11) { // electrons
-              if ( passTriggerSingleEl()   // Ele23 trigger not present in MC. Need to keep lepton threshold high
+              if ( passTrigger(trigs_SingleEl_)
                   && t.lep_relIso03[0]<0.1 // tighter selection for electrons
                       && t.lep_relIso03[0]*t.lep_pt[0]<5 // tighter selection for electrons
                       && t.lep_tightId[0]>2
@@ -1431,7 +1474,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
 void MT2Looper::fillHistosSRBase() {
 
-  if(!passTriggerSR()) return;
+  if(!passTrigger(trigs_SR_)) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1485,7 +1528,7 @@ void MT2Looper::fillHistosSRBase() {
 
 void MT2Looper::fillHistosInclusive() {
 
-  if(!passTriggerSR()) return;
+  if(!passTrigger(trigs_SR_)) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1519,7 +1562,7 @@ void MT2Looper::fillHistosInclusive() {
 
 void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
-  if(!passTriggerSR()) return;  
+  if(!passTrigger(trigs_SR_)) return;  
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1619,7 +1662,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 // hists for single lepton control region
 void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suffix) {
 
-  if(!passTriggerSR()) return;
+  if(!passTrigger(trigs_SR_)) return;
   
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -1796,7 +1839,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   if (t.ngamma==0) return;
 
   // trigger requirement
-  if (!passTriggerPhoton()) return;
+  if (!passTrigger(trigs_Photon_)) return;
 
   // // additional cleaning for fakes and HLT-emulation (2016)
   // if (fabs(t.gamma_eta[0])>2.4 || t.gamma_hOverE015[0]>0.1 ) return;
@@ -2169,7 +2212,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
 // hists for single lepton control region
 void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& suffix) {
 
-  if(!passTriggerSR()) return;
+  if(!passTrigger(trigs_SR_)) return;
 
   // met/caloMet filter for additional cleaning
   if (t.met_miniaodPt / t.met_caloPt > 5.0) return;
@@ -2609,6 +2652,8 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     if (t.HLT_Photons) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_simpleht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+    plot1D("h_jet1pt"+s,       t.gamma_jet1_pt,   evtweight_, h_1d, ";jet1 p_{T} [GeV]", 150, 0, 1500);
+    plot1D("h_jet2pt"+s,       t.gamma_jet2_pt,   evtweight_, h_1d, ";jet2 p_{T} [GeV]", 150, 0, 1500);
     plot1D("h_nJet30"+s,       t.gamma_nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nBJet20"+s,      t.gamma_nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
     plot1D("h_deltaPhiMin"+s,  t.gamma_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
@@ -3054,73 +3099,67 @@ float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
   return 1.;
 }
 
-bool MT2Looper::passTriggerSR() {
-    
+// perform an "OR" of all triggers stored in "trigs" vector
+// this vector is just a list of pointers to ints (t.HLT_*)
+bool MT2Looper::passTrigger(vector<int*> &trigs, bool debug) {
+
     if(!t.isData) return true;
 
-    if (t.HLT_PFHT1050 || 
-        t.HLT_PFHT800_PFMET75_PFMHT75 || 
-        t.HLT_PFHT500_PFMET100_PFMHT100 || 
-        t.HLT_PFMET120_PFMHT120 || 
-        t.HLT_PFMET120_PFMHT120_PFHT60 ||
-        t.HLT_PFMETNoMu120_PFMHTNoMu120)
-        return true;
+    if(debug){
+        for(uint i=0; i<trigs.size(); i++){
+            cout << *trigs.at(i) << " ";
+        }
+        cout << endl;
+    }
+
+    for(uint i=0; i<trigs.size(); i++){
+        if(*trigs.at(i))
+            return true;
+    }
 
     return false;
    
 }
 
-bool MT2Looper::passTriggerDilepSF() {
-    
-    if(!t.isData) return true;
+// push pointers of ints (t.HLT_*) to a vector. They get updated everytime t.GetEntry() is called
+// (this function exists just to convert config-file strings into pointers to the actual trigger results.
+//  Do it here so we don't have to do this long list of if-statments multiple times per event)
+void MT2Looper::fillTriggerVectors(vector<int*> &trigs, vector<string> trig_names) {
 
-    if(t.HLT_DoubleEl || 
-       t.HLT_DoubleMu || 
-       t.HLT_Photon200 || 
-       t.HLT_DoubleMu_NonIso || 
-       t.HLT_SingleMu_NonIso || 
-       t.HLT_DoubleEl33)
-        return true;
+    trigs.clear();
 
-    return false;
+    for(uint i=0; i<trig_names.size(); i++){
+        string s = trig_names.at(i);
+        if     (s=="PFHT1050")                              trigs.push_back(&t.HLT_PFHT1050);
+        else if(s=="PFHT900")                          trigs.push_back(&t.HLT_PFHT900);
+        else if(s=="PFHT800")                          trigs.push_back(&t.HLT_PFHT800);
+        else if(s=="PFJet450")                         trigs.push_back(&t.HLT_PFJet450);
+        else if(s=="PFHT500_PFMET100_PFMHT100")        trigs.push_back(&t.HLT_PFHT500_PFMET100_PFMHT100);
+        else if(s=="PFHT800_PFMET75_PFMHT75")          trigs.push_back(&t.HLT_PFHT800_PFMET75_PFMHT75);
+        else if(s=="PFHT300_PFMET110")                 trigs.push_back(&t.HLT_PFHT300_PFMET110);
+        else if(s=="PFMET120_PFMHT120")                trigs.push_back(&t.HLT_PFMET120_PFMHT120);
+        else if(s=="PFMET120_PFMHT120_PFHT60")         trigs.push_back(&t.HLT_PFMET120_PFMHT120_PFHT60);
+        else if(s=="PFMETNoMu120_PFMHTNoMu120")        trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120);
+        else if(s=="PFMETNoMu120_PFMHTNoMu120_PFHT60") trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60);
+        else if(s=="Photon200")                        trigs.push_back(&t.HLT_Photon200);
+        else if(s=="Photon165_HE10")                   trigs.push_back(&t.HLT_Photon165_HE10);
+        else if(s=="SingleEl")                         trigs.push_back(&t.HLT_SingleEl);
+        else if(s=="SingleEl_NonIso")                  trigs.push_back(&t.HLT_SingleEl_NonIso);
+        else if(s=="SingleMu")                         trigs.push_back(&t.HLT_SingleMu);
+        else if(s=="SingleMu_NonIso")                  trigs.push_back(&t.HLT_SingleMu_NonIso);
+        else if(s=="DoubleEl")                         trigs.push_back(&t.HLT_DoubleEl);
+        else if(s=="DoubleMu")                         trigs.push_back(&t.HLT_DoubleMu);
+        else if(s=="Photon200")                        trigs.push_back(&t.HLT_Photon200);
+        else if(s=="DoubleMu_NonIso")                  trigs.push_back(&t.HLT_DoubleMu_NonIso);
+        else if(s=="DoubleEl33")                       trigs.push_back(&t.HLT_DoubleEl33);
+        else if(s=="MuX_Ele12")                        trigs.push_back(&t.HLT_MuX_Ele12);
+        else if(s=="Mu8_EleX")                         trigs.push_back(&t.HLT_Mu8_EleX);
+        else if(s=="Mu12_EleX")                        trigs.push_back(&t.HLT_Mu12_EleX);
+        else if(s=="Mu30_Ele30_NonIso")                trigs.push_back(&t.HLT_Mu30_Ele30_NonIso);
+        else if(s=="Mu33_Ele33_NonIso")                trigs.push_back(&t.HLT_Mu33_Ele33_NonIso);
+        else if(s=="Mu37_Ele27_NonIso")                trigs.push_back(&t.HLT_Mu37_Ele27_NonIso);
+        else if(s=="Mu27_Ele37_NonIso")                trigs.push_back(&t.HLT_Mu27_Ele37_NonIso);
+        else
+            cout << "[MT2Looper::fillTriggerVectors] WARNING: unknown trigger " << s << "! Not applying." << endl;
+    }
 }
-
-bool MT2Looper::passTriggerDilepOF() {
-    
-    if(!t.isData) return true;
-
-    if(t.HLT_MuX_Ele12 || 
-       t.HLT_Mu8_EleX || 
-       t.HLT_Mu12_EleX || 
-       t.HLT_Mu30_Ele30_NonIso || 
-       t.HLT_Mu33_Ele33_NonIso || 
-       t.HLT_Mu37_Ele27_NonIso || 
-       t.HLT_Mu27_Ele37_NonIso || 
-       t.HLT_Photon200 || 
-       t.HLT_SingleMu_NonIso)
-        return true;
-
-    return false;
-}
-
-bool MT2Looper::passTriggerSingleMu() { 
-    if(!t.isData) return true;
-    if(t.HLT_SingleMu || t.HLT_SingleMu_NonIso)
-        return true;
-    return false;
-}
-
-bool MT2Looper::passTriggerSingleEl() { 
-    if(!t.isData) return true;
-    if(t.HLT_SingleEl || t.HLT_SingleEl_NonIso)
-        return true;
-    return false;
-}
-           
-bool MT2Looper::passTriggerPhoton() { 
-    if(!t.isData) return true;
-    if(t.HLT_Photon200)
-        return true;
-    return false;
-}
-           

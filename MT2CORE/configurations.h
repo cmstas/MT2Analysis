@@ -13,6 +13,7 @@ struct MT2Configuration {
     float btag_med_threshold;
     std::vector<std::pair<std::string, std::string> > JECs;
     std::map<std::string, bool> filters;
+    std::map<std::string, std::vector<std::string> > triggers;
 };
 
 MT2Configuration GetMT2Config(std::string tag);

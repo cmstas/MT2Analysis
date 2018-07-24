@@ -37,12 +37,13 @@ MT2Config_defs["data_2017_31Mar2018"] = {
                   ],
     "triggers" : {
         "SR" : [ 
-            "HLT_PFHT1050",
-            "HLT_PFHT800_PFMET75_PFMHT75",
-            "HLT_PFHT500_PFMET100_PFMHT100",
-            "HLT_PFMET120_PFMHT120",
-            "HLT_PFMET120_PFMHT120_PFHT60",
-            "HLT_PFMETNoMu120_PFMHTNoMu120"
+            "PFHT1050",
+            "PFHT800_PFMET75_PFMHT75",
+            "PFHT500_PFMET100_PFMHT100",
+            "PFMET120_PFMHT120",
+            "PFMET120_PFMHT120_PFHT60",
+            "PFMETNoMu120_PFMHTNoMu120",
+            "PFMETNoMu120_PFMHTNoMu120_PFHT60"
             ],
         "Photon" : [ 
             "Photon200" 
@@ -128,6 +129,42 @@ MT2Config_defs["data_2016_Moriond17"] = {
                   "badMuonFilterV2",
                   "badChargedHadronFilterV2"
                   ],
+    "triggers" : {
+        "SR" : [ 
+            "PFHT900",
+            "PFJet450",
+            "PFHT300_PFMET110",
+            "PFMET120_PFMHT120",
+            "PFMETNoMu120_PFMHTNoMu120",
+            ],
+        "Photon" : [ 
+            "Photon165_HE10" 
+            ],
+        "SingleEl" : [
+            "SingleEl",
+            "SingleEl_NonIso"
+            ],
+        "SingleMu" : [
+            "SingleMu",
+            "SingleMu_NonIso"
+            ],
+        "DilepSF" : [
+            "DoubleEl",
+            "DoubleMu",
+            "Photon165_HE10",
+            "DoubleMu_NonIso",
+            "SingleMu_NonIso",
+            "DoubleEl33"
+            ],
+        "DilepOF" : [
+            "MuX_Ele12",
+            "Mu8_EleX",
+            "Mu30_Ele30_NonIso",
+            "Mu33_Ele33_NonIso",
+            "Photon165_HE10",
+            "SingleMu_NonIso"
+            ]
+        }
     }
 
 MT2Config_defs["mc_94x_Fall17"] = {
@@ -215,6 +252,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     c.json = "";
     c.lumi = 1.0;
+    c.triggers = std::map<std::string, std::vector<std::string> > ();
 """)
 
     for filter in allfilters:
@@ -234,6 +272,11 @@ MT2Configuration GetMT2Config(std::string tag){
             if filter not in allfilters:
                 raise Exception("ERROR: filter {0} not in list of all filters!".format(filter))
             fout.write("        c.filters[\"{0}\"] = true;\n".format(filter))
+        if "triggers" in c[tag]:
+            for reg in c[tag]["triggers"]:
+                fout.write("        c.triggers[\"{0}\"] = std::vector<std::string> ();\n".format(reg))
+                for trig in c[tag]["triggers"][reg]:
+                    fout.write("        c.triggers[\"{0}\"].push_back(\"{1}\");\n".format(reg, trig))
 
     fout.write("""
     }else{
