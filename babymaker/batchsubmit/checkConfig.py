@@ -28,6 +28,7 @@ preamble = []
 executable_command = ''
 input_dir = ''
 output_dir = ''
+doRebal = 0
 expected_output_files = []
 for line in input_lines:
     # save preamble at the beginning of the file, for resubmission script
@@ -50,6 +51,7 @@ for line in input_lines:
             input_dir = tokens[1][:k]
         if len(output_dir) == 0:
             output_dir = tokens[2]
+            doRebal = int(tokens[3]) if len(tokens)>3 else 0
         output_file = tokens[0].split('=')[1]
         expected_output_files.append(output_file)
 
@@ -81,7 +83,7 @@ else:
         outf.write('\n')
         outf.write(executable_command)
         outf.write('transfer_executable=True\n')
-        outf.write('arguments=%s %s/%s.root %s\n' % (mf,input_dir,mf,output_dir))
+        outf.write('arguments=%s %s/%s.root %s %d\n' % (mf,input_dir,mf,output_dir,doRebal))
         outf.write('queue\n')
         outf.write('\n')
 

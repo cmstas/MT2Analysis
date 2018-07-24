@@ -3032,6 +3032,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
     BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
     BabyTree_->Branch("HLT_PFMETNoMu130_PFMHTNoMu130", &HLT_PFMETNoMu130_PFMHTNoMu130 );
     BabyTree_->Branch("HLT_PFMETNoMu140_PFMHTNoMu140", &HLT_PFMETNoMu140_PFMHTNoMu140 );
+    BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60", &HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 );
     BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
     BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
     BabyTree_->Branch("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110 );
@@ -3502,6 +3503,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
     HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
     HLT_PFMETNoMu130_PFMHTNoMu130 = -999;
     HLT_PFMETNoMu140_PFMHTNoMu140 = -999;
+    HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 = -999;
     HLT_PFMET90_PFMHT90 = -999;
     HLT_PFMET100_PFMHT100 = -999;
     HLT_PFMET110_PFMHT110 = -999;

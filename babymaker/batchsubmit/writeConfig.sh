@@ -39,12 +39,12 @@ fi
 # prepare input sandbox
 #
 
-DIR=$PWD
-rm ${DIR}/job_input/input.*
+# DIR=$PWD
+# rm ${DIR}/job_input/input.*
 #printenv | grep -v PS1 | grep -v printenv | awk '{print "export "$1}' > ${DIR}/job_input/setupenv.sh
-tar -hcf ${DIR}/job_input/input.tar job_input/*
-gzip ${DIR}/job_input/input.tar
-cd ${DIR}
+# tar -hcf ${DIR}/job_input/input.tar job_input/*
+# gzip ${DIR}/job_input/input.tar
+# cd ${DIR}
 
 COPYDIR=/hadoop/cms/store/user/${USERNAME}/mt2babies/${COPYDIRBASE}
 echo "[writeConfig] running on dataset ${DATADIR}"
@@ -53,6 +53,11 @@ echo "[writeConfig] copying output to ${COPYDIR}"
 if [ ! -d "${COPYDIR}" ]; then
     echo "[writeConfig] creating job output directory " ${COPYDIR}
     mkdir -p ${COPYDIR}
+fi
+
+DOREBAL=0
+if [[ $COPYDIRBASE = *"RebalanceAndSmear"* ]]; then
+    DOREBAL=1
 fi
 
 #
@@ -86,7 +91,7 @@ x509userproxy=${PROXY}
         echo "
 executable=${EXE}
 transfer_executable=True
-arguments=`echo ${FILE##*/} | sed 's/\.root//g'` ${FILE} ${COPYDIR}
+arguments=`echo ${FILE##*/} | sed 's/\.root//g'` ${FILE} ${COPYDIR} ${DOREBAL}
 queue
 " >> condor_${COPYDIRBASE##*/}.cmd
     done
