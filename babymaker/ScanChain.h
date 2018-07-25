@@ -33,7 +33,7 @@ class babyMaker {
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string, std::string config_tag, bool isFastsim = false, int max_events = -1);
+  void ScanChain(TChain*, std::string sample, const std::string config_tag, bool isFastsim = false, int max_events = -1);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();

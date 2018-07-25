@@ -19,6 +19,7 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "lumi" : 41.37,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btag_med_threshold" : 0.8838,
+    "ea_version" : 3,
     "JECs" : [ ["2017B", "Fall17_17Nov2017B_V6_DATA"],
                ["2017C", "Fall17_17Nov2017C_V6_DATA"],
                ["2017D", "Fall17_17Nov2017D_V6_DATA"],
@@ -84,6 +85,7 @@ MT2Config_defs["data_2017_Prompt"] = {
     "lumi" : 41.97,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btag_med_threshold" : 0.8838,
+    "ea_version" : 3,
     "JECs" : [ ["", "Summer16_23Sep2016HV4_DATA"] 
                ],
     "filters" : [ "eeBadScFilter",
@@ -101,6 +103,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     "lumi" : 19.26,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btag_med_threshold" : 0.8838,
+    "ea_version" : 3,
     "JECs" : [ ["", "Fall17_17Nov2017C_V6_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
@@ -112,6 +115,7 @@ MT2Config_defs["data_2016_Moriond17"] = {
     "lumi" : 35.92,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
     "btag_med_threshold" : 0.8484,
+    "ea_version" : 1,
     "JECs" : [ ["2016B", "Summer16_23Sep2016BCDV4_DATA"],
                ["2016C", "Summer16_23Sep2016BCDV4_DATA"],
                ["2016D", "Summer16_23Sep2016BCDV4_DATA"],
@@ -171,6 +175,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "lumi" : 41.37,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btag_med_threshold" : 0.8838,
+    "ea_version" : 3,
     "JECs" : [ ["", "Fall17_17Nov2017_V4_MC"]
                ],
     "filters" : [ "globalTightHalo2016Filter",
@@ -188,6 +193,7 @@ MT2Config_defs["mc_80x_Moriond17"] = {
     "lumi" : 35.92,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
     "btag_med_threshold" : 0.8484,
+    "ea_version" : 1,
     "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
                ],
     "filters" : [ "globalTightHalo2016Filter",
@@ -201,6 +207,32 @@ MT2Config_defs["mc_80x_Moriond17"] = {
 }
 
 
+
+
+def GetFilterString(config_tag):
+    if config_tag not in MT2Config_defs:
+        raise ValueError("'{0}' not a valid configuration!".format(config_tag))
+    c = MT2Config_defs[config_tag]
+    s = "( nVert>0 && nJet30FailId==0"
+    for filt in c["filters"]:
+        s += " && Flag_"+filt
+    s += " )"
+    return s
+
+def GetTriggerString(config_tag, trig_reg):
+    if config_tag not in MT2Config_defs:
+        raise ValueError("'{0}' not a valid configuration!".format(config_tag))
+    c = MT2Config_defs[config_tag]
+    if "triggers" not in c:
+        return "1"
+    if trig_reg not in c["triggers"]:
+        raise ValueError("'{0}' not a valid trigger set for configuration '{1}'".format(trig_reg, config_tag))
+    s = "( "
+    for i,trig in enumerate(c["triggers"][trig_reg]):
+        if i==0: s += "HLT_"+trig
+        else:    s += " || HLT_"+trig
+    s += " )"
+    return s
 
 ## This will be run if you call "python configurations.py"
 ## Generates a corresponding .cc file that can return
@@ -266,6 +298,7 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.lumi               = {0};\n".format(c[tag]["lumi"]))
         fout.write("        c.btagcalib_csv      = \"{0}\";\n".format(c[tag]["btagcalib_csv"]))
         fout.write("        c.btag_med_threshold = {0};\n".format(c[tag]["btag_med_threshold"]))
+        fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         for jec in c[tag]["JECs"]:
             fout.write("        c.JECs.push_back(std::pair<std::string, std::string> (\"{0}\", \"{1}\"));\n".format(jec[0], jec[1]))
         for filter in c[tag]["filters"]:

@@ -44,6 +44,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 35.92;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btag_med_threshold = 0.8484;
+        c.ea_version         = 1;
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
@@ -94,6 +95,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 41.37;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
+        c.ea_version         = 3;
         c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V6_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017C", "Fall17_17Nov2017C_V6_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017D", "Fall17_17Nov2017D_V6_DATA"));
@@ -148,6 +150,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 41.97;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
+        c.ea_version         = 3;
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016HV4_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -195,6 +198,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 19.26;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
+        c.ea_version         = 3;
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V6_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalTightHalo2016Filter"] = true;
@@ -244,6 +248,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 35.92;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btag_med_threshold = 0.8484;
+        c.ea_version         = 1;
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
         c.filters["globalTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -258,6 +263,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 41.37;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
+        c.ea_version         = 3;
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V4_MC"));
         c.filters["globalTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;

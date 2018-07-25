@@ -86,7 +86,7 @@ const bool savePFphotons = true;
 
 DatasetInfoFromFile datasetInfoFromFile;
 
-MT2Configuration config;
+MT2Configuration config_;
 
 babyMaker *thisBabyMaker; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
@@ -104,14 +104,17 @@ inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,f
 
 //--------------------------------------------------------------------
 
-void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string config_tag, bool isFastsim, int max_events){
+void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::string config_tag, bool isFastsim, int max_events){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
-  config = GetMT2Config(config_tag);
+  config_ = GetMT2Config(config_tag);
   cout << "Using configuration \"" << config_tag << "\"" << endl;
+  // gconf is a GlobalConfig object in CORE
+  // used to store CORE-specific values, working-points, etc
+  gconf.ea_version = config_.ea_version;  // effective-area constants are year-specific. 
 
   if (baby_name.find("data_Run201") != std::string::npos) {
     isDataFromFileName = true;
@@ -126,7 +129,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
   if (isDataFromFileName && applyJSON) {
-      string json_file = "jsons/" + config.json;
+      string json_file = "jsons/" + config_.json;
       cout << "Loading json file: " << json_file << endl;
       set_goodrun_file(json_file.c_str());
   }
@@ -145,8 +148,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    cout << "Applying btag scale factors from btagsf/" << config.btagcalib_csv << endl;
-    calib = new BTagCalibration("csvv2", "btagsf/"+config.btagcalib_csv); // 94X version
+    cout << "Applying btag scale factors from btagsf/" << config_.btagcalib_csv << endl;
+    calib = new BTagCalibration("csvv2", "btagsf/"+config_.btagcalib_csv); // 94X version
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
     reader_fullsim = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central",{"up","down"});
     reader_fullsim->load(*calib, BTagEntry::JetFlavor::FLAV_B, "comb");
@@ -241,7 +244,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
     cout << "running on file: " << currentFile->GetTitle() << endl;
 
     evt_id = sampleID(currentFile->GetTitle());
-    evt_id = -1;
     TString currentFileName(currentFile->GetTitle());
 
     // ----------------------------------
@@ -265,9 +267,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
       jetcorr_filenames_pfL1FastJetL2L3.clear();
       std::string jetcorr_uncertainty_filename;
 
-      for(uint ijec=0; ijec < config.JECs.size(); ijec++){
-          string keyword = config.JECs.at(ijec).first;
-          string jecname = config.JECs.at(ijec).second;
+      for(uint ijec=0; ijec < config_.JECs.size(); ijec++){
+          string keyword = config_.JECs.at(ijec).first;
+          string jecname = config_.JECs.at(ijec).second;
           if(keyword == "" || currentFileName.Contains(keyword)){
               jetcorr_filenames_pfL1FastJetL2L3.clear();
               jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L1FastJet_AK4PFchs.txt");
@@ -1841,6 +1843,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
           pfjet_p4_cor   = pfjet_p4_uncor * corr;
           pfjet_p4_corUP = pfjet_p4_uncor * corr * varUP;
           pfjet_p4_corDN = pfjet_p4_uncor * corr * varDN;
+
+          // // ad-hoc MET fix for 2017. Should be OK after next re-reco?
+          if(config_tag.find("data_2017_31Mar2018") != string::npos && fabs(pfjet_p4_uncor.eta()) > 2.650 && fabs(pfjet_p4_uncor.eta()) < 3.139 && pfjet_p4_uncor.pt() < 75){
+              float met_x = met_pt*cos(met_phi);
+              float met_y = met_pt*sin(met_phi);
+              met_x += (pfjet_p4_cor.pt() - pfjet_p4_uncor.pt()) * cos(pfjet_p4_uncor.phi());
+              met_y += (pfjet_p4_cor.pt() - pfjet_p4_uncor.pt()) * sin(pfjet_p4_uncor.phi());
+              met_pt = sqrt(met_x*met_x + met_y*met_y);
+              met_phi = atan2(met_y, met_x);
+
+              pfjet_p4_cor /= corr;
+              pfjet_p4_corUP /= corr * varUP;
+              pfjet_p4_corDN /= corr * varDN;
+          }
+
         }
 
         p4sCorrJets.push_back(pfjet_p4_cor);
@@ -2105,7 +2122,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
 	      if (jet_pt[njet] > 30.0) nBJet30mva++;
             }
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= config.btag_med_threshold){
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold){
               nBJet20++; 
               nBJet20csv++;
 	      if (jet_pt[njet] > 30.0) nBJet30csv++;
@@ -2208,7 +2225,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
               nJet30JECup++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= config.btag_med_threshold) {
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold) {
               nBJet20JECup++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2233,7 +2250,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
               nJet30JECdn++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= config.btag_med_threshold) {
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold) {
               nBJet20JECdn++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2259,7 +2276,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, std::string conf
               if(jet_btagMVA[njet] >= 0.4432){ // CombinedMVAv2
                   gamma_nBJet20mva++;
               }
-              if(jet_btagCSV[njet] >= config.btag_med_threshold) { 
+              if(jet_btagCSV[njet] >= config_.btag_med_threshold) { 
                 gamma_nBJet20++; 
                 gamma_nBJet20csv++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
@@ -3915,7 +3932,7 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
     float pt_constrained_y = 0.0;
     float min_prob = 1E-20;
     for(int i=0; i < t->nRebalJets; i++){
-        bool isBjet = (t->rebal_jetbtagcsv[i] > config.btag_med_threshold);        
+        bool isBjet = (t->rebal_jetbtagcsv[i] > config_.btag_med_threshold);        
         float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
         prob = max(prob, min_prob);
         likelihood += log(prob);

@@ -11,6 +11,7 @@ struct MT2Configuration {
     float lumi;
     std::string btagcalib_csv;
     float btag_med_threshold;
+    int ea_version;
     std::vector<std::pair<std::string, std::string> > JECs;
     std::map<std::string, bool> filters;
     std::map<std::string, std::vector<std::string> > triggers;
