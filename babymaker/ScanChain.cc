@@ -2061,11 +2061,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
 
-          jet_chFrac[njet] = cms3.pfjets_chargedHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_nhFrac[njet] = cms3.pfjets_neutralHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_cemFrac[njet] = cms3.pfjets_chargedEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_nemFrac[njet] = cms3.pfjets_neutralEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_muFrac[njet] = cms3.pfjets_muonE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+          jet_chf[njet] = cms3.pfjets_chargedHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_nhf[njet] = cms3.pfjets_neutralHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_cemf[njet] = cms3.pfjets_chargedEmE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_nemf[njet] = cms3.pfjets_neutralEmE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_muf[njet] = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -2082,7 +2082,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           //jet_qgl
           jet_area[njet] = cms3.pfjets_area().at(iJet);
           jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
-          jet_muf[njet] = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 
           if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
           else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
@@ -2115,8 +2114,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
 	      p4sLeptonCleanedJets.push_back(p4sCorrJets.at(iJet));
               nJet30++;
-              if (jet_pt[njet] > 40.) nJet40++;
-            } // pt40
+              good_jet_idxs[nJet30-1] = njet;
+              if (jet_pt[njet] > 40.) 
+                  nJet40++;
+            } // pt30
             if(jet_btagMVA[njet] >= 0.4432) {
               nBJet20mva++;
 	      if (jet_pt[njet] > 30.0) nBJet30mva++;
@@ -2124,6 +2125,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
             //CSVv2IVFM
             if(jet_btagCSV[njet] >= config_.btag_med_threshold){
               nBJet20++; 
+              good_bjet_idxs[nBJet20-1] = njet;
               nBJet20csv++;
 	      if (jet_pt[njet] > 30.0) nBJet30csv++;
               // btag SF - not final yet
@@ -2847,7 +2849,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           }
       } // end rebalancing
 
-
       FillBabyNtuple();
 
     }//end loop on events in a file
@@ -3312,11 +3313,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
     BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
     BabyTree_->Branch("jet_btagDeepCSV", jet_btagDeepCSV, "jet_btagDeepCSV[njet]/F" );
-    BabyTree_->Branch("jet_chFrac", jet_chFrac, "jet_chFrac[njet]/F" );
-    BabyTree_->Branch("jet_nhFrac", jet_nhFrac, "jet_nhFrac[njet]/F" );
-    BabyTree_->Branch("jet_cemFrac", jet_cemFrac, "jet_cemFrac[njet]/F" );
-    BabyTree_->Branch("jet_nemFrac", jet_nemFrac, "jet_nemFrac[njet]/F" );
-    BabyTree_->Branch("jet_muFrac", jet_muFrac, "jet_muFrac[njet]/F" );
+    BabyTree_->Branch("jet_chf", jet_chf, "jet_chf[njet]/F" );
+    BabyTree_->Branch("jet_nhf", jet_nhf, "jet_nhf[njet]/F" );
+    BabyTree_->Branch("jet_cemf", jet_cemf, "jet_cemf[njet]/F" );
+    BabyTree_->Branch("jet_nemf", jet_nemf, "jet_nemf[njet]/F" );
+    BabyTree_->Branch("jet_muf", jet_muf, "jet_muf[njet]/F" );
     BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
     BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
     BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
@@ -3325,7 +3326,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
     BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
     BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
-    BabyTree_->Branch("jet_muf", jet_muf, "jet_muf[njet]/F" );
+    BabyTree_->Branch("good_jet_idxs", good_jet_idxs, "good_jet_idxs[nJet30]/I" );
+    BabyTree_->Branch("good_bjet_idxs", good_bjet_idxs, "good_bjet_idxs[nBJet20]/I" );
     BabyTree_->Branch("weight_lepsf", &weight_lepsf );
     BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
     BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
@@ -3843,11 +3845,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       jet_btagCSV[i] = -999;
       jet_btagMVA[i] = -999;
       jet_btagDeepCSV[i] = -999;
-      jet_chFrac[i] = -999;
-      jet_nhFrac[i] = -999;
-      jet_cemFrac[i] = -999;
-      jet_nemFrac[i] = -999;
-      jet_muFrac[i] = -999;
+      jet_chf[i] = -999;
+      jet_nhf[i] = -999;
+      jet_cemf[i] = -999;
+      jet_nemf[i] = -999;
+      jet_muf[i] = -999;
       jet_rawPt[i] = -999;
       jet_mcPt[i] = -999;
       jet_mcFlavour[i] = -999;
@@ -3856,7 +3858,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       jet_area[i] = -999;
       jet_id[i] = -999;
       jet_puId[i] = -999;
-      jet_muf[i] = -999;
+      good_jet_idxs[i] = -999;
+      good_bjet_idxs[i] = -999;
     }
 
     rebal_status = -999;

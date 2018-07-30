@@ -529,11 +529,11 @@ class babyMaker {
   Float_t         jet_btagCSV[max_njet];   //[njet] 
   Float_t         jet_btagMVA[max_njet];   //[njet]
   Float_t         jet_btagDeepCSV[max_njet];   //[njet]
-  Float_t         jet_chFrac[max_njet];   //[njet]
-  Float_t         jet_nhFrac[max_njet];   //[njet]
-  Float_t         jet_cemFrac[max_njet];   //[njet]
-  Float_t         jet_nemFrac[max_njet];   //[njet]
-  Float_t         jet_muFrac[max_njet];   //[njet]
+  Float_t         jet_chf[max_njet];   //[njet]
+  Float_t         jet_nhf[max_njet];   //[njet]
+  Float_t         jet_cemf[max_njet];   //[njet]
+  Float_t         jet_nemf[max_njet];   //[njet]
+  Float_t         jet_muf[max_njet];   //[njet]
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
   Int_t           jet_mcFlavour[max_njet];   //[njet]
@@ -542,7 +542,8 @@ class babyMaker {
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
-  Float_t         jet_muf[max_njet];   //[njet]
+  Int_t           good_jet_idxs[max_njet];   //[njet]
+  Int_t           good_bjet_idxs[max_njet];   //[njet]
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;

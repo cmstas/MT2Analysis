@@ -380,11 +380,11 @@ public :
    Float_t         jet_mass[100];   //[njet]
    Float_t         jet_btagCSV[100];   //[njet]
    Float_t         jet_btagMVA[100];   //[njet]
-   Float_t         jet_chFrac[100];  //[njet]
-   Float_t         jet_nhFrac[100];  //[njet]
-   Float_t         jet_cemFrac[100];  //[njet]
-   Float_t         jet_nemFrac[100];  //[njet]
-   Float_t         jet_muFrac[100];  //[njet]
+   Float_t         jet_chf[100];  //[njet]
+   Float_t         jet_nhf[100];  //[njet]
+   Float_t         jet_cemf[100];  //[njet]
+   Float_t         jet_nemf[100];  //[njet]
+   Float_t         jet_muf[100];  //[njet]
    Float_t         jet_rawPt[100];   //[njet]
    Float_t         jet_mcPt[100];   //[njet]
    Int_t           jet_mcFlavour[100];   //[njet]
@@ -393,6 +393,8 @@ public :
    Float_t         jet_area[100];   //[njet]
    Int_t           jet_id[100];   //[njet]
    Int_t           jet_puId[100];   //[njet]
+   Int_t           good_jet_idxs[100];   //[njet]
+   Int_t           good_bjet_idxs[100];   //[njet]
    Int_t           GenSusyMScan1;
    Int_t           GenSusyMScan2;
    Int_t           GenSusyMScan3;
@@ -797,11 +799,11 @@ public :
    TBranch        *b_jet_mass;   //!
    TBranch        *b_jet_btagCSV;   //!
    TBranch        *b_jet_btagMVA;   //!
-   TBranch        *b_jet_chFrac;   //!
-   TBranch        *b_jet_nhFrac;   //!
-   TBranch        *b_jet_cemFrac;   //!
-   TBranch        *b_jet_nemFrac;   //!
-   TBranch        *b_jet_muFrac;   //!
+   TBranch        *b_jet_chf;   //!
+   TBranch        *b_jet_nhf;   //!
+   TBranch        *b_jet_cemf;   //!
+   TBranch        *b_jet_nemf;   //!
+   TBranch        *b_jet_muf;   //!
    TBranch        *b_jet_rawPt;   //!
    TBranch        *b_jet_mcPt;   //!
    TBranch        *b_jet_mcFlavour;   //!
@@ -810,6 +812,8 @@ public :
    TBranch        *b_jet_area;   //!
    TBranch        *b_jet_id;   //!
    TBranch        *b_jet_puId;   //!
+   TBranch        *b_good_jet_idxs;   //!
+   TBranch        *b_good_bjet_idxs;   //!
    TBranch        *b_GenSusyMScan1;   //!
    TBranch        *b_GenSusyMScan2;   //!
    TBranch        *b_GenSusyMScan3;   //!
@@ -1273,11 +1277,11 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("jet_mass"))                               fChain->SetBranchAddress("jet_mass", jet_mass, &b_jet_mass);
    if(bs->FindObject("jet_btagCSV"))                            fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
    if(bs->FindObject("jet_btagMVA"))                            fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
-   if(bs->FindObject("jet_chFrac"))                             fChain->SetBranchAddress("jet_chFrac", jet_chFrac, &b_jet_chFrac);
-   if(bs->FindObject("jet_nhFrac"))                             fChain->SetBranchAddress("jet_nhFrac", jet_nhFrac, &b_jet_nhFrac);
-   if(bs->FindObject("jet_nemFrac"))                            fChain->SetBranchAddress("jet_nemFrac", jet_cemFrac, &b_jet_cemFrac);
-   if(bs->FindObject("jet_cemFrac"))                            fChain->SetBranchAddress("jet_cemFrac", jet_nemFrac, &b_jet_nemFrac);
-   if(bs->FindObject("jet_muFrac"))                             fChain->SetBranchAddress("jet_muFrac", jet_muFrac, &b_jet_muFrac);
+   if(bs->FindObject("jet_chf"))                                fChain->SetBranchAddress("jet_chf", jet_chf, &b_jet_chf);
+   if(bs->FindObject("jet_nhf"))                                fChain->SetBranchAddress("jet_nhf", jet_nhf, &b_jet_nhf);
+   if(bs->FindObject("jet_nemf"))                               fChain->SetBranchAddress("jet_nemf", jet_cemf, &b_jet_cemf);
+   if(bs->FindObject("jet_cemf"))                               fChain->SetBranchAddress("jet_cemf", jet_nemf, &b_jet_nemf);
+   if(bs->FindObject("jet_muf"))                                fChain->SetBranchAddress("jet_muf", jet_muf, &b_jet_muf);
    if(bs->FindObject("jet_rawPt"))                              fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    if(bs->FindObject("jet_mcPt"))                               fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);
    if(bs->FindObject("jet_mcFlavour"))                          fChain->SetBranchAddress("jet_mcFlavour", jet_mcFlavour, &b_jet_mcFlavour);
@@ -1286,6 +1290,8 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("jet_area"))                               fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
    if(bs->FindObject("jet_id"))                                 fChain->SetBranchAddress("jet_id", jet_id, &b_jet_id);
    if(bs->FindObject("jet_puId"))                               fChain->SetBranchAddress("jet_puId", jet_puId, &b_jet_puId);
+   if(bs->FindObject("good_jet_idxs"))                          fChain->SetBranchAddress("good_jet_idxs", good_jet_idxs, &b_good_jet_idxs);
+   if(bs->FindObject("good_bjet_idxs"))                         fChain->SetBranchAddress("good_bjet_idxs", good_bjet_idxs, &b_good_bjet_idxs);
    if(bs->FindObject("GenSusyMScan1"))                          fChain->SetBranchAddress("GenSusyMScan1", &GenSusyMScan1, &b_GenSusyMScan1);
    if(bs->FindObject("GenSusyMScan2"))                          fChain->SetBranchAddress("GenSusyMScan2", &GenSusyMScan2, &b_GenSusyMScan2);
    if(bs->FindObject("GenSusyMScan3"))                          fChain->SetBranchAddress("GenSusyMScan3", &GenSusyMScan3, &b_GenSusyMScan3);
