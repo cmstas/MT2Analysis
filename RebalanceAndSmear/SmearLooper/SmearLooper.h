@@ -141,16 +141,17 @@ class SmearLooper {
   Int_t           evt_id;  
   
   //----- TRIGGER 
-  Int_t           HLT_PFHT800;   
-  Int_t           HLT_PFHT900;   
-  Int_t           HLT_PFJet450;   
+  Int_t           HLT_PFHT1050;   
   Int_t           HLT_PFJet500;   
-  Int_t           HLT_PFHT125_Prescale;   
-  Int_t           HLT_PFHT200_Prescale;   
-  Int_t           HLT_PFHT300_Prescale;   
-  Int_t           HLT_PFHT350_Prescale;   
-  Int_t           HLT_PFHT475_Prescale;   
-  Int_t           HLT_PFHT600_Prescale;   
+  Int_t           HLT_PFHT180_Prescale;   
+  Int_t           HLT_PFHT250_Prescale;   
+  Int_t           HLT_PFHT370_Prescale;   
+  Int_t           HLT_PFHT430_Prescale;   
+  Int_t           HLT_PFHT510_Prescale;   
+  Int_t           HLT_PFHT590_Prescale;   
+  Int_t           HLT_PFHT680_Prescale;   
+  Int_t           HLT_PFHT780_Prescale;   
+  Int_t           HLT_PFHT890_Prescale;   
 
   //---- reco quantities
   Int_t           a_nJet30;
@@ -167,7 +168,11 @@ class SmearLooper {
   Float_t         r_ht; 
   Float_t         r_met_pt;
   Float_t         r_met_phi;  
-  
+  Float_t         r_jet1_pt;
+  Float_t         r_jet1_eta;
+  Float_t         r_jet2_pt;
+  Float_t         r_jet2_eta;
+
   //----- smeared quantities
   Int_t           s_nsmears;
   Float_t         s_prescale;  
@@ -179,6 +184,13 @@ class SmearLooper {
   Float_t         s_ht[max_nsmear];
   Float_t         s_mt2[max_nsmear];
   Float_t         s_met_pt[max_nsmear];
+  Float_t         s_jet1_pt[max_nsmear];
+  Float_t         s_jet1_eta[max_nsmear];
+  Float_t         s_jet1_smearfact[max_nsmear];
+  Float_t         s_jet2_pt[max_nsmear];
+  Float_t         s_jet2_eta[max_nsmear];
+  Float_t         s_jet2_smearfact[max_nsmear];
+  Float_t         s_max_smearfact[max_nsmear];
 };
 
 #endif
