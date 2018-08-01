@@ -175,6 +175,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "lumi" : 41.37,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btag_med_threshold" : 0.8838,
+    "pu_weights_file" : "puWeight2017.root",
     "ea_version" : 3,
     "JECs" : [ ["", "Fall17_17Nov2017_V4_MC"]
                ],
@@ -193,6 +194,7 @@ MT2Config_defs["mc_80x_Moriond17"] = {
     "lumi" : 35.92,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
     "btag_med_threshold" : 0.8484,
+    "pu_weights_file" : "puWeight2016.root",
     "ea_version" : 1,
     "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
                ],
@@ -284,6 +286,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     c.json = "";
     c.lumi = 1.0;
+    c.pu_weights_file = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
 """)
 
@@ -298,6 +301,8 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.lumi               = {0};\n".format(c[tag]["lumi"]))
         fout.write("        c.btagcalib_csv      = \"{0}\";\n".format(c[tag]["btagcalib_csv"]))
         fout.write("        c.btag_med_threshold = {0};\n".format(c[tag]["btag_med_threshold"]))
+        if "pu_weights_file" in c[tag]:
+            fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         for jec in c[tag]["JECs"]:
             fout.write("        c.JECs.push_back(std::pair<std::string, std::string> (\"{0}\", \"{1}\"));\n".format(jec[0], jec[1]))

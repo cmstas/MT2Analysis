@@ -568,6 +568,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   cout << "[MT2Looper::loop] using configuration tag: " << config_tag << endl;
   cout << "                  JSON: " << config_.json << endl;
   cout << "                  lumi: " << config_.lumi << " fb-1" << endl;
+  if (config_.pu_weights_file != ""){
+      cout << "                  PU weights file: " << config_.pu_weights_file << endl;
+  }
   cout << "                  Filters applied:" << endl;
   for(map<string,bool>::iterator it=config_.filters.begin(); it!=config_.filters.end(); it++){
       if(it->second)
@@ -659,8 +662,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
     delete f_weights;
   }
   h_nTrueInt_weights_ = 0;
-  if (doNTrueIntReweight) {
-    TFile* f_weights = new TFile("../babymaker/data/puWeight2016.root");
+  if (doNTrueIntReweight && config_.pu_weights_file != "") {
+      TFile* f_weights = new TFile(("../babymaker/data/" + config_.pu_weights_file).c_str());
     TH1D* h_nTrueInt_weights_temp = (TH1D*) f_weights->Get("pileupWeight");
     outfile_->cd();
     h_nTrueInt_weights_ = (TH1D*) h_nTrueInt_weights_temp->Clone("h_pileupWeight");
@@ -1011,9 +1014,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  evtweight_ *= puWeight;
 	}
 	if (doNTrueIntReweight) {
-	  int nTrueInt_input = t.nTrueInt;
-	  float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
-	  evtweight_ *= puWeight;
+            if(h_nTrueInt_weights_==0){
+                cout << "[MT2Looper::loop] WARNING! You requested to do nTrueInt reweighting but didn't supply a PU weights file. Turning off." << endl;
+            }else{
+                int nTrueInt_input = t.nTrueInt;
+                float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
+                evtweight_ *= puWeight;
+            }
 	}
 	// prioritize files for lepton SF, if we accidentally gave both options
 	if (applyLeptonSFfromFiles) {
@@ -2908,6 +2915,8 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
     plot1D("h_J0pt"+s,       jet1_pt_,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J0eta"+s,      t.jet_eta[0],  evtweight_, h_1d, ";eta(jet1)", 100,-5,5);
     plot1D("h_J0phi"+s,      t.jet_phi[0],  evtweight_, h_1d, ";phi(jet1)", 100,-3.2,3.2);
+    plot1D("h_J1eta"+s,      t.jet_eta[1],  evtweight_, h_1d, ";eta(jet2)", 100,-5,5);
+    plot1D("h_J1phi"+s,      t.jet_phi[1],  evtweight_, h_1d, ";phi(jet2)", 100,-3.2,3.2);
     plot1D("h_J1pt"+s,       jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   }
   

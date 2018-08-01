@@ -24,6 +24,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     c.json = "";
     c.lumi = 1.0;
+    c.pu_weights_file = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
     c.filters["eeBadScFilter"] = false;
     c.filters["globalTightHalo2016Filter"] = false;
@@ -248,6 +249,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 35.92;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btag_med_threshold = 0.8484;
+        c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
         c.filters["globalTightHalo2016Filter"] = true;
@@ -263,6 +265,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.lumi               = 41.37;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
+        c.pu_weights_file    = "puWeight2017.root";
         c.ea_version         = 3;
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V4_MC"));
         c.filters["globalTightHalo2016Filter"] = true;
