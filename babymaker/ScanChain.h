@@ -600,6 +600,110 @@ class babyMaker {
   Float_t         rebal_met_phi;
   Float_t         rebal_pt_soft_x;
   Float_t         rebal_pt_soft_y;
+
+  
+  ////////////////
+  //   Short Track
+  ////////////////
+
+  static const int maxntracks = 1000;
+
+  // Event-level variables
+  Int_t           ntracks;
+  Int_t           nshorttracks;
+  Int_t           nshorttracks_P;
+  Int_t           nshorttracks_M;
+  Int_t           nshorttracks_L;
+  Int_t           nshorttrackcandidates;
+  Int_t           nshorttrackcandidates_P;
+  Int_t           nshorttrackcandidates_M;
+  Int_t           nshorttrackcandidates_L;
+  
+  // Track kinematics
+  Float_t         track_pt[maxntracks];
+  Float_t         track_ptErr[maxntracks];
+  Float_t         track_eta[maxntracks];
+  Float_t         track_phi[maxntracks];
+  Int_t           track_charge[maxntracks];
+  Float_t         track_dedxStrip[maxntracks];
+  Float_t         track_dedxPixel[maxntracks];
+
+  // Track quality
+  //Float_t         track_nChi2[maxntracks];
+  Float_t         track_ipSigXY[maxntracks];
+  Float_t         track_dxy[maxntracks];
+  Float_t         track_dxyErr[maxntracks];
+  Float_t         track_dz[maxntracks];
+  Float_t         track_dzErr[maxntracks];
+  Int_t           track_isHighPurity[maxntracks];
+  Int_t           track_DeadECAL[maxntracks];
+  Int_t           track_DeadHCAL[maxntracks];
+
+  // Track length
+  Int_t           track_isshort[maxntracks];
+  Int_t           track_iscandidate[maxntracks];
+  Int_t           track_ispixelonly[maxntracks];
+  Int_t           track_ismedium[maxntracks];
+  Int_t           track_islong[maxntracks];
+  Int_t           track_ispixelonlycandidate[maxntracks];
+  Int_t           track_ismediumcandidate[maxntracks];
+  Int_t           track_islongcandidate[maxntracks];
+  Int_t           track_HitSignature[maxntracks];
+  Int_t           track_nPixelHits[maxntracks];
+  Int_t           track_nLostOuterHits[maxntracks];
+  Int_t           track_nLostInnerPixelHits[maxntracks];
+  Int_t           track_nLayersWithMeasurement[maxntracks];
+  Int_t           track_nPixelLayersWithMeasurement[maxntracks];
+
+  // Nearest PF information
+  Int_t           track_nearestPF_id[maxntracks];
+  Float_t         track_nearestPF_DR[maxntracks];
+  Float_t         track_nearestPF_pt[maxntracks];
+
+  // Nearest jet information
+  Float_t         track_jetDR[maxntracks];
+  Float_t         track_jetPt[maxntracks];
+  Float_t         track_jetEta[maxntracks];
+  Float_t         track_jetPhi[maxntracks];
+
+  // Pileup and Isolation
+  Float_t         track_chHIso0p3[maxntracks];
+  Float_t         track_chHminiIso[maxntracks];
+  Float_t         track_neuHIso0p3[maxntracks];
+  Float_t         track_neuHminiIso[maxntracks];
+  Float_t         track_phIso0p3[maxntracks];
+  Float_t         track_phminiIso[maxntracks];
+  Int_t           track_isLepOverlap[maxntracks];
+  Float_t         track_neuIso0p05[maxntracks];
+  Float_t         track_neuRelIso0p05[maxntracks];
+
+  Float_t         track_iso[maxntracks]; // DeltaBeta corrected
+  Float_t         track_isonomin[maxntracks];
+  Float_t         track_reliso[maxntracks];
+  Float_t         track_relisonomin[maxntracks];
+  Float_t         track_iso_uncorrected[maxntracks];
+  Float_t         track_reliso_uncorrected[maxntracks];
+  Float_t         track_iso_correction[maxntracks]; // The DeltaBeta correction
+  Float_t         track_reliso_correction[maxntracks];
+
+  Float_t         track_miniiso[maxntracks]; // DeltaBeta corrected
+  Float_t         track_miniisonomin[maxntracks];
+  Float_t         track_minireliso[maxntracks];
+  Float_t         track_minirelisonomin[maxntracks];
+  Float_t         track_miniiso_uncorrected[maxntracks];
+  Float_t         track_minireliso_uncorrected[maxntracks];
+  Float_t         track_miniiso_correction[maxntracks]; // The DeltaBeta correction
+  Float_t         track_minireliso_correction[maxntracks];
+
+  // Gen info
+  Int_t           track_isChargino[maxntracks];
+  Int_t           track_genPdgId[maxntracks];
+  Float_t         track_genMatchDR[maxntracks];
+  Float_t         track_decayXY[maxntracks];
+  
+  Int_t           nCharginos;
+  
+
 };
 
 #endif

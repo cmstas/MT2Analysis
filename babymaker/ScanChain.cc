@@ -578,7 +578,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           }
 
         }else{
-          evt_nEvts = cms3.evt_nEvts();
+	  evt_nEvts = cms3.evt_nEvts();
           evt_scale1fb = cms3.evt_scale1fb();
           evt_xsec = cms3.evt_xsec_incl();
           evt_kfactor = cms3.evt_kfactor();
@@ -2921,6 +2921,212 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           }
       } // end rebalancing
 
+      //////////////
+      // Short Track
+      //////////////
+
+      ntracks = 0; nshorttracks = 0; nshorttrackcandidates = 0;
+      nshorttracks_P = 0; nshorttracks_M = 0; nshorttracks_L = 0;
+      nshorttrackcandidates_P = 0; nshorttrackcandidates_M = 0; nshorttrackcandidates_L = 0;
+      for (unsigned int i_it = 0; i_it < cms3.isotracks_p4().size(); i_it++) {
+	if (!cms3.isotracks_isLostTrack().at(i_it)) continue;
+	if (!cms3.isotracks_fromPV().at(i_it)) continue;
+	if (cms3.isotracks_pttrk().at(i_it) < 15) continue;
+
+	// Candidate kinematics
+	//	const LorentzVector& cand_p4 = cms3.isotracks_p4().at(i_it);
+
+	// Kinematics
+	// The track-based quantities are *almost* always identical to the candidate quantities for lostTracks.
+	track_pt[ntracks] = cms3.isotracks_pttrk().at(i_it);
+	track_ptErr[ntracks] = cms3.isotracks_pterr().at(i_it);
+	track_eta[ntracks] = cms3.isotracks_etatrk().at(i_it);
+	track_phi[ntracks] = cms3.isotracks_phitrk().at(i_it);
+	track_charge[ntracks] = cms3.isotracks_charge().at(i_it);
+	track_dedxStrip[ntracks] = cms3.isotracks_dEdxStrip().at(i_it);
+	track_dedxPixel[ntracks] = cms3.isotracks_dEdxPixel().at(i_it);
+
+	// Quality
+	//	track_nChi2[ntracks] = cms3.isotracks_normalizedChi2().at(i_it);
+	track_dxy[ntracks] = cms3.isotracks_dxy().at(i_it);
+	track_dxyErr[ntracks] = cms3.isotracks_dxyError().at(i_it);
+	track_dz[ntracks] = fabs(cms3.isotracks_dz().at(i_it));
+	track_dzErr[ntracks] = cms3.isotracks_dzError().at(i_it);
+	track_ipSigXY[ntracks] = track_dxyErr[ntracks] > 0 ? track_dxy[ntracks] / track_dxyErr[ntracks] : -1;
+	track_isHighPurity[ntracks] = cms3.isotracks_isHighPurityTrack().at(i_it);
+	for (unsigned int iCAL = 0; iCAL < cms3.isotracks_crossedEcalStatus().at(i_it).size(); iCAL++) {
+	  if (cms3.isotracks_crossedEcalStatus().at(i_it).at(iCAL) != 0) {
+	    	track_DeadECAL[ntracks] = 1;
+		break;
+	  }
+	}
+	for (unsigned int iCAL = 0; iCAL < cms3.isotracks_crossedHcalStatus().at(i_it).size(); iCAL++) {
+	  if (cms3.isotracks_crossedHcalStatus().at(i_it).at(iCAL) != 0) {
+	    	track_DeadHCAL[ntracks] = 1;
+		break;
+	  }
+	}
+	
+	// Hits and layers
+	track_HitSignature[ntracks] = cms3.isotracks_HitSignature().at(i_it);
+	track_nPixelHits[ntracks] = cms3.isotracks_numberOfValidPixelHits().at(i_it);
+	track_nLostOuterHits[ntracks] = cms3.isotracks_numberOfLostHitsOuter().at(i_it);
+	track_nLostInnerPixelHits[ntracks] = cms3.isotracks_numberOfLostPixelHitsInner().at(i_it);
+	track_nLayersWithMeasurement[ntracks] = cms3.isotracks_trackerLayersWithMeasurement().at(i_it);
+	track_nPixelLayersWithMeasurement[ntracks] = cms3.isotracks_pixelLayersWithMeasurement().at(i_it);
+
+	// Nearest PF
+	track_nearestPF_id[ntracks] = cms3.isotracks_nearestPF_id().at(i_it);
+	track_nearestPF_DR[ntracks] = cms3.isotracks_nearestPF_DR().at(i_it);
+	track_nearestPF_pt[ntracks] = cms3.isotracks_nearestPF_pt().at(i_it);
+
+	// Nearest jet
+	float minJetDR = 0.5; int jetIdx = -1;
+	for (int iJet = 0; iJet < nJet30; iJet++) {
+	  const float jPhi = jet_phi[iJet];
+	  const float jEta = jet_eta[iJet];
+	  const float dr = DeltaR(jEta,track_eta[i_it],jPhi,track_phi[i_it]);
+	  if (dr < minJetDR) {
+	    minJetDR = dr;
+	    jetIdx = iJet;
+	  }
+	}
+	if (jetIdx >= 0) {
+	  track_jetDR[ntracks] = minJetDR;
+	  track_jetPt[ntracks] = jet_pt[jetIdx];
+	  track_jetEta[ntracks] = jet_eta[jetIdx];
+	  track_jetPhi[ntracks] = jet_phi[jetIdx];
+	}
+
+	// Pileup
+	track_chHIso0p3[ntracks] = cms3.isotracks_pfIso_ch().at(i_it); // These two isos are used to slim the isotracks collection for cand_p4.pt() < 20 GeV,
+	track_chHminiIso[ntracks] = cms3.isotracks_miniIso_ch().at(i_it); // using cand_p4 for the relative iso pt.
+	track_neuHIso0p3[ntracks] = cms3.isotracks_pfIso_nh().at(i_it);
+	track_neuHminiIso[ntracks] = cms3.isotracks_miniIso_nh().at(i_it);
+	track_phIso0p3[ntracks] = cms3.isotracks_pfIso_em().at(i_it);
+	track_phminiIso[ntracks] = cms3.isotracks_miniIso_em().at(i_it);
+
+	const float nIso = track_neuHIso0p3[ntracks] + track_phIso0p3[ntracks];
+	track_iso_uncorrected[ntracks] = track_chHIso0p3[ntracks] + nIso;
+	track_reliso_uncorrected[ntracks] = track_iso_uncorrected[ntracks] / track_pt[ntracks];
+	track_iso_correction[ntracks] = 0.5 * cms3.isotracks_pfIso_db().at(i_it);
+	track_reliso_correction[ntracks] = track_iso_correction[ntracks] / track_pt[ntracks];
+	track_iso[ntracks] = track_iso_uncorrected[ntracks] - max(0.0,(double) track_iso_correction[ntracks]);
+	track_reliso[ntracks] = track_reliso_uncorrected[ntracks] - max(0.0,(double) track_reliso_correction[ntracks]);
+	track_isonomin[ntracks] = track_iso_uncorrected[ntracks] - track_iso_correction[ntracks];
+	track_relisonomin[ntracks] = track_reliso_uncorrected[ntracks] - track_reliso_correction[ntracks];
+
+	const float nMiniIso = track_neuHminiIso[ntracks] + track_phminiIso[ntracks];
+	track_miniiso_uncorrected[ntracks] = track_chHminiIso[ntracks] + nMiniIso;
+	track_minireliso_uncorrected[ntracks] = track_miniiso_uncorrected[ntracks] / track_pt[ntracks];
+	track_miniiso_correction[ntracks] = 0.5 * cms3.isotracks_miniIso_db().at(i_it);
+	track_minireliso_correction[ntracks] = track_miniiso_correction[ntracks] / track_pt[ntracks];
+	track_miniiso[ntracks] = track_miniiso_uncorrected[ntracks] - max(0.0,(double) track_miniiso_correction[ntracks]);
+	track_minireliso[ntracks] = track_minireliso_uncorrected[ntracks] - max(0.0,(double) track_minireliso_correction[ntracks]);
+	track_miniisonomin[ntracks] = track_miniiso_uncorrected[ntracks] - track_miniiso_correction[ntracks];
+	track_minirelisonomin[ntracks] = track_minireliso_uncorrected[ntracks] - track_minireliso_correction[ntracks];
+
+	track_neuIso0p05[ntracks] = cms3.isotracks_pfNeutralSum().at(i_it);
+	track_neuRelIso0p05[ntracks] = track_neuIso0p05[ntracks] / track_pt[ntracks];
+
+	track_isLepOverlap[ntracks] = cms3.isotracks_lepOverlap().at(i_it);
+
+	if (!isData) {
+	  float minGenDR = 0.01; int genIdx = -1;
+	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {
+	    if (cms3.genps_status().at(iGen) != 1) continue;
+	    if (fabs(cms3.genps_charge().at(iGen)) < 0.01) continue;	    
+	    const float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),track_eta[ntracks],cms3.genps_p4().at(iGen).phi(),track_phi[ntracks]);
+	    if (dr < minGenDR) {
+	      minGenDR = dr;
+	      genIdx = iGen;
+	    }
+	  }
+	  if (genIdx >= 0) {
+	    track_genMatchDR[ntracks] = minGenDR;
+	    track_genPdgId[ntracks] = cms3.genps_id().at(genIdx);
+	    track_isChargino[ntracks] = abs(track_genPdgId[ntracks]) == 1000024;
+	  }	  
+	}
+
+	// Apply ST and STC selections	
+	
+	// Basic selections
+	const bool DeadCAL = track_DeadECAL[ntracks] || track_DeadHCAL[ntracks];
+	const bool ptSel = track_pt[ntracks] > 15;
+	const bool BaseSel = !DeadCAL && ptSel;
+	
+	if (!BaseSel) {ntracks++; continue;}
+
+	// Length and categorization
+	const bool lostOuterHitsSel = track_nLostOuterHits[ntracks] >= 2;
+	const bool isP = track_nLayersWithMeasurement[ntracks] == track_nPixelLayersWithMeasurement[ntracks];
+	const bool isLong = track_nLayersWithMeasurement[ntracks] >= 7;
+	const bool isM = !isP && !isLong && lostOuterHitsSel;
+	const bool isL = isLong && lostOuterHitsSel;
+	const bool isShort = isP || isM || isL;
+
+	if (!isShort) {ntracks++; continue;}
+
+	// Lepton veto
+	const bool nearestPFSel = !(track_nearestPF_DR[ntracks] < 0.1 && (abs(track_nearestPF_id[ntracks]) == 11 || abs(track_nearestPF_id[ntracks]) == 13));
+	float minrecodr = 0.2;
+	for (int iL = 0; iL < nlep; iL++) {
+	  float dr = DeltaR(lep_eta[iL],track_eta[ntracks],lep_phi[iL],track_phi[ntracks]);
+	  if (minrecodr < dr) minrecodr = dr;
+	}
+	const bool recoVeto = minrecodr < 0.1;
+	// Get rid of anything near or overlapping a lepton
+	const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
+	
+	if (!PassesRecoVeto) {ntracks++; continue;}
+
+	const float isoSTC = 6, qualSTC = 3;
+
+	// Isolation
+	const bool PassesIsoSelSTC = track_neuIso0p05[ntracks] < 10 * isoSTC && track_neuRelIso0p05[ntracks] < 0.1 * isoSTC && track_iso[ntracks] < 10 * isoSTC && track_reliso[ntracks] < 0.2 * isoSTC;
+	if (!PassesIsoSelSTC) {ntracks++; continue;}
+	const bool PassesIsoSel = track_neuIso0p05[ntracks] < 10 && track_neuRelIso0p05[ntracks] < 0.1 && track_iso[ntracks] < 10 && track_reliso[ntracks] < 0.2;
+
+	// Quality
+	const bool PixLayersSel = track_nPixelLayersWithMeasurement[ntracks] >= (track_nLayersWithMeasurement[ntracks] > 4 ? 2 : 3);
+	const bool LostInnerPixelHitsSel = track_nLostInnerPixelHits[ntracks] == 0;
+
+	const bool QualitySelBase = PixLayersSel && LostInnerPixelHitsSel;
+	
+	if (!QualitySelBase) {ntracks++; continue;}
+
+	const bool ptErrOverPt2Sel = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.001));
+	const bool ptErrOverPt2SelSTC = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.001)) * qualSTC;
+	const bool dxySel = track_dxy[ntracks] < (isP ? 0.02 : 0.01);
+	const bool dxySelSTC = track_dxy[ntracks] < (isP ? 0.02 : 0.01) * qualSTC; 
+	const bool dzSel = track_dz[ntracks] < 0.05;
+	const bool dzSelSTC = track_dz[ntracks] < 0.05 * qualSTC;
+
+	const bool QualityST = ptErrOverPt2Sel && dxySel && dzSel;
+	const bool QualitySTC = ptErrOverPt2SelSTC && dxySelSTC && dzSelSTC;
+
+	// Due to isotrack slimming selection, we only have isotracks with ChH < 5.0 GeV, ChH / cand_pt < 0.2, miniChH / cand_pt < 0.2 for tracks with cand pt < 20 GeV
+
+	// Already checked for IsoSTC above
+	if (QualityST && PassesIsoSel) {
+	  nshorttracks++;
+	  track_isshort[ntracks] = 1;
+	  if (isP) {nshorttracks_P++; track_ispixelonly[ntracks] = 1;}
+	  else if (isM) {nshorttracks_M++; track_ismedium[ntracks] = 1;}
+	  else {nshorttracks_L++; track_islong[ntracks] = 1;}	   
+	}
+	// STCs (can't be STs also)
+	if (QualitySTC && ! track_isshort[ntracks]) {
+	  nshorttrackcandidates++;
+	  track_iscandidate[ntracks] = 1;
+	  if (isP) {nshorttrackcandidates_P++; track_ispixelonlycandidate[ntracks] = 1;}
+	  else if (isM) {nshorttrackcandidates_M++; track_ismediumcandidate[ntracks] = 1;}
+	  else {nshorttrackcandidates_L++; track_islongcandidate[ntracks] = 1;}	  
+	}
+
+	ntracks++;
+      } // End isotracks loop
 
       FillBabyNtuple();
 
@@ -3443,6 +3649,84 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
         BabyTree_->Branch("rebal_met_phi", &rebal_met_phi);
     }
 
+    // Short Track
+
+    BabyTree_->Branch("ntracks", &ntracks);
+    BabyTree_->Branch("nshorttracks", &nshorttracks);
+    BabyTree_->Branch("nshorttracks_P", &nshorttracks_P);
+    BabyTree_->Branch("nshorttracks_M", &nshorttracks_M);
+    BabyTree_->Branch("nshorttracks_L", &nshorttracks_L);
+    BabyTree_->Branch("nshorttrackcandidates", &nshorttrackcandidates);
+    BabyTree_->Branch("nshorttrackcandidates_P", &nshorttrackcandidates_P);
+    BabyTree_->Branch("nshorttrackcandidates_M", &nshorttrackcandidates_M);
+    BabyTree_->Branch("nshorttrackcandidates_L", &nshorttrackcandidates_L);
+    BabyTree_->Branch("track_pt", track_pt, "track_pt[ntracks]/F");
+    BabyTree_->Branch("track_ptErr", track_ptErr, "track_ptErr[ntracks]/F");
+    BabyTree_->Branch("track_eta", track_eta, "track_eta[ntracks]/F");
+    BabyTree_->Branch("track_phi", track_phi, "track_phi[ntracks]/F");
+    BabyTree_->Branch("track_charge", track_charge, "track_charge[ntracks]/I");
+    BabyTree_->Branch("track_dedxStrip", track_dedxStrip, "track_dedxStrip[ntracks]/F");
+    BabyTree_->Branch("track_dedxPixel", track_dedxPixel, "track_dedxPixel[ntracks]/F");
+    //    BabyTree_->Branch("track_nChi2", track_nChi2, "track_nChi2[ntracks]/F");
+    BabyTree_->Branch("track_ipSigXY", track_ipSigXY, "track_ipSigXY[ntracks]/F");
+    BabyTree_->Branch("track_dxy", track_dxy, "track_dxy[ntracks]/F");
+    BabyTree_->Branch("track_dxyErr", track_dxyErr, "track_dxyErr[ntracks]/F");
+    BabyTree_->Branch("track_dz", track_dz, "track_dz[ntracks]/F");
+    BabyTree_->Branch("track_dzErr", track_dzErr, "track_dzErr[ntracks]/F");
+    BabyTree_->Branch("track_isHighPurity", track_isHighPurity, "track_isHighPurity[ntracks]/I");
+    BabyTree_->Branch("track_DeadECAL", track_DeadECAL, "track_DeadECAL[ntracks]/I");
+    BabyTree_->Branch("track_DeadHCAL", track_DeadHCAL, "track_DeadHCAL[ntracks]/I");
+    BabyTree_->Branch("track_isshort", track_isshort, "track_isshort[ntracks]/I");
+    BabyTree_->Branch("track_iscandidate", track_iscandidate, "track_iscandidate[ntracks]/I");
+    BabyTree_->Branch("track_ispixelonly", track_ispixelonly, "track_ispixelonly[ntracks]/I");
+    BabyTree_->Branch("track_ismedium", track_ismedium, "track_ismedium[ntracks]/I");
+    BabyTree_->Branch("track_islong", track_islong, "track_islong[ntracks]/I");
+    BabyTree_->Branch("track_ispixelonlycandidate", track_ispixelonlycandidate, "track_ispixelonlycandidate[ntracks]/I");
+    BabyTree_->Branch("track_ismediumcandidate", track_ismediumcandidate, "track_ismediumcandidate[ntracks]/I");
+    BabyTree_->Branch("track_islongcandidate", track_islongcandidate, "track_islongcandidate[ntracks]/I");
+    BabyTree_->Branch("track_HitSignature", track_HitSignature, "track_HitSignature[ntracks]/I");
+    BabyTree_->Branch("track_nPixelHits", track_nPixelHits, "track_nPixelHits[ntracks]/I");
+    BabyTree_->Branch("track_nLostOuterHits", track_nLostOuterHits, "track_nLostOuterHits[ntracks]/I");
+    BabyTree_->Branch("track_nLostInnerPixelHits", track_nLostInnerPixelHits, "track_nLostInnerPixelHits[ntracks]/I");
+    BabyTree_->Branch("track_nLayersWithMeasurement", track_nLayersWithMeasurement, "track_nLayersWithMeasurement[ntracks]/I");
+    BabyTree_->Branch("track_nPixelLayersWithMeasurement", track_nPixelLayersWithMeasurement, "track_nPixelLayersWithMeasurement[ntracks]/I");
+    BabyTree_->Branch("track_nearestPF_id", track_nearestPF_id, "track_nearestPF_id[ntracks]/I");
+    BabyTree_->Branch("track_nearestPF_DR", track_nearestPF_DR, "track_nearestPF_DR[ntracks]/F");
+    BabyTree_->Branch("track_nearestPF_pt", track_nearestPF_pt, "track_nearestPF_pt[ntracks]/F");
+    BabyTree_->Branch("track_jetDR", track_jetDR, "track_jetDR[ntracks]/F");
+    BabyTree_->Branch("track_jetPt", track_jetPt, "track_jetPt[ntracks]/F");
+    BabyTree_->Branch("track_jetEta", track_jetEta, "track_jetEta[ntracks]/F");
+    BabyTree_->Branch("track_jetPhi", track_jetPhi, "track_jetPhi[ntracks]/F");
+    BabyTree_->Branch("track_chHIso0p3", track_chHIso0p3, "track_chHIso0p3[ntracks]/F");
+    BabyTree_->Branch("track_chHminiIso", track_chHminiIso, "track_chHminiIso[ntracks]/F");
+    BabyTree_->Branch("track_neuHIso0p3", track_neuHIso0p3, "track_neuHIso0p3[ntracks]/F");
+    BabyTree_->Branch("track_neuHminiIso", track_neuHminiIso, "track_neuHminiIso[ntracks]/F");
+    BabyTree_->Branch("track_phIso0p3", track_phIso0p3, "track_phIso0p3[ntracks]/F");
+    BabyTree_->Branch("track_phminiIso0p3", track_phminiIso, "track_phminiIso[ntracks]/F");
+    BabyTree_->Branch("track_isLepOverlap", track_isLepOverlap, "track_isLepOverlap[ntracks]/I");
+    BabyTree_->Branch("track_neuIso0p05", track_neuIso0p05, "track_neuIso0p05[ntracks]/F");
+    BabyTree_->Branch("track_neuRelIso0p05", track_neuRelIso0p05, "track_neuRelIso0p05[ntracks]/F");
+    BabyTree_->Branch("track_iso", track_iso, "track_iso[ntracks]/F");
+    BabyTree_->Branch("track_reliso", track_reliso, "track_reliso[ntracks]/F");
+    BabyTree_->Branch("track_isonomin", track_isonomin, "track_isonomin[ntracks]/F");
+    BabyTree_->Branch("track_relisonomin", track_relisonomin, "track_relisonomin[ntracks]/F");
+    BabyTree_->Branch("track_iso_uncorrected", track_iso_uncorrected, "track_iso_uncorrected[ntracks]/F");
+    BabyTree_->Branch("track_reliso_uncorrected", track_reliso_uncorrected, "track_reliso_uncorrected[ntracks]/F");
+    BabyTree_->Branch("track_iso_correction", track_iso_correction, "track_iso_correction[ntracks]/F");
+    BabyTree_->Branch("track_reliso_correction", track_reliso_correction, "track_reliso_correction[ntracks]/F");
+    BabyTree_->Branch("track_miniiso", track_miniiso, "track_miniiso[ntracks]/F");
+    BabyTree_->Branch("track_minireliso", track_minireliso, "track_minireliso[ntracks]/F");
+    BabyTree_->Branch("track_miniisonomin", track_miniisonomin, "track_miniisonomin[ntracks]/F");
+    BabyTree_->Branch("track_minirelisonomin", track_minirelisonomin, "track_minirelisonomin[ntracks]/F");
+    BabyTree_->Branch("track_miniiso_uncorrected", track_miniiso_uncorrected, "track_miniiso_uncorrected[ntracks]/F");
+    BabyTree_->Branch("track_minireliso_uncorrected", track_minireliso_uncorrected, "track_minireliso_uncorrected[ntracks]/F");
+    BabyTree_->Branch("track_miniiso_correction", track_miniiso_correction, "track_miniiso_correction[ntracks]/F");
+    BabyTree_->Branch("track_minireliso_correction", track_minireliso_correction, "track_minireliso_correction[ntracks]/F");
+    BabyTree_->Branch("track_isChargino", track_isChargino, "track_isChargino[ntracks]/I");
+    BabyTree_->Branch("track_genPdgId", track_genPdgId, "track_genPdgId[ntracks]/I");
+    BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
+    BabyTree_->Branch("track_nCharginos", &nCharginos);
+
     // also make counter histogram
     count_hist_ = new TH1D("Count","Count",1,0,2);
 
@@ -3949,6 +4233,85 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
     }
     
+    ntracks = -999;
+    nshorttracks = -999;
+    nshorttracks_P = -999;
+    nshorttracks_M = -999;
+    nshorttracks_L = -999;
+    nshorttrackcandidates = -999;
+    nshorttrackcandidates_P = -999;
+    nshorttrackcandidates_M = -999;
+    nshorttrackcandidates_L = -999;
+    
+    for (int i=0; i < maxntracks; i++){
+      track_pt[i] = -999;
+      track_ptErr[i] = -999;
+      track_eta[i] = -999;
+      track_phi[i] = -999;
+      track_charge[i] = -999;
+      track_dedxStrip[i] = -999;
+      track_dedxPixel[i] = -999;
+      //      track_nChi2[i] = -999;
+      track_ipSigXY[i] = -999;
+      track_dxy[i] = -999;
+      track_dxyErr[i] = -999;
+      track_dz[i] = -999;
+      track_dzErr[i] = -999;
+      track_isHighPurity[i] = -999;
+      track_DeadECAL[i] = 0;
+      track_DeadHCAL[i] = 0;
+      track_isshort[i] = 0;
+      track_iscandidate[i] = 0;
+      track_ispixelonly[i] = 0;
+      track_ismedium[i] = 0;
+      track_islong[i] = 0;
+      track_ispixelonlycandidate[i] = 0;
+      track_ismediumcandidate[i] = 0;
+      track_islongcandidate[i] = 0;
+      track_HitSignature[i] = -999;
+      track_nPixelHits[i] = -999;
+      track_nLostOuterHits[i] = -999;
+      track_nLostInnerPixelHits[i] = -999;
+      track_nLayersWithMeasurement[i] = -999;
+      track_nPixelLayersWithMeasurement[i] = -999;
+      track_nearestPF_id[i] = -999;
+      track_nearestPF_pt[i] = -999;
+      track_nearestPF_DR[i] = -999;
+      track_jetDR[i] = -999;
+      track_jetPt[i] = -999;
+      track_jetEta[i] = -999;
+      track_jetPhi[i] = -999;
+      track_chHIso0p3[i] = -999;
+      track_chHminiIso[i] = -999;
+      track_neuHIso0p3[i] = -999;
+      track_neuHminiIso[i] = -999;
+      track_phIso0p3[i] = -999;
+      track_phminiIso[i] = -999;
+      track_isLepOverlap[i] = -999;
+      track_neuIso0p05[i] = -999;
+      track_neuRelIso0p05[i] = -999;
+      track_iso[i] = -999;
+      track_reliso[i] = -999;
+      track_isonomin[i] = -999;
+      track_relisonomin[i] = -999;
+      track_iso_uncorrected[i] = -999;
+      track_reliso_uncorrected[i] = -999;
+      track_iso_correction[i] = -999;
+      track_reliso_correction[i] = -999;      
+      track_miniiso[i] = -999;
+      track_minireliso[i] = -999;
+      track_miniisonomin[i] = -999;
+      track_minirelisonomin[i] = -999;
+      track_miniiso_uncorrected[i] = -999;
+      track_minireliso_uncorrected[i] = -999;
+      track_miniiso_correction[i] = -999;
+      track_minireliso_correction[i] = -999;      
+      track_isChargino[i] = 0;
+      track_genPdgId[i] = -999;
+      track_genMatchDR[i] = -999;
+    }
+    nCharginos = 0;
+
     return;
   }
 
