@@ -175,22 +175,22 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2015D") && infile.Contains("05Oct2015"))                  sample = Form("data_Run2015D_05Oct2015_%s"  , outfileid.Data());
   else if (infile.Contains("Run2015D"))                                                  sample = Form("data_Run2015D_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016B_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2016B") && infile.Contains("23Sep2016"))                  sample = Form("data_Run2016B_23Sep2016_%s"  , outfileid.Data());
+  else if (infile.Contains("Run2016B") && infile.Contains("17Jul2018"))                  sample = Form("data_Run2016B_17Jul2018_%s"  , outfileid.Data());
   else if (infile.Contains("Run2016B"))                                                  sample = Form("data_Run2016B_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016C") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016C_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2016C") && infile.Contains("23Sep2016"))                  sample = Form("data_Run2016C_23Sep2016_%s"  , outfileid.Data());
+  else if (infile.Contains("Run2016C") && infile.Contains("17Jul2018"))                  sample = Form("data_Run2016C_17Jul2018_%s"  , outfileid.Data());
   else if (infile.Contains("Run2016C"))                                                  sample = Form("data_Run2016C_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016D") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016D_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2016D") && infile.Contains("23Sep2016"))                  sample = Form("data_Run2016D_23Sep2016_%s"  , outfileid.Data());
+  else if (infile.Contains("Run2016D") && infile.Contains("17Jul2018"))                  sample = Form("data_Run2016D_17Jul2018_%s"  , outfileid.Data());
   else if (infile.Contains("Run2016D"))                                                  sample = Form("data_Run2016D_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016E") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016E_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2016E") && infile.Contains("23Sep2016"))                  sample = Form("data_Run2016E_23Sep2016_%s"  , outfileid.Data());
+  else if (infile.Contains("Run2016E") && infile.Contains("17Jul2018"))                  sample = Form("data_Run2016E_17Jul2018_%s"  , outfileid.Data());
   else if (infile.Contains("Run2016E"))                                                  sample = Form("data_Run2016E_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016F") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016F_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2016F") && infile.Contains("23Sep2016"))                  sample = Form("data_Run2016F_23Sep2016_%s"  , outfileid.Data());
+  else if (infile.Contains("Run2016F") && infile.Contains("17Jul2018"))                  sample = Form("data_Run2016F_17Jul2018_%s"  , outfileid.Data());
   else if (infile.Contains("Run2016F"))                                                  sample = Form("data_Run2016F_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016G") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016G_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2016G") && infile.Contains("23Sep2016"))                  sample = Form("data_Run2016G_23Sep2016_%s"  , outfileid.Data());
+  else if (infile.Contains("Run2016G") && infile.Contains("17Jul2018"))                  sample = Form("data_Run2016G_17Jul2018_%s"  , outfileid.Data());
   else if (infile.Contains("Run2016G"))                                                  sample = Form("data_Run2016G_%s"            , outfileid.Data());
   else if (infile.Contains("Run2016H") && infile.Contains("PromptReco"))                 sample = Form("data_Run2016H_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2016H"))                                                  sample = Form("data_Run2016H_%s"            , outfileid.Data());
@@ -199,13 +199,14 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2017D") && infile.Contains("PromptReco"))                 sample = Form("data_Run2017D_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2017E") && infile.Contains("PromptReco"))                 sample = Form("data_Run2017E_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2017F") && infile.Contains("PromptReco"))                 sample = Form("data_Run2017F_PromptReco_%s" , outfileid.Data());
-  else if (infile.Contains("Run2017B") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017B_31Mar2018_%s" , outfileid.Data());
-  else if (infile.Contains("Run2017C") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017C_31Mar2018_%s" , outfileid.Data());
-  else if (infile.Contains("Run2017D") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017D_31Mar2018_%s" , outfileid.Data());
-  else if (infile.Contains("Run2017E") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017E_31Mar2018_%s" , outfileid.Data());
-  else if (infile.Contains("Run2017F") && infile.Contains("31Mar2018"))                 sample = Form("data_Run2017F_31Mar2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017B") && infile.Contains("31Mar2018"))                  sample = Form("data_Run2017B_31Mar2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017C") && infile.Contains("31Mar2018"))                  sample = Form("data_Run2017C_31Mar2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017D") && infile.Contains("31Mar2018"))                  sample = Form("data_Run2017D_31Mar2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017E") && infile.Contains("31Mar2018"))                  sample = Form("data_Run2017E_31Mar2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2017F") && infile.Contains("31Mar2018"))                  sample = Form("data_Run2017F_31Mar2018_%s" , outfileid.Data());
   else if (infile.Contains("Run2018A") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018A_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2018B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018B_PromptReco_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018C") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018C_PromptReco_%s" , outfileid.Data());
 
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
@@ -215,12 +216,14 @@ int main(int argc, char **argv) {
   bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast"));
 
   string config_tag = "";
-  if(infile.Contains("Run2016") && infile.Contains("03Feb2017"))       config_tag = "data_2016_Moriond17";
+  if     (infile.Contains("Run2016") && infile.Contains("03Feb2017"))  config_tag = "data_2016_Moriond17";
+  else if(infile.Contains("Run2016") && infile.Contains("17Jul2018"))  config_tag = "data_2016_94x";
   else if(infile.Contains("Run2017") && infile.Contains("PromptReco")) config_tag = "data_2017_Prompt";
   else if(infile.Contains("Run2017") && infile.Contains("31Mar2018"))  config_tag = "data_2017_31Mar2018";
   else if(infile.Contains("Run2018") && infile.Contains("PromptReco")) config_tag = "data_2018_Prompt";
   else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Moriond17";
   else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";
+  else if(infile.Contains("101X_upgrade2018"))                         config_tag = "mc_94x_Fall17";
   else{
       std::cout << "[processBaby] ERROR! could not determine correct configuration to use" << std::endl;
       return 1;

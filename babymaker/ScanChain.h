@@ -206,17 +206,17 @@ class babyMaker {
   Int_t           Flag_eeBadScFilter;
   Int_t           Flag_ecalBadCalibFilter;
   Int_t           Flag_badMuonFilter;
-  Int_t           Flag_badMuonFilterV2;  
+  Int_t           Flag_badMuonFilter2016;  
   Int_t           Flag_badMuons;  
   Int_t           Flag_duplicateMuons;  
   Int_t           Flag_noBadMuons;  
   Int_t           Flag_badChargedCandidateFilter;
-  Int_t           Flag_badChargedHadronFilter;
-  Int_t           Flag_badChargedHadronFilterV2;  
+  Int_t           Flag_badChargedHadronFilter2016;  
   Int_t           Flag_METFilters;  
 
 //----- TRIGGER 
   Int_t           HLT_PFHT1050;   
+  Int_t           HLT_PFHT900;   
   Int_t           HLT_PFMET170;
   Int_t           HLT_PFHT300_PFMET100;   
   Int_t           HLT_PFHT300_PFMET110;   
@@ -273,6 +273,12 @@ class babyMaker {
   Int_t           HLT_PFHT680_Prescale;   
   Int_t           HLT_PFHT780_Prescale;   
   Int_t           HLT_PFHT890_Prescale;   
+  Int_t           HLT_PFHT125_Prescale;   
+  Int_t           HLT_PFHT200_Prescale;   
+  Int_t           HLT_PFHT300_Prescale;   
+  Int_t           HLT_PFHT350_Prescale;   
+  Int_t           HLT_PFHT475_Prescale;   
+  Int_t           HLT_PFHT600_Prescale; 
   Int_t           HLT_DiCentralPFJet70_PFMET120;
   Int_t           HLT_DiCentralPFJet55_PFMET110;
 

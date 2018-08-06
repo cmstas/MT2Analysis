@@ -106,12 +106,12 @@ int main(int argc, char **argv) {
   
   for (unsigned int idx = 0; idx < samples.size(); idx++) {
     // TString infile = Form("%s/%s*.root",input_dir.c_str(),sample.c_str());
-    TString infile = Form("%s/%s.root",input_dir.c_str(),samples.at(idx).c_str());
+    TString infile = Form("%s/%s*root",input_dir.c_str(),samples.at(idx).c_str());
     ch->Add(infile);
-    if (ch->GetEntries() == 0) {
-      std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
+  }
+  if (ch->GetEntries() == 0) {
+      std::cout << Form("ERROR: no entries in chain. indir/sample is: %s/%s",input_dir.c_str(), sample.c_str()) << std::endl;
       return 2;
-    }
   }
   
   SmearLooper *looper = new SmearLooper();

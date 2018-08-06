@@ -7,6 +7,7 @@
 FILEID=$1
 FILE=$2
 COPYDIR=$3
+DOREBAL=$4
 
 echo "[wrapper] FILEID    = " ${FILEID}
 echo "[wrapper] FILE      = " ${FILE}
@@ -76,7 +77,7 @@ tar -zxf input.tar.gz
 #source job_input/setupenv.sh
 #printenv
 
-cd job_input
+# cd job_input
 echo "[wrapper] input contents are"
 ls -a
 
@@ -88,14 +89,14 @@ ls
 #
 echo "[wrapper] running: ./processBaby ${FILEID} ${FILE}"
 
-./processBaby ${FILEID} ${FILE}
+./processBaby ${FILEID} ${FILE} -1 ${DOREBAL}
 
 #
 # do something with output
 #
 
 echo "[wrapper] output is"
-ls
+ls -lh
 
 #
 # clean up
@@ -110,6 +111,7 @@ if [ ! -d "${COPYDIR}" ]; then
     mkdir ${COPYDIR}
 fi
 
+export LD_PRELOAD=/usr/lib64/gfal2-plugins/libgfal_plugin_xrootd.so
 gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/${OUTPUT}
 
 echo "[wrapper] cleaning up"

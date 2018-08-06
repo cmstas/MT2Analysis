@@ -2,24 +2,14 @@
 
 make -j12
 
-#INDIR=/nfs-6/userdata/mt2/Spring15_QCD_MG_RebalanceAndSmear_25nsV2_MC_JEC
-#OUTDIR=output/MC_controlRegions_579pb
-#declare -a Samples=(qcd_ht2000toInf qcd_ht1500to2000 qcd_ht1000to1500 qcd_ht300to500 qcd_ht700to1000 qcd_ht500to700)
+INDIR=/hadoop/cms/store/user/bemarsh/mt2babies/RebalanceAndSmear_V00-09-02_29p02fb_data_Run2017C_JetHT_PromptReco-v2
 
-# INDIR=/nfs-6/userdata/mt2/RebalanceAndSmear_V00-08-14_data_rereco_skim
-# INDIR=/hadoop/cms/store/user/bemarsh/mt2babies/merged/RebalanceAndSmear_V00-08-12
-INDIR=/hadoop/cms/store/user/bemarsh/mt2babies//RebalanceAndSmear_V00-08-12_data_rereco_data_Run2016B_JetHT_23Sep2016 
-# REBALDIR=../RebalanceLooper/output/mt2babies_withPUID_withBTAG_forEWK_allEvents
-# OUTDIR=output/RebalanceAndSmear_V00-08-12_noRS
-
-# INDIR=..
-# REBALDIR=../RebalanceLooper/output/test
 OUTDIR=output/test
 
 LOGDIR=logs
 
 # declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
-declare -a Samples=(data_Run2016B_23Sep2016_merged_ntuple_786)
+declare -a Samples=(data_Run2017C_PromptReco_merged_ntuple_9)
 # declare -a Samples=(data_Run2016B_23Sep2016_merged_ntuple_397 data_Run2016B_23Sep2016_merged_ntuple_398 data_Run2016B_23Sep2016_merged_ntuple_399 data_Run2016B_23Sep2016_merged_ntuple_4 data_Run2016B_23Sep2016_merged_ntuple_40 data_Run2016B_23Sep2016_merged_ntuple_400 data_Run2016B_23Sep2016_merged_ntuple_401 data_Run2016B_23Sep2016_merged_ntuple_402 data_Run2016B_23Sep2016_merged_ntuple_403 data_Run2016B_23Sep2016_merged_ntuple_404)
 
 # declare -a Samples=(ttsl ttdl wjets_ht100to200 wjets_ht200to400 wjets_ht400to600 wjets_ht600to800 wjets_ht800to1200 wjets_ht1200to2500 wjets_ht2500toInf )
@@ -32,5 +22,5 @@ mkdir -p ${LOGDIR}
 
 for SAMPLE in ${Samples[@]};
   do echo ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}
-  nohup nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR}  -l 1 -r -n 100 -d >& ${LOGDIR}/log_${SAMPLE}.txt&
+  nohup nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${OUTDIR} -b -r -l 3 -n 100 >& ${LOGDIR}/log_${SAMPLE}.txt&
 done

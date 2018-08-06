@@ -20,7 +20,9 @@ int sampleID (const string& name) {
     else if (name.find("SinglePhoton") != string::npos) return 7;
     else if (name.find("SingleMuon") != string::npos) return 8;
     else if (name.find("SingleElectron") != string::npos) return 9;
+    else if (name.find("EGamma") != string::npos) return 10;
   }
+
   
   if (name.find("QCD") != string::npos) {
     if ((name.find("QCD_Pt-15to3000") != string::npos) || (name.find("QCD_Pt_15to3000") != string::npos)) return 101;
@@ -84,6 +86,9 @@ int sampleID (const string& name) {
     else if (name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
     else if (name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
     else if (name.find("TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8") != string::npos) return 306;
+
+    else if (name.find("TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8") != string::npos) return 301;
+    else if (name.find("TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8") != string::npos) return 303;
     
     else if (name.find("TTJets_HT-600to800") != string::npos) return 311;
     else if (name.find("TTJets_HT-800to1200") != string::npos) return 312;
@@ -98,6 +103,13 @@ int sampleID (const string& name) {
   else if (name.find("TBarToLeptons_s-channel") != string::npos) return 403;
   else if (name.find("TBarToLeptons_t-channel") != string::npos) return 404;
   else if (name.find("Tbar_tW-channel") != string::npos) return 405;
+
+  else if (name.find("ST_s-channel_4f") != string::npos) return 400;
+  else if (name.find("ST_t-channel_top") != string::npos) return 401;
+  else if (name.find("ST_tW_top") != string::npos) return 402;
+  else if (name.find("ST_t-channel_antitop") != string::npos) return 404;
+  else if (name.find("ST_tW_antitop") != string::npos) return 405;
+
   // amcatnlo
   else if (name.find("TTWToLNu") != string::npos) return 410; 
   else if (name.find("TTWToQQ") != string::npos) return 411; 

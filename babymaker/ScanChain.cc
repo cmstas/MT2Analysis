@@ -354,9 +354,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
       //TRIGGER - check first to enable cuts
       HLT_PFHT1050        = passHLTTriggerPattern("HLT_PFHT1050_v");
-      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
+      HLT_PFHT900         = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_PFMET170          = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
       HLT_PFHT300_PFMET100  = passHLTTriggerPattern("HLT_PFHT300_PFMET100_v"); 
-      HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); 
+      HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); // 2016
       HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
       HLT_PFHT500_PFMET100_PFMHT100 = passHLTTriggerPattern("HLT_PFHT500_PFMET100_PFMHT100_IDTight_v");
@@ -378,8 +379,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       HLT_PFMET140_PFMHT140         = passHLTTriggerPattern("HLT_PFMET140_PFMHT140_IDTight_v");
       HLT_PFMET100_PFMHT100_PFHT60  = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_PFHT60_v");
       HLT_PFMET120_PFMHT120_PFHT60  = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v");
-      HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v");
-      HLT_PFJet500        = passHLTTriggerPattern("HLT_PFJet500_v");
+      HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v"); // 2016
+      HLT_PFJet500        = passHLTTriggerPattern("HLT_PFJet500_v"); // 2017,18
       HLT_ECALHT800       = passHLTTriggerPattern("HLT_ECALHT800_v");
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
@@ -389,46 +390,54 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       HLT_SingleMu_NonIso     = passHLTTriggerPattern("HLT_Mu50_v") || passHLTTriggerPattern("HLT_TkMu50_v") ||
 	passHLTTriggerPattern("HLT_Mu55_v");
       HLT_SingleEl     = 
-        passHLTTriggerPattern("HLT_Ele27_WPTight_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele32_WPTight_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele35_WPTight_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele38_WPTight_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v");
-      HLT_SingleEl_NonIso     = passHLTTriggerPattern("HLT_Ele105_CaloIdVT_GsfTrkIdT_v") ||
-	passHLTTriggerPattern("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") ||
-	passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_MW_v");
-      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") || 
-          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-          passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_v") ||
-        passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
-        passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");
+          passHLTTriggerPattern("HLT_Ele27_eta2p1_WPTight_Gsf_v") || // 2016
+          passHLTTriggerPattern("HLT_Ele32_eta2p1_WPTight_Gsf_v") || // 2016
+          passHLTTriggerPattern("HLT_Ele27_WPTight_Gsf_v") ||
+          passHLTTriggerPattern("HLT_Ele32_WPTight_Gsf_v") ||  // 2017,18
+          passHLTTriggerPattern("HLT_Ele35_WPTight_Gsf_v") ||  // 2017,18
+          passHLTTriggerPattern("HLT_Ele38_WPTight_Gsf_v") ||  // 2017,18
+          passHLTTriggerPattern("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"); // 2016
+      HLT_SingleEl_NonIso     = passHLTTriggerPattern("HLT_Ele105_CaloIdVT_GsfTrkIdT_v") || //2016
+          passHLTTriggerPattern("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");  // 2017,18
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); // 2016,17,18
+      HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") || // 2016
+          passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_MW_v");  // 2016,17,18
+      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") || // 2016,17,18
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); // 2016,17,18
+      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_v") || // 2016,17,18
+          passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || // 2016
+          passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");  // 2016
       HLT_Mu12_EleX = passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
-          passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_Mu30_Ele30_NonIso = passHLTTriggerPattern("HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v");
-      HLT_Mu33_Ele33_NonIso = passHLTTriggerPattern("HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v");
-      HLT_Mu37_Ele27_NonIso = passHLTTriggerPattern("HLT_Mu37_Ele27_CaloIdL_MW_v");
-      HLT_Mu27_Ele37_NonIso = passHLTTriggerPattern("HLT_Mu27_Ele37_CaloIdL_MW_v");
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
-	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
-	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||
-        passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") ||
-	passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_v") ||
-	passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_v") ||
-        passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8_v");
-      HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu37_TkMu27_v");
+          passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v"); // 2017,18
+      HLT_Mu30_Ele30_NonIso = passHLTTriggerPattern("HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v"); // 2016
+      HLT_Mu33_Ele33_NonIso = passHLTTriggerPattern("HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v"); // 2016
+      HLT_Mu37_Ele27_NonIso = passHLTTriggerPattern("HLT_Mu37_Ele27_CaloIdL_MW_v"); // 2017,18
+      HLT_Mu27_Ele37_NonIso = passHLTTriggerPattern("HLT_Mu27_Ele37_CaloIdL_MW_v"); // 2017,18
+      HLT_DoubleMu     = 
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||    // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||  // 2016
+          passHLTTriggerPattern("HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") || //2017,18
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") ||   //2017,18
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") ||
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_v") ||
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_v") ||
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8_v");
+      HLT_DoubleMu_NonIso     = 
+          passHLTTriggerPattern("HLT_Mu30_TkMu11_v") || // 2016 
+          passHLTTriggerPattern("HLT_Mu40_TkMu11_v") || // 2016
+          passHLTTriggerPattern("HLT_Mu37_TkMu27_v");   // 2017,18
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
-      HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
+      HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); // 2017,18
       HLT_Photon175_Prescale = passHLTTriggerPattern("HLT_Photon175_v") ? HLT_prescale(triggerName("HLT_Photon175_v"), false) : 0; 
-      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
+      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); // 2016
       HLT_Photon250_NoHE = passHLTTriggerPattern("HLT_Photon250_NoHE_v"); 
+      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
+      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
+      /* 2017,18 prescaled HT triggers */
       HLT_PFHT180_Prescale  = passHLTTriggerPattern("HLT_PFHT180_v") ? HLT_prescale(triggerName("HLT_PFHT180_v"), true) : 0; 
       HLT_PFHT250_Prescale  = passHLTTriggerPattern("HLT_PFHT250_v") ? HLT_prescale(triggerName("HLT_PFHT250_v"), true) : 0; 
       HLT_PFHT370_Prescale  = passHLTTriggerPattern("HLT_PFHT370_v") ? HLT_prescale(triggerName("HLT_PFHT370_v"), true) : 0; 
@@ -438,8 +447,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       HLT_PFHT680_Prescale  = passHLTTriggerPattern("HLT_PFHT680_v") ? HLT_prescale(triggerName("HLT_PFHT680_v"), false) : 0; 
       HLT_PFHT780_Prescale  = passHLTTriggerPattern("HLT_PFHT780_v") ? HLT_prescale(triggerName("HLT_PFHT780_v"), false) : 0; 
       HLT_PFHT890_Prescale  = passHLTTriggerPattern("HLT_PFHT890_v") ? HLT_prescale(triggerName("HLT_PFHT890_v"), false) : 0; 
-      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
-      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
+      /* 2016 prescaled HT triggers */
+      HLT_PFHT125_Prescale  = passHLTTriggerPattern("HLT_PFHT125_v") ? HLT_prescale(triggerName("HLT_PFHT125_v")) : 0; 
+      HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0; 
+      HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0; 
+      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v") ? HLT_prescale(triggerName("HLT_PFHT350_v")) : 0; 
+      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v") ? HLT_prescale(triggerName("HLT_PFHT475_v")) : 0; 
+      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v") ? HLT_prescale(triggerName("HLT_PFHT600_v")) : 0;
 
       if (!isData && applyTriggerCuts && !(HLT_PFHT1050 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
             || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
@@ -605,28 +619,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
-        if(baby_name.find("2017") != string::npos || baby_name.find("2018") != string::npos){
-            Flag_ecalBadCalibFilter                         = cms3.filt_ecalBadCalibFilter();
-            Flag_badMuonFilter           = cms3.filt_BadPFMuonFilter();
-            Flag_badChargedCandidateFilter  = cms3.filt_BadChargedCandidateFilter();
-        }
-	// inputs for badMuonFilters in latest cms3 tags
-	if (recent_cms3_version || isCMS4) {
-	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
-	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
-          // Flag_badMuonFilter                            = badMuonFilter();
-          // Flag_badMuonFilterV2                          = badMuonFilterV2();         
-	  // if (small_cms3_version >= 18) {
-	  //   Flag_badMuons                                 = cms3.filt_badMuons();
-	  //   Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
-	  //   Flag_noBadMuons                               = cms3.filt_noBadMuons();
-	  // }
-          // Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
-	}
-	// Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
-	// necessary?
-	Flag_METFilters                               = cms3.filt_metfilter();
+        Flag_ecalBadCalibFilter                       = cms3.filt_ecalBadCalibFilter();
+        Flag_badMuonFilter                          = cms3.filt_BadPFMuonFilter();
+        Flag_badChargedCandidateFilter                = cms3.filt_BadChargedCandidateFilter();
+        Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+        Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
+        // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
+        // since we don't store all PFCands. Should now just be able to use the filters from miniAOD above
+        Flag_badMuonFilter2016                        = badMuonFilterV2();         
+        Flag_badChargedHadronFilter2016               = badChargedCandidateFilterV2();          
       }
+      Flag_METFilters                               = cms3.filt_metfilter();
       
       // gen block -- for MC only
       ngenPart = 0;
@@ -2036,9 +2039,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	  // check for bad fastsim jets
 	  if (isFastsim && isBadFastsimJet(iJet)) ++nJet20BadFastsim;
-	  
+
           // first check jet ID - count the number of jets that fail.  Don't apply for fastsim
-          if(!isTightPFJet_2017_v1(iJet) && !isFastsim) {
+          bool passJetID = true;
+          if(config_.jet_id == "50nsV1")
+              passJetID = isLoosePFJet_50nsV1(iJet);
+          else if(config_.jet_id == "2017_v1")
+              passJetID = isTightPFJet_2017_v1(iJet);
+          else
+              cout << "WARNING! unknown jet ID '" << config_.jet_id << "'! Assuming all jets pass for now. Fix your config." << endl;
+          if(passJetID && !isFastsim) {
             if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
             if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
             if (!isOverlapJetGamma) {
@@ -3026,15 +3036,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
     BabyTree_->Branch("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter );
     BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
-    BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 ); 
+    BabyTree_->Branch("Flag_badMuonFilter2016", &Flag_badMuonFilter2016 ); 
     BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
     BabyTree_->Branch("Flag_duplicateMuons", &Flag_duplicateMuons );   
     BabyTree_->Branch("Flag_noBadMuons", &Flag_noBadMuons );  
     BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
-    BabyTree_->Branch("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter );
-    BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
+    BabyTree_->Branch("Flag_badChargedHadronFilter2016", &Flag_badChargedHadronFilter2016 );    
     BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
     BabyTree_->Branch("HLT_PFHT1050", &HLT_PFHT1050 );
+    BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
     BabyTree_->Branch("HLT_PFHT500_PFMET100_PFMHT100", &HLT_PFHT500_PFMET100_PFMHT100 ); 
     BabyTree_->Branch("HLT_PFHT700_PFMET85_PFMHT85", &HLT_PFHT700_PFMET85_PFMHT85 );
     BabyTree_->Branch("HLT_PFHT800_PFMET75_PFMHT75", &HLT_PFHT800_PFMET75_PFMHT75 );
@@ -3091,6 +3101,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     BabyTree_->Branch("HLT_PFHT680_Prescale", &HLT_PFHT680_Prescale );
     BabyTree_->Branch("HLT_PFHT780_Prescale", &HLT_PFHT780_Prescale );
     BabyTree_->Branch("HLT_PFHT890_Prescale", &HLT_PFHT890_Prescale );
+    BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
+    BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+    BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
+    BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+    BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+    BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
     BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
     BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
     BabyTree_->Branch("nlep", &nlep, "nlep/I" );
@@ -3106,6 +3122,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     BabyTree_->Branch("lep_heepId", lep_heepId, "lep_heepId[nlep]/I" );
     BabyTree_->Branch("lep_highPtFit_pt", lep_highPtFit_pt, "lep_highPtFit_pt[nlep]/F");
     BabyTree_->Branch("lep_highPtFit_eta", lep_highPtFit_eta, "lep_highPtFit_eta[nlep]/F" );
+    BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
+    BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+    BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
+    BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+    BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+    BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+    BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
+    BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+    BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
+    BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+    BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+    BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
     BabyTree_->Branch("lep_highPtFit_phi", lep_highPtFit_phi, "lep_highPtFit_phi[nlep]/F" );
     BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
     BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
@@ -3498,15 +3526,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     Flag_eeBadScFilter = -999;
     Flag_ecalBadCalibFilter = -999;
     Flag_badMuonFilter = -999;
-    Flag_badMuonFilterV2 = -999;    
+    Flag_badMuonFilter2016 = -999;    
     Flag_badMuons = -999;    
     Flag_duplicateMuons = -999;    
     Flag_noBadMuons = -999;    
     Flag_badChargedCandidateFilter = -999;
-    Flag_badChargedHadronFilter = -999;
-    Flag_badChargedHadronFilterV2 = -999;    
+    Flag_badChargedHadronFilter2016 = -999;    
     Flag_METFilters = -999;
     HLT_PFHT1050 = -999;
+    HLT_PFHT900 = -999;
     HLT_PFHT500_PFMET100_PFMHT100 = -999;
     HLT_PFHT700_PFMET85_PFMHT85 = -999;
     HLT_PFHT800_PFMET75_PFMHT75 = -999;
@@ -3563,6 +3591,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     HLT_PFHT680_Prescale = -999;
     HLT_PFHT780_Prescale = -999;
     HLT_PFHT890_Prescale = -999;
+    HLT_PFHT125_Prescale = -999;
+    HLT_PFHT200_Prescale = -999;
+    HLT_PFHT300_Prescale = -999;
+    HLT_PFHT350_Prescale = -999;
+    HLT_PFHT475_Prescale = -999;
+    HLT_PFHT600_Prescale = -999;
     HLT_DiCentralPFJet70_PFMET120 = -999;
     HLT_DiCentralPFJet55_PFMET110 = -999;
     nlep = -999;

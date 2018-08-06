@@ -39,13 +39,14 @@ MT2Configuration GetMT2Config(std::string tag){
     c.filters["badMuonFilterV2"] = false;
     c.filters["badChargedHadronFilterV2"] = false;
 
-    if(tag == "data_2016_Moriond17"){
+    if(tag == "data_2016_94x"){
 
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.92;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btag_med_threshold = 0.8484;
         c.ea_version         = 1;
+        c.jet_id             = "50nsV1";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
@@ -54,13 +55,65 @@ MT2Configuration GetMT2Config(std::string tag){
         c.JECs.push_back(std::pair<std::string, std::string> ("2016G", "Summer16_23Sep2016GV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016H", "Summer16_23Sep2016HV4_DATA"));
         c.filters["eeBadScFilter"] = true;
-        c.filters["globalTightHalo2016Filter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["badMuonFilterV2"] = true;
-        c.filters["badChargedHadronFilterV2"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
+        c.triggers["SR"] = std::vector<std::string> ();
+        c.triggers["SR"].push_back("PFHT900");
+        c.triggers["SR"].push_back("PFJet450");
+        c.triggers["SR"].push_back("PFHT300_PFMET110");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120");
+        c.triggers["Photon"] = std::vector<std::string> ();
+        c.triggers["Photon"].push_back("Photon165_HE10");
+        c.triggers["DilepSF"] = std::vector<std::string> ();
+        c.triggers["DilepSF"].push_back("DoubleEl");
+        c.triggers["DilepSF"].push_back("DoubleMu");
+        c.triggers["DilepSF"].push_back("Photon165_HE10");
+        c.triggers["DilepSF"].push_back("DoubleMu_NonIso");
+        c.triggers["DilepSF"].push_back("SingleMu_NonIso");
+        c.triggers["DilepSF"].push_back("DoubleEl33");
+        c.triggers["SingleMu"] = std::vector<std::string> ();
+        c.triggers["SingleMu"].push_back("SingleMu");
+        c.triggers["SingleMu"].push_back("SingleMu_NonIso");
+        c.triggers["SingleEl"] = std::vector<std::string> ();
+        c.triggers["SingleEl"].push_back("SingleEl");
+        c.triggers["SingleEl"].push_back("SingleEl_NonIso");
+        c.triggers["DilepOF"] = std::vector<std::string> ();
+        c.triggers["DilepOF"].push_back("MuX_Ele12");
+        c.triggers["DilepOF"].push_back("Mu8_EleX");
+        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
+        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
+        c.triggers["DilepOF"].push_back("Photon165_HE10");
+        c.triggers["DilepOF"].push_back("SingleMu_NonIso");
+
+    }else if(tag == "data_2016_Moriond17"){
+
+        c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
+        c.lumi               = 35.92;
+        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
+        c.btag_med_threshold = 0.8484;
+        c.ea_version         = 1;
+        c.jet_id             = "50nsV1";
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016E", "Summer16_23Sep2016EFV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016F", "Summer16_23Sep2016EFV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016G", "Summer16_23Sep2016GV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016H", "Summer16_23Sep2016HV4_DATA"));
+        c.filters["eeBadScFilter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT900");
         c.triggers["SR"].push_back("PFJet450");
@@ -97,13 +150,14 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
         c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V6_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017C", "Fall17_17Nov2017C_V6_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017D", "Fall17_17Nov2017D_V6_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017E", "Fall17_17Nov2017E_V6_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017F", "Fall17_17Nov2017F_V6_DATA"));
         c.filters["eeBadScFilter"] = true;
-        c.filters["globalTightHalo2016Filter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
@@ -138,8 +192,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("MuX_Ele12");
         c.triggers["DilepOF"].push_back("Mu8_EleX");
         c.triggers["DilepOF"].push_back("Mu12_EleX");
-        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
-        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
         c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
         c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
         c.triggers["DilepOF"].push_back("Photon200");
@@ -152,6 +204,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
         c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016HV4_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -186,8 +239,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("MuX_Ele12");
         c.triggers["DilepOF"].push_back("Mu8_EleX");
         c.triggers["DilepOF"].push_back("Mu12_EleX");
-        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
-        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
         c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
         c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
         c.triggers["DilepOF"].push_back("Photon200");
@@ -200,9 +251,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btag_med_threshold = 0.8838;
         c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V6_DATA"));
         c.filters["eeBadScFilter"] = true;
-        c.filters["globalTightHalo2016Filter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
@@ -237,8 +289,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("MuX_Ele12");
         c.triggers["DilepOF"].push_back("Mu8_EleX");
         c.triggers["DilepOF"].push_back("Mu12_EleX");
-        c.triggers["DilepOF"].push_back("Mu30_Ele30_NonIso");
-        c.triggers["DilepOF"].push_back("Mu33_Ele33_NonIso");
         c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
         c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
         c.triggers["DilepOF"].push_back("Photon200");
@@ -251,8 +301,9 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
+        c.jet_id             = "50nsV1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
-        c.filters["globalTightHalo2016Filter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
@@ -267,8 +318,9 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold = 0.8838;
         c.pu_weights_file    = "puWeight2017.root";
         c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V4_MC"));
-        c.filters["globalTightHalo2016Filter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
