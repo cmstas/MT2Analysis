@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <map>
-#include <bitset>
 #include <vector>
 
 // ROOT
