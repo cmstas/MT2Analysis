@@ -15,7 +15,6 @@
 #include "Math/LorentzVector.h"
 #include "Math/GenVector/LorentzVector.h"
 
-// TODO: add this file and get everything working
 #include "../MT2CORE/RebalSmear/JRTreader.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
@@ -28,13 +27,13 @@ class babyMaker {
 
  public:
 
-  babyMaker() : doRecomputeRawPFMET_(false) {};
+   babyMaker() : doRecomputeRawPFMET_(false), doRebal(false) {};
   ~babyMaker() {
     delete BabyFile_;
     delete BabyTree_;
   };
 
-  void ScanChain(TChain*, std::string = "testSample", bool isFastsim = false, int max_events = -1);
+  void ScanChain(TChain*, std::string sample, const std::string config_tag, bool isFastsim = false, int max_events = -1);
 
   void MakeBabyNtuple(const char *);
   void InitBabyNtuple();
@@ -42,7 +41,9 @@ class babyMaker {
   void CloseBabyNtuple();
 
   void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
-
+  void SetDoRebal(bool flag) {doRebal = flag;}
+    
+  //functiuon to minimize for rebalancing
   static void minuitFunction(int& nDim, double* gout, double& result, double par[], int flg);
   JRTreader rebal_reader;
 
@@ -58,6 +59,7 @@ class babyMaker {
   bool isDataFromFileName;
   bool isPromptReco;
   bool doRecomputeRawPFMET_;
+  bool doRebal;
 
   // for btag SFs
   BTagCalibration* calib;
@@ -204,17 +206,17 @@ class babyMaker {
   Int_t           Flag_eeBadScFilter;
   Int_t           Flag_ecalBadCalibFilter;
   Int_t           Flag_badMuonFilter;
-  Int_t           Flag_badMuonFilterV2;  
+  Int_t           Flag_badMuonFilter2016;  
   Int_t           Flag_badMuons;  
   Int_t           Flag_duplicateMuons;  
   Int_t           Flag_noBadMuons;  
   Int_t           Flag_badChargedCandidateFilter;
-  Int_t           Flag_badChargedHadronFilter;
-  Int_t           Flag_badChargedHadronFilterV2;  
+  Int_t           Flag_badChargedHadronFilter2016;  
   Int_t           Flag_METFilters;  
 
 //----- TRIGGER 
   Int_t           HLT_PFHT1050;   
+  Int_t           HLT_PFHT900;   
   Int_t           HLT_PFMET170;
   Int_t           HLT_PFHT300_PFMET100;   
   Int_t           HLT_PFHT300_PFMET110;   
@@ -271,6 +273,12 @@ class babyMaker {
   Int_t           HLT_PFHT680_Prescale;   
   Int_t           HLT_PFHT780_Prescale;   
   Int_t           HLT_PFHT890_Prescale;   
+  Int_t           HLT_PFHT125_Prescale;   
+  Int_t           HLT_PFHT200_Prescale;   
+  Int_t           HLT_PFHT300_Prescale;   
+  Int_t           HLT_PFHT350_Prescale;   
+  Int_t           HLT_PFHT475_Prescale;   
+  Int_t           HLT_PFHT600_Prescale; 
   Int_t           HLT_DiCentralPFJet70_PFMET120;
   Int_t           HLT_DiCentralPFJet55_PFMET110;
 
@@ -526,11 +534,12 @@ class babyMaker {
   Float_t         jet_mass[max_njet];   //[njet]
   Float_t         jet_btagCSV[max_njet];   //[njet] 
   Float_t         jet_btagMVA[max_njet];   //[njet]
-  Float_t         jet_chFrac[max_njet];   //[njet]
-  Float_t         jet_nhFrac[max_njet];   //[njet]
-  Float_t         jet_cemFrac[max_njet];   //[njet]
-  Float_t         jet_nemFrac[max_njet];   //[njet]
-  Float_t         jet_muFrac[max_njet];   //[njet]
+  Float_t         jet_btagDeepCSV[max_njet];   //[njet]
+  Float_t         jet_chf[max_njet];   //[njet]
+  Float_t         jet_nhf[max_njet];   //[njet]
+  Float_t         jet_cemf[max_njet];   //[njet]
+  Float_t         jet_nemf[max_njet];   //[njet]
+  Float_t         jet_muf[max_njet];   //[njet]
   Float_t         jet_rawPt[max_njet];   //[njet]
   Float_t         jet_mcPt[max_njet];   //[njet]
   Int_t           jet_mcFlavour[max_njet];   //[njet]
@@ -539,7 +548,8 @@ class babyMaker {
   Float_t         jet_area[max_njet];   //[njet]
   Int_t           jet_id[max_njet];   //[njet]
   Int_t           jet_puId[max_njet];   //[njet]
-  Float_t         jet_muf[max_njet];   //[njet]
+  Int_t           good_jet_idxs[max_njet];   //[njet]
+  Int_t           good_bjet_idxs[max_njet];   //[njet]
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;
@@ -629,7 +639,7 @@ class babyMaker {
   Float_t         track_dedxPixel[maxntracks];
 
   // Track quality
-  //Float_t         track_nChi2[maxntracks];
+  Float_t         track_nChi2[maxntracks];
   Float_t         track_ipSigXY[maxntracks];
   Float_t         track_dxy[maxntracks];
   Float_t         track_dxyErr[maxntracks];

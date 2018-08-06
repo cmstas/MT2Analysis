@@ -6,8 +6,8 @@
 
 # TAG="RebalanceAndSmear_V00-09-06"
 # TAG="V00-09-04_json_294927-306462_PromptReco_41p96fb"
-TAG="V00-10-01_json_294927-306462_31Mar2018"
-# TAG="V00-09-05_Fall17MC"
+TAG="RebalanceAndSmear_V00-10-01_json_294927-306462_31Mar2018_correctJECs"
+# TAG="V00-10-01_94X_mc"
 
 #
 # DATA
@@ -144,38 +144,60 @@ TAG="V00-10-01_json_294927-306462_31Mar2018"
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_DoubleEG_31Mar2018
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_MuonEG_31Mar2018
 
-# #
-# # TTBAR
-# #
+# # #
+# # # JetHT only for Rebalance and Smear
+# # #
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_JetHT_31Mar2018
 
+
+# # #
+# # # TTBAR
+# # #
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_mc2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_ttsl
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_ttdl
 
 # #
 # # HIGH STATS TTBAR EXTENSION
 # #
 
-# #
-# # W+JETS
-# #
+# # #
+# # # W+JETS
+# # #
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht100to200
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_mc2017/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht200to400
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_mc2017/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht400to600
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_mc2017/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht600to800
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_mc2017/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht800to1200
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_mc2017/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht1200to2500
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_wjets_ht2500toInf
 
 # #
 # # W+JETS extensions
 # #
 
-# #
-# # SINGLE TOP
-# #
+# # #
+# # # SINGLE TOP
+# # #
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_singletop_tW_antitop
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_singletop_tW_top
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_singletop_t_antitop
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_singletop_t_top
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_singletop_s_amcatnlo
 
-# #
-# # DY+JETS
-# #
-
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-100to200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_dyjetsll_ht100to200
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_dyjetsll_ht200to400
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_dyjetsll_ht400to600
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_dyjetsll_ht600to800
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_dyjetsll_ht800to1200
-# ## missing 1200to2500
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_dyjetsll_ht2500toInf
+# # #
+# # # DY+JETS
+# # #
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-100to200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht100to200
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht200to400
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht400to600
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht600to800
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht800to1200
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht1200to2500
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_dyjetsll_ht2500toInf
 
 # #
 # # GAMMA + JETS
@@ -208,18 +230,17 @@ TAG="V00-10-01_json_294927-306462_31Mar2018"
 # # # TTV, tt+X
 # # #
 
-# #
-# # QCD HT BINS
-# #
-
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht100to200
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht200to300
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht300to500
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht500to700
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht700to1000
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht1000to1500
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht1500to2000
-# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1_MINIAODSIM_CMS4_V00-00-10/ ${TAG}_qcd_ht2000toInf
+# # #
+# # # QCD HT BINS
+# # #
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht100to200
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht200to300
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht300to500
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_old_pmx_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht500to700
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht700to1000
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht1000to1500
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht1500to2000
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2_MINIAODSIM_CMS4_V09-04-13/ ${TAG}_qcd_ht2000toInf
 
 # #
 # # QCD HT BINS Extension

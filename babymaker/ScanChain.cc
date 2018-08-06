@@ -42,6 +42,7 @@
 // MT2CORE
 #include "../MT2CORE/sampleID.h"
 #include "../MT2CORE/applyWeights.h"
+#include "../MT2CORE/configurations.h"
 
 // header
 #include "ScanChain.h"
@@ -52,7 +53,7 @@ using namespace tas;
 // turn on to add debugging statements (default false) 
 const bool verbose = false;
 // turn on to apply JEC from text files (default true)
-const bool applyJECfromFile = true;
+bool applyJECfromFile = true;
 // change to do unclustered energy uncertainty MET variations. 0 = DEFAULT, 1 = UP, -1 = DN
 const int applyUnclusteredUnc = 0;
 // turn on to apply btag SFs (default true)
@@ -71,8 +72,6 @@ const bool applyLeptonSFs = true;
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
 const bool removePostProcVars = false;
-// for merging prompt reco 2015 with reMINIAOD (default true)
-const bool removeEarlyPromptReco = false;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
@@ -81,13 +80,13 @@ const bool applyLeptonIso = true;
 const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
-// do rebalancing and save rebalanced jet info in babies
-const bool doRebal = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = true;
 
 DatasetInfoFromFile datasetInfoFromFile;
+
+MT2Configuration config_;
 
 babyMaker *thisBabyMaker; //little sketchy, but need a global pointer to babyMaker for use in minuitFunction (for doing rebalancing)
 
@@ -105,21 +104,21 @@ inline bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,f
 
 //--------------------------------------------------------------------
 
-void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, int max_events){
+void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::string config_tag, bool isFastsim, int max_events){
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
-  isPromptReco = false;
+  config_ = GetMT2Config(config_tag);
+  cout << "Using configuration \"" << config_tag << "\"" << endl;
+  // gconf is a GlobalConfig object in CORE
+  // used to store CORE-specific values, working-points, etc
+  gconf.ea_version = config_.ea_version;  // effective-area constants are year-specific. 
+
   if (baby_name.find("data_Run201") != std::string::npos) {
     isDataFromFileName = true;
     cout << "running on DATA, based on file name" << endl;
-    if (baby_name.find("PromptReco") != std::string::npos) {
-      isPromptReco = true;
-      cout << "  DATA is PromptReco" << endl;
-      if (removeEarlyPromptReco) cout << "  Removing runs <= 251562" << endl;
-    }
   } else {
     isDataFromFileName = false;
     cout << "running on MC, based on file name" << endl;
@@ -129,16 +128,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
   MakeBabyNtuple( Form("%s.root", baby_name.c_str()) );
 
-  if (baby_name.find("data") != string::npos && applyJSON) {
-      string json_file;
-      if(baby_name.find("2017") != string::npos){
-          json_file = "jsons/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
-      }else if(baby_name.find("2018") != string::npos){
-          json_file = "jsons/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-      }else{
-          cout << "ERROR: couldn't decide which json to use!" << endl;
-          return;   
-      }
+  if (isDataFromFileName && applyJSON) {
+      string json_file = "jsons/" + config_.json;
       cout << "Loading json file: " << json_file << endl;
       set_goodrun_file(json_file.c_str());
   }
@@ -148,15 +139,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       rebal_reader.SetTailScale(1.0);
       rebal_reader.SetMeanShift(0.0);
       // don't want to widen cores for rebalancing, so treat as MC always
-      rebal_reader.Init("rebal/JetResponseTemplates_ptBinned_92x_DCBfit.root", false);      
-      cout << "Initialized rebal" << endl;
+      string rebal_file = "rebal/JetResponseTemplates_ptBinned_94x_fixMatching4.root";
+      rebal_reader.Init(rebal_file.c_str(), false);
+      cout << "Initialized rebalancing template reader with template file: " << rebal_file << endl;
   }
 
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    calib = new BTagCalibration("csvv2", "btagsf/CSVv2_Moriond17_B_H.csv"); // 80X moriond17 version
+    cout << "Applying btag scale factors from btagsf/" << config_.btagcalib_csv << endl;
+    calib = new BTagCalibration("csvv2", "btagsf/"+config_.btagcalib_csv); // 94X version
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
     reader_fullsim = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central",{"up","down"});
     reader_fullsim->load(*calib, BTagEntry::JetFlavor::FLAV_B, "comb");
@@ -240,7 +233,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
   // File Loop
   int nDuplicates = 0;
   int nFailJSON = 0;
-  int nFailRunNumber = 0;
   int nEvents = chain->GetEntries();
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
@@ -274,106 +266,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
     if (applyJECfromFile) {
       jetcorr_filenames_pfL1FastJetL2L3.clear();
       std::string jetcorr_uncertainty_filename;
-
-      if (isDataFromFileName) {
-	// // old corrections, independent of run
-	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L1FastJet_AK4PFchs.txt");
-	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L2Relative_AK4PFchs.txt");
-	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L3Absolute_AK4PFchs.txt");
-	// jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_DATA_L2L3Residual_AK4PFchs.txt");
-
-	// run dependent corrections for 80X data
-	if (currentFileName.Contains("2016B") || currentFileName.Contains("2016C") || currentFileName.Contains("2016D")) {
+      
+      for(uint ijec=0; ijec < config_.JECs.size(); ijec++){
+	string keyword = config_.JECs.at(ijec).first;
+	string jecname = config_.JECs.at(ijec).second;
+	if(keyword == "" || currentFileName.Contains(keyword)){
 	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016BCDV4_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L1FastJet_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L2Relative_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L3Absolute_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L2L3Residual_AK4PFchs.txt");
+	  if(!isDataFromFileName){
+	    jetcorr_uncertainty_filename = "jetCorrections/" + jecname + "_Uncertainty_AK4PFchs.txt";
+	  }
+	  break;
 	}
-	else if (currentFileName.Contains("2016E") || currentFileName.Contains("2016F")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016EFV4_DATA_L2L3Residual_AK4PFchs.txt");
-
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
-	}
-	else if (currentFileName.Contains("2016G")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
-	}
-	else if (currentFileName.Contains("2016H")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PFchs.txt");
-          // 2017 re-reco data
-	}else if (currentFileName.Contains("2017B")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017B_V6_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017B_V6_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017B_V6_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017B_V6_DATA_L2L3Residual_AK4PFchs.txt");            
-	}else if (currentFileName.Contains("2017C")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017C_V6_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017C_V6_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017C_V6_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017C_V6_DATA_L2L3Residual_AK4PFchs.txt");            
-	}else if (currentFileName.Contains("2017D")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017D_V6_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017D_V6_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017D_V6_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017D_V6_DATA_L2L3Residual_AK4PFchs.txt");            
-	}else if (currentFileName.Contains("2017E")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017E_V6_DATA_L2L3Residual_AK4PFchs.txt");            
-	}else if (currentFileName.Contains("2017F") || currentFileName.Contains("2018")) {
-	  jetcorr_filenames_pfL1FastJetL2L3.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017F_V6_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017F_V6_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017F_V6_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017F_V6_DATA_L2L3Residual_AK4PFchs.txt");            
-        }
-      } else if (isFastsim) {
-	jetcorr_filenames_pfL1FastJetL2L3.clear();
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_FastSimV1_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Spring16_FastSimV1_MC_Uncertainty_AK4PFchs.txt"; 
-      } else if (currentFileName.Contains("Spring16")) { // Spring16 MC (ICHEP)
-	jetcorr_filenames_pfL1FastJetL2L3.clear();
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Spring16_25nsV6_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Spring16_25nsV6_MC_Uncertainty_AK4PFchs.txt";
-      } else if (currentFileName.Contains("Summer16")) { // Summer16 corrections (Moriond 2017)
-	jetcorr_filenames_pfL1FastJetL2L3.clear();
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt";
-      } else { // default: Fall17 corrections 
-        jetcorr_filenames_pfL1FastJetL2L3.clear();
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017_V4_MC_L1FastJet_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017_V4_MC_L2Relative_AK4PFchs.txt");
-	jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/Fall17_17Nov2017_V4_MC_L3Absolute_AK4PFchs.txt");
-	jetcorr_uncertainty_filename = "jetCorrections/Fall17_17Nov2017_V4_MC_Uncertainty_AK4PFchs.txt";
       }
-
 
       cout << "applying JEC from the following files:" << endl;
       for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3.size(); ++ifile) {
@@ -381,12 +289,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       }
       jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
       
+
+      // ad-hoc solution for latter part of 2016F that requires the 2016G corrections
       if (isDataFromFileName && currentFileName.Contains("2016F")) {
-	cout << "additional run-dependent JEC from the following files:" << endl;
-	for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3_postrun278802.size(); ++ifile) {
-	  cout << "   " << jetcorr_filenames_pfL1FastJetL2L3_postrun278802.at(ifile) << endl;
-	}
-	jet_corrector_pfL1FastJetL2L3_postrun278802  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.clear();
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
+          cout << "additional run-dependent JEC from the following files:" << endl;
+          for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3_postrun278802.size(); ++ifile) {
+              cout << "   " << jetcorr_filenames_pfL1FastJetL2L3_postrun278802.at(ifile) << endl;
+          }
+          jet_corrector_pfL1FastJetL2L3_postrun278802  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
       }
 
       if (!isDataFromFileName) {
@@ -414,7 +329,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       cms3.GetEntry(event);
       ++nEventsTotal;
       count_hist_->Fill(1);
-
+      
       // Progress
       CMS3::progress( nEventsTotal, nEventsChain );
 
@@ -439,9 +354,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
       //TRIGGER - check first to enable cuts
       HLT_PFHT1050        = passHLTTriggerPattern("HLT_PFHT1050_v");
-      HLT_PFMET170       = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
+      HLT_PFHT900         = passHLTTriggerPattern("HLT_PFHT900_v");
+      HLT_PFMET170          = passHLTTriggerPattern("HLT_PFMET170_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFMET170_HBHECleaned_v") || passHLTTriggerPattern("HLT_PFMET170_NotCleaned_v"); 
       HLT_PFHT300_PFMET100  = passHLTTriggerPattern("HLT_PFHT300_PFMET100_v"); 
-      HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); 
+      HLT_PFHT300_PFMET110  = passHLTTriggerPattern("HLT_PFHT300_PFMET110_v"); // 2016
       HLT_PFHT350_PFMET100  = passHLTTriggerPattern("HLT_PFHT350_PFMET100_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_JetIdCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET100_v"); 
       HLT_PFHT350_PFMET120  = passHLTTriggerPattern("HLT_PFHT350_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_PFHT350_PFMET120_JetIdCleaned_v"); 
       HLT_PFHT500_PFMET100_PFMHT100 = passHLTTriggerPattern("HLT_PFHT500_PFMET100_PFMHT100_IDTight_v");
@@ -463,8 +379,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFMET140_PFMHT140         = passHLTTriggerPattern("HLT_PFMET140_PFMHT140_IDTight_v");
       HLT_PFMET100_PFMHT100_PFHT60  = passHLTTriggerPattern("HLT_PFMET100_PFMHT100_IDTight_PFHT60_v");
       HLT_PFMET120_PFMHT120_PFHT60  = passHLTTriggerPattern("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v");
-      HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v");
-      HLT_PFJet500        = passHLTTriggerPattern("HLT_PFJet500_v");
+      HLT_PFJet450        = passHLTTriggerPattern("HLT_PFJet450_v"); // 2016
+      HLT_PFJet500        = passHLTTriggerPattern("HLT_PFJet500_v"); // 2017,18
       HLT_ECALHT800       = passHLTTriggerPattern("HLT_ECALHT800_v");
       HLT_SingleMu     = passHLTTriggerPattern("HLT_IsoMu17_eta2p1_v") ||
         passHLTTriggerPattern("HLT_IsoMu20_v") || passHLTTriggerPattern("HLT_IsoMu20_eta2p1_v") ||
@@ -474,46 +390,54 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_SingleMu_NonIso     = passHLTTriggerPattern("HLT_Mu50_v") || passHLTTriggerPattern("HLT_TkMu50_v") ||
 	passHLTTriggerPattern("HLT_Mu55_v");
       HLT_SingleEl     = 
-        passHLTTriggerPattern("HLT_Ele27_WPTight_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele32_WPTight_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele35_WPTight_Gsf_v") ||
-        passHLTTriggerPattern("HLT_Ele38_WPTight_Gsf_v") ||
-	passHLTTriggerPattern("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v");
-      HLT_SingleEl_NonIso     = passHLTTriggerPattern("HLT_Ele105_CaloIdVT_GsfTrkIdT_v") ||
-	passHLTTriggerPattern("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");
-      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") ||
-	passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_MW_v");
-      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") || 
-          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-          passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_v") ||
-        passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
-        passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");
+          passHLTTriggerPattern("HLT_Ele27_eta2p1_WPTight_Gsf_v") || // 2016
+          passHLTTriggerPattern("HLT_Ele32_eta2p1_WPTight_Gsf_v") || // 2016
+          passHLTTriggerPattern("HLT_Ele27_WPTight_Gsf_v") ||
+          passHLTTriggerPattern("HLT_Ele32_WPTight_Gsf_v") ||  // 2017,18
+          passHLTTriggerPattern("HLT_Ele35_WPTight_Gsf_v") ||  // 2017,18
+          passHLTTriggerPattern("HLT_Ele38_WPTight_Gsf_v") ||  // 2017,18
+          passHLTTriggerPattern("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"); // 2016
+      HLT_SingleEl_NonIso     = passHLTTriggerPattern("HLT_Ele105_CaloIdVT_GsfTrkIdT_v") || //2016
+          passHLTTriggerPattern("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");  // 2017,18
+      HLT_DoubleEl     = passHLTTriggerPattern("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); // 2016,17,18
+      HLT_DoubleEl33   = passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") || // 2016
+          passHLTTriggerPattern("HLT_DoubleEle33_CaloIdL_MW_v");  // 2016,17,18
+      HLT_MuX_Ele12 = passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") || // 2016,17,18
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); // 2016,17,18
+      HLT_Mu8_EleX = passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_v") || // 2016,17,18
+          passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || // 2016
+          passHLTTriggerPattern("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");  // 2016
       HLT_Mu12_EleX = passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
-          passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v");
-      HLT_Mu30_Ele30_NonIso = passHLTTriggerPattern("HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v");
-      HLT_Mu33_Ele33_NonIso = passHLTTriggerPattern("HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v");
-      HLT_Mu37_Ele27_NonIso = passHLTTriggerPattern("HLT_Mu37_Ele27_CaloIdL_MW_v");
-      HLT_Mu27_Ele37_NonIso = passHLTTriggerPattern("HLT_Mu27_Ele37_CaloIdL_MW_v");
-      HLT_DoubleMu     = passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
-        passHLTTriggerPattern("HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||
-	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
-	passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") ||
-        passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||
-        passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") ||
-	passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_v") ||
-	passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_v") ||
-        passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8_v");
-      HLT_DoubleMu_NonIso     = passHLTTriggerPattern("HLT_Mu37_TkMu27_v");
+          passHLTTriggerPattern("HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v"); // 2017,18
+      HLT_Mu30_Ele30_NonIso = passHLTTriggerPattern("HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v"); // 2016
+      HLT_Mu33_Ele33_NonIso = passHLTTriggerPattern("HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v"); // 2016
+      HLT_Mu37_Ele27_NonIso = passHLTTriggerPattern("HLT_Mu37_Ele27_CaloIdL_MW_v"); // 2017,18
+      HLT_Mu27_Ele37_NonIso = passHLTTriggerPattern("HLT_Mu27_Ele37_CaloIdL_MW_v"); // 2017,18
+      HLT_DoubleMu     = 
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||    // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||  // 2016
+          passHLTTriggerPattern("HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") ||  // 2016
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") || //2017,18
+          passHLTTriggerPattern("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") ||   //2017,18
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") ||
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_v") ||
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_v") ||
+          passHLTTriggerPattern("HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass8_v");
+      HLT_DoubleMu_NonIso     = 
+          passHLTTriggerPattern("HLT_Mu30_TkMu11_v") || // 2016 
+          passHLTTriggerPattern("HLT_Mu40_TkMu11_v") || // 2016
+          passHLTTriggerPattern("HLT_Mu37_TkMu27_v");   // 2017,18
       HLT_Photon120 = passHLTTriggerPattern("HLT_Photon120_v"); 
-      HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); 
+      HLT_Photon200 = passHLTTriggerPattern("HLT_Photon200_v"); // 2017,18
       HLT_Photon175_Prescale = passHLTTriggerPattern("HLT_Photon175_v") ? HLT_prescale(triggerName("HLT_Photon175_v"), false) : 0; 
-      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); 
+      HLT_Photon165_HE10 = passHLTTriggerPattern("HLT_Photon165_HE10_v"); // 2016
       HLT_Photon250_NoHE = passHLTTriggerPattern("HLT_Photon250_NoHE_v"); 
+      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
+      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
+      /* 2017,18 prescaled HT triggers */
       HLT_PFHT180_Prescale  = passHLTTriggerPattern("HLT_PFHT180_v") ? HLT_prescale(triggerName("HLT_PFHT180_v"), true) : 0; 
       HLT_PFHT250_Prescale  = passHLTTriggerPattern("HLT_PFHT250_v") ? HLT_prescale(triggerName("HLT_PFHT250_v"), true) : 0; 
       HLT_PFHT370_Prescale  = passHLTTriggerPattern("HLT_PFHT370_v") ? HLT_prescale(triggerName("HLT_PFHT370_v"), true) : 0; 
@@ -523,8 +447,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       HLT_PFHT680_Prescale  = passHLTTriggerPattern("HLT_PFHT680_v") ? HLT_prescale(triggerName("HLT_PFHT680_v"), false) : 0; 
       HLT_PFHT780_Prescale  = passHLTTriggerPattern("HLT_PFHT780_v") ? HLT_prescale(triggerName("HLT_PFHT780_v"), false) : 0; 
       HLT_PFHT890_Prescale  = passHLTTriggerPattern("HLT_PFHT890_v") ? HLT_prescale(triggerName("HLT_PFHT890_v"), false) : 0; 
-      HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
-      HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
+      /* 2016 prescaled HT triggers */
+      HLT_PFHT125_Prescale  = passHLTTriggerPattern("HLT_PFHT125_v") ? HLT_prescale(triggerName("HLT_PFHT125_v")) : 0; 
+      HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0; 
+      HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0; 
+      HLT_PFHT350_Prescale  = passHLTTriggerPattern("HLT_PFHT350_v") ? HLT_prescale(triggerName("HLT_PFHT350_v")) : 0; 
+      HLT_PFHT475_Prescale  = passHLTTriggerPattern("HLT_PFHT475_v") ? HLT_prescale(triggerName("HLT_PFHT475_v")) : 0; 
+      HLT_PFHT600_Prescale  = passHLTTriggerPattern("HLT_PFHT600_v") ? HLT_prescale(triggerName("HLT_PFHT600_v")) : 0;
 
       if (!isData && applyTriggerCuts && !(HLT_PFHT1050 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
             || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
@@ -538,18 +467,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	else isGolden = 0;
       }
 
-      if ( isData && isPromptReco && removeEarlyPromptReco && (run <= 251562) ) {
-        ++nFailRunNumber;
-        continue;
-      }
-
       // set jet corrector based on run number for data
       if (isData && run >= 278802 && run <= 278808) {
 	jet_corrector_pfL1FastJetL2L3_current = jet_corrector_pfL1FastJetL2L3_postrun278802;
       } else {
 	jet_corrector_pfL1FastJetL2L3_current = jet_corrector_pfL1FastJetL2L3;
       }
-
+      
       if (!removePostProcVars) {
         if(isCMS4){
           if(!isData){
@@ -695,28 +619,17 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
-        if(baby_name.find("2017") != string::npos || baby_name.find("2018") != string::npos){
-            Flag_ecalBadCalibFilter                         = cms3.filt_ecalBadCalibFilter();
-            Flag_badMuonFilter           = cms3.filt_BadPFMuonFilter();
-            Flag_badChargedCandidateFilter  = cms3.filt_BadChargedCandidateFilter();
-        }
-	// inputs for badMuonFilters in latest cms3 tags
-	if (recent_cms3_version || isCMS4) {
-	  Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
-	  Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
-          // Flag_badMuonFilter                            = badMuonFilter();
-          // Flag_badMuonFilterV2                          = badMuonFilterV2();         
-	  // if (small_cms3_version >= 18) {
-	  //   Flag_badMuons                                 = cms3.filt_badMuons();
-	  //   Flag_duplicateMuons                           = cms3.filt_duplicateMuons();
-	  //   Flag_noBadMuons                               = cms3.filt_noBadMuons();
-	  // }
-          // Flag_badChargedHadronFilterV2                 = badChargedCandidateFilterV2();          
-	}
-	// Flag_badChargedHadronFilter                   = badChargedCandidateFilter();
-	// necessary?
-	Flag_METFilters                               = cms3.filt_metfilter();
+        Flag_ecalBadCalibFilter                       = cms3.filt_ecalBadCalibFilter();
+        Flag_badMuonFilter                          = cms3.filt_BadPFMuonFilter();
+        Flag_badChargedCandidateFilter                = cms3.filt_BadChargedCandidateFilter();
+        Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+        Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
+        // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
+        // since we don't store all PFCands. Should now just be able to use the filters from miniAOD above
+        Flag_badMuonFilter2016                        = badMuonFilterV2();         
+        Flag_badChargedHadronFilter2016               = badChargedCandidateFilterV2();          
       }
+      Flag_METFilters                               = cms3.filt_metfilter();
       
       // gen block -- for MC only
       ngenPart = 0;
@@ -732,7 +645,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
       if (!isData) {
 	
         if (verbose) cout << "before sparm values" << endl;
-
+	
 	// assume that first sparm value is parent mass, second is LSP mass
 	if (evt_id >= 1000 && evt_id < 1200) {
 	  if (sparm_values().size() == 2) {
@@ -1933,6 +1846,21 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           pfjet_p4_cor   = pfjet_p4_uncor * corr;
           pfjet_p4_corUP = pfjet_p4_uncor * corr * varUP;
           pfjet_p4_corDN = pfjet_p4_uncor * corr * varDN;
+
+          // // ad-hoc MET fix for 2017. Should be OK after next re-reco?
+          if(config_tag.find("data_2017_31Mar2018") != string::npos && fabs(pfjet_p4_uncor.eta()) > 2.650 && fabs(pfjet_p4_uncor.eta()) < 3.139 && pfjet_p4_uncor.pt() < 75){
+              float met_x = met_pt*cos(met_phi);
+              float met_y = met_pt*sin(met_phi);
+              met_x += (pfjet_p4_cor.pt() - pfjet_p4_uncor.pt()) * cos(pfjet_p4_uncor.phi());
+              met_y += (pfjet_p4_cor.pt() - pfjet_p4_uncor.pt()) * sin(pfjet_p4_uncor.phi());
+              met_pt = sqrt(met_x*met_x + met_y*met_y);
+              met_phi = atan2(met_y, met_x);
+
+              pfjet_p4_cor /= corr;
+              pfjet_p4_corUP /= corr * varUP;
+              pfjet_p4_corDN /= corr * varDN;
+          }
+
         }
 
         p4sCorrJets.push_back(pfjet_p4_cor);
@@ -2111,9 +2039,16 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 
 	  // check for bad fastsim jets
 	  if (isFastsim && isBadFastsimJet(iJet)) ++nJet20BadFastsim;
-	  
+
           // first check jet ID - count the number of jets that fail.  Don't apply for fastsim
-          if(!isTightPFJet_2017_v1(iJet) && !isFastsim) {
+          bool passJetID = true;
+          if(config_.jet_id == "50nsV1")
+              passJetID = isLoosePFJet_50nsV1(iJet);
+          else if(config_.jet_id == "2017_v1")
+              passJetID = isTightPFJet_2017_v1(iJet);
+          else
+              cout << "WARNING! unknown jet ID '" << config_.jet_id << "'! Assuming all jets pass for now. Fix your config." << endl;
+          if(passJetID && !isFastsim) {
             if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
             if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
             if (!isOverlapJetGamma) {
@@ -2133,13 +2068,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           jet_mass[njet] = cms3.pfjets_p4().at(iJet).M();
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
+          jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
 
-          jet_chFrac[njet] = cms3.pfjets_chargedHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_nhFrac[njet] = cms3.pfjets_neutralHadronE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_cemFrac[njet] = cms3.pfjets_chargedEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_nemFrac[njet] = cms3.pfjets_neutralEmE().at(iJet) / cms3.pfjets_p4()[iJet].E();
-          jet_muFrac[njet] = cms3.pfjets_muonE().at(iJet) / cms3.pfjets_p4()[iJet].E();
+          jet_chf[njet] = cms3.pfjets_chargedHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_nhf[njet] = cms3.pfjets_neutralHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_cemf[njet] = cms3.pfjets_chargedEmE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_nemf[njet] = cms3.pfjets_neutralEmE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
+          jet_muf[njet] = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 
           if (!isData) {
 	    jet_mcPt[njet] = -1;
@@ -2156,7 +2092,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
           //jet_qgl
           jet_area[njet] = cms3.pfjets_area().at(iJet);
           jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
-          jet_muf[njet] = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 
           if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
           else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
@@ -2189,15 +2124,18 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               p4sForDphiRl.push_back(p4sCorrJets.at(iJet));
 	      p4sLeptonCleanedJets.push_back(p4sCorrJets.at(iJet));
               nJet30++;
-              if (jet_pt[njet] > 40.) nJet40++;
-            } // pt40
+              good_jet_idxs[nJet30-1] = njet;
+              if (jet_pt[njet] > 40.) 
+                  nJet40++;
+            } // pt30
             if(jet_btagMVA[njet] >= 0.4432) {
               nBJet20mva++;
 	      if (jet_pt[njet] > 30.0) nBJet30mva++;
             }
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.8484){
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold){
               nBJet20++; 
+              good_bjet_idxs[nBJet20-1] = njet;
               nBJet20csv++;
 	      if (jet_pt[njet] > 30.0) nBJet30csv++;
               // btag SF - not final yet
@@ -2299,7 +2237,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30JECup++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.8484) {
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold) {
               nBJet20JECup++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2324,7 +2262,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               nJet30JECdn++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= 0.8484) {
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold) {
               nBJet20JECdn++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2350,7 +2288,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
               if(jet_btagMVA[njet] >= 0.4432){ // CombinedMVAv2
                   gamma_nBJet20mva++;
               }
-              if(jet_btagCSV[njet] >= 0.8484) { 
+              if(jet_btagCSV[njet] >= config_.btag_med_threshold) { 
                 gamma_nBJet20++; 
                 gamma_nBJet20csv++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
@@ -2947,7 +2885,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	track_dedxPixel[ntracks] = cms3.isotracks_dEdxPixel().at(i_it);
 
 	// Quality
-	//	track_nChi2[ntracks] = cms3.isotracks_normalizedChi2().at(i_it);
+	track_nChi2[ntracks] = cms3.isotracks_normChi2().at(i_it);
 	track_dxy[ntracks] = cms3.isotracks_dxy().at(i_it);
 	track_dxyErr[ntracks] = cms3.isotracks_dxyError().at(i_it);
 	track_dz[ntracks] = fabs(cms3.isotracks_dz().at(i_it));
@@ -3124,1262 +3062,1291 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, bool isFastsim, 
 	  else if (isM) {nshorttrackcandidates_M++; track_ismediumcandidate[ntracks] = 1;}
 	  else {nshorttrackcandidates_L++; track_islongcandidate[ntracks] = 1;}	  
 	}
-
+	
 	ntracks++;
       } // End isotracks loop
 
       FillBabyNtuple();
 
     }//end loop on events in a file
-
+    
     delete tree;
     f->Close();
-
+    
     if (applyJECfromFile) {
       delete jet_corrector_pfL1FastJetL2L3;
       if (jet_corrector_pfL1FastJetL2L3_postrun278802) delete jet_corrector_pfL1FastJetL2L3_postrun278802;
       if (!isDataFromFileName) delete jetcorr_uncertainty;  
     }
-
-    }//end loop on files
-
-    cout << "Processed " << nEventsTotal << " events" << endl;
-    if ( nEventsChain != nEventsTotal ) {
-      std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
-    }
-
-    cout << nDuplicates << " duplicate events were skipped." << endl;
-    cout << nFailJSON << " events were removed by JSON." << endl;
-    cout << nFailRunNumber << " events were removed due to run number." << endl;
-
-    CloseBabyNtuple();
-
-    if (applyBtagSFs) {
-      delete calib;
-      /*
+    
+  }//end loop on files
+  
+  cout << "Processed " << nEventsTotal << " events" << endl;
+  if ( nEventsChain != nEventsTotal ) {
+    std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
+  }
+  
+  cout << nDuplicates << " duplicate events were skipped." << endl;
+  cout << nFailJSON << " events were removed by JSON." << endl;
+  
+  CloseBabyNtuple();
+  
+  if (applyBtagSFs) {
+    delete calib;
+    /*
       delete reader_heavy;
       delete reader_heavy_UP;
       delete reader_heavy_DN;
       delete reader_light;
       delete reader_light_UP;
       delete reader_light_DN;
-      */
-      delete reader_fullsim;
-      if (isFastsim) {
-	delete calib_fastsim;
-	delete reader_fastsim;
-      }
+    */
+    delete reader_fullsim;
+    if (isFastsim) {
+      delete calib_fastsim;
+      delete reader_fastsim;
     }
-
-    bmark->Stop("benchmark");
-    cout << endl;
-    cout << nEventsTotal << " Events Processed" << endl;
-    cout << "------------------------------" << endl;
-    cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
-    cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
-    cout << endl;
-    delete bmark;
-
-    return;
   }
+  
+  bmark->Stop("benchmark");
+  cout << endl;
+  cout << nEventsTotal << " Events Processed" << endl;
+  cout << "------------------------------" << endl;
+  cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << endl;
+  delete bmark;
+  
+  return;
+}
 
-  void babyMaker::MakeBabyNtuple(const char *BabyFilename){
+void babyMaker::MakeBabyNtuple(const char *BabyFilename){
 
-    BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
-    BabyFile_->cd();
-    BabyTree_ = new TTree("mt2", "A Baby Ntuple");
-
-    BabyTree_->Branch("run", &run );
-    BabyTree_->Branch("lumi", &lumi );
-    BabyTree_->Branch("evt", &evt, "evt/l" );
-    BabyTree_->Branch("isData", &isData );
-    BabyTree_->Branch("isGolden", &isGolden );
-    BabyTree_->Branch("evt_scale1fb", &evt_scale1fb);
-    BabyTree_->Branch("evt_xsec", &evt_xsec );
-    BabyTree_->Branch("evt_kfactor", &evt_kfactor );
-    BabyTree_->Branch("evt_filter", &evt_filter );
-    BabyTree_->Branch("evt_nEvts", &evt_nEvts, "evt_nEvts/l" );
-    BabyTree_->Branch("evt_id", &evt_id );
-    BabyTree_->Branch("genWeight", &genWeight );
-    BabyTree_->Branch("puWeight", &puWeight );
-    BabyTree_->Branch("nVert", &nVert );
-    BabyTree_->Branch("nTrueInt", &nTrueInt );
-    BabyTree_->Branch("rho", &rho );
-    BabyTree_->Branch("nJet30", &nJet30 );
-    BabyTree_->Branch("nJet30JECup", &nJet30JECup );
-    BabyTree_->Branch("nJet30JECdn", &nJet30JECdn );
-    BabyTree_->Branch("nJet40", &nJet40 );
-    BabyTree_->Branch("nBJet20", &nBJet20 );
-    BabyTree_->Branch("nBJet20csv", &nBJet20csv );
-    BabyTree_->Branch("nBJet20mva", &nBJet20mva );
-    BabyTree_->Branch("nBJet20JECup", &nBJet20JECup );
-    BabyTree_->Branch("nBJet20JECdn", &nBJet20JECdn );
-    BabyTree_->Branch("nBJet25", &nBJet25 );
-    BabyTree_->Branch("nBJet30", &nBJet30 );
-    BabyTree_->Branch("nBJet30csv", &nBJet30csv );
-    BabyTree_->Branch("nBJet30mva", &nBJet30mva );
-    BabyTree_->Branch("nBJet40", &nBJet40 );
-    BabyTree_->Branch("nJet30FailId", &nJet30FailId );
-    BabyTree_->Branch("nJet100FailId", &nJet100FailId );
-    BabyTree_->Branch("nJet20BadFastsim", &nJet20BadFastsim );
-    BabyTree_->Branch("nJet200MuFrac50DphiMet", &nJet200MuFrac50DphiMet );
-    BabyTree_->Branch("nMuons10", &nMuons10 );
-    BabyTree_->Branch("nBadMuons20", &nBadMuons20 );
-    BabyTree_->Branch("nElectrons10", &nElectrons10 );
-    BabyTree_->Branch("nLepLowMT", &nLepLowMT );
-    BabyTree_->Branch("nTaus20", &nTaus20 );
-    BabyTree_->Branch("nGammas20", &nGammas20 );
-    BabyTree_->Branch("nPFCHCand3", &nPFCHCand3 );
-    BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
-    BabyTree_->Branch("deltaPhiMin_genmet", &deltaPhiMin_genmet );
-    BabyTree_->Branch("diffMetMht", &diffMetMht );
-    BabyTree_->Branch("diffMetMht_genmet", &diffMetMht_genmet );
-    BabyTree_->Branch("deltaPhiMinJECup", &deltaPhiMinJECup );
-    BabyTree_->Branch("deltaPhiMinJECdn", &deltaPhiMinJECdn );
-    BabyTree_->Branch("diffMetMhtJECup", &diffMetMhtJECup );
-    BabyTree_->Branch("diffMetMhtJECdn", &diffMetMhtJECdn );
-    BabyTree_->Branch("minMTBMet", &minMTBMet );
-    BabyTree_->Branch("zll_minMTBMet", &zll_minMTBMet );
-    BabyTree_->Branch("gamma_minMTBMet", &gamma_minMTBMet );
-    BabyTree_->Branch("ht", &ht );
-    BabyTree_->Branch("htJECup", &htJECup );
-    BabyTree_->Branch("htJECdn", &htJECdn );
-    BabyTree_->Branch("mt2", &mt2 );
-    BabyTree_->Branch("mt2JECup", &mt2JECup );
-    BabyTree_->Branch("mt2JECdn", &mt2JECdn );
-    BabyTree_->Branch("mt2_gen", &mt2_gen );
-    BabyTree_->Branch("mt2_genmet", &mt2_genmet );
-    BabyTree_->Branch("jet1_pt", &jet1_pt );
-    BabyTree_->Branch("jet2_pt", &jet2_pt );
-    BabyTree_->Branch("jet1_ptJECup", &jet1_ptJECup );
-    BabyTree_->Branch("jet2_ptJECup", &jet2_ptJECup );
-    BabyTree_->Branch("jet1_ptJECdn", &jet1_ptJECdn );
-    BabyTree_->Branch("jet2_ptJECdn", &jet2_ptJECdn );
-    BabyTree_->Branch("jet_failFSveto", &jet_failFSveto );
-    BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
-    BabyTree_->Branch("gamma_jet2_pt", &gamma_jet2_pt );
-    BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
-    BabyTree_->Branch("pseudoJet1_eta", &pseudoJet1_eta );
-    BabyTree_->Branch("pseudoJet1_phi", &pseudoJet1_phi );
-    BabyTree_->Branch("pseudoJet1_mass", &pseudoJet1_mass );
-    BabyTree_->Branch("pseudoJet2_pt", &pseudoJet2_pt );
-    BabyTree_->Branch("pseudoJet2_eta", &pseudoJet2_eta );
-    BabyTree_->Branch("pseudoJet2_phi", &pseudoJet2_phi );
-    BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
-    BabyTree_->Branch("mht_pt", &mht_pt );
-    BabyTree_->Branch("mht_phi", &mht_phi );
-    BabyTree_->Branch("mht_ptJECup", &mht_ptJECup );
-    BabyTree_->Branch("mht_phiJECup", &mht_phiJECup );
-    BabyTree_->Branch("mht_ptJECdn", &mht_ptJECdn );
-    BabyTree_->Branch("mht_phiJECdn", &mht_phiJECdn );
-    BabyTree_->Branch("met_pt", &met_pt );
-    BabyTree_->Branch("met_phi", &met_phi );
-    BabyTree_->Branch("met_ptJECup", &met_ptJECup );
-    BabyTree_->Branch("met_phiJECup", &met_phiJECup );
-    BabyTree_->Branch("met_ptJECdn", &met_ptJECdn );
-    BabyTree_->Branch("met_phiJECdn", &met_phiJECdn );
-    BabyTree_->Branch("met_rawPt",  &met_rawPt );
-    BabyTree_->Branch("met_rawPhi", &met_rawPhi );
-    BabyTree_->Branch("met_caloPt",  &met_caloPt );
-    BabyTree_->Branch("met_caloPhi", &met_caloPhi );
-    BabyTree_->Branch("met_trkPt",  &met_trkPt );
-    BabyTree_->Branch("met_trkPhi", &met_trkPhi );
-    BabyTree_->Branch("met_genPt",  &met_genPt );
-    BabyTree_->Branch("met_genPhi", &met_genPhi );
-    BabyTree_->Branch("met_miniaodPt",  &met_miniaodPt );
-    BabyTree_->Branch("met_miniaodPhi", &met_miniaodPhi );
-    BabyTree_->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter );
-    BabyTree_->Branch("Flag_trkPOG_manystripclus53X", &Flag_trkPOG_manystripclus53X );
-    BabyTree_->Branch("Flag_ecalLaserCorrFilter", &Flag_ecalLaserCorrFilter );
-    BabyTree_->Branch("Flag_trkPOG_toomanystripclus53X", &Flag_trkPOG_toomanystripclus53X );
-    BabyTree_->Branch("Flag_hcalLaserEventFilter", &Flag_hcalLaserEventFilter );
-    BabyTree_->Branch("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters );
-    BabyTree_->Branch("Flag_trkPOGFilters", &Flag_trkPOGFilters );
-    BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
-    BabyTree_->Branch("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter );
-    BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
-    BabyTree_->Branch("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter );
-    BabyTree_->Branch("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter );
-    BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
-    BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
-    BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
-    BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
-    BabyTree_->Branch("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter );
-    BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
-    BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 ); 
-    BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
-    BabyTree_->Branch("Flag_duplicateMuons", &Flag_duplicateMuons );   
-    BabyTree_->Branch("Flag_noBadMuons", &Flag_noBadMuons );  
-    BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
-    BabyTree_->Branch("Flag_badChargedHadronFilter", &Flag_badChargedHadronFilter );
-    BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
-    BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
-    BabyTree_->Branch("HLT_PFHT1050", &HLT_PFHT1050 );
-    BabyTree_->Branch("HLT_PFHT500_PFMET100_PFMHT100", &HLT_PFHT500_PFMET100_PFMHT100 ); 
-    BabyTree_->Branch("HLT_PFHT700_PFMET85_PFMHT85", &HLT_PFHT700_PFMET85_PFMHT85 );
-    BabyTree_->Branch("HLT_PFHT800_PFMET75_PFMHT75", &HLT_PFHT800_PFMET75_PFMHT75 );
-    BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
-    BabyTree_->Branch("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100 );
-    BabyTree_->Branch("HLT_PFHT300_PFMET110", &HLT_PFHT300_PFMET110 );
-    BabyTree_->Branch("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100 );
-    BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
-    BabyTree_->Branch("HLT_PFMETNoMu90_PFMHTNoMu90", &HLT_PFMETNoMu90_PFMHTNoMu90 );
-    BabyTree_->Branch("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 );
-    BabyTree_->Branch("HLT_PFMETNoMu100_PFMHTNoMu100", &HLT_PFMETNoMu100_PFMHTNoMu100 );
-    BabyTree_->Branch("HLT_PFMETNoMu110_PFMHTNoMu110", &HLT_PFMETNoMu110_PFMHTNoMu110 );
-    BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
-    BabyTree_->Branch("HLT_PFMETNoMu130_PFMHTNoMu130", &HLT_PFMETNoMu130_PFMHTNoMu130 );
-    BabyTree_->Branch("HLT_PFMETNoMu140_PFMHTNoMu140", &HLT_PFMETNoMu140_PFMHTNoMu140 );
-    BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
-    BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
-    BabyTree_->Branch("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110 );
-    BabyTree_->Branch("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120 );
-    BabyTree_->Branch("HLT_PFMET130_PFMHT130", &HLT_PFMET130_PFMHT130 );
-    BabyTree_->Branch("HLT_PFMET140_PFMHT140", &HLT_PFMET140_PFMHT140 );
-    BabyTree_->Branch("HLT_PFMET100_PFMHT100_PFHT60", &HLT_PFMET100_PFMHT100_PFHT60 );
-    BabyTree_->Branch("HLT_PFMET120_PFMHT120_PFHT60", &HLT_PFMET120_PFMHT120_PFHT60 );
-    BabyTree_->Branch("HLT_PFJet450", &HLT_PFJet450 );
-    BabyTree_->Branch("HLT_PFJet500", &HLT_PFJet500 );
-    BabyTree_->Branch("HLT_ECALHT800", &HLT_ECALHT800 );
-    BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
-    BabyTree_->Branch("HLT_SingleMu_NonIso", &HLT_SingleMu_NonIso );
-    BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
-    BabyTree_->Branch("HLT_SingleEl_NonIso", &HLT_SingleEl_NonIso );
-    BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
-    BabyTree_->Branch("HLT_DoubleEl33", &HLT_DoubleEl33 );
-    BabyTree_->Branch("HLT_MuX_Ele12", &HLT_MuX_Ele12 );
-    BabyTree_->Branch("HLT_Mu8_EleX", &HLT_Mu8_EleX );
-    BabyTree_->Branch("HLT_Mu12_EleX", &HLT_Mu12_EleX );
-    BabyTree_->Branch("HLT_Mu30_Ele30_NonIso", &HLT_Mu30_Ele30_NonIso );
-    BabyTree_->Branch("HLT_Mu33_Ele33_NonIso", &HLT_Mu33_Ele33_NonIso );
-    BabyTree_->Branch("HLT_Mu37_Ele27_NonIso", &HLT_Mu37_Ele27_NonIso );
-    BabyTree_->Branch("HLT_Mu27_Ele37_NonIso", &HLT_Mu27_Ele37_NonIso );
-    BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
-    BabyTree_->Branch("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso );
-    BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
-    BabyTree_->Branch("HLT_Photon200", &HLT_Photon200 );
-    BabyTree_->Branch("HLT_Photon175_Prescale", &HLT_Photon175_Prescale );
-    BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
-    BabyTree_->Branch("HLT_Photon250_NoHE", &HLT_Photon250_NoHE );
-    BabyTree_->Branch("HLT_PFHT180_Prescale", &HLT_PFHT180_Prescale );
-    BabyTree_->Branch("HLT_PFHT250_Prescale", &HLT_PFHT250_Prescale );
-    BabyTree_->Branch("HLT_PFHT370_Prescale", &HLT_PFHT370_Prescale );
-    BabyTree_->Branch("HLT_PFHT430_Prescale", &HLT_PFHT430_Prescale );
-    BabyTree_->Branch("HLT_PFHT510_Prescale", &HLT_PFHT510_Prescale );
-    BabyTree_->Branch("HLT_PFHT590_Prescale", &HLT_PFHT590_Prescale );
-    BabyTree_->Branch("HLT_PFHT680_Prescale", &HLT_PFHT680_Prescale );
-    BabyTree_->Branch("HLT_PFHT780_Prescale", &HLT_PFHT780_Prescale );
-    BabyTree_->Branch("HLT_PFHT890_Prescale", &HLT_PFHT890_Prescale );
-    BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
-    BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
-    BabyTree_->Branch("nlep", &nlep, "nlep/I" );
-    BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
-    BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
-    BabyTree_->Branch("lep_phi", lep_phi, "lep_phi[nlep]/F" );
-    BabyTree_->Branch("lep_mass", lep_mass, "lep_mass[nlep]/F" );
-    BabyTree_->Branch("lep_charge", lep_charge, "lep_charge[nlep]/I" );
-    BabyTree_->Branch("lep_pdgId", lep_pdgId, "lep_pdgId[nlep]/I" );
-    BabyTree_->Branch("lep_dxy", lep_dxy, "lep_dxy[nlep]/F" );
-    BabyTree_->Branch("lep_dz", lep_dz, "lep_dz[nlep]/F" );
-    BabyTree_->Branch("lep_tightId", lep_tightId, "lep_tightId[nlep]/I" );
-    BabyTree_->Branch("lep_heepId", lep_heepId, "lep_heepId[nlep]/I" );
-    BabyTree_->Branch("lep_highPtFit_pt", lep_highPtFit_pt, "lep_highPtFit_pt[nlep]/F");
-    BabyTree_->Branch("lep_highPtFit_eta", lep_highPtFit_eta, "lep_highPtFit_eta[nlep]/F" );
-    BabyTree_->Branch("lep_highPtFit_phi", lep_highPtFit_phi, "lep_highPtFit_phi[nlep]/F" );
-    BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
-    BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
-    BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
-    // BabyTree_->Branch("lep_relIsoAn04", lep_relIsoAn04, "lep_relIsoAn04[nlep]/F" );
-    BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
-    BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
-    BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
-    BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
-    BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
-    BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
-    // BabyTree_->Branch("isoTrack_relIsoAn04", isoTrack_relIsoAn04, "isoTrack_relIsoAn04[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
-    BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
-    BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
-    BabyTree_->Branch("nhighPtPFcands", &nhighPtPFcands, "nhighPtPFcands/I" );
-    BabyTree_->Branch("highPtPFcands_pt", highPtPFcands_pt, "highPtPFcands_pt[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_eta", highPtPFcands_eta, "highPtPFcands_eta[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_phi", highPtPFcands_phi, "highPtPFcands_phi[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_mass", highPtPFcands_mass, "highPtPFcands_mass[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_absIso", highPtPFcands_absIso, "highPtPFcands_absIso[nhighPtPFcands]/F" );
-    // BabyTree_->Branch("highPtPFcands_relIsoAn04", highPtPFcands_relIsoAn04, "highPtPFcands_relIsoAn04[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_dz", highPtPFcands_dz, "highPtPFcands_dz[nhighPtPFcands]/F" );
-    BabyTree_->Branch("highPtPFcands_pdgId", highPtPFcands_pdgId, "highPtPFcands_pdgId[nhighPtPFcands]/I" );
-    BabyTree_->Branch("highPtPFcands_mcMatchId", highPtPFcands_mcMatchId, "highPtPFcands_mcMatchId[nhighPtPFcands]/I" );
-    BabyTree_->Branch("nPFLep5LowMT", &nPFLep5LowMT, "nPFLep5LowMT/I" );
-    BabyTree_->Branch("nPFHad10LowMT", &nPFHad10LowMT, "nPFHad10LowMT/I" );
-    BabyTree_->Branch("ntau", &ntau, "ntau/I" );
-    BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
-    BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
-    BabyTree_->Branch("tau_phi", tau_phi, "tau_phi[ntau]/F" );
-    BabyTree_->Branch("tau_mass", tau_mass, "tau_mass[ntau]/F" );
-    BabyTree_->Branch("tau_charge", tau_charge, "tau_charge[ntau]/I" );
-    BabyTree_->Branch("tau_dxy", tau_dxy, "tau_dxy[ntau]/F" );
-    BabyTree_->Branch("tau_dz", tau_dz, "tau_dz[ntau]/F" );
-    BabyTree_->Branch("tau_idCI3hit", tau_idCI3hit, "tau_idCI3hit[ntau]/I" );
-    BabyTree_->Branch("tau_isoCI3hit", tau_isoCI3hit, "tau_isoCI3hit[ntau]/F" );
-    BabyTree_->Branch("tau_mcMatchId", tau_mcMatchId, "tau_mcMatchId[ntau]/I" );
-    BabyTree_->Branch("ngamma", &ngamma, "ngamma/I" );
-    BabyTree_->Branch("gamma_pt", gamma_pt, "gamma_pt[ngamma]/F" );
-    BabyTree_->Branch("gamma_eta", gamma_eta, "gamma_eta[ngamma]/F" );
-    BabyTree_->Branch("gamma_phi", gamma_phi, "gamma_phi[ngamma]/F" );
-    BabyTree_->Branch("gamma_mass", gamma_mass, "gamma_mass[ngamma]/F" );
-    BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_mcMatchId[ngamma]/I" );
-    BabyTree_->Branch("gamma_genIso04", gamma_genIso04, "gamma_genIso04[ngamma]/F" );
-    BabyTree_->Branch("gamma_drMinParton", gamma_drMinParton, "gamma_drMinParton[ngamma]/F" );
-    BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
-    BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
-    BabyTree_->Branch("gamma_phIso", gamma_phIso, "gamma_phIso[ngamma]/F" );
-    BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
-    BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
-    BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
-    BabyTree_->Branch("gamma_hOverE015", gamma_hOverE015, "gamma_hOverE015[ngamma]/F" );
-    BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
-    BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
-    BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
-    BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
-    BabyTree_->Branch("gamma_nJet30FailId", &gamma_nJet30FailId );
-    BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
-    BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
-    BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
-    BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
-    BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
-    BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
-    BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
-    BabyTree_->Branch("gamma_ht", &gamma_ht );
-    BabyTree_->Branch("gamma_deltaPhiMin", &gamma_deltaPhiMin );
-    BabyTree_->Branch("gamma_diffMetMht", &gamma_diffMetMht );
-    BabyTree_->Branch("gamma_mht_pt", &gamma_mht_pt );
-    BabyTree_->Branch("gamma_mht_phi", &gamma_mht_phi );
-    BabyTree_->Branch("gamma_met_pt", &gamma_met_pt );
-    BabyTree_->Branch("gamma_met_phi", &gamma_met_phi );
-    BabyTree_->Branch("npfPhoton", &npfPhoton, "npfPhoton/I" );
-    BabyTree_->Branch("pfPhoton_pt", pfPhoton_pt, "pfPhoton_pt[npfPhoton]/F" );
-    BabyTree_->Branch("pfPhoton_eta", pfPhoton_eta, "pfPhoton_eta[npfPhoton]/F" );
-    BabyTree_->Branch("pfPhoton_phi", pfPhoton_phi, "pfPhoton_phi[npfPhoton]/F" );
-    BabyTree_->Branch("zll_mt2", &zll_mt2 );
-    BabyTree_->Branch("zll_deltaPhiMin", &zll_deltaPhiMin );
-    BabyTree_->Branch("zll_diffMetMht", &zll_diffMetMht );
-    BabyTree_->Branch("zll_met_pt", &zll_met_pt );
-    BabyTree_->Branch("zll_met_phi", &zll_met_phi );
-    BabyTree_->Branch("zll_mht_pt", &zll_mht_pt );
-    BabyTree_->Branch("zll_mht_phi", &zll_mht_phi );
-    BabyTree_->Branch("zll_mass", &zll_mass );
-    BabyTree_->Branch("zll_pt", &zll_pt );
-    BabyTree_->Branch("zll_eta", &zll_eta );
-    BabyTree_->Branch("zll_phi", &zll_phi );
-    BabyTree_->Branch("zll_ht", &zll_ht );
-    BabyTree_->Branch("zll_mt2JECup", &zll_mt2JECup );
-    BabyTree_->Branch("zll_deltaPhiMinJECup", &zll_deltaPhiMinJECup );
-    BabyTree_->Branch("zll_diffMetMhtJECup", &zll_diffMetMhtJECup );
-    BabyTree_->Branch("zll_met_ptJECup", &zll_met_ptJECup );
-    BabyTree_->Branch("zll_met_phiJECup", &zll_met_phiJECup );
-    BabyTree_->Branch("zll_mht_ptJECup", &zll_mht_ptJECup );
-    BabyTree_->Branch("zll_mht_phiJECup", &zll_mht_phiJECup );
-    BabyTree_->Branch("zll_htJECup", &zll_htJECup );
-    BabyTree_->Branch("zll_mt2JECdn", &zll_mt2JECdn );
-    BabyTree_->Branch("zll_deltaPhiMinJECdn", &zll_deltaPhiMinJECdn );
-    BabyTree_->Branch("zll_diffMetMhtJECdn", &zll_diffMetMhtJECdn );
-    BabyTree_->Branch("zll_met_ptJECdn", &zll_met_ptJECdn );
-    BabyTree_->Branch("zll_met_phiJECdn", &zll_met_phiJECdn );
-    BabyTree_->Branch("zll_mht_ptJECdn", &zll_mht_ptJECdn );
-    BabyTree_->Branch("zll_mht_phiJECdn", &zll_mht_phiJECdn );
-    BabyTree_->Branch("zll_htJECdn", &zll_htJECdn );
-    BabyTree_->Branch("zllmt_mt2", &zllmt_mt2 );
-    BabyTree_->Branch("zllmt_deltaPhiMin", &zllmt_deltaPhiMin );
-    BabyTree_->Branch("zllmt_diffMetMht", &zllmt_diffMetMht );
-    BabyTree_->Branch("zllmt_met_pt", &zllmt_met_pt );
-    BabyTree_->Branch("zllmt_met_phi", &zllmt_met_phi );
-    BabyTree_->Branch("zllmt_mht_pt", &zllmt_mht_pt );
-    BabyTree_->Branch("zllmt_mht_phi", &zllmt_mht_phi );
-    BabyTree_->Branch("zllmt_ht", &zllmt_ht );
-    BabyTree_->Branch("zllmt_mt", &zllmt_mt );
-    BabyTree_->Branch("rl_mt2", &rl_mt2 );
-    BabyTree_->Branch("rl_deltaPhiMin", &rl_deltaPhiMin );
-    BabyTree_->Branch("rl_diffMetMht", &rl_diffMetMht );
-    BabyTree_->Branch("rl_met_pt", &rl_met_pt );
-    BabyTree_->Branch("rl_met_phi", &rl_met_phi );
-    BabyTree_->Branch("rl_mht_pt", &rl_mht_pt );
-    BabyTree_->Branch("rl_mht_phi", &rl_mht_phi );
-    BabyTree_->Branch("rl_mass", &rl_mass );
-    BabyTree_->Branch("rl_pt", &rl_pt );
-    BabyTree_->Branch("rl_eta", &rl_eta );
-    BabyTree_->Branch("rl_phi", &rl_phi );
-    BabyTree_->Branch("rl_ht", &rl_ht );
-    if (!isDataFromFileName) {
-      if (saveGenParticles) {
-        BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
-        BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
-        BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
-        BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
-        BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
-        BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
-        BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
-        BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
-        BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
-        BabyTree_->Branch("genPart_grandmotherId", genPart_grandmotherId, "genPart_grandmotherId[ngenPart]/I" );
-      }
-      BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
-      BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
-      BabyTree_->Branch("genLep_eta", genLep_eta, "genLep_eta[ngenLep]/F" );
-      BabyTree_->Branch("genLep_phi", genLep_phi, "genLep_phi[ngenLep]/F" );
-      BabyTree_->Branch("genLep_mass", genLep_mass, "genLep_mass[ngenLep]/F" );
-      BabyTree_->Branch("genLep_pdgId", genLep_pdgId, "genLep_pdgId[ngenLep]/I" );
-      BabyTree_->Branch("genLep_status", genLep_status, "genLep_status[ngenLep]/I" );
-      BabyTree_->Branch("genLep_charge", genLep_charge, "genLep_charge[ngenLep]/F" );
-      BabyTree_->Branch("genLep_sourceId", genLep_sourceId, "genLep_sourceId[ngenLep]/I" );
-      BabyTree_->Branch("ngenStat23", &ngenStat23, "ngenStat23/I" );
-      BabyTree_->Branch("genStat23_pt", genStat23_pt, "genStat23_pt[ngenStat23]/F" );
-      BabyTree_->Branch("genStat23_eta", genStat23_eta, "genStat23_eta[ngenStat23]/F" );
-      BabyTree_->Branch("genStat23_phi", genStat23_phi, "genStat23_phi[ngenStat23]/F" );
-      BabyTree_->Branch("genStat23_mass", genStat23_mass, "genStat23_mass[ngenStat23]/F" );
-      BabyTree_->Branch("genStat23_pdgId", genStat23_pdgId, "genStat23_pdgId[ngenStat23]/I" );
-      BabyTree_->Branch("genStat23_status", genStat23_status, "genStat23_status[ngenStat23]/I" );
-      BabyTree_->Branch("genStat23_charge", genStat23_charge, "genStat23_charge[ngenStat23]/F" );
-      BabyTree_->Branch("genStat23_sourceId", genStat23_sourceId, "genStat23_sourceId[ngenStat23]/I" );
-      BabyTree_->Branch("ngenGamma", &ngenGamma, "ngenGamma/I" );
-      BabyTree_->Branch("genGamma_pt", genGamma_pt, "genGamma_pt[ngenGamma]/F" );
-      BabyTree_->Branch("genGamma_eta", genGamma_eta, "genGamma_eta[ngenGamma]/F" );
-      BabyTree_->Branch("genGamma_phi", genGamma_phi, "genGamma_phi[ngenGamma]/F" );
-      BabyTree_->Branch("genGamma_motherId", genGamma_motherId, "genGamma_motherId[ngenGamma]/I" );
-      BabyTree_->Branch("ngenTau", &ngenTau, "ngenTau/I" );
-      BabyTree_->Branch("ngenTau1Prong", &ngenTau1Prong, "ngenTau1Prong/I" );
-      BabyTree_->Branch("ngenTau3Prong", &ngenTau3Prong, "ngenTau3Prong/I" );
-      BabyTree_->Branch("genTau_pt", genTau_pt, "genTau_pt[ngenTau]/F" );
-      BabyTree_->Branch("genTau_eta", genTau_eta, "genTau_eta[ngenTau]/F" );
-      BabyTree_->Branch("genTau_phi", genTau_phi, "genTau_phi[ngenTau]/F" );
-      BabyTree_->Branch("genTau_mass", genTau_mass, "genTau_mass[ngenTau]/F" );
-      BabyTree_->Branch("genTau_pdgId", genTau_pdgId, "genTau_pdgId[ngenTau]/I" );
-      BabyTree_->Branch("genTau_status", genTau_status, "genTau_status[ngenTau]/I" );
-      BabyTree_->Branch("genTau_charge", genTau_charge, "genTau_charge[ngenTau]/F" );
-      BabyTree_->Branch("genTau_sourceId", genTau_sourceId, "genTau_sourceId[ngenTau]/I" );
-      BabyTree_->Branch("genTau_decayMode", genTau_decayMode, "genTau_decayMode[ngenTau]/I" );
-      BabyTree_->Branch("genTau_leadTrackPt", genTau_leadTrackPt, "genTau_leadTrackPt[ngenTau]/F" );
-      BabyTree_->Branch("genTau_neutralDaughters", genTau_neutralDaughters, "genTau_neutralDaughters[ngenTau]/I" );
-      BabyTree_->Branch("ngenLepFromTau", &ngenLepFromTau, "ngenLepFromTau/I" );
-      BabyTree_->Branch("genLepFromTau_pt", genLepFromTau_pt, "genLepFromTau_pt[ngenLepFromTau]/F" );
-      BabyTree_->Branch("genLepFromTau_eta", genLepFromTau_eta, "genLepFromTau_eta[ngenLepFromTau]/F" );
-      BabyTree_->Branch("genLepFromTau_phi", genLepFromTau_phi, "genLepFromTau_phi[ngenLepFromTau]/F" );
-      BabyTree_->Branch("genLepFromTau_mass", genLepFromTau_mass, "genLepFromTau_mass[ngenLepFromTau]/F" );
-      BabyTree_->Branch("genLepFromTau_pdgId", genLepFromTau_pdgId, "genLepFromTau_pdgId[ngenLepFromTau]/I" );
-      BabyTree_->Branch("genLepFromTau_status", genLepFromTau_status, "genLepFromTau_status[ngenLepFromTau]/I" );
-      BabyTree_->Branch("genLepFromTau_charge", genLepFromTau_charge, "genLepFromTau_charge[ngenLepFromTau]/F" );
-      BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
-      BabyTree_->Branch("ngenLepFromZ", &ngenLepFromZ, "ngenLepFromZ/I" );
-      BabyTree_->Branch("ngenNuFromZ", &ngenNuFromZ, "ngenNuFromZ/I" );
-      BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
-      BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
-      BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
-      BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
-      if (saveLHEweights || saveLHEweightsScaleOnly) {
-	BabyTree_->Branch("nLHEweight", &nLHEweight, "nLHEweight/I" );
-	BabyTree_->Branch("LHEweight_wgt", LHEweight_wgt, "LHEweight_wgt[nLHEweight]/F" );
-      }
-    }
-    BabyTree_->Branch("njet", &njet, "njet/I" );
-    BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
-    BabyTree_->Branch("jet_eta", jet_eta, "jet_eta[njet]/F" );
-    BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
-    BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
-    BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
-    BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
-    BabyTree_->Branch("jet_chFrac", jet_chFrac, "jet_chFrac[njet]/F" );
-    BabyTree_->Branch("jet_nhFrac", jet_nhFrac, "jet_nhFrac[njet]/F" );
-    BabyTree_->Branch("jet_cemFrac", jet_cemFrac, "jet_cemFrac[njet]/F" );
-    BabyTree_->Branch("jet_nemFrac", jet_nemFrac, "jet_nemFrac[njet]/F" );
-    BabyTree_->Branch("jet_muFrac", jet_muFrac, "jet_muFrac[njet]/F" );
-    BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
-    BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
-    BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
-    BabyTree_->Branch("jet_hadronFlavour", jet_hadronFlavour, "jet_hadronFlavour[njet]/I" );
-    BabyTree_->Branch("jet_qgl", jet_qgl, "jet_qgl[njet]/F" );
-    BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
-    BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
-    BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
-    BabyTree_->Branch("jet_muf", jet_muf, "jet_muf[njet]/F" );
-    BabyTree_->Branch("weight_lepsf", &weight_lepsf );
-    BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
-    BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
-    BabyTree_->Branch("weight_lepsf_0l", &weight_lepsf_0l );
-    BabyTree_->Branch("weight_lepsf_0l_UP", &weight_lepsf_0l_UP );
-    BabyTree_->Branch("weight_lepsf_0l_DN", &weight_lepsf_0l_DN );
-    BabyTree_->Branch("weight_btagsf", &weight_btagsf );
-    BabyTree_->Branch("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP );
-    BabyTree_->Branch("weight_btagsf_light_UP", &weight_btagsf_light_UP );
-    BabyTree_->Branch("weight_btagsf_heavy_DN", &weight_btagsf_heavy_DN );
-    BabyTree_->Branch("weight_btagsf_light_DN", &weight_btagsf_light_DN );
-    BabyTree_->Branch("weight_sigtrigsf", &weight_sigtrigsf );
-    BabyTree_->Branch("weight_dileptrigsf", &weight_dileptrigsf );
-    BabyTree_->Branch("weight_phottrigsf", &weight_phottrigsf );
-    BabyTree_->Branch("weight_pu", &weight_pu );
-    BabyTree_->Branch("weight_isr", &weight_isr );
-    BabyTree_->Branch("weight_isr_UP", &weight_isr_UP );
-    BabyTree_->Branch("weight_isr_DN", &weight_isr_DN );
-    BabyTree_->Branch("weight_scales_UP", &weight_scales_UP );
-    BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
-    BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
-    BabyTree_->Branch("weight_pdfs_DN", &weight_pdfs_DN );
-    BabyTree_->Branch("weight_toppt", &weight_toppt );
-    BabyTree_->Branch("genRecoil_pt", &genRecoil_pt );
-    BabyTree_->Branch("genTop_pt", &genTop_pt );
-    BabyTree_->Branch("genTbar_pt", &genTbar_pt );
-    BabyTree_->Branch("genProd_pdgId", &genProd_pdgId );
-    BabyTree_->Branch("weight_pol_L", &weight_pol_L );
-    BabyTree_->Branch("weight_pol_R", &weight_pol_R );
-    BabyTree_->Branch("nisrMatch", &nisrMatch );
-    
-    if(doRebal){
-        BabyTree_->Branch("rebal_status", &rebal_status);
-        BabyTree_->Branch("nRebalJets", &nRebalJets);
-        BabyTree_->Branch("rebal_useJet", rebal_useJet, "rebal_useJet[njet]/I");
-        BabyTree_->Branch("rebal_jetpt", rebal_jetpt, "rebal_jetpt[nRebalJets]/F");
-        BabyTree_->Branch("rebal_jeteta", rebal_jeteta, "rebal_jeteta[nRebalJets]/F");
-        BabyTree_->Branch("rebal_jetphi", rebal_jetphi, "rebal_jetphi[nRebalJets]/F");
-        BabyTree_->Branch("rebal_jetbtagcsv", rebal_jetbtagcsv, "rebal_jetbtagcsv[nRebalJets]/F");
-        BabyTree_->Branch("rebal_factors", rebal_factors, "rebal_factors[nRebalJets]/F");
-        BabyTree_->Branch("rebal_met_pt", &rebal_met_pt);
-        BabyTree_->Branch("rebal_met_phi", &rebal_met_phi);
-    }
-
-    // Short Track
-
-    BabyTree_->Branch("ntracks", &ntracks);
-    BabyTree_->Branch("nshorttracks", &nshorttracks);
-    BabyTree_->Branch("nshorttracks_P", &nshorttracks_P);
-    BabyTree_->Branch("nshorttracks_M", &nshorttracks_M);
-    BabyTree_->Branch("nshorttracks_L", &nshorttracks_L);
-    BabyTree_->Branch("nshorttrackcandidates", &nshorttrackcandidates);
-    BabyTree_->Branch("nshorttrackcandidates_P", &nshorttrackcandidates_P);
-    BabyTree_->Branch("nshorttrackcandidates_M", &nshorttrackcandidates_M);
-    BabyTree_->Branch("nshorttrackcandidates_L", &nshorttrackcandidates_L);
-    BabyTree_->Branch("track_pt", track_pt, "track_pt[ntracks]/F");
-    BabyTree_->Branch("track_ptErr", track_ptErr, "track_ptErr[ntracks]/F");
-    BabyTree_->Branch("track_eta", track_eta, "track_eta[ntracks]/F");
-    BabyTree_->Branch("track_phi", track_phi, "track_phi[ntracks]/F");
-    BabyTree_->Branch("track_charge", track_charge, "track_charge[ntracks]/I");
-    BabyTree_->Branch("track_dedxStrip", track_dedxStrip, "track_dedxStrip[ntracks]/F");
-    BabyTree_->Branch("track_dedxPixel", track_dedxPixel, "track_dedxPixel[ntracks]/F");
-    //    BabyTree_->Branch("track_nChi2", track_nChi2, "track_nChi2[ntracks]/F");
-    BabyTree_->Branch("track_ipSigXY", track_ipSigXY, "track_ipSigXY[ntracks]/F");
-    BabyTree_->Branch("track_dxy", track_dxy, "track_dxy[ntracks]/F");
-    BabyTree_->Branch("track_dxyErr", track_dxyErr, "track_dxyErr[ntracks]/F");
-    BabyTree_->Branch("track_dz", track_dz, "track_dz[ntracks]/F");
-    BabyTree_->Branch("track_dzErr", track_dzErr, "track_dzErr[ntracks]/F");
-    BabyTree_->Branch("track_isHighPurity", track_isHighPurity, "track_isHighPurity[ntracks]/I");
-    BabyTree_->Branch("track_DeadECAL", track_DeadECAL, "track_DeadECAL[ntracks]/I");
-    BabyTree_->Branch("track_DeadHCAL", track_DeadHCAL, "track_DeadHCAL[ntracks]/I");
-    BabyTree_->Branch("track_isshort", track_isshort, "track_isshort[ntracks]/I");
-    BabyTree_->Branch("track_iscandidate", track_iscandidate, "track_iscandidate[ntracks]/I");
-    BabyTree_->Branch("track_ispixelonly", track_ispixelonly, "track_ispixelonly[ntracks]/I");
-    BabyTree_->Branch("track_ismedium", track_ismedium, "track_ismedium[ntracks]/I");
-    BabyTree_->Branch("track_islong", track_islong, "track_islong[ntracks]/I");
-    BabyTree_->Branch("track_ispixelonlycandidate", track_ispixelonlycandidate, "track_ispixelonlycandidate[ntracks]/I");
-    BabyTree_->Branch("track_ismediumcandidate", track_ismediumcandidate, "track_ismediumcandidate[ntracks]/I");
-    BabyTree_->Branch("track_islongcandidate", track_islongcandidate, "track_islongcandidate[ntracks]/I");
-    BabyTree_->Branch("track_HitSignature", track_HitSignature, "track_HitSignature[ntracks]/I");
-    BabyTree_->Branch("track_nPixelHits", track_nPixelHits, "track_nPixelHits[ntracks]/I");
-    BabyTree_->Branch("track_nLostOuterHits", track_nLostOuterHits, "track_nLostOuterHits[ntracks]/I");
-    BabyTree_->Branch("track_nLostInnerPixelHits", track_nLostInnerPixelHits, "track_nLostInnerPixelHits[ntracks]/I");
-    BabyTree_->Branch("track_nLayersWithMeasurement", track_nLayersWithMeasurement, "track_nLayersWithMeasurement[ntracks]/I");
-    BabyTree_->Branch("track_nPixelLayersWithMeasurement", track_nPixelLayersWithMeasurement, "track_nPixelLayersWithMeasurement[ntracks]/I");
-    BabyTree_->Branch("track_nearestPF_id", track_nearestPF_id, "track_nearestPF_id[ntracks]/I");
-    BabyTree_->Branch("track_nearestPF_DR", track_nearestPF_DR, "track_nearestPF_DR[ntracks]/F");
-    BabyTree_->Branch("track_nearestPF_pt", track_nearestPF_pt, "track_nearestPF_pt[ntracks]/F");
-    BabyTree_->Branch("track_jetDR", track_jetDR, "track_jetDR[ntracks]/F");
-    BabyTree_->Branch("track_jetPt", track_jetPt, "track_jetPt[ntracks]/F");
-    BabyTree_->Branch("track_jetEta", track_jetEta, "track_jetEta[ntracks]/F");
-    BabyTree_->Branch("track_jetPhi", track_jetPhi, "track_jetPhi[ntracks]/F");
-    BabyTree_->Branch("track_chHIso0p3", track_chHIso0p3, "track_chHIso0p3[ntracks]/F");
-    BabyTree_->Branch("track_chHminiIso", track_chHminiIso, "track_chHminiIso[ntracks]/F");
-    BabyTree_->Branch("track_neuHIso0p3", track_neuHIso0p3, "track_neuHIso0p3[ntracks]/F");
-    BabyTree_->Branch("track_neuHminiIso", track_neuHminiIso, "track_neuHminiIso[ntracks]/F");
-    BabyTree_->Branch("track_phIso0p3", track_phIso0p3, "track_phIso0p3[ntracks]/F");
-    BabyTree_->Branch("track_phminiIso0p3", track_phminiIso, "track_phminiIso[ntracks]/F");
-    BabyTree_->Branch("track_isLepOverlap", track_isLepOverlap, "track_isLepOverlap[ntracks]/I");
-    BabyTree_->Branch("track_neuIso0p05", track_neuIso0p05, "track_neuIso0p05[ntracks]/F");
-    BabyTree_->Branch("track_neuRelIso0p05", track_neuRelIso0p05, "track_neuRelIso0p05[ntracks]/F");
-    BabyTree_->Branch("track_iso", track_iso, "track_iso[ntracks]/F");
-    BabyTree_->Branch("track_reliso", track_reliso, "track_reliso[ntracks]/F");
-    BabyTree_->Branch("track_isonomin", track_isonomin, "track_isonomin[ntracks]/F");
-    BabyTree_->Branch("track_relisonomin", track_relisonomin, "track_relisonomin[ntracks]/F");
-    BabyTree_->Branch("track_iso_uncorrected", track_iso_uncorrected, "track_iso_uncorrected[ntracks]/F");
-    BabyTree_->Branch("track_reliso_uncorrected", track_reliso_uncorrected, "track_reliso_uncorrected[ntracks]/F");
-    BabyTree_->Branch("track_iso_correction", track_iso_correction, "track_iso_correction[ntracks]/F");
-    BabyTree_->Branch("track_reliso_correction", track_reliso_correction, "track_reliso_correction[ntracks]/F");
-    BabyTree_->Branch("track_miniiso", track_miniiso, "track_miniiso[ntracks]/F");
-    BabyTree_->Branch("track_minireliso", track_minireliso, "track_minireliso[ntracks]/F");
-    BabyTree_->Branch("track_miniisonomin", track_miniisonomin, "track_miniisonomin[ntracks]/F");
-    BabyTree_->Branch("track_minirelisonomin", track_minirelisonomin, "track_minirelisonomin[ntracks]/F");
-    BabyTree_->Branch("track_miniiso_uncorrected", track_miniiso_uncorrected, "track_miniiso_uncorrected[ntracks]/F");
-    BabyTree_->Branch("track_minireliso_uncorrected", track_minireliso_uncorrected, "track_minireliso_uncorrected[ntracks]/F");
-    BabyTree_->Branch("track_miniiso_correction", track_miniiso_correction, "track_miniiso_correction[ntracks]/F");
-    BabyTree_->Branch("track_minireliso_correction", track_minireliso_correction, "track_minireliso_correction[ntracks]/F");
-    BabyTree_->Branch("track_isChargino", track_isChargino, "track_isChargino[ntracks]/I");
-    BabyTree_->Branch("track_genPdgId", track_genPdgId, "track_genPdgId[ntracks]/I");
-    BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
-    BabyTree_->Branch("track_nCharginos", &nCharginos);
-
-    // also make counter histogram
-    count_hist_ = new TH1D("Count","Count",1,0,2);
-
-    return;
-  }
-
-  void babyMaker::InitBabyNtuple () {
-
-    run    = -999;
-    lumi   = -999;
-    evt    = -999;
-    isData = -999;
-    isGolden = -1;
-    evt_scale1fb = 0;
-    evt_xsec = -999.0;
-    evt_kfactor = -999.0;
-    evt_filter = -999.0;
-    evt_nEvts = 0;
-    //evt_id = -1; // don't reset every event
-    genWeight = 0;
-    puWeight = -999.0;
-    nVert = -999;
-    nTrueInt = -999;
-    rho = -999.0;
-    nJet30 = -999;
-    nJet30JECup = -999;
-    nJet30JECdn = -999;
-    nJet40 = -999;
-    nBJet20 = -999;
-    nBJet20csv = -999;
-    nBJet20mva = -999;
-    nBJet20JECup = -999;
-    nBJet20JECdn = -999;
-    nBJet25 = -999;
-    nBJet30 = -999;
-    nBJet30csv = -999;
-    nBJet30mva = -999;
-    nBJet40 = -999;
-    nJet30FailId = -999;
-    nJet100FailId = -999;
-    nJet20BadFastsim = -999;
-    nJet200MuFrac50DphiMet = -999;
-    nMuons10 = -999;
-    nBadMuons20 = -999;
-    nElectrons10 = -999;
-    nLepLowMT = -999;
-    nTaus20 = -999;
-    nGammas20 = -999;
-    nPFCHCand3 = -999;
-    deltaPhiMin = -999.0;
-    deltaPhiMin_genmet = -999.0;
-    diffMetMht = -999.0;
-    diffMetMht_genmet = -999.0;
-    deltaPhiMinJECup = -999.0;
-    deltaPhiMinJECdn = -999.0;
-    diffMetMhtJECup = -999.0;
-    diffMetMhtJECdn = -999.0;
-    minMTBMet = -999.0;
-    zll_minMTBMet = -999.0;
-    rl_minMTBMet = -999.0;
-    gamma_minMTBMet = -999.0;
-    ht = -999.0;
-    htJECup = -999.0;
-    htJECdn = -999.0;
-    mt2 = -999.0;
-    mt2JECup = -999.0;
-    mt2JECdn = -999.0;
-    mt2_gen = -999.0;
-    mt2_genmet = -999.0;
-    jet1_pt = 0.0;
-    jet2_pt = 0.0;
-    jet1_ptJECup = 0.0;
-    jet2_ptJECup = 0.0;
-    jet1_ptJECdn = 0.0;
-    jet2_ptJECdn = 0.0;
-    jet_failFSveto = 0.0;
-    gamma_jet1_pt = 0.0;
-    gamma_jet2_pt = 0.0;
-    pseudoJet1_pt = 0.0;
-    pseudoJet1_eta = 0.0;
-    pseudoJet1_phi = 0.0;
-    pseudoJet1_mass = 0.0;
-    pseudoJet2_pt = 0.0;
-    pseudoJet2_eta = 0.0;
-    pseudoJet2_phi = 0.0;
-    pseudoJet2_mass = 0.0;
-    mht_pt = -999.0;
-    mht_phi = -999.0;
-    mht_ptJECup = -999.0;
-    mht_phiJECup = -999.0;
-    mht_ptJECdn = -999.0;
-    mht_phiJECdn = -999.0;
-    met_pt = -999.0;
-    met_phi = -999.0;
-    met_ptJECup = -999.0;
-    met_phiJECup = -999.0;
-    met_ptJECdn = -999.0;
-    met_phiJECdn = -999.0;
-    met_rawPt = -999.0;
-    met_rawPhi = -999.0;
-    met_caloPt = -999.0;
-    met_caloPhi = -999.0;
-    met_trkPt = -999.0;
-    met_trkPhi = -999.0;
-    met_genPt = -999.0;
-    met_genPhi = -999.0;
-    met_miniaodPt = -999.0;
-    met_miniaodPhi = -999.0;
-    Flag_EcalDeadCellTriggerPrimitiveFilter = -999;
-    Flag_trkPOG_manystripclus53X = -999;
-    Flag_ecalLaserCorrFilter = -999;
-    Flag_trkPOG_toomanystripclus53X = -999;
-    Flag_hcalLaserEventFilter = -999;
-    Flag_trkPOG_logErrorTooManyClusters = -999;
-    Flag_trkPOGFilters = -999;
-    Flag_trackingFailureFilter = -999;
-    Flag_CSCTightHaloFilter = -999;
-    Flag_CSCTightHalo2015Filter = -999;
-    Flag_globalTightHalo2016Filter = -999;
-    Flag_globalSuperTightHalo2016Filter = -999;
-    Flag_HBHENoiseFilter = -999;
-    Flag_HBHENoiseIsoFilter = -999;
-    Flag_goodVertices = -999;
-    Flag_eeBadScFilter = -999;
-    Flag_ecalBadCalibFilter = -999;
-    Flag_badMuonFilter = -999;
-    Flag_badMuonFilterV2 = -999;    
-    Flag_badMuons = -999;    
-    Flag_duplicateMuons = -999;    
-    Flag_noBadMuons = -999;    
-    Flag_badChargedCandidateFilter = -999;
-    Flag_badChargedHadronFilter = -999;
-    Flag_badChargedHadronFilterV2 = -999;    
-    Flag_METFilters = -999;
-    HLT_PFHT1050 = -999;
-    HLT_PFHT500_PFMET100_PFMHT100 = -999;
-    HLT_PFHT700_PFMET85_PFMHT85 = -999;
-    HLT_PFHT800_PFMET75_PFMHT75 = -999;
-    HLT_PFMET170 = -999;
-    HLT_PFHT300_PFMET100 = -999;
-    HLT_PFHT300_PFMET110 = -999;
-    HLT_PFHT350_PFMET100 = -999;
-    HLT_PFHT350_PFMET120 = -999;
-    HLT_PFMETNoMu90_PFMHTNoMu90 = -999;
-    HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 = -999;
-    HLT_PFMETNoMu100_PFMHTNoMu100 = -999;
-    HLT_PFMETNoMu110_PFMHTNoMu110 = -999;
-    HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
-    HLT_PFMETNoMu130_PFMHTNoMu130 = -999;
-    HLT_PFMETNoMu140_PFMHTNoMu140 = -999;
-    HLT_PFMET90_PFMHT90 = -999;
-    HLT_PFMET100_PFMHT100 = -999;
-    HLT_PFMET110_PFMHT110 = -999;
-    HLT_PFMET120_PFMHT120 = -999;
-    HLT_PFMET130_PFMHT130 = -999;
-    HLT_PFMET140_PFMHT140 = -999;
-    HLT_PFMET100_PFMHT100_PFHT60 = -999;
-    HLT_PFMET120_PFMHT120_PFHT60 = -999;
-    HLT_PFJet450 = -999;
-    HLT_PFJet500 = -999;
-    HLT_ECALHT800 = -999;
-    HLT_SingleMu = -999;   
-    HLT_SingleMu_NonIso = -999;   
-    HLT_SingleEl = -999;   
-    HLT_SingleEl_NonIso = -999;   
-    HLT_DoubleEl = -999;   
-    HLT_DoubleEl33 = -999;   
-    HLT_MuX_Ele12 = -999;   
-    HLT_Mu8_EleX = -999;   
-    HLT_Mu12_EleX = -999;   
-    HLT_Mu30_Ele30_NonIso = -999;   
-    HLT_Mu33_Ele33_NonIso = -999;   
-    HLT_Mu37_Ele27_NonIso = -999;   
-    HLT_Mu27_Ele37_NonIso = -999;   
-    HLT_DoubleMu = -999;   
-    HLT_DoubleMu_NonIso = -999;   
-    HLT_Photon120 = -999;   
-    HLT_Photon200 = -999;   
-    HLT_Photon175_Prescale = -999;   
-    HLT_Photon165_HE10 = -999;   
-    HLT_Photon250_NoHE = -999;   
-    HLT_PFHT180_Prescale = -999;
-    HLT_PFHT250_Prescale = -999;
-    HLT_PFHT370_Prescale = -999;
-    HLT_PFHT430_Prescale = -999;
-    HLT_PFHT510_Prescale = -999;
-    HLT_PFHT590_Prescale = -999;
-    HLT_PFHT680_Prescale = -999;
-    HLT_PFHT780_Prescale = -999;
-    HLT_PFHT890_Prescale = -999;
-    HLT_DiCentralPFJet70_PFMET120 = -999;
-    HLT_DiCentralPFJet55_PFMET110 = -999;
-    nlep = -999;
-    nisoTrack = -999;
-    nhighPtPFcands = -999;
-    nPFLep5LowMT = -999;
-    nPFHad10LowMT = -999;
-    ntau = -999;
-    npfPhoton = -999;
-    ngamma = -999;
-    ngenPart = -999;
-    ngenLep = -999;
-    ngenStat23 = -999;
-    ngenGamma = -999;
-    ngenTau = -999;
-    ngenTau1Prong = -999;
-    ngenTau3Prong = -999;
-    ngenLepFromTau = -999;
-    ngenLepFromZ = -999;
-    ngenNuFromZ = -999;
-    njet = -999;
-    gamma_mt2 = -999.0;
-    gamma_nJet30 = -999;
-    gamma_nJet40 = -999;
-    gamma_nJet30FailId = -999;
-    gamma_nJet100FailId = -999;
-    gamma_nBJet20 = -999;
-    gamma_nBJet20csv = -999;
-    gamma_nBJet20mva = -999;
-    gamma_nBJet25 = -999;
-    gamma_nBJet30 = -999;
-    gamma_nBJet40 = -999;
-    gamma_ht = -999.0;
-    gamma_deltaPhiMin = -999.0;
-    gamma_diffMetMht = -999.0;
-    gamma_mht_pt = -999.0;
-    gamma_mht_phi = -999.0;
-    gamma_met_pt = -999.0;
-    gamma_met_phi = -999.0;
-    zll_mt2 = -999.0;
-    zll_deltaPhiMin = -999.0;
-    zll_diffMetMht = -999.0;
-    zll_met_pt = -999.0;
-    zll_met_phi = -999.0;
-    zll_mht_pt = -999.0;
-    zll_mht_phi = -999.0;
-    zll_mass = -999.0;
-    zll_pt = -999.0;
-    zll_eta = -999.0;
-    zll_phi = -999.0;
-    zll_ht = -999.0;
-    zll_mt2JECup = -999.0;
-    zll_deltaPhiMinJECup = -999.0;
-    zll_diffMetMhtJECup = -999.0;
-    zll_met_ptJECup = -999.0;
-    zll_met_phiJECup = -999.0;
-    zll_mht_ptJECup = -999.0;
-    zll_mht_phiJECup = -999.0;
-    zll_htJECup = -999.0;
-    zll_mt2JECdn = -999.0;
-    zll_deltaPhiMinJECdn = -999.0;
-    zll_diffMetMhtJECdn = -999.0;
-    zll_met_ptJECdn = -999.0;
-    zll_met_phiJECdn = -999.0;
-    zll_mht_ptJECdn = -999.0;
-    zll_mht_phiJECdn = -999.0;
-    zll_htJECdn = -999.0;
-    zllmt_mt2 = -999.0;
-    zllmt_deltaPhiMin = -999.0;
-    zllmt_diffMetMht = -999.0;
-    zllmt_met_pt = -999.0;
-    zllmt_met_phi = -999.0;
-    zllmt_mht_pt = -999.0;
-    zllmt_mht_phi = -999.0;
-    zllmt_ht = -999.0;
-    zllmt_mt = -999.0;
-    rl_mt2 = -999.0;
-    rl_deltaPhiMin = -999.0;
-    rl_diffMetMht = -999.0;
-    rl_met_pt = -999.0;
-    rl_met_phi = -999.0;
-    rl_mht_pt = -999.0;
-    rl_mht_phi = -999.0;
-    rl_mass = -999.0;
-    rl_pt = -999.0;
-    rl_eta = -999.0;
-    rl_phi = -999.0;
-    rl_ht = -999.0;
-    GenSusyMScan1 = 0;
-    GenSusyMScan2 = 0;
-    GenSusyMScan3 = 0;
-    GenSusyMScan4 = 0;
-    weight_lepsf = 1.;
-    weight_lepsf_UP = 1.;
-    weight_lepsf_DN = 1.;
-    weight_lepsf_0l = 1.;
-    weight_lepsf_0l_UP = 1.;
-    weight_lepsf_0l_DN = 1.;
-    weight_btagsf = 1.;
-    weight_btagsf_heavy_UP = 1.;
-    weight_btagsf_light_UP = 1.;
-    weight_btagsf_heavy_DN = 1.;
-    weight_btagsf_light_DN = 1.;
-    weight_sigtrigsf = 1.;
-    weight_dileptrigsf = 1.;
-    weight_phottrigsf = 1.;
-    weight_pu = 1.;
-    weight_isr = 1.;
-    weight_isr_UP = 1.;
-    weight_isr_DN = 1.;
-    weight_scales_UP = 1.;
-    weight_scales_DN = 1.;
-    weight_pdfs_UP = 1.;
-    weight_pdfs_DN = 1.;
-    weight_toppt = 1.;
-    genRecoil_pt = -999.;
-    genTop_pt = -999.;
-    genTbar_pt = -999.;
-    genProd_pdgId = -999;
-    nLHEweight = -999;
-    weight_pol_L = -999;
-    weight_pol_R = -999;
-    nisrMatch = -999;
-
-    for(int i=0; i < max_nlep; i++){
-      lep_pt[i] = -999;
-      lep_eta[i] = -999;
-      lep_phi[i] = -999;
-      lep_mass[i] = -999;
-      lep_charge[i] = -999;
-      lep_pdgId[i] = -999;
-      lep_dxy[i] = -999;
-      lep_dz[i] = -999;
-      lep_tightId[i] = -999;
-      lep_heepId[i] = -999;
-      lep_highPtFit_pt[i] = -999;
-      lep_highPtFit_eta[i] = -999;
-      lep_highPtFit_phi[i] = -999;
-      lep_relIso03[i] = -999;
-      lep_relIso04[i] = -999;
-      lep_miniRelIso[i] = -999;
-      // lep_relIsoAn04[i] = -999;
-      lep_mcMatchId[i] = -999;
-      lep_lostHits[i] = -999;
-      lep_convVeto[i] = -999;
-      lep_tightCharge[i] = -999;
-    }
-
-    for(int i=0; i < max_nisoTrack; i++){
-      isoTrack_pt[i] = -999;
-      isoTrack_eta[i] = -999;
-      isoTrack_phi[i] = -999;
-      isoTrack_mass[i] = -999;
-      isoTrack_absIso[i] = -999;
-      // isoTrack_relIsoAn04[i] = -999;
-      isoTrack_dz[i] = -999;
-      isoTrack_pdgId[i] = -999;
-      isoTrack_mcMatchId[i] = -999;
-    }
-
-    for(int i=0; i < max_nhighPtPFcands; i++){
-      highPtPFcands_pt[i] = -999;
-      highPtPFcands_eta[i] = -999;
-      highPtPFcands_phi[i] = -999;
-      highPtPFcands_mass[i] = -999;
-      highPtPFcands_absIso[i] = -999;
-      // highPtPFcands_relIsoAn04[i] = -999;
-      highPtPFcands_dz[i] = -999;
-      highPtPFcands_pdgId[i] = -999;
-      highPtPFcands_mcMatchId[i] = -999;
-    }
-
-    for(int i=0; i < max_ntau; i++){
-      tau_pt[i] = -999;
-      tau_eta[i] = -999;
-      tau_phi[i] = -999;
-      tau_mass[i] = -999;
-      tau_charge[i] = -999;
-      tau_dxy[i] = -999;
-      tau_dz[i] = -999;
-      tau_idCI3hit[i] = -999;
-      tau_isoCI3hit[i] = -999;
-      tau_mcMatchId[i] = -999;
-    }
-
-    for(int i=0; i < max_ngamma; i++){
-      gamma_pt[i] = -999;
-      gamma_eta[i] = -999;
-      gamma_phi[i] = -999;
-      gamma_mass[i] = -999;
-      gamma_mcMatchId[i] = -999;
-      gamma_genIso04[i] = -999;
-      gamma_drMinParton[i] = -999;
-      gamma_chHadIso[i] = -999;
-      gamma_neuHadIso[i] = -999;
-      gamma_phIso[i] = -999;
-      gamma_sigmaIetaIeta[i] = -999;
-      gamma_r9[i] = -999;
-      gamma_hOverE[i] = -999;
-      gamma_hOverE015[i] = -999;
-      gamma_idCutBased[i] = -999;
-      pfPhoton_pt[i] = -999;
-      pfPhoton_eta[i] = -999;
-      pfPhoton_phi[i] = -999;
-    }
-
+  BabyFile_ = new TFile(Form("%s", BabyFilename), "RECREATE");
+  BabyFile_->cd();
+  BabyTree_ = new TTree("mt2", "A Baby Ntuple");
+  
+  BabyTree_->Branch("run", &run );
+  BabyTree_->Branch("lumi", &lumi );
+  BabyTree_->Branch("evt", &evt, "evt/l" );
+  BabyTree_->Branch("isData", &isData );
+  BabyTree_->Branch("isGolden", &isGolden );
+  BabyTree_->Branch("evt_scale1fb", &evt_scale1fb);
+  BabyTree_->Branch("evt_xsec", &evt_xsec );
+  BabyTree_->Branch("evt_kfactor", &evt_kfactor );
+  BabyTree_->Branch("evt_filter", &evt_filter );
+  BabyTree_->Branch("evt_nEvts", &evt_nEvts, "evt_nEvts/l" );
+  BabyTree_->Branch("evt_id", &evt_id );
+  BabyTree_->Branch("genWeight", &genWeight );
+  BabyTree_->Branch("puWeight", &puWeight );
+  BabyTree_->Branch("nVert", &nVert );
+  BabyTree_->Branch("nTrueInt", &nTrueInt );
+  BabyTree_->Branch("rho", &rho );
+  BabyTree_->Branch("nJet30", &nJet30 );
+  BabyTree_->Branch("nJet30JECup", &nJet30JECup );
+  BabyTree_->Branch("nJet30JECdn", &nJet30JECdn );
+  BabyTree_->Branch("nJet40", &nJet40 );
+  BabyTree_->Branch("nBJet20", &nBJet20 );
+  BabyTree_->Branch("nBJet20csv", &nBJet20csv );
+  BabyTree_->Branch("nBJet20mva", &nBJet20mva );
+  BabyTree_->Branch("nBJet20JECup", &nBJet20JECup );
+  BabyTree_->Branch("nBJet20JECdn", &nBJet20JECdn );
+  BabyTree_->Branch("nBJet25", &nBJet25 );
+  BabyTree_->Branch("nBJet30", &nBJet30 );
+  BabyTree_->Branch("nBJet30csv", &nBJet30csv );
+  BabyTree_->Branch("nBJet30mva", &nBJet30mva );
+  BabyTree_->Branch("nBJet40", &nBJet40 );
+  BabyTree_->Branch("nJet30FailId", &nJet30FailId );
+  BabyTree_->Branch("nJet100FailId", &nJet100FailId );
+  BabyTree_->Branch("nJet20BadFastsim", &nJet20BadFastsim );
+  BabyTree_->Branch("nJet200MuFrac50DphiMet", &nJet200MuFrac50DphiMet );
+  BabyTree_->Branch("nMuons10", &nMuons10 );
+  BabyTree_->Branch("nBadMuons20", &nBadMuons20 );
+  BabyTree_->Branch("nElectrons10", &nElectrons10 );
+  BabyTree_->Branch("nLepLowMT", &nLepLowMT );
+  BabyTree_->Branch("nTaus20", &nTaus20 );
+  BabyTree_->Branch("nGammas20", &nGammas20 );
+  BabyTree_->Branch("nPFCHCand3", &nPFCHCand3 );
+  BabyTree_->Branch("deltaPhiMin", &deltaPhiMin );
+  BabyTree_->Branch("deltaPhiMin_genmet", &deltaPhiMin_genmet );
+  BabyTree_->Branch("diffMetMht", &diffMetMht );
+  BabyTree_->Branch("diffMetMht_genmet", &diffMetMht_genmet );
+  BabyTree_->Branch("deltaPhiMinJECup", &deltaPhiMinJECup );
+  BabyTree_->Branch("deltaPhiMinJECdn", &deltaPhiMinJECdn );
+  BabyTree_->Branch("diffMetMhtJECup", &diffMetMhtJECup );
+  BabyTree_->Branch("diffMetMhtJECdn", &diffMetMhtJECdn );
+  BabyTree_->Branch("minMTBMet", &minMTBMet );
+  BabyTree_->Branch("zll_minMTBMet", &zll_minMTBMet );
+  BabyTree_->Branch("gamma_minMTBMet", &gamma_minMTBMet );
+  BabyTree_->Branch("ht", &ht );
+  BabyTree_->Branch("htJECup", &htJECup );
+  BabyTree_->Branch("htJECdn", &htJECdn );
+  BabyTree_->Branch("mt2", &mt2 );
+  BabyTree_->Branch("mt2JECup", &mt2JECup );
+  BabyTree_->Branch("mt2JECdn", &mt2JECdn );
+  BabyTree_->Branch("mt2_gen", &mt2_gen );
+  BabyTree_->Branch("mt2_genmet", &mt2_genmet );
+  BabyTree_->Branch("jet1_pt", &jet1_pt );
+  BabyTree_->Branch("jet2_pt", &jet2_pt );
+  BabyTree_->Branch("jet1_ptJECup", &jet1_ptJECup );
+  BabyTree_->Branch("jet2_ptJECup", &jet2_ptJECup );
+  BabyTree_->Branch("jet1_ptJECdn", &jet1_ptJECdn );
+  BabyTree_->Branch("jet2_ptJECdn", &jet2_ptJECdn );
+  BabyTree_->Branch("jet_failFSveto", &jet_failFSveto );
+  BabyTree_->Branch("gamma_jet1_pt", &gamma_jet1_pt );
+  BabyTree_->Branch("gamma_jet2_pt", &gamma_jet2_pt );
+  BabyTree_->Branch("pseudoJet1_pt", &pseudoJet1_pt );
+  BabyTree_->Branch("pseudoJet1_eta", &pseudoJet1_eta );
+  BabyTree_->Branch("pseudoJet1_phi", &pseudoJet1_phi );
+  BabyTree_->Branch("pseudoJet1_mass", &pseudoJet1_mass );
+  BabyTree_->Branch("pseudoJet2_pt", &pseudoJet2_pt );
+  BabyTree_->Branch("pseudoJet2_eta", &pseudoJet2_eta );
+  BabyTree_->Branch("pseudoJet2_phi", &pseudoJet2_phi );
+  BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
+  BabyTree_->Branch("mht_pt", &mht_pt );
+  BabyTree_->Branch("mht_phi", &mht_phi );
+  BabyTree_->Branch("mht_ptJECup", &mht_ptJECup );
+  BabyTree_->Branch("mht_phiJECup", &mht_phiJECup );
+  BabyTree_->Branch("mht_ptJECdn", &mht_ptJECdn );
+  BabyTree_->Branch("mht_phiJECdn", &mht_phiJECdn );
+  BabyTree_->Branch("met_pt", &met_pt );
+  BabyTree_->Branch("met_phi", &met_phi );
+  BabyTree_->Branch("met_ptJECup", &met_ptJECup );
+  BabyTree_->Branch("met_phiJECup", &met_phiJECup );
+  BabyTree_->Branch("met_ptJECdn", &met_ptJECdn );
+  BabyTree_->Branch("met_phiJECdn", &met_phiJECdn );
+  BabyTree_->Branch("met_rawPt",  &met_rawPt );
+  BabyTree_->Branch("met_rawPhi", &met_rawPhi );
+  BabyTree_->Branch("met_caloPt",  &met_caloPt );
+  BabyTree_->Branch("met_caloPhi", &met_caloPhi );
+  BabyTree_->Branch("met_trkPt",  &met_trkPt );
+  BabyTree_->Branch("met_trkPhi", &met_trkPhi );
+  BabyTree_->Branch("met_genPt",  &met_genPt );
+  BabyTree_->Branch("met_genPhi", &met_genPhi );
+  BabyTree_->Branch("met_miniaodPt",  &met_miniaodPt );
+  BabyTree_->Branch("met_miniaodPhi", &met_miniaodPhi );
+  BabyTree_->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter );
+  BabyTree_->Branch("Flag_trkPOG_manystripclus53X", &Flag_trkPOG_manystripclus53X );
+  BabyTree_->Branch("Flag_ecalLaserCorrFilter", &Flag_ecalLaserCorrFilter );
+  BabyTree_->Branch("Flag_trkPOG_toomanystripclus53X", &Flag_trkPOG_toomanystripclus53X );
+  BabyTree_->Branch("Flag_hcalLaserEventFilter", &Flag_hcalLaserEventFilter );
+  BabyTree_->Branch("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters );
+  BabyTree_->Branch("Flag_trkPOGFilters", &Flag_trkPOGFilters );
+  BabyTree_->Branch("Flag_trackingFailureFilter", &Flag_trackingFailureFilter );
+  BabyTree_->Branch("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter );
+  BabyTree_->Branch("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter );
+  BabyTree_->Branch("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter );
+  BabyTree_->Branch("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter );
+  BabyTree_->Branch("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter );
+  BabyTree_->Branch("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter );
+  BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
+  BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
+  BabyTree_->Branch("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter );
+  BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
+  BabyTree_->Branch("Flag_badMuonFilter2016", &Flag_badMuonFilter2016 ); 
+  BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
+  BabyTree_->Branch("Flag_duplicateMuons", &Flag_duplicateMuons );   
+  BabyTree_->Branch("Flag_noBadMuons", &Flag_noBadMuons );  
+  BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
+  BabyTree_->Branch("Flag_badChargedHadronFilter2016", &Flag_badChargedHadronFilter2016 );    
+  BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
+  BabyTree_->Branch("HLT_PFHT1050", &HLT_PFHT1050 );
+  BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
+  BabyTree_->Branch("HLT_PFHT500_PFMET100_PFMHT100", &HLT_PFHT500_PFMET100_PFMHT100 ); 
+  BabyTree_->Branch("HLT_PFHT700_PFMET85_PFMHT85", &HLT_PFHT700_PFMET85_PFMHT85 );
+  BabyTree_->Branch("HLT_PFHT800_PFMET75_PFMHT75", &HLT_PFHT800_PFMET75_PFMHT75 );
+  BabyTree_->Branch("HLT_PFMET170", &HLT_PFMET170 );
+  BabyTree_->Branch("HLT_PFHT300_PFMET100", &HLT_PFHT300_PFMET100 );
+  BabyTree_->Branch("HLT_PFHT300_PFMET110", &HLT_PFHT300_PFMET110 );
+  BabyTree_->Branch("HLT_PFHT350_PFMET100", &HLT_PFHT350_PFMET100 );
+  BabyTree_->Branch("HLT_PFHT350_PFMET120", &HLT_PFHT350_PFMET120 );
+  BabyTree_->Branch("HLT_PFMETNoMu90_PFMHTNoMu90", &HLT_PFMETNoMu90_PFMHTNoMu90 );
+  BabyTree_->Branch("HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90", &HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 );
+  BabyTree_->Branch("HLT_PFMETNoMu100_PFMHTNoMu100", &HLT_PFMETNoMu100_PFMHTNoMu100 );
+  BabyTree_->Branch("HLT_PFMETNoMu110_PFMHTNoMu110", &HLT_PFMETNoMu110_PFMHTNoMu110 );
+  BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120", &HLT_PFMETNoMu120_PFMHTNoMu120 );
+  BabyTree_->Branch("HLT_PFMETNoMu130_PFMHTNoMu130", &HLT_PFMETNoMu130_PFMHTNoMu130 );
+  BabyTree_->Branch("HLT_PFMETNoMu140_PFMHTNoMu140", &HLT_PFMETNoMu140_PFMHTNoMu140 );
+  BabyTree_->Branch("HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60", &HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 );
+  BabyTree_->Branch("HLT_PFMET90_PFMHT90", &HLT_PFMET90_PFMHT90 );
+  BabyTree_->Branch("HLT_PFMET100_PFMHT100", &HLT_PFMET100_PFMHT100 );
+  BabyTree_->Branch("HLT_PFMET110_PFMHT110", &HLT_PFMET110_PFMHT110 );
+  BabyTree_->Branch("HLT_PFMET120_PFMHT120", &HLT_PFMET120_PFMHT120 );
+  BabyTree_->Branch("HLT_PFMET130_PFMHT130", &HLT_PFMET130_PFMHT130 );
+  BabyTree_->Branch("HLT_PFMET140_PFMHT140", &HLT_PFMET140_PFMHT140 );
+  BabyTree_->Branch("HLT_PFMET100_PFMHT100_PFHT60", &HLT_PFMET100_PFMHT100_PFHT60 );
+  BabyTree_->Branch("HLT_PFMET120_PFMHT120_PFHT60", &HLT_PFMET120_PFMHT120_PFHT60 );
+  BabyTree_->Branch("HLT_PFJet450", &HLT_PFJet450 );
+  BabyTree_->Branch("HLT_PFJet500", &HLT_PFJet500 );
+  BabyTree_->Branch("HLT_ECALHT800", &HLT_ECALHT800 );
+  BabyTree_->Branch("HLT_SingleMu", &HLT_SingleMu );
+  BabyTree_->Branch("HLT_SingleMu_NonIso", &HLT_SingleMu_NonIso );
+  BabyTree_->Branch("HLT_SingleEl", &HLT_SingleEl );
+  BabyTree_->Branch("HLT_SingleEl_NonIso", &HLT_SingleEl_NonIso );
+  BabyTree_->Branch("HLT_DoubleEl", &HLT_DoubleEl );
+  BabyTree_->Branch("HLT_DoubleEl33", &HLT_DoubleEl33 );
+  BabyTree_->Branch("HLT_MuX_Ele12", &HLT_MuX_Ele12 );
+  BabyTree_->Branch("HLT_Mu8_EleX", &HLT_Mu8_EleX );
+  BabyTree_->Branch("HLT_Mu12_EleX", &HLT_Mu12_EleX );
+  BabyTree_->Branch("HLT_Mu30_Ele30_NonIso", &HLT_Mu30_Ele30_NonIso );
+  BabyTree_->Branch("HLT_Mu33_Ele33_NonIso", &HLT_Mu33_Ele33_NonIso );
+  BabyTree_->Branch("HLT_Mu37_Ele27_NonIso", &HLT_Mu37_Ele27_NonIso );
+  BabyTree_->Branch("HLT_Mu27_Ele37_NonIso", &HLT_Mu27_Ele37_NonIso );
+  BabyTree_->Branch("HLT_DoubleMu", &HLT_DoubleMu );
+  BabyTree_->Branch("HLT_DoubleMu_NonIso", &HLT_DoubleMu_NonIso );
+  BabyTree_->Branch("HLT_Photon120", &HLT_Photon120 );
+  BabyTree_->Branch("HLT_Photon200", &HLT_Photon200 );
+  BabyTree_->Branch("HLT_Photon175_Prescale", &HLT_Photon175_Prescale );
+  BabyTree_->Branch("HLT_Photon165_HE10", &HLT_Photon165_HE10 );
+  BabyTree_->Branch("HLT_Photon250_NoHE", &HLT_Photon250_NoHE );
+  BabyTree_->Branch("HLT_PFHT180_Prescale", &HLT_PFHT180_Prescale );
+  BabyTree_->Branch("HLT_PFHT250_Prescale", &HLT_PFHT250_Prescale );
+  BabyTree_->Branch("HLT_PFHT370_Prescale", &HLT_PFHT370_Prescale );
+  BabyTree_->Branch("HLT_PFHT430_Prescale", &HLT_PFHT430_Prescale );
+  BabyTree_->Branch("HLT_PFHT510_Prescale", &HLT_PFHT510_Prescale );
+  BabyTree_->Branch("HLT_PFHT590_Prescale", &HLT_PFHT590_Prescale );
+  BabyTree_->Branch("HLT_PFHT680_Prescale", &HLT_PFHT680_Prescale );
+  BabyTree_->Branch("HLT_PFHT780_Prescale", &HLT_PFHT780_Prescale );
+  BabyTree_->Branch("HLT_PFHT890_Prescale", &HLT_PFHT890_Prescale );
+  BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
+  BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+  BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
+  BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+  BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+  BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+  BabyTree_->Branch("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120 );
+  BabyTree_->Branch("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110 );
+  BabyTree_->Branch("nlep", &nlep, "nlep/I" );
+  BabyTree_->Branch("lep_pt", lep_pt, "lep_pt[nlep]/F");
+  BabyTree_->Branch("lep_eta", lep_eta, "lep_eta[nlep]/F" );
+  BabyTree_->Branch("lep_phi", lep_phi, "lep_phi[nlep]/F" );
+  BabyTree_->Branch("lep_mass", lep_mass, "lep_mass[nlep]/F" );
+  BabyTree_->Branch("lep_charge", lep_charge, "lep_charge[nlep]/I" );
+  BabyTree_->Branch("lep_pdgId", lep_pdgId, "lep_pdgId[nlep]/I" );
+  BabyTree_->Branch("lep_dxy", lep_dxy, "lep_dxy[nlep]/F" );
+  BabyTree_->Branch("lep_dz", lep_dz, "lep_dz[nlep]/F" );
+  BabyTree_->Branch("lep_tightId", lep_tightId, "lep_tightId[nlep]/I" );
+  BabyTree_->Branch("lep_heepId", lep_heepId, "lep_heepId[nlep]/I" );
+  BabyTree_->Branch("lep_highPtFit_pt", lep_highPtFit_pt, "lep_highPtFit_pt[nlep]/F");
+  BabyTree_->Branch("lep_highPtFit_eta", lep_highPtFit_eta, "lep_highPtFit_eta[nlep]/F" );
+  BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
+  BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+  BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
+  BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+  BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+  BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+  BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
+  BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
+  BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
+  BabyTree_->Branch("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale );
+  BabyTree_->Branch("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale );
+  BabyTree_->Branch("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale );
+  BabyTree_->Branch("lep_highPtFit_phi", lep_highPtFit_phi, "lep_highPtFit_phi[nlep]/F" );
+  BabyTree_->Branch("lep_relIso03", lep_relIso03, "lep_relIso03[nlep]/F" );
+  BabyTree_->Branch("lep_relIso04", lep_relIso04, "lep_relIso04[nlep]/F" );
+  BabyTree_->Branch("lep_miniRelIso", lep_miniRelIso, "lep_miniRelIso[nlep]/F" );
+  // BabyTree_->Branch("lep_relIsoAn04", lep_relIsoAn04, "lep_relIsoAn04[nlep]/F" );
+  BabyTree_->Branch("lep_mcMatchId", lep_mcMatchId, "lep_mcMatchId[nlep]/I" );
+  BabyTree_->Branch("lep_lostHits", lep_lostHits, "lep_lostHits[nlep]/I" );
+  BabyTree_->Branch("lep_convVeto", lep_convVeto, "lep_convVeto[nlep]/I" );
+  BabyTree_->Branch("lep_tightCharge", lep_tightCharge, "lep_tightCharge[nlep]/I" );
+  BabyTree_->Branch("nisoTrack", &nisoTrack, "nisoTrack/I" );
+  BabyTree_->Branch("isoTrack_pt", isoTrack_pt, "isoTrack_pt[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_eta", isoTrack_eta, "isoTrack_eta[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_phi", isoTrack_phi, "isoTrack_phi[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_mass", isoTrack_mass, "isoTrack_mass[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_absIso", isoTrack_absIso, "isoTrack_absIso[nisoTrack]/F" );
+  // BabyTree_->Branch("isoTrack_relIsoAn04", isoTrack_relIsoAn04, "isoTrack_relIsoAn04[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_dz", isoTrack_dz, "isoTrack_dz[nisoTrack]/F" );
+  BabyTree_->Branch("isoTrack_pdgId", isoTrack_pdgId, "isoTrack_pdgId[nisoTrack]/I" );
+  BabyTree_->Branch("isoTrack_mcMatchId", isoTrack_mcMatchId, "isoTrack_mcMatchId[nisoTrack]/I" );
+  BabyTree_->Branch("nhighPtPFcands", &nhighPtPFcands, "nhighPtPFcands/I" );
+  BabyTree_->Branch("highPtPFcands_pt", highPtPFcands_pt, "highPtPFcands_pt[nhighPtPFcands]/F" );
+  BabyTree_->Branch("highPtPFcands_eta", highPtPFcands_eta, "highPtPFcands_eta[nhighPtPFcands]/F" );
+  BabyTree_->Branch("highPtPFcands_phi", highPtPFcands_phi, "highPtPFcands_phi[nhighPtPFcands]/F" );
+  BabyTree_->Branch("highPtPFcands_mass", highPtPFcands_mass, "highPtPFcands_mass[nhighPtPFcands]/F" );
+  BabyTree_->Branch("highPtPFcands_absIso", highPtPFcands_absIso, "highPtPFcands_absIso[nhighPtPFcands]/F" );
+  // BabyTree_->Branch("highPtPFcands_relIsoAn04", highPtPFcands_relIsoAn04, "highPtPFcands_relIsoAn04[nhighPtPFcands]/F" );
+  BabyTree_->Branch("highPtPFcands_dz", highPtPFcands_dz, "highPtPFcands_dz[nhighPtPFcands]/F" );
+  BabyTree_->Branch("highPtPFcands_pdgId", highPtPFcands_pdgId, "highPtPFcands_pdgId[nhighPtPFcands]/I" );
+  BabyTree_->Branch("highPtPFcands_mcMatchId", highPtPFcands_mcMatchId, "highPtPFcands_mcMatchId[nhighPtPFcands]/I" );
+  BabyTree_->Branch("nPFLep5LowMT", &nPFLep5LowMT, "nPFLep5LowMT/I" );
+  BabyTree_->Branch("nPFHad10LowMT", &nPFHad10LowMT, "nPFHad10LowMT/I" );
+  BabyTree_->Branch("ntau", &ntau, "ntau/I" );
+  BabyTree_->Branch("tau_pt", tau_pt, "tau_pt[ntau]/F" );
+  BabyTree_->Branch("tau_eta", tau_eta, "tau_eta[ntau]/F" );
+  BabyTree_->Branch("tau_phi", tau_phi, "tau_phi[ntau]/F" );
+  BabyTree_->Branch("tau_mass", tau_mass, "tau_mass[ntau]/F" );
+  BabyTree_->Branch("tau_charge", tau_charge, "tau_charge[ntau]/I" );
+  BabyTree_->Branch("tau_dxy", tau_dxy, "tau_dxy[ntau]/F" );
+  BabyTree_->Branch("tau_dz", tau_dz, "tau_dz[ntau]/F" );
+  BabyTree_->Branch("tau_idCI3hit", tau_idCI3hit, "tau_idCI3hit[ntau]/I" );
+  BabyTree_->Branch("tau_isoCI3hit", tau_isoCI3hit, "tau_isoCI3hit[ntau]/F" );
+  BabyTree_->Branch("tau_mcMatchId", tau_mcMatchId, "tau_mcMatchId[ntau]/I" );
+  BabyTree_->Branch("ngamma", &ngamma, "ngamma/I" );
+  BabyTree_->Branch("gamma_pt", gamma_pt, "gamma_pt[ngamma]/F" );
+  BabyTree_->Branch("gamma_eta", gamma_eta, "gamma_eta[ngamma]/F" );
+  BabyTree_->Branch("gamma_phi", gamma_phi, "gamma_phi[ngamma]/F" );
+  BabyTree_->Branch("gamma_mass", gamma_mass, "gamma_mass[ngamma]/F" );
+  BabyTree_->Branch("gamma_mcMatchId", gamma_mcMatchId, "gamma_mcMatchId[ngamma]/I" );
+  BabyTree_->Branch("gamma_genIso04", gamma_genIso04, "gamma_genIso04[ngamma]/F" );
+  BabyTree_->Branch("gamma_drMinParton", gamma_drMinParton, "gamma_drMinParton[ngamma]/F" );
+  BabyTree_->Branch("gamma_chHadIso", gamma_chHadIso, "gamma_chHadIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_neuHadIso", gamma_neuHadIso, "gamma_neuHadIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_phIso", gamma_phIso, "gamma_phIso[ngamma]/F" );
+  BabyTree_->Branch("gamma_sigmaIetaIeta", gamma_sigmaIetaIeta, "gamma_sigmaIetaIeta[ngamma]/F" );
+  BabyTree_->Branch("gamma_r9", gamma_r9, "gamma_r9[ngamma]/F" );
+  BabyTree_->Branch("gamma_hOverE", gamma_hOverE, "gamma_hOverE[ngamma]/F" );
+  BabyTree_->Branch("gamma_hOverE015", gamma_hOverE015, "gamma_hOverE015[ngamma]/F" );
+  BabyTree_->Branch("gamma_idCutBased", gamma_idCutBased, "gamma_idCutBased[ngamma]/I" );
+  BabyTree_->Branch("gamma_mt2", &gamma_mt2 );
+  BabyTree_->Branch("gamma_nJet30", &gamma_nJet30 );
+  BabyTree_->Branch("gamma_nJet40", &gamma_nJet40 );
+  BabyTree_->Branch("gamma_nJet30FailId", &gamma_nJet30FailId );
+  BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
+  BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
+  BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
+  BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
+  BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
+  BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
+  BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
+  BabyTree_->Branch("gamma_ht", &gamma_ht );
+  BabyTree_->Branch("gamma_deltaPhiMin", &gamma_deltaPhiMin );
+  BabyTree_->Branch("gamma_diffMetMht", &gamma_diffMetMht );
+  BabyTree_->Branch("gamma_mht_pt", &gamma_mht_pt );
+  BabyTree_->Branch("gamma_mht_phi", &gamma_mht_phi );
+  BabyTree_->Branch("gamma_met_pt", &gamma_met_pt );
+  BabyTree_->Branch("gamma_met_phi", &gamma_met_phi );
+  BabyTree_->Branch("npfPhoton", &npfPhoton, "npfPhoton/I" );
+  BabyTree_->Branch("pfPhoton_pt", pfPhoton_pt, "pfPhoton_pt[npfPhoton]/F" );
+  BabyTree_->Branch("pfPhoton_eta", pfPhoton_eta, "pfPhoton_eta[npfPhoton]/F" );
+  BabyTree_->Branch("pfPhoton_phi", pfPhoton_phi, "pfPhoton_phi[npfPhoton]/F" );
+  BabyTree_->Branch("zll_mt2", &zll_mt2 );
+  BabyTree_->Branch("zll_deltaPhiMin", &zll_deltaPhiMin );
+  BabyTree_->Branch("zll_diffMetMht", &zll_diffMetMht );
+  BabyTree_->Branch("zll_met_pt", &zll_met_pt );
+  BabyTree_->Branch("zll_met_phi", &zll_met_phi );
+  BabyTree_->Branch("zll_mht_pt", &zll_mht_pt );
+  BabyTree_->Branch("zll_mht_phi", &zll_mht_phi );
+  BabyTree_->Branch("zll_mass", &zll_mass );
+  BabyTree_->Branch("zll_pt", &zll_pt );
+  BabyTree_->Branch("zll_eta", &zll_eta );
+  BabyTree_->Branch("zll_phi", &zll_phi );
+  BabyTree_->Branch("zll_ht", &zll_ht );
+  BabyTree_->Branch("zll_mt2JECup", &zll_mt2JECup );
+  BabyTree_->Branch("zll_deltaPhiMinJECup", &zll_deltaPhiMinJECup );
+  BabyTree_->Branch("zll_diffMetMhtJECup", &zll_diffMetMhtJECup );
+  BabyTree_->Branch("zll_met_ptJECup", &zll_met_ptJECup );
+  BabyTree_->Branch("zll_met_phiJECup", &zll_met_phiJECup );
+  BabyTree_->Branch("zll_mht_ptJECup", &zll_mht_ptJECup );
+  BabyTree_->Branch("zll_mht_phiJECup", &zll_mht_phiJECup );
+  BabyTree_->Branch("zll_htJECup", &zll_htJECup );
+  BabyTree_->Branch("zll_mt2JECdn", &zll_mt2JECdn );
+  BabyTree_->Branch("zll_deltaPhiMinJECdn", &zll_deltaPhiMinJECdn );
+  BabyTree_->Branch("zll_diffMetMhtJECdn", &zll_diffMetMhtJECdn );
+  BabyTree_->Branch("zll_met_ptJECdn", &zll_met_ptJECdn );
+  BabyTree_->Branch("zll_met_phiJECdn", &zll_met_phiJECdn );
+  BabyTree_->Branch("zll_mht_ptJECdn", &zll_mht_ptJECdn );
+  BabyTree_->Branch("zll_mht_phiJECdn", &zll_mht_phiJECdn );
+  BabyTree_->Branch("zll_htJECdn", &zll_htJECdn );
+  BabyTree_->Branch("zllmt_mt2", &zllmt_mt2 );
+  BabyTree_->Branch("zllmt_deltaPhiMin", &zllmt_deltaPhiMin );
+  BabyTree_->Branch("zllmt_diffMetMht", &zllmt_diffMetMht );
+  BabyTree_->Branch("zllmt_met_pt", &zllmt_met_pt );
+  BabyTree_->Branch("zllmt_met_phi", &zllmt_met_phi );
+  BabyTree_->Branch("zllmt_mht_pt", &zllmt_mht_pt );
+  BabyTree_->Branch("zllmt_mht_phi", &zllmt_mht_phi );
+  BabyTree_->Branch("zllmt_ht", &zllmt_ht );
+  BabyTree_->Branch("zllmt_mt", &zllmt_mt );
+  BabyTree_->Branch("rl_mt2", &rl_mt2 );
+  BabyTree_->Branch("rl_deltaPhiMin", &rl_deltaPhiMin );
+  BabyTree_->Branch("rl_diffMetMht", &rl_diffMetMht );
+  BabyTree_->Branch("rl_met_pt", &rl_met_pt );
+  BabyTree_->Branch("rl_met_phi", &rl_met_phi );
+  BabyTree_->Branch("rl_mht_pt", &rl_mht_pt );
+  BabyTree_->Branch("rl_mht_phi", &rl_mht_phi );
+  BabyTree_->Branch("rl_mass", &rl_mass );
+  BabyTree_->Branch("rl_pt", &rl_pt );
+  BabyTree_->Branch("rl_eta", &rl_eta );
+  BabyTree_->Branch("rl_phi", &rl_phi );
+  BabyTree_->Branch("rl_ht", &rl_ht );
+  if (!isDataFromFileName) {
     if (saveGenParticles) {
-      for(int i=0; i < max_ngenPart; i++){
-        genPart_pt[i] = -999;
-        genPart_eta[i] = -999;
-        genPart_phi[i] = -999;
-        genPart_mass[i] = -999;
-        genPart_pdgId[i] = -999;
-        genPart_status[i] = -999;
-        genPart_charge[i] = -999;
-        genPart_motherId[i] = -999;
-        genPart_grandmotherId[i] = -999;
-      }
+      BabyTree_->Branch("ngenPart", &ngenPart, "ngenPart/I" );
+      BabyTree_->Branch("genPart_pt", genPart_pt, "genPart_pt[ngenPart]/F" );
+      BabyTree_->Branch("genPart_eta", genPart_eta, "genPart_eta[ngenPart]/F" );
+      BabyTree_->Branch("genPart_phi", genPart_phi, "genPart_phi[ngenPart]/F" );
+      BabyTree_->Branch("genPart_mass", genPart_mass, "genPart_mass[ngenPart]/F" );
+      BabyTree_->Branch("genPart_pdgId", genPart_pdgId, "genPart_pdgId[ngenPart]/I" );
+      BabyTree_->Branch("genPart_status", genPart_status, "genPart_status[ngenPart]/I" );
+      BabyTree_->Branch("genPart_charge", genPart_charge, "genPart_charge[ngenPart]/F" );
+      BabyTree_->Branch("genPart_motherId", genPart_motherId, "genPart_motherId[ngenPart]/I" );
+      BabyTree_->Branch("genPart_grandmotherId", genPart_grandmotherId, "genPart_grandmotherId[ngenPart]/I" );
     }
-
-    for(int i=0; i < max_ngenLep; i++){
-      genLep_pt[i] = -999;
-      genLep_eta[i] = -999;
-      genLep_phi[i] = -999;
-      genLep_mass[i] = -999;
-      genLep_pdgId[i] = -999;
-      genLep_status[i] = -999;
-      genLep_charge[i] = -999;
-      genLep_sourceId[i] = -999;
-    }
-
-    for(int i=0; i < max_ngenStat23; i++){
-      genStat23_pt[i] = -999;
-      genStat23_eta[i] = -999;
-      genStat23_phi[i] = -999;
-      genStat23_mass[i] = -999;
-      genStat23_pdgId[i] = -999;
-      genStat23_status[i] = -999;
-      genStat23_charge[i] = -999;
-      genStat23_sourceId[i] = -999;
-    }
-
-    for(int i=0; i < max_ngenGamma; i++){
-      genGamma_pt[i] = -999;
-      genGamma_eta[i] = -999;
-      genGamma_phi[i] = -999;
-      genGamma_motherId[i] = -999;
-    }
-
-    for(int i=0; i < max_ngenTau; i++){
-      genTau_pt[i] = -999;
-      genTau_eta[i] = -999;
-      genTau_phi[i] = -999;
-      genTau_mass[i] = -999;
-      genTau_pdgId[i] = -999;
-      genTau_status[i] = -999;
-      genTau_charge[i] = -999;
-      genTau_sourceId[i] = -999;
-      genTau_decayMode[i] = -999;
-      genTau_leadTrackPt[i] = -999;
-      genTau_neutralDaughters[i] = -999;
-    }
-
-    for(int i=0; i < max_ngenLepFromTau; i++){
-      genLepFromTau_pt[i] = -999;
-      genLepFromTau_eta[i] = -999;
-      genLepFromTau_phi[i] = -999;
-      genLepFromTau_mass[i] = -999;
-      genLepFromTau_pdgId[i] = -999;
-      genLepFromTau_status[i] = -999;
-      genLepFromTau_charge[i] = -999;
-      genLepFromTau_sourceId[i] = -999;
-    }
-
-    for(int i=0; i < max_njet; i++){
-      jet_pt[i] = -999;
-      jet_eta[i] = -999;
-      jet_phi[i] = -999;
-      jet_mass[i] = -999;
-      jet_btagCSV[i] = -999;
-      jet_btagMVA[i] = -999;
-      jet_chFrac[i] = -999;
-      jet_nhFrac[i] = -999;
-      jet_cemFrac[i] = -999;
-      jet_nemFrac[i] = -999;
-      jet_muFrac[i] = -999;
-      jet_rawPt[i] = -999;
-      jet_mcPt[i] = -999;
-      jet_mcFlavour[i] = -999;
-      jet_hadronFlavour[i] = -999;
-      jet_qgl[i] = -999;
-      jet_area[i] = -999;
-      jet_id[i] = -999;
-      jet_puId[i] = -999;
-      jet_muf[i] = -999;
-    }
-
-    rebal_status = -999;
-    nRebalJets = -999;
-    rebal_met_pt = -999;
-    rebal_met_phi = -999;
-    for(int i=0; i < max_njet; i++){
-        rebal_useJet[i] = -999;
-        rebal_jetpt[i] = -999;
-        rebal_jeteta[i] = -999;
-        rebal_jetphi[i] = -999;
-        rebal_jetbtagcsv[i] = -999;
-        rebal_factors[i] = -999;
-    }
-
+    BabyTree_->Branch("ngenLep", &ngenLep, "ngenLep/I" );
+    BabyTree_->Branch("genLep_pt", genLep_pt, "genLep_pt[ngenLep]/F" );
+    BabyTree_->Branch("genLep_eta", genLep_eta, "genLep_eta[ngenLep]/F" );
+    BabyTree_->Branch("genLep_phi", genLep_phi, "genLep_phi[ngenLep]/F" );
+    BabyTree_->Branch("genLep_mass", genLep_mass, "genLep_mass[ngenLep]/F" );
+    BabyTree_->Branch("genLep_pdgId", genLep_pdgId, "genLep_pdgId[ngenLep]/I" );
+    BabyTree_->Branch("genLep_status", genLep_status, "genLep_status[ngenLep]/I" );
+    BabyTree_->Branch("genLep_charge", genLep_charge, "genLep_charge[ngenLep]/F" );
+    BabyTree_->Branch("genLep_sourceId", genLep_sourceId, "genLep_sourceId[ngenLep]/I" );
+    BabyTree_->Branch("ngenStat23", &ngenStat23, "ngenStat23/I" );
+    BabyTree_->Branch("genStat23_pt", genStat23_pt, "genStat23_pt[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_eta", genStat23_eta, "genStat23_eta[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_phi", genStat23_phi, "genStat23_phi[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_mass", genStat23_mass, "genStat23_mass[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_pdgId", genStat23_pdgId, "genStat23_pdgId[ngenStat23]/I" );
+    BabyTree_->Branch("genStat23_status", genStat23_status, "genStat23_status[ngenStat23]/I" );
+    BabyTree_->Branch("genStat23_charge", genStat23_charge, "genStat23_charge[ngenStat23]/F" );
+    BabyTree_->Branch("genStat23_sourceId", genStat23_sourceId, "genStat23_sourceId[ngenStat23]/I" );
+    BabyTree_->Branch("ngenGamma", &ngenGamma, "ngenGamma/I" );
+    BabyTree_->Branch("genGamma_pt", genGamma_pt, "genGamma_pt[ngenGamma]/F" );
+    BabyTree_->Branch("genGamma_eta", genGamma_eta, "genGamma_eta[ngenGamma]/F" );
+    BabyTree_->Branch("genGamma_phi", genGamma_phi, "genGamma_phi[ngenGamma]/F" );
+    BabyTree_->Branch("genGamma_motherId", genGamma_motherId, "genGamma_motherId[ngenGamma]/I" );
+    BabyTree_->Branch("ngenTau", &ngenTau, "ngenTau/I" );
+    BabyTree_->Branch("ngenTau1Prong", &ngenTau1Prong, "ngenTau1Prong/I" );
+    BabyTree_->Branch("ngenTau3Prong", &ngenTau3Prong, "ngenTau3Prong/I" );
+    BabyTree_->Branch("genTau_pt", genTau_pt, "genTau_pt[ngenTau]/F" );
+    BabyTree_->Branch("genTau_eta", genTau_eta, "genTau_eta[ngenTau]/F" );
+    BabyTree_->Branch("genTau_phi", genTau_phi, "genTau_phi[ngenTau]/F" );
+    BabyTree_->Branch("genTau_mass", genTau_mass, "genTau_mass[ngenTau]/F" );
+    BabyTree_->Branch("genTau_pdgId", genTau_pdgId, "genTau_pdgId[ngenTau]/I" );
+    BabyTree_->Branch("genTau_status", genTau_status, "genTau_status[ngenTau]/I" );
+    BabyTree_->Branch("genTau_charge", genTau_charge, "genTau_charge[ngenTau]/F" );
+    BabyTree_->Branch("genTau_sourceId", genTau_sourceId, "genTau_sourceId[ngenTau]/I" );
+    BabyTree_->Branch("genTau_decayMode", genTau_decayMode, "genTau_decayMode[ngenTau]/I" );
+    BabyTree_->Branch("genTau_leadTrackPt", genTau_leadTrackPt, "genTau_leadTrackPt[ngenTau]/F" );
+    BabyTree_->Branch("genTau_neutralDaughters", genTau_neutralDaughters, "genTau_neutralDaughters[ngenTau]/I" );
+    BabyTree_->Branch("ngenLepFromTau", &ngenLepFromTau, "ngenLepFromTau/I" );
+    BabyTree_->Branch("genLepFromTau_pt", genLepFromTau_pt, "genLepFromTau_pt[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_eta", genLepFromTau_eta, "genLepFromTau_eta[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_phi", genLepFromTau_phi, "genLepFromTau_phi[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_mass", genLepFromTau_mass, "genLepFromTau_mass[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_pdgId", genLepFromTau_pdgId, "genLepFromTau_pdgId[ngenLepFromTau]/I" );
+    BabyTree_->Branch("genLepFromTau_status", genLepFromTau_status, "genLepFromTau_status[ngenLepFromTau]/I" );
+    BabyTree_->Branch("genLepFromTau_charge", genLepFromTau_charge, "genLepFromTau_charge[ngenLepFromTau]/F" );
+    BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
+    BabyTree_->Branch("ngenLepFromZ", &ngenLepFromZ, "ngenLepFromZ/I" );
+    BabyTree_->Branch("ngenNuFromZ", &ngenNuFromZ, "ngenNuFromZ/I" );
+    BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
+    BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
+    BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
+    BabyTree_->Branch("GenSusyMScan4", &GenSusyMScan4 );
     if (saveLHEweights || saveLHEweightsScaleOnly) {
-      for(int i=0; i < max_nLHEweight; i++){
-	LHEweight_wgt[i] = -999;
-      }
+      BabyTree_->Branch("nLHEweight", &nLHEweight, "nLHEweight/I" );
+      BabyTree_->Branch("LHEweight_wgt", LHEweight_wgt, "LHEweight_wgt[nLHEweight]/F" );
     }
+  }
+  BabyTree_->Branch("njet", &njet, "njet/I" );
+  BabyTree_->Branch("jet_pt", jet_pt, "jet_pt[njet]/F" );
+  BabyTree_->Branch("jet_eta", jet_eta, "jet_eta[njet]/F" );
+  BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
+  BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
+  BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
+  BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
+  BabyTree_->Branch("jet_btagDeepCSV", jet_btagDeepCSV, "jet_btagDeepCSV[njet]/F" );
+  BabyTree_->Branch("jet_chf", jet_chf, "jet_chf[njet]/F" );
+  BabyTree_->Branch("jet_nhf", jet_nhf, "jet_nhf[njet]/F" );
+  BabyTree_->Branch("jet_cemf", jet_cemf, "jet_cemf[njet]/F" );
+  BabyTree_->Branch("jet_nemf", jet_nemf, "jet_nemf[njet]/F" );
+  BabyTree_->Branch("jet_muf", jet_muf, "jet_muf[njet]/F" );
+  BabyTree_->Branch("jet_rawPt", jet_rawPt, "jet_rawPt[njet]/F" );
+  BabyTree_->Branch("jet_mcPt", jet_mcPt, "jet_mcPt[njet]/F" );
+  BabyTree_->Branch("jet_mcFlavour", jet_mcFlavour, "jet_mcFlavour[njet]/I" );
+  BabyTree_->Branch("jet_hadronFlavour", jet_hadronFlavour, "jet_hadronFlavour[njet]/I" );
+  BabyTree_->Branch("jet_qgl", jet_qgl, "jet_qgl[njet]/F" );
+  BabyTree_->Branch("jet_area", jet_area, "jet_area[njet]/F" );
+  BabyTree_->Branch("jet_id", jet_id, "jet_id[njet]/I" );
+  BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
+  BabyTree_->Branch("good_jet_idxs", good_jet_idxs, "good_jet_idxs[nJet30]/I" );
+  BabyTree_->Branch("good_bjet_idxs", good_bjet_idxs, "good_bjet_idxs[nBJet20]/I" );
+  BabyTree_->Branch("weight_lepsf", &weight_lepsf );
+  BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
+  BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
+  BabyTree_->Branch("weight_lepsf_0l", &weight_lepsf_0l );
+  BabyTree_->Branch("weight_lepsf_0l_UP", &weight_lepsf_0l_UP );
+  BabyTree_->Branch("weight_lepsf_0l_DN", &weight_lepsf_0l_DN );
+  BabyTree_->Branch("weight_btagsf", &weight_btagsf );
+  BabyTree_->Branch("weight_btagsf_heavy_UP", &weight_btagsf_heavy_UP );
+  BabyTree_->Branch("weight_btagsf_light_UP", &weight_btagsf_light_UP );
+  BabyTree_->Branch("weight_btagsf_heavy_DN", &weight_btagsf_heavy_DN );
+  BabyTree_->Branch("weight_btagsf_light_DN", &weight_btagsf_light_DN );
+  BabyTree_->Branch("weight_sigtrigsf", &weight_sigtrigsf );
+  BabyTree_->Branch("weight_dileptrigsf", &weight_dileptrigsf );
+  BabyTree_->Branch("weight_phottrigsf", &weight_phottrigsf );
+  BabyTree_->Branch("weight_pu", &weight_pu );
+  BabyTree_->Branch("weight_isr", &weight_isr );
+  BabyTree_->Branch("weight_isr_UP", &weight_isr_UP );
+  BabyTree_->Branch("weight_isr_DN", &weight_isr_DN );
+  BabyTree_->Branch("weight_scales_UP", &weight_scales_UP );
+  BabyTree_->Branch("weight_scales_DN", &weight_scales_DN );
+  BabyTree_->Branch("weight_pdfs_UP", &weight_pdfs_UP );
+  BabyTree_->Branch("weight_pdfs_DN", &weight_pdfs_DN );
+  BabyTree_->Branch("weight_toppt", &weight_toppt );
+  BabyTree_->Branch("genRecoil_pt", &genRecoil_pt );
+  BabyTree_->Branch("genTop_pt", &genTop_pt );
+  BabyTree_->Branch("genTbar_pt", &genTbar_pt );
+  BabyTree_->Branch("genProd_pdgId", &genProd_pdgId );
+  BabyTree_->Branch("weight_pol_L", &weight_pol_L );
+  BabyTree_->Branch("weight_pol_R", &weight_pol_R );
+  BabyTree_->Branch("nisrMatch", &nisrMatch );
     
-    ntracks = -999;
-    nshorttracks = -999;
-    nshorttracks_P = -999;
-    nshorttracks_M = -999;
-    nshorttracks_L = -999;
-    nshorttrackcandidates = -999;
-    nshorttrackcandidates_P = -999;
-    nshorttrackcandidates_M = -999;
-    nshorttrackcandidates_L = -999;
+  if(doRebal){
+    BabyTree_->Branch("rebal_status", &rebal_status);
+    BabyTree_->Branch("nRebalJets", &nRebalJets);
+    BabyTree_->Branch("rebal_useJet", rebal_useJet, "rebal_useJet[njet]/I");
+    BabyTree_->Branch("rebal_jetpt", rebal_jetpt, "rebal_jetpt[nRebalJets]/F");
+    BabyTree_->Branch("rebal_jeteta", rebal_jeteta, "rebal_jeteta[nRebalJets]/F");
+    BabyTree_->Branch("rebal_jetphi", rebal_jetphi, "rebal_jetphi[nRebalJets]/F");
+    BabyTree_->Branch("rebal_jetbtagcsv", rebal_jetbtagcsv, "rebal_jetbtagcsv[nRebalJets]/F");
+    BabyTree_->Branch("rebal_factors", rebal_factors, "rebal_factors[nRebalJets]/F");
+    BabyTree_->Branch("rebal_met_pt", &rebal_met_pt);
+    BabyTree_->Branch("rebal_met_phi", &rebal_met_phi);
+  }
+
+  // Short Track
+
+  BabyTree_->Branch("ntracks", &ntracks);
+  BabyTree_->Branch("nshorttracks", &nshorttracks);
+  BabyTree_->Branch("nshorttracks_P", &nshorttracks_P);
+  BabyTree_->Branch("nshorttracks_M", &nshorttracks_M);
+  BabyTree_->Branch("nshorttracks_L", &nshorttracks_L);
+  BabyTree_->Branch("nshorttrackcandidates", &nshorttrackcandidates);
+  BabyTree_->Branch("nshorttrackcandidates_P", &nshorttrackcandidates_P);
+  BabyTree_->Branch("nshorttrackcandidates_M", &nshorttrackcandidates_M);
+  BabyTree_->Branch("nshorttrackcandidates_L", &nshorttrackcandidates_L);
+  BabyTree_->Branch("track_pt", track_pt, "track_pt[ntracks]/F");
+  BabyTree_->Branch("track_ptErr", track_ptErr, "track_ptErr[ntracks]/F");
+  BabyTree_->Branch("track_eta", track_eta, "track_eta[ntracks]/F");
+  BabyTree_->Branch("track_phi", track_phi, "track_phi[ntracks]/F");
+  BabyTree_->Branch("track_charge", track_charge, "track_charge[ntracks]/I");
+  BabyTree_->Branch("track_dedxStrip", track_dedxStrip, "track_dedxStrip[ntracks]/F");
+  BabyTree_->Branch("track_dedxPixel", track_dedxPixel, "track_dedxPixel[ntracks]/F");
+  BabyTree_->Branch("track_nChi2", track_nChi2, "track_nChi2[ntracks]/F");
+  BabyTree_->Branch("track_ipSigXY", track_ipSigXY, "track_ipSigXY[ntracks]/F");
+  BabyTree_->Branch("track_dxy", track_dxy, "track_dxy[ntracks]/F");
+  BabyTree_->Branch("track_dxyErr", track_dxyErr, "track_dxyErr[ntracks]/F");
+  BabyTree_->Branch("track_dz", track_dz, "track_dz[ntracks]/F");
+  BabyTree_->Branch("track_dzErr", track_dzErr, "track_dzErr[ntracks]/F");
+  BabyTree_->Branch("track_isHighPurity", track_isHighPurity, "track_isHighPurity[ntracks]/I");
+  BabyTree_->Branch("track_DeadECAL", track_DeadECAL, "track_DeadECAL[ntracks]/I");
+  BabyTree_->Branch("track_DeadHCAL", track_DeadHCAL, "track_DeadHCAL[ntracks]/I");
+  BabyTree_->Branch("track_isshort", track_isshort, "track_isshort[ntracks]/I");
+  BabyTree_->Branch("track_iscandidate", track_iscandidate, "track_iscandidate[ntracks]/I");
+  BabyTree_->Branch("track_ispixelonly", track_ispixelonly, "track_ispixelonly[ntracks]/I");
+  BabyTree_->Branch("track_ismedium", track_ismedium, "track_ismedium[ntracks]/I");
+  BabyTree_->Branch("track_islong", track_islong, "track_islong[ntracks]/I");
+  BabyTree_->Branch("track_ispixelonlycandidate", track_ispixelonlycandidate, "track_ispixelonlycandidate[ntracks]/I");
+  BabyTree_->Branch("track_ismediumcandidate", track_ismediumcandidate, "track_ismediumcandidate[ntracks]/I");
+  BabyTree_->Branch("track_islongcandidate", track_islongcandidate, "track_islongcandidate[ntracks]/I");
+  BabyTree_->Branch("track_HitSignature", track_HitSignature, "track_HitSignature[ntracks]/I");
+  BabyTree_->Branch("track_nPixelHits", track_nPixelHits, "track_nPixelHits[ntracks]/I");
+  BabyTree_->Branch("track_nLostOuterHits", track_nLostOuterHits, "track_nLostOuterHits[ntracks]/I");
+  BabyTree_->Branch("track_nLostInnerPixelHits", track_nLostInnerPixelHits, "track_nLostInnerPixelHits[ntracks]/I");
+  BabyTree_->Branch("track_nLayersWithMeasurement", track_nLayersWithMeasurement, "track_nLayersWithMeasurement[ntracks]/I");
+  BabyTree_->Branch("track_nPixelLayersWithMeasurement", track_nPixelLayersWithMeasurement, "track_nPixelLayersWithMeasurement[ntracks]/I");
+  BabyTree_->Branch("track_nearestPF_id", track_nearestPF_id, "track_nearestPF_id[ntracks]/I");
+  BabyTree_->Branch("track_nearestPF_DR", track_nearestPF_DR, "track_nearestPF_DR[ntracks]/F");
+  BabyTree_->Branch("track_nearestPF_pt", track_nearestPF_pt, "track_nearestPF_pt[ntracks]/F");
+  BabyTree_->Branch("track_jetDR", track_jetDR, "track_jetDR[ntracks]/F");
+  BabyTree_->Branch("track_jetPt", track_jetPt, "track_jetPt[ntracks]/F");
+  BabyTree_->Branch("track_jetEta", track_jetEta, "track_jetEta[ntracks]/F");
+  BabyTree_->Branch("track_jetPhi", track_jetPhi, "track_jetPhi[ntracks]/F");
+  BabyTree_->Branch("track_chHIso0p3", track_chHIso0p3, "track_chHIso0p3[ntracks]/F");
+  BabyTree_->Branch("track_chHminiIso", track_chHminiIso, "track_chHminiIso[ntracks]/F");
+  BabyTree_->Branch("track_neuHIso0p3", track_neuHIso0p3, "track_neuHIso0p3[ntracks]/F");
+  BabyTree_->Branch("track_neuHminiIso", track_neuHminiIso, "track_neuHminiIso[ntracks]/F");
+  BabyTree_->Branch("track_phIso0p3", track_phIso0p3, "track_phIso0p3[ntracks]/F");
+  BabyTree_->Branch("track_phminiIso0p3", track_phminiIso, "track_phminiIso[ntracks]/F");
+  BabyTree_->Branch("track_isLepOverlap", track_isLepOverlap, "track_isLepOverlap[ntracks]/I");
+  BabyTree_->Branch("track_neuIso0p05", track_neuIso0p05, "track_neuIso0p05[ntracks]/F");
+  BabyTree_->Branch("track_neuRelIso0p05", track_neuRelIso0p05, "track_neuRelIso0p05[ntracks]/F");
+  BabyTree_->Branch("track_iso", track_iso, "track_iso[ntracks]/F");
+  BabyTree_->Branch("track_reliso", track_reliso, "track_reliso[ntracks]/F");
+  BabyTree_->Branch("track_isonomin", track_isonomin, "track_isonomin[ntracks]/F");
+  BabyTree_->Branch("track_relisonomin", track_relisonomin, "track_relisonomin[ntracks]/F");
+  BabyTree_->Branch("track_iso_uncorrected", track_iso_uncorrected, "track_iso_uncorrected[ntracks]/F");
+  BabyTree_->Branch("track_reliso_uncorrected", track_reliso_uncorrected, "track_reliso_uncorrected[ntracks]/F");
+  BabyTree_->Branch("track_iso_correction", track_iso_correction, "track_iso_correction[ntracks]/F");
+  BabyTree_->Branch("track_reliso_correction", track_reliso_correction, "track_reliso_correction[ntracks]/F");
+  BabyTree_->Branch("track_miniiso", track_miniiso, "track_miniiso[ntracks]/F");
+  BabyTree_->Branch("track_minireliso", track_minireliso, "track_minireliso[ntracks]/F");
+  BabyTree_->Branch("track_miniisonomin", track_miniisonomin, "track_miniisonomin[ntracks]/F");
+  BabyTree_->Branch("track_minirelisonomin", track_minirelisonomin, "track_minirelisonomin[ntracks]/F");
+  BabyTree_->Branch("track_miniiso_uncorrected", track_miniiso_uncorrected, "track_miniiso_uncorrected[ntracks]/F");
+  BabyTree_->Branch("track_minireliso_uncorrected", track_minireliso_uncorrected, "track_minireliso_uncorrected[ntracks]/F");
+  BabyTree_->Branch("track_miniiso_correction", track_miniiso_correction, "track_miniiso_correction[ntracks]/F");
+  BabyTree_->Branch("track_minireliso_correction", track_minireliso_correction, "track_minireliso_correction[ntracks]/F");
+  BabyTree_->Branch("track_isChargino", track_isChargino, "track_isChargino[ntracks]/I");
+  BabyTree_->Branch("track_genPdgId", track_genPdgId, "track_genPdgId[ntracks]/I");
+  BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
+  BabyTree_->Branch("track_nCharginos", &nCharginos);
+
+  // also make counter histogram
+  count_hist_ = new TH1D("Count","Count",1,0,2);
+
+  return;
+}
+
+void babyMaker::InitBabyNtuple () {
+
+  run    = -999;
+  lumi   = -999;
+  evt    = -999;
+  isData = -999;
+  isGolden = -1;
+  evt_scale1fb = 0;
+  evt_xsec = -999.0;
+  evt_kfactor = -999.0;
+  evt_filter = -999.0;
+  evt_nEvts = 0;
+  //evt_id = -1; // don't reset every event
+  genWeight = 0;
+  puWeight = -999.0;
+  nVert = -999;
+  nTrueInt = -999;
+  rho = -999.0;
+  nJet30 = -999;
+  nJet30JECup = -999;
+  nJet30JECdn = -999;
+  nJet40 = -999;
+  nBJet20 = -999;
+  nBJet20csv = -999;
+  nBJet20mva = -999;
+  nBJet20JECup = -999;
+  nBJet20JECdn = -999;
+  nBJet25 = -999;
+  nBJet30 = -999;
+  nBJet30csv = -999;
+  nBJet30mva = -999;
+  nBJet40 = -999;
+  nJet30FailId = -999;
+  nJet100FailId = -999;
+  nJet20BadFastsim = -999;
+  nJet200MuFrac50DphiMet = -999;
+  nMuons10 = -999;
+  nBadMuons20 = -999;
+  nElectrons10 = -999;
+  nLepLowMT = -999;
+  nTaus20 = -999;
+  nGammas20 = -999;
+  nPFCHCand3 = -999;
+  deltaPhiMin = -999.0;
+  deltaPhiMin_genmet = -999.0;
+  diffMetMht = -999.0;
+  diffMetMht_genmet = -999.0;
+  deltaPhiMinJECup = -999.0;
+  deltaPhiMinJECdn = -999.0;
+  diffMetMhtJECup = -999.0;
+  diffMetMhtJECdn = -999.0;
+  minMTBMet = -999.0;
+  zll_minMTBMet = -999.0;
+  rl_minMTBMet = -999.0;
+  gamma_minMTBMet = -999.0;
+  ht = -999.0;
+  htJECup = -999.0;
+  htJECdn = -999.0;
+  mt2 = -999.0;
+  mt2JECup = -999.0;
+  mt2JECdn = -999.0;
+  mt2_gen = -999.0;
+  mt2_genmet = -999.0;
+  jet1_pt = 0.0;
+  jet2_pt = 0.0;
+  jet1_ptJECup = 0.0;
+  jet2_ptJECup = 0.0;
+  jet1_ptJECdn = 0.0;
+  jet2_ptJECdn = 0.0;
+  jet_failFSveto = 0.0;
+  gamma_jet1_pt = 0.0;
+  gamma_jet2_pt = 0.0;
+  pseudoJet1_pt = 0.0;
+  pseudoJet1_eta = 0.0;
+  pseudoJet1_phi = 0.0;
+  pseudoJet1_mass = 0.0;
+  pseudoJet2_pt = 0.0;
+  pseudoJet2_eta = 0.0;
+  pseudoJet2_phi = 0.0;
+  pseudoJet2_mass = 0.0;
+  mht_pt = -999.0;
+  mht_phi = -999.0;
+  mht_ptJECup = -999.0;
+  mht_phiJECup = -999.0;
+  mht_ptJECdn = -999.0;
+  mht_phiJECdn = -999.0;
+  met_pt = -999.0;
+  met_phi = -999.0;
+  met_ptJECup = -999.0;
+  met_phiJECup = -999.0;
+  met_ptJECdn = -999.0;
+  met_phiJECdn = -999.0;
+  met_rawPt = -999.0;
+  met_rawPhi = -999.0;
+  met_caloPt = -999.0;
+  met_caloPhi = -999.0;
+  met_trkPt = -999.0;
+  met_trkPhi = -999.0;
+  met_genPt = -999.0;
+  met_genPhi = -999.0;
+  met_miniaodPt = -999.0;
+  met_miniaodPhi = -999.0;
+  Flag_EcalDeadCellTriggerPrimitiveFilter = -999;
+  Flag_trkPOG_manystripclus53X = -999;
+  Flag_ecalLaserCorrFilter = -999;
+  Flag_trkPOG_toomanystripclus53X = -999;
+  Flag_hcalLaserEventFilter = -999;
+  Flag_trkPOG_logErrorTooManyClusters = -999;
+  Flag_trkPOGFilters = -999;
+  Flag_trackingFailureFilter = -999;
+  Flag_CSCTightHaloFilter = -999;
+  Flag_CSCTightHalo2015Filter = -999;
+  Flag_globalTightHalo2016Filter = -999;
+  Flag_globalSuperTightHalo2016Filter = -999;
+  Flag_HBHENoiseFilter = -999;
+  Flag_HBHENoiseIsoFilter = -999;
+  Flag_goodVertices = -999;
+  Flag_eeBadScFilter = -999;
+  Flag_ecalBadCalibFilter = -999;
+  Flag_badMuonFilter = -999;
+  Flag_badMuonFilter2016 = -999;    
+  Flag_badMuons = -999;    
+  Flag_duplicateMuons = -999;    
+  Flag_noBadMuons = -999;    
+  Flag_badChargedCandidateFilter = -999;
+  Flag_badChargedHadronFilter2016 = -999;    
+  Flag_METFilters = -999;
+  HLT_PFHT1050 = -999;
+  HLT_PFHT900 = -999;
+  HLT_PFHT500_PFMET100_PFMHT100 = -999;
+  HLT_PFHT700_PFMET85_PFMHT85 = -999;
+  HLT_PFHT800_PFMET75_PFMHT75 = -999;
+  HLT_PFMET170 = -999;
+  HLT_PFHT300_PFMET100 = -999;
+  HLT_PFHT300_PFMET110 = -999;
+  HLT_PFHT350_PFMET100 = -999;
+  HLT_PFHT350_PFMET120 = -999;
+  HLT_PFMETNoMu90_PFMHTNoMu90 = -999;
+  HLT_MonoCentralPFJet80_PFMETNoMu90_PFMHTNoMu90 = -999;
+  HLT_PFMETNoMu100_PFMHTNoMu100 = -999;
+  HLT_PFMETNoMu110_PFMHTNoMu110 = -999;
+  HLT_PFMETNoMu120_PFMHTNoMu120 = -999;
+  HLT_PFMETNoMu130_PFMHTNoMu130 = -999;
+  HLT_PFMETNoMu140_PFMHTNoMu140 = -999;
+  HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 = -999;
+  HLT_PFMET90_PFMHT90 = -999;
+  HLT_PFMET100_PFMHT100 = -999;
+  HLT_PFMET110_PFMHT110 = -999;
+  HLT_PFMET120_PFMHT120 = -999;
+  HLT_PFMET130_PFMHT130 = -999;
+  HLT_PFMET140_PFMHT140 = -999;
+  HLT_PFMET100_PFMHT100_PFHT60 = -999;
+  HLT_PFMET120_PFMHT120_PFHT60 = -999;
+  HLT_PFJet450 = -999;
+  HLT_PFJet500 = -999;
+  HLT_ECALHT800 = -999;
+  HLT_SingleMu = -999;   
+  HLT_SingleMu_NonIso = -999;   
+  HLT_SingleEl = -999;   
+  HLT_SingleEl_NonIso = -999;   
+  HLT_DoubleEl = -999;   
+  HLT_DoubleEl33 = -999;   
+  HLT_MuX_Ele12 = -999;   
+  HLT_Mu8_EleX = -999;   
+  HLT_Mu12_EleX = -999;   
+  HLT_Mu30_Ele30_NonIso = -999;   
+  HLT_Mu33_Ele33_NonIso = -999;   
+  HLT_Mu37_Ele27_NonIso = -999;   
+  HLT_Mu27_Ele37_NonIso = -999;   
+  HLT_DoubleMu = -999;   
+  HLT_DoubleMu_NonIso = -999;   
+  HLT_Photon120 = -999;   
+  HLT_Photon200 = -999;   
+  HLT_Photon175_Prescale = -999;   
+  HLT_Photon165_HE10 = -999;   
+  HLT_Photon250_NoHE = -999;   
+  HLT_PFHT180_Prescale = -999;
+  HLT_PFHT250_Prescale = -999;
+  HLT_PFHT370_Prescale = -999;
+  HLT_PFHT430_Prescale = -999;
+  HLT_PFHT510_Prescale = -999;
+  HLT_PFHT590_Prescale = -999;
+  HLT_PFHT680_Prescale = -999;
+  HLT_PFHT780_Prescale = -999;
+  HLT_PFHT890_Prescale = -999;
+  HLT_PFHT125_Prescale = -999;
+  HLT_PFHT200_Prescale = -999;
+  HLT_PFHT300_Prescale = -999;
+  HLT_PFHT350_Prescale = -999;
+  HLT_PFHT475_Prescale = -999;
+  HLT_PFHT600_Prescale = -999;
+  HLT_DiCentralPFJet70_PFMET120 = -999;
+  HLT_DiCentralPFJet55_PFMET110 = -999;
+  nlep = -999;
+  nisoTrack = -999;
+  nhighPtPFcands = -999;
+  nPFLep5LowMT = -999;
+  nPFHad10LowMT = -999;
+  ntau = -999;
+  npfPhoton = -999;
+  ngamma = -999;
+  ngenPart = -999;
+  ngenLep = -999;
+  ngenStat23 = -999;
+  ngenGamma = -999;
+  ngenTau = -999;
+  ngenTau1Prong = -999;
+  ngenTau3Prong = -999;
+  ngenLepFromTau = -999;
+  ngenLepFromZ = -999;
+  ngenNuFromZ = -999;
+  njet = -999;
+  gamma_mt2 = -999.0;
+  gamma_nJet30 = -999;
+  gamma_nJet40 = -999;
+  gamma_nJet30FailId = -999;
+  gamma_nJet100FailId = -999;
+  gamma_nBJet20 = -999;
+  gamma_nBJet20csv = -999;
+  gamma_nBJet20mva = -999;
+  gamma_nBJet25 = -999;
+  gamma_nBJet30 = -999;
+  gamma_nBJet40 = -999;
+  gamma_ht = -999.0;
+  gamma_deltaPhiMin = -999.0;
+  gamma_diffMetMht = -999.0;
+  gamma_mht_pt = -999.0;
+  gamma_mht_phi = -999.0;
+  gamma_met_pt = -999.0;
+  gamma_met_phi = -999.0;
+  zll_mt2 = -999.0;
+  zll_deltaPhiMin = -999.0;
+  zll_diffMetMht = -999.0;
+  zll_met_pt = -999.0;
+  zll_met_phi = -999.0;
+  zll_mht_pt = -999.0;
+  zll_mht_phi = -999.0;
+  zll_mass = -999.0;
+  zll_pt = -999.0;
+  zll_eta = -999.0;
+  zll_phi = -999.0;
+  zll_ht = -999.0;
+  zll_mt2JECup = -999.0;
+  zll_deltaPhiMinJECup = -999.0;
+  zll_diffMetMhtJECup = -999.0;
+  zll_met_ptJECup = -999.0;
+  zll_met_phiJECup = -999.0;
+  zll_mht_ptJECup = -999.0;
+  zll_mht_phiJECup = -999.0;
+  zll_htJECup = -999.0;
+  zll_mt2JECdn = -999.0;
+  zll_deltaPhiMinJECdn = -999.0;
+  zll_diffMetMhtJECdn = -999.0;
+  zll_met_ptJECdn = -999.0;
+  zll_met_phiJECdn = -999.0;
+  zll_mht_ptJECdn = -999.0;
+  zll_mht_phiJECdn = -999.0;
+  zll_htJECdn = -999.0;
+  zllmt_mt2 = -999.0;
+  zllmt_deltaPhiMin = -999.0;
+  zllmt_diffMetMht = -999.0;
+  zllmt_met_pt = -999.0;
+  zllmt_met_phi = -999.0;
+  zllmt_mht_pt = -999.0;
+  zllmt_mht_phi = -999.0;
+  zllmt_ht = -999.0;
+  zllmt_mt = -999.0;
+  rl_mt2 = -999.0;
+  rl_deltaPhiMin = -999.0;
+  rl_diffMetMht = -999.0;
+  rl_met_pt = -999.0;
+  rl_met_phi = -999.0;
+  rl_mht_pt = -999.0;
+  rl_mht_phi = -999.0;
+  rl_mass = -999.0;
+  rl_pt = -999.0;
+  rl_eta = -999.0;
+  rl_phi = -999.0;
+  rl_ht = -999.0;
+  GenSusyMScan1 = 0;
+  GenSusyMScan2 = 0;
+  GenSusyMScan3 = 0;
+  GenSusyMScan4 = 0;
+  weight_lepsf = 1.;
+  weight_lepsf_UP = 1.;
+  weight_lepsf_DN = 1.;
+  weight_lepsf_0l = 1.;
+  weight_lepsf_0l_UP = 1.;
+  weight_lepsf_0l_DN = 1.;
+  weight_btagsf = 1.;
+  weight_btagsf_heavy_UP = 1.;
+  weight_btagsf_light_UP = 1.;
+  weight_btagsf_heavy_DN = 1.;
+  weight_btagsf_light_DN = 1.;
+  weight_sigtrigsf = 1.;
+  weight_dileptrigsf = 1.;
+  weight_phottrigsf = 1.;
+  weight_pu = 1.;
+  weight_isr = 1.;
+  weight_isr_UP = 1.;
+  weight_isr_DN = 1.;
+  weight_scales_UP = 1.;
+  weight_scales_DN = 1.;
+  weight_pdfs_UP = 1.;
+  weight_pdfs_DN = 1.;
+  weight_toppt = 1.;
+  genRecoil_pt = -999.;
+  genTop_pt = -999.;
+  genTbar_pt = -999.;
+  genProd_pdgId = -999;
+  nLHEweight = -999;
+  weight_pol_L = -999;
+  weight_pol_R = -999;
+  nisrMatch = -999;
+
+  for(int i=0; i < max_nlep; i++){
+    lep_pt[i] = -999;
+    lep_eta[i] = -999;
+    lep_phi[i] = -999;
+    lep_mass[i] = -999;
+    lep_charge[i] = -999;
+    lep_pdgId[i] = -999;
+    lep_dxy[i] = -999;
+    lep_dz[i] = -999;
+    lep_tightId[i] = -999;
+    lep_heepId[i] = -999;
+    lep_highPtFit_pt[i] = -999;
+    lep_highPtFit_eta[i] = -999;
+    lep_highPtFit_phi[i] = -999;
+    lep_relIso03[i] = -999;
+    lep_relIso04[i] = -999;
+    lep_miniRelIso[i] = -999;
+    // lep_relIsoAn04[i] = -999;
+    lep_mcMatchId[i] = -999;
+    lep_lostHits[i] = -999;
+    lep_convVeto[i] = -999;
+    lep_tightCharge[i] = -999;
+  }
+
+  for(int i=0; i < max_nisoTrack; i++){
+    isoTrack_pt[i] = -999;
+    isoTrack_eta[i] = -999;
+    isoTrack_phi[i] = -999;
+    isoTrack_mass[i] = -999;
+    isoTrack_absIso[i] = -999;
+    // isoTrack_relIsoAn04[i] = -999;
+    isoTrack_dz[i] = -999;
+    isoTrack_pdgId[i] = -999;
+    isoTrack_mcMatchId[i] = -999;
+  }
+
+  for(int i=0; i < max_nhighPtPFcands; i++){
+    highPtPFcands_pt[i] = -999;
+    highPtPFcands_eta[i] = -999;
+    highPtPFcands_phi[i] = -999;
+    highPtPFcands_mass[i] = -999;
+    highPtPFcands_absIso[i] = -999;
+    // highPtPFcands_relIsoAn04[i] = -999;
+    highPtPFcands_dz[i] = -999;
+    highPtPFcands_pdgId[i] = -999;
+    highPtPFcands_mcMatchId[i] = -999;
+  }
+
+  for(int i=0; i < max_ntau; i++){
+    tau_pt[i] = -999;
+    tau_eta[i] = -999;
+    tau_phi[i] = -999;
+    tau_mass[i] = -999;
+    tau_charge[i] = -999;
+    tau_dxy[i] = -999;
+    tau_dz[i] = -999;
+    tau_idCI3hit[i] = -999;
+    tau_isoCI3hit[i] = -999;
+    tau_mcMatchId[i] = -999;
+  }
+
+  for(int i=0; i < max_ngamma; i++){
+    gamma_pt[i] = -999;
+    gamma_eta[i] = -999;
+    gamma_phi[i] = -999;
+    gamma_mass[i] = -999;
+    gamma_mcMatchId[i] = -999;
+    gamma_genIso04[i] = -999;
+    gamma_drMinParton[i] = -999;
+    gamma_chHadIso[i] = -999;
+    gamma_neuHadIso[i] = -999;
+    gamma_phIso[i] = -999;
+    gamma_sigmaIetaIeta[i] = -999;
+    gamma_r9[i] = -999;
+    gamma_hOverE[i] = -999;
+    gamma_hOverE015[i] = -999;
+    gamma_idCutBased[i] = -999;
+    pfPhoton_pt[i] = -999;
+    pfPhoton_eta[i] = -999;
+    pfPhoton_phi[i] = -999;
+  }
+
+  if (saveGenParticles) {
+    for(int i=0; i < max_ngenPart; i++){
+      genPart_pt[i] = -999;
+      genPart_eta[i] = -999;
+      genPart_phi[i] = -999;
+      genPart_mass[i] = -999;
+      genPart_pdgId[i] = -999;
+      genPart_status[i] = -999;
+      genPart_charge[i] = -999;
+      genPart_motherId[i] = -999;
+      genPart_grandmotherId[i] = -999;
+    }
+  }
+
+  for(int i=0; i < max_ngenLep; i++){
+    genLep_pt[i] = -999;
+    genLep_eta[i] = -999;
+    genLep_phi[i] = -999;
+    genLep_mass[i] = -999;
+    genLep_pdgId[i] = -999;
+    genLep_status[i] = -999;
+    genLep_charge[i] = -999;
+    genLep_sourceId[i] = -999;
+  }
+
+  for(int i=0; i < max_ngenStat23; i++){
+    genStat23_pt[i] = -999;
+    genStat23_eta[i] = -999;
+    genStat23_phi[i] = -999;
+    genStat23_mass[i] = -999;
+    genStat23_pdgId[i] = -999;
+    genStat23_status[i] = -999;
+    genStat23_charge[i] = -999;
+    genStat23_sourceId[i] = -999;
+  }
+
+  for(int i=0; i < max_ngenGamma; i++){
+    genGamma_pt[i] = -999;
+    genGamma_eta[i] = -999;
+    genGamma_phi[i] = -999;
+    genGamma_motherId[i] = -999;
+  }
+
+  for(int i=0; i < max_ngenTau; i++){
+    genTau_pt[i] = -999;
+    genTau_eta[i] = -999;
+    genTau_phi[i] = -999;
+    genTau_mass[i] = -999;
+    genTau_pdgId[i] = -999;
+    genTau_status[i] = -999;
+    genTau_charge[i] = -999;
+    genTau_sourceId[i] = -999;
+    genTau_decayMode[i] = -999;
+    genTau_leadTrackPt[i] = -999;
+    genTau_neutralDaughters[i] = -999;
+  }
+
+  for(int i=0; i < max_ngenLepFromTau; i++){
+    genLepFromTau_pt[i] = -999;
+    genLepFromTau_eta[i] = -999;
+    genLepFromTau_phi[i] = -999;
+    genLepFromTau_mass[i] = -999;
+    genLepFromTau_pdgId[i] = -999;
+    genLepFromTau_status[i] = -999;
+    genLepFromTau_charge[i] = -999;
+    genLepFromTau_sourceId[i] = -999;
+  }
+
+  for(int i=0; i < max_njet; i++){
+    jet_pt[i] = -999;
+    jet_eta[i] = -999;
+    jet_phi[i] = -999;
+    jet_mass[i] = -999;
+    jet_btagCSV[i] = -999;
+    jet_btagMVA[i] = -999;
+    jet_btagDeepCSV[i] = -999;
+    jet_chf[i] = -999;
+    jet_nhf[i] = -999;
+    jet_cemf[i] = -999;
+    jet_nemf[i] = -999;
+    jet_muf[i] = -999;
+    jet_rawPt[i] = -999;
+    jet_mcPt[i] = -999;
+    jet_mcFlavour[i] = -999;
+    jet_hadronFlavour[i] = -999;
+    jet_qgl[i] = -999;
+    jet_area[i] = -999;
+    jet_id[i] = -999;
+    jet_puId[i] = -999;
+    good_jet_idxs[i] = -999;
+    good_bjet_idxs[i] = -999;
+  }
+
+  rebal_status = -999;
+  nRebalJets = -999;
+  rebal_met_pt = -999;
+  rebal_met_phi = -999;
+  for(int i=0; i < max_njet; i++){
+    rebal_useJet[i] = -999;
+    rebal_jetpt[i] = -999;
+    rebal_jeteta[i] = -999;
+    rebal_jetphi[i] = -999;
+    rebal_jetbtagcsv[i] = -999;
+    rebal_factors[i] = -999;
+  }
+
+  if (saveLHEweights || saveLHEweightsScaleOnly) {
+    for(int i=0; i < max_nLHEweight; i++){
+      LHEweight_wgt[i] = -999;
+    }
+  }
     
-    for (int i=0; i < maxntracks; i++){
-      track_pt[i] = -999;
-      track_ptErr[i] = -999;
-      track_eta[i] = -999;
-      track_phi[i] = -999;
-      track_charge[i] = -999;
-      track_dedxStrip[i] = -999;
-      track_dedxPixel[i] = -999;
-      //      track_nChi2[i] = -999;
-      track_ipSigXY[i] = -999;
-      track_dxy[i] = -999;
-      track_dxyErr[i] = -999;
-      track_dz[i] = -999;
-      track_dzErr[i] = -999;
-      track_isHighPurity[i] = -999;
-      track_DeadECAL[i] = 0;
-      track_DeadHCAL[i] = 0;
-      track_isshort[i] = 0;
-      track_iscandidate[i] = 0;
-      track_ispixelonly[i] = 0;
-      track_ismedium[i] = 0;
-      track_islong[i] = 0;
-      track_ispixelonlycandidate[i] = 0;
-      track_ismediumcandidate[i] = 0;
-      track_islongcandidate[i] = 0;
-      track_HitSignature[i] = -999;
-      track_nPixelHits[i] = -999;
-      track_nLostOuterHits[i] = -999;
-      track_nLostInnerPixelHits[i] = -999;
-      track_nLayersWithMeasurement[i] = -999;
-      track_nPixelLayersWithMeasurement[i] = -999;
-      track_nearestPF_id[i] = -999;
-      track_nearestPF_pt[i] = -999;
-      track_nearestPF_DR[i] = -999;
-      track_jetDR[i] = -999;
-      track_jetPt[i] = -999;
-      track_jetEta[i] = -999;
-      track_jetPhi[i] = -999;
-      track_chHIso0p3[i] = -999;
-      track_chHminiIso[i] = -999;
-      track_neuHIso0p3[i] = -999;
-      track_neuHminiIso[i] = -999;
-      track_phIso0p3[i] = -999;
-      track_phminiIso[i] = -999;
-      track_isLepOverlap[i] = -999;
-      track_neuIso0p05[i] = -999;
-      track_neuRelIso0p05[i] = -999;
-      track_iso[i] = -999;
-      track_reliso[i] = -999;
-      track_isonomin[i] = -999;
-      track_relisonomin[i] = -999;
-      track_iso_uncorrected[i] = -999;
-      track_reliso_uncorrected[i] = -999;
-      track_iso_correction[i] = -999;
-      track_reliso_correction[i] = -999;      
-      track_miniiso[i] = -999;
-      track_minireliso[i] = -999;
-      track_miniisonomin[i] = -999;
-      track_minirelisonomin[i] = -999;
-      track_miniiso_uncorrected[i] = -999;
-      track_minireliso_uncorrected[i] = -999;
-      track_miniiso_correction[i] = -999;
-      track_minireliso_correction[i] = -999;      
-      track_isChargino[i] = 0;
-      track_genPdgId[i] = -999;
-      track_genMatchDR[i] = -999;
-    }
-    nCharginos = 0;
-
-    return;
-  }
-
-  void babyMaker::FillBabyNtuple(){
-    BabyTree_->Fill();
-    return;
-  }
-
-  void babyMaker::CloseBabyNtuple(){
-    BabyFile_->cd();
-    BabyTree_->Write();
-    count_hist_->Write();
-    BabyFile_->Close();
-    return;
-  }
-
-  float babyMaker::getBtagEffFromFile(float pt, float eta, int mcFlavour, bool isFastsim){
-    if(!h_btag_eff_b || !h_btag_eff_c || !h_btag_eff_udsg) {
-      std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
-      return 1.;
-    }
-
-    if(isFastsim && (!h_btag_eff_b_fastsim || !h_btag_eff_c_fastsim || !h_btag_eff_udsg_fastsim)) {
-      std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
-      return 1.;
-    }
-
-    // only use pt bins up to 400 GeV for charm and udsg
-    float pt_cutoff = std::max(20.,std::min(399.,double(pt)));
-    TH2D* h(0);
-    if (abs(mcFlavour) == 5) {
-      h = isFastsim ? h_btag_eff_b_fastsim : h_btag_eff_b;
-      // use pt bins up to 600 GeV for b
-      pt_cutoff = std::max(20.,std::min(599.,double(pt)));
-    }
-    else if (abs(mcFlavour) == 4) {
-      h = isFastsim ? h_btag_eff_c_fastsim : h_btag_eff_c;
-    }
-    else {
-      h = isFastsim ? h_btag_eff_udsg_fastsim : h_btag_eff_udsg;
-    }
+  ntracks = -999;
+  nshorttracks = -999;
+  nshorttracks_P = -999;
+  nshorttracks_M = -999;
+  nshorttracks_L = -999;
+  nshorttrackcandidates = -999;
+  nshorttrackcandidates_P = -999;
+  nshorttrackcandidates_M = -999;
+  nshorttrackcandidates_L = -999;
     
-    int binx = h->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h->GetYaxis()->FindBin(fabs(eta));
-    return h->GetBinContent(binx,biny);
+  for (int i=0; i < maxntracks; i++){
+    track_pt[i] = -999;
+    track_ptErr[i] = -999;
+    track_eta[i] = -999;
+    track_phi[i] = -999;
+    track_charge[i] = -999;
+    track_dedxStrip[i] = -999;
+    track_dedxPixel[i] = -999;
+    track_nChi2[i] = -999;
+    track_ipSigXY[i] = -999;
+    track_dxy[i] = -999;
+    track_dxyErr[i] = -999;
+    track_dz[i] = -999;
+    track_dzErr[i] = -999;
+    track_isHighPurity[i] = -999;
+    track_DeadECAL[i] = 0;
+    track_DeadHCAL[i] = 0;
+    track_isshort[i] = 0;
+    track_iscandidate[i] = 0;
+    track_ispixelonly[i] = 0;
+    track_ismedium[i] = 0;
+    track_islong[i] = 0;
+    track_ispixelonlycandidate[i] = 0;
+    track_ismediumcandidate[i] = 0;
+    track_islongcandidate[i] = 0;
+    track_HitSignature[i] = -999;
+    track_nPixelHits[i] = -999;
+    track_nLostOuterHits[i] = -999;
+    track_nLostInnerPixelHits[i] = -999;
+    track_nLayersWithMeasurement[i] = -999;
+    track_nPixelLayersWithMeasurement[i] = -999;
+    track_nearestPF_id[i] = -999;
+    track_nearestPF_pt[i] = -999;
+    track_nearestPF_DR[i] = -999;
+    track_jetDR[i] = -999;
+    track_jetPt[i] = -999;
+    track_jetEta[i] = -999;
+    track_jetPhi[i] = -999;
+    track_chHIso0p3[i] = -999;
+    track_chHminiIso[i] = -999;
+    track_neuHIso0p3[i] = -999;
+    track_neuHminiIso[i] = -999;
+    track_phIso0p3[i] = -999;
+    track_phminiIso[i] = -999;
+    track_isLepOverlap[i] = -999;
+    track_neuIso0p05[i] = -999;
+    track_neuRelIso0p05[i] = -999;
+    track_iso[i] = -999;
+    track_reliso[i] = -999;
+    track_isonomin[i] = -999;
+    track_relisonomin[i] = -999;
+    track_iso_uncorrected[i] = -999;
+    track_reliso_uncorrected[i] = -999;
+    track_iso_correction[i] = -999;
+    track_reliso_correction[i] = -999;      
+    track_miniiso[i] = -999;
+    track_minireliso[i] = -999;
+    track_miniisonomin[i] = -999;
+    track_minirelisonomin[i] = -999;
+    track_miniiso_uncorrected[i] = -999;
+    track_minireliso_uncorrected[i] = -999;
+    track_miniiso_correction[i] = -999;
+    track_minireliso_correction[i] = -999;      
+    track_isChargino[i] = 0;
+    track_genPdgId[i] = -999;
+    track_genMatchDR[i] = -999;
   }
+  nCharginos = 0;
+
+  return;
+}
+
+void babyMaker::FillBabyNtuple(){
+  BabyTree_->Fill();
+  return;
+}
+
+void babyMaker::CloseBabyNtuple(){
+  BabyFile_->cd();
+  BabyTree_->Write();
+  count_hist_->Write();
+  BabyFile_->Close();
+  return;
+}
+
+float babyMaker::getBtagEffFromFile(float pt, float eta, int mcFlavour, bool isFastsim){
+  if(!h_btag_eff_b || !h_btag_eff_c || !h_btag_eff_udsg) {
+    std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
+    return 1.;
+  }
+
+  if(isFastsim && (!h_btag_eff_b_fastsim || !h_btag_eff_c_fastsim || !h_btag_eff_udsg_fastsim)) {
+    std::cout << "babyMaker::getBtagEffFromFile: ERROR: missing input hists" << std::endl;
+    return 1.;
+  }
+
+  // only use pt bins up to 400 GeV for charm and udsg
+  float pt_cutoff = std::max(20.,std::min(399.,double(pt)));
+  TH2D* h(0);
+  if (abs(mcFlavour) == 5) {
+    h = isFastsim ? h_btag_eff_b_fastsim : h_btag_eff_b;
+    // use pt bins up to 600 GeV for b
+    pt_cutoff = std::max(20.,std::min(599.,double(pt)));
+  }
+  else if (abs(mcFlavour) == 4) {
+    h = isFastsim ? h_btag_eff_c_fastsim : h_btag_eff_c;
+  }
+  else {
+    h = isFastsim ? h_btag_eff_udsg_fastsim : h_btag_eff_udsg;
+  }
+    
+  int binx = h->GetXaxis()->FindBin(pt_cutoff);
+  int biny = h->GetYaxis()->FindBin(fabs(eta));
+  return h->GetBinContent(binx,biny);
+}
 
 void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double par[], int flg) {
-    babyMaker *t = thisBabyMaker;
-    float likelihood = 0;
-    float pt_constrained_x = 0.0;
-    float pt_constrained_y = 0.0;
-    float min_prob = 1E-20;
-    for(int i=0; i < t->nRebalJets; i++){
-        bool isBjet = (t->rebal_jetbtagcsv[i] > 0.8484);        
-        float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
-        prob = max(prob, min_prob);
-        likelihood += log(prob);
-        pt_constrained_x -= (t->rebal_jetpt[i])*cos(t->rebal_jetphi[i])/par[i];
-        pt_constrained_y -= (t->rebal_jetpt[i])*sin(t->rebal_jetphi[i])/par[i];
-    }
-    //float x1 = (pt_soft_x - pt_constrained_x)/sigma_soft;
-    //float x2 = (pt_soft_y - pt_constrained_y)/sigma_soft;
-    float x1 = (t->rebal_pt_soft_x - pt_constrained_x)/20.0;
-    float x2 = (t->rebal_pt_soft_y - pt_constrained_y)/20.0;
-    likelihood += -x1*x1/2;
-    likelihood += -x2*x2/2;
+  babyMaker *t = thisBabyMaker;
+  float likelihood = 0;
+  float pt_constrained_x = 0.0;
+  float pt_constrained_y = 0.0;
+  float min_prob = 1E-20;
+  for(int i=0; i < t->nRebalJets; i++){
+    bool isBjet = (t->rebal_jetbtagcsv[i] > config_.btag_med_threshold);        
+    float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
+    prob = max(prob, min_prob);
+    likelihood += log(prob);
+    pt_constrained_x -= (t->rebal_jetpt[i])*cos(t->rebal_jetphi[i])/par[i];
+    pt_constrained_y -= (t->rebal_jetpt[i])*sin(t->rebal_jetphi[i])/par[i];
+  }
+  //float x1 = (pt_soft_x - pt_constrained_x)/sigma_soft;
+  //float x2 = (pt_soft_y - pt_constrained_y)/sigma_soft;
+  float x1 = (t->rebal_pt_soft_x - pt_constrained_x)/20.0;
+  float x2 = (t->rebal_pt_soft_y - pt_constrained_y)/20.0;
+  likelihood += -x1*x1/2;
+  likelihood += -x2*x2/2;
 
-    result = -likelihood;
+  result = -likelihood;
 
 }

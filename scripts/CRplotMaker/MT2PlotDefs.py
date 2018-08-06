@@ -27,6 +27,8 @@ sl_plots = [
     ("nJet30",True,(0,14),None),
     ("nBJet20",True,(0,6),None),
     ("leppt",True,(0,400),None,2),
+    ("J0pt",True,None,None,3),
+    ("J1pt",True,None,None,3),
 ]
 
 dy_plots = [
@@ -39,6 +41,15 @@ dy_plots = [
     ("zllmass",True,(70,120),None),
     ("zllpt",True,(0,1000),None,2),
     ("nlepveto",False,None,None),
+    ("jetpt1",True,(0,1200),None),
+    ("jetpt2",True,(0,1200),None),    
+    ("leppt1",True,(0,500),None),
+    ("leppt2",True,(0,500),None),    
+    ("htEle",True,(250,1500),None),
+    ("htMu",True,(250,1500),None),
+]
+
+dy_OF_plots = [
     ("htemu",True,(250,1500),None,2),
     ("metemu",True,(200,1000),None,2),
     ("mt2emu",True,(200,1000),None,2),
@@ -47,12 +58,6 @@ dy_plots = [
     ("nBJet20emu",True,(0,6),None),
     ("zllmassemu",True,(70,120),None),
     ("nlepvetoemu",False,None,None),
-    ("jetpt1",True,(200,1200),None),
-    ("jetpt2",True,(200,1200),None),    
-    ("leppt1",True,(0,500),None),
-    ("leppt2",True,(0,500),None),    
-    ("htEle",True,(250,1500),None),
-    ("htMu",True,(250,1500),None),
 ]
 
 gj_plots = [

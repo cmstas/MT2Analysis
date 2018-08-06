@@ -5,7 +5,7 @@ import pyRootPlotMaker as ppm
 import MT2PlotUtils as utils
 import MT2PlotDefs as pd
 
-def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag="", signals=[], dataNames=["Data"], opts=""):
+def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["pdf"], tag="", signals=[], dataNames=["Data"], dataScales=None, mcScale=None, opts=""):
     # rootdir contains output of MT2Looper, samples are names of the .root files,
     # data is the name of the data file, dirname is the directory within the root file
     # to extract plots from, plots are a list of plot definitions from MT2PlotDefs
@@ -71,7 +71,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                 # handle the case with more than one directory
                 for idir in range(1, len(dirnames)):
                     h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
-
+                if mcScale is not None:
+                    h_bkg_vecs[iplot][-1].Scale(mcScale)
         fid.Close()
 
     ## get signal histograms
@@ -133,6 +134,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                 # handle the case with more than one directory
                 for idir in range(1, len(dirnames)):
                     h_data_vec[ip][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+                if dataScales is not None:
+                    h_data_vec[ip][id].Scale(dataScales[id])
             fid.Close()
 
     # make the output directory if it doesn't exist
@@ -160,7 +163,9 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         if "noSubtitles" in opts:
             subtitles=None
         if h_data_vec[0]!=None:
-            subLegText = ["MC scaled by {datamcsf}","# Data events: {ndata}"]
+            subLegText = ["MC scaled by {datamcsf}"]
+            for ih in range(len(h_data_vec[0])):
+                subLegText.append("# Data{0} events: {{ndata{0}}}".format("" if len(h_data_vec[0])==1 else ih+1))
         else:
             subLegText = None
         # subLegText = None
