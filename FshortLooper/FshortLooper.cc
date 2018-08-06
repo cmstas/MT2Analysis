@@ -230,6 +230,8 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
   }//end loop on events in a file
 
   // Post-processing
+
+  // Calculate Fshort for this particular sample
   for (vector<TH2F*>::iterator hist = allhists.begin(); hist != allhists.end(); hist++) {
     TH2F* h = *hist;
     for (int len = 0; len < 4; len++) {

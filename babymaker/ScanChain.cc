@@ -84,6 +84,9 @@ const bool saveLHEweightsScaleOnly = true;
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = true;
 
+// Short Track Candidate isolation and quality loosening factors
+const float isoSTC = 6, qualSTC = 3;
+
 DatasetInfoFromFile datasetInfoFromFile;
 
 MT2Configuration config_;
@@ -2863,6 +2866,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       // Short Track
       //////////////
 
+      if (verbose) std::cout << "Before short tracks" << std::endl;
+
       ntracks = 0; nshorttracks = 0; nshorttrackcandidates = 0;
       nshorttracks_P = 0; nshorttracks_M = 0; nshorttracks_L = 0;
       nshorttrackcandidates_P = 0; nshorttrackcandidates_M = 0; nshorttrackcandidates_L = 0;
@@ -2936,6 +2941,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  track_jetPhi[ntracks] = jet_phi[jetIdx];
 	}
 
+	if (verbose) std::cout << "Before short track pileup and isolation" << std::endl;
+
 	// Pileup
 	track_chHIso0p3[ntracks] = cms3.isotracks_pfIso_ch().at(i_it); // These two isos are used to slim the isotracks collection for cand_p4.pt() < 20 GeV,
 	track_chHminiIso[ntracks] = cms3.isotracks_miniIso_ch().at(i_it); // using cand_p4 for the relative iso pt.
@@ -2966,8 +2973,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	track_neuIso0p05[ntracks] = cms3.isotracks_pfNeutralSum().at(i_it);
 	track_neuRelIso0p05[ntracks] = track_neuIso0p05[ntracks] / track_pt[ntracks];
-
+	
 	track_isLepOverlap[ntracks] = cms3.isotracks_lepOverlap().at(i_it);
+
+	if (verbose) std::cout << "Before short track gen matching" << std::endl;
 
 	if (!isData) {
 	  float minGenDR = 0.01; int genIdx = -1;
@@ -3006,6 +3015,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	if (!isShort) {ntracks++; continue;}
 
+	if (verbose) std::cout << "Before short track lepton rejection" << std::endl;
+
 	// Lepton veto
 	const bool nearestPFSel = !(track_nearestPF_DR[ntracks] < 0.1 && (abs(track_nearestPF_id[ntracks]) == 11 || abs(track_nearestPF_id[ntracks]) == 13));
 	float minrecodr = 0.2;
@@ -3018,8 +3029,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
 	
 	if (!PassesRecoVeto) {ntracks++; continue;}
-
-	const float isoSTC = 6, qualSTC = 3;
 
 	// Isolation
 	const bool PassesIsoSelSTC = track_neuIso0p05[ntracks] < 10 * isoSTC && track_neuRelIso0p05[ntracks] < 0.1 * isoSTC && track_iso[ntracks] < 10 * isoSTC && track_reliso[ntracks] < 0.2 * isoSTC;
@@ -3064,7 +3073,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	}
 	
 	ntracks++;
-      } // End isotracks loop
+      } // End isotracks loop (short tracks)
 
       FillBabyNtuple();
 

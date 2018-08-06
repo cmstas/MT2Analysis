@@ -23,8 +23,14 @@ simplecanvas.SetLeftMargin(0.16)
 simplecanvas.SetTopMargin(0.12)
 simplecanvas.SetRightMargin(0.16)
 
-indir="output/"
-outdir="pngs/"
+if len(sys.argv) < 2: 
+    print "Which tag to use?"
+    exit()
+runtag=sys.argv[2]
+indir="output/"+runtag
+pngdir="pngs/"+runtag
+outdir="output/"
+os.system("mkdir -p {0}".format(pngdir))
 os.system("mkdir -p {0}".format(outdir))
 
 dy_samples=["dy_ht1200to2500", "dy_ht400to600",  "dy_ht200to400", "dy_ht600to800", "dy_ht200to400", "dy_ht400to600"]    
@@ -39,7 +45,7 @@ filedict=dict([(sample,ROOT.TFile.Open("{0}/{1}.root".format(indir,sample))) for
 
 names = filedict["ttdl"].GetKeyNames()
 
-outfile = ROOT.TFile.Open("Fshort.root","RECREATE")
+outfile = ROOT.TFile.Open("{0}/Fshort_{1}.root".format(outdir,runtag),"RECREATE")
 outfile.cd()
 
 for rawname in names:
@@ -65,7 +71,7 @@ for rawname in names:
         h_fsr.SetBinError(length, 1, newerr)
     h_fsr.SetMarkerSize(1.8)
     h_fsr.Draw("text E")
-    simplecanvas.SaveAs("{0}/{1}.png".format(outdir,name))
+    simplecanvas.SaveAs("{0}/{1}.png".format(pngdir,name))
     h_fsr.Write()
 
 outfile.Close()

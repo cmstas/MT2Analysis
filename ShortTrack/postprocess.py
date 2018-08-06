@@ -23,8 +23,14 @@ simplecanvas.SetLeftMargin(0.2)
 simplecanvas.SetRightMargin(0.2)
 simplecanvas.SetTopMargin(0.12)
 
-indir="output/"
-outdir="pngs/"
+if len(sys.argv) < 2: 
+    print "Which tag to run on?"
+    exit(1)
+runtag=sys.argv[1]
+indir="output/"+runtag
+pngdir="pngs/"+runtag
+outdir="output"
+os.system("mkdir -p {0}".format(pngdir))
 os.system("mkdir -p {0}".format(outdir))
 
 dy_samples=["dy_ht1200to2500", "dy_ht400to600",  "dy_ht200to400", "dy_ht600to800", "dy_ht200to400", "dy_ht400to600"]    
@@ -39,7 +45,7 @@ filedict=dict([(sample,ROOT.TFile.Open("{0}/{1}.root".format(indir,sample))) for
 
 names = filedict["ttdl"].GetKeyNames()
 
-outfile = ROOT.TFile.Open("Result.root","RECREATE")
+outfile = ROOT.TFile.Open("{0}/Result_{1}.root".format(outdir,runtag),"RECREATE")
 outfile.cd()
 
 counts_names = []
@@ -57,7 +63,7 @@ for name in counts_names:
         h_counts.Add(filedict[sample].Get(name))
     h_counts.SetMarkerSize(1.5)
     h_counts.Draw("text E")
-    simplecanvas.SaveAs("{0}/{1}.png".format(outdir,name))
+    simplecanvas.SaveAs("{0}/{1}.png".format(pngdir,name))
     h_counts.Write()
 
 outfile.Close()

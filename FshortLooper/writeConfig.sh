@@ -23,11 +23,13 @@ JOBLOGDIR="${PWD}/job_logs"
 PROXY=$(voms-proxy-info -path)
 USERNAME=$(whoami)
 
-LOGDIR="/nfs-6/userdata/dpgilber/condor_submit_logs/FshortLooper"
-OUTDIR="/nfs-6/userdata/dpgilber/condor_job_logs/FshortLooper"
+LOGDIR="/nfs-6/userdata/${USERNAME}/condor_submit_logs/FshortLooper"
+OUTDIR="/nfs-6/userdata/${USERNAME}/condor_job_logs/FshortLooper"
 LOG="${LOGDIR}/condor_`date "+%m_%d_%Y"`.log"
 OUT="${OUTDIR}/1e.\$(Cluster).\$(Process).out"
 ERR="${OUTDIR}/1e.\$(Cluster).\$(Process).err"
+
+mkdir -p condor
 
 if [ ! -d "${LOGDIR}" ]; then
     echo "[writeConfig] creating log directory " ${LOGDIR}
@@ -57,7 +59,7 @@ fi
 #
 # write configuration
 #
-   
+
 echo "
 universe=${UNIVERSE}
 when_to_transfer_output = ON_EXIT
