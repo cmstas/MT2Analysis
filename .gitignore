@@ -2,12 +2,17 @@
 *.so
 *.gdb_history
 *.cxx
+*.pcm
 *logs*
 *.pcm
 *.d
 *.log
 *.pyc
 *.cmd
+*.exe
 *.display.screen
 babymaker/processBaby
+babymaker/*.root
+babymaker/*.txt
 CORE
+**/condor

@@ -437,6 +437,107 @@ public :
    Float_t         rebal_pt_soft_x;
    Float_t         rebal_pt_soft_y;
 
+   ///////////////
+   // Short Track
+   ///////////////
+
+  static const int maxntracks = 1000;
+
+  // Event-level variables
+  Int_t           ntracks;
+  Int_t           nshorttracks;
+  Int_t           nshorttracks_P;
+  Int_t           nshorttracks_M;
+  Int_t           nshorttracks_L;
+  Int_t           nshorttrackcandidates;
+  Int_t           nshorttrackcandidates_P;
+  Int_t           nshorttrackcandidates_M;
+  Int_t           nshorttrackcandidates_L;
+  
+  // Track kinematics
+  Float_t         track_pt[maxntracks];
+  Float_t         track_ptErr[maxntracks];
+  Float_t         track_eta[maxntracks];
+  Float_t         track_phi[maxntracks];
+  Int_t           track_charge[maxntracks];
+  Float_t         track_dedxStrip[maxntracks];
+  Float_t         track_dedxPixel[maxntracks];
+
+  // Track quality
+  //Float_t         track_nChi2[maxntracks];
+  Float_t         track_ipSigXY[maxntracks];
+  Float_t         track_dxy[maxntracks];
+  Float_t         track_dxyErr[maxntracks];
+  Float_t         track_dz[maxntracks];
+  Float_t         track_dzErr[maxntracks];
+  Int_t           track_isHighPurity[maxntracks];
+  Int_t           track_DeadECAL[maxntracks];
+  Int_t           track_DeadHCAL[maxntracks];
+
+  // Track length
+  Int_t           track_isshort[maxntracks];
+  Int_t           track_iscandidate[maxntracks];
+  Int_t           track_ispixelonly[maxntracks];
+  Int_t           track_ismedium[maxntracks];
+  Int_t           track_islong[maxntracks];
+  Int_t           track_ispixelonlycandidate[maxntracks];
+  Int_t           track_ismediumcandidate[maxntracks];
+  Int_t           track_islongcandidate[maxntracks];
+  Int_t           track_HitSignature[maxntracks];
+  Int_t           track_nPixelHits[maxntracks];
+  Int_t           track_nLostOuterHits[maxntracks];
+  Int_t           track_nLostInnerPixelHits[maxntracks];
+  Int_t           track_nLayersWithMeasurement[maxntracks];
+  Int_t           track_nPixelLayersWithMeasurement[maxntracks];
+
+  // Nearest PF information
+  Int_t           track_nearestPF_id[maxntracks];
+  Float_t         track_nearestPF_DR[maxntracks];
+  Float_t         track_nearestPF_pt[maxntracks];
+
+  // Nearest jet information
+  Float_t         track_jetDR[maxntracks];
+  Float_t         track_jetPt[maxntracks];
+  Float_t         track_jetEta[maxntracks];
+  Float_t         track_jetPhi[maxntracks];
+
+  // Pileup and Isolation
+  Float_t         track_chHIso0p3[maxntracks];
+  Float_t         track_chHminiIso[maxntracks];
+  Float_t         track_neuHIso0p3[maxntracks];
+  Float_t         track_neuHminiIso[maxntracks];
+  Float_t         track_phIso0p3[maxntracks];
+  Float_t         track_phminiIso[maxntracks];
+  Int_t           track_isLepOverlap[maxntracks];
+  Float_t         track_neuIso0p05[maxntracks];
+  Float_t         track_neuRelIso0p05[maxntracks];
+
+  Float_t         track_iso[maxntracks]; // DeltaBeta corrected
+  Float_t         track_isonomin[maxntracks];
+  Float_t         track_reliso[maxntracks];
+  Float_t         track_relisonomin[maxntracks];
+  Float_t         track_iso_uncorrected[maxntracks];
+  Float_t         track_reliso_uncorrected[maxntracks];
+  Float_t         track_iso_correction[maxntracks]; // The DeltaBeta correction
+  Float_t         track_reliso_correction[maxntracks];
+
+  Float_t         track_miniiso[maxntracks]; // DeltaBeta corrected
+  Float_t         track_miniisonomin[maxntracks];
+  Float_t         track_minireliso[maxntracks];
+  Float_t         track_minirelisonomin[maxntracks];
+  Float_t         track_miniiso_uncorrected[maxntracks];
+  Float_t         track_minireliso_uncorrected[maxntracks];
+  Float_t         track_miniiso_correction[maxntracks]; // The DeltaBeta correction
+  Float_t         track_minireliso_correction[maxntracks];
+
+  // Gen info
+  Int_t           track_isChargino[maxntracks];
+  Int_t           track_genPdgId[maxntracks];
+  Float_t         track_genMatchDR[maxntracks];
+  
+  Int_t           nCharginos;
+
+
    // List of branches
    TBranch        *b_run;   //!
    TBranch        *b_lumi;   //!
@@ -850,6 +951,82 @@ public :
    TBranch        *b_rebal_met_phi;
    TBranch        *b_rebal_pt_soft_x;
    TBranch        *b_rebal_pt_soft_y;
+
+   // Short Track
+   TBranch        *b_ntracks;
+   TBranch        *b_nshorttracks;
+   TBranch        *b_nshorttracks_P;
+   TBranch        *b_nshorttracks_M;
+   TBranch        *b_nshorttracks_L;
+   TBranch        *b_nshorttrackcandidates;
+   TBranch        *b_nshorttrackcandidates_P;
+   TBranch        *b_nshorttrackcandidates_M;
+   TBranch        *b_nshorttrackcandidates_L;
+   TBranch        *b_track_pt;
+   TBranch        *b_track_ptErr;
+   TBranch        *b_track_eta;
+   TBranch        *b_track_phi;
+   TBranch        *b_track_charge;
+   TBranch        *b_track_dedxStrip;
+   TBranch        *b_track_dedxPixel;
+   TBranch        *b_track_ipSigXY;
+   TBranch        *b_track_dxy;
+   TBranch        *b_track_dxyErr;
+   TBranch        *b_track_dz;
+   TBranch        *b_track_dzErr;
+   TBranch        *b_track_isHighPurity;
+   TBranch        *b_track_DeadECAL;
+   TBranch        *b_track_DeadHCAL;
+   TBranch        *b_track_isshort;
+   TBranch        *b_track_iscandidate;
+   TBranch        *b_track_ispixelonly;
+   TBranch        *b_track_ismedium;
+   TBranch        *b_track_islong;
+   TBranch        *b_track_ispixelonlycandidate;
+   TBranch        *b_track_ismediumcandidate;
+   TBranch        *b_track_islongcandidate;
+   TBranch        *b_track_HitSignature;
+   TBranch        *b_track_nPixelHits;
+   TBranch        *b_track_nLostOuterHits;
+   TBranch        *b_track_nLostInnerPixelHits;
+   TBranch        *b_track_nLayersWithMeasurement;
+   TBranch        *b_track_nPixelLayersWithMeasurement;
+   TBranch        *b_track_nearestPF_id;
+   TBranch        *b_track_nearestPF_DR;
+   TBranch        *b_track_nearestPF_pt;
+   TBranch        *b_track_jetDR;
+   TBranch        *b_track_jetPt;
+   TBranch        *b_track_jetEta;
+   TBranch        *b_track_jetPhi;
+   TBranch        *b_track_chHIso0p3;
+   TBranch        *b_track_chHminiIso;
+   TBranch        *b_track_neuHIso0p3;
+   TBranch        *b_track_neuHminiIso;
+   TBranch        *b_track_phIso0p3;
+   TBranch        *b_track_phminiIso;
+   TBranch        *b_track_isLepOverlap;
+   TBranch        *b_track_neuIso0p05;
+   TBranch        *b_track_neuRelIso0p05;
+   TBranch        *b_track_iso;
+   TBranch        *b_track_isonomin;
+   TBranch        *b_track_reliso;
+   TBranch        *b_track_relisonomin;
+   TBranch        *b_track_iso_uncorrected;
+   TBranch        *b_track_reliso_uncorrected;
+   TBranch        *b_track_iso_correction;
+   TBranch        *b_track_reliso_correction;
+   TBranch        *b_track_miniiso;
+   TBranch        *b_track_miniisonomin;
+   TBranch        *b_track_minireliso;
+   TBranch        *b_track_minirelisonomin;
+   TBranch        *b_track_miniiso_uncorrected;
+   TBranch        *b_track_minireliso_uncorrected;
+   TBranch        *b_track_miniiso_correction;
+   TBranch        *b_track_minireliso_correction;
+   TBranch        *b_track_isChargino;
+   TBranch        *b_track_genPdgId;
+   TBranch        *b_track_genMatchDR;
+   TBranch        *b_nCharginos;
 
    mt2tree(TTree *tree=0);
    virtual ~mt2tree();
@@ -1324,6 +1501,74 @@ void mt2tree::Init(TTree *tree)
    fChain->SetBranchAddress("rebal_pt_soft_x", &rebal_pt_soft_x, &b_rebal_pt_soft_x);
    fChain->SetBranchAddress("rebal_pt_soft_y", &rebal_pt_soft_y, &b_rebal_pt_soft_y);
 
+   // Short Track
+   fChain->SetBranchAddress("ntracks", &ntracks, &b_ntracks);
+   fChain->SetBranchAddress("nshorttracks", &nshorttracks, &b_nshorttracks);
+   fChain->SetBranchAddress("nshorttracks_P", &nshorttracks_P, &b_nshorttracks_P);
+   fChain->SetBranchAddress("nshorttracks_M", &nshorttracks_M, &b_nshorttracks_M);
+   fChain->SetBranchAddress("nshorttracks_L", &nshorttracks_L, &b_nshorttracks_L);
+   fChain->SetBranchAddress("nshorttrackcandidates", &nshorttrackcandidates, &b_nshorttrackcandidates);
+   fChain->SetBranchAddress("nshorttrackcandidates_P", &nshorttrackcandidates_P, &b_nshorttrackcandidates_P);
+   fChain->SetBranchAddress("nshorttrackcandidates_M", &nshorttrackcandidates_M, &b_nshorttrackcandidates_M);
+   fChain->SetBranchAddress("nshorttrackcandidates_L", &nshorttrackcandidates_L, &b_nshorttrackcandidates_L);
+   fChain->SetBranchAddress("track_pt", track_pt, &b_track_pt);
+   fChain->SetBranchAddress("track_ptErr", track_ptErr, &b_track_ptErr);
+   fChain->SetBranchAddress("track_eta", track_eta, &b_track_eta);
+   fChain->SetBranchAddress("track_phi", track_phi, &b_track_phi);
+   fChain->SetBranchAddress("track_charge", track_charge, &b_track_charge);
+   fChain->SetBranchAddress("track_dedxStrip", track_dedxStrip, &b_track_dedxStrip);
+   fChain->SetBranchAddress("track_dedxPixel", track_dedxPixel, &b_track_dedxPixel);
+   fChain->SetBranchAddress("track_ipSigXY", track_ipSigXY, &b_track_ipSigXY);
+   fChain->SetBranchAddress("track_dxy", track_dxy, &b_track_dxy);
+   fChain->SetBranchAddress("track_dxyErr", track_dxyErr, &b_track_dxyErr);
+   fChain->SetBranchAddress("track_dz", track_dz, &b_track_dz);
+   fChain->SetBranchAddress("track_dzErr", track_dzErr, &b_track_dzErr);
+   fChain->SetBranchAddress("track_isHighPurity", track_isHighPurity, &b_track_isHighPurity);
+   fChain->SetBranchAddress("track_DeadECAL", track_DeadECAL, &b_track_DeadECAL);
+   fChain->SetBranchAddress("track_DeadHCAL", track_DeadHCAL, &b_track_DeadHCAL);
+   fChain->SetBranchAddress("track_isshort", track_isshort, &b_track_isshort);
+   fChain->SetBranchAddress("track_iscandidate", track_iscandidate, &b_track_iscandidate);
+   fChain->SetBranchAddress("track_ispixelonly", track_ispixelonly, &b_track_ispixelonly);
+   fChain->SetBranchAddress("track_ismedium", track_ismedium, &b_track_ismedium);
+   fChain->SetBranchAddress("track_islong", track_islong, &b_track_islong);
+   fChain->SetBranchAddress("track_ispixelonlycandidate", track_ispixelonlycandidate, &b_track_ispixelonlycandidate);
+   fChain->SetBranchAddress("track_ismediumcandidate", track_ismediumcandidate, &b_track_ismediumcandidate);
+   fChain->SetBranchAddress("track_islongcandidate", track_islongcandidate, &b_track_islongcandidate);
+   fChain->SetBranchAddress("track_HitSignature", track_HitSignature, &b_track_HitSignature);
+   fChain->SetBranchAddress("track_nPixelHits", track_nPixelHits, &b_track_nPixelHits);
+   fChain->SetBranchAddress("track_nLayersWithMeasurement", track_nLayersWithMeasurement, &b_track_nLayersWithMeasurement);
+   fChain->SetBranchAddress("track_nPixelLayersWithMeasurement", track_nPixelLayersWithMeasurement, &b_track_nPixelLayersWithMeasurement);
+   fChain->SetBranchAddress("track_nearestPF_id", track_nearestPF_id, &b_track_nearestPF_id);
+   fChain->SetBranchAddress("track_nearestPF_pt", track_nearestPF_pt, &b_track_nearestPF_pt);
+   fChain->SetBranchAddress("track_nearestPF_DR", track_nearestPF_DR, &b_track_nearestPF_DR);
+   fChain->SetBranchAddress("track_jetDR", track_jetDR, &b_track_jetDR);
+   fChain->SetBranchAddress("track_jetPt", track_jetPt, &b_track_jetPt);
+   fChain->SetBranchAddress("track_jetEta", track_jetEta, &b_track_jetEta);
+   fChain->SetBranchAddress("track_jetPhi", track_jetPhi, &b_track_jetPhi);
+   fChain->SetBranchAddress("track_chHIso0p3", track_chHIso0p3, &b_track_chHIso0p3);
+   fChain->SetBranchAddress("track_chHminiIso", track_chHminiIso, &b_track_chHminiIso);
+   fChain->SetBranchAddress("track_neuHIso0p3", track_neuHIso0p3, &b_track_neuHIso0p3);
+   fChain->SetBranchAddress("track_neuHminiIso", track_neuHminiIso, &b_track_neuHminiIso);
+   fChain->SetBranchAddress("track_phIso0p3", track_phIso0p3, &b_track_phIso0p3);
+   fChain->SetBranchAddress("track_phminiIso", track_phminiIso, &b_track_phminiIso);
+   fChain->SetBranchAddress("track_isLepOverlap", track_isLepOverlap, &b_track_isLepOverlap);
+   fChain->SetBranchAddress("track_neuIso0p05", track_neuIso0p05, &b_track_neuIso0p05);
+   fChain->SetBranchAddress("track_iso", track_iso, &b_track_iso);
+   fChain->SetBranchAddress("track_isonomin", track_isonomin, &b_track_isonomin);
+   fChain->SetBranchAddress("track_reliso", track_reliso, &b_track_reliso);
+   fChain->SetBranchAddress("track_relisonomin", track_relisonomin, &b_track_relisonomin);
+   fChain->SetBranchAddress("track_iso_uncorrected", track_iso_uncorrected, &b_track_iso_uncorrected);
+   fChain->SetBranchAddress("track_reliso_uncorrected", track_reliso_uncorrected, &b_track_reliso_uncorrected);
+   fChain->SetBranchAddress("track_miniiso", track_miniiso, &b_track_miniiso);
+   fChain->SetBranchAddress("track_miniisonomin", track_miniisonomin, &b_track_miniisonomin);
+   fChain->SetBranchAddress("track_minireliso", track_minireliso, &b_track_minireliso);
+   fChain->SetBranchAddress("track_minirelisonomin", track_minirelisonomin, &b_track_minirelisonomin);
+   fChain->SetBranchAddress("track_miniiso_uncorrected", track_miniiso_uncorrected, &b_track_miniiso_uncorrected);
+   fChain->SetBranchAddress("track_minireliso_uncorrected", track_minireliso_uncorrected, &b_track_minireliso_uncorrected);
+   fChain->SetBranchAddress("track_isChargino", track_isChargino, &b_track_isChargino);
+   fChain->SetBranchAddress("track_genPdgId", track_genPdgId, &b_track_genPdgId); 
+   fChain->SetBranchAddress("track_genMatchDR", track_genMatchDR, &b_track_genMatchDR); 
+   fChain->SetBranchAddress("nCharginos", &nCharginos, &b_nCharginos); 
    Notify();
 }
 
