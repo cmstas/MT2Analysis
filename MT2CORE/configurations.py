@@ -12,6 +12,8 @@
 # To use within a python script, simply do "from configurations import MT2Config_defs"
 #
 
+import copy
+
 MT2Config_defs = {}
 
 MT2Config_defs["data_2017_31Mar2018"] = {
@@ -74,6 +76,18 @@ MT2Config_defs["data_2017_31Mar2018"] = {
             "Mu27_Ele37_NonIso",
             "Photon200",
             "SingleMu_NonIso"
+            ],
+        "prescaledHT" : [
+            "PFHT180_Prescale",
+            "PFHT250_Prescale",
+            "PFHT370_Prescale",
+            "PFHT430_Prescale",
+            "PFHT510_Prescale",
+            "PFHT590_Prescale",
+            "PFHT680_Prescale",
+            "PFHT780_Prescale",
+            "PFHT890_Prescale",
+            "PFHT1050",
             ]
         }                              
     }
@@ -169,11 +183,20 @@ MT2Config_defs["data_2016_Moriond17"] = {
             "Mu33_Ele33_NonIso",
             "Photon165_HE10",
             "SingleMu_NonIso"
+            ],
+        "prescaledHT" : [
+            "PFHT125_Prescale",
+            "PFHT200_Prescale",
+            "PFHT300_Prescale",
+            "PFHT350_Prescale",
+            "PFHT475_Prescale",
+            "PFHT600_Prescale",
+            "PFHT900",
             ]
         }
     }
 
-MT2Config_defs["data_2016_94x"] = MT2Config_defs["data_2016_Moriond17"]
+MT2Config_defs["data_2016_94x"] = copy.deepcopy(MT2Config_defs["data_2016_Moriond17"])
 MT2Config_defs["data_2016_94x"]["filters"] = [
     "eeBadScFilter",
     "globalSuperTightHalo2016Filter",
@@ -223,6 +246,9 @@ MT2Config_defs["mc_80x_Moriond17"] = {
                   "badChargedHadronFilterV2"
                   ],
 }
+
+MT2Config_defs["mc_80x_fastsim_Moriond17"] = copy.deepcopy(MT2Config_defs["mc_80x_Moriond17"])
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
 
 
 

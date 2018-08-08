@@ -133,9 +133,9 @@ public :
    Int_t           Flag_globalTightHalo2016Filter = -999;
    Int_t           Flag_globalSuperTightHalo2016Filter = -999;
    Int_t           Flag_badMuonFilter = -999;
-   Int_t           Flag_badMuonFilter2016 = -999;
+   Int_t           Flag_badMuonFilterV2 = -999;
    Int_t           Flag_badChargedCandidateFilter = -999;
-   Int_t           Flag_badChargedHadronFilter2016 = -999;
+   Int_t           Flag_badChargedHadronFilterV2 = -999;
    Int_t           HLT_PFHT800 = 0;
    Int_t           HLT_PFHT900 = 0;
    Int_t           HLT_PFHT1050 = 0;
@@ -653,9 +653,9 @@ public :
    TBranch        *b_Flag_globalTightHalo2016Filter;   //!
    TBranch        *b_Flag_globalSuperTightHalo2016Filter;   //!
    TBranch        *b_Flag_badMuonFilter;   //!
-   TBranch        *b_Flag_badMuonFilter2016;   //!
+   TBranch        *b_Flag_badMuonFilterV2;   //!
    TBranch        *b_Flag_badChargedCandidateFilter;   //!
-   TBranch        *b_Flag_badChargedHadronFilter2016;   //!
+   TBranch        *b_Flag_badChargedHadronFilterV2;   //!
    TBranch        *b_HLT_HT800;   //!
    TBranch        *b_HLT_HT900;   //!
    TBranch        *b_HLT_MET170;   //!
@@ -1207,9 +1207,9 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("Flag_globalTightHalo2016Filter"))         fChain->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter, &b_Flag_globalTightHalo2016Filter);
    if(bs->FindObject("Flag_globalSuperTightHalo2016Filter"))    fChain->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter, &b_Flag_globalSuperTightHalo2016Filter);
    if(bs->FindObject("Flag_badMuonFilter"))                     fChain->SetBranchAddress("Flag_badMuonFilter", &Flag_badMuonFilter, &b_Flag_badMuonFilter);
-   if(bs->FindObject("Flag_badMuonFilter2016"))                   fChain->SetBranchAddress("Flag_badMuonFilter2016", &Flag_badMuonFilter2016, &b_Flag_badMuonFilter2016);
+   if(bs->FindObject("Flag_badMuonFilterV2"))                   fChain->SetBranchAddress("Flag_badMuonFilterV2", &Flag_badMuonFilterV2, &b_Flag_badMuonFilterV2);
    if(bs->FindObject("Flag_badChargedCandidateFilter"))         fChain->SetBranchAddress("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter, &b_Flag_badChargedCandidateFilter);
-   if(bs->FindObject("Flag_badChargedHadronFilter2016"))          fChain->SetBranchAddress("Flag_badChargedHadronFilter2016", &Flag_badChargedHadronFilter2016, &b_Flag_badChargedHadronFilter2016);
+   if(bs->FindObject("Flag_badChargedHadronFilterV2"))          fChain->SetBranchAddress("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2, &b_Flag_badChargedHadronFilterV2);
    if(bs->FindObject("HLT_HT800"))                              fChain->SetBranchAddress("HLT_HT800", &HLT_HT800, &b_HLT_HT800);
    if(bs->FindObject("HLT_HT900"))                              fChain->SetBranchAddress("HLT_HT900", &HLT_HT900, &b_HLT_HT900);
    if(bs->FindObject("HLT_MET170"))                             fChain->SetBranchAddress("HLT_MET170", &HLT_MET170, &b_HLT_MET170);

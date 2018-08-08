@@ -82,7 +82,7 @@ const bool saveLHEweights = false;
 const bool saveLHEweightsScaleOnly = true;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
-const bool savePFphotons = true;
+const bool savePFphotons = false;
 
 // Short Track Candidate isolation and quality loosening factors
 const float isoSTC = 6, qualSTC = 3;
@@ -142,7 +142,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       rebal_reader.SetTailScale(1.0);
       rebal_reader.SetMeanShift(0.0);
       // don't want to widen cores for rebalancing, so treat as MC always
-      string rebal_file = "rebal/JetResponseTemplates_ptBinned_94x_fixMatching4.root";
+      string rebal_file = "rebal/JetResponseTemplates_ptBinned_94x_fixMatching5.root";
       rebal_reader.Init(rebal_file.c_str(), false);
       cout << "Initialized rebalancing template reader with template file: " << rebal_file << endl;
   }
@@ -629,8 +629,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
         // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
         // since we don't store all PFCands. Should now just be able to use the filters from miniAOD above
-        Flag_badMuonFilter2016                        = badMuonFilterV2();         
-        Flag_badChargedHadronFilter2016               = badChargedCandidateFilterV2();          
+        Flag_badMuonFilterV2                        = badMuonFilterV2();         
+        Flag_badChargedHadronFilterV2               = badChargedCandidateFilterV2();          
       }
       Flag_METFilters                               = cms3.filt_metfilter();
       
@@ -3252,12 +3252,12 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
   BabyTree_->Branch("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter );
   BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
-  BabyTree_->Branch("Flag_badMuonFilter2016", &Flag_badMuonFilter2016 ); 
+  BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 ); 
   BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
   BabyTree_->Branch("Flag_duplicateMuons", &Flag_duplicateMuons );   
   BabyTree_->Branch("Flag_noBadMuons", &Flag_noBadMuons );  
   BabyTree_->Branch("Flag_badChargedCandidateFilter", &Flag_badChargedCandidateFilter );
-  BabyTree_->Branch("Flag_badChargedHadronFilter2016", &Flag_badChargedHadronFilter2016 );    
+  BabyTree_->Branch("Flag_badChargedHadronFilterV2", &Flag_badChargedHadronFilterV2 );    
   BabyTree_->Branch("Flag_METFilters", &Flag_METFilters );
   BabyTree_->Branch("HLT_PFHT1050", &HLT_PFHT1050 );
   BabyTree_->Branch("HLT_PFHT900", &HLT_PFHT900 );
@@ -3820,12 +3820,12 @@ void babyMaker::InitBabyNtuple () {
   Flag_eeBadScFilter = -999;
   Flag_ecalBadCalibFilter = -999;
   Flag_badMuonFilter = -999;
-  Flag_badMuonFilter2016 = -999;    
+  Flag_badMuonFilterV2 = -999;    
   Flag_badMuons = -999;    
   Flag_duplicateMuons = -999;    
   Flag_noBadMuons = -999;    
   Flag_badChargedCandidateFilter = -999;
-  Flag_badChargedHadronFilter2016 = -999;    
+  Flag_badChargedHadronFilterV2 = -999;    
   Flag_METFilters = -999;
   HLT_PFHT1050 = -999;
   HLT_PFHT900 = -999;
