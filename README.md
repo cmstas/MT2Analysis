@@ -26,26 +26,26 @@ babymaker/batchsubmit
 (this assumes you already have root setup)
 ``` bash
 git clone git@github.com:cmstas/MT2Analysis.git
-cd MT2Analysis/MT2looper
+cd MT2Analysis/MT2Looper
 make
 ```
 
 ## Executing main analysis
 Starting from the (skimmed) babies:
 
-### Run MT2looper to produce root histogram files
-Go to `MT2looper` and modify `INDIR`, `OUTDIR`, and `Samples` in `do.sh`, then do:
+### Run MT2Looper to produce root histogram files
+Go to `MT2Looper` and modify `INDIR`, `OUTDIR`, and `Samples` in `do.sh`, then do:
 ``` bash
 . do.sh
 ```
 ### Make the data driven backgrounds
-Go to `scripts` and modify `INDIR` in `makeDataDrivenEstimates.sh` to point to the output dir from `MT2looper`.  Then do:
+Go to `scripts` and modify `INDIR` in `makeDataDrivenEstimates.sh` to point to the output dir from `MT2Looper`.  Then do:
 ``` bash
 . makeDataDrivenEstimates.sh
 ```
 
 ### Merge histograms for signal scans, if necessary
-Go to `scripts` and modify `INDIR` in `processSignal.sh` to point to the output dir from `MT2looper`.  Also comment out any signal scans that you did not process.  Then do:
+Go to `scripts` and modify `INDIR` in `processSignal.sh` to point to the output dir from `MT2Looper`.  Also comment out any signal scans that you did not process.  Then do:
 ``` bash
 . processSignal.sh
 ```
