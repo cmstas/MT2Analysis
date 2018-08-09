@@ -7,10 +7,10 @@ class mt2tree;
 const bool recalculate = false; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
 const float isoSTC = 6, qualSTC = 3; // change these if recalculating Fshort
 
-bool FshortLooper::FillHists(const vector<TH2F*> hists, const double weight, const int fill_type, const int len_index) {
+bool FshortLooper::FillHists(const vector<TH2D*> hists, const double weight, const int fill_type, const int len_index) {
   if (unlikely(len_index < 1 || len_index > 3)) return false;
   if (unlikely(fill_type < 1 || fill_type > 3)) return false;
-  for (vector<TH2F*>::const_iterator hist = hists.begin(); hist != hists.end(); hist++) {
+  for (vector<TH2D*>::const_iterator hist = hists.begin(); hist != hists.end(); hist++) {
     (*hist)->Fill(0.0,(double) fill_type, weight);
     if (fill_type == 3) continue;
     (*hist)->Fill((double) len_index,(double) fill_type, weight);
@@ -24,7 +24,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
 
-  TH2F* h_FSR_60to100MT2 = new TH2F("h_FSR_60to100MT2","ST and STC Counts by Length",4,0,4,4,0,4);
+  TH2D* h_FSR_60to100MT2 = new TH2D("h_FSR_60to100MT2","ST and STC Counts by Length",4,0,4,4,0,4);
   h_FSR_60to100MT2->GetXaxis()->SetBinLabel(1,"Incl");
   h_FSR_60to100MT2->GetXaxis()->SetBinLabel(2,"P");
   h_FSR_60to100MT2->GetXaxis()->SetBinLabel(3,"M");
@@ -34,18 +34,18 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
   h_FSR_60to100MT2->GetYaxis()->SetBinLabel(3,"STC");
   h_FSR_60to100MT2->GetYaxis()->SetBinLabel(4,"Tracks");
 
-  TH2F* h_FSR_100to200MT2 = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_100to200MT2");
-  TH2F* h_FSR_gt200MT2 = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_gt200MT2");
-  TH2F* h_FSR_gt0p3dphi = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_gt0p3dphi");
-  TH2F* h_FSR_lt0p3dphi = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_lt0p3dphi");
-  TH2F* h_FSR_0nlep = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_0nlep");
-  TH2F* h_FSR_gt0nlep = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_gt0nlep");
-  TH2F* h_FSR_2to3njet = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_2to3njet");
-  TH2F* h_FSR_gt3njet = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_gt3njet");
-  TH2F* h_FSR_gt1000HT = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_gt1000HT");
-  TH2F* h_FSR_lt1000HT = (TH2F*) h_FSR_60to100MT2->Clone("h_FSR_lt1000HT");
+  TH2D* h_FSR_100to200MT2 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_100to200MT2");
+  TH2D* h_FSR_gt200MT2 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt200MT2");
+  TH2D* h_FSR_gt0p3dphi = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt0p3dphi");
+  TH2D* h_FSR_lt0p3dphi = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_lt0p3dphi");
+  TH2D* h_FSR_0nlep = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_0nlep");
+  TH2D* h_FSR_gt0nlep = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt0nlep");
+  TH2D* h_FSR_2to3njet = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_2to3njet");
+  TH2D* h_FSR_gt3njet = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt3njet");
+  TH2D* h_FSR_gt1000HT = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt1000HT");
+  TH2D* h_FSR_lt1000HT = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_lt1000HT");
 
-  vector<TH2F*> allhists = {h_FSR_60to100MT2, h_FSR_100to200MT2, h_FSR_gt200MT2, h_FSR_gt0p3dphi, h_FSR_lt0p3dphi, h_FSR_0nlep, h_FSR_gt0nlep, 
+  vector<TH2D*> allhists = {h_FSR_60to100MT2, h_FSR_100to200MT2, h_FSR_gt200MT2, h_FSR_gt0p3dphi, h_FSR_lt0p3dphi, h_FSR_0nlep, h_FSR_gt0nlep, 
 			    h_FSR_2to3njet, h_FSR_gt3njet, h_FSR_lt1000HT, h_FSR_gt1000HT};
 
   mt2tree t;
@@ -92,7 +92,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
     }
 
     // 60to100MT2, 100to200MT2, gt200MT2, gt0p3dphi, lt0p3dphi, 0nlep, gt0nlep, 2to3njet, gt3njet, gt1000HT, lt1000HT
-    vector<TH2F*> histsToFill;
+    vector<TH2D*> histsToFill;
     if (t.mt2 < 100) {
       histsToFill.push_back(h_FSR_60to100MT2);
       t.deltaPhiMin < 0.3 ? histsToFill.push_back(h_FSR_lt0p3dphi) : histsToFill.push_back(h_FSR_gt0p3dphi);
@@ -202,10 +202,11 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 	const bool isQualityTrack = pixLayersSel4 && QualityTrackBase;
 	const bool isQualityTrackSTC = pixLayersSel4 && QualityTrackSTCBase;
 	
-	// Candidate (loosened isolation, quality)
-	isSTC = PassesFullIsoSelSTC && isQualityTrackSTC;
 	// Full Short Track
 	isST = PassesFullIsoSel && isQualityTrack;
+
+	// Candidate (loosened isolation, quality)
+	isSTC = PassesFullIsoSelSTC && isQualityTrackSTC && !isST;
       }
       else {
 	if (t.track_iscandidate[i_trk]) {
@@ -219,7 +220,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
       }
 
       // Fills
-      if (isSTC && ! isST) {
+      if (isSTC) {
 	FillHists(histsToFill,weight,2,fillIndex);
       }
       if (isST) FillHists(histsToFill,weight,1,fillIndex);
@@ -232,8 +233,8 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
   // Post-processing
 
   // Calculate Fshort for this particular sample
-  for (vector<TH2F*>::iterator hist = allhists.begin(); hist != allhists.end(); hist++) {
-    TH2F* h = *hist;
+  for (vector<TH2D*>::iterator hist = allhists.begin(); hist != allhists.end(); hist++) {
+    TH2D* h = *hist;
     for (int len = 0; len < 4; len++) {
       double den = h->GetBinContent((double) len, 3); // STC count
       if (den == 0.0) {
@@ -257,7 +258,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
-  for (vector<TH2F*>::iterator hist = allhists.begin(); hist != allhists.end(); hist++) (*hist)->Write();
+  for (vector<TH2D*>::iterator hist = allhists.begin(); hist != allhists.end(); hist++) (*hist)->Write();
   outfile_.Close();
   cout << "Wrote everything" << endl;
 

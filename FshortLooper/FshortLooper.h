@@ -29,7 +29,7 @@ class FshortLooper {
  public:
   FshortLooper();
   ~FshortLooper();
-  bool FillHists(const std::vector<TH2F*> hist, const double weight, const int fill_type, const int len_index=1);
+  bool FillHists(const std::vector<TH2D*> hist, const double weight, const int fill_type, const int len_index=1);
   int loop(TChain* ch_st, char* infile);
 };
 

@@ -3055,7 +3055,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	// Due to isotrack slimming selection, we only have isotracks with ChH < 5.0 GeV, ChH / cand_pt < 0.2, miniChH / cand_pt < 0.2 for tracks with cand pt < 20 GeV
 
-	// Already checked for IsoSTC above
+	// Does this isotrack pass short track quality and isolation?
 	if (QualityST && PassesIsoSel) {
 	  nshorttracks++;
 	  track_isshort[ntracks] = 1;
@@ -3064,6 +3064,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  else {nshorttracks_L++; track_islong[ntracks] = 1;}	   
 	}
 	// STCs (can't be STs also)
+	// Already checked for IsoSTC above
 	if (QualitySTC && ! track_isshort[ntracks]) {
 	  nshorttrackcandidates++;
 	  track_iscandidate[ntracks] = 1;

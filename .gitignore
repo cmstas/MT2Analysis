@@ -16,3 +16,4 @@ babymaker/*.root
 babymaker/*.txt
 CORE
 **/condor
+MT2Looper/runLooper

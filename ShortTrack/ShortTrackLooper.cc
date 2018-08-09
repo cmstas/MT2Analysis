@@ -8,7 +8,7 @@ const bool recalculate = false; // to use a non standard (ie not in babies) Fsho
 const float isoSTC = 6, qualSTC = 3;
 
 TFile FshortFile("Fshort.root");
-TH1D* h_fs = ((TH2F*) FshortFile.Get("h_FSR_60to100MT2"))->ProjectionX("h_fs",1,1);
+TH1D* h_fs = ((TH2D*) FshortFile.Get("h_FSR_60to100MT2"))->ProjectionX("h_fs",1,1);
 // bin 1 is inclusive, then P, M, L
 const double fs_P = h_fs->GetBinContent(2);
 const double fs_M = h_fs->GetBinContent(3);
@@ -20,7 +20,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag) {
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
 
-  TH2F h_eventwise_counts ("h_eventwise_counts","Events Counts by Length",3,0,3,3,0,3);
+  TH2D h_eventwise_counts ("h_eventwise_counts","Events Counts by Length",3,0,3,3,0,3);
   h_eventwise_counts.GetYaxis()->SetTitleOffset(3.0);
   h_eventwise_counts.GetXaxis()->SetBinLabel(1,"P");
   h_eventwise_counts.GetXaxis()->SetBinLabel(2,"M");
@@ -30,15 +30,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag) {
   h_eventwise_counts.GetYaxis()->SetBinLabel(3,"CR STC Events");
 
   // NjHt
-  TH2F* h_LL_VR = (TH2F*)h_eventwise_counts.Clone("h_LL_VR");
-  TH2F* h_LH_VR = (TH2F*)h_eventwise_counts.Clone("h_LH_VR");
-  TH2F* h_HL_VR = (TH2F*)h_eventwise_counts.Clone("h_HL_VR");
-  TH2F* h_HH_VR = (TH2F*)h_eventwise_counts.Clone("h_HH_VR");
+  TH2D* h_LL_VR = (TH2D*)h_eventwise_counts.Clone("h_LL_VR");
+  TH2D* h_LH_VR = (TH2D*)h_eventwise_counts.Clone("h_LH_VR");
+  TH2D* h_HL_VR = (TH2D*)h_eventwise_counts.Clone("h_HL_VR");
+  TH2D* h_HH_VR = (TH2D*)h_eventwise_counts.Clone("h_HH_VR");
 
-  TH2F* h_LL_SR = (TH2F*)h_eventwise_counts.Clone("h_LL_SR");
-  TH2F* h_LH_SR = (TH2F*)h_eventwise_counts.Clone("h_LH_SR");
-  TH2F* h_HL_SR = (TH2F*)h_eventwise_counts.Clone("h_HL_SR");
-  TH2F* h_HH_SR = (TH2F*)h_eventwise_counts.Clone("h_HH_SR");
+  TH2D* h_LL_SR = (TH2D*)h_eventwise_counts.Clone("h_LL_SR");
+  TH2D* h_LH_SR = (TH2D*)h_eventwise_counts.Clone("h_LH_SR");
+  TH2D* h_HL_SR = (TH2D*)h_eventwise_counts.Clone("h_HL_SR");
+  TH2D* h_HH_SR = (TH2D*)h_eventwise_counts.Clone("h_HH_SR");
 
   mt2tree t;
 
@@ -104,7 +104,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag) {
       else weight = 1.0 / 115.2;
     }
 
-    TH2F* hist;
+    TH2D* hist;
     
     // L*
     if (t.nJet30 < 4) {
@@ -168,12 +168,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag) {
 
     if (recalculate) {
       // Manual calculation for testing new ST/STC definitions not coded in babymaker
-      int nSTCp = 0;
-      int nSTCm = 0;
-      int nSTCl = 0;
-      int nSTp = 0;
-      int nSTm = 0;
-      int nSTl = 0;
+      nSTCp = 0;
+      nSTCm = 0;
+      nSTCl = 0;
+      nSTp = 0;
+      nSTm = 0;
+      nSTl = 0;
 
       const int ntracks = t.ntracks;
       for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
@@ -266,10 +266,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag) {
 	const bool isQualityTrack = pixLayersSel4 && QualityTrackBase;
 	const bool isQualityTrackSTC = pixLayersSel4 && QualityTrackSTCBase;
 	
-	// Candidate (loosened isolation, quality)
-	const bool isSTC = PassesFullIsoSelSTC && isQualityTrackSTC;
 	// Full Short Track
 	const bool isST = PassesFullIsoSel && isQualityTrack;
+
+	// Candidate (loosened isolation, quality)
+	const bool isSTC = PassesFullIsoSelSTC && isQualityTrackSTC && !isST;
 
 	if (isSTC) {
 	  switch(lenIndex) {
