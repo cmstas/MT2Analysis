@@ -120,8 +120,8 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
+        c.filters["badMuonFilterV2"] = true;
+        c.filters["badChargedHadronFilterV2"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT900");
         c.triggers["SR"].push_back("PFJet450");
@@ -342,6 +342,24 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
         c.triggers["DilepOF"].push_back("Photon200");
         c.triggers["DilepOF"].push_back("SingleMu_NonIso");
+
+    }else if(tag == "mc_101x_Spring18"){
+
+        c.lumi               = 41.37;
+        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
+        c.btag_med_threshold = 0.8838;
+        c.pu_weights_file    = "";
+        c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V4_MC"));
+        c.filters["globalSuperTightHalo2016Filter"] = true;
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
 
     }else if(tag == "mc_80x_Moriond17"){
 
