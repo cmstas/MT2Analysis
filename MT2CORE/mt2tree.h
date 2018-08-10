@@ -1580,7 +1580,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("track_isChargino"))                       fChain->SetBranchAddress("track_isChargino", track_isChargino, &b_track_isChargino);
    if(bs->FindObject("track_genPdgId"))                         fChain->SetBranchAddress("track_genPdgId", track_genPdgId, &b_track_genPdgId); 
    if(bs->FindObject("track_genMatchDR"))                       fChain->SetBranchAddress("track_genMatchDR", track_genMatchDR, &b_track_genMatchDR); 
-   if(bs->FindObject("track_nCharginos"))                       fChain->SetBranchAddress("nCharginos", &nCharginos, &b_nCharginos); 
+   if(bs->FindObject("nCharginos"))                             fChain->SetBranchAddress("nCharginos", &nCharginos, &b_nCharginos); 
    Notify();
 }
 
