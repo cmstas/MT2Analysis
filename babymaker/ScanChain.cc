@@ -1943,6 +1943,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         removedJetsGamma.push_back(minIndex);
       }
 
+      
       njet = 0;
       nJet30 = 0;
       nJet30JECup = 0;
@@ -2053,7 +2054,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               passJetID = isTightPFJet_2017_v1(iJet);
           else
               cout << "WARNING! unknown jet ID '" << config_.jet_id << "'! Assuming all jets pass for now. Fix your config." << endl;
-          if(passJetID && !isFastsim) {
+          if(!passJetID && !isFastsim) {
             if (p4sCorrJets.at(iJet).pt() > 30.0) ++nJet30FailId;
             if (p4sCorrJets.at(iJet).pt() > 100.0) ++nJet100FailId;
             if (!isOverlapJetGamma) {
@@ -2104,7 +2105,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           else if (isLoosePFJet_50nsV1(iJet)) jet_id[njet] = 1;
           else jet_id[njet] = 0;
 
-          jet_puId[njet] = loosePileupJetId(iJet) ? 1 : 0;
+          jet_puId[njet] = pileupJetId(iJet, id_level_t::PUID_loose) ? 1 : 0;
 
 	  // ad-hoc filter:
 	  //  check for jets with pt > 200, mufrac > 0.5, dphi(jet,MET) > pi - 0.4
