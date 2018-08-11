@@ -6,7 +6,10 @@ import re
 import sys
 import os
 import subprocess
-import NitfyUtils
+
+sys.path.append("../Nifty")
+
+import NiftyUtils
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
@@ -25,36 +28,25 @@ simplecanvas.SetTopMargin(0.12)
 simplecanvas.SetRightMargin(0.16)
 
 if len(sys.argv) < 2: 
-    print "Which tag to use?"
+    print "Which file?"
     exit()
-runtag=sys.argv[1]
-indir="output/"+runtag
-pngdir="pngs/"+runtag
-outdir="output/"
-os.system("mkdir -p {0}".format(pngdir))
-os.system("mkdir -p {0}".format(outdir))
 
-dy_samples=["dy_ht1200to2500", "dy_ht400to600",  "dy_ht200to400", "dy_ht600to800", "dy_ht200to400", "dy_ht400to600"]    
-qcd_samples=["qcd_ht2000toInf", "qcd_ht500to700", "qcd_ht300to500", "qcd_ht700to1000", "qcd_ht1000to1500", "qcd_ht1500to2000"]
-tt_samples=["ttsl", "ttdl"]
-wj_samples=[ "wjets_ht400to600","wjets_ht200to400","wjets_ht2500toInf"]
-zinv_samples=["zinv_ht400to600","zinv_ht600to800",]
+filename = sys.argv[1]
+shortname = filename[filename.rfind("/")+1:filename.find(".")]
 
-samples = dy_samples + qcd_samples + tt_samples + wj_samples + zinv_samples
+os.system("mkdir -p output")
+os.system("mkdir -p pngs/{0}".format(shortname))
 
-filedict=dict([(sample,ROOT.TFile.Open("{0}/{1}.root".format(indir,sample))) for sample in samples])
+tfile = ROOT.TFile.Open(filename,"READ")
+names = tfile.GetKeyNames()
 
-names = filedict["ttdl"].GetKeyNames()
-
-outfile = ROOT.TFile.Open("{0}/Fshort_{1}.root".format(outdir,runtag),"RECREATE")
+outfile = ROOT.TFile.Open("output/Fshort_{}.root".format(shortname),"RECREATE")
 outfile.cd()
 
 for rawname in names:
     if rawname.find("FSR") < 0: continue
     name = rawname[1:] # Get rid of leading /
-    h_fsr = filedict[samples[0]].Get(name)
-    for sample in samples[1:]:
-        h_fsr.Add(filedict[sample].Get(name))
+    h_fsr = tfile.Get(name)
     for length in range(1,5):
         den = h_fsr.GetBinContent(length,3)
         if den == 0:
@@ -72,12 +64,11 @@ for rawname in names:
         h_fsr.SetBinError(length, 1, newerr)
     h_fsr.SetMarkerSize(1.8)
     h_fsr.Draw("text E")
-    simplecanvas.SaveAs("{0}/{1}.png".format(pngdir,name))
+    simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
     h_fsr.Write()
 
 outfile.Close()
 
-for name,f in filedict.iteritems():
-    f.Close()
+tfile.Close()
 
 print "Done"

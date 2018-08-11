@@ -2928,7 +2928,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	for (int iJet = 0; iJet < nJet30; iJet++) {
 	  const float jPhi = jet_phi[iJet];
 	  const float jEta = jet_eta[iJet];
-	  const float dr = DeltaR(jEta,track_eta[i_it],jPhi,track_phi[i_it]);
+	  const float dr = DeltaR(jEta,track_eta[ntracks],jPhi,track_phi[ntracks]);
 	  if (dr < minJetDR) {
 	    minJetDR = dr;
 	    jetIdx = iJet;
@@ -3007,7 +3007,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	// Length and categorization
 	const bool lostOuterHitsSel = track_nLostOuterHits[ntracks] >= 2;
-	const bool isP = track_nLayersWithMeasurement[ntracks] == track_nPixelLayersWithMeasurement[ntracks];
+	const bool isP = track_nLayersWithMeasurement[ntracks] == track_nPixelLayersWithMeasurement[ntracks] && lostOuterHitsSel;
 	const bool isLong = track_nLayersWithMeasurement[ntracks] >= 7;
 	const bool isM = !isP && !isLong && lostOuterHitsSel;
 	const bool isL = isLong && lostOuterHitsSel;
@@ -3045,10 +3045,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	const bool ptErrOverPt2Sel = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.001));
 	const bool ptErrOverPt2SelSTC = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.001)) * qualSTC;
-	const bool dxySel = track_dxy[ntracks] < (isP ? 0.02 : 0.01);
-	const bool dxySelSTC = track_dxy[ntracks] < (isP ? 0.02 : 0.01) * qualSTC; 
-	const bool dzSel = track_dz[ntracks] < 0.05;
-	const bool dzSelSTC = track_dz[ntracks] < 0.05 * qualSTC;
+	const bool dxySel = fabs(track_dxy[ntracks]) < (isP ? 0.02 : 0.01);
+	const bool dxySelSTC = fabs(track_dxy[ntracks]) < (isP ? 0.02 : 0.01) * qualSTC; 
+	const bool dzSel = fabs(track_dz[ntracks]) < 0.05;
+	const bool dzSelSTC = fabs(track_dz[ntracks]) < 0.05 * qualSTC;
 
 	const bool QualityST = ptErrOverPt2Sel && dxySel && dzSel;
 	const bool QualitySTC = ptErrOverPt2SelSTC && dxySelSTC && dzSelSTC;

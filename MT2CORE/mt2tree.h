@@ -1548,6 +1548,8 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("track_islongcandidate"))                  fChain->SetBranchAddress("track_islongcandidate", track_islongcandidate, &b_track_islongcandidate);
    if(bs->FindObject("track_HitSignature"))                     fChain->SetBranchAddress("track_HitSignature", track_HitSignature, &b_track_HitSignature);
    if(bs->FindObject("track_nPixelHits"))                       fChain->SetBranchAddress("track_nPixelHits", track_nPixelHits, &b_track_nPixelHits);
+   if(bs->FindObject("track_nLostOuterHits"))                   fChain->SetBranchAddress("track_nLostOuterHits", track_nLostOuterHits, &b_track_nLostOuterHits);
+   if(bs->FindObject("track_nLostInnerPixelHits"))              fChain->SetBranchAddress("track_nLostInnerPixelHits", track_nLostInnerPixelHits, &b_track_nLostInnerPixelHits);
    if(bs->FindObject("track_nLayersWithMeasurement"))           fChain->SetBranchAddress("track_nLayersWithMeasurement", track_nLayersWithMeasurement, &b_track_nLayersWithMeasurement);
    if(bs->FindObject("track_nPixelLayersWithMeasurement"))      fChain->SetBranchAddress("track_nPixelLayersWithMeasurement", track_nPixelLayersWithMeasurement, &b_track_nPixelLayersWithMeasurement);
    if(bs->FindObject("track_nearestPF_id"))                     fChain->SetBranchAddress("track_nearestPF_id", track_nearestPF_id, &b_track_nearestPF_id);
@@ -1580,7 +1582,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("track_isChargino"))                       fChain->SetBranchAddress("track_isChargino", track_isChargino, &b_track_isChargino);
    if(bs->FindObject("track_genPdgId"))                         fChain->SetBranchAddress("track_genPdgId", track_genPdgId, &b_track_genPdgId); 
    if(bs->FindObject("track_genMatchDR"))                       fChain->SetBranchAddress("track_genMatchDR", track_genMatchDR, &b_track_genMatchDR); 
-   if(bs->FindObject("track_nCharginos"))                       fChain->SetBranchAddress("nCharginos", &nCharginos, &b_nCharginos); 
+   if(bs->FindObject("nCharginos"))                             fChain->SetBranchAddress("nCharginos", &nCharginos, &b_nCharginos); 
    Notify();
 }
 

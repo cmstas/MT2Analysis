@@ -1,11 +1,16 @@
 #include "FshortLooper.h"
 
 using namespace std;
+using namespace duplicate_removal;
 
 class mt2tree;
 
-const bool recalculate = false; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
+const bool recalculate = true; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
 const float isoSTC = 6, qualSTC = 3; // change these if recalculating Fshort
+
+// turn on to apply json file to data
+const bool applyJSON = true;
+const bool blind = true;
 
 bool FshortLooper::FillHists(const vector<TH2D*> hists, const double weight, const int fill_type, const int len_index) {
   if (unlikely(len_index < 1 || len_index > 3)) return false;
@@ -18,7 +23,7 @@ bool FshortLooper::FillHists(const vector<TH2D*> hists, const double weight, con
   return true;
 }
 
-int FshortLooper::loop (TChain* ch_st, char * outtag) {
+int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
   string tag(outtag);
 
   // Book histograms
@@ -51,16 +56,43 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
   mt2tree t;
   t.Init(ch_st);
 
+  // Load the configuration and output to screen
+  config_ = GetMT2Config(string(config_tag));
+  cout << "[MT2Looper::loop] using configuration tag: " << config_tag << endl;
+  cout << "                  JSON: " << config_.json << endl;
+  cout << "                  lumi: " << config_.lumi << " fb-1" << endl;
+
+
+  if (applyJSON && config_.json != "") {
+    cout << "[MT2Looper::loop] Loading json file: " << config_.json << endl;
+    //set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
+    set_goodrun_file((config_.json).c_str());
+  }
+
   const unsigned int nEventsTree = ch_st->GetEntries();
+  int nDuplicates = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
     //    if (event % 1000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
 
     t.GetEntry(event); 
 
     //---------------------
+    // skip duplicates -- needed when running on mutiple streams in data
+    //---------------------
+    if( t.isData ) {
+      DorkyEventIdentifier id(t.run, t.evt, t.lumi);
+      if (is_duplicate(id) ){
+	++nDuplicates;
+	continue;
+      }
+    }
+
+    //---------------------
     // basic event selection and cleaning
     //---------------------
     
+    if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
+
     if (unlikely(t.nVert == 0)) {
       continue;
     }
@@ -82,10 +114,10 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
       continue;
     }
 
-    const float lumi = 35.9; // 2016
-    double weight = t.evt_scale1fb * lumi;
+    const float lumi = config_.lumi; // 2016
+    double weight = t.isData ? 1.0 : t.evt_scale1fb * lumi;
     // if these are true, assume that data trigger is prescaled JetHT trigger
-    if (t.met_pt < 250 && t.nlep == 0 && t.ht < 1000) {
+    if (!t.isData && (t.met_pt < 250 && t.nlep == 0 && t.ht < 1000) ) {
       if (t.ht < 450) weight = 1.0 / 9200.0;
       else if (t.ht < 575) weight = 1.0 / 460.6;
       else weight = 1.0 / 115.2;
@@ -100,8 +132,13 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
       t.nJet30 < 4 ? histsToFill.push_back(h_FSR_2to3njet) : histsToFill.push_back(h_FSR_gt3njet);
       t.ht < 1000 ? histsToFill.push_back(h_FSR_lt1000HT) : histsToFill.push_back(h_FSR_gt1000HT);
     }
-    else if (t.mt2 < 200) histsToFill.push_back(h_FSR_100to200MT2);
-    else histsToFill.push_back(h_FSR_gt200MT2);
+    else if (t.mt2 < 200) {
+      histsToFill.push_back(h_FSR_100to200MT2);
+    }
+    else if ( !(blind && t.isData) ) histsToFill.push_back(h_FSR_gt200MT2); // Only look at MT2 > 200 GeV in data if unblinded
+    else {
+      continue; // No need to consider this event if not filling any hists
+    }
 
     // Analysis code
 
@@ -111,29 +148,49 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
       int fillIndex = -1;
       bool isST = false, isSTC = false;
       if (recalculate) {
+
 	// Apply basic selections
-	const bool EtaPhiSel = t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk];
+	const bool EtaPhiSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]);
 	const float pt = t.track_pt[i_trk];
 	const bool ptSel = pt > 15;
 	const bool BaseSel = EtaPhiSel && ptSel;
 	
-	if (!BaseSel) continue;
+	if (!BaseSel) {
+	  if (t.track_isshort[i_trk]) {
+	    cout << "ST: " << endl;
+	  }
+	  else if (t.track_iscandidate[i_trk]) {
+	    cout << "STC: " << endl;
+	  }
+	  else continue;
+	  cout << "EtaPhi: " << EtaPhiSel << endl;
+	  continue;
+	}
 	
 	FillHists(histsToFill,weight,3); // No length yet, just filling inclusive tracks
 	
 	// Length and category
-	const int Nlayers = t.track_nLayersWithMeasurement[i_trk];
+	// Length and categorization
 	const bool lostOuterHitsSel = t.track_nLostOuterHits[i_trk] >= 2;
-	const bool PixEqTracker = t.track_nPixelLayersWithMeasurement[i_trk] == Nlayers;
-	const bool PixLtTracker = t.track_nPixelLayersWithMeasurement[i_trk] < Nlayers;
-	const bool shortSel = t.track_nLayersWithMeasurement[i_trk] < 7;
-	const bool isP = PixEqTracker;
-	const bool isM = PixLtTracker && shortSel;
-	const bool isL = PixLtTracker && !shortSel;
-	const bool isShort = (isP || isM || isL) && lostOuterHitsSel;     
+	const int nLayers = t.track_nLayersWithMeasurement[i_trk];
+	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[ntracks] && lostOuterHitsSel;
+	const bool isLong = nLayers >= 7;
+	const bool isM = !isP && !isLong && lostOuterHitsSel;
+	const bool isL = isLong && lostOuterHitsSel;
+	const bool isShort = isP || isM || isL;
+	if (!isShort) {
+	  if (t.track_isshort[i_trk]) {
+	    cout << "ST: " << endl;
+	  }
+	  else if (t.track_iscandidate[i_trk]) {
+	    cout << "STC: " << endl;
+	  }
+	  else continue;
+	  cout << "LOH: " << t.track_nLostOuterHits[i_trk] << endl;
+	  cout << "NL: " << nLayers << endl;
+	  continue;
+	}
 
-	if (!isShort) continue;
-	
 	fillIndex = isP ? 1 : (isM ? 2 : 3);
 	
 	const float nearestPF_DR = t.track_nearestPF_DR[i_trk];
@@ -148,8 +205,20 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 	const bool recoVeto = minrecodr < 0.1;
 	const bool PassesRecoVeto = !recoVeto && nearestPFSel && !t.track_isLepOverlap[i_trk];
 	
-	if (!PassesRecoVeto) continue;
-	
+	if (!PassesRecoVeto) {
+	  if (t.track_isshort[i_trk]) {
+	    cout << "ST: " << endl;
+	  }
+	  else if (t.track_iscandidate[i_trk]) {
+	    cout << "STC: " << endl;
+	  }
+	  else continue;
+	  cout << "LepOverlap: " << t.track_isLepOverlap[i_trk] << endl;
+	  cout << "Reco<0.1: " << recoVeto << endl;
+	  cout << "nearestPF: " << nearestPFSel << endl;
+	  continue;
+	}
+
 	// Isolation
 	const float niso = t.track_neuIso0p05[i_trk];
 	const bool NeuIso0p05Sel = niso < 10;
@@ -165,11 +234,15 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 	const bool relisoSelSTC = reliso < 0.2 * isoSTC;
 	const bool PassesFullIsoSel = NeuIso0p05Sel && NeuRelIso0p05Sel && isoSel && relisoSel;
 	const bool PassesFullIsoSelSTC = NeuIso0p05SelSTC && NeuRelIso0p05SelSTC && isoSelSTC && relisoSelSTC;
+
+	if (!PassesFullIsoSelSTC) {
+	  continue;
+	}
 	
 	// Quality
 	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= 2;
 	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= 3;
-	const bool pixLayersSel4 = Nlayers > 4 ? pixLayersSelLoose : pixLayersSelTight; // Apply 2 layer selection to tracks with 5+ layers
+	const bool pixLayersSel4 = nLayers > 4 ? pixLayersSelLoose : pixLayersSelTight; // Apply 2 layer selection to tracks with 5+ layers
 	
 	const int lostInnerHits = t.track_nLostInnerPixelHits[i_trk];
 	const bool lostInnerHitsSel = lostInnerHits == 0;
@@ -184,15 +257,15 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 	// Assume long track
 	bool pterrSel = pterrSelTight;
 	bool pterrSelSTC = pterrSelTightSTC;
-	if (PixEqTracker) {pterrSel = pterrSelLoose; pterrSelSTC = pterrSelLooseSTC;}
-	else if (Nlayers < 7) {pterrSel = pterrSelMedium; pterrSelSTC = pterrSelMediumSTC;}
+	if (isP) {pterrSel = pterrSelLoose; pterrSelSTC = pterrSelLooseSTC;}
+	else if (nLayers < 7) {pterrSel = pterrSelMedium; pterrSelSTC = pterrSelMediumSTC;}
 	const float dxy = fabs(t.track_dxy[i_trk]);
 	const bool dxySelLoose = dxy < 0.02;
 	const bool dxySelLooseSTC = dxy < 0.02 * qualSTC;
 	const bool dxySelTight = dxy < 0.01;
 	const bool dxySelTightSTC = dxy < 0.01 * qualSTC;
-	const bool dxySel = PixEqTracker ? dxySelLoose : dxySelTight;
-	const bool dxySelSTC = PixEqTracker ? dxySelLooseSTC : dxySelTightSTC;
+	const bool dxySel = isP ? dxySelLoose : dxySelTight;
+	const bool dxySelSTC = isP ? dxySelLooseSTC : dxySelTightSTC;
 	const float dz = fabs(t.track_dz[i_trk]);
 	const bool dzSel = dz < 0.05;
 	const bool dzSelSTC = dz < 0.05*qualSTC;
@@ -201,12 +274,16 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 	const bool QualityTrackSTCBase =  lostInnerHitsSel && pterrSelSTC && isHighPurity && dxySelSTC && dzSelSTC;
 	const bool isQualityTrack = pixLayersSel4 && QualityTrackBase;
 	const bool isQualityTrackSTC = pixLayersSel4 && QualityTrackSTCBase;
+
+	if (!isQualityTrackSTC) {
+	  continue;
+	}
 	
 	// Full Short Track
 	isST = PassesFullIsoSel && isQualityTrack;
 
-	// Candidate (loosened isolation, quality)
-	isSTC = PassesFullIsoSelSTC && isQualityTrackSTC && !isST;
+	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
+	isSTC = !isST;
       }
       else {
 	if (t.track_iscandidate[i_trk]) {
@@ -223,7 +300,9 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
       if (isSTC) {
 	FillHists(histsToFill,weight,2,fillIndex);
       }
-      if (isST) FillHists(histsToFill,weight,1,fillIndex);
+      if (isST) {
+	FillHists(histsToFill,weight,1,fillIndex);
+      }
 
 
     } // Track loop
@@ -235,7 +314,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
   // Calculate Fshort for this particular sample
   for (vector<TH2D*>::iterator hist = allhists.begin(); hist != allhists.end(); hist++) {
     TH2D* h = *hist;
-    for (int len = 0; len < 4; len++) {
+    for (int len = 1; len < 5; len++) {
       double den = h->GetBinContent((double) len, 3); // STC count
       if (den == 0.0) {
 	h->SetBinContent((double) len, 1.0, -1.0);
@@ -254,6 +333,10 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
     }
   }
 
+  cout << "Processed " << nEventsTree << " events." << endl;
+  cout << nDuplicates << " duplicates skipped." << endl;
+
+
   cout << "About to write" << endl;
 
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
@@ -267,8 +350,8 @@ int FshortLooper::loop (TChain* ch_st, char * outtag) {
 
 int main (int argc, char ** argv) {
 
-  if (argc < 3) {
-    cout << "Usage: ./FshortLooper.exe <outtag> <infile>" << endl;
+  if (argc < 4) {
+    cout << "Usage: ./FshortLooper.exe <outtag> <infile> <config>" << endl;
     return 1;
   }
 
@@ -276,7 +359,7 @@ int main (int argc, char ** argv) {
   ch->Add(argv[2]);
 
   FshortLooper * fsl = new FshortLooper();
-  fsl->loop(ch,argv[1]);
+  fsl->loop(ch,argv[1],argv[3]);
   return 0;
 }
 
