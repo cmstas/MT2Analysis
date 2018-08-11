@@ -11,7 +11,7 @@ COPYDIRBASE=$2
 # UNIVERSE="grid"
 UNIVERSE="vanilla"
 EXE="wrapper.sh"
-INPUT="wrapper.sh, job_input/input.tar.gz"
+INPUT="wrapper.sh, job_input/input.tar.xz"
 # can add other US sites here if desired
 SITE="T2_US_UCSD"
 SUBMITLOGDIR="${PWD}/submit_logs"
@@ -38,13 +38,6 @@ fi
 #
 # prepare input sandbox
 #
-
-# DIR=$PWD
-# rm ${DIR}/job_input/input.*
-#printenv | grep -v PS1 | grep -v printenv | awk '{print "export "$1}' > ${DIR}/job_input/setupenv.sh
-# tar -hcf ${DIR}/job_input/input.tar job_input/*
-# gzip ${DIR}/job_input/input.tar
-# cd ${DIR}
 
 COPYDIR=/hadoop/cms/store/user/${USERNAME}/mt2babies/${COPYDIRBASE}
 echo "[writeConfig] running on dataset ${DATADIR}"

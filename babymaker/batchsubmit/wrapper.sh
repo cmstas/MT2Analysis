@@ -72,7 +72,7 @@ echo "[wrapper] current directory is:"
 pwd
 
 echo "[wrapper] extracting input sandbox"
-tar -zxf input.tar.gz
+tar -xJf input.tar.xz
 
 #source job_input/setupenv.sh
 #printenv

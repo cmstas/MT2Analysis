@@ -4,21 +4,31 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-10-02_2016fullYear_17Jul2018"
+TAG="V00-10-03_2016fullYear_17Jul2018"
 
 #
 # DATA
 #
 
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/JetHT_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016B_JetHT_17Jul2018-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MET_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17            ${TAG}_data_Run2016B_MET_17Jul2018-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/HTMHT_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016B_MET_17Jul2018-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/DoubleMuon_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17     ${TAG}_data_Run2016B_DoubleMuon_17Jul2018-v1
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SingleMuon_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17     ${TAG}_data_Run2016B_SingleMuon_17Jul2018-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SingleElectron_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17 ${TAG}_data_Run2016B_EGamma_17Jul2018-v1
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SinglePhoton_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17   ${TAG}_data_Run2016B_EGamma_17Jul2018-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/DoubleEG_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17       ${TAG}_data_Run2016B_EGamma_17Jul2018-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MuonEG_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17         ${TAG}_data_Run2016B_MuonEG_17Jul2018-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/JetHT_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016B_JetHT_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MET_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17            ${TAG}_data_Run2016B_MET_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/HTMHT_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016B_MET_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/DoubleMuon_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17     ${TAG}_data_Run2016B_DoubleMuon_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SingleMuon_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17     ${TAG}_data_Run2016B_SingleMuon_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SingleElectron_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17 ${TAG}_data_Run2016B_EGamma_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SinglePhoton_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17   ${TAG}_data_Run2016B_EGamma_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/DoubleEG_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17       ${TAG}_data_Run2016B_EGamma_17Jul2018_ver1-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MuonEG_Run2016B-17Jul2018_ver1-v1_MINIAOD_CMS4_V09-04-17         ${TAG}_data_Run2016B_MuonEG_17Jul2018_ver1-v1
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/JetHT_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016B_JetHT_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MET_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17            ${TAG}_data_Run2016B_MET_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/HTMHT_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016B_MET_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/DoubleMuon_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17     ${TAG}_data_Run2016B_DoubleMuon_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SingleMuon_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17     ${TAG}_data_Run2016B_SingleMuon_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SingleElectron_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17 ${TAG}_data_Run2016B_EGamma_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/SinglePhoton_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17   ${TAG}_data_Run2016B_EGamma_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/DoubleEG_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17       ${TAG}_data_Run2016B_EGamma_17Jul2018_ver2-v1
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MuonEG_Run2016B-17Jul2018_ver2-v1_MINIAOD_CMS4_V09-04-17         ${TAG}_data_Run2016B_MuonEG_17Jul2018_ver2-v1
 
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/JetHT_Run2016C-17Jul2018-v1_MINIAOD_CMS4_V09-04-17          ${TAG}_data_Run2016C_JetHT_17Jul2018-v1
 ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2016_94x/MET_Run2016C-17Jul2018-v1_MINIAOD_CMS4_V09-04-17            ${TAG}_data_Run2016C_MET_17Jul2018-v1

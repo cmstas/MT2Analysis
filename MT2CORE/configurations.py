@@ -228,6 +228,10 @@ MT2Config_defs["mc_94x_Fall17"] = {
                   ],
 }
 
+MT2Config_defs["mc_101x_Spring18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_101x_Spring18"]["pu_weights_file"] = ""
+
+
 MT2Config_defs["mc_80x_Moriond17"] = {
     "lumi" : 35.92,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
