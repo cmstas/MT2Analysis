@@ -3005,7 +3005,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  // Basic selections
 	  const bool DeadCAL = track_DeadECAL[ntracks] || track_DeadHCAL[ntracks];
 	  const bool ptSel = track_pt[ntracks] > 15;
-	  const bool BaseSel = !DeadCAL && ptSel;
+	  const bool etaSel = fabs(track_eta[ntracks]) < 2.4;
+	  const bool BaseSel = !DeadCAL && etaSel && ptSel;
 
 	  if (!BaseSel) {ntracks++; continue;}
 	  

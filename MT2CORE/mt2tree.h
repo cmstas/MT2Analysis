@@ -198,6 +198,12 @@ public :
    Int_t           HLT_PFHT680_Prescale = 0;   
    Int_t           HLT_PFHT780_Prescale = 0;   
    Int_t           HLT_PFHT890_Prescale = 0;   
+   Int_t           HLT_PFHT125_Prescale = 0;   
+   Int_t           HLT_PFHT200_Prescale = 0;   
+   Int_t           HLT_PFHT300_Prescale = 0;   
+   Int_t           HLT_PFHT350_Prescale = 0;   
+   Int_t           HLT_PFHT475_Prescale = 0;   
+   Int_t           HLT_PFHT600_Prescale = 0; 
    Int_t           HLT_DiCentralPFJet70_PFMET120 = 0;   
    Int_t           HLT_DiCentralPFJet55_PFMET110 = 0;   
    Int_t           nlep;
@@ -717,6 +723,12 @@ public :
    TBranch        *b_HLT_PFHT680_Prescale;   //!
    TBranch        *b_HLT_PFHT780_Prescale;   //!
    TBranch        *b_HLT_PFHT890_Prescale;   //!
+   TBranch        *b_HLT_PFHT125_Prescale;   //!
+   TBranch        *b_HLT_PFHT200_Prescale;   //!
+   TBranch        *b_HLT_PFHT300_Prescale;   //!
+   TBranch        *b_HLT_PFHT350_Prescale;   //!
+   TBranch        *b_HLT_PFHT475_Prescale;   //!
+   TBranch        *b_HLT_PFHT600_Prescale;   //!
    TBranch        *b_HLT_DiCentralPFJet70_PFMET120;   //!
    TBranch        *b_HLT_DiCentralPFJet55_PFMET110;   //!
    TBranch        *b_nlep;   //!
@@ -1271,6 +1283,12 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("HLT_PFHT680_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT680_Prescale", &HLT_PFHT680_Prescale, &b_HLT_PFHT680_Prescale);
    if(bs->FindObject("HLT_PFHT780_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT780_Prescale", &HLT_PFHT780_Prescale, &b_HLT_PFHT780_Prescale);
    if(bs->FindObject("HLT_PFHT890_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT890_Prescale", &HLT_PFHT890_Prescale, &b_HLT_PFHT890_Prescale);
+   if(bs->FindObject("HLT_PFHT125_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale, &b_HLT_PFHT125_Prescale);
+   if(bs->FindObject("HLT_PFHT200_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale, &b_HLT_PFHT200_Prescale);
+   if(bs->FindObject("HLT_PFHT300_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale, &b_HLT_PFHT300_Prescale);
+   if(bs->FindObject("HLT_PFHT350_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT350_Prescale", &HLT_PFHT350_Prescale, &b_HLT_PFHT350_Prescale);
+   if(bs->FindObject("HLT_PFHT475_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT475_Prescale", &HLT_PFHT475_Prescale, &b_HLT_PFHT475_Prescale);
+   if(bs->FindObject("HLT_PFHT600_Prescale"))                   fChain->SetBranchAddress("HLT_PFHT600_Prescale", &HLT_PFHT600_Prescale, &b_HLT_PFHT600_Prescale);
    if(bs->FindObject("HLT_DiCentralPFJet70_PFMET120"))          fChain->SetBranchAddress("HLT_DiCentralPFJet70_PFMET120", &HLT_DiCentralPFJet70_PFMET120, &b_HLT_DiCentralPFJet70_PFMET120);
    if(bs->FindObject("HLT_DiCentralPFJet55_PFMET110"))          fChain->SetBranchAddress("HLT_DiCentralPFJet55_PFMET110", &HLT_DiCentralPFJet55_PFMET110, &b_HLT_DiCentralPFJet55_PFMET110);
    if(bs->FindObject("nlep"))                                   fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
