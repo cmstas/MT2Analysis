@@ -676,7 +676,7 @@ void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/outp
   TFile* f_gq = new TFile(Form("%s/qcdplusgjet.root",input_dir.c_str())); //qcd+gjets file
   TFile* f_g = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str())); //gjet file
   TFile* f_q = new TFile(Form("%s/qcd_ht.root",input_dir.c_str())); //qcd file
-  TFile* f_z = new TFile(Form("%s/zinvFromGJ.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
+  TFile* f_z = new TFile(Form("%s/zinvFromDY.root",input_dir.c_str())); //zinv pred from ZinvMaker.C, contains ratio
   TFile* f_zOrig = new TFile(Form("%s/zinv_ht.root",input_dir.c_str())); //zinv file out of the box
   if(f_g->IsZombie() || f_q->IsZombie() || f_gq->IsZombie() || f_data->IsZombie() || f_z->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;

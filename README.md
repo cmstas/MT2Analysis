@@ -33,6 +33,17 @@ make
 ## Executing main analysis
 Starting from the (skimmed) babies:
 
+### Run QCDLooper to produce rphi estimate files
+Go to `QCDLooper` and modify `do.sh` to point towards the data and mc babies you wish to use. The standard skims will not work here, as the rphi estimate needs low MT2 events. Worst case, you can use completely unskimmed babies, but this takes a long time.
+``` bash
+. do.sh
+```
+
+TODO: Modify QCDLooper to run on any of 2016, 2017, or 2018 intelligently. It currently (9 Aug 2018) runs with 2017 settings with 2016 commented out.
+
+Now, follow the instructions in QCDLooper and scripts/qcdEstimate, then edit `string rphi_file_name` in `MT2Looper/MT2Looper.cc` point to your qcdHistos.root output.
+
+
 ### Run MT2Looper to produce root histogram files
 Go to `MT2Looper` and modify `INDIR`, `OUTDIR`, and `Samples` in `do.sh`, then do:
 ``` bash
