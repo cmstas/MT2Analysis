@@ -10,13 +10,13 @@ import os
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
-verbose = True # Print more error messages
+verbose = False # Print more error messages
 suppressZeroBins = True # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
 suppressZeroTRs = False # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
 doSuperSignalRegions = False # Print cards for super signal regions
 dummy_alpha = 1
 uncorrelatedZGratio = False 
-fourNuisancesPerBinZGratio = True
+fourNuisancesPerBinZGratio = False
 integratedZinvEstimate = True # Use MC to distribute counts in low-stats MT2 bins
 doDummySignalSyst = False 
 subtractSignalContam = True # For T1tttt and T2tt, adjust signal counts for signal contribution to CRSL
@@ -30,6 +30,10 @@ suppressUHmt2bin = True # The first MT2 bin in UH regions has a large QCD contri
 last_zinv_ratio = 0.5 
 last_lostlep_transfer = 2.0
 last_zinvDY_transfer = 2.0
+
+def SetLastZinvDYTransfer( valToSet ):
+    global last_zinvDY_transfer
+    last_zinvDY_transfer = valToSet
 
 # We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
 n_zero = 1e-3
@@ -57,7 +61,7 @@ bmark.Start("benchmark")
 # These are typically in MT2looper/output/some_directory
 # See makeDataDrivenEstimates.sh
 f_lostlep = ROOT.TFile("{0}/lostlepFromCRs.root".format(indir))
-f_zinv = ROOT.TFile("{0}/zinvFromGJ.root".format(indir))
+if not doZinvFromDY: f_zinv = ROOT.TFile("{0}/zinvFromGJ.root".format(indir))
 f_zinvDY = ROOT.TFile("{0}/zinvFromDY.root".format(indir))
 f_zgratio = ROOT.TFile("{0}/doubleRatio.root".format(indir))
 f_purity = ROOT.TFile("{0}/purity.root".format(indir))
@@ -68,7 +72,7 @@ if (doData): f_data = ROOT.TFile("{0}/data_Run2016.root".format(indir))
 if f_lostlep.IsZombie():
     print "lostlepFromCRs.root does not exist\n"
     exit(1)
-if f_zinv.IsZombie():
+if not doZinvFromDY and f_zinv.IsZombie():
     print "zinvFromGJ.root does not exist\n"
     exit(1)
 if f_zinvDY.IsZombie():
@@ -97,7 +101,7 @@ def makeTemplate(directory,imt2):
     if verbose: print "Forming template for region {0}, bin {1}\n".format(directory,imt2)
     dir_sig = f_sig.Get(directory)
     dir_lostlep = f_lostlep.Get(directory)
-    dir_zinv = f_zinv.Get(directory)
+    if not doZinvFromDY: dir_zinv = f_zinv.Get(directory)
     dir_zinvDY = f_zinvDY.Get(directory)
     dir_zgratio = f_zgratio.Get(directory)
     dir_purity = f_purity.Get(directory)
@@ -426,7 +430,7 @@ def makeTemplate(directory,imt2):
     n_mt2bins = 1
     h_zinv = None
     # If they exist, pull zinv parameters from histograms. Else, use default values (mostly 0s).
-    if (not dir_zinv == None):
+    if not doZinvFromDY and not dir_zinv == None:
         h_zinv = f_zinv.Get(fullhistname)
         if (not h_zinv == None):
             n_zinv = h_zinv.GetBinContent(imt2)
@@ -724,7 +728,7 @@ def makeTemplate(directory,imt2):
             zinvDY_alpha = 10.0
             n_zinvDY = n_zinvDY_cr * zinvDY_alpha
     if (zinvDY_alpha > 0.0):
-        last_zinvDY_transfer = zinvDY_alpha
+        SetLastZinvDYTransfer(zinvDY_alpha)
     elif (n_zinvDY == 0):
         zinvDY_alpha = 0
     else:
@@ -808,10 +812,10 @@ def makeTemplate(directory,imt2):
         if (isSignalWithLeptons):
             n_syst += 1
 
-    if (njets_LOW == 1): n_syst += 2
+    if njets_LOW == 1: n_syst += 2
     else: n_syst += 4
 
-    if (doZinvFromDY):
+    if doZinvFromDY:
         n_bkg = n_lostlep+n_zinvDY+n_qcd
     else:
         n_bkg = n_lostlep_n_zinv+n_qcd
@@ -1192,6 +1196,7 @@ skip = "srbase"
 # Loop through every directory in the signal file
 for key in iterator:
     directory = key.GetTitle()
+    if verbose: print directory
     # If the directory name contains "srbase", skip it
     if directory.find(skip) >= 0: continue
     # If the directory name contains "sr" but not "srbase", process it
