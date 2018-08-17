@@ -31,6 +31,10 @@ last_zinv_ratio = 0.5
 last_lostlep_transfer = 2.0
 last_zinvDY_transfer = 2.0
 
+def SetLastLostlepTransfer( valToSet ):
+    global last_lostlep_transfer
+    last_lostlep_transfer = valToSet
+
 def SetLastZinvDYTransfer( valToSet ):
     global last_zinvDY_transfer
     last_zinvDY_transfer = valToSet
@@ -659,7 +663,7 @@ def makeTemplate(directory,imt2):
             n_lostlep = n_lostlep_cr * lostlep_alpha
     # Update last_lostlep_transfer if this value is a good one.
     if (lostlep_alpha > 0.0):
-        last_lostlep_transfer = lostlep_alpha 
+        SetLastLostlepTransfer(lostlep_alpha)
     # If the SR lostlep count prediction is 0, set alpha to 0 for now (in case it was somehow negative). We'll adjust this later.
     elif (n_lostlep == 0):
         lostlep_alpha = 0
