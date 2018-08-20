@@ -74,19 +74,38 @@ for rawname in names:
     elif name.find("mt2") > 0:
         h_mt2 = tfile.Get(name)
         h_mt2.SetLineWidth(3)
+        h_mt2.SetMinimum(0)
         h_mt2.SetTitle(h_mt2.GetTitle()+";M_{T2} (GeV);Count")
         h_mt2.Draw()
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
 
-mt2_STC_L=tfile.Get("h_mt2_STC_L")
-mt2_ST_L=tfile.Get("h_mt2_ST_L")
-
-mt2_ST_L.Divide(mt2_STC_L)
-mt2_ST_L.SetTitle("f_{short} by M_{T2}, L Track;M_{T2} (GeV);f_{short}")
-mt2_ST_L.GetXaxis().SetRange(1,14)
-mt2_ST_L.SetMinimum(0)
-mt2_ST_L.Draw()
-simplecanvas.SaveAs("pngs/{0}/fs_by_mt2_L.png".format(shortname))
+for length in ["P","M","L"]:
+    mt2_STC=tfile.Get("h_mt2_STC_{}".format(length))
+    mt2_ST=tfile.Get("h_mt2_ST_{}".format(length))
+    
+    mt2_STC_23=tfile.Get("h_mt2_STC_{}_23".format(length))
+    mt2_ST_23=tfile.Get("h_mt2_ST_{}_23".format(length))
+    
+    mt2_STC_4=tfile.Get("h_mt2_STC_{}_4".format(length))
+    mt2_ST_4=tfile.Get("h_mt2_ST_{}_4".format(length))
+    
+    mt2_ST.Divide(mt2_STC)
+    mt2_ST.SetTitle("f_{{short}} by M_{{T2}}, {} Track;M_{{T2}} (GeV);f_{{short}}".format(length))
+    mt2_ST.SetMinimum(0)
+    mt2_ST.Draw()
+    simplecanvas.SaveAs("pngs/{0}/fs_by_mt2_{1}.png".format(shortname,length))
+    
+    mt2_ST_23.Divide(mt2_STC_23)
+    mt2_ST_23.SetTitle("f_{{short}} by M_{{T2}}, {} Track;M_{{T2}} (GeV);f_{{short}}".format(length))
+    mt2_ST_23.SetMinimum(0)
+    mt2_ST_23.Draw()
+    simplecanvas.SaveAs("pngs/{0}/fs_by_mt2_{1}_23.png".format(shortname,length))
+    
+    mt2_ST_4.Divide(mt2_STC_4)
+    mt2_ST_4.SetTitle("f_{{short}} by M_{{T2}}, {} Track;M_{{T2}} (GeV);f_{{short}}".format(length))
+    mt2_ST_4.SetMinimum(0)
+    mt2_ST_4.Draw()
+    simplecanvas.SaveAs("pngs/{0}/fs_by_mt2_{1}_4.png".format(shortname,length))
 
 outfile.Close()
 

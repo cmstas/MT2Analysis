@@ -91,12 +91,18 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
   TH2D* h_FSR_gt1000HT_4 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt1000HT_4");
   TH2D* h_FSR_lt1000HT_4 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_lt1000HT_4");
 
+  TH2D* h_FSR_4to6njet = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_4to6njet");
+  TH2D* h_FSR_gt6njet = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt6njet");
+  TH2D* h_FSR_100to200MT2_46 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_100to200MT2_46");
+  TH2D* h_FSR_100to200MT2_7 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_100to200MT2_7");
+
   //vector<TH2D*> fsrhists = {h_FSR_60to100MT2, h_FSR_100to200MT2, h_FSR_gt200MT2, h_FSR_gt0p3dphi, h_FSR_lt0p3dphi, h_FSR_0nlep, h_FSR_gt0nlep, h_FSR_2to3njet, h_FSR_gt3njet, h_FSR_lt1000HT, h_FSR_gt1000HT};
 
   vector<TH2D*> fsrhists = {h_FSR_60to100MT2, h_FSR_2to3njet, h_FSR_gt3njet, 
 			    h_FSR_100to200MT2, h_FSR_100to200MT2_23, h_FSR_100to200MT2_4, 
 			    h_FSR_gt200MT2, h_FSR_gt200MT2_23, h_FSR_gt200MT2_4,
-			    h_FSR_lt1000HT, h_FSR_gt1000HT, h_FSR_lt1000HT_23, h_FSR_gt1000HT_4, h_FSR_lt1000HT_23, h_FSR_gt1000HT_4};
+			    h_FSR_lt1000HT, h_FSR_gt1000HT, h_FSR_lt1000HT_23, h_FSR_lt1000HT_4, h_FSR_gt1000HT_23, h_FSR_gt1000HT_4,
+			    h_FSR_4to6njet, h_FSR_gt6njet, h_FSR_100to200MT2_46, h_FSR_100to200MT2_7};
 
   vector<TH1D*> mt2hists =  { h_mt2_ST_P, h_mt2_ST_M, h_mt2_ST_L, h_mt2_STC_P, h_mt2_STC_M, h_mt2_STC_L,
 			      h_mt2_ST_P_23, h_mt2_ST_M_23, h_mt2_ST_L_23, h_mt2_STC_P_23, h_mt2_STC_M_23, h_mt2_STC_L_23,
@@ -186,8 +192,50 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
       continue;
     }
 
+    // MET Filters
+    if (config_.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
+    if (config_.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+    if (config_.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+    if (config_.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+    if (config_.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+    if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+    if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+    if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+    if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+    if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+    
+    // Not applied in MT2Looper
+    // if (!t.Flag_METFilters) continue;
+    // if (!t.Flag_trkPOG_manystripclus53X) continue;
+    // if (!t.Flag_ecalLaserCorrFilter) continue;
+    // if (!t.Flag_trkPOG_toomanystripclus53X) continue;
+    // if (!t.Flag_hcalLaserEventFilter) continue;
+    // if (!t.Flag_trkPOG_logErrorTooManyClusters) continue;
+    // if (!t.Flag_trkPOG_Filters) continue;
+    // if (!t.Flag_trackingFailureFilter) continue;
+    // if (!t.Flag_CSCTightHaloFilter) continue;
+    // if (!t.Flag_CSCTightHalo2015Filter) continue;
+
+    // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
+    if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
+      cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
+      continue;
+    }
+    
+    // catch events with unphysical jet pt
+    if(t.jet_pt[0] > 13000.){
+      cout << endl << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
+      continue;
+    }
+
+
     // Triggers
-    bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
+    //    bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
+    bool passPrescaleTrigger = false;
     bool passUnPrescaleTrigger = t.HLT_PFHT900 || t.HLT_PFJet450;
     bool passMetTrigger = t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
     
@@ -218,12 +266,26 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	histsToFill.push_back(h_FSR_gt3njet);
 	t.ht < 1000 ? histsToFill.push_back(h_FSR_lt1000HT_4) : histsToFill.push_back(h_FSR_gt1000HT_4);
       }
+
+      if (t.nJet30 >= 4 && t.nJet30 <= 6) {
+	histsToFill.push_back(h_FSR_4to6njet);
+      } else if (t.nJet30 >= 7) {
+	histsToFill.push_back(h_FSR_gt6njet);
+      }
+
       t.ht < 1000 ? histsToFill.push_back(h_FSR_lt1000HT) : histsToFill.push_back(h_FSR_gt1000HT);
     }
     // Validation Region
     else if (t.mt2 < 200) {
       histsToFill.push_back(h_FSR_100to200MT2);
       t.nJet30 < 4 ? histsToFill.push_back(h_FSR_100to200MT2_23) : histsToFill.push_back(h_FSR_100to200MT2_4);
+
+      if (t.nJet30 >= 4 && t.nJet30 <= 6) {
+	histsToFill.push_back(h_FSR_100to200MT2_46);
+      } else if (t.nJet30 >= 7) {
+	histsToFill.push_back(h_FSR_100to200MT2_7);
+      }
+
     }
     // Signal Region
     else if ( !(blind && t.isData) ) {
@@ -248,7 +310,9 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]);
 	const float pt = t.track_pt[i_trk];
 	const bool ptSel = pt > 15;
-	const bool etaSel = fabs(t.track_eta[i_trk]) < 2.4;
+	const float absEta = fabs(t.track_eta[i_trk]);
+	//	const bool etaSel = absEta < 2.4 && !( (absEta < 0.35 && absEta > 0.15) || (absEta < 1.65 && absEta > 1.42) || (absEta < 1.85 && absEta > 1.55) );
+	const bool etaSel = absEta < 2.4 && !(absEta < 1.65 && absEta > 1.42);
 	const bool BaseSel = CaloSel && ptSel && etaSel;
 	
 	if (!BaseSel) {
@@ -357,11 +421,34 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	  continue;
 	}
 	
+	
 	// Full Short Track
 	isST = PassesFullIsoSel && isQualityTrack;
 
 	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
 	isSTC = !isST;
+
+	const bool isInHotspot = 
+	  ((t.track_eta[i_trk] < -2.1 && t.track_eta[i_trk] > -2.4) && (t.track_phi[i_trk] < -1.2 && t.track_phi[i_trk] > -1.6)) 
+	  || ( (t.track_eta[i_trk] < -1.9 && t.track_eta[i_trk] > -2.2) && (t.track_phi[i_trk] < -2.2 && t.track_phi[i_trk] > -2.6) );
+	
+	if (isSTC && isInHotspot) {
+	  cout << "HOTSPOT: STC " << t.run << ":" << t.lumi << ":" << t.evt;
+	  continue;
+	} 
+	else if (isST && isInHotspot) {
+	  cout << "HOTSPOT: ST " << t.run << ":" << t.lumi << ":" << t.evt;
+	  continue;
+	} 
+
+
+	if (isST && isL) {
+	  cout << "Long ST: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	}
+	if (isSTC && isL) {
+	  cout << "Long STC: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	}
+	
       }
       else {
 	if (t.track_iscandidate[i_trk]) {
@@ -419,7 +506,6 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	  }
 	}
       }
-
 
     } // Track loop
 

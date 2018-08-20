@@ -13,7 +13,8 @@ const bool applyJSON = true;
 const bool blind = true;
 
 //TFile FshortFile("Fshort_data_2016.root");
-TFile FshortFile("Fshort_data_2016_FullSelec.root");
+//TFile FshortFile("Fshort_data_2016_FullSelec.root");
+TFile FshortFile("Fshort_data_2016_Filters.root");
 TH1D* h_fs = ((TH2D*) FshortFile.Get("h_FSR_60to100MT2"))->ProjectionX("h_fs",1,1);
 TH1D* h_fs_Nj23 = ((TH2D*) FshortFile.Get("h_FSR_2to3njet"))->ProjectionX("h_fs_2to3njet",1,1);
 TH1D* h_fs_Nj4 = ((TH2D*) FshortFile.Get("h_FSR_gt3njet"))->ProjectionX("h_fs_gt3njet",1,1);
@@ -147,6 +148,34 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, char* config_tag) {
       continue;
     }
       
+    // MET Filters
+    if (config_.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
+    if (config_.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+    if (config_.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+    if (config_.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+    if (config_.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+    if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+    if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+    if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+    if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+    if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+
+    // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
+    if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
+      cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
+      continue;
+    }
+    
+    // catch events with unphysical jet pt
+    if(t.jet_pt[0] > 13000.){
+      cout << endl << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
+      continue;
+    }
+
     // Triggers
     bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
     bool passUnPrescaleTrigger = t.HLT_PFHT900 || t.HLT_PFJet450;
@@ -255,7 +284,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, char* config_tag) {
 	const bool CaloSel = ! (t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]);
 	const float pt = t.track_pt[i_trk];
 	const bool ptSel = pt > 15;
-	const bool etaSel = fabs(t.track_eta[i_trk]) < 2.4;
+	const float absEta = fabs(t.track_eta[i_trk]);
+	const bool etaSel = absEta < 2.4 && !(absEta < 1.65 && absEta > 1.42);
+	//	const bool etaSel = absEta < 2.4 && !( (absEta < 0.35 && absEta > 0.15) || (absEta < 1.65 && absEta > 1.42) || (absEta < 1.85 && absEta > 1.55) );
 	const bool BaseSel = CaloSel && ptSel && etaSel;
 	
 	if (!BaseSel) continue;
@@ -353,6 +384,19 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, char* config_tag) {
 
 	// Candidate (loosened isolation, quality)
 	const bool isSTC = !isST;
+
+		const bool isInHotspot = 
+	  ((t.track_eta[i_trk] < -2.1 && t.track_eta[i_trk] > -2.4) && (t.track_phi[i_trk] < -1.2 && t.track_phi[i_trk] > -1.6)) 
+	  || ( (t.track_eta[i_trk] < -1.9 && t.track_eta[i_trk] > -2.2) && (t.track_phi[i_trk] < -2.2 && t.track_phi[i_trk] > -2.6) );
+	
+	if (isSTC && isInHotspot) {
+	  cout << "HOTSPOT: STC " << t.run << ":" << t.lumi << ":" << t.evt;
+	  continue;
+	} 
+	else if (isST && isInHotspot) {
+	  cout << "HOTSPOT: ST " << t.run << ":" << t.lumi << ":" << t.evt;
+	  continue;
+	} 
 
 	if (isSTC) {
 	  switch(lenIndex) {
