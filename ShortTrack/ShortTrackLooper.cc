@@ -14,7 +14,9 @@ const bool blind = true;
 
 //TFile FshortFile("Fshort_data_2016.root");
 //TFile FshortFile("Fshort_data_2016_FullSelec.root");
-TFile FshortFile("Fshort_data_2016_Filters.root");
+//TFile FshortFile("Fshort_data_2016_Filters.root");
+TFile FshortFile("Fshort_data_2016_NoDupsWithPrescale.root");
+//TFile FshortFile("Fshort_data_2016_NoDups.root");
 TH1D* h_fs = ((TH2D*) FshortFile.Get("h_FSR_60to100MT2"))->ProjectionX("h_fs",1,1);
 TH1D* h_fs_Nj23 = ((TH2D*) FshortFile.Get("h_FSR_2to3njet"))->ProjectionX("h_fs_2to3njet",1,1);
 TH1D* h_fs_Nj4 = ((TH2D*) FshortFile.Get("h_FSR_gt3njet"))->ProjectionX("h_fs_gt3njet",1,1);
@@ -178,6 +180,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, char* config_tag) {
 
     // Triggers
     bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
+    // bool passPrescaleTrigger = false;
     bool passUnPrescaleTrigger = t.HLT_PFHT900 || t.HLT_PFJet450;
     bool passMetTrigger = t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
     

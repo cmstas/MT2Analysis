@@ -234,8 +234,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 
 
     // Triggers
-    //    bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
-    bool passPrescaleTrigger = false;
+    bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
     bool passUnPrescaleTrigger = t.HLT_PFHT900 || t.HLT_PFJet450;
     bool passMetTrigger = t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
     
@@ -432,12 +431,9 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	  ((t.track_eta[i_trk] < -2.1 && t.track_eta[i_trk] > -2.4) && (t.track_phi[i_trk] < -1.2 && t.track_phi[i_trk] > -1.6)) 
 	  || ( (t.track_eta[i_trk] < -1.9 && t.track_eta[i_trk] > -2.2) && (t.track_phi[i_trk] < -2.2 && t.track_phi[i_trk] > -2.6) );
 	
-	if (isSTC && isInHotspot) {
-	  cout << "HOTSPOT: STC " << t.run << ":" << t.lumi << ":" << t.evt;
-	  continue;
-	} 
-	else if (isST && isInHotspot) {
-	  cout << "HOTSPOT: ST " << t.run << ":" << t.lumi << ":" << t.evt;
+	if (isInHotspot) {
+	  if (isSTC) cout << "HOTSPOT: STC " << t.run << ":" << t.lumi << ":" << t.evt;
+	  else if (isST) cout << "HOTSPOT: ST " << t.run << ":" << t.lumi << ":" << t.evt;
 	  continue;
 	} 
 
