@@ -6,6 +6,7 @@ import re
 import sys
 import os
 import subprocess
+import NitfyUtils
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
@@ -26,7 +27,7 @@ simplecanvas.SetRightMargin(0.16)
 if len(sys.argv) < 2: 
     print "Which tag to use?"
     exit()
-runtag=sys.argv[2]
+runtag=sys.argv[1]
 indir="output/"+runtag
 pngdir="pngs/"+runtag
 outdir="output/"
