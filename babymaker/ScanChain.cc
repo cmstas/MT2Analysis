@@ -2099,12 +2099,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           jet_area[njet] = cms3.pfjets_area().at(iJet);
           jet_rawPt[njet] = cms3.pfjets_p4().at(iJet).pt() * cms3.pfjets_undoJEC().at(iJet);
 
-          if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
-          else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
-          else if (isTightPFJet_50nsV1(iJet)) jet_id[njet] = 3;
-          else if (isLoosePFJet_50nsV1(iJet)) jet_id[njet] = 1;
-          else jet_id[njet] = 0;
-
+          if(config_.jet_id == "50nsV1"){
+              if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
+              else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
+              else if (isTightPFJet_50nsV1(iJet)) jet_id[njet] = 3;
+              else if (isLoosePFJet_50nsV1(iJet)) jet_id[njet] = 1;
+              else jet_id[njet] = 0;
+          }else if(config_.jet_id == "2017_v1"){
+              if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
+              else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
+              else if (isTightPFJet_2017_v1(iJet)) jet_id[njet] = 3;
+              else jet_id[njet] = 0;
+          }
+              
+              
           jet_puId[njet] = pileupJetId(iJet, id_level_t::PUID_loose) ? 1 : 0;
 
 	  // ad-hoc filter:
