@@ -11,9 +11,15 @@
 *.cmd
 *.exe
 *.display.screen
+*.pdf
+*.png
 babymaker/processBaby
 babymaker/*.root
 babymaker/*.txt
+babymaker/batchsubmit/job_input/*
+babymaker/batchsubmit/submitAll.sh
 CORE
 **/condor
 MT2Looper/runLooper
+MT2Looper/output/*
+Nifty
