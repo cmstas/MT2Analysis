@@ -2449,22 +2449,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         mt2JECup = HemMT2(met_ptJECup, met_phiJECup, hemJetsUP.at(0), hemJetsUP.at(1));
 	//if (nlep > 0) sl_mt2 = HemMT2(lep_pt[0], lep_phi[0], hemJets.at(0), hemJets.at(1));
 
-        // // order hemispheres by pt for saving
-        // int idx_lead = 0;
-        // int idx_subl = 1;
-        // if (hemJets.at(1).pt() > hemJets.at(0).pt()) {
-        //   idx_lead = 1;
-        //   idx_subl = 0;
-        // }
+        // order hemispheres by pt for saving
+        int idx_lead = 0;
+        int idx_subl = 1;
+	if (hemJetsUP.at(1).pt() > hemJetsUP.at(0).pt()) {
+          idx_lead = 1;
+          idx_subl = 0;
+	}
 
-        // pseudoJet1_pt   = hemJets.at(idx_lead).pt();
-        // pseudoJet1_eta  = hemJets.at(idx_lead).eta();
-        // pseudoJet1_phi  = hemJets.at(idx_lead).phi();
-        // pseudoJet1_mass = hemJets.at(idx_lead).mass();
-        // pseudoJet2_pt   = hemJets.at(idx_subl).pt();
-        // pseudoJet2_eta  = hemJets.at(idx_subl).eta();
-        // pseudoJet2_phi  = hemJets.at(idx_subl).phi();
-        // pseudoJet2_mass = hemJets.at(idx_subl).mass();
+	pseudoJet1JECup_pt   = hemJetsUP.at(idx_lead).pt();
+	pseudoJet1JECup_eta  = hemJetsUP.at(idx_lead).eta();
+	pseudoJet1JECup_phi  = hemJetsUP.at(idx_lead).phi();
+	pseudoJet1JECup_mass = hemJetsUP.at(idx_lead).mass();
+	pseudoJet2JECup_pt   = hemJetsUP.at(idx_subl).pt();
+	pseudoJet2JECup_eta  = hemJetsUP.at(idx_subl).eta();
+	pseudoJet2JECup_phi  = hemJetsUP.at(idx_subl).phi();
+	pseudoJet2JECup_mass = hemJetsUP.at(idx_subl).mass();
       }
       vector<LorentzVector> hemJetsDN;
       if(p4sForHemsDN.size() > 1){
@@ -2474,22 +2474,23 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         mt2JECdn = HemMT2(met_ptJECdn, met_phiJECdn, hemJetsDN.at(0), hemJetsDN.at(1));
 	//if (nlep > 0) sl_mt2 = HemMT2(lep_pt[0], lep_phi[0], hemJets.at(0), hemJets.at(1));
 
-        // // order hemispheres by pt for saving
-        // int idx_lead = 0;
-        // int idx_subl = 1;
-        // if (hemJets.at(1).pt() > hemJets.at(0).pt()) {
-        //   idx_lead = 1;
-        //   idx_subl = 0;
-        // }
+        // order hemispheres by pt for saving
+        int idx_lead = 0;
+        int idx_subl = 1;
+	if (hemJetsDN.at(1).pt() > hemJetsDN.at(0).pt()) {
+          idx_lead = 1;
+          idx_subl = 0;
+	}
 
-        // pseudoJet1_pt   = hemJets.at(idx_lead).pt();
-        // pseudoJet1_eta  = hemJets.at(idx_lead).eta();
-        // pseudoJet1_phi  = hemJets.at(idx_lead).phi();
-        // pseudoJet1_mass = hemJets.at(idx_lead).mass();
-        // pseudoJet2_pt   = hemJets.at(idx_subl).pt();
-        // pseudoJet2_eta  = hemJets.at(idx_subl).eta();
-        // pseudoJet2_phi  = hemJets.at(idx_subl).phi();
-        // pseudoJet2_mass = hemJets.at(idx_subl).mass();
+	pseudoJet1JECdn_pt   = hemJetsDN.at(idx_lead).pt();
+	pseudoJet1JECdn_eta  = hemJetsDN.at(idx_lead).eta();
+	pseudoJet1JECdn_phi  = hemJetsDN.at(idx_lead).phi();
+	pseudoJet1JECdn_mass = hemJetsDN.at(idx_lead).mass();
+	pseudoJet2JECdn_pt   = hemJetsDN.at(idx_subl).pt();
+	pseudoJet2JECdn_eta  = hemJetsDN.at(idx_subl).eta();
+	pseudoJet2JECdn_phi  = hemJetsDN.at(idx_subl).phi();
+	pseudoJet2JECdn_mass = hemJetsDN.at(idx_subl).mass();
+
       }
 
       mht_pt  = sumMhtp4.pt();
@@ -2538,6 +2539,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         hemJetsGamma = getHemJets(p4sForHemsGamma);  
 
         gamma_mt2 = HemMT2(gamma_met_pt, gamma_met_phi, hemJetsGamma.at(0), hemJetsGamma.at(1));
+
+        // order hemispheres by pt for saving
+        int idx_lead = 0;
+        int idx_subl = 1;
+        if (hemJetsGamma.at(1).pt() > hemJetsGamma.at(0).pt()) {
+          idx_lead = 1;
+          idx_subl = 0;
+        }
+
+        gamma_pseudoJet1_pt   = hemJetsGamma.at(idx_lead).pt();
+        gamma_pseudoJet1_eta  = hemJetsGamma.at(idx_lead).eta();
+        gamma_pseudoJet1_phi  = hemJetsGamma.at(idx_lead).phi();
+        gamma_pseudoJet1_mass = hemJetsGamma.at(idx_lead).mass();
+        gamma_pseudoJet2_pt   = hemJetsGamma.at(idx_subl).pt();
+        gamma_pseudoJet2_eta  = hemJetsGamma.at(idx_subl).eta();
+        gamma_pseudoJet2_phi  = hemJetsGamma.at(idx_subl).phi();
+        gamma_pseudoJet2_mass = hemJetsGamma.at(idx_subl).mass();
+
       }
 
       gamma_mht_pt  = sumMhtp4Gamma.pt();
@@ -2593,14 +2612,68 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           hemJetsZll = getHemJets(p4sForHemsZll);  
 
           zll_mt2 = HemMT2(zll_met_pt, zll_met_phi, hemJetsZll.at(0), hemJetsZll.at(1));
+
+	  // order hemispheres by pt for saving
+	  int idx_lead = 0;
+	  int idx_subl = 1;
+	  if (hemJetsZll.at(1).pt() > hemJetsZll.at(0).pt()) {
+	    idx_lead = 1;
+	    idx_subl = 0;
+	  }
+	  
+	  zll_pseudoJet1_pt   = hemJetsZll.at(idx_lead).pt();
+	  zll_pseudoJet1_eta  = hemJetsZll.at(idx_lead).eta();
+	  zll_pseudoJet1_phi  = hemJetsZll.at(idx_lead).phi();
+	  zll_pseudoJet1_mass = hemJetsZll.at(idx_lead).mass();
+	  zll_pseudoJet2_pt   = hemJetsZll.at(idx_subl).pt();
+	  zll_pseudoJet2_eta  = hemJetsZll.at(idx_subl).eta();
+	  zll_pseudoJet2_phi  = hemJetsZll.at(idx_subl).phi();
+	  zll_pseudoJet2_mass = hemJetsZll.at(idx_subl).mass();
+	  
         }
         if(p4sForHemsZllUP.size() > 1){
           hemJetsZllUP = getHemJets(p4sForHemsZllUP);  
           zll_mt2JECup = HemMT2(zll_met_ptJECup, zll_met_phiJECup, hemJetsZllUP.at(0), hemJetsZllUP.at(1));
+
+	  // order hemispheres by pt for saving
+	  int idx_lead = 0;
+	  int idx_subl = 1;
+	  if (hemJetsZllUP.at(1).pt() > hemJetsZllUP.at(0).pt()) {
+	    idx_lead = 1;
+	    idx_subl = 0;
+	  }
+	  
+	  zll_pseudoJet1JECup_pt   = hemJetsZllUP.at(idx_lead).pt();
+	  zll_pseudoJet1JECup_eta  = hemJetsZllUP.at(idx_lead).eta();
+	  zll_pseudoJet1JECup_phi  = hemJetsZllUP.at(idx_lead).phi();
+	  zll_pseudoJet1JECup_mass = hemJetsZllUP.at(idx_lead).mass();
+	  zll_pseudoJet2JECup_pt   = hemJetsZllUP.at(idx_subl).pt();
+	  zll_pseudoJet2JECup_eta  = hemJetsZllUP.at(idx_subl).eta();
+	  zll_pseudoJet2JECup_phi  = hemJetsZllUP.at(idx_subl).phi();
+	  zll_pseudoJet2JECup_mass = hemJetsZllUP.at(idx_subl).mass();
+
         }
         if(p4sForHemsZllDN.size() > 1){
           hemJetsZllDN = getHemJets(p4sForHemsZllDN);  
           zll_mt2JECdn = HemMT2(zll_met_ptJECdn, zll_met_phiJECdn, hemJetsZllDN.at(0), hemJetsZllDN.at(1));
+
+	  // order hemispheres by pt for saving
+	  int idx_lead = 0;
+	  int idx_subl = 1;
+	  if (hemJetsZllDN.at(1).pt() > hemJetsZllDN.at(0).pt()) {
+	    idx_lead = 1;
+	    idx_subl = 0;
+	  }
+	  
+	  zll_pseudoJet1JECdn_pt   = hemJetsZllDN.at(idx_lead).pt();
+	  zll_pseudoJet1JECdn_eta  = hemJetsZllDN.at(idx_lead).eta();
+	  zll_pseudoJet1JECdn_phi  = hemJetsZllDN.at(idx_lead).phi();
+	  zll_pseudoJet1JECdn_mass = hemJetsZllDN.at(idx_lead).mass();
+	  zll_pseudoJet2JECdn_pt   = hemJetsZllDN.at(idx_subl).pt();
+	  zll_pseudoJet2JECdn_eta  = hemJetsZllDN.at(idx_subl).eta();
+	  zll_pseudoJet2JECdn_phi  = hemJetsZllDN.at(idx_subl).phi();
+	  zll_pseudoJet2JECdn_mass = hemJetsZllDN.at(idx_subl).mass();
+
         }		  
 
         zll_mht_pt  = sumMhtp4Zll.pt();
@@ -2644,6 +2717,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           hemJetsZllMT = getHemJets(p4sForHemsZllMT);  
 
           zllmt_mt2 = HemMT2(zllmt_met_pt, zllmt_met_phi, hemJetsZllMT.at(0), hemJetsZllMT.at(1));
+
+	  // order hemispheres by pt for saving
+	  int idx_lead = 0;
+	  int idx_subl = 1;
+	  if (hemJetsZllMT.at(1).pt() > hemJetsZllMT.at(0).pt()) {
+	    idx_lead = 1;
+	    idx_subl = 0;
+	  }
+	  
+	  zllmt_pseudoJet1_pt   = hemJetsZllMT.at(idx_lead).pt();
+	  zllmt_pseudoJet1_eta  = hemJetsZllMT.at(idx_lead).eta();
+	  zllmt_pseudoJet1_phi  = hemJetsZllMT.at(idx_lead).phi();
+	  zllmt_pseudoJet1_mass = hemJetsZllMT.at(idx_lead).mass();
+	  zllmt_pseudoJet2_pt   = hemJetsZllMT.at(idx_subl).pt();
+	  zllmt_pseudoJet2_eta  = hemJetsZllMT.at(idx_subl).eta();
+	  zllmt_pseudoJet2_phi  = hemJetsZllMT.at(idx_subl).phi();
+	  zllmt_pseudoJet2_mass = hemJetsZllMT.at(idx_subl).mass();
+
         }	  
 
         zllmt_mht_pt  = sumMhtp4ZllMT.pt();
@@ -2679,6 +2770,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           hemJetsRl = getHemJets(p4sForHemsRl);  
 
           rl_mt2 = HemMT2(rl_met_pt, rl_met_phi, hemJetsRl.at(0), hemJetsRl.at(1));
+
+	  // order hemispheres by pt for saving
+	  int idx_lead = 0;
+	  int idx_subl = 1;
+	  if (hemJetsRl.at(1).pt() > hemJetsRl.at(0).pt()) {
+	    idx_lead = 1;
+	    idx_subl = 0;
+	  }
+	  
+	  rl_pseudoJet1_pt   = hemJetsRl.at(idx_lead).pt();
+	  rl_pseudoJet1_eta  = hemJetsRl.at(idx_lead).eta();
+	  rl_pseudoJet1_phi  = hemJetsRl.at(idx_lead).phi();
+	  rl_pseudoJet1_mass = hemJetsRl.at(idx_lead).mass();
+	  rl_pseudoJet2_pt   = hemJetsRl.at(idx_subl).pt();
+	  rl_pseudoJet2_eta  = hemJetsRl.at(idx_subl).eta();
+	  rl_pseudoJet2_phi  = hemJetsRl.at(idx_subl).phi();
+	  rl_pseudoJet2_mass = hemJetsRl.at(idx_subl).mass();
+
         }	  
 
         rl_mht_pt  = sumMhtp4Rl.pt();
@@ -2700,7 +2809,24 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         if(goodGenJets.size() > 1){
           hemJets = getHemJets(goodGenJets);  
           mt2_gen = HemMT2(met_genPt, met_genPhi, hemJets.at(0), hemJets.at(1));
-        }
+        	  // order hemispheres by pt for saving
+	  int idx_lead = 0;
+	  int idx_subl = 1;
+	  if (hemJets.at(1).pt() > hemJets.at(0).pt()) {
+	    idx_lead = 1;
+	    idx_subl = 0;
+	  }
+	  
+	  gen_pseudoJet1_pt   = hemJets.at(idx_lead).pt();
+	  gen_pseudoJet1_eta  = hemJets.at(idx_lead).eta();
+	  gen_pseudoJet1_phi  = hemJets.at(idx_lead).phi();
+	  gen_pseudoJet1_mass = hemJets.at(idx_lead).mass();
+	  gen_pseudoJet2_pt   = hemJets.at(idx_subl).pt();
+	  gen_pseudoJet2_eta  = hemJets.at(idx_subl).eta();
+	  gen_pseudoJet2_phi  = hemJets.at(idx_subl).phi();
+	  gen_pseudoJet2_mass = hemJets.at(idx_subl).mass();
+
+	}
       } // !isData
 
       if (verbose) cout << "before taus" << endl;
@@ -3226,6 +3352,79 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("pseudoJet2_eta", &pseudoJet2_eta );
   BabyTree_->Branch("pseudoJet2_phi", &pseudoJet2_phi );
   BabyTree_->Branch("pseudoJet2_mass", &pseudoJet2_mass );
+  BabyTree_->Branch("pseudoJet1JECup_pt", &pseudoJet1JECup_pt );
+  BabyTree_->Branch("pseudoJet1JECup_eta", &pseudoJet1JECup_eta );
+  BabyTree_->Branch("pseudoJet1JECup_phi", &pseudoJet1JECup_phi );
+  BabyTree_->Branch("pseudoJet1JECup_mass", &pseudoJet1JECup_mass );
+  BabyTree_->Branch("pseudoJet2JECup_pt", &pseudoJet2JECup_pt );
+  BabyTree_->Branch("pseudoJet2JECup_eta", &pseudoJet2JECup_eta );
+  BabyTree_->Branch("pseudoJet2JECup_phi", &pseudoJet2JECup_phi );
+  BabyTree_->Branch("pseudoJet2JECup_mass", &pseudoJet2JECup_mass );
+  BabyTree_->Branch("pseudoJet1JECdn_pt", &pseudoJet1JECdn_pt );
+  BabyTree_->Branch("pseudoJet1JECdn_eta", &pseudoJet1JECdn_eta );
+  BabyTree_->Branch("pseudoJet1JECdn_phi", &pseudoJet1JECdn_phi );
+  BabyTree_->Branch("pseudoJet1JECdn_mass", &pseudoJet1JECdn_mass );
+  BabyTree_->Branch("pseudoJet2JECdn_pt", &pseudoJet2JECdn_pt );
+  BabyTree_->Branch("pseudoJet2JECdn_eta", &pseudoJet2JECdn_eta );
+  BabyTree_->Branch("pseudoJet2JECdn_phi", &pseudoJet2JECdn_phi );
+  BabyTree_->Branch("pseudoJet2JECdn_mass", &pseudoJet2JECdn_mass );
+  BabyTree_->Branch("zll_pseudoJet1_pt", &zll_pseudoJet1_pt );
+  BabyTree_->Branch("zll_pseudoJet1_eta", &zll_pseudoJet1_eta );
+  BabyTree_->Branch("zll_pseudoJet1_phi", &zll_pseudoJet1_phi );
+  BabyTree_->Branch("zll_pseudoJet1_mass", &zll_pseudoJet1_mass );
+  BabyTree_->Branch("zll_pseudoJet2_pt", &zll_pseudoJet2_pt );
+  BabyTree_->Branch("zll_pseudoJet2_eta", &zll_pseudoJet2_eta );
+  BabyTree_->Branch("zll_pseudoJet2_phi", &zll_pseudoJet2_phi );
+  BabyTree_->Branch("zll_pseudoJet2_mass", &zll_pseudoJet2_mass );
+  BabyTree_->Branch("zll_pseudoJet1JECup_pt", &zll_pseudoJet1JECup_pt );
+  BabyTree_->Branch("zll_pseudoJet1JECup_eta", &zll_pseudoJet1JECup_eta );
+  BabyTree_->Branch("zll_pseudoJet1JECup_phi", &zll_pseudoJet1JECup_phi );
+  BabyTree_->Branch("zll_pseudoJet1JECup_mass", &zll_pseudoJet1JECup_mass );
+  BabyTree_->Branch("zll_pseudoJet2JECup_pt", &zll_pseudoJet2JECup_pt );
+  BabyTree_->Branch("zll_pseudoJet2JECup_eta", &zll_pseudoJet2JECup_eta );
+  BabyTree_->Branch("zll_pseudoJet2JECup_phi", &zll_pseudoJet2JECup_phi );
+  BabyTree_->Branch("zll_pseudoJet2JECup_mass", &zll_pseudoJet2JECup_mass );
+  BabyTree_->Branch("zll_pseudoJet1JECdn_pt", &zll_pseudoJet1JECdn_pt );
+  BabyTree_->Branch("zll_pseudoJet1JECdn_eta", &zll_pseudoJet1JECdn_eta );
+  BabyTree_->Branch("zll_pseudoJet1JECdn_phi", &zll_pseudoJet1JECdn_phi );
+  BabyTree_->Branch("zll_pseudoJet1JECdn_mass", &zll_pseudoJet1JECdn_mass );
+  BabyTree_->Branch("zll_pseudoJet2JECdn_pt", &zll_pseudoJet2JECdn_pt );
+  BabyTree_->Branch("zll_pseudoJet2JECdn_eta", &zll_pseudoJet2JECdn_eta );
+  BabyTree_->Branch("zll_pseudoJet2JECdn_phi", &zll_pseudoJet2JECdn_phi );
+  BabyTree_->Branch("zll_pseudoJet2JECdn_mass", &zll_pseudoJet2JECdn_mass );
+  BabyTree_->Branch("gamma_pseudoJet1_pt", &gamma_pseudoJet1_pt );
+  BabyTree_->Branch("gamma_pseudoJet1_eta", &gamma_pseudoJet1_eta );
+  BabyTree_->Branch("gamma_pseudoJet1_phi", &gamma_pseudoJet1_phi );
+  BabyTree_->Branch("gamma_pseudoJet1_mass", &gamma_pseudoJet1_mass );
+  BabyTree_->Branch("gamma_pseudoJet2_pt", &gamma_pseudoJet2_pt );
+  BabyTree_->Branch("gamma_pseudoJet2_eta", &gamma_pseudoJet2_eta );
+  BabyTree_->Branch("gamma_pseudoJet2_phi", &gamma_pseudoJet2_phi );
+  BabyTree_->Branch("gamma_pseudoJet2_mass", &gamma_pseudoJet2_mass );
+  BabyTree_->Branch("zllmt_pseudoJet1_pt", &zllmt_pseudoJet1_pt );
+  BabyTree_->Branch("zllmt_pseudoJet1_eta", &zllmt_pseudoJet1_eta );
+  BabyTree_->Branch("zllmt_pseudoJet1_phi", &zllmt_pseudoJet1_phi );
+  BabyTree_->Branch("zllmt_pseudoJet1_mass", &zllmt_pseudoJet1_mass );
+  BabyTree_->Branch("zllmt_pseudoJet2_pt", &zllmt_pseudoJet2_pt );
+  BabyTree_->Branch("zllmt_pseudoJet2_eta", &zllmt_pseudoJet2_eta );
+  BabyTree_->Branch("zllmt_pseudoJet2_phi", &zllmt_pseudoJet2_phi );
+  BabyTree_->Branch("zllmt_pseudoJet2_mass", &zllmt_pseudoJet2_mass );
+  BabyTree_->Branch("rl_pseudoJet1_pt", &rl_pseudoJet1_pt );
+  BabyTree_->Branch("rl_pseudoJet1_eta", &rl_pseudoJet1_eta );
+  BabyTree_->Branch("rl_pseudoJet1_phi", &rl_pseudoJet1_phi );
+  BabyTree_->Branch("rl_pseudoJet1_mass", &rl_pseudoJet1_mass );
+  BabyTree_->Branch("rl_pseudoJet2_pt", &rl_pseudoJet2_pt );
+  BabyTree_->Branch("rl_pseudoJet2_eta", &rl_pseudoJet2_eta );
+  BabyTree_->Branch("rl_pseudoJet2_phi", &rl_pseudoJet2_phi );
+  BabyTree_->Branch("rl_pseudoJet2_mass", &rl_pseudoJet2_mass );
+  BabyTree_->Branch("gen_pseudoJet1_pt", &gen_pseudoJet1_pt );
+  BabyTree_->Branch("gen_pseudoJet1_eta", &gen_pseudoJet1_eta );
+  BabyTree_->Branch("gen_pseudoJet1_phi", &gen_pseudoJet1_phi );
+  BabyTree_->Branch("gen_pseudoJet1_mass", &gen_pseudoJet1_mass );
+  BabyTree_->Branch("gen_pseudoJet2_pt", &gen_pseudoJet2_pt );
+  BabyTree_->Branch("gen_pseudoJet2_eta", &gen_pseudoJet2_eta );
+  BabyTree_->Branch("gen_pseudoJet2_phi", &gen_pseudoJet2_phi );
+  BabyTree_->Branch("gen_pseudoJet2_mass", &gen_pseudoJet2_mass );
+
   BabyTree_->Branch("mht_pt", &mht_pt );
   BabyTree_->Branch("mht_phi", &mht_phi );
   BabyTree_->Branch("mht_ptJECup", &mht_ptJECup );
@@ -3794,6 +3993,79 @@ void babyMaker::InitBabyNtuple () {
   pseudoJet2_eta = 0.0;
   pseudoJet2_phi = 0.0;
   pseudoJet2_mass = 0.0;
+  pseudoJet1JECup_pt = 0.0;
+  pseudoJet1JECup_eta = 0.0;
+  pseudoJet1JECup_phi = 0.0;
+  pseudoJet1JECup_mass = 0.0;
+  pseudoJet2JECup_pt = 0.0;
+  pseudoJet2JECup_eta = 0.0;
+  pseudoJet2JECup_phi = 0.0;
+  pseudoJet2JECup_mass = 0.0;
+  pseudoJet1JECdn_pt = 0.0;
+  pseudoJet1JECdn_eta = 0.0;
+  pseudoJet1JECdn_phi = 0.0;
+  pseudoJet1JECdn_mass = 0.0;
+  pseudoJet2JECdn_pt = 0.0;
+  pseudoJet2JECdn_eta = 0.0;
+  pseudoJet2JECdn_phi = 0.0;
+  pseudoJet2JECdn_mass = 0.0;
+  zll_pseudoJet1_pt = 0.0;
+  zll_pseudoJet1_eta = 0.0;
+  zll_pseudoJet1_phi = 0.0;
+  zll_pseudoJet1_mass = 0.0;
+  zll_pseudoJet2_pt = 0.0;
+  zll_pseudoJet2_eta = 0.0;
+  zll_pseudoJet2_phi = 0.0;
+  zll_pseudoJet2_mass = 0.0;
+  zll_pseudoJet1JECup_pt = 0.0;
+  zll_pseudoJet1JECup_eta = 0.0;
+  zll_pseudoJet1JECup_phi = 0.0;
+  zll_pseudoJet1JECup_mass = 0.0;
+  zll_pseudoJet2JECup_pt = 0.0;
+  zll_pseudoJet2JECup_eta = 0.0;
+  zll_pseudoJet2JECup_phi = 0.0;
+  zll_pseudoJet2JECup_mass = 0.0;
+  zll_pseudoJet1JECdn_pt = 0.0;
+  zll_pseudoJet1JECdn_eta = 0.0;
+  zll_pseudoJet1JECdn_phi = 0.0;
+  zll_pseudoJet1JECdn_mass = 0.0;
+  zll_pseudoJet2JECdn_pt = 0.0;
+  zll_pseudoJet2JECdn_eta = 0.0;
+  zll_pseudoJet2JECdn_phi = 0.0;
+  zll_pseudoJet2JECdn_mass = 0.0;
+  gamma_pseudoJet1_pt = 0.0;
+  gamma_pseudoJet1_eta = 0.0;
+  gamma_pseudoJet1_phi = 0.0;
+  gamma_pseudoJet1_mass = 0.0;
+  gamma_pseudoJet2_pt = 0.0;
+  gamma_pseudoJet2_eta = 0.0;
+  gamma_pseudoJet2_phi = 0.0;
+  gamma_pseudoJet2_mass = 0.0;
+  zllmt_pseudoJet1_pt = 0.0;
+  zllmt_pseudoJet1_eta = 0.0;
+  zllmt_pseudoJet1_phi = 0.0;
+  zllmt_pseudoJet1_mass = 0.0;
+  zllmt_pseudoJet2_pt = 0.0;
+  zllmt_pseudoJet2_eta = 0.0;
+  zllmt_pseudoJet2_phi = 0.0;
+  zllmt_pseudoJet2_mass = 0.0;
+  rl_pseudoJet1_pt = 0.0;
+  rl_pseudoJet1_eta = 0.0;
+  rl_pseudoJet1_phi = 0.0;
+  rl_pseudoJet1_mass = 0.0;
+  rl_pseudoJet2_pt = 0.0;
+  rl_pseudoJet2_eta = 0.0;
+  rl_pseudoJet2_phi = 0.0;
+  rl_pseudoJet2_mass = 0.0;
+  gen_pseudoJet1_pt = 0.0;
+  gen_pseudoJet1_eta = 0.0;
+  gen_pseudoJet1_phi = 0.0;
+  gen_pseudoJet1_mass = 0.0;
+  gen_pseudoJet2_pt = 0.0;
+  gen_pseudoJet2_eta = 0.0;
+  gen_pseudoJet2_phi = 0.0;
+  gen_pseudoJet2_mass = 0.0;
+
   mht_pt = -999.0;
   mht_phi = -999.0;
   mht_ptJECup = -999.0;

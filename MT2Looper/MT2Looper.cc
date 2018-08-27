@@ -150,7 +150,8 @@ MT2Looper::~MT2Looper(){
 };
 
 void MT2Looper::SetSignalRegions(){
-  SRVec =  getSignalRegions2017(); 
+  //  SRVec =  getSignalRegions2017(); 
+  SRVec =  getSignalRegions2018(); 
   SRVecMonojet = getSignalRegionsMonojet2017(); 
 
   //store histograms with cut values for all variables
@@ -950,43 +951,67 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       ht_            = t.ht;
       met_pt_        = t.met_pt;
       met_phi_       = t.met_phi;
+      deltaPhiMin_   = t.deltaPhiMin;
+      diffMetMht_    = t.diffMetMht;
+      zll_mt2_       = t.zll_mt2;
+      zll_ht_        = t.zll_ht;
+      zll_met_pt_    = t.zll_met_pt;
+      zll_met_phi_   = t.zll_met_phi;
+      zll_deltaPhiMin_=t.zll_deltaPhiMin;
+      zll_diffMetMht_= t.zll_diffMetMht;
       mht_pt_        = t.mht_pt;
       mht_phi_       = t.mht_phi;
       jet1_pt_       = t.jet1_pt;
       jet2_pt_       = t.jet2_pt;
-      deltaPhiMin_   = t.deltaPhiMin;
-      diffMetMht_    = t.diffMetMht;
       nJet30_        = t.nJet30;
       nBJet20_       = t.nBJet20;
-      
+      pseudoJet1_eta_= t.pseudoJet1_eta;
+      zll_pseudoJet1_eta_= t.zll_pseudoJet1_eta;
+
       //apply JEC variations
       if (doJECVars == 1) {
 	mt2_           = t.mt2JECup;
 	ht_            = t.htJECup;
 	met_pt_        = t.met_ptJECup;
 	met_phi_       = t.met_phiJECup;
+	deltaPhiMin_   = t.deltaPhiMinJECup;
+	diffMetMht_    = t.diffMetMhtJECup;
+	zll_mt2_       = t.zll_mt2JECup;
+	zll_ht_        = t.zll_htJECup;
+	zll_met_pt_    = t.zll_met_ptJECup;
+	zll_met_phi_   = t.zll_met_phiJECup;
+	deltaPhiMin_   = t.deltaPhiMinJECup;
+	diffMetMht_    = t.diffMetMhtJECup;
 	mht_pt_        = t.mht_ptJECup;
 	mht_phi_       = t.mht_phiJECup;
 	jet1_pt_       = t.jet1_ptJECup;
 	jet2_pt_       = t.jet2_ptJECup;
-	deltaPhiMin_   = t.deltaPhiMinJECup;
-	diffMetMht_    = t.diffMetMhtJECup;
 	nJet30_        = t.nJet30JECup;
 	nBJet20_       = t.nBJet20JECup;
+	pseudoJet1_eta_= t.pseudoJet1JECup_eta;
+	zll_pseudoJet1_eta_= t.zll_pseudoJet1JECup_eta;
       }
       else if (doJECVars == -1) {
 	mt2_           = t.mt2JECdn;
 	ht_            = t.htJECdn;
 	met_pt_        = t.met_ptJECdn;
 	met_phi_       = t.met_phiJECdn;
+	deltaPhiMin_   = t.deltaPhiMinJECdn;
+	diffMetMht_    = t.diffMetMhtJECdn;
+	zll_mt2_       = t.zll_mt2JECdn;
+	zll_ht_        = t.zll_htJECdn;
+	zll_met_pt_    = t.zll_met_ptJECdn;
+	zll_met_phi_   = t.zll_met_phiJECdn;
+	deltaPhiMin_   = t.deltaPhiMinJECdn;
+	diffMetMht_    = t.diffMetMhtJECdn;
 	mht_pt_        = t.mht_ptJECdn;
 	mht_phi_       = t.mht_phiJECdn;
 	jet1_pt_       = t.jet1_ptJECdn;
 	jet2_pt_       = t.jet2_ptJECdn;
-	deltaPhiMin_   = t.deltaPhiMinJECdn;
-	diffMetMht_    = t.diffMetMhtJECdn;
 	nJet30_        = t.nJet30JECdn;
 	nBJet20_       = t.nBJet20JECdn;
+	pseudoJet1_eta_= t.pseudoJet1JECdn_eta;
+	zll_pseudoJet1_eta_= t.zll_pseudoJet1JECdn_eta;
       }
       else if (doJECVars == 0) {}
       else { cerr << "WARNING: options doJECVars has illegal value!" << endl; }
@@ -1513,6 +1538,7 @@ void MT2Looper::fillHistosSRBase() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
+  values["PJ1eta"]      = pseudoJet1_eta_;
 
   if(SRBase.PassesSelection(values)) {
     fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
@@ -1567,6 +1593,7 @@ void MT2Looper::fillHistosInclusive() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
+  values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < InclusiveRegions.size(); srN++){
     std::map<std::string, float> values_temp = values;
@@ -1604,6 +1631,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
+  values["PJ1eta"]      = pseudoJet1_eta_;
   //values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
 
 
@@ -1650,6 +1678,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
+    values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values_genmet)){
@@ -1751,6 +1780,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
+  values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRSL(values)){
@@ -1822,6 +1852,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
+    values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelectionCRSL(values_genmet)){
@@ -1900,7 +1931,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.gamma_mt2;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
-  
+  values["PJ1eta"]      = t.gamma_pseudoJet1_eta;
+
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
   valuesBase["deltaPhiMin"] = t.gamma_deltaPhiMin;
@@ -2050,16 +2082,17 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   if (t.nJet200MuFrac50DphiMet > 0) return;
   
   std::map<std::string, float> values;
-  values["deltaPhiMin"] = t.zll_deltaPhiMin;
-  values["diffMetMhtOverMet"]  = t.zll_diffMetMht/t.zll_met_pt;
+  values["deltaPhiMin"] = zll_deltaPhiMin_;
+  values["diffMetMhtOverMet"]  = zll_diffMetMht_/zll_met_pt_;
   values["nlep"]        = 0; // dummy value
   values["j1pt"]        = jet1_pt_;
   values["j2pt"]        = jet2_pt_;
   values["njets"]       = nJet30_;
   values["nbjets"]      = nBJet20_;
-  values["mt2"]         = t.zll_mt2;
-  values["ht"]          = t.zll_ht;
-  values["met"]         = t.zll_met_pt;
+  values["mt2"]         = zll_mt2_;
+  values["ht"]          = zll_ht_;
+  values["met"]         = zll_met_pt_;
+  values["PJ1eta"]      = zll_pseudoJet1_eta_;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2145,6 +2178,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.rl_mt2;
   values["ht"]          = t.rl_ht;
   values["met"]         = t.rl_met_pt;
+  values["PJ1eta"]      = t.rl_pseudoJet1_eta;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2253,6 +2287,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
+  values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRQCD(values)){
@@ -2693,7 +2728,7 @@ void MT2Looper::fillHistosGammaJets(std::map<std::string, TH1*>& h_1d, std::map<
     else plot1D("h_gammaPtEE"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 256, 220, 1500);
     plot1D("h_gammaEta"+s,       t.gamma_eta[0],   evtweight_, h_1d, ";gamma #eta", 50, -2.5, 2.5);
     plot1D("h_gammaPhi"+s,       t.gamma_phi[0],   evtweight_, h_1d, ";gamma #phi", 50, -3.1416, 3.1416);
-    if (t.HLT_Photons) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
+    if (t.HLT_Photon120) plot1D("h_gammaPt_HLT"+s,       t.gamma_pt[0],   evtweight_, h_1d, ";gamma p_{T} [GeV]", 300, 0, 1500);
     plot1D("h_ht"+s,       t.gamma_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_simpleht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     plot1D("h_jet1pt"+s,       t.gamma_jet1_pt,   evtweight_, h_1d, ";jet1 p_{T} [GeV]", 150, 0, 1500);
@@ -2895,7 +2930,7 @@ void MT2Looper::fillHistosRemovedLepton(std::map<std::string, TH1*>& h_1d, int n
     plot1D("h_deltaPhiMin"+s,  t.rl_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
     plot1D("h_diffMetMht"+s,   t.rl_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
     plot1D("h_diffMetMhtOverMet"+s,   t.rl_diffMetMht/t.rl_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
-    plot1D("h_minMTBMet"+s,   t.rl_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
+    //    plot1D("h_minMTBMet"+s,   t.rl_minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     t.nLepLowMT,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_htbins"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins, htbins);
     plot1D("h_htbins2"+s,       t.rl_ht,   evtweight_, h_1d, ";H_{T} [GeV]", n_htbins2, htbins2);
@@ -3195,7 +3230,7 @@ void MT2Looper::fillTriggerVectors(vector<int*> &trigs, vector<string> trig_name
         string s = trig_names.at(i);
         if     (s=="PFHT1050")                              trigs.push_back(&t.HLT_PFHT1050);
         else if(s=="PFHT900")                          trigs.push_back(&t.HLT_PFHT900);
-        else if(s=="PFHT800")                          trigs.push_back(&t.HLT_PFHT800);
+	//        else if(s=="PFHT800")                          trigs.push_back(&t.HLT_PFHT800);
         else if(s=="PFJet450")                         trigs.push_back(&t.HLT_PFJet450);
         else if(s=="PFHT500_PFMET100_PFMHT100")        trigs.push_back(&t.HLT_PFHT500_PFMET100_PFMHT100);
         else if(s=="PFHT800_PFMET75_PFMHT75")          trigs.push_back(&t.HLT_PFHT800_PFMET75_PFMHT75);

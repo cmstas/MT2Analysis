@@ -94,6 +94,78 @@ public :
    Float_t         pseudoJet2_eta;
    Float_t         pseudoJet2_phi;
    Float_t         pseudoJet2_mass;
+   Float_t         pseudoJet1JECup_pt;
+   Float_t         pseudoJet1JECup_eta;
+   Float_t         pseudoJet1JECup_phi;
+   Float_t         pseudoJet1JECup_mass;
+   Float_t         pseudoJet2JECup_pt;
+   Float_t         pseudoJet2JECup_eta;
+   Float_t         pseudoJet2JECup_phi;
+   Float_t         pseudoJet2JECup_mass;
+   Float_t         pseudoJet1JECdn_pt;
+   Float_t         pseudoJet1JECdn_eta;
+   Float_t         pseudoJet1JECdn_phi;
+   Float_t         pseudoJet1JECdn_mass;
+   Float_t         pseudoJet2JECdn_pt;
+   Float_t         pseudoJet2JECdn_eta;
+   Float_t         pseudoJet2JECdn_phi;
+   Float_t         pseudoJet2JECdn_mass;
+   Float_t         zll_pseudoJet1_pt;
+   Float_t         zll_pseudoJet1_eta;
+   Float_t         zll_pseudoJet1_phi;
+   Float_t         zll_pseudoJet1_mass;
+   Float_t         zll_pseudoJet2_pt;
+   Float_t         zll_pseudoJet2_eta;
+   Float_t         zll_pseudoJet2_phi;
+   Float_t         zll_pseudoJet2_mass;
+   Float_t         zll_pseudoJet1JECup_pt;
+   Float_t         zll_pseudoJet1JECup_eta;
+   Float_t         zll_pseudoJet1JECup_phi;
+   Float_t         zll_pseudoJet1JECup_mass;
+   Float_t         zll_pseudoJet2JECup_pt;
+   Float_t         zll_pseudoJet2JECup_eta;
+   Float_t         zll_pseudoJet2JECup_phi;
+   Float_t         zll_pseudoJet2JECup_mass;
+   Float_t         zll_pseudoJet1JECdn_pt;
+   Float_t         zll_pseudoJet1JECdn_eta;
+   Float_t         zll_pseudoJet1JECdn_phi;
+   Float_t         zll_pseudoJet1JECdn_mass;
+   Float_t         zll_pseudoJet2JECdn_pt;
+   Float_t         zll_pseudoJet2JECdn_eta;
+   Float_t         zll_pseudoJet2JECdn_phi;
+   Float_t         zll_pseudoJet2JECdn_mass;
+   Float_t         gamma_pseudoJet1_pt;
+   Float_t         gamma_pseudoJet1_eta;
+   Float_t         gamma_pseudoJet1_phi;
+   Float_t         gamma_pseudoJet1_mass;
+   Float_t         gamma_pseudoJet2_pt;
+   Float_t         gamma_pseudoJet2_eta;
+   Float_t         gamma_pseudoJet2_phi;
+   Float_t         gamma_pseudoJet2_mass;
+   Float_t         zllmt_pseudoJet1_pt;
+   Float_t         zllmt_pseudoJet1_eta;
+   Float_t         zllmt_pseudoJet1_phi;
+   Float_t         zllmt_pseudoJet1_mass;
+   Float_t         zllmt_pseudoJet2_pt;
+   Float_t         zllmt_pseudoJet2_eta;
+   Float_t         zllmt_pseudoJet2_phi;
+   Float_t         zllmt_pseudoJet2_mass;
+   Float_t         rl_pseudoJet1_pt;
+   Float_t         rl_pseudoJet1_eta;
+   Float_t         rl_pseudoJet1_phi;
+   Float_t         rl_pseudoJet1_mass;
+   Float_t         rl_pseudoJet2_pt;
+   Float_t         rl_pseudoJet2_eta;
+   Float_t         rl_pseudoJet2_phi;
+   Float_t         rl_pseudoJet2_mass;
+   Float_t         gen_pseudoJet1_pt;
+   Float_t         gen_pseudoJet1_eta;
+   Float_t         gen_pseudoJet1_phi;
+   Float_t         gen_pseudoJet1_mass;
+   Float_t         gen_pseudoJet2_pt;
+   Float_t         gen_pseudoJet2_eta;
+   Float_t         gen_pseudoJet2_phi;
+   Float_t         gen_pseudoJet2_mass;
    Float_t         mht_pt;
    Float_t         mht_ptJECup;
    Float_t         mht_ptJECdn;
@@ -620,6 +692,78 @@ public :
    TBranch        *b_pseudoJet2_eta;   //!
    TBranch        *b_pseudoJet2_phi;   //!
    TBranch        *b_pseudoJet2_mass;   //!
+   TBranch        *b_pseudoJet1JECup_pt;   //!
+   TBranch        *b_pseudoJet1JECup_eta;   //!
+   TBranch        *b_pseudoJet1JECup_phi;   //!
+   TBranch        *b_pseudoJet1JECup_mass;   //!
+   TBranch        *b_pseudoJet2JECup_pt;   //!
+   TBranch        *b_pseudoJet2JECup_eta;   //!
+   TBranch        *b_pseudoJet2JECup_phi;   //!
+   TBranch        *b_pseudoJet2JECup_mass;   //!
+   TBranch        *b_pseudoJet1JECdn_pt;   //!
+   TBranch        *b_pseudoJet1JECdn_eta;   //!
+   TBranch        *b_pseudoJet1JECdn_phi;   //!
+   TBranch        *b_pseudoJet1JECdn_mass;   //!
+   TBranch        *b_pseudoJet2JECdn_pt;   //!
+   TBranch        *b_pseudoJet2JECdn_eta;   //!
+   TBranch        *b_pseudoJet2JECdn_phi;   //!
+   TBranch        *b_pseudoJet2JECdn_mass;   //!
+   TBranch        *b_zll_pseudoJet1_pt;   //!
+   TBranch        *b_zll_pseudoJet1_eta;   //!
+   TBranch        *b_zll_pseudoJet1_phi;   //!
+   TBranch        *b_zll_pseudoJet1_mass;   //!
+   TBranch        *b_zll_pseudoJet2_pt;   //!
+   TBranch        *b_zll_pseudoJet2_eta;   //!
+   TBranch        *b_zll_pseudoJet2_phi;   //!
+   TBranch        *b_zll_pseudoJet2_mass;   //!
+   TBranch        *b_zll_pseudoJet1JECup_pt;   //!
+   TBranch        *b_zll_pseudoJet1JECup_eta;   //!
+   TBranch        *b_zll_pseudoJet1JECup_phi;   //!
+   TBranch        *b_zll_pseudoJet1JECup_mass;   //!
+   TBranch        *b_zll_pseudoJet2JECup_pt;   //!
+   TBranch        *b_zll_pseudoJet2JECup_eta;   //!
+   TBranch        *b_zll_pseudoJet2JECup_phi;   //!
+   TBranch        *b_zll_pseudoJet2JECup_mass;   //!
+   TBranch        *b_zll_pseudoJet1JECdn_pt;   //!
+   TBranch        *b_zll_pseudoJet1JECdn_eta;   //!
+   TBranch        *b_zll_pseudoJet1JECdn_phi;   //!
+   TBranch        *b_zll_pseudoJet1JECdn_mass;   //!
+   TBranch        *b_zll_pseudoJet2JECdn_pt;   //!
+   TBranch        *b_zll_pseudoJet2JECdn_eta;   //!
+   TBranch        *b_zll_pseudoJet2JECdn_phi;   //!
+   TBranch        *b_zll_pseudoJet2JECdn_mass;   //!
+   TBranch        *b_gamma_pseudoJet1_pt;   //!
+   TBranch        *b_gamma_pseudoJet1_eta;   //!
+   TBranch        *b_gamma_pseudoJet1_phi;   //!
+   TBranch        *b_gamma_pseudoJet1_mass;   //!
+   TBranch        *b_gamma_pseudoJet2_pt;   //!
+   TBranch        *b_gamma_pseudoJet2_eta;   //!
+   TBranch        *b_gamma_pseudoJet2_phi;   //!
+   TBranch        *b_gamma_pseudoJet2_mass;   //!
+   TBranch        *b_zllmt_pseudoJet1_pt;   //!
+   TBranch        *b_zllmt_pseudoJet1_eta;   //!
+   TBranch        *b_zllmt_pseudoJet1_phi;   //!
+   TBranch        *b_zllmt_pseudoJet1_mass;   //!
+   TBranch        *b_zllmt_pseudoJet2_pt;   //!
+   TBranch        *b_zllmt_pseudoJet2_eta;   //!
+   TBranch        *b_zllmt_pseudoJet2_phi;   //!
+   TBranch        *b_zllmt_pseudoJet2_mass;   //!
+   TBranch        *b_rl_pseudoJet1_pt;   //!
+   TBranch        *b_rl_pseudoJet1_eta;   //!
+   TBranch        *b_rl_pseudoJet1_phi;   //!
+   TBranch        *b_rl_pseudoJet1_mass;   //!
+   TBranch        *b_rl_pseudoJet2_pt;   //!
+   TBranch        *b_rl_pseudoJet2_eta;   //!
+   TBranch        *b_rl_pseudoJet2_phi;   //!
+   TBranch        *b_rl_pseudoJet2_mass;   //!
+   TBranch        *b_gen_pseudoJet1_pt;   //!
+   TBranch        *b_gen_pseudoJet1_eta;   //!
+   TBranch        *b_gen_pseudoJet1_phi;   //!
+   TBranch        *b_gen_pseudoJet1_mass;   //!
+   TBranch        *b_gen_pseudoJet2_pt;   //!
+   TBranch        *b_gen_pseudoJet2_eta;   //!
+   TBranch        *b_gen_pseudoJet2_phi;   //!
+   TBranch        *b_gen_pseudoJet2_mass;   //!
    TBranch        *b_mht_pt;   //!
    TBranch        *b_mht_ptJECup;   //!
    TBranch        *b_mht_ptJECdn;   //!
@@ -1180,6 +1324,78 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("pseudoJet2_eta"))                         fChain->SetBranchAddress("pseudoJet2_eta", &pseudoJet2_eta, &b_pseudoJet2_eta);
    if(bs->FindObject("pseudoJet2_phi"))                         fChain->SetBranchAddress("pseudoJet2_phi", &pseudoJet2_phi, &b_pseudoJet2_phi);
    if(bs->FindObject("pseudoJet2_mass"))                        fChain->SetBranchAddress("pseudoJet2_mass", &pseudoJet2_mass, &b_pseudoJet2_mass);
+   if(bs->FindObject("pseudoJet1JECup_pt"))                     fChain->SetBranchAddress("pseudoJet1JECup_pt", &pseudoJet1JECup_pt, &b_pseudoJet1JECup_pt);
+   if(bs->FindObject("pseudoJet1JECup_eta"))                    fChain->SetBranchAddress("pseudoJet1JECup_eta", &pseudoJet1JECup_eta, &b_pseudoJet1JECup_eta);
+   if(bs->FindObject("pseudoJet1JECup_phi"))                    fChain->SetBranchAddress("pseudoJet1JECup_phi", &pseudoJet1JECup_phi, &b_pseudoJet1JECup_phi);
+   if(bs->FindObject("pseudoJet1JECup_mass"))                   fChain->SetBranchAddress("pseudoJet1JECup_mass", &pseudoJet1JECup_mass, &b_pseudoJet1JECup_mass);
+   if(bs->FindObject("pseudoJet2JECup_pt"))                     fChain->SetBranchAddress("pseudoJet2JECup_pt", &pseudoJet2JECup_pt, &b_pseudoJet2JECup_pt);
+   if(bs->FindObject("pseudoJet2JECup_eta"))                    fChain->SetBranchAddress("pseudoJet2JECup_eta", &pseudoJet2JECup_eta, &b_pseudoJet2JECup_eta);
+   if(bs->FindObject("pseudoJet2JECup_phi"))                    fChain->SetBranchAddress("pseudoJet2JECup_phi", &pseudoJet2JECup_phi, &b_pseudoJet2JECup_phi);
+   if(bs->FindObject("pseudoJet2JECup_mass"))                   fChain->SetBranchAddress("pseudoJet2JECup_mass", &pseudoJet2JECup_mass, &b_pseudoJet2JECup_mass);
+   if(bs->FindObject("pseudoJet1JECdn_pt"))                     fChain->SetBranchAddress("pseudoJet1JECdn_pt", &pseudoJet1JECdn_pt, &b_pseudoJet1JECdn_pt);
+   if(bs->FindObject("pseudoJet1JECdn_eta"))                    fChain->SetBranchAddress("pseudoJet1JECdn_eta", &pseudoJet1JECdn_eta, &b_pseudoJet1JECdn_eta);
+   if(bs->FindObject("pseudoJet1JECdn_phi"))                    fChain->SetBranchAddress("pseudoJet1JECdn_phi", &pseudoJet1JECdn_phi, &b_pseudoJet1JECdn_phi);
+   if(bs->FindObject("pseudoJet1JECdn_mass"))                   fChain->SetBranchAddress("pseudoJet1JECdn_mass", &pseudoJet1JECdn_mass, &b_pseudoJet1JECdn_mass);
+   if(bs->FindObject("pseudoJet2JECdn_pt"))                     fChain->SetBranchAddress("pseudoJet2JECdn_pt", &pseudoJet2JECdn_pt, &b_pseudoJet2JECdn_pt);
+   if(bs->FindObject("pseudoJet2JECdn_eta"))                    fChain->SetBranchAddress("pseudoJet2JECdn_eta", &pseudoJet2JECdn_eta, &b_pseudoJet2JECdn_eta);
+   if(bs->FindObject("pseudoJet2JECdn_phi"))                    fChain->SetBranchAddress("pseudoJet2JECdn_phi", &pseudoJet2JECdn_phi, &b_pseudoJet2JECdn_phi);
+   if(bs->FindObject("pseudoJet2JECdn_mass"))                   fChain->SetBranchAddress("pseudoJet2JECdn_mass", &pseudoJet2JECdn_mass, &b_pseudoJet2JECdn_mass);
+   if(bs->FindObject("zll_pseudoJet1_pt"))                      fChain->SetBranchAddress("zll_pseudoJet1_pt", &zll_pseudoJet1_pt, &b_zll_pseudoJet1_pt);
+   if(bs->FindObject("zll_pseudoJet1_eta"))                     fChain->SetBranchAddress("zll_pseudoJet1_eta", &zll_pseudoJet1_eta, &b_zll_pseudoJet1_eta);
+   if(bs->FindObject("zll_pseudoJet1_phi"))                     fChain->SetBranchAddress("zll_pseudoJet1_phi", &zll_pseudoJet1_phi, &b_zll_pseudoJet1_phi);
+   if(bs->FindObject("zll_pseudoJet1_mass"))                    fChain->SetBranchAddress("zll_pseudoJet1_mass", &zll_pseudoJet1_mass, &b_zll_pseudoJet1_mass);
+   if(bs->FindObject("zll_pseudoJet2_pt"))                      fChain->SetBranchAddress("zll_pseudoJet2_pt", &zll_pseudoJet2_pt, &b_zll_pseudoJet2_pt);
+   if(bs->FindObject("zll_pseudoJet2_eta"))                     fChain->SetBranchAddress("zll_pseudoJet2_eta", &zll_pseudoJet2_eta, &b_zll_pseudoJet2_eta);
+   if(bs->FindObject("zll_pseudoJet2_phi"))                     fChain->SetBranchAddress("zll_pseudoJet2_phi", &zll_pseudoJet2_phi, &b_zll_pseudoJet2_phi);
+   if(bs->FindObject("zll_pseudoJet2_mass"))                    fChain->SetBranchAddress("zll_pseudoJet2_mass", &zll_pseudoJet2_mass, &b_zll_pseudoJet2_mass);
+   if(bs->FindObject("zll_pseudoJet1JECup_pt"))                 fChain->SetBranchAddress("zll_pseudoJet1JECup_pt", &zll_pseudoJet1JECup_pt, &b_zll_pseudoJet1JECup_pt);
+   if(bs->FindObject("zll_pseudoJet1JECup_eta"))                fChain->SetBranchAddress("zll_pseudoJet1JECup_eta", &zll_pseudoJet1JECup_eta, &b_zll_pseudoJet1JECup_eta);
+   if(bs->FindObject("zll_pseudoJet1JECup_phi"))                fChain->SetBranchAddress("zll_pseudoJet1JECup_phi", &zll_pseudoJet1JECup_phi, &b_zll_pseudoJet1JECup_phi);
+   if(bs->FindObject("zll_pseudoJet1JECup_mass"))               fChain->SetBranchAddress("zll_pseudoJet1JECup_mass", &zll_pseudoJet1JECup_mass, &b_zll_pseudoJet1JECup_mass);
+   if(bs->FindObject("zll_pseudoJet2JECup_pt"))                 fChain->SetBranchAddress("zll_pseudoJet2JECup_pt", &zll_pseudoJet2JECup_pt, &b_zll_pseudoJet2JECup_pt);
+   if(bs->FindObject("zll_pseudoJet2JECup_eta"))                fChain->SetBranchAddress("zll_pseudoJet2JECup_eta", &zll_pseudoJet2JECup_eta, &b_zll_pseudoJet2JECup_eta);
+   if(bs->FindObject("zll_pseudoJet2JECup_phi"))                fChain->SetBranchAddress("zll_pseudoJet2JECup_phi", &zll_pseudoJet2JECup_phi, &b_zll_pseudoJet2JECup_phi);
+   if(bs->FindObject("zll_pseudoJet2JECup_mass"))               fChain->SetBranchAddress("zll_pseudoJet2JECup_mass", &zll_pseudoJet2JECup_mass, &b_zll_pseudoJet2JECup_mass);
+   if(bs->FindObject("zll_pseudoJet1JECdn_pt"))                 fChain->SetBranchAddress("zll_pseudoJet1JECdn_pt", &zll_pseudoJet1JECdn_pt, &b_zll_pseudoJet1JECdn_pt);
+   if(bs->FindObject("zll_pseudoJet1JECdn_eta"))                fChain->SetBranchAddress("zll_pseudoJet1JECdn_eta", &zll_pseudoJet1JECdn_eta, &b_zll_pseudoJet1JECdn_eta);
+   if(bs->FindObject("zll_pseudoJet1JECdn_phi"))                fChain->SetBranchAddress("zll_pseudoJet1JECdn_phi", &zll_pseudoJet1JECdn_phi, &b_zll_pseudoJet1JECdn_phi);
+   if(bs->FindObject("zll_pseudoJet1JECdn_mass"))               fChain->SetBranchAddress("zll_pseudoJet1JECdn_mass", &zll_pseudoJet1JECdn_mass, &b_zll_pseudoJet1JECdn_mass);
+   if(bs->FindObject("zll_pseudoJet2JECdn_pt"))                 fChain->SetBranchAddress("zll_pseudoJet2JECdn_pt", &zll_pseudoJet2JECdn_pt, &b_zll_pseudoJet2JECdn_pt);
+   if(bs->FindObject("zll_pseudoJet2JECdn_eta"))                fChain->SetBranchAddress("zll_pseudoJet2JECdn_eta", &zll_pseudoJet2JECdn_eta, &b_zll_pseudoJet2JECdn_eta);
+   if(bs->FindObject("zll_pseudoJet2JECdn_phi"))                fChain->SetBranchAddress("zll_pseudoJet2JECdn_phi", &zll_pseudoJet2JECdn_phi, &b_zll_pseudoJet2JECdn_phi);
+   if(bs->FindObject("zll_pseudoJet2JECdn_mass"))               fChain->SetBranchAddress("zll_pseudoJet2JECdn_mass", &zll_pseudoJet2JECdn_mass, &b_zll_pseudoJet2JECdn_mass);
+   if(bs->FindObject("gamma_pseudoJet1_pt"))                    fChain->SetBranchAddress("gamma_pseudoJet1_pt", &gamma_pseudoJet1_pt, &b_gamma_pseudoJet1_pt);
+   if(bs->FindObject("gamma_pseudoJet1_eta"))                   fChain->SetBranchAddress("gamma_pseudoJet1_eta", &gamma_pseudoJet1_eta, &b_gamma_pseudoJet1_eta);
+   if(bs->FindObject("gamma_pseudoJet1_phi"))                   fChain->SetBranchAddress("gamma_pseudoJet1_phi", &gamma_pseudoJet1_phi, &b_gamma_pseudoJet1_phi);
+   if(bs->FindObject("gamma_pseudoJet1_mass"))                  fChain->SetBranchAddress("gamma_pseudoJet1_mass", &gamma_pseudoJet1_mass, &b_gamma_pseudoJet1_mass);
+   if(bs->FindObject("gamma_pseudoJet2_pt"))                    fChain->SetBranchAddress("gamma_pseudoJet2_pt", &gamma_pseudoJet2_pt, &b_gamma_pseudoJet2_pt);
+   if(bs->FindObject("gamma_pseudoJet2_eta"))                   fChain->SetBranchAddress("gamma_pseudoJet2_eta", &gamma_pseudoJet2_eta, &b_gamma_pseudoJet2_eta);
+   if(bs->FindObject("gamma_pseudoJet2_phi"))                   fChain->SetBranchAddress("gamma_pseudoJet2_phi", &gamma_pseudoJet2_phi, &b_gamma_pseudoJet2_phi);
+   if(bs->FindObject("gamma_pseudoJet2_mass"))                  fChain->SetBranchAddress("gamma_pseudoJet2_mass", &gamma_pseudoJet2_mass, &b_gamma_pseudoJet2_mass);
+   if(bs->FindObject("zllmt_pseudoJet1_pt"))                    fChain->SetBranchAddress("zllmt_pseudoJet1_pt", &zllmt_pseudoJet1_pt, &b_zllmt_pseudoJet1_pt);
+   if(bs->FindObject("zllmt_pseudoJet1_eta"))                   fChain->SetBranchAddress("zllmt_pseudoJet1_eta", &zllmt_pseudoJet1_eta, &b_zllmt_pseudoJet1_eta);
+   if(bs->FindObject("zllmt_pseudoJet1_phi"))                   fChain->SetBranchAddress("zllmt_pseudoJet1_phi", &zllmt_pseudoJet1_phi, &b_zllmt_pseudoJet1_phi);
+   if(bs->FindObject("zllmt_pseudoJet1_mass"))                  fChain->SetBranchAddress("zllmt_pseudoJet1_mass", &zllmt_pseudoJet1_mass, &b_zllmt_pseudoJet1_mass);
+   if(bs->FindObject("zllmt_pseudoJet2_pt"))                    fChain->SetBranchAddress("zllmt_pseudoJet2_pt", &zllmt_pseudoJet2_pt, &b_zllmt_pseudoJet2_pt);
+   if(bs->FindObject("zllmt_pseudoJet2_eta"))                   fChain->SetBranchAddress("zllmt_pseudoJet2_eta", &zllmt_pseudoJet2_eta, &b_zllmt_pseudoJet2_eta);
+   if(bs->FindObject("zllmt_pseudoJet2_phi"))                   fChain->SetBranchAddress("zllmt_pseudoJet2_phi", &zllmt_pseudoJet2_phi, &b_zllmt_pseudoJet2_phi);
+   if(bs->FindObject("zllmt_pseudoJet2_mass"))                  fChain->SetBranchAddress("zllmt_pseudoJet2_mass", &zllmt_pseudoJet2_mass, &b_zllmt_pseudoJet2_mass);
+   if(bs->FindObject("rl_pseudoJet1_pt"))                       fChain->SetBranchAddress("rl_pseudoJet1_pt", &rl_pseudoJet1_pt, &b_rl_pseudoJet1_pt);
+   if(bs->FindObject("rl_pseudoJet1_eta"))                      fChain->SetBranchAddress("rl_pseudoJet1_eta", &rl_pseudoJet1_eta, &b_rl_pseudoJet1_eta);
+   if(bs->FindObject("rl_pseudoJet1_phi"))                      fChain->SetBranchAddress("rl_pseudoJet1_phi", &rl_pseudoJet1_phi, &b_rl_pseudoJet1_phi);
+   if(bs->FindObject("rl_pseudoJet1_mass"))                     fChain->SetBranchAddress("rl_pseudoJet1_mass", &rl_pseudoJet1_mass, &b_rl_pseudoJet1_mass);
+   if(bs->FindObject("rl_pseudoJet2_pt"))                       fChain->SetBranchAddress("rl_pseudoJet2_pt", &rl_pseudoJet2_pt, &b_rl_pseudoJet2_pt);
+   if(bs->FindObject("rl_pseudoJet2_eta"))                      fChain->SetBranchAddress("rl_pseudoJet2_eta", &rl_pseudoJet2_eta, &b_rl_pseudoJet2_eta);
+   if(bs->FindObject("rl_pseudoJet2_phi"))                      fChain->SetBranchAddress("rl_pseudoJet2_phi", &rl_pseudoJet2_phi, &b_rl_pseudoJet2_phi);
+   if(bs->FindObject("rl_pseudoJet2_mass"))                     fChain->SetBranchAddress("rl_pseudoJet2_mass", &rl_pseudoJet2_mass, &b_rl_pseudoJet2_mass);
+   if(bs->FindObject("gen_pseudoJet1_pt"))                      fChain->SetBranchAddress("gen_pseudoJet1_pt", &gen_pseudoJet1_pt, &b_gen_pseudoJet1_pt);
+   if(bs->FindObject("gen_pseudoJet1_eta"))                     fChain->SetBranchAddress("gen_pseudoJet1_eta", &gen_pseudoJet1_eta, &b_gen_pseudoJet1_eta);
+   if(bs->FindObject("gen_pseudoJet1_phi"))                     fChain->SetBranchAddress("gen_pseudoJet1_phi", &gen_pseudoJet1_phi, &b_gen_pseudoJet1_phi);
+   if(bs->FindObject("gen_pseudoJet1_mass"))                    fChain->SetBranchAddress("gen_pseudoJet1_mass", &gen_pseudoJet1_mass, &b_gen_pseudoJet1_mass);
+   if(bs->FindObject("gen_pseudoJet2_pt"))                      fChain->SetBranchAddress("gen_pseudoJet2_pt", &gen_pseudoJet2_pt, &b_gen_pseudoJet2_pt);
+   if(bs->FindObject("gen_pseudoJet2_eta"))                     fChain->SetBranchAddress("gen_pseudoJet2_eta", &gen_pseudoJet2_eta, &b_gen_pseudoJet2_eta);
+   if(bs->FindObject("gen_pseudoJet2_phi"))                     fChain->SetBranchAddress("gen_pseudoJet2_phi", &gen_pseudoJet2_phi, &b_gen_pseudoJet2_phi);
+   if(bs->FindObject("gen_pseudoJet2_mass"))                    fChain->SetBranchAddress("gen_pseudoJet2_mass", &gen_pseudoJet2_mass, &b_gen_pseudoJet2_mass);
    if(bs->FindObject("mht_pt"))                                 fChain->SetBranchAddress("mht_pt", &mht_pt, &b_mht_pt);
    if(bs->FindObject("mht_ptJECup"))                            fChain->SetBranchAddress("mht_ptJECup", &mht_ptJECup, &b_mht_ptJECup);
    if(bs->FindObject("mht_ptJECdn"))                            fChain->SetBranchAddress("mht_ptJECdn", &mht_ptJECdn, &b_mht_ptJECdn);
