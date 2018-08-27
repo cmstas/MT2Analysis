@@ -7,9 +7,9 @@ To use, modify `do.sh` with desired input/output directories and then run. Will 
 sample, much like MT2Looper.
 
 Next, combine all non-QCD samples:      
-   hadd -f nonqcd.root dyjetsll_ht.root gjets_dr0p05_ht.root singletop.root ttdl.root ttg.root ttsl.root ttw.root ttz.root wjets_ht.root
+   hadd -f ewk.root dyjetsll_ht.root gjets_dr0p05_ht.root singletop.root ttdl.root ttg.root ttsl.root ttw.root ttz.root wjets_ht.root
 
-Next, feed these into the `makeQCDHistos.py` script in the `scripts/qcdEstimate` directory. This will combine the looper output 
-files into barebones histograms for rphi, fj, rb, stored in a single root file.
+Next, feed these into the `makeQCDHistos.py` script in the `scripts/qcdEstimate` directory, by editing inputs.txt. This will combine the looper output 
+files into barebones histograms for rphi, fj, rb, stored in a single root file. You need to edit `rphi_file_name` in MT2Looper.cc to point to the qcdHistos.root file produced by this script to get rphi histograms in the MT2Looper output. 
 
 Finally, pass this output into `makeQCDPlots.py` to get pretty plots.

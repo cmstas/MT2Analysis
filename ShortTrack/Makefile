@@ -15,7 +15,7 @@ ifndef VERBOSE
   QUIET := @
 endif
 
-NAME=SingleRegion
+NAME=ShortTrackLooper
 
 CC = g++ 
 CMSROOT = ..
@@ -34,7 +34,7 @@ SOURCES = $(wildcard *.cc)
 OBJECTS = $(SOURCES:.cc=.o)
 LIB = lib$(NAME).so
 
-CORESOURCES = $(wildcard $(COREDIR)/*.cc) $(wildcard $(COREDIR)/Tools/*.cc) $(wildcard $(COREDIR)/Tools/MT2/*.cc)  $(wildcard $(COREDIR)/Tools/btagsf/*.cc)
+CORESOURCES = $(wildcard $(COREDIR)/*.cc) $(wildcard $(COREDIR)/Tools/*.cc) $(wildcard $(COREDIR)/Tools/MT2/*.cc)  $(wildcard $(COREDIR)/Tools/btagsf/*.cc)  $(wildcard $(COREDIR)/Tools/dorky/*.cc)
 COREOBJECTS = $(CORESOURCES:.cc=.o) 
 CORELIB = lib$(NAME)CORE.so
 
