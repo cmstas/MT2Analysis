@@ -951,8 +951,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       jet2_pt_       = t.jet2_pt;
       nJet30_        = t.nJet30;
       nBJet20_       = t.nBJet20;
-      pseudoJet1_eta_= t.pseudoJet1_eta;
-      zll_pseudoJet1_eta_= t.zll_pseudoJet1_eta;
+      pseudoJet1_eta_= fabs(t.pseudoJet1_eta);
+      zll_pseudoJet1_eta_= fabs(t.zll_pseudoJet1_eta);
 
       //apply JEC variations
       if (doJECVars == 1) {
@@ -974,8 +974,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	jet2_pt_       = t.jet2_ptJECup;
 	nJet30_        = t.nJet30JECup;
 	nBJet20_       = t.nBJet20JECup;
-	pseudoJet1_eta_= t.pseudoJet1JECup_eta;
-	zll_pseudoJet1_eta_= t.zll_pseudoJet1JECup_eta;
+	pseudoJet1_eta_= fabs(t.pseudoJet1JECup_eta);
+	zll_pseudoJet1_eta_= fabs(t.zll_pseudoJet1JECup_eta);
       }
       else if (doJECVars == -1) {
 	mt2_           = t.mt2JECdn;
@@ -996,8 +996,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	jet2_pt_       = t.jet2_ptJECdn;
 	nJet30_        = t.nJet30JECdn;
 	nBJet20_       = t.nBJet20JECdn;
-	pseudoJet1_eta_= t.pseudoJet1JECdn_eta;
-	zll_pseudoJet1_eta_= t.zll_pseudoJet1JECdn_eta;
+	pseudoJet1_eta_= fabs(t.pseudoJet1JECdn_eta);
+	zll_pseudoJet1_eta_= fabs(t.zll_pseudoJet1JECdn_eta);
       }
       else if (doJECVars == 0) {}
       else { cerr << "WARNING: options doJECVars has illegal value!" << endl; }
