@@ -23,6 +23,7 @@ namespace mt2
   std::vector<SR> getSignalRegions2016();
   std::vector<SR> getSignalRegionsMonojet2017();
   std::vector<SR> getSignalRegions2017();
+  std::vector<SR> getSignalRegionsPJ();
   std::vector<SR> getSignalRegions2018();
 
 } // namespace mt2
