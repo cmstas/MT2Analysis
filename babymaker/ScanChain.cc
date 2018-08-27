@@ -121,7 +121,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
   // used to store CORE-specific values, working-points, etc
   gconf.ea_version = config_.ea_version;  // effective-area constants are year-specific. 
 
-  if (baby_name.find("data_Run201") != std::string::npos) {
+  if (baby_name.find("data_Run201") != std::string::npos || baby_name.find("dataRun2") != std::string::npos) {
     isDataFromFileName = true;
     cout << "running on DATA, based on file name" << endl;
   } else {

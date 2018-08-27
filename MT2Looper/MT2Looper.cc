@@ -265,7 +265,6 @@ void MT2Looper::SetSignalRegions(){
 
   SRBase.SetName("srbase");
   SRBase.SetVar("mt2", 200, -1);
-  // SRBase.SetVar("mt2", 0, -1);
   SRBase.SetVar("j1pt", 30, -1);
   SRBase.SetVar("j2pt", 30, -1);
   SRBase.SetVar("deltaPhiMin", 0.3, -1);
@@ -273,7 +272,6 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVar("nlep", 0, 1);
   SRBase.SetVar("passesHtMet", 1, 2);
   SRBase.SetVarCRSL("mt2", 200, -1);
-  // SRBase.SetVarCRSL("mt2", 0, -1);
   SRBase.SetVarCRSL("j1pt", 30, -1);
   SRBase.SetVarCRSL("j2pt", 30, -1);
   SRBase.SetVarCRSL("deltaPhiMin", 0.3, -1);
@@ -281,6 +279,7 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVarCRSL("nlep", 1, 2);
   SRBase.SetVarCRSL("passesHtMet", 1, 2);
   SRBase.SetMT2Bins(n_mt2bins_SRBase, (float*) SRBase_mt2bins);
+  
 
   std::vector<std::string> vars = SRBase.GetListOfVariables();
   TDirectory * dir = (TDirectory*)outfile_->Get((SRBase.GetName()).c_str());
@@ -723,14 +722,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   }
   if (verbose) cout<<__LINE__<<endl;
 
-  if (applyLeptonSFfromFiles) {
-    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
-    setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-		"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
-    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
-  }
+  // if (applyLeptonSFfromFiles) {
+  //   setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+  //   setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+  //       	"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+  //       	"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+  //       	"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+  //   setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
+  // }
   
   if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     setElSFfile_fastsim("../babymaker/lepsf/moriond17/sf_el_vetoCB_mini01.root");  
@@ -1332,6 +1331,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	if (verbose) cout<<__LINE__<<endl;
 
 	fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
+        // cout << endl << "FOUNDEVENT: " << t.run << ":" << t.lumi << ":" << t.evt << " " << t.ht << " " << t.met_pt << " " << t.nJet30 << endl;
 
 	fillHistosSignalRegion("sr");
 
@@ -2306,6 +2306,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
     }
 
     if(SRBaseMonojet.PassesSelectionCRQCD(values_monojet)){
+        // cout << endl << "FOUNDEVENT: " << t.run << ":" << t.lumi << ":" << t.evt << " " << t.evt_id << endl;
       fillHistosQCD(SRBaseMonojet.crqcdHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crqcdbaseJ", suffix);
     }
 
@@ -2931,6 +2932,21 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
   // to include QCD estimate for monojet region
   if (nJet30_ == 1 || directoryname.Contains("J")) mt2_temp = ht_;
 
+  // can use good_jet_idxs branch in newer babies.
+  // leaving this here for now since still using old babies
+  int lead_jet_idx = -1;
+  int sublead_jet_idx = -1;
+  for(int i=0; i<t.njet; i++){
+      if(t.jet_pt[i] > 30 && fabs(t.jet_eta[i])<2.4){
+          if(lead_jet_idx == -1)
+              lead_jet_idx = i;
+          else if(sublead_jet_idx == -1){
+              sublead_jet_idx = i;
+              break;
+          }
+      }
+  }
+
   plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
   plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
   plot1D("h_mt2bins"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
@@ -2945,16 +2961,18 @@ void MT2Looper::fillHistosQCD(std::map<std::string, TH1*>& h_1d, int n_mt2bins, 
     plot1D("h_nJet30"+s,       nJet30_,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
     plot1D("h_nJet30Eta3"+s,       nJet30Eta3_,   evtweight_, h_1d, ";N(jets, |#eta| > 3.0)", 10, 0, 10);
     plot1D("h_nBJet20"+s,      nBJet20_,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
-    plot1D("h_deltaPhiMin"+s,  deltaPhiMin_,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+    plot1D("h_deltaPhiMin"+s,  deltaPhiMin_,   evtweight_, h_1d, ";#Delta#phi_{min}", 96, 0, 3.2);
     plot1D("h_diffMetMht"+s,   diffMetMht_,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
     plot1D("h_diffMetMhtOverMet"+s,   diffMetMht_/met_pt_,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 2.);
     plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_J0pt"+s,       jet1_pt_,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
-    plot1D("h_J0eta"+s,      t.jet_eta[0],  evtweight_, h_1d, ";eta(jet1)", 100,-5,5);
-    plot1D("h_J0phi"+s,      t.jet_phi[0],  evtweight_, h_1d, ";phi(jet1)", 100,-3.2,3.2);
-    plot1D("h_J1eta"+s,      t.jet_eta[1],  evtweight_, h_1d, ";eta(jet2)", 100,-5,5);
-    plot1D("h_J1phi"+s,      t.jet_phi[1],  evtweight_, h_1d, ";phi(jet2)", 100,-3.2,3.2);
+    plot1D("h_J0eta"+s,      t.jet_eta[lead_jet_idx],  evtweight_, h_1d, ";eta(jet1)", 100,-5,5);
+    plot1D("h_J0phi"+s,      t.jet_phi[lead_jet_idx],  evtweight_, h_1d, ";phi(jet1)", 100,-3.2,3.2);
+    if(sublead_jet_idx > -1){
+        plot1D("h_J1eta"+s,      t.jet_eta[sublead_jet_idx],  evtweight_, h_1d, ";eta(jet2)", 100,-5,5);
+        plot1D("h_J1phi"+s,      t.jet_phi[sublead_jet_idx],  evtweight_, h_1d, ";phi(jet2)", 100,-3.2,3.2);
+    }
     plot1D("h_J1pt"+s,       jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   }
   
