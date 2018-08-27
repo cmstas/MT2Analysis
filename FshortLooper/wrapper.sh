@@ -8,19 +8,22 @@ FILEID=$1
 FILE=$2
 COPYDIR=$3
 TAG=$4
+CONFIG=$5
 
 echo "[wrapper] FILEID    = " ${FILEID}
 echo "[wrapper] FILE      = " ${FILE}
 echo "[wrapper] COPYDIR   = " ${COPYDIR}
+echo "[wrapper] CONFIG    = " ${CONFIG}
+
 
 #
 # set up environment
 #
-CMSSW_VERSION=CMSSW_8_0_26
+CMSSW_VERSION=CMSSW_9_4_7
 
 ###version using cvmfs install of CMSSW
 echo "[wrapper] setting env"
-export SCRAM_ARCH=slc6_amd64_gcc530
+export SCRAM_ARCH=slc6_amd64_gcc630
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 OLDDIR=`pwd`
 cd /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/cmssw/$CMSSW_VERSION/src
@@ -47,6 +50,7 @@ echo
 echo "[wrapper] hostname  = " `hostname`
 echo "[wrapper] date      = " `date`
 echo "[wrapper] linux timestamp = " `date +%s`
+echo "[wrapper] input file = ${FILE}" 
 echo "[wrapper] checking input file with ls"
 ls -alrth ${FILE}
 
@@ -70,11 +74,7 @@ fi
 
 echo "[wrapper] creating input sandbox"
 
-TEMP=job_input_${TAG}_${FILEID}
-
-cp -r job_input $TEMP
-
-cd $TEMP
+tar xfz input.tar
 
 echo "[wrapper] input contents are"
 ls -a
@@ -85,9 +85,9 @@ ls
 #
 # run it
 #
-echo "[wrapper] running: ./FshortLooper.exe ${FILEID} ${FILE}"
+echo "[wrapper] running: ./FshortLooper.exe ${FILEID} ${FILE} ${CONFIG}"
 
-./FshortLooper.exe ${FILEID} ${FILE}
+./FshortLooper.exe ${FILEID} ${FILE} ${CONFIG}
 
 #
 # do something with output
@@ -104,17 +104,14 @@ echo "[wrapper] copying file"
 OUTPUT=`ls | grep ${FILEID}`
 echo "[wrapper] OUTPUT = " ${OUTPUT}
 
-if [ ! -d "${COPYDIR}" ]; then
-    echo "creating output directory " ${COPYDIR}
-    mkdir ${COPYDIR}
-fi
-
-mv ${OUTPUT} ${COPYDIR}/${OUTPUT}
+echo "[wrapper] preparing to gfal-copy"
+export LD_PRELOAD=/usr/lib64/gfal2-plugins/libgfal_plugin_xrootd.so
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/${OUTPUT}
 
 echo "[wrapper] cleaning up"
-cd ..
-rm -rf $TEMP
+for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done
 echo "[wrapper] cleaned up"
+pwd
 ls
 
 
