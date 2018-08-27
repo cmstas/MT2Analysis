@@ -275,24 +275,7 @@ void MT2Looper::SetSignalRegions(){
   SRBase.SetVarCRSL("diffMetMhtOverMet", 0, 0.5);
   SRBase.SetVarCRSL("nlep", 1, 2);
   SRBase.SetVarCRSL("passesHtMet", 1, 2);
-  SRBase.SetVarCRQCD("mt2", 200, -1);
-  SRBase.SetVarCRQCD("j1pt", 30, -1);
-  SRBase.SetVarCRQCD("j2pt", 30, -1);
-  SRBase.SetVarCRQCD("deltaPhiMin", 0, 0.3);
-  SRBase.SetVarCRQCD("diffMetMhtOverMet", 0, 0.5);
-  SRBase.SetVarCRQCD("nlep", 0, 1);
-  SRBase.SetVarCRQCD("passesHtMet", 1, 2);
   SRBase.SetMT2Bins(n_mt2bins_SRBase, (float*) SRBase_mt2bins);
-
-  CRMT2Sideband.SetName("crqcdMT2Sideband");
-  CRMT2Sideband.SetVar("mt2", 100, 200);
-  CRMT2Sideband.SetVar("j1pt", 30, -1);
-  CRMT2Sideband.SetVar("j2pt", 30, -1);
-  CRMT2Sideband.SetVar("deltaPhiMin", 0.3, -1);
-  CRMT2Sideband.SetVar("diffMetMhtOverMet", 0, 0.5);
-  CRMT2Sideband.SetVar("nlep", 0, 1);
-  CRMT2Sideband.SetVar("passesHtMet", 1, 2);
-  CRMT2Sideband.SetMT2Bins(n_mt2bins_SRBase, (float*) SRBase_mt2bins);
   
 
   std::vector<std::string> vars = SRBase.GetListOfVariables();
@@ -1310,7 +1293,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
       // check for failing minDphi, for QCD CR
       bool doQCDplots = false;
-      if (nJet30_ >= 2 && ((deltaPhiMin_ < 0.3 && mt2_>200) || (deltaPhiMin_ > 0.3 && mt2_>100 && mt2_<200) || (nJet30_==2 && met_pt_>250.))) doQCDplots = true;
+      if (nJet30_ >= 2 && deltaPhiMin_ < 0.3) doQCDplots = true;
 
       ////////////////////////////////////
       /// done with overall selection  /// 
@@ -2295,25 +2278,6 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
       fillHistosQCD(SRVec.at(srN).crqcdHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //      break;//control regions are not necessarily orthogonal
     }
-  }
-
-  // topological regions
-  std::map<std::string, float> valuesBase;
-  valuesBase["deltaPhiMin"] = deltaPhiMin_;
-  valuesBase["diffMetMhtOverMet"]  = diffMetMht_/met_pt_;
-  valuesBase["nlep"]        = nlepveto_;
-  valuesBase["j1pt"]        = jet1_pt_;
-  valuesBase["j2pt"]        = jet2_pt_;
-  valuesBase["mt2"]         = mt2_;
-  valuesBase["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
-
-  if(SRBase.PassesSelectionCRQCD(valuesBase)){
-      fillHistosQCD(SRBase.crqcdHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), prefix+"base", suffix);
-  }
-
-  //MT2 sideband
-  if(CRMT2Sideband.PassesSelection(valuesBase)){
-      fillHistosQCD(CRMT2Sideband.srHistMap, CRMT2Sideband.GetNumberOfMT2Bins(), CRMT2Sideband.GetMT2Bins(), prefix+"MT2Sideband", suffix);
   }
 
   // do monojet SRs
