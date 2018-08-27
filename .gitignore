@@ -18,6 +18,7 @@ babymaker/*.root
 babymaker/*.txt
 babymaker/batchsubmit/job_input/*
 babymaker/batchsubmit/submitAll.sh
+babymaker/batchsubmit/mergeLogs/*
 CORE
 **/condor
 MT2Looper/runLooper

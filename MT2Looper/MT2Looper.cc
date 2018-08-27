@@ -1579,7 +1579,7 @@ void MT2Looper::fillHistosInclusive() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
-  if (include_pf_eta) values["PJ1eta"]      = pseudoJet1_eta_;
+  if (include_pj_eta) values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < InclusiveRegions.size(); srN++){
     std::map<std::string, float> values_temp = values;
@@ -1617,7 +1617,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
-  if (include_pf_eta) values["PJ1eta"]      = pseudoJet1_eta_;
+  if (include_pj_eta) values["PJ1eta"]      = pseudoJet1_eta_;
   //values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
 
 
@@ -1664,7 +1664,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
-    if (include_pf_eta) values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
+    if (include_pj_eta) values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values_genmet)){
@@ -1766,7 +1766,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
-  if (include_pf_eta) values["PJ1eta"]      = pseudoJet1_eta_;
+  if (include_pj_eta) values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRSL(values)){
@@ -1838,7 +1838,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
-    if (include_pf_eta) values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
+    if (include_pj_eta) values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelectionCRSL(values_genmet)){
@@ -1917,7 +1917,7 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.gamma_mt2;
   values["ht"]          = t.gamma_ht;
   values["met"]         = t.gamma_met_pt;
-  if (include_pf_eta) values["PJ1eta"]      = t.gamma_pseudoJet1_eta;
+  if (include_pj_eta) values["PJ1eta"]      = t.gamma_pseudoJet1_eta;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2078,7 +2078,7 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   values["mt2"]         = zll_mt2_;
   values["ht"]          = zll_ht_;
   values["met"]         = zll_met_pt_;
-  if (include_pf_eta) values["PJ1eta"]      = zll_pseudoJet1_eta_;
+  if (include_pj_eta) values["PJ1eta"]      = zll_pseudoJet1_eta_;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2164,7 +2164,7 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   values["mt2"]         = t.rl_mt2;
   values["ht"]          = t.rl_ht;
   values["met"]         = t.rl_met_pt;
-  if (include_pf_eta) values["PJ1eta"]      = t.rl_pseudoJet1_eta;
+  if (include_pj_eta) values["PJ1eta"]      = t.rl_pseudoJet1_eta;
 
   // Separate list for SRBASE
   std::map<std::string, float> valuesBase;
@@ -2273,7 +2273,7 @@ void MT2Looper::fillHistosCRQCD(const std::string& prefix, const std::string& su
   values["mt2"]         = mt2_;
   values["ht"]          = ht_;
   values["met"]         = met_pt_;
-  if (include_pf_eta) values["PJ1eta"]      = pseudoJet1_eta_;
+  if (include_pj_eta) values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRQCD(values)){

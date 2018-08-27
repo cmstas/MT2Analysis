@@ -3613,7 +3613,7 @@ namespace mt2 {
 
     // Split every bin into low and high eta
     std::vector<SR> SRVec_2;
-    for (unsigned int iSR = 0; iSR < SRVec.Size(); iSR++) {
+    for (unsigned int iSR = 0; iSR < SRVec.size(); iSR++) {
       SR low = SRVec.at(iSR);
       SR high = SRVec.at(iSR);
       low.SetVar("PJ1eta",0,1.4);
@@ -3624,7 +3624,7 @@ namespace mt2 {
       high.SetVarCRSL("PJ1eta",1.4,-1);
       high.SetVarCRDY("PJ1eta",1.4,-1);
       high.SetVarCRQCD("PJ1eta",1.4,-1);
-      string name = high.GetName();
+      std::string name = high.GetName();
       char last = name.back();
       int remove = 1;
       switch (last) {
@@ -3641,10 +3641,11 @@ namespace mt2 {
 	}
 	break;
       }
-      int num = atoi(name.substr(0,name.length()-remove));
+      std::string ht_str = name.substr(0,name.length()-remove);
+      int num = atoi(ht_str.c_str());
       num += 19;
-      name = itoa(num) + name.substr(name.length()-remove,remove);
-      high.SetName(name);
+      TString newname = Form("%d%s", num, name.substr(name.length()-remove,remove).c_str());
+      high.SetName(newname.Data());
       SRVec_2.push_back(low);
       SRVec_2.push_back(high);
     }
