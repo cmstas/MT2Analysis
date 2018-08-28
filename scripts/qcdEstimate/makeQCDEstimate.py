@@ -14,7 +14,7 @@ data_sample = "data_Run2016"
 qcd_sample = "qcd_ht"
 nonqcd_samples = ["top","wjets_ht","zinv_ht","dyjetsll_ht"]
 
-ht_reg_names = ["ht250to450","ht450to575","ht575to1000","ht1000to1500" ,"ht1500toInf","ht1000toInf","ht1500toInf"]
+ht_reg_names = ["ht250to450","ht450to575","ht575to1200","ht1200to1500" ,"ht1500toInf","ht1200toInf","ht1500toInf"]
 nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
 top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
                  "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
@@ -79,7 +79,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
   topo_reg_names = top_reg_names
   if ht_reg == "ht250to450":
     topo_reg_names = vl_top_reg_names
-  elif ht_reg == "ht1000toInf":
+  elif ht_reg == "ht1200toInf":
     topo_reg_names = ssr_top_reg_names
   elif ht_reg == "ht1500toInf" and iht == 6:
     topo_reg_names = ssr_top_reg_names
@@ -93,7 +93,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
     topi = itop+1
     if ht_reg == "ht250to450":
       topi = vl_top_reg_nums[itop]
-    elif ht_reg == "ht1000toInf":
+    elif ht_reg == "ht1200toInf":
       topi = ssr_low_top_reg_nums[itop]
     elif ht_reg == "ht1500toInf" and iht == 6:
         topi = ssr_hi_top_reg_nums[itop]
