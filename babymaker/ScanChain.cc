@@ -84,7 +84,7 @@ const bool saveLHEweightsScaleOnly = true;
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
 // turn off short track info if running over older cms4 without all the branches
-const bool doShortTrackInfo = true;
+bool doShortTrackInfo = true;
 
 // Short Track Candidate isolation and quality loosening factors
 const float isoSTC = 6, qualSTC = 3;
@@ -348,12 +348,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       }
 
       // get CMS3 version number to use later
-      TString cms3_version = cms3.evt_CMS3tag().at(0);
+      TString cms3_version = cms3.evt_CMS3tag().at(0);     
       // convert last two digits of version number to int
       int small_cms3_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
       bool recent_cms3_version = true;
       if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
       bool isCMS4 = cms3_version.Contains("CMS4");
+      if (cms3_version.Contains("V10-01-00")) doShortTrackInfo = false;
 
       if (verbose) cout << "before trigger" << endl;
 
@@ -1851,21 +1852,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           pfjet_p4_cor   = pfjet_p4_uncor * corr;
           pfjet_p4_corUP = pfjet_p4_uncor * corr * varUP;
           pfjet_p4_corDN = pfjet_p4_uncor * corr * varDN;
-
-          // // ad-hoc MET fix for 2017. Should be OK after next re-reco?
-          if(config_tag.find("data_2017_31Mar2018") != string::npos && fabs(pfjet_p4_uncor.eta()) > 2.650 && fabs(pfjet_p4_uncor.eta()) < 3.139 && pfjet_p4_uncor.pt() < 75){
-              float met_x = met_pt*cos(met_phi);
-              float met_y = met_pt*sin(met_phi);
-              met_x += (pfjet_p4_cor.pt() - pfjet_p4_uncor.pt()) * cos(pfjet_p4_uncor.phi());
-              met_y += (pfjet_p4_cor.pt() - pfjet_p4_uncor.pt()) * sin(pfjet_p4_uncor.phi());
-              met_pt = sqrt(met_x*met_x + met_y*met_y);
-              met_phi = atan2(met_y, met_x);
-
-              pfjet_p4_cor /= corr;
-              pfjet_p4_corUP /= corr * varUP;
-              pfjet_p4_corDN /= corr * varDN;
-          }
-
         }
 
         p4sCorrJets.push_back(pfjet_p4_cor);

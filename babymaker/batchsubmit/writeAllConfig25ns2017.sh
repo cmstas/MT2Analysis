@@ -8,7 +8,8 @@
 # TAG="V00-09-04_json_294927-306462_PromptReco_41p96fb"
 # TAG="RebalanceAndSmear_V00-10-01_json_294927-306462_31Mar2018_correctJECs"
 # TAG="RebalanceAndSmear_V00-10-01_94X_mc"
-TAG="V00-10-03_94x_2017_mc"
+# TAG="V00-10-03_94x_2017_mc"
+TAG="V00-10-04_2017fullYear_31Mar2018"
 
 #
 # DATA
@@ -95,64 +96,64 @@ TAG="V00-10-03_94x_2017_mc"
 # ./writeConfig.sh /hadoop/cms/store/user/namin/ProjectMetis/MuonEG_Run2017F-PromptReco-v1_MINIAOD_CMS4_V00-00-06 ${TAG}_data_Run2017F_MuonEG_PromptReco-v1
 
 
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_MET_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_HTMHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_SingleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_SingleElectron_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_SinglePhoton_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_DoubleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_DoubleEG_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_MuonEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_JetHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_MET_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_HTMHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_SingleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_SingleElectron_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_SinglePhoton_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_DoubleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_DoubleEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_MuonEG_31Mar2018
 
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_MET_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_HTMHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_SingleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_SingleElectron_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_SinglePhoton_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_DoubleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_DoubleEG_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_MuonEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_JetHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_MET_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_HTMHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_SingleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_SingleElectron_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_SinglePhoton_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_DoubleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_DoubleEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_MuonEG_31Mar2018
 
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_MET_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_HTMHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_SingleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_SingleElectron_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_SinglePhoton_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_DoubleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_DoubleEG_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_MuonEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_JetHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_MET_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_HTMHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_SingleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_SingleElectron_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_SinglePhoton_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_DoubleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_DoubleEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_MuonEG_31Mar2018
 
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_MET_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_HTMHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_SingleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_SingleElectron_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_SinglePhoton_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_DoubleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_DoubleEG_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_MuonEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_JetHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_MET_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_HTMHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_SingleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_SingleElectron_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_SinglePhoton_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_DoubleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_DoubleEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_MuonEG_31Mar2018
 
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_MET_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_HTMHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_SingleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_SingleElectron_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_SinglePhoton_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_DoubleMuon_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_DoubleEG_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_MuonEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_JetHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MET_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_MET_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/HTMHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_HTMHT_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleMuon_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_SingleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SingleElectron_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_SingleElectron_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/SinglePhoton_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_SinglePhoton_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleMuon_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_DoubleMuon_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/DoubleEG_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_DoubleEG_31Mar2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/MuonEG_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_MuonEG_31Mar2018
 
 # # #
 # # # JetHT only for Rebalance and Smear
 # # #
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017B_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017C_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017D_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017E_JetHT_31Mar2018
-# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-12/ ${TAG}_data_Run2017F_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017B-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017B_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017C-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017C_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017D-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017D_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017E_JetHT_31Mar2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017F-31Mar2018-v1_MINIAOD_CMS4_V09-04-17/ ${TAG}_data_Run2017F_JetHT_31Mar2018
 
 
 # #
@@ -292,9 +293,12 @@ mkdir -p configs_${TAG}
 mv condor_${TAG}*.cmd configs_${TAG}
 echo "#!/bin/bash" > submitAll.sh
 echo "voms-proxy-init -voms cms -valid 240:00" >> submitAll.sh
+x=0
 for file in configs_${TAG}/*.cmd
 do 
     echo "condor_submit ${file}" >> submitAll.sh
+    x=$((x+`grep "queue" $file | wc -l`))
 done
+echo "[writeAllConfig] TOTAL # JOBS: $x"
 chmod +x submitAll.sh
 echo "[writeAllConfig] wrote submit script submitAll.sh"

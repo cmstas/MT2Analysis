@@ -6,7 +6,7 @@
 
 # TAG="V00-10-03_2018_HEmiss_MC"
 # TAG="V00-10-03_2018_HEmiss_data_relval"
-TAG="V00-10-01_json_314472-317696_2017C_JECs"
+TAG="V00-10-04_2018_json_314472-317696"
 
 #
 # DATA
@@ -138,9 +138,12 @@ mkdir -p configs_${TAG}
 mv condor_${TAG}*.cmd configs_${TAG}
 echo "#!/bin/bash" > submitAll.sh
 echo "voms-proxy-init -voms cms -valid 240:00" >> submitAll.sh
+x=0
 for file in configs_${TAG}/*.cmd
 do 
     echo "condor_submit ${file}" >> submitAll.sh
+    x=$((x+`grep "queue" $file | wc -l`))
 done
+echo "[writeAllConfig] TOTAL # JOBS: $x"
 chmod +x submitAll.sh
 echo "[writeAllConfig] wrote submit script submitAll.sh"

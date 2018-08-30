@@ -4,7 +4,7 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="V00-10-03_2016fullYear_17Jul2018"
+TAG="V00-10-04_2016fullYear_17Jul2018"
 
 #
 # DATA
@@ -167,9 +167,12 @@ mkdir -p configs_${TAG}
 mv condor_${TAG}*.cmd configs_${TAG}
 echo "#!/bin/bash" > submitAll.sh
 echo "voms-proxy-init -voms cms -valid 240:00" >> submitAll.sh
+x=0
 for file in configs_${TAG}/*.cmd
 do 
     echo "condor_submit ${file}" >> submitAll.sh
+    x=$((x+`grep "queue" $file | wc -l`))
 done
+echo "[writeAllConfig] TOTAL # JOBS: $x"
 chmod +x submitAll.sh
 echo "[writeAllConfig] wrote submit script submitAll.sh"

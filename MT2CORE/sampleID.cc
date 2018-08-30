@@ -86,15 +86,14 @@ int sampleID (const string& name) {
     else if (name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
     else if (name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
     else if (name.find("TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8") != string::npos) return 306;
-
-    else if (name.find("TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8") != string::npos) return 301;
-    else if (name.find("TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8") != string::npos) return 303;
     
     else if (name.find("TTJets_HT-600to800") != string::npos) return 311;
     else if (name.find("TTJets_HT-800to1200") != string::npos) return 312;
     else if (name.find("TTJets_HT-1200to2500") != string::npos) return 313;
     else if (name.find("TTJets_HT-2500toInf") != string::npos) return 314;
   }
+  else if (name.find("TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8") != string::npos) return 301;
+  else if (name.find("TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8") != string::npos) return 303;
 
   // 400 block: single top, ttV
   else if (name.find("TToLeptons_s-channel") != string::npos) return 400;
