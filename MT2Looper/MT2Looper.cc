@@ -80,7 +80,7 @@ float doubleRatioWeight(float pTv) {
 RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
 RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
 
-bool verbose = false;
+bool verbose = true;
 bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
@@ -154,7 +154,8 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
   //  SRVec =  getSignalRegions2017(); 
-  SRVec =  getSignalRegions2018(); 
+  //  SRVec =  getSignalRegions2018(); 
+  SRVec = getSignalRegionsPJ();
   SRVecMonojet = getSignalRegionsMonojet2017(); 
 
   //store histograms with cut values for all variables
@@ -1524,7 +1525,6 @@ void MT2Looper::fillHistosSRBase() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
-  if (include_pj_eta) values["PJ1eta"]      = pseudoJet1_eta_;
 
   if(SRBase.PassesSelection(values)) {
     fillHistos(SRBase.srHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), SRBase.GetName(), "");
@@ -1579,7 +1579,6 @@ void MT2Looper::fillHistosInclusive() {
   values["j2pt"]        = jet2_pt_;
   values["mt2"]         = mt2_;
   values["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
-  if (include_pj_eta) values["PJ1eta"]      = pseudoJet1_eta_;
 
   for(unsigned int srN = 0; srN < InclusiveRegions.size(); srN++){
     std::map<std::string, float> values_temp = values;

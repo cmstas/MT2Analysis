@@ -135,6 +135,7 @@ int SR::GetNumberOfMT2Bins(){
 bool SR::PassesSelection(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariables() != values.size()){
+    std::cout << "Number of variables to cut on != number of variables in signal region " << GetName() << ". Passed " << values.size() << ", expected " << GetNumberOfVariables() << std::endl;
     throw std::invalid_argument("Number of variables to cut on != number of variables in signal region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
@@ -155,7 +156,7 @@ bool SR::PassesSelection(std::map<std::string, float> values){
 bool SR::PassesSelectionCRSL(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariablesCRSL() != values.size()){
-    std::cout << "Number of variables to cut on != number of variables in CRSL region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRSL() << std::endl;
+    std::cout << "Number of variables to cut on != number of variables in CRSL region " << GetName() << ". Passed " << values.size() << ", expected " << GetNumberOfVariablesCRSL() << std::endl;
     throw std::invalid_argument("Number of variables to cut on != number of variables in CRSL region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
@@ -176,7 +177,7 @@ bool SR::PassesSelectionCRSL(std::map<std::string, float> values){
 bool SR::PassesSelectionCRDY(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariablesCRDY() != values.size()){
-    std::cout << "Number of variables to cut on != number of variables in CRDY region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRDY() << std::endl;
+    std::cout << "Number of variables to cut on != number of variables in CRDY region " << GetName() << ". Passed " << values.size() << ", expected " << GetNumberOfVariablesCRDY() << std::endl;
     throw std::invalid_argument("Number of variables to cut on != number of variables in CRDY region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
@@ -197,7 +198,7 @@ bool SR::PassesSelectionCRDY(std::map<std::string, float> values){
 bool SR::PassesSelectionCRQCD(std::map<std::string, float> values){
   float ep = 0.000001;
   if(GetNumberOfVariablesCRQCD() != values.size()){
-    std::cout << "Number of variables to cut on != number of variables in CRQCD region. Passed " << values.size() << ", expected " << GetNumberOfVariablesCRQCD() << std::endl;
+    std::cout << "Number of variables to cut on != number of variables in CRQCD region " << GetName() << ". Passed " << values.size() << ", expected " << GetNumberOfVariablesCRQCD() << std::endl;
     throw std::invalid_argument("Number of variables to cut on != number of variables in CRQCD region");
   }
   for(std::map<std::string, float>::const_iterator it = values.begin(); it != values.end(); it++){
