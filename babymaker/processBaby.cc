@@ -10,7 +10,7 @@
 int main(int argc, char **argv) {
 
   if (argc < 3) {
-    std::cout << "USAGE: processBaby <tag> <filename> [<max_num_events>] [<doRebal> (0,1)]" << std::endl;
+    std::cout << "USAGE: processBaby <tag> <filename> [<max_num_events>] [<doRebal> (0,1)] [<doShortTrack> (0,1)]" << std::endl;
     return 1;
   }
 
@@ -24,6 +24,10 @@ int main(int argc, char **argv) {
   bool doRebal = false;
   if (argc >= 5) doRebal = (bool)atoi(argv[4]);
   std::cout << "Doing rebalancing? " << (doRebal ? "yes" : "no") << std::endl;
+
+  bool doShortTrack = true;
+  if (argc >= 6) doShortTrack = (bool)atoi(argv[5]);
+  std::cout << "Doing short track info? " << (doShortTrack ? "yes" : "no") << std::endl;
 
   TChain *chain = new TChain("Events");
   chain->Add(infile.Data());
@@ -236,6 +240,7 @@ int main(int argc, char **argv) {
   
   babyMaker *looper = new babyMaker();
   looper->SetDoRebal(doRebal);
+  looper->SetDoShortTrack(doShortTrack);
   looper->ScanChain(chain, sample, config_tag, isFastsim, max_events); 
   delete chain;
   return 0;
