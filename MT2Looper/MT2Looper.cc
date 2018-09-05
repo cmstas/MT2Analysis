@@ -80,7 +80,7 @@ float doubleRatioWeight(float pTv) {
 RooRealVar* x_ = new RooRealVar( "x", "", 0., 50.);
 RooRealVar* w_ = new RooRealVar( "w", "", 0., 1000.);
 
-bool verbose = true;
+bool verbose = false;
 bool useDRforGammaQCDMixing = true; // requires GenParticles
 // turn on to apply weights to central value
 bool applyWeights = false;
