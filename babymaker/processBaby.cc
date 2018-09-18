@@ -207,6 +207,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2018A") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018A_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2018B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018B_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2018C") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018C_PromptReco_%s" , outfileid.Data());
+  else if (infile.Contains("dataRun2") && infile.Contains("2018B"))                      sample = Form("data_Run2018B_RelVal_%s" , outfileid.Data());
 
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
@@ -221,6 +222,7 @@ int main(int argc, char **argv) {
   else if(infile.Contains("Run2017") && infile.Contains("PromptReco")) config_tag = "data_2017_Prompt";
   else if(infile.Contains("Run2017") && infile.Contains("31Mar2018"))  config_tag = "data_2017_31Mar2018";
   else if(infile.Contains("Run2018") && infile.Contains("PromptReco")) config_tag = "data_2018_Prompt";
+  else if(infile.Contains("dataRun2") && infile.Contains("2018"))      config_tag = "data_2018_Prompt";
   else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Moriond17";
   else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";
   else if(infile.Contains("101X_upgrade2018"))                         config_tag = "mc_101x_Spring18";

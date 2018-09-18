@@ -20,6 +20,7 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "json" : "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt",
     "lumi" : 41.37,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
@@ -97,6 +98,7 @@ MT2Config_defs["data_2017_Prompt"] = {
     "json" : "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt",
     "lumi" : 41.97,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
@@ -116,6 +118,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     "json" : "Cert_314472-321221_13TeV_PromptReco_Collisions18_JSON_snt.txt",
     "lumi" : 19.26,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
@@ -129,6 +132,7 @@ MT2Config_defs["data_2016_Moriond17"] = {
     "json" : "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt",
     "lumi" : 35.92,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
     "btag_med_threshold" : 0.8484,
     "ea_version" : 1,
     "jet_id": "50nsV1",
@@ -211,6 +215,7 @@ MT2Config_defs["data_2016_94x"]["filters"] = [
 MT2Config_defs["mc_94x_Fall17"] = {
     "lumi" : 41.37,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
     "ea_version" : 3,
@@ -235,6 +240,7 @@ MT2Config_defs["mc_101x_Spring18"]["pu_weights_file"] = ""
 MT2Config_defs["mc_80x_Moriond17"] = {
     "lumi" : 35.92,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
     "btag_med_threshold" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
     "ea_version" : 1,
@@ -346,6 +352,7 @@ MT2Configuration GetMT2Config(std::string tag){
         if "lumi" in c[tag]:
             fout.write("        c.lumi               = {0};\n".format(c[tag]["lumi"]))
         fout.write("        c.btagcalib_csv      = \"{0}\";\n".format(c[tag]["btagcalib_csv"]))
+        fout.write("        c.btageff_file       = \"{0}\";\n".format(c[tag]["btageff_file"]))
         fout.write("        c.btag_med_threshold = {0};\n".format(c[tag]["btag_med_threshold"]))
         if "pu_weights_file" in c[tag]:
             fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 

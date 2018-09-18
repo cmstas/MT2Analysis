@@ -161,7 +161,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     reader_fullsim->load(*calib, BTagEntry::JetFlavor::FLAV_C, "comb");
     reader_fullsim->load(*calib, BTagEntry::JetFlavor::FLAV_UDSG, "incl");
     // get btag efficiencies
-    TFile* f_btag_eff = new TFile("btagsf/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root");
+    cout << "Using btag efficiencies from btagsf/" << config_.btageff_file << endl;
+    TFile* f_btag_eff = new TFile(("btagsf/"+config_.btageff_file).c_str());
     TH2D* h_btag_eff_b_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
     TH2D* h_btag_eff_c_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
     TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -355,6 +356,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
       bool isCMS4 = cms3_version.Contains("CMS4");
       if (cms3_version.Contains("V10-01-00")) doShortTrackInfo = false;
+      if (cms3_version.Contains("V00-00-03")) doShortTrackInfo = false;
 
       if (verbose) cout << "before trigger" << endl;
 
@@ -625,9 +627,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
-        Flag_ecalBadCalibFilter                       = cms3.filt_ecalBadCalibFilter();
-        Flag_badMuonFilter                          = cms3.filt_BadPFMuonFilter();
-        Flag_badChargedCandidateFilter                = cms3.filt_BadChargedCandidateFilter();
+        if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
+        if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
+        if(config_.filters["badChargedCandidateFilter"]) Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
         Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
         Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
         // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
@@ -2060,7 +2062,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           jet_mass[njet] = cms3.pfjets_p4().at(iJet).M();
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
           jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
-          jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
+          if(config_tag != "mc_80x_Moriond17") jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
           // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
 
           jet_chf[njet] = cms3.pfjets_chargedHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());

@@ -10,6 +10,7 @@ struct MT2Configuration {
     std::string json;
     float lumi;
     std::string btagcalib_csv;
+    std::string btageff_file;
     float btag_med_threshold;
     std::string pu_weights_file;
     int ea_version;
