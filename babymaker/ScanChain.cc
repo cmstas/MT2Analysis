@@ -83,8 +83,6 @@ const bool saveLHEweightsScaleOnly = true;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
-// turn off short track info if running over older cms4 without all the branches
-bool doShortTrackInfo = true;
 
 // Short Track Candidate isolation and quality loosening factors
 const float isoSTC = 6, qualSTC = 3;
@@ -3144,13 +3142,20 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  if (verbose) std::cout << "Before short track lepton rejection" << std::endl;
 	  
 	  // Lepton veto
+	  // Veto on ANY reco lepton, not just those passing MT2 IDs
 	  const bool nearestPFSel = !(track_nearestPF_DR[ntracks] < 0.1 && (abs(track_nearestPF_id[ntracks]) == 11 || abs(track_nearestPF_id[ntracks]) == 13));
 	  float minrecodr = 0.2;
-	  for (int iL = 0; iL < nlep; iL++) {
-	    float dr = DeltaR(lep_eta[iL],track_eta[ntracks],lep_phi[iL],track_phi[ntracks]);
+	  for (unsigned int i_el = 0; i_el < cms3.els_p4().size(); i_el++) {
+	    float dr = DeltaR(cms3.els_p4().at(i_el).eta(),track_eta[ntracks],cms3.els_p4().at(i_el).phi(),track_phi[ntracks]);
+	    if (minrecodr < dr) minrecodr = dr;
+	  }
+	  for (unsigned int i_mu = 0; i_mu < cms3.mus_p4().size(); i_mu++) {
+	    float dr = DeltaR(cms3.mus_p4().at(i_mu).eta(),track_eta[ntracks],cms3.mus_p4().at(i_mu).phi(),track_phi[ntracks]);
 	    if (minrecodr < dr) minrecodr = dr;
 	  }
 	  const bool recoVeto = minrecodr < 0.1;
+	  if (recoVeto && !track_isLepOverlap[ntracks]) 
+	    std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
 	  // Get rid of anything near or overlapping a lepton
 	  const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
 	

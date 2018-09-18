@@ -27,7 +27,7 @@ class babyMaker {
 
  public:
 
-   babyMaker() : doRecomputeRawPFMET_(false), doRebal(false) {};
+ babyMaker() : doRecomputeRawPFMET_(false), doRebal(false), doShortTrackInfo(true) {};
   ~babyMaker() {
     delete BabyFile_;
     delete BabyTree_;
@@ -42,6 +42,7 @@ class babyMaker {
 
   void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
   void SetDoRebal(bool flag) {doRebal = flag;}
+  void SetDoShortTrack(bool flag) {doShortTrackInfo = flag;}
     
   //functiuon to minimize for rebalancing
   static void minuitFunction(int& nDim, double* gout, double& result, double par[], int flg);
@@ -60,6 +61,7 @@ class babyMaker {
   bool isPromptReco;
   bool doRecomputeRawPFMET_;
   bool doRebal;
+  bool doShortTrackInfo;
 
   // for btag SFs
   BTagCalibration* calib;

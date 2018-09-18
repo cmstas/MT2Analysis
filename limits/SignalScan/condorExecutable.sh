@@ -74,8 +74,10 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
 fi
 
 #Copy the output
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_$SAMPLE.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/limit_$SAMPLE.root
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/log_$SAMPLE.log srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/logs/log_$SAMPLE.log
+#gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_$SAMPLE.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/limit_$SAMPLE.root
+#gfal-copy -p -f -t 4200 --verbose file://`pwd`/log_$SAMPLE.log srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/logs/log_$SAMPLE.log
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_${SAMPLE}.root gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/limit_${SAMPLE}.root
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/log_${SAMPLE}.log gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/log_${SAMPLE}.log
 #lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/limit_$SAMPLE.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/limit_$SAMPLE.root
 stageout_error=$?
 
