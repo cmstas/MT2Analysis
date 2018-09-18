@@ -200,7 +200,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
       h_lostlepDD_cr = (TH1D*) h_data_cr->Clone("h_mt2binsCRyield"); // actual number of CR events in each MT2 bin
       h_lostlepDD_cr_datacard = (TH1D*) h_data_cr->Clone("h_mt2binsCRyieldDatacard"); // CR event yields, integrated above some MT2 bin
       // if not doHybrid, this will integrate all the MT2 bins
-      double data_cr_totalyield = h_lostlepDD_cr->Integral(0,-1);
+      data_cr_totalyield = h_lostlepDD_cr->Integral(0,-1);
       double err_cr_yield = 0.;
       double cr_yield = h_lostlepDD_cr->IntegralAndError(lastbin_hybrid,-1,err_cr_yield);
       for ( int ibin=lastbin_hybrid; ibin <= h_lostlepDD_cr_datacard->GetNbinsX(); ++ibin ) {
