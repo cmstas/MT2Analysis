@@ -113,6 +113,7 @@ class MT2Looper {
   SR SRBaseMonojet;
   SR SRBaseMonojet0B;
   SR SRBaseMonojet1B;
+  SR CRMT2Sideband;
   SR SRNoCut;
   SR CRSL_WJets;
   SR CRSL_TTbar;
