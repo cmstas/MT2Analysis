@@ -4227,7 +4227,6 @@ namespace mt2 {
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
-
     // Low PJeta regions (20+)
 
     // first 11 regions (up to index 10) are high eta, then there are some more inclusive regions from indices 11 to 18
@@ -4493,10 +4492,11 @@ namespace mt2 {
 	low = 1.4;
 	high = -1;
       }
-	sr.SetVar("PJ1eta", low, high);
-	sr.SetVarCRSL("PJ1eta", low, high);
-	sr.SetVarCRDY("PJ1eta", low, high);
-	sr.SetVarCRQCD("PJ1eta", low, high);
+      SR& sr = temp_SR_vec.at(iSR);
+      sr.SetVar("PJ1eta", low, high);
+      sr.SetVarCRSL("PJ1eta", low, high);
+      sr.SetVarCRDY("PJ1eta", low, high);
+      sr.SetVarCRQCD("PJ1eta", low, high);
     }
 
     //add HT and MET requirements
@@ -4674,6 +4674,9 @@ namespace mt2 {
       else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
       else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
       SRVec.push_back(fullSR);
     }
@@ -4707,6 +4710,9 @@ namespace mt2 {
       else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
       SRVec.push_back(fullSR);
     }
@@ -4817,6 +4823,9 @@ namespace mt2 {
       else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
@@ -4848,6 +4857,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr50[] = {200, 400, 600, 800, 1000, 1200, 1800};
     sr.SetMT2Bins(6, mt2bins_sr50);
     SRVec.push_back(sr);
@@ -4869,6 +4882,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr51[] = {200, 400, 600, 800, 1000, 1400, 1800};
     sr.SetMT2Bins(6, mt2bins_sr51);
     SRVec.push_back(sr);
@@ -4890,6 +4907,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr52[] = {200, 400, 600, 800, 1000, 1200, 1800};
     sr.SetMT2Bins(6, mt2bins_sr52);
     SRVec.push_back(sr);
@@ -4911,6 +4932,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr53[] = {200, 400, 600, 800, 1000, 1400, 1800};
     sr.SetMT2Bins(6, mt2bins_sr53);
     SRVec.push_back(sr);
@@ -4932,6 +4957,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr54[] = {200, 400, 600, 800, 1000, 1800};
     sr.SetMT2Bins(5, mt2bins_sr54);
     SRVec.push_back(sr);
@@ -4953,6 +4982,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr55[] = {200, 400, 600, 800, 1000, 1800};
     sr.SetMT2Bins(5, mt2bins_sr55);
     SRVec.push_back(sr);
@@ -4975,6 +5008,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr56[] = {200, 400, 600, 800, 1000, 1800};
     sr.SetMT2Bins(5, mt2bins_sr56);
     SRVec.push_back(sr);
@@ -4996,6 +5033,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr57[] = {200, 400, 600, 800, 1800};
     sr.SetMT2Bins(4, mt2bins_sr57);
     SRVec.push_back(sr);
@@ -5017,6 +5058,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr58[] = {200, 400, 600, 1800};
     sr.SetMT2Bins(3, mt2bins_sr58);
     SRVec.push_back(sr);
@@ -5038,6 +5083,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr59[] = {200, 400, 600, 1800};
     sr.SetMT2Bins(3, mt2bins_sr59);
     SRVec.push_back(sr);
@@ -5059,6 +5108,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1000, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr60[] = {200, 400, 600, 1800};
     sr.SetMT2Bins(3, mt2bins_sr60);
     SRVec.push_back(sr);
@@ -5080,6 +5133,10 @@ namespace mt2 {
     sr.SetVarCRDY("met", 30, -1);
     sr.SetVarCRQCD("ht", 1500, -1);
     sr.SetVarCRQCD("met", 30, -1);
+    sr.SetVar("PJ1eta", 0, -1);
+    sr.SetVarCRSL("PJ1eta", 0, -1);
+    sr.SetVarCRDY("PJ1eta", 0, -1);
+    sr.SetVarCRQCD("PJ1eta", 0, -1);
     float mt2bins_sr61[] = {200, 400, 1800};
     sr.SetMT2Bins(2, mt2bins_sr61);
     SRVec.push_back(sr);
