@@ -4477,6 +4477,17 @@ namespace mt2 {
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
+    // Merged 2-3j, 2b region for H, UH
+    sr.SetName("43");
+    sr.SetVar("njets", 2, 4);
+    sr.SetVar("nbjets", 2, 3);
+    sr.SetVarCRSL("njets", 2, 4);
+    sr.SetVarCRSL("nbjets", 2, 3);
+    sr.SetVarCRDY("njets", 2, 4);
+    sr.SetVarCRDY("nbjets", 2, 3);
+    temp_SR_vec.push_back(sr);
+    sr.Clear();
+
 
     // Add PJeta requirements
     for (unsigned int iSR = 0; iSR < temp_SR_vec.size(); iSR++) {
@@ -4499,6 +4510,8 @@ namespace mt2 {
       sr.SetVarCRQCD("PJ1eta", low, high);
     }
 
+    const float H_UH_division = 1600.0;
+
     //add HT and MET requirements
     for(unsigned int iSR = 0; iSR < FirstLowEtaRegionIndex; iSR++){
       if (iSR >= 3 && iSR <= 10) continue;
@@ -4515,13 +4528,13 @@ namespace mt2 {
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = 0; iSR < FirstLowEtaRegionIndex; iSR++){
@@ -4538,17 +4551,17 @@ namespace mt2 {
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500};      fullSR.SetMT2Bins(3, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 300, H_UH_division};           fullSR.SetMT2Bins(2, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = 0; iSR < FirstLowEtaRegionIndex; iSR++){
@@ -4566,89 +4579,89 @@ namespace mt2 {
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
       // Relative to 2016, need one extra bin here in M to adjust for HT trigger shift from 1000 to 1200 GeV (now have 800-1000 and 1000+ bin)
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division};       fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 300, 400, 500, 700, 900,  H_UH_division};       fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};                  fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division};       fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division};       fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 500, 700, H_UH_division};             fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 500, 700, H_UH_division};             fullSR.SetMT2Bins(5, mt2bins);}
       // Same reason, now there's a 600-900, 900+ bin setup here
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 900, 1500};      fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 900, 1500};      fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[6] = {200, 300, 400, 600, 900, 1500};      fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[6] = {200, 300, 400, 600, 900, 1500};      fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 500, 700, H_UH_division};      fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};           fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};           fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, H_UH_division};                fullSR.SetMT2Bins(3, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = 0; iSR < FirstLowEtaRegionIndex; iSR++){
       if (iSR >= 11) continue;      
       SR fullSR = temp_SR_vec.at(iSR);  
       fullSR.SetName(fullSR.GetName() + "H");
-      fullSR.SetVar("ht", 1200, 1500);
+      fullSR.SetVar("ht", 1200, H_UH_division);
       fullSR.SetVar("met", 30, -1);
-      fullSR.SetVarCRSL("ht", 1200, 1500);
+      fullSR.SetVarCRSL("ht", 1200, H_UH_division);
       fullSR.SetVarCRSL("met", 30, -1);
-      fullSR.SetVarCRDY("ht", 1200, 1500);
+      fullSR.SetVarCRDY("ht", 1200, H_UH_division);
       fullSR.SetVarCRDY("met", 30, -1);
-      fullSR.SetVarCRQCD("ht", 1200, 1500);
+      fullSR.SetVarCRQCD("ht", 1200, H_UH_division);
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1500};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1500};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1500};                  fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1500};                  fullSR.SetMT2Bins(3, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, H_UH_division};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[2] = {200, H_UH_division};                            fullSR.SetMT2Bins(1, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[6] = {200, 400, 600, 800, 1000, H_UH_division};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, H_UH_division};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[5] = {200, 400, 600, 800, H_UH_division};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, H_UH_division};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, H_UH_division};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 400, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = 0; iSR < FirstLowEtaRegionIndex; iSR++){
       if (iSR >= 11) continue;
       SR fullSR = temp_SR_vec.at(iSR);  
       fullSR.SetName(fullSR.GetName() + "UH");
-      fullSR.SetVar("ht", 1500, -1);
+      fullSR.SetVar("ht", H_UH_division, -1);
       fullSR.SetVar("met", 30, -1);
-      fullSR.SetVarCRSL("ht", 1500, -1);
+      fullSR.SetVarCRSL("ht", H_UH_division, -1);
       fullSR.SetVarCRSL("met", 30, -1);
-      fullSR.SetVarCRDY("ht", 1500, -1);
+      fullSR.SetVarCRDY("ht", H_UH_division, -1);
       fullSR.SetVarCRDY("met", 30, -1);
-      fullSR.SetVarCRQCD("ht", 1500, -1);
+      fullSR.SetVarCRQCD("ht", H_UH_division, -1);
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
       int njets_hi = fullSR.GetUpperBound("njets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 2){
-        float mt2bins[3] = {200, 400, 1800};
+        float mt2bins[2] = {200, 1800};
         float mt2bins_ssr[4] = {200, 400, 600, 1800};
         if (njets_hi == -1)
           fullSR.SetMT2Bins(3, mt2bins_ssr);
         else
-          fullSR.SetMT2Bins(2, mt2bins);          
+          fullSR.SetMT2Bins(1, mt2bins);          
       }      
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1800};                  fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1800};       fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[5] = {200, 400, 600, 800, 1800};       fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
       SRVec.push_back(fullSR);
     }
 
     //add HT and MET requirements for low PJ eta bins
     // we need to modify these bins to account for the 2, 3, 4, 5-6, 7-9, and 10+ jet rebinning
     for(unsigned int iSR = FirstLowEtaRegionIndex; iSR < temp_SR_vec.size(); iSR++){
-      // regions 35-39 and 42 are M, H, UH only
+      // regions 35-39 and 42 are M, H, UH only, 43 is H,UH only
       if (iSR >= 34 && iSR <= 38) continue;
-      if (iSR == 41) continue;
+      if (iSR >= 41) continue;
       SR fullSR = temp_SR_vec.at(iSR); 
       fullSR.SetName(fullSR.GetName() + "VL");
       fullSR.SetVar("ht", 250, 450);
@@ -4661,29 +4674,29 @@ namespace mt2 {
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, 1500}; fullSR.SetMT2Bins(3, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division}; fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[3] = {200, 300, H_UH_division};      fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 300, H_UH_division};      fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[3] = {200, 300, H_UH_division};      fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[3] = {200, 300, H_UH_division};      fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[2] = {200, H_UH_division};           fullSR.SetMT2Bins(1, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[2] = {200, H_UH_division};           fullSR.SetMT2Bins(1, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = FirstLowEtaRegionIndex; iSR < temp_SR_vec.size(); iSR++){
-      // regions 35-39 and 42 are M, H, UH only
+      // regions 35-39 and 42 are M, H, UH only, 43 is H,UH only
       if (iSR >= 34 && iSR <= 38) continue;
-      if (iSR == 41) continue;
+      if (iSR >= 41) continue;
       SR fullSR = temp_SR_vec.at(iSR);      
       fullSR.SetName(fullSR.GetName() + "L");
       fullSR.SetVar("ht", 450, 575);
@@ -4697,29 +4710,30 @@ namespace mt2 {
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
       // Same as VL, except an extra 400-500 MT2 bin
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, 1500}; fullSR.SetMT2Bins(4, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 500, H_UH_division}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 300, 400, H_UH_division};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, H_UH_division};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 300, 400, H_UH_division};      fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 300, H_UH_division};           fullSR.SetMT2Bins(2, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = FirstLowEtaRegionIndex; iSR < temp_SR_vec.size(); iSR++){
-      // regions 32-34 and 41 are VL, L only
+      // regions 32-34 and 41 are VL, L only, 43 is H,UH only
       if (iSR >= 31 && iSR <= 33) continue;
       if (iSR == 40) continue;
+      if (iSR == 42) continue;
       SR fullSR = temp_SR_vec.at(iSR);  
       fullSR.SetName(fullSR.GetName() + "M");
       fullSR.SetVar("ht", 575, 1200);
@@ -4732,107 +4746,109 @@ namespace mt2 {
       fullSR.SetVarCRQCD("met", 250, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 300, 400, 600, 800, 1500}; fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, 1500};      fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 10 && nbjets_lo == 0){float mt2bins[3] = {200, 300, 1500};               fullSR.SetMT2Bins(2, mt2bins);}
-      else if(njets_lo == 10 && nbjets_lo == 1){float mt2bins[3] = {200, 300, 1500};               fullSR.SetMT2Bins(2, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, H_UH_division};                 fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 600, 800, H_UH_division};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, H_UH_division};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 500, H_UH_division};            fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, H_UH_division};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};            fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 600, 800, 1000, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[6] = {200, 300, 400, 600, 800, H_UH_division}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[7] = {200, 300, 400, 500, 600, 700, H_UH_division};  fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[5] = {200, 300, 400, 600, H_UH_division};      fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 300, 400, H_UH_division};           fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 10 && nbjets_lo == 0){float mt2bins[3]= {200, 300, H_UH_division};                fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 10 && nbjets_lo == 1){float mt2bins[4]= {200, 300, 400, H_UH_division};           fullSR.SetMT2Bins(3, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = FirstLowEtaRegionIndex; iSR < temp_SR_vec.size(); iSR++){
       // regions 32-34 and 41 are VL, L only
       if (iSR >= 31 && iSR <= 33) continue;
+      if (iSR == 23 || iSR == 24) continue; // regions 24 and 25 (2j2b and 3j2b) are merged for H
       if (iSR == 40) continue;
       SR fullSR = temp_SR_vec.at(iSR);  
       fullSR.SetName(fullSR.GetName() + "H");
-      fullSR.SetVar("ht", 1200, 1500);
+      fullSR.SetVar("ht", 1200, H_UH_division);
       fullSR.SetVar("met", 30, -1);
-      fullSR.SetVarCRSL("ht", 1200, 1500);
+      fullSR.SetVarCRSL("ht", 1200, H_UH_division);
       fullSR.SetVarCRSL("met", 30, -1);
-      fullSR.SetVarCRDY("ht", 1200, 1500);
+      fullSR.SetVarCRDY("ht", 1200, H_UH_division);
       fullSR.SetVarCRDY("met", 30, -1);
-      fullSR.SetVarCRQCD("ht", 1200, 1500);
+      fullSR.SetVarCRQCD("ht", 1200, H_UH_division);
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 1500}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1500};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1500};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1500};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1500};                  fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1500};                  fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 10 && nbjets_lo == 0){float mt2bins[3] = {200, 300, 1500};               fullSR.SetMT2Bins(2, mt2bins);}
-      else if(njets_lo == 10 && nbjets_lo == 1){float mt2bins[3] = {200, 300, 1500};               fullSR.SetMT2Bins(2, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[3] = {200, 400, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[2] = {200, H_UH_division};                            fullSR.SetMT2Bins(1, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, H_UH_division}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[3] = {200, 400, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      //      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[2] = {200, H_UH_division};                            fullSR.SetMT2Bins(1, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, H_UH_division};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, H_UH_division};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[3] = {200, 400, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, H_UH_division};       fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, H_UH_division};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, H_UH_division};                  fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[5] = {200, 400, 600, 800, H_UH_division};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, H_UH_division};             fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[3] = {200, 400, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 300, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 300, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 10 && nbjets_lo == 0){float mt2bins[3]= {200, 300, H_UH_division};                       fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 10 && nbjets_lo == 1){float mt2bins[4]= {200, 300, 400, H_UH_division};                  fullSR.SetMT2Bins(3, mt2bins);}
       SRVec.push_back(fullSR);
     }
     for(unsigned int iSR = FirstLowEtaRegionIndex; iSR < temp_SR_vec.size(); iSR++){
       // regions 32-34 and 41 are VL, L only
       if (iSR >= 31 && iSR <= 33) continue;
+      if (iSR == 23 || iSR == 24) continue; // regions 24 and 25 (2j2b and 3j2b) are merged for UH
       if (iSR == 40) continue;
       SR fullSR = temp_SR_vec.at(iSR);  
       fullSR.SetName(fullSR.GetName() + "UH");
-      fullSR.SetVar("ht", 1500, -1);
+      fullSR.SetVar("ht", H_UH_division, -1);
       fullSR.SetVar("met", 30, -1);
-      fullSR.SetVarCRSL("ht", 1500, -1);
+      fullSR.SetVarCRSL("ht", H_UH_division, -1);
       fullSR.SetVarCRSL("met", 30, -1);
-      fullSR.SetVarCRDY("ht", 1500, -1);
+      fullSR.SetVarCRDY("ht", H_UH_division, -1);
       fullSR.SetVarCRDY("met", 30, -1);
-      fullSR.SetVarCRQCD("ht", 1500, -1);
+      fullSR.SetVarCRQCD("ht", H_UH_division, -1);
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
       int njets_hi = fullSR.GetUpperBound("njets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[5] = {200, 400, 600, 800, 1800}; fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[3] = {200, 400, 1800};           fullSR.SetMT2Bins(2, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 2){
-        float mt2bins[3] = {200, 400, 1800};
+        float mt2bins[2] = {200, 1800};
         float mt2bins_ssr[4] = {200, 400, 600, 1800};
         if (njets_hi == -1)
           fullSR.SetMT2Bins(3, mt2bins_ssr);
         else
-          fullSR.SetMT2Bins(2, mt2bins);          
+          fullSR.SetMT2Bins(1, mt2bins);          
       }      
-      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1800};                       fullSR.SetMT2Bins(2, mt2bins);}      
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 1800}; fullSR.SetMT2Bins(6, mt2bins);}
-      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 1800};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 1800};                  fullSR.SetMT2Bins(3, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                       fullSR.SetMT2Bins(2, mt2bins);}
-      else if(njets_lo == 10 && nbjets_lo == 0){float mt2bins[3] = {200, 300, 1500};               fullSR.SetMT2Bins(2, mt2bins);}
-      else if(njets_lo == 10 && nbjets_lo == 1){float mt2bins[3] = {200, 300, 1500};               fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 0){float mt2bins[5] = {200, 400, 600, 800, 1800};       fullSR.SetMT2Bins(4, mt2bins);}
+      else if(njets_lo == 3 && nbjets_lo == 1){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      //      else if(njets_lo == 3 && nbjets_lo == 2){float mt2bins[2] = {200, 1800};                      fullSR.SetMT2Bins(1, mt2bins);}      
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 1800}; fullSR.SetMT2Bins(5, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 5 && nbjets_lo == 2){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[4] = {200, 400, 600, 1800};            fullSR.SetMT2Bins(3, mt2bins);}
+      else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 3){float mt2bins[3] = {200, 400, 1800};                 fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 10 && nbjets_lo == 0){float mt2bins[3] = {200, 300, 1800};                fullSR.SetMT2Bins(2, mt2bins);}
+      else if(njets_lo == 10 && nbjets_lo == 1){float mt2bins[4] = {200, 300, 400, 1800};           fullSR.SetMT2Bins(3, mt2bins);}
       SRVec.push_back(fullSR);
     }
 
@@ -4870,17 +4886,17 @@ namespace mt2 {
     sr.SetName("51");
     sr.SetVar("njets", 2, -1);
     sr.SetVar("nbjets", 0, -1);
-    sr.SetVar("ht", 1500, -1);
+    sr.SetVar("ht", H_UH_division, -1);
     sr.SetVar("met", 30, -1);
     sr.SetVarCRSL("njets", 2, -1);
     sr.SetVarCRSL("nbjets", 0, -1);
-    sr.SetVarCRSL("ht", 1500, -1);
+    sr.SetVarCRSL("ht", H_UH_division, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 2, -1);
     sr.SetVarCRDY("nbjets", 0, -1);
-    sr.SetVarCRDY("ht", 1500, -1);
+    sr.SetVarCRDY("ht", H_UH_division, -1);
     sr.SetVarCRDY("met", 30, -1);
-    sr.SetVarCRQCD("ht", 1500, -1);
+    sr.SetVarCRQCD("ht", H_UH_division, -1);
     sr.SetVarCRQCD("met", 30, -1);
     sr.SetVar("PJ1eta", 0, -1);
     sr.SetVarCRSL("PJ1eta", 0, -1);
@@ -4920,17 +4936,17 @@ namespace mt2 {
     sr.SetName("53");
     sr.SetVar("njets", 4, -1);
     sr.SetVar("nbjets", 0, -1);
-    sr.SetVar("ht", 1500, -1);
+    sr.SetVar("ht", H_UH_division, -1);
     sr.SetVar("met", 30, -1);
     sr.SetVarCRSL("njets", 4, -1);
     sr.SetVarCRSL("nbjets", 0, -1);
-    sr.SetVarCRSL("ht", 1500, -1);
+    sr.SetVarCRSL("ht", H_UH_division, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 4, -1);
     sr.SetVarCRDY("nbjets", 0, -1);
-    sr.SetVarCRDY("ht", 1500, -1);
+    sr.SetVarCRDY("ht", H_UH_division, -1);
     sr.SetVarCRDY("met", 30, -1);
-    sr.SetVarCRQCD("ht", 1500, -1);
+    sr.SetVarCRQCD("ht", H_UH_division, -1);
     sr.SetVarCRQCD("met", 30, -1);
     sr.SetVar("PJ1eta", 0, -1);
     sr.SetVarCRSL("PJ1eta", 0, -1);
@@ -4970,17 +4986,17 @@ namespace mt2 {
     sr.SetName("55");
     sr.SetVar("njets", 7, -1);
     sr.SetVar("nbjets", 0, -1);
-    sr.SetVar("ht", 1500, -1);
+    sr.SetVar("ht", H_UH_division, -1);
     sr.SetVar("met", 30, -1);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 0, -1);
-    sr.SetVarCRSL("ht", 1500, -1);
+    sr.SetVarCRSL("ht", H_UH_division, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 0, -1);
-    sr.SetVarCRDY("ht", 1500, -1);
+    sr.SetVarCRDY("ht", H_UH_division, -1);
     sr.SetVarCRDY("met", 30, -1);
-    sr.SetVarCRQCD("ht", 1500, -1);
+    sr.SetVarCRQCD("ht", H_UH_division, -1);
     sr.SetVarCRQCD("met", 30, -1);
     sr.SetVar("PJ1eta", 0, -1);
     sr.SetVarCRSL("PJ1eta", 0, -1);
@@ -5021,17 +5037,17 @@ namespace mt2 {
     sr.SetName("57");
     sr.SetVar("njets", 2, -1);
     sr.SetVar("nbjets", 2, -1);
-    sr.SetVar("ht", 1500, -1);
+    sr.SetVar("ht", H_UH_division, -1);
     sr.SetVar("met", 30, -1);
     sr.SetVarCRSL("njets", 2, -1);
     sr.SetVarCRSL("nbjets", 2, -1);
-    sr.SetVarCRSL("ht", 1500, -1);
+    sr.SetVarCRSL("ht", H_UH_division, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 2, -1);
     sr.SetVarCRDY("nbjets", 2, -1);
-    sr.SetVarCRDY("ht", 1500, -1);
+    sr.SetVarCRDY("ht", H_UH_division, -1);
     sr.SetVarCRDY("met", 30, -1);
-    sr.SetVarCRQCD("ht", 1500, -1);
+    sr.SetVarCRQCD("ht", H_UH_division, -1);
     sr.SetVarCRQCD("met", 30, -1);
     sr.SetVar("PJ1eta", 0, -1);
     sr.SetVarCRSL("PJ1eta", 0, -1);
@@ -5071,17 +5087,17 @@ namespace mt2 {
     sr.SetName("59");
     sr.SetVar("njets", 2, -1);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVar("ht", 1500, -1);
+    sr.SetVar("ht", H_UH_division, -1);
     sr.SetVar("met", 30, -1);
     sr.SetVarCRSL("njets", 2, -1);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRSL("ht", 1500, -1);
+    sr.SetVarCRSL("ht", H_UH_division, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 2, -1);
     sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
-    sr.SetVarCRDY("ht", 1500, -1);
+    sr.SetVarCRDY("ht", H_UH_division, -1);
     sr.SetVarCRDY("met", 30, -1);
-    sr.SetVarCRQCD("ht", 1500, -1);
+    sr.SetVarCRQCD("ht", H_UH_division, -1);
     sr.SetVarCRQCD("met", 30, -1);
     sr.SetVar("PJ1eta", 0, -1);
     sr.SetVarCRSL("PJ1eta", 0, -1);
@@ -5121,17 +5137,17 @@ namespace mt2 {
     sr.SetName("61");
     sr.SetVar("njets", 7, -1);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVar("ht", 1500, -1);
+    sr.SetVar("ht", H_UH_division, -1);
     sr.SetVar("met", 30, -1);
     sr.SetVarCRSL("njets", 7, -1);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRSL("ht", 1500, -1);
+    sr.SetVarCRSL("ht", H_UH_division, -1);
     sr.SetVarCRSL("met", 30, -1);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1); // DY: NB>0
-    sr.SetVarCRDY("ht", 1500, -1);
+    sr.SetVarCRDY("ht", H_UH_division, -1);
     sr.SetVarCRDY("met", 30, -1);
-    sr.SetVarCRQCD("ht", 1500, -1);
+    sr.SetVarCRQCD("ht", H_UH_division, -1);
     sr.SetVarCRQCD("met", 30, -1);
     sr.SetVar("PJ1eta", 0, -1);
     sr.SetVarCRSL("PJ1eta", 0, -1);
