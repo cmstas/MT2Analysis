@@ -25,6 +25,7 @@ namespace mt2
   std::vector<SR> getSignalRegions2017();
   std::vector<SR> getSignalRegionsPJ();
   std::vector<SR> getSignalRegions2018();
+  std::vector<SR> getSignalRegions2018HUH();
 
 } // namespace mt2
 
