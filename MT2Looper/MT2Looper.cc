@@ -136,7 +136,7 @@ bool include_pj_eta = false;
 
 // load rphi fits to perform r_effective calculation.
 bool doReffCalculation = false;
-string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/V00-09-04_41p96fb/qcdHistos.root";
+string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/V00-10-04_94x_Fall17_MC/qcdHistos.root";
 TFile* rphi_file;
 vector<TF1*> rphi_fits_data;
 vector<TF1*> rphi_fits_mc;
@@ -153,7 +153,7 @@ MT2Looper::~MT2Looper(){
 };
 
 void MT2Looper::SetSignalRegions(){
-  //  SRVec =  getSignalRegions2017(); 
+   // SRVec =  getSignalRegions2017(); 
   //  SRVec =  getSignalRegions2018(); 
   SRVec = getSignalRegionsPJ();
   SRVecMonojet = getSignalRegionsMonojet2017(); 
@@ -648,7 +648,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       cout << "WARNING: could not open rphi file: " << rphi_file_name << endl;
       doReffCalculation = false;
     }else{
-      string ht_strs[6] = {"ht250to450","ht450to575","ht575to1000","ht1000to1500","ht1500toInf","ht1000toInf"};
+      string ht_strs[6] = {"ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"};
       string syst_strs[3] = {"","_systUp","_systDown"};
       for(int i=0; i<6; i++){
         for(int j=0; j<3; j++){
@@ -740,14 +740,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   }
   if (verbose) cout<<__LINE__<<endl;
 
-  // if (applyLeptonSFfromFiles) {
-  //   setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
-  //   setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-  //       	"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-  //       	"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-  //       	"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
-  //   setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
-  // }
+  if (applyLeptonSFfromFiles) {
+    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+        	"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+        	"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+        	"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
+  }
   
   if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     setElSFfile_fastsim("../babymaker/lepsf/moriond17/sf_el_vetoCB_mini01.root");  

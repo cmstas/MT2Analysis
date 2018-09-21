@@ -42,7 +42,7 @@ MT2Configuration GetMT2Config(std::string tag){
     if(tag == "data_2016_94x"){
 
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
-        c.lumi               = 35.92;
+        c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
         c.btag_med_threshold = 0.8484;
@@ -103,7 +103,7 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2016_Moriond17"){
 
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
-        c.lumi               = 35.92;
+        c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
         c.btag_med_threshold = 0.8484;
@@ -350,7 +350,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_101x_Spring18"){
 
-        c.lumi               = 41.37;
+        c.lumi               = 41.529;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold = 0.8838;
@@ -369,7 +369,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_80x_Moriond17"){
 
-        c.lumi               = 35.92;
+        c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
         c.btag_med_threshold = 0.8484;
@@ -387,7 +387,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_80x_fastsim_Moriond17"){
 
-        c.lumi               = 35.92;
+        c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
         c.btag_med_threshold = 0.8484;
@@ -405,7 +405,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_94x_Fall17"){
 
-        c.lumi               = 41.37;
+        c.lumi               = 41.529;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold = 0.8838;

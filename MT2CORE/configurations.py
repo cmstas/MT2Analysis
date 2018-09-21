@@ -130,7 +130,7 @@ MT2Config_defs["data_2018_Prompt"] = {
 
 MT2Config_defs["data_2016_Moriond17"] = {
     "json" : "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt",
-    "lumi" : 35.92,
+    "lumi" : 35.922,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
     "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
     "btag_med_threshold" : 0.8484,
@@ -213,7 +213,7 @@ MT2Config_defs["data_2016_94x"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_Fall17"] = {
-    "lumi" : 41.37,
+    "lumi" : 41.529,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold" : 0.8838,
@@ -238,7 +238,7 @@ MT2Config_defs["mc_101x_Spring18"]["pu_weights_file"] = ""
 
 
 MT2Config_defs["mc_80x_Moriond17"] = {
-    "lumi" : 35.92,
+    "lumi" : 35.922,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
     "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
     "btag_med_threshold" : 0.8484,
