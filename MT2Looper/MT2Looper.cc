@@ -101,7 +101,7 @@ bool applyDileptonTriggerWeights = true;
 // use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = true;
+bool doSystVariationPlots = false;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply nTrueInt reweighting to MC
@@ -131,7 +131,7 @@ bool ignoreScale1fb = false;
 // print qcd CR event list
 bool print_qcd_event_list = false;
 // set this to true if using a signal region set that includes pseudojet eta binning
-bool include_pj_eta = false;
+bool include_pj_eta = true;
 
 
 // load rphi fits to perform r_effective calculation.
@@ -155,8 +155,11 @@ MT2Looper::~MT2Looper(){
 void MT2Looper::SetSignalRegions(){
   //  SRVec =  getSignalRegions2017(); 
   //  SRVec =  getSignalRegions2018(); 
-  SRVec = getSignalRegionsPJ();
+  //  SRVec =  getSignalRegions2018HUH(); 
+  SRVec =  getSignalRegions2018lessNJ(); 
   SRVecMonojet = getSignalRegionsMonojet2017(); 
+
+  if (verbose) cout << "Storing cut values for multijet" << endl;
 
   //store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -225,6 +228,8 @@ void MT2Looper::SetSignalRegions(){
     outfile_->cd();
   }
 
+  if (verbose) cout << "Storing cut values for monojet" << endl;
+
   //monojet regions: store histograms with cut values for all variables
   for(unsigned int i = 0; i < SRVecMonojet.size(); i++){
     std::vector<std::string> vars = SRVecMonojet.at(i).GetListOfVariables();
@@ -263,6 +268,8 @@ void MT2Looper::SetSignalRegions(){
     plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).crgjHistMap, "", 1, 0, 2);
     outfile_->cd();
   }
+
+  if (verbose) cout << "Setting up base and sideband SRs" << endl;
 
   SRBase.SetName("srbase");
   SRBase.SetVar("mt2", 200, -1);
@@ -337,6 +344,8 @@ void MT2Looper::SetSignalRegions(){
   }
   plot1D("h_n_mt2bins",  1, SRBase.GetNumberOfMT2Bins(), SRBase.crrlHistMap, "", 1, 0, 2);
   outfile_->cd();
+
+  if (verbose) cout << "setting up inclusive regions" << endl;
 
   //setup inclusive regions
   SR InclusiveHT250to450 = SRBase;
@@ -421,6 +430,8 @@ void MT2Looper::SetSignalRegions(){
   CRSL_TTbar.SetName("crslttbar");
   CRSL_TTbar.SetVarCRSL("nbjets", 2, -1);
   CRSL_TTbar.crslHistMap.clear();
+
+  if (verbose) cout << "setting up monojet base regions" << endl;
 
   // ----- monojet base regions
 
@@ -524,7 +535,7 @@ void MT2Looper::SetSignalRegions(){
   plot1D("h_n_mt2bins",  1, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.crqcdHistMap, "", 1, 0, 2);
   outfile_->cd();
 
-
+  if (verbose) cout << "Setting up regions inclusive in Njet" << endl;
   
   // inclusive in njets (mono+multi jet regions)
   SRBaseIncl.SetName("srbaseIncl");
@@ -740,14 +751,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   }
   if (verbose) cout<<__LINE__<<endl;
 
-  // if (applyLeptonSFfromFiles) {
-  //   setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
-  //   setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-  //       	"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-  //       	"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-  //       	"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
-  //   setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
-  // }
+  if (applyLeptonSFfromFiles) {
+    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
+    setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+		"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+         	"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+         	"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
+  }
   
   if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
     setElSFfile_fastsim("../babymaker/lepsf/moriond17/sf_el_vetoCB_mini01.root");  
@@ -778,6 +789,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   cout << "[MT2Looper::loop] setting up histos" << endl;
 
   SetSignalRegions();
+
+  if (verbose) cout << "Set signal regions successfully." << endl;
 
   SRNoCut.SetName("nocut");
   float SRNoCut_mt2bins[10] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800};
@@ -1024,7 +1037,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       // set weights and start making plots
       //---------------------
       outfile_->cd();
-      const float lumi = config_.lumi;
+      //      const float lumi = config_.lumi;
+      const float lumi = 150; // we're looking at 150/fb for region test
     
       evtweight_ = 1.;
       if (verbose) cout<<__LINE__<<endl;
@@ -1036,7 +1050,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
 	} else {
-	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
+	  if (!ignoreScale1fb) {
+	    evtweight_ = t.evt_scale1fb != 1 ? t.evt_scale1fb * lumi : 1.9099e-06 * lumi; // manually fix the scale1fb for wjets_ht2500toInf
+	  }
 	}
 	if (verbose) cout<<__LINE__<<endl;
 	if (applyBtagSF) {
