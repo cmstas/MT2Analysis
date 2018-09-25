@@ -18,7 +18,7 @@ done
 
 CONFIG=mc_80x_Moriond17
 INDIR=/home/users/dpgilber/2017/SkimSMS
-declare -a Samples=(T1bbbb_1400_1200 T1qqqq_1200_1000 T1tttt_1200_800 T2bb_1000_600 T2qq_1400_700 T2tt_1000_500 T1bbbb_1900_1400 T1qqqq_1800_1000 T1tttt_1600_1000 T2bb_1200_100 T2qq_1600_100 T2tt_1100_100 T1bbbb_2100_200 T1qqqq_1900_200 T1tttt_1900_200 T2bb_700_600 T2qq_900_800 T2tt_700_400)
+declare -a Samples=(T1bbbb T1qqqq T1tttt T2qq T2bb T2tt)
 
 for SAMPLE in ${Samples[@]}; do
     echo nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${CONFIG} ${OUTDIR}
