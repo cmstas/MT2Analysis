@@ -762,7 +762,7 @@ def makeTemplate(directory,imt2):
         n_syst += 1
     else:
         zinv_alpha = zinv_ratio_zg * zinv_purity * 0.92
-        if (f_data):
+        if (doData):
             zinv_alpha *= 0.93
         if (zinv_alpha > 0.5):
             zinv_alpha = 0.5
