@@ -976,6 +976,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     fullhistnameScanIsr = "{0}_sigscan_isr_UP".format(fullhistname)
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
+    fullhistnameCRSLGenMet = "{0}_genmet".format(fullhistnameCRSL)
     fullhistnameCRSLScan = "{0}_sigscan".format(fullhistnameCRSL)
     fullhistnameCRSLScanGenMet = "{0}_sigscan_genmet".format(fullhistnameCRSL)
 
