@@ -1015,6 +1015,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
         h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         del h_sigscan
         h_sigscan_genmet = f_sig.Get(fullhistnameScanGenMet)
+        h_sig_genmet = None
         if (not h_sigscan_genmet == None):
             h_sig_genmet = h_sigscan_genmet.ProjectionX("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         h_sigscan_btagsf_heavy_UP = f_sig.Get(fullhistnameScanBtagsfHeavy)
@@ -1051,9 +1052,14 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     
     # Suppress for missing reco histograms even if gen histogram exists
     if (h_sig == None or h_sig_genmet == None):
-        if (h_sig_genmet == None):
-            print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper.".format(cardname)
-            exit(1)
+        if h_sig == None:
+            print "No signal in {0}.".format(cardname)
+            if suppressZeroBins or suppresZeroTRs:
+                return False
+        if (h_sig_genmet == None and h_sig != None and h_sig.GetBinContent(imt2) > 0):
+            print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper. We'll assume that the gen counts are 0 for a good reason, but you may want to check this.".format(cardname)
+            h_sig_genmet = h_sig.Clone("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory))
+            h_sig_genmet.Scale(0) # make an empty genmet histogram so we can proceed
         if (suppressZeroBins or suppressZeroTRs):
             if verbose: print "{0}_{1}_{2}_{3} suppressed due to missing histogram".format(channel,signal,im1,im2)
             return False        
