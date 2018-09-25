@@ -5,15 +5,15 @@ INDIR=/home/users/mderdzinski/winter2017/clean_master/MT2looper/output/full2016_
 THISDIR=`pwd`
 
 ## to use data for lostlepton
-LOSTLEPFILE=data_Run2016
+#LOSTLEPFILE=data_Run2016
 ## to use MC for lostlepton
-#LOSTLEPFILE=lostlep
+LOSTLEPFILE=lostlep
 
-GJETFILE=data_Run2016
-#GJETFILE=qcdplusgjet
+#GJETFILE=data_Run2016
+GJETFILE=qcdplusgjet
 
-RLFILE=data_Run2016
-#RLFILE=removedlep
+#RLFILE=data_Run2016
+RLFILE=removedlep
 
 QCDFILE=data_Run2016
 #QCDFILE=qcd_ht

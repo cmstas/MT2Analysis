@@ -2,7 +2,7 @@
 
 make -j 12 || return $?
 
-OUTDIR=output/RegionTest4
+OUTDIR=output/RegionTest5
 LOGDIR=logs/
 mkdir -p ${OUTDIR}
 mkdir -p ${LOGDIR}

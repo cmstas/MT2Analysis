@@ -1697,7 +1697,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
-    if (include_pj_eta) values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
+    if (include_pj_eta) values_genmet["PJ1eta"]      = isSignal_ ? pseudoJet1_eta_ : t.gen_pseudoJet1_eta;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values_genmet)){
@@ -1871,7 +1871,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
     values_genmet["mt2"]         = t.mt2_genmet;
     values_genmet["ht"]          = ht_;
     values_genmet["met"]         = t.met_genPt;
-    if (include_pj_eta) values_genmet["PJ1eta"]      = t.gen_pseudoJet1_eta;
+    if (include_pj_eta) values_genmet["PJ1eta"]      = isSignal_ ? pseudoJet1_eta_ : t.gen_pseudoJet1_eta;
 
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelectionCRSL(values_genmet)){
