@@ -140,10 +140,8 @@ def makeTemplate(directory,imt2):
     fullhistnameFitSyst = "{0}FitSyst".format(fullhistname)
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
-    fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
     crqcd_directory = directory.replace("sr","crqcd")
     fullhistnameQCD = "{0}/h_mt2bins".format(crqcd_directory)
-    fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
 
     isSignalWithLeptons = signal.find("T1tttt") != -1 or signal.find("T2tt") != -1
     
