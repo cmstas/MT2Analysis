@@ -101,7 +101,7 @@ bool applyDileptonTriggerWeights = true;
 // use 2016 ICHEP ISR weights based on nisrMatch, signal and ttbar only
 bool applyISRWeights = true;
 // turn on to enable plots of MT2 with systematic variations applied. will only do variations for applied weights
-bool doSystVariationPlots = false;
+bool doSystVariationPlots = true;
 // turn on to apply Nvtx reweighting to MC
 bool doNvtxReweight = false;
 // turn on to apply nTrueInt reweighting to MC
@@ -153,10 +153,11 @@ MT2Looper::~MT2Looper(){
 };
 
 void MT2Looper::SetSignalRegions(){
-  //  SRVec =  getSignalRegions2017(); 
-  //  SRVec =  getSignalRegions2018(); 
+  //SRVec =  getSignalRegions2017(); 
+  //SRVec =  getSignalRegions2018(); 
+  SRVec = getSignalRegionsPJ();
   //  SRVec =  getSignalRegions2018HUH(); 
-  SRVec =  getSignalRegions2018lessNJ(); 
+  //SRVec =  getSignalRegions2018lessNJ(); 
   SRVecMonojet = getSignalRegionsMonojet2017(); 
 
   if (verbose) cout << "Storing cut values for multijet" << endl;

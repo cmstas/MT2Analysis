@@ -26,3 +26,5 @@ MT2Looper/runLooper
 MT2Looper/output/*
 Nifty
 MT2Looper/background*.root
+scripts/combine/*
+scripts/cards*

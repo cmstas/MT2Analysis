@@ -2,7 +2,7 @@
 
 make -j 12 || return $?
 
-OUTDIR=output/RegionTest5
+OUTDIR=output/RegionTestPJ
 LOGDIR=logs/
 mkdir -p ${OUTDIR}
 mkdir -p ${LOGDIR}
@@ -19,6 +19,7 @@ done
 CONFIG=mc_80x_Moriond17
 INDIR=/home/users/dpgilber/2017/SkimSMS
 declare -a Samples=(T1bbbb T1qqqq T1tttt T2qq T2bb T2tt)
+#declare -a Samples=(T1qqqq)
 
 for SAMPLE in ${Samples[@]}; do
     echo nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${CONFIG} ${OUTDIR}

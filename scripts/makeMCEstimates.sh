@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INDIR=/home/users/dpgilber/2017/MT2AnalysisRegions/MT2Looper/output/RegionTest2
+INDIR=/home/users/dpgilber/2017/MT2AnalysisRegions/MT2Looper/output/RegionTest4
 
 THISDIR=`pwd`
 

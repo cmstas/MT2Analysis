@@ -10,7 +10,7 @@ import os
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
-verbose = False # Print more error messages
+verbose = True # Print more error messages
 suppressZeroBins = True # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
 suppressZeroTRs = False # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
 doSuperSignalRegions = False # Print cards for super signal regions
@@ -19,7 +19,7 @@ uncorrelatedZGratio = False
 fourNuisancesPerBinZGratio = False
 integratedZinvEstimate = True # Use MC to distribute counts in low-stats MT2 bins
 doDummySignalSyst = False 
-subtractSignalContam = True # For T1tttt and T2tt, adjust signal counts for signal contribution to CRSL
+subtractSignalContam = False # For T1tttt and T2tt, adjust signal counts for signal contribution to CRSL
 doZinvFromDY = True # "False" is not yet fully implemented
 decorrelatedLostlepNuisances = False 
 doSimpleLostlepNuisances = False
@@ -796,13 +796,13 @@ def makeTemplate(directory,imt2):
     # within makeCard.
     template_list = []
     template_list.append("imax 1  number of channels\n")
-    template_list.append("jmax 3  number of backgrounds\n")
+    template_list.append("jmax 2  number of backgrounds\n")
     template_list.append("kmax *\n")
     template_list.append("------------\n")
     template_list.append("bin         {0}\n".format(channel))
     template_list.append("observation {0:.3f}\n".format(n_data))
     template_list.append("------------\n")
-    template_list.append("bin             {0}   {1}   {2}   {3}\n".format(channel,channel,channel,channel))
+    template_list.append("bin             {0}   {1}   {2}\n".format(channel,channel,channel))
     template_list.append("process          sig       zinv        llep\n")
     template_list.append("process           0         1           2\n")
     if (doZinvFromDY):
@@ -930,6 +930,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
         h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         del h_sigscan
         h_sigscan_genmet = f_sig.Get(fullhistnameScanGenMet)
+        h_sig_genmet = None
         if (not h_sigscan_genmet == None):
             h_sig_genmet = h_sigscan_genmet.ProjectionX("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         h_sigscan_btagsf_heavy_UP = f_sig.Get(fullhistnameScanBtagsfHeavy)
@@ -966,12 +967,16 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     
     # Suppress for missing reco histograms even if gen histogram exists
     if (h_sig == None or h_sig_genmet == None):
-        if (h_sig_genmet == None):
-            print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper.".format(cardname)
-            exit(1)
         if (suppressZeroBins or suppressZeroTRs):
             if verbose: print "{0}_{1}_{2}_{3} suppressed due to missing histogram".format(channel,signal,im1,im2)
             return False        
+        elif h_sig == None:
+            print "No h_sig in {0} and not suppressing. Exiting....".format(cardname)
+            exit(1)
+        elif (h_sig_genmet == None and h_sig.GetBinContent(imt2) > 0):
+            print "genmet histogram doesn't exist for {0} but h_sig has nonzero content. This is strange and may indicate something went wrong in the looper. Assuming gen histogram is just 0s everywhere for good reason, but check this.".format(cardname)
+            h_sig_genmet = h_sig.Clone("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory))
+            h_sig_genmet.Scale(0) # Make a dummy h_sig_genmet histogram with 0 counts so we can continue
     # The number we actually write is based on recogenaverage, so determine whether to suppress based on that number.
     elif ( (h_sig.Integral(0,-1) + h_sig_genmet.Integral(0,-1)) / 2 < n_zero):
         if (suppressZeroBins or suppressZeroTRs):
