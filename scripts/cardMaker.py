@@ -57,7 +57,7 @@ doData = True
 if len(argv) > 4:
     if argv[4] == "0" or argv[4].lower() == "false": doScan = False
     if len(argv) > 5:
-        if argv[5] == "0" or argv[4].lower() == "false": doData = False
+        if argv[5] == "0" or argv[5].lower() == "false": doData = False
 
 bmark = ROOT.TBenchmark()
 bmark.Start("benchmark")
