@@ -154,10 +154,11 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
   //SRVec =  getSignalRegions2017(); 
-  //SRVec =  getSignalRegions2018(); 
-  SRVec = getSignalRegionsPJ();
-  //  SRVec =  getSignalRegions2018HUH(); 
-  //SRVec =  getSignalRegions2018lessNJ(); 
+  SRVec =  getSignalRegions2018(); 
+  //  SRVec = getSignalRegionsPJ();
+  //SRVec =  getSignalRegions2018HUH(); 
+  //  SRVec =  getSignalRegions2018lessNJ(); 
+  //SRVec = getSignalRegions2018hiHTnoPJ();
   SRVecMonojet = getSignalRegionsMonojet2017(); 
 
   if (verbose) cout << "Storing cut values for multijet" << endl;

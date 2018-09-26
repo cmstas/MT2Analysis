@@ -21,7 +21,7 @@ for sample in ${Samples[@]}; do
     for masspoint in ${masspoints[@]}; do
 	point=${masspoint%/}
 	pushd $point
-	command="combineCards.py ../../../../cards_${dir}WithQCD_${sample}/*${point}.txt > combined_${point}.txt"
+	command="combineCards.py ../../../../cards_RegionTest${dir}_${sample}/*${point}.txt > combined_${point}.txt"
 	echo $command
 	eval $command
 	popd

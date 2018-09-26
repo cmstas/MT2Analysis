@@ -57,7 +57,7 @@ doData = True
 if len(argv) > 4:
     if argv[4] == "0" or argv[4].lower() == "false": doScan = False
     if len(argv) > 5:
-        if argv[5] == "0" or argv[4].lower() == "false": doData = False
+        if argv[5] == "0" or argv[5].lower() == "false": doData = False
 
 bmark = ROOT.TBenchmark()
 bmark.Start("benchmark")
@@ -140,10 +140,8 @@ def makeTemplate(directory,imt2):
     fullhistnameFitSyst = "{0}FitSyst".format(fullhistname)
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
-    fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
     crqcd_directory = directory.replace("sr","crqcd")
     fullhistnameQCD = "{0}/h_mt2bins".format(crqcd_directory)
-    fullhistnameCRSLGenMet = "{0}/h_mt2bins_genmet".format(crsl_directory)
 
     isSignalWithLeptons = signal.find("T1tttt") != -1 or signal.find("T2tt") != -1
     
@@ -762,7 +760,7 @@ def makeTemplate(directory,imt2):
         n_syst += 1
     else:
         zinv_alpha = zinv_ratio_zg * zinv_purity * 0.92
-        if (f_data):
+        if (doData):
             zinv_alpha *= 0.93
         if (zinv_alpha > 0.5):
             zinv_alpha = 0.5
@@ -826,7 +824,7 @@ def makeTemplate(directory,imt2):
 
     if (n_bkg < 0.001): n_qcd = 0.01
 
-    if (not f_data == None):
+    if (doData):
         h_data = f_data.Get(fullhistname)
         if (not h_data == None):
             n_data = h_data.GetBinContent(imt2)
@@ -978,6 +976,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     fullhistnameScanIsr = "{0}_sigscan_isr_UP".format(fullhistname)
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
+    fullhistnameCRSLGenMet = "{0}_genmet".format(fullhistnameCRSL)
     fullhistnameCRSLScan = "{0}_sigscan".format(fullhistnameCRSL)
     fullhistnameCRSLScanGenMet = "{0}_sigscan_genmet".format(fullhistnameCRSL)
 
@@ -1016,6 +1015,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
         h_sig = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         del h_sigscan
         h_sigscan_genmet = f_sig.Get(fullhistnameScanGenMet)
+        h_sig_genmet = None
         if (not h_sigscan_genmet == None):
             h_sig_genmet = h_sigscan_genmet.ProjectionX("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         h_sigscan_btagsf_heavy_UP = f_sig.Get(fullhistnameScanBtagsfHeavy)
@@ -1052,9 +1052,14 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
     
     # Suppress for missing reco histograms even if gen histogram exists
     if (h_sig == None or h_sig_genmet == None):
-        if (h_sig_genmet == None):
-            print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper.".format(cardname)
-            exit(1)
+        if h_sig == None:
+            print "No signal in {0}.".format(cardname)
+            if suppressZeroBins or suppresZeroTRs:
+                return False
+        if (h_sig_genmet == None and h_sig != None and h_sig.GetBinContent(imt2) > 0):
+            print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper. We'll assume that the gen counts are 0 for a good reason, but you may want to check this.".format(cardname)
+            h_sig_genmet = h_sig.Clone("h_mt2bins_genmet_{0}_{1}_{2}".format(str(im1),str(im2),directory))
+            h_sig_genmet.Scale(0) # make an empty genmet histogram so we can proceed
         if (suppressZeroBins or suppressZeroTRs):
             if verbose: print "{0}_{1}_{2}_{3} suppressed due to missing histogram".format(channel,signal,im1,im2)
             return False        

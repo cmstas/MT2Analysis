@@ -18,7 +18,7 @@
 
 using namespace std;
 
-const bool verbose = false;
+const bool verbose = true;
 
 //_______________________________________________________________________________
 void ReplaceString(std::string& subject, const std::string& search, const std::string& replace) {
@@ -304,7 +304,7 @@ void makeQCDFromCRs( TFile* f_data , TFile* f_qcd , TFile* f_qcd_monojet , vecto
 
     } // multijets
 
-    delete mt2bins;
+    delete[] mt2bins;
     
   } // loop over signal regions
 

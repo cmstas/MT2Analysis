@@ -305,28 +305,28 @@ namespace mt2 {
     sr.Clear();
 
     sr.SetName("9");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
     sr.SetVar("lowMT", 0, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("10");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
     sr.SetVar("lowMT", 0, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("11");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
     sr.SetVar("lowMT", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("12");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
     sr.SetVar("lowMT", 0, 1);
     temp_SR_vec.push_back(sr);
@@ -498,28 +498,28 @@ namespace mt2 {
     sr.Clear();
 
     sr.SetName("9");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
     sr.SetVar("lowMT", 0, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("10");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
     sr.SetVar("lowMT", 0, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("11");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
     sr.SetVar("lowMT", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("12");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
     sr.SetVar("lowMT", 0, 1);
     temp_SR_vec.push_back(sr);
@@ -4393,31 +4393,31 @@ namespace mt2 {
 
     // 7-9 jet regions for M, H, UH
     sr.SetName("35");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 0, 1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("36");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 1, 2);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("37");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 2, 3);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -4468,11 +4468,11 @@ namespace mt2 {
 
     // 7-9 jets, for M, H, UH
     sr.SetName("42");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -5594,31 +5594,31 @@ namespace mt2 {
 
     // 7-9 jet regions for M, H, UH
     sr.SetName("35");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 0, 1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("36");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 1, 2);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("37");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 2, 3);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -5669,11 +5669,11 @@ namespace mt2 {
 
     // 7-9 jets, for M, H, UH
     sr.SetName("42");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -6773,31 +6773,31 @@ namespace mt2 {
 
     // 7-9 jet regions for M, H, UH
     sr.SetName("29");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 0, 1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("30");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 1, 2);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("31");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 2, 3);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -6848,11 +6848,11 @@ namespace mt2 {
 
     // 7-9 jets, for M, H, UH
     sr.SetName("36");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -7869,31 +7869,31 @@ namespace mt2 {
 
     // 7-9 jet regions for M
     sr.SetName("29");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 0, 1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("30");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 1, 2);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("31");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 2, 3);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -7944,11 +7944,11 @@ namespace mt2 {
 
     // 7-9 jets, for M
     sr.SetName("36");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -8023,31 +8023,31 @@ namespace mt2 {
 
     // 7-9 jet regions
     sr.SetName("43");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 0, 1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 0, 1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 0, 1);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("44");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 1, 2);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 1, 2);
     temp_SR_vec.push_back(sr);
     sr.Clear();
 
     sr.SetName("45");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 2, 3);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 2, 3);
     temp_SR_vec.push_back(sr);
     sr.Clear();
@@ -8087,11 +8087,11 @@ namespace mt2 {
 
     // 7-9 jets
     sr.SetName("49");
-    sr.SetVar("njets", 7, 9);
+    sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 3, -1);
-    sr.SetVarCRSL("njets", 7, 9);
+    sr.SetVarCRSL("njets", 7, 10);
     sr.SetVarCRSL("nbjets", 3, -1);
-    sr.SetVarCRDY("njets", 7, 9);
+    sr.SetVarCRDY("njets", 7, 10);
     sr.SetVarCRDY("nbjets", 3, -1);
     temp_SR_vec.push_back(sr);
     sr.Clear();

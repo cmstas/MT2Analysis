@@ -2,14 +2,14 @@
 
 make -j 12 || return $?
 
-OUTDIR=output/RegionTestPJ
+OUTDIR=output/RegionTest2
 LOGDIR=logs/
 mkdir -p ${OUTDIR}
 mkdir -p ${LOGDIR}
 
 CONFIG=mc_94x_Fall17
 INDIR=/nfs-6/userdata/mt2/V00-10-04_2017fullYear_31Mar2018_skim/
-declare -a Samples=(ttsl ttdl singletop qcd_ht ww ttw ttz ttg dyjetsll_ht gjets_dr0p4_ht wjets_ht100to200 wjets_ht1200to2500 wjets_ht200to400 wjets_ht2500toInf wjets_ht400to600 wjets_ht600to800 wjets_ht800to1200 zinv_ht)
+declare -a Samples=(ttsl ttdl singletop ww ttw ttz ttg dyjetsll_ht gjets_dr0p4_ht wjets_ht100to200 wjets_ht1200to2500 wjets_ht200to400 wjets_ht2500toInf wjets_ht400to600 wjets_ht600to800 wjets_ht800to1200 zinv_ht qcd_ht500to700 qcd_ht700to1000 qcd_ht1000to1500 qcd_ht1500to2000 qcd_ht2000toInf)
 
 for SAMPLE in ${Samples[@]}; do
     echo nice -n 10 ./runLooper ${INDIR} ${SAMPLE} ${CONFIG} ${OUTDIR}

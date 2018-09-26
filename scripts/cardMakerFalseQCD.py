@@ -54,10 +54,13 @@ if (not os.path.exists(outdir)): os.mkdir(outdir)
 
 doScan = True
 doData = True
+SSR_start = 20
 if len(argv) > 4:
     if argv[4] == "0" or argv[4].lower() == "false": doScan = False
     if len(argv) > 5:
         if argv[5] == "0" or argv[5].lower() == "false": doData = False
+        if len(argv) > 6:
+            SSR_start = int(argv[6])
 
 bmark = ROOT.TBenchmark()
 bmark.Start("benchmark")
@@ -68,8 +71,10 @@ f_lostlep = ROOT.TFile("{0}/lostlepFromCRs.root".format(indir))
 if not doZinvFromDY: f_zinv = ROOT.TFile("{0}/zinvFromGJ.root".format(indir))
 f_zinvDY = ROOT.TFile("{0}/zinvFromDY.root".format(indir))
 f_purity = ROOT.TFile("{0}/purity.root".format(indir))
+f_qcd = ROOT.TFile("{0}/qcd_ht.root".format(indir))
 f_sig = ROOT.TFile("{0}/{1}.root".format(indir,signal))
 if (doData): f_data = ROOT.TFile("{0}/data_Run2016.root".format(indir))
+else: f_data = ROOT.TFile("{0}/background.root".format(indir))
 
 if f_lostlep.IsZombie():
     print "lostlepFromCRs.root does not exist\n"
@@ -83,12 +88,18 @@ if f_zinvDY.IsZombie():
 if f_purity.IsZombie(): 
     print "purity.root does not exist\n"
     exit(1)
+if f_qcd.IsZombie():
+    print "qcd_ht.root does not exist\n"
+    exit(1)
 if f_sig.IsZombie():
     print "{0}.root does not exist\n".format(signal)
     exit(1)
 if (doData and f_data.IsZombie()):
     print "data_Run2016.root does not exist\n"
     print "Perhaps you wanted to set doData = False or forgot to hadd?\n"
+    exit(1)
+elif f_data.IsZombie():
+    print "background.root does not exist. It is needed if you wish to perform a data-less \"MC closure\" run.\n"
     exit(1)
 
 # All signal mass points share the same backgrounds. Assemble the background portion of the 
@@ -100,6 +111,7 @@ def makeTemplate(directory,imt2):
     if not doZinvFromDY: dir_zinv = f_zinv.Get(directory)
     dir_zinvDY = f_zinvDY.Get(directory)
 #    dir_zgratio = f_zgratio.Get(directory)
+    dir_qcd = f_qcd.Get(directory)
     dir_purity = f_purity.Get(directory)
 
     # While "X == None" is discouraged in favor of "X is None" by python standards, this is necessary by design in PyROOT.
@@ -243,9 +255,12 @@ def makeTemplate(directory,imt2):
     else:
         jet_str = "j{0}".format(str(njets_LOW))
 
-    if pj_LOW < 0.1 and pj_HI < 0.0: pj_str = "InclPJ"
-    elif: pj_LOW < 0.1: pj_str = "LowPJ"
-    else: pj_str = "HiPJ"            
+    if pj_LOW < 0.1 and pj_HI < 0.0: 
+        pj_str = "InclPJ"
+    elif pj_LOW < 0.1: 
+        pj_str = "LowPJ"
+    else: 
+        pj_str = "HiPJ"            
 
     # We've been representing an upper limit of Infinity as -1 internally. Swap back for our printed description.
     ht_str = ht_str.replace("-1","Inf")
@@ -382,6 +397,13 @@ def makeTemplate(directory,imt2):
         if (not h_lostlep_MCExtrap == None):
             lostlep_MCExtrap = h_lostlep_MCExtrap.GetBinContent(imt2)
             del h_lostlep_MCExtrap
+
+    ###########
+    ### QCD ###
+    ###########
+
+    h_qcd = f_qcd.Get(fullhistname)
+    n_qcd = h_qcd.GetBinContent(imt2) if h_qcd != None else 0
 
     # At this stage, we've either extracted values for lostlep parameters from histograms, or those histograms didn't exist,
     # and we're using default values (mostly 0s).
@@ -610,7 +632,7 @@ def makeTemplate(directory,imt2):
     name_lostlep_mtcut = "llep_mtcut{0}".format(llep_corr_str)
 
     if (doSimpleLostlepNuisances):
-        name_lostlep_lepeff = "llep_lepeff_{0}_{1}_{2}_{3}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl,pj_str,pj_str_crsl)
+        name_lostlep_lepeff = "llep_lepeff_{0}_{1}_{2}_{3}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl,pj_str_crsl)
         lostlep_lepeff = 1.12
         if (njets_LOW == 7 and nbjets_LOW >= 3):
             lostlep_alphaerr = 1.18
@@ -764,9 +786,9 @@ def makeTemplate(directory,imt2):
     else: n_syst += 4
 
     if doZinvFromDY:
-        n_bkg = n_lostlep+n_zinvDY
+        n_bkg = n_lostlep+n_zinvDY+n_qcd
     else:
-        n_bkg = n_lostlep_n_zinv
+        n_bkg = n_lostlep_n_zinv+n_qcd
 
     if (doData):
         h_data = f_data.Get(fullhistname)
@@ -807,22 +829,22 @@ def makeTemplate(directory,imt2):
     # within makeCard.
     template_list = []
     template_list.append("imax 1  number of channels\n")
-    template_list.append("jmax 2  number of backgrounds\n")
+    template_list.append("jmax 3  number of backgrounds\n")
     template_list.append("kmax *\n")
     template_list.append("------------\n")
     template_list.append("bin         {0}\n".format(channel))
     template_list.append("observation {0:.3f}\n".format(n_data))
     template_list.append("------------\n")
-    template_list.append("bin             {0}   {1}   {2}\n".format(channel,channel,channel))
-    template_list.append("process          sig       zinv        llep\n")
-    template_list.append("process           0         1           2\n")
+    template_list.append("bin             {0}   {1}   {2}    {3}\n".format(channel,channel,channel,channel))
+    template_list.append("process          sig       zinv        llep        qcd\n")
+    template_list.append("process           0         1           2           3\n")
     if (doZinvFromDY):
         # Include signal placeholder
-        template_list.append("rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite))
+        template_list.append("rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}     {2:.3f}\n".format(n_zinvDY_towrite,n_lostlep_towrite,n_qcd))
     else:  
         print "Zinv currently only fully implemented from DY. Aborting...\n"
         exit(1)
-        template_list.append("rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}\n".format(n_zinv,n_lostlep))
+        template_list.append("rate            n_sig_cor_recogenaverage    {0:.3f}      {1:.3f}      {2:.3f}      {3:.3f}\n".format(n_zinv,n_lostlep,n_qcd))
     template_list.append("------------\n")
 
     # Write in signal placeholders
@@ -877,6 +899,8 @@ def makeTemplate(directory,imt2):
         print "Zinv currently only implemented for DY\n"
         exit(1)
         
+    template_list.append("{0}_{1}        lnN    -    -    -    2.0 \n".format("decorrelated_ad_hoc_qcd_syst",channel))
+
     template = "".join(template_list)
 
     # The template contains background information used for all signal mass points.
@@ -1137,8 +1161,8 @@ for key in iterator:
     if directory.find(keep) >= 0:
         sr_number = int(re.findall("\d+",directory)[0]) # Search for the first integer of any length in the directory string
         # We're either doing super signal regions or we're not; handle appropriately
-        if (sr_number < 20 and doSuperSignalRegions): continue
-        elif (sr_number >= 20 and not doSuperSignalRegions): continue
+        if (sr_number < SSR_start and doSuperSignalRegions): continue
+        elif (sr_number >= SSR_start and not doSuperSignalRegions): continue
         #print "Expected a directory corresponding to a numbered signal region, e.g. sr1VL, but could not find a number in directory {0}, aborting...".format(directory)
         #    exit(1)
         if verbose: print directory

@@ -1,4 +1,5 @@
 declare -a Samples=(T1tttt T1qqqq T1bbbb T2bb T2tt T2qq)
+#declare -a Samples=(T1qqqq)
 
 if [ "$#" -ne 1 ]; then
     return 1
