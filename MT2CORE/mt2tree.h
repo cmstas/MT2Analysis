@@ -297,6 +297,7 @@ public :
    Int_t           lep_lostHits[50];   //[nlep]
    Int_t           lep_convVeto[50];   //[nlep]
    Int_t           lep_tightCharge[50];   //[nlep]
+   Int_t           lep_isPF[50];   //[nlep]
    Int_t           nisoTrack;
    Float_t         isoTrack_pt[50];   //[nisoTrack]
    Float_t         isoTrack_eta[50];   //[nisoTrack]
@@ -910,6 +911,7 @@ public :
    TBranch        *b_lep_lostHits;   //!
    TBranch        *b_lep_convVeto;   //!
    TBranch        *b_lep_tightCharge;   //!
+   TBranch        *b_lep_isPF;   //!
    TBranch        *b_nisoTrack;   //!
    TBranch        *b_isoTrack_pt;   //!
    TBranch        *b_isoTrack_eta;   //!
@@ -1558,6 +1560,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("lep_lostHits"))                           fChain->SetBranchAddress("lep_lostHits", lep_lostHits, &b_lep_lostHits);
    if(bs->FindObject("lep_convVeto"))                           fChain->SetBranchAddress("lep_convVeto", lep_convVeto, &b_lep_convVeto);
    if(bs->FindObject("lep_tightCharge"))                        fChain->SetBranchAddress("lep_tightCharge", lep_tightCharge, &b_lep_tightCharge);
+   if(bs->FindObject("lep_isPF"))                               fChain->SetBranchAddress("lep_isPF", lep_isPF, &b_lep_isPF);
    if(bs->FindObject("nisoTrack"))                              fChain->SetBranchAddress("nisoTrack", &nisoTrack, &b_nisoTrack);
    if(bs->FindObject("isoTrack_pt"))                            fChain->SetBranchAddress("isoTrack_pt", isoTrack_pt, &b_isoTrack_pt);
    if(bs->FindObject("isoTrack_eta"))                           fChain->SetBranchAddress("isoTrack_eta", isoTrack_eta, &b_isoTrack_eta);
