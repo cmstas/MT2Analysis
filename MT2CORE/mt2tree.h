@@ -489,6 +489,8 @@ public :
    Int_t           jet_puId[100];   //[njet]
    Int_t           good_jet_idxs[100];   //[njet]
    Int_t           good_bjet_idxs[100];   //[njet]
+   Int_t           jet_closest_met_idx;
+   Float_t         jet_closest_met_dphi;
    Int_t           GenSusyMScan1;
    Int_t           GenSusyMScan2;
    Int_t           GenSusyMScan3;
@@ -1103,6 +1105,8 @@ public :
    TBranch        *b_jet_puId;   //!
    TBranch        *b_good_jet_idxs;   //!
    TBranch        *b_good_bjet_idxs;   //!
+   TBranch        *b_jet_closest_met_idx;
+   TBranch        *b_jet_closest_met_dphi;
    TBranch        *b_GenSusyMScan1;   //!
    TBranch        *b_GenSusyMScan2;   //!
    TBranch        *b_GenSusyMScan3;   //!
@@ -1752,6 +1756,8 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("jet_puId"))                               fChain->SetBranchAddress("jet_puId", jet_puId, &b_jet_puId);
    if(bs->FindObject("good_jet_idxs"))                          fChain->SetBranchAddress("good_jet_idxs", good_jet_idxs, &b_good_jet_idxs);
    if(bs->FindObject("good_bjet_idxs"))                         fChain->SetBranchAddress("good_bjet_idxs", good_bjet_idxs, &b_good_bjet_idxs);
+   if(bs->FindObject("jet_closest_met_idx"))                    fChain->SetBranchAddress("jet_closest_met_idx", &jet_closest_met_idx, &b_jet_closest_met_idx);
+   if(bs->FindObject("jet_closest_met_dphi"))                   fChain->SetBranchAddress("jet_closest_met_dphi", &jet_closest_met_dphi, &b_jet_closest_met_dphi);
    if(bs->FindObject("GenSusyMScan1"))                          fChain->SetBranchAddress("GenSusyMScan1", &GenSusyMScan1, &b_GenSusyMScan1);
    if(bs->FindObject("GenSusyMScan2"))                          fChain->SetBranchAddress("GenSusyMScan2", &GenSusyMScan2, &b_GenSusyMScan2);
    if(bs->FindObject("GenSusyMScan3"))                          fChain->SetBranchAddress("GenSusyMScan3", &GenSusyMScan3, &b_GenSusyMScan3);

@@ -626,6 +626,8 @@ class babyMaker {
   Int_t           jet_puId[max_njet];   //[njet]
   Int_t           good_jet_idxs[max_njet];   //[njet]
   Int_t           good_bjet_idxs[max_njet];   //[njet]
+  Int_t           jet_closest_met_idx;
+  Float_t         jet_closest_met_dphi;
 
 //----- SUSY SIGNALS
   Int_t           GenSusyMScan1;

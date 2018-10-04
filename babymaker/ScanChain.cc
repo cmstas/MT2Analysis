@@ -2403,6 +2403,19 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         if(ip4 < 4) deltaPhiMinJECdn = min(deltaPhiMinJECdn, DeltaPhi( met_phiJECdn, p4sForDphiDN.at(ip4).phi() ));
       }
 
+      // get closest jet to MET vector for later use in plotting
+      jet_closest_met_idx = -1;
+      jet_closest_met_dphi = -999;
+      float mindphi = 9999;
+      for(int i=0; i<nJet30; i++){
+          float dphi = DeltaPhi(met_phi, jet_phi[good_jet_idxs[i]]);
+          if(dphi < mindphi){
+              mindphi = dphi;
+              jet_closest_met_idx = good_jet_idxs[i];
+              jet_closest_met_dphi = dphi;
+          }
+      }
+
       vector<LorentzVector> hemJets;
       if(p4sForHems.size() > 1){
         //Hemispheres used in MT2 calculation
@@ -3780,6 +3793,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_puId", jet_puId, "jet_puId[njet]/I" );
   BabyTree_->Branch("good_jet_idxs", good_jet_idxs, "good_jet_idxs[nJet30]/I" );
   BabyTree_->Branch("good_bjet_idxs", good_bjet_idxs, "good_bjet_idxs[nBJet20]/I" );
+  BabyTree_->Branch("jet_closest_met_idx", &jet_closest_met_idx, "jet_closest_met_idx/I" );
+  BabyTree_->Branch("jet_closest_met_dphi", &jet_closest_met_dphi, "jet_closest_met_dphi/F" );
   BabyTree_->Branch("weight_lepsf", &weight_lepsf );
   BabyTree_->Branch("weight_lepsf_UP", &weight_lepsf_UP );
   BabyTree_->Branch("weight_lepsf_DN", &weight_lepsf_DN );
