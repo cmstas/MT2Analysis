@@ -1032,6 +1032,7 @@ def makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,sig
             h_sig_isr_UP = h_sigscan_isr_UP.ProjectionX("h_mt2bins_isr_UP_{0}_{1}_{2}".format(str(im1),str(im2),directory),bin1,bin1,bin2,bin2)
         h_sig_crsl = None
         h_sigscan_crsl_genmet = None
+        h_sig_crsl_genmet = None
         if (subtractSignalContam):
             h_sigscan_crsl = f_sig.Get(fullhistnameCRSLScan)
             h_sigscan_crsl_genmet = f_sig.Get(fullhistnameCRSLScanGenMet)

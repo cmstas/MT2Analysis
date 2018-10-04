@@ -1406,6 +1406,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
             // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
             if (thisDR < 0.01) {
               overlap = true;
+	      lep_isPF[iLep] = true;
               break;
             }
           } // loop over reco leps
@@ -3544,6 +3545,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lep_heepId", lep_heepId, "lep_heepId[nlep]/I" );
   BabyTree_->Branch("lep_highPtFit_pt", lep_highPtFit_pt, "lep_highPtFit_pt[nlep]/F");
   BabyTree_->Branch("lep_highPtFit_eta", lep_highPtFit_eta, "lep_highPtFit_eta[nlep]/F" );
+  BabyTree_->Branch("lep_isPF", lep_isPF, "lep_isPF[nlep]/I" );
   BabyTree_->Branch("HLT_PFHT125_Prescale", &HLT_PFHT125_Prescale );
   BabyTree_->Branch("HLT_PFHT200_Prescale", &HLT_PFHT200_Prescale );
   BabyTree_->Branch("HLT_PFHT300_Prescale", &HLT_PFHT300_Prescale );
@@ -4316,6 +4318,7 @@ void babyMaker::InitBabyNtuple () {
     lep_lostHits[i] = -999;
     lep_convVeto[i] = -999;
     lep_tightCharge[i] = -999;
+    lep_isPF[i] = 0;
   }
 
   for(int i=0; i < max_nisoTrack; i++){

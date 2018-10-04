@@ -12,5 +12,8 @@ rm -r $OUTPUTDIR/*
 while read i
 do
   echo $i
+  if [[ $i == -* ]]; then
+      continue # skip lines starting with -
+  fi
   ./submit.sh $i ${DATE} ${MODEL} ${COMBINED}
 done < $INDIR/points_$MODEL.txt

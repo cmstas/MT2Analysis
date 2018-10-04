@@ -26,6 +26,9 @@ fi
 while read i
 do
   echo $i
+  if [[ $i == -* ]]; then
+      continue # skip lines starting with -
+  fi
   if [ $COMBINED == 1 ]
   then
       tar -czvf cards_$i.tar.gz "datacard_"*"${i}_combined.txt" >> log_tar.log 2>&1  #for cards already combined
