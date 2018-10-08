@@ -157,32 +157,24 @@ The directory also contains other skimming scripts for specific purposes.
 
 #################################################################################
 #                                                                               #
-#   Instructions for running MT2 baby making within the AutoTwopler framework   #
+#   Instructions for running MT2 baby making within the Project Metis framework #
 #                                                                               #
 #################################################################################
 
-1. Need to checkout NtupleTools inside of MT2Analysis
+1. Get Project Metis and mt2 babymaking submissions scripts
 ``` bash
-git clone git@github.com:cmstas/NtupleTools.git
+source metis_setup.sh
 ```
 
-2. Run setup script (in NtupleTools/AutoTwopler) - this needs to be done in every session
+2. Edit the datasets you wish to run on inside the appropriate ProjectMetis/examples/mt2baby*.py submissions scripts, point mt2home towards your base MT2Analysis directory, choose the tag for this babymaking run, and set the output directory for the unmerged babies (hadoop) and the merged babies (nfs). Metis will run on the most recent CMS4 version of this dataset by default. If you want to force a different tag, uncommented the 'tag = "CMS4_X_Y_Z"' line and set it to to the desired version.
+
+3. Make a tar file of inputs for Metis
 ``` bash
-. setup.sh
+source createTarFile.sh
 ```
 
-3. Prepare input files for job submission (in MT2Analysis/babymaker/batchsubmit)
+4. Run Metis
 ``` bash
-. make_job_inputs.sh
-```
-
-4. Job submission
-
-User interaction primarily happens with mt2.py and ducks.py, both inside of MT2Analysis/babymaker/batchsubmit.
-The file mt2.py should only need to be touched rarely.  It contains dataset --> shortname mapping for samples and default mt2 configuration parameters.
-Most interaction is through ducks.py, which is also where parameters from mt2.py can (and should) be overridden, like the ntuple tag.
-
-5. Launching jobs
-``` bash
-python ducks.py
+cd ProjectMetis
+python examples/my_mt2baby_submission_script.py
 ```
