@@ -17,6 +17,7 @@ import copy
 MT2Config_defs = {}
 
 MT2Config_defs["data_2017_31Mar2018"] = {
+    "year" : 2017,
     "json" : "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt",
     "lumi" : 41.37,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
@@ -95,6 +96,7 @@ MT2Config_defs["data_2017_31Mar2018"] = {
 
 
 MT2Config_defs["data_2017_Prompt"] = {
+    "year" : 2017,
     "json" : "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt",
     "lumi" : 41.97,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
@@ -115,6 +117,7 @@ MT2Config_defs["data_2017_Prompt"] = {
     }
 
 MT2Config_defs["data_2018_Prompt"] = {
+    "year" : 2018,
     "json" : "Cert_314472-321221_13TeV_PromptReco_Collisions18_JSON_snt.txt",
     "lumi" : 19.26,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
@@ -129,6 +132,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     }
 
 MT2Config_defs["data_2016_Moriond17"] = {
+    "year" : 2016,
     "json" : "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt",
     "lumi" : 35.922,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
@@ -213,6 +217,7 @@ MT2Config_defs["data_2016_94x"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_Fall17"] = {
+    "year" : 2017,
     "lumi" : 41.529,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
@@ -234,10 +239,12 @@ MT2Config_defs["mc_94x_Fall17"] = {
 }
 
 MT2Config_defs["mc_101x_Spring18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_101x_Spring18"]["year"] = 2018
 MT2Config_defs["mc_101x_Spring18"]["pu_weights_file"] = ""
 
 
 MT2Config_defs["mc_80x_Moriond17"] = {
+    "year" : 2016,
     "lumi" : 35.922,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
     "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
@@ -336,6 +343,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     MT2Configuration c;
 
+    c.year = -1;
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
@@ -347,6 +355,8 @@ MT2Configuration GetMT2Config(std::string tag){
 
     for i,tag in enumerate(sorted(c.keys())):
         fout.write("\n    {0}(tag == \"{1}\"){{\n\n".format("if" if i==0 else "}else if", tag))
+        if "year" in c[tag]:
+            fout.write("        c.year               = {0};\n".format(c[tag]["year"]))
         if "json" in c[tag]:
             fout.write("        c.json               = \"{0}\";\n".format(c[tag]["json"]))
         if "lumi" in c[tag]:

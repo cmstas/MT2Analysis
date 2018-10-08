@@ -117,6 +117,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
   cout << "Using configuration \"" << config_tag << "\"" << endl;
   // gconf is a GlobalConfig object in CORE
   // used to store CORE-specific values, working-points, etc
+  gconf.year = config_.year;  
   gconf.ea_version = config_.ea_version;  // effective-area constants are year-specific. 
 
   if (baby_name.find("data_Run201") != std::string::npos || baby_name.find("dataRun2") != std::string::npos) {
@@ -555,23 +556,30 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	std::pair <float, float> t1metUP;
 	std::pair <float, float> t1metDN;
 	std::pair <float, float> t1met;
+	std::pair <float, float> t1met_old2017;
+        int do_2017metfix = config_.year==2017 ? 2 : 0;
 	if (!isData) {
 	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, jetcorr_uncertainty, 1,doRecomputeRawPFMET_);
 	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, jetcorr_uncertainty, 0,doRecomputeRawPFMET_);
-	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, 0, 0,doRecomputeRawPFMET_);
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, 0, 0,doRecomputeRawPFMET_, do_2017metfix);
+	  t1met_old2017 = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, 0, 0,doRecomputeRawPFMET_, 0);
 	}
 	else if (useMuEGCleanedMet) {
 	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
 	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
 	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
+	  t1met_old2017 = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 1); // never apply variations to data
 	}
 	else {
 	  t1metUP = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
 	  t1metDN = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
-	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current); // never apply variations to data
+	  t1met = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, do_2017metfix); // never apply variations to data
+	  t1met_old2017 = getT1CHSMET_fromMINIAOD(jet_corrector_pfL1FastJetL2L3_current, NULL, 0, 0, 0); // never apply variations to data
 	}
 	met_pt  = t1met.first;
 	met_phi = t1met.second;
+        met_old2017_pt = t1met_old2017.first;
+        met_old2017_phi = t1met_old2017.second;
 	met_ptJECup  = t1metUP.first;
 	met_phiJECup = t1metUP.second;
 	met_ptJECdn  = t1metDN.first;
@@ -580,10 +588,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       else if (useMuEGCleanedMet){
 	met_pt  = cms3.evt_muegclean_pfmet();
 	met_phi = cms3.evt_muegclean_pfmetPhi();
+	met_old2017_pt  = cms3.evt_muegclean_pfmet();
+	met_old2017_phi = cms3.evt_muegclean_pfmetPhi();
       }
       else {
 	met_pt  = cms3.evt_pfmet();
 	met_phi = cms3.evt_pfmetPhi();
+	met_old2017_pt  = cms3.evt_old_pfmet();
+	met_old2017_phi = cms3.evt_old_pfmetPhi();
       }
       met_rawPt  = cms3.evt_pfmet_raw();
       met_rawPhi = cms3.evt_pfmetPhi_raw();
@@ -3440,6 +3452,8 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("mht_phiJECdn", &mht_phiJECdn );
   BabyTree_->Branch("met_pt", &met_pt );
   BabyTree_->Branch("met_phi", &met_phi );
+  BabyTree_->Branch("met_old2017_pt", &met_old2017_pt );
+  BabyTree_->Branch("met_old2017_phi", &met_old2017_phi );
   BabyTree_->Branch("met_ptJECup", &met_ptJECup );
   BabyTree_->Branch("met_phiJECup", &met_phiJECup );
   BabyTree_->Branch("met_ptJECdn", &met_ptJECdn );
@@ -4084,6 +4098,8 @@ void babyMaker::InitBabyNtuple () {
   mht_phiJECdn = -999.0;
   met_pt = -999.0;
   met_phi = -999.0;
+  met_old2017_pt = -999.0;
+  met_old2017_phi = -999.0;
   met_ptJECup = -999.0;
   met_phiJECup = -999.0;
   met_ptJECdn = -999.0;

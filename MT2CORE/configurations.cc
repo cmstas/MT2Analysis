@@ -22,6 +22,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     MT2Configuration c;
 
+    c.year = -1;
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
@@ -41,6 +42,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     if(tag == "data_2016_94x"){
 
+        c.year               = 2016;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
@@ -102,6 +104,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "data_2016_Moriond17"){
 
+        c.year               = 2016;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
@@ -163,6 +166,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "data_2017_31Mar2018"){
 
+        c.year               = 2017;
         c.json               = "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
         c.lumi               = 41.37;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
@@ -229,6 +233,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "data_2017_Prompt"){
 
+        c.year               = 2017;
         c.json               = "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
         c.lumi               = 41.97;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
@@ -288,6 +293,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "data_2018_Prompt"){
 
+        c.year               = 2018;
         c.json               = "Cert_314472-321221_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         c.lumi               = 19.26;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
@@ -350,6 +356,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_101x_Spring18"){
 
+        c.year               = 2018;
         c.lumi               = 41.529;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
@@ -369,6 +376,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_80x_Moriond17"){
 
+        c.year               = 2016;
         c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
@@ -387,6 +395,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_80x_fastsim_Moriond17"){
 
+        c.year               = 2016;
         c.lumi               = 35.922;
         c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
@@ -405,6 +414,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
     }else if(tag == "mc_94x_Fall17"){
 
+        c.year               = 2017;
         c.lumi               = 41.529;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";

@@ -246,9 +246,11 @@ class babyMaker {
   Float_t         mht_phiJECup;
   Float_t         mht_phiJECdn;
   Float_t         met_pt;
+  Float_t         met_old2017_pt;
   Float_t         met_ptJECup;
   Float_t         met_ptJECdn;
   Float_t         met_phi;
+  Float_t         met_old2017_phi;
   Float_t         met_phiJECup;
   Float_t         met_phiJECdn;
   Float_t         met_rawPt;

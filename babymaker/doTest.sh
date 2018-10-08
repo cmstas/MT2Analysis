@@ -2,21 +2,11 @@
 
 make -j 8 || return $?
 
-#./processBaby data_json_test /home/users/jgran/temp/74x_sync/CMSSW_7_4_3/src/CMS3/NtupleMaker/ntuple_data.root
-#./processBaby data_test  /nfs-7/userdata/jgran/74x_sync/ntuple_data.root
-#./processBaby data_json_fixrho  /home/users/jgran/temp/electronID/CMSSW_7_4_1_patch1/src/CMS3/NtupleMaker/ntuple_rereco.root
-#./processBaby qcd_CMS3-07-04-03_test  /hadoop/cms/store/group/snt/run2_25ns/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/V07-04-03/merged_ntuple_31.root
-#./processBaby qcd_test_noJEC_fixjetID ./ntuple_QCD.root
-#./processBaby qcd_test_noJEC_fixjetID_fixgamma /home/users/gzevi/ntupling/CMSSW_7_4_1_patch1/src/CMS3/NtupleMaker/ntupleQCD_Pt_1000to1400_10000.root
+# ./processBaby test /hadoop/cms/store/group/snt/run2_data2016_94x/JetHT_Run2016E-17Jul2018-v1_MINIAOD_CMS4_V09-04-17/merged_ntuple_42.root 1000
+# ./processBaby test /hadoop/cms/store/group/snt/run2_data2017/JetHT_Run2017E-31Mar2018-v1_MINIAOD_CMS4_V09-04-19/merged_ntuple_42.root 100000
+# ./processBaby test /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00/merged_ntuple_42.root 1000
+# ./processBaby test /hadoop/cms/store/group/snt/run2_mc2017/WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3_MINIAODSIM_CMS4_V09-04-17/merged_ntuple_42.root 1000
 
-##### Run2 datasets for sync - note that these do NOT have the postprocessing vars
-#./processBaby test_ttbar_1k /nfs-7/userdata/olivito/mt2/run2_25ns_MiniAODv2/ntuple_ttbar_25ns_1k.root
-#./processBaby test_ttbar_10k /nfs-7/userdata/olivito/mt2/run2_25ns_MiniAODv2/ntuple_ttbar_25ns_10k.root
-#./processBaby test_data_JetHT_1k /nfs-7/userdata/olivito/mt2/run2_25ns_MiniAODv2/ntuple_data_Run2015D_JetHT_PromptReco-v4_1k.root
-#./processBaby test_data_JetHT_10k /nfs-7/userdata/olivito/mt2/run2_25ns_MiniAODv2/ntuple_data_Run2015D_JetHT_PromptReco-v4_10k.root
-
-#./processBaby test_T2tt /hadoop/cms/store/group/snt/run2_fastsim_v1/SMS-T2tt_mStop-600-950_mLSP-1to450_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1/V07-04-12_miniaodv1_FS/merged_ntuple_1.root
-
-# ./processBaby test_T2tt_rpv /hadoop/cms/store/group/snt/run2_moriond17/SMS-T2tt_RPV_SMS_T2tt_mStop-700_Private80X-TEST-v1/V08-00-16/merged_ntuple_1.root
-
-./processBaby data_Run2017B_JetHT /hadoop/cms/store/user/namin/ProjectMetis/JetHT_Run2017B-PromptReco-v2_MINIAOD_CMS4_V00-00-03/merged_ntuple_1.root 10000
+# ./processBaby test /hadoop/cms/store/group/snt/run2_mc2016_cms4/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_MINIAODSIM_CMS4_V00-00-03_2017Sep27/merged_ntuple_3.root 1000
+# ./processBaby test /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00/merged_ntuple_87.root 1000
+./processBaby test /hadoop/cms/store/group/snt/run2_mc2017//TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-19/merged_ntuple_42.root 1000

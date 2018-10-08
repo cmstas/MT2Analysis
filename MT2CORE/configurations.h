@@ -8,7 +8,8 @@
 
 struct MT2Configuration {
     std::string json;
-    float lumi;
+    int year = -1;
+    float lumi = -1;
     std::string btagcalib_csv;
     std::string btageff_file;
     float btag_med_threshold;
