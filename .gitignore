@@ -20,6 +20,7 @@ babymaker/batchsubmit/job_input/*
 babymaker/batchsubmit/submitAll.sh
 babymaker/batchsubmit/mergeLogs/*
 babymaker/batchsubmit/skim/skimLogs*
+babymaker/batchsubmit/ProjectMetis/*
 CORE
 **/condor
 MT2Looper/runLooper
