@@ -46,7 +46,7 @@ ls -lrth
 echo -e "\n--- begin running ---\n" #                           <----- section division
 
 echo "Converting Metis-style inputs into MT2-style inputs"
-FILEID=`echo ${INPUTFILENAMES##*/} | sed 's/\.root//g'`
+FILEID=`echo ${INPUTFILENAME##*/} | sed 's/\.root//g'`
 DOREBAL=0
 if [[ $OUTPUTDIR = *"RebalanceAndSmear"* ]]; then
     DOREBAL=1
@@ -70,7 +70,7 @@ import os
 foundBad = False
 try:
     f1 = r.TFile("${OUTPUT}")
-    t = f1.Get("t")
+    t = f1.Get("mt2")
     nevts = t.GetEntries()
     for i in range(0,t.GetEntries(),1):
         if t.GetEntry(i) < 0:
@@ -97,4 +97,3 @@ if [ "$?" != "0" ]; then
     echo "Removing output file because gfal-copy crashed"
     gfal-rm --verbose gsiftp://gftp.t2.ucsd.edu${OUTPUTDIR}/${OUTPUT}
 fi
-
