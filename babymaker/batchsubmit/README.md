@@ -166,14 +166,14 @@ The directory also contains other skimming scripts for specific purposes.
 source metis_setup.sh
 ```
 
-2. Edit the datasets you wish to run on inside the appropriate ProjectMetis/examples/mt2baby*.py submissions scripts, point mt2home towards your base MT2Analysis directory, choose the tag for this babymaking run, and set the output directory for the unmerged babies (hadoop) and the merged babies (nfs). Metis will run on the most recent CMS4 version of this dataset by default. If you want to force a different tag, uncommented the 'tag = "CMS4_X_Y_Z"' line and set it to to the desired version.
+2. Edit the datasets you wish to run on inside the appropriate ProjectMetis/examples/mt2baby*.py submissions script, point the mt2homevariable in this script towards your base MT2Analysis directory, choose the tag for this babymaking run, and set the output directory for the unmerged babies (hadoop) and the merged babies (nfs). Metis will run on the most recent CMS4 version of this dataset by default. If you want to force a different tag, uncomment the 'tag = "CMS4_X_Y_Z"' line and set it to to the desired version.
 
 3. Make a tar file of inputs for Metis
 ``` bash
 source createTarFile.sh
 ```
 
-4. Metis feeds its own generalized inputs the exectuable, so we can't use MT2's wrapper.sh. There is a separate metis_executable.sh that interfaces between Metis and processBaby. If you need to make any edits to the workflow (for example, maybe you edited the arguments taken by processBaby, or want to do rebalance and smear regardless of whether the output name contains "RebalanceAndSmear"), edit this file, not wrapper.sh.
+4. Metis feeds its own generalized inputs to the exectuable, so we can't use MT2's wrapper.sh. There is a separate metis_executable.sh that interfaces between Metis and processBaby. If you need to make any edits to the workflow (for example, maybe you edited the arguments taken by processBaby, or want to do rebalance and smear regardless of whether the output name contains "RebalanceAndSmear"), edit this file, not wrapper.sh.
 
 5. Run Metis
 ``` bash
