@@ -25,6 +25,7 @@ decorrelatedLostlepNuisances = False
 doSimpleLostlepNuisances = False
 printTable = False # "True" is not yet implemented
 suppressUHmt2bin = True # The first MT2 bin in UH regions has a large QCD contribution; throw out this bin?
+saveTemplates = True # Save templates separately from cards
 
 # These are used when an implausible alpha is found for a bin
 last_zinv_ratio = 0.5 
@@ -50,7 +51,10 @@ if len(argv) < 3:
 signal = argv[1]
 indir = argv[2]
 outdir = argv[3]
-if (not os.path.exists(outdir)): os.mkdir(outdir)
+if (not os.path.exists(outdir)): 
+    os.mkdir(outdir)
+    if saveTemplates:
+        os.mkdir(outdir+"/templates")
 
 doScan = True
 doData = True
@@ -1232,6 +1236,11 @@ for key in iterator:
                 else:
                     print "Template could not be formed due to missing histograms in bin {0} of directory {1}, but we're suppressing zero bins anyway. Continuing.".format(imt2,directory)
                     continue
+            if saveTemplates:
+                templatefile = open(outdir+"/templates/"+channel+"_template.txt","w")
+                templatefile.write(template)
+                templatefile.close()            
+            if (suppressUHmt2bin and directory.find("UH") != -1 and imt2 == 1): continue
             # If we're doing a full scan, loop over mass points and replace placeholders in the template with appropriate signal values for each point.
             if (doScan):
                 y_binwidth = 25
@@ -1241,7 +1250,6 @@ for key in iterator:
                     y_max = 800
                 for im1 in range(0,2301,25):
                     for im2 in range(0,y_max+1,y_binwidth):
-                        if (suppressUHmt2bin and directory.find("UH") != -1 and imt2 == 1): continue
                         # Replace signal placeholders and print the card
                         success = makeCard(directory,template,channel,lostlep_alpha,lostlep_lastbin_hybrid,signal,outdir,imt2,n_bkg,im1,im2)
                         # If no histograms are found for that mass point, don't add it to the list of processed points
