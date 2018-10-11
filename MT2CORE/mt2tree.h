@@ -571,6 +571,7 @@ public :
   Float_t         track_dz[maxntracks];
   Float_t         track_dzErr[maxntracks];
   Int_t           track_isHighPurity[maxntracks];
+  Int_t           track_recoveto[maxntracks];
   Int_t           track_DeadECAL[maxntracks];
   Int_t           track_DeadHCAL[maxntracks];
 
@@ -1176,6 +1177,7 @@ public :
    TBranch        *b_track_dzErr;
    TBranch        *b_track_nChi2;
    TBranch        *b_track_isHighPurity;
+   TBranch        *b_track_recoveto;
    TBranch        *b_track_DeadECAL;
    TBranch        *b_track_DeadHCAL;
    TBranch        *b_track_isshort;
@@ -1827,6 +1829,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("track_dzErr"))                            fChain->SetBranchAddress("track_dzErr", track_dzErr, &b_track_dzErr);
    if(bs->FindObject("track_nChi2"))                            fChain->SetBranchAddress("track_nChi2", track_nChi2, &b_track_nChi2);
    if(bs->FindObject("track_isHighPurity"))                     fChain->SetBranchAddress("track_isHighPurity", track_isHighPurity, &b_track_isHighPurity);
+   if(bs->FindObject("track_recoveto"))                         fChain->SetBranchAddress("track_recoveto", track_recoveto, &b_track_recoveto);
    if(bs->FindObject("track_DeadECAL"))                         fChain->SetBranchAddress("track_DeadECAL", track_DeadECAL, &b_track_DeadECAL);
    if(bs->FindObject("track_DeadHCAL"))                         fChain->SetBranchAddress("track_DeadHCAL", track_DeadHCAL, &b_track_DeadHCAL);
    if(bs->FindObject("track_isshort"))                          fChain->SetBranchAddress("track_isshort", track_isshort, &b_track_isshort);

@@ -726,6 +726,7 @@ class babyMaker {
   Float_t         track_dz[maxntracks];
   Float_t         track_dzErr[maxntracks];
   Int_t           track_isHighPurity[maxntracks];
+  Int_t           track_recoveto[maxntracks];
   Int_t           track_DeadECAL[maxntracks];
   Int_t           track_DeadHCAL[maxntracks];
 

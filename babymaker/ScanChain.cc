@@ -3147,6 +3147,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	  // Apply ST and STC selections	
 	  
+	  // Apply reco veto first so we can store the result for all tracks. We can't fully reconsider the short track definition  without remaking babies otherwise.
+	  if (verbose) std::cout << "Before short track lepton rejection" << std::endl;
+	  
+	  // Lepton veto
+	  // Veto on ANY reco lepton, not just those passing MT2 IDs
+	  const bool nearestPFSel = !(track_nearestPF_DR[ntracks] < 0.1 && (abs(track_nearestPF_id[ntracks]) == 11 || abs(track_nearestPF_id[ntracks]) == 13));
+	  float minrecodr = 0.2; float overlap_id = 0;
+	  for (unsigned int i_el = 0; i_el < cms3.els_p4().size(); i_el++) {
+	    float dr = DeltaR(cms3.els_p4().at(i_el).eta(),track_eta[ntracks],cms3.els_p4().at(i_el).phi(),track_phi[ntracks]);
+	    if (dr < minrecodr) {
+	      minrecodr = dr;
+	      overlap_id = 11;
+	    }
+	  }
+	  for (unsigned int i_mu = 0; i_mu < cms3.mus_p4().size(); i_mu++) {
+	    float dr = DeltaR(cms3.mus_p4().at(i_mu).eta(),track_eta[ntracks],cms3.mus_p4().at(i_mu).phi(),track_phi[ntracks]);
+	    if (dr < minrecodr) {
+	      minrecodr = dr;
+	      overlap_id = 13;
+	    }
+	  }
+	  const bool recoVeto = minrecodr < 0.1;
+	  if (recoVeto && !track_isLepOverlap[ntracks]) 
+	    std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
+	  // Get rid of anything near or overlapping a lepton
+	  const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
+	
+	  track_recoveto[ntracks] = overlap_id;
+
+	  if (!PassesRecoVeto) {ntracks++; continue;}
+
 	  // Basic selections
 	  const bool DeadCAL = track_DeadECAL[ntracks] || track_DeadHCAL[ntracks];
 	  const bool ptSel = track_pt[ntracks] > 15;
@@ -3164,29 +3195,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  const bool isShort = isP || isM || isL;
 	  
 	  if (!isShort) {ntracks++; continue;}
-	  
-	  if (verbose) std::cout << "Before short track lepton rejection" << std::endl;
-	  
-	  // Lepton veto
-	  // Veto on ANY reco lepton, not just those passing MT2 IDs
-	  const bool nearestPFSel = !(track_nearestPF_DR[ntracks] < 0.1 && (abs(track_nearestPF_id[ntracks]) == 11 || abs(track_nearestPF_id[ntracks]) == 13));
-	  float minrecodr = 0.2;
-	  for (unsigned int i_el = 0; i_el < cms3.els_p4().size(); i_el++) {
-	    float dr = DeltaR(cms3.els_p4().at(i_el).eta(),track_eta[ntracks],cms3.els_p4().at(i_el).phi(),track_phi[ntracks]);
-	    if (minrecodr < dr) minrecodr = dr;
-	  }
-	  for (unsigned int i_mu = 0; i_mu < cms3.mus_p4().size(); i_mu++) {
-	    float dr = DeltaR(cms3.mus_p4().at(i_mu).eta(),track_eta[ntracks],cms3.mus_p4().at(i_mu).phi(),track_phi[ntracks]);
-	    if (minrecodr < dr) minrecodr = dr;
-	  }
-	  const bool recoVeto = minrecodr < 0.1;
-	  if (recoVeto && !track_isLepOverlap[ntracks]) 
-	    std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
-	  // Get rid of anything near or overlapping a lepton
-	  const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
-	
-	  if (!PassesRecoVeto) {ntracks++; continue;}
-	  
+	  	  
 	  // Isolation
 	  const bool PassesIsoSelSTC = track_neuIso0p05[ntracks] < 10 * isoSTC && track_neuRelIso0p05[ntracks] < 0.1 * isoSTC && track_iso[ntracks] < 10 * isoSTC && track_reliso[ntracks] < 0.2 * isoSTC;
 	  if (!PassesIsoSelSTC) {ntracks++; continue;}
@@ -3196,7 +3205,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  const bool PixLayersSel = track_nPixelLayersWithMeasurement[ntracks] >= (track_nLayersWithMeasurement[ntracks] > 4 ? 2 : 3);
 	  const bool LostInnerPixelHitsSel = track_nLostInnerPixelHits[ntracks] == 0;
 	  
-	  const bool QualitySelBase = PixLayersSel && LostInnerPixelHitsSel;
+	  const bool QualitySelBase = PixLayersSel && LostInnerPixelHitsSel && track_isHighPurity[ntracks];
 
 	  if (!QualitySelBase) {ntracks++; continue;}
 	  
@@ -3233,7 +3242,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  ntracks++;
 	} // End isotracks loop (short tracks)
       } // End short track info
-      
+
       FillBabyNtuple();
       
     }//end loop on events in a file
@@ -3878,6 +3887,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("track_dz", track_dz, "track_dz[ntracks]/F");
   BabyTree_->Branch("track_dzErr", track_dzErr, "track_dzErr[ntracks]/F");
   BabyTree_->Branch("track_isHighPurity", track_isHighPurity, "track_isHighPurity[ntracks]/I");
+  BabyTree_->Branch("track_recoveto", track_recoveto, "track_recoveto[ntracks]/I");
   BabyTree_->Branch("track_DeadECAL", track_DeadECAL, "track_DeadECAL[ntracks]/I");
   BabyTree_->Branch("track_DeadHCAL", track_DeadHCAL, "track_DeadHCAL[ntracks]/I");
   BabyTree_->Branch("track_isshort", track_isshort, "track_isshort[ntracks]/I");
@@ -4547,6 +4557,7 @@ void babyMaker::InitBabyNtuple () {
     track_dz[i] = -999;
     track_dzErr[i] = -999;
     track_isHighPurity[i] = -999;
+    track_recoveto[i] = -999;
     track_DeadECAL[i] = 0;
     track_DeadHCAL[i] = 0;
     track_isshort[i] = 0;
