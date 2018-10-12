@@ -43,7 +43,7 @@ JRTreader::~JRTreader(){
     DeleteFitVec(fits_nonb);
 }
 
-int JRTreader::Init(const char *fname, bool correctDataResponse){
+int JRTreader::Init(const char *fname, bool correctDataResponse, int unc_var){
     TFile *f = TFile::Open(fname);
     if(f->IsZombie())
         return 0;
@@ -71,7 +71,7 @@ int JRTreader::Init(const char *fname, bool correctDataResponse){
                 if(useFits){
                     core = (TH1D*)f->Get(fitname+"_core");
                     tail = (TH1D*)f->Get(fitname+"_tail");
-                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001) : 1.0;
+                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001, unc_var) : 1.0;
                     coreScale *= corr;
                     TransformFit(fits_b->at(ipt)->at(ieta), core, tail);
                     coreScale /= corr;
@@ -89,7 +89,7 @@ int JRTreader::Init(const char *fname, bool correctDataResponse){
                 if(useFits){
                     core = (TH1D*)f->Get(fitname+"_core");
                     tail = (TH1D*)f->Get(fitname+"_tail");
-                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001) : 1.0;
+                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001, unc_var) : 1.0;
                     coreScale *= corr;
                     TransformFit(fits_nonb->at(ipt)->at(ieta), core, tail);
                     coreScale /= corr;
@@ -104,10 +104,10 @@ int JRTreader::Init(const char *fname, bool correctDataResponse){
 
         }
     }
-
+    
     f->Close();
     delete f;
-        
+     
     return 1;
 }
 
@@ -179,26 +179,43 @@ void JRTreader::UseRawHistograms(bool use){
     useFits = !use;
 }
 
-float JRTreader::GetJERCorrection(float eta){
+float JRTreader::GetJERCorrection(float eta, int unc_var){
     // jet-energy resolution is larger in data than MC by the following 
     // eta-dependent factors.
     // We broaden the JRT around 1 by the same factor for data
     // numbers from: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
+    // set unc_var=0 for central value, +1 to vary up, and -1 to vary down
 
-    if      (eta >= 0.0 && eta < 0.5) return 1.109;
-    else if (eta >= 0.5 && eta < 0.8) return 1.138;
-    else if (eta >= 0.8 && eta < 1.1) return 1.114;
-    else if (eta >= 1.1 && eta < 1.3) return 1.123;
-    else if (eta >= 1.3 && eta < 1.7) return 1.084;
-    else if (eta >= 1.7 && eta < 1.9) return 1.082;
-    else if (eta >= 1.9 && eta < 2.1) return 1.140;
-    else if (eta >= 2.1 && eta < 2.3) return 1.067;
-    else if (eta >= 2.3 && eta < 2.5) return 1.177;
-    else if (eta >= 2.5 && eta < 2.8) return 1.364;
-    else if (eta >= 2.8 && eta < 3.0) return 1.857;
-    // else if (eta >= 2.8 && eta < 3.0) return 1.346; //try average of neighbors to see if 1.9 value is affecting things
-    else if (eta >= 3.0 && eta < 3.2) return 1.328;
-    else                              return 1.160;
+    // // 80x prompt reco
+    // if      (eta >= 0.0 && eta < 0.5) return 1.109;
+    // else if (eta >= 0.5 && eta < 0.8) return 1.138;
+    // else if (eta >= 0.8 && eta < 1.1) return 1.114;
+    // else if (eta >= 1.1 && eta < 1.3) return 1.123;
+    // else if (eta >= 1.3 && eta < 1.7) return 1.084;
+    // else if (eta >= 1.7 && eta < 1.9) return 1.082;
+    // else if (eta >= 1.9 && eta < 2.1) return 1.140;
+    // else if (eta >= 2.1 && eta < 2.3) return 1.067;
+    // else if (eta >= 2.3 && eta < 2.5) return 1.177;
+    // else if (eta >= 2.5 && eta < 2.8) return 1.364;
+    // else if (eta >= 2.8 && eta < 3.0) return 1.857;
+    // // else if (eta >= 2.8 && eta < 3.0) return 1.346; //try average of neighbors to see if 1.9 value is affecting things
+    // else if (eta >= 3.0 && eta < 3.2) return 1.328;
+    // else                              return 1.160;
+
+    // // 80x re-reco
+    if      (eta >= 0.0 && eta < 0.5) return 1.160 + unc_var * 0.0645;
+    else if (eta >= 0.5 && eta < 0.8) return 1.195 + unc_var * 0.0652;
+    else if (eta >= 0.8 && eta < 1.1) return 1.146 + unc_var * 0.0632;
+    else if (eta >= 1.1 && eta < 1.3) return 1.161 + unc_var * 0.1025;
+    else if (eta >= 1.3 && eta < 1.7) return 1.128 + unc_var * 0.0986;
+    else if (eta >= 1.7 && eta < 1.9) return 1.100 + unc_var * 0.1079;
+    else if (eta >= 1.9 && eta < 2.1) return 1.143 + unc_var * 0.1214;
+    else if (eta >= 2.1 && eta < 2.3) return 1.151 + unc_var * 0.1140;
+    else if (eta >= 2.3 && eta < 2.5) return 1.296 + unc_var * 0.2371;
+    else if (eta >= 2.5 && eta < 2.8) return 1.342 + unc_var * 0.2091;
+    else if (eta >= 2.8 && eta < 3.0) return 1.779 + unc_var * 0.2008;
+    else if (eta >= 3.0 && eta < 3.2) return 1.187 + unc_var * 0.1243;
+    else                              return 1.192 + unc_var * 0.1488;
 
 }
 
@@ -207,56 +224,184 @@ float JRTreader::GetJERCorrection(float eta){
 // will need to change if templates are updated.
 void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin){
 
-    if(isBjet){
-        if(ptbin > 20) ptbin = 20;
+    // // 94x templates
+    // if(isBjet){
+    //     if(ptbin > 20) ptbin = 20;
 
-        if(ptbin>=0 && ptbin<=0)
-            ;
-        if(ptbin>=1 && ptbin<=4)
-            if(etabin >= 16) etabin = 15;
-        if(ptbin>=5 && ptbin<=7)
-            if(etabin >= 15) etabin = 14;
-        if(ptbin>=8 && ptbin<=9)
+    //     if(ptbin>=0 && ptbin<=0)
+    //         ;
+    //     if(ptbin>=1 && ptbin<=4)
+    //         if(etabin >= 16) etabin = 15;
+    //     if(ptbin>=5 && ptbin<=7)
+    //         if(etabin >= 15) etabin = 14;
+    //     if(ptbin>=8 && ptbin<=9)
+    //         if(etabin >= 14) etabin = 13;
+    //     if(ptbin>=10 && ptbin<=12)
+    //         if(etabin >= 12) etabin = 11;
+    //     if(ptbin>=13 && ptbin<=15)
+    //         if(etabin >= 10) etabin = 9;
+    //     if(ptbin>=16 && ptbin<=16)
+    //         if(etabin >= 7) etabin = 6;
+    //     if(ptbin>=17 && ptbin<=18)
+    //         if(etabin >=6) etabin = 5;
+    //     if(ptbin>=19 && ptbin<=19)
+    //         if(etabin >=4) etabin = 3;
+    //     if(ptbin>=20 && ptbin<=20)
+    //         if(etabin >=2) etabin = 1;
+
+    // }
+    // if(!isBjet){
+    //     if(ptbin > 20) ptbin = 20;
+
+    //     if(ptbin>=0 && ptbin<=3)
+    //         ;
+    //     if(ptbin>=4 && ptbin<=5)
+    //         if(etabin >= 16) etabin = 15;
+    //     if(ptbin>=6 && ptbin<=8)
+    //         if(etabin >= 15) etabin = 14;
+    //     if(ptbin>=9 && ptbin<=11)
+    //         if(etabin >=14) etabin = 13;
+    //     if(ptbin>=12 && ptbin<=13)
+    //         if(etabin >= 12) etabin = 11;
+    //     if(ptbin>=14 && ptbin<=16)
+    //         if(etabin >= 10) etabin = 9;
+    //     if(ptbin>=17 && ptbin<=17)
+    //         if(etabin >= 7) etabin = 6;
+    //     if(ptbin>=18 && ptbin<=18)
+    //         if(etabin >=5) etabin = 4;
+    //     if(ptbin>=19 && ptbin<=19)
+    //         if(etabin >=4) etabin = 3;
+    //     if(ptbin>=20 && ptbin<=20)
+    //         if(etabin >=3) etabin = 2;
+
+    // }
+
+    // low stats 94x templates
+    if(isBjet){
+        if(ptbin > 18) ptbin = 18;
+
+        if(ptbin>=0 && ptbin<=3)
+            if(etabin >= 13) etabin = 11;
+        if(ptbin>=4 && ptbin<=6)
             if(etabin >= 14) etabin = 13;
-        if(ptbin>=10 && ptbin<=12)
+        if(ptbin>=7 && ptbin<=9)
             if(etabin >= 12) etabin = 11;
-        if(ptbin>=13 && ptbin<=15)
+        if(ptbin>=10 && ptbin<=14)
             if(etabin >= 10) etabin = 9;
-        if(ptbin>=16 && ptbin<=16)
+        if(ptbin>=15 && ptbin<=15)
             if(etabin >= 7) etabin = 6;
-        if(ptbin>=17 && ptbin<=18)
-            if(etabin >=6) etabin = 5;
-        if(ptbin>=19 && ptbin<=19)
+        if(ptbin>=16 && ptbin<=17)
+            if(etabin >= 6) etabin = 5;
+        if(ptbin>=18 && ptbin<=18)
             if(etabin >=4) etabin = 3;
-        if(ptbin>=20 && ptbin<=20)
-            if(etabin >=2) etabin = 1;
 
     }
     if(!isBjet){
-        if(ptbin > 20) ptbin = 20;
+        if(ptbin > 19) ptbin = 19;
 
-        if(ptbin>=0 && ptbin<=3)
-            ;
-        if(ptbin>=4 && ptbin<=5)
+        if(ptbin>=0 && ptbin<=5)
             if(etabin >= 16) etabin = 15;
         if(ptbin>=6 && ptbin<=8)
             if(etabin >= 15) etabin = 14;
-        if(ptbin>=9 && ptbin<=11)
+        if(ptbin>=9 && ptbin<=10)
             if(etabin >=14) etabin = 13;
-        if(ptbin>=12 && ptbin<=13)
+        if(ptbin>=11 && ptbin<=14)
             if(etabin >= 12) etabin = 11;
-        if(ptbin>=14 && ptbin<=16)
+        if(ptbin>=15 && ptbin<=16)
             if(etabin >= 10) etabin = 9;
         if(ptbin>=17 && ptbin<=17)
             if(etabin >= 7) etabin = 6;
         if(ptbin>=18 && ptbin<=18)
-            if(etabin >=5) etabin = 4;
+            if(etabin >=6) etabin = 5;
         if(ptbin>=19 && ptbin<=19)
-            if(etabin >=4) etabin = 3;
-        if(ptbin>=20 && ptbin<=20)
             if(etabin >=3) etabin = 2;
 
     }
+
+    // // 80x templates
+    // if(isBjet){
+    //     if(ptbin > 19) ptbin = 19;
+
+    //     if(ptbin>=0 && ptbin<=1)
+    //         ;
+    //     if(ptbin>=2 && ptbin<=4)
+    //         if(etabin >= 16) etabin = 15;
+    //     if(ptbin>=5 && ptbin<=6)
+    //         if(etabin >= 15) etabin = 14;
+    //     if(ptbin>=7 && ptbin<=8)
+    //         if(etabin >= 14) etabin = 13;
+    //     if(ptbin>=9 && ptbin<=11)
+    //         if(etabin >= 12) etabin = 11;
+    //     if(ptbin>=12 && ptbin<=14)
+    //         if(etabin >= 10) etabin = 9;
+    //     if(ptbin>=15 && ptbin<=17)
+    //         if(etabin >= 6) etabin = 5;
+    //     if(ptbin>=18 && ptbin<=18)
+    //         if(etabin >=4) etabin = 3;
+    //     if(ptbin>=19 && ptbin<=19)
+    //         if(etabin >=3) etabin = 2;
+
+    // }
+    // if(!isBjet){
+    //     if(ptbin > 20) ptbin = 20;
+
+    //     if(ptbin>=0 && ptbin<=3)
+    //         ;
+    //     if(ptbin>=4 && ptbin<=5)
+    //         if(etabin >= 16) etabin = 15;
+    //     if(ptbin>=6 && ptbin<=8)
+    //         if(etabin >= 15) etabin = 14;
+    //     if(ptbin>=9 && ptbin<=10)
+    //         if(etabin >=14) etabin = 13;
+    //     if(ptbin>=11 && ptbin<=13)
+    //         if(etabin >= 12) etabin = 11;
+    //     if(ptbin>=14 && ptbin<=15)
+    //         if(etabin >= 10) etabin = 9;
+    //     if(ptbin>=16 && ptbin<=16)
+    //         if(etabin >= 7) etabin = 6;
+    //     if(ptbin>=17 && ptbin<=18)
+    //         if(etabin >=6) etabin = 5;
+    //     if(ptbin>=19 && ptbin<=19)
+    //         if(etabin >=4) etabin = 3;
+    //     if(ptbin>=20 && ptbin<=20)
+    //         if(etabin >=3) etabin = 2;
+
+    // }
+
+    // // Jason templates
+    // if(isBjet){
+    //     if(ptbin > 16) ptbin = 16;
+
+    //     if(ptbin>=0 && ptbin<=9)
+    //         if(etabin >=14) etabin = 13;
+    //     if(ptbin>=10 && ptbin<=12)
+    //         if(etabin >= 12) etabin = 11;
+    //     if(ptbin>=13 && ptbin<=14)
+    //         if(etabin >= 10) etabin = 9;
+    //     if(ptbin>=15 && ptbin<=15)
+    //         if(etabin >= 7) etabin = 6;
+    //     if(ptbin>=16 && ptbin<=16)
+    //         if(etabin >= 6) etabin = 5;
+    // }
+    // if(!isBjet){
+    //     if(ptbin > 17) ptbin = 17;
+
+    //     if(ptbin>=0 && ptbin<=1)
+    //         ;
+    //     if(ptbin>=2 && ptbin<=7)
+    //         if(etabin >= 16) etabin = 15;
+    //     if(ptbin>=8 && ptbin<=10)
+    //         if(etabin >= 15) etabin = 14;
+    //     if(ptbin>=11 && ptbin<=13)
+    //         if(etabin >= 14) etabin = 3;
+    //     if(ptbin>=14 && ptbin<=15)
+    //         if(etabin >= 10) etabin = 9;
+    //     if(ptbin>=16 && ptbin<=16)
+    //         if(etabin >=6) etabin = 5;
+    //     if(ptbin>=17 && ptbin<=17)
+    //         if(etabin >=3) etabin = 2;
+
+    // }
 
     *new_ptbin = ptbin;
     *new_etabin = etabin;
@@ -301,6 +446,7 @@ void JRTreader::SetMeanShift(float shift){
 
 void JRTreader::TransformFit(TH1D *fit, TH1D *core, TH1D *tail){
 
+    // cout << coreScale << " " << tailScale << " " << meanShift << endl;
 
     for(int ibin=1; ibin <= fit->GetNbinsX(); ibin++){
 

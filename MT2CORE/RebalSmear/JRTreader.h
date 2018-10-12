@@ -18,10 +18,10 @@ class JRTreader {
     
     JRTreader(const char *fname=0);
     ~JRTreader();
-    int Init(const char *fname, bool correctDataResponse=false);
+    int Init(const char *fname, bool correctDataResponse=false, int unc_var=0);
     float GetRandomResponse(float pt, float eta, bool isBjet);
     float GetValue(float pt, float eta, bool isBjet, float smearfact);
-    static float GetJERCorrection(float eta);
+    static float GetJERCorrection(float eta, int unc_var=0);
     static int GetPtBin(float pt);
     static int GetEtaBin(float eta);
     static void GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin);
@@ -33,6 +33,8 @@ class JRTreader {
     void SetBinWidth(float width);
     void Draw(int,int, TH1D* usethis=NULL, string tag="test");
     void DrawComp(TH1D* h1, TH1D* h2, TString tag="test");
+
+    // void debug(){ cout << "ADDR: " << fits_nonb << " test   " << fits_nonb->size() << endl; }
 
     // Sorry to anyone else that attempts to read this. Eta bins in the templates do not correspond to the
     // eta bins for the Jet Energy Response data/MC corrections, so I have to use a finer binning that
