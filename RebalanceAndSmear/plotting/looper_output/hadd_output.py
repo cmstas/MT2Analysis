@@ -8,7 +8,8 @@ import os
 import sys
 import glob
 
-test=True
+test=False
+doSmearbaby=False
 
 indir = sys.argv[1]
 basedir = indir.strip("/").split("/")[-1]
@@ -30,6 +31,8 @@ while idir < len(list_of_subdirs):
   for fname in os.listdir(list_of_subdirs[idir]):      
     path = os.path.join(list_of_subdirs[idir],fname)
     if os.path.isdir(path):
+      if not doSmearbaby and "smearbaby" in path:
+        continue
       print "Appending directory {0}".format(path)
     list_of_subdirs.append(path) if os.path.isdir(path) else list_of_files.append(path)            
   if len(list_of_files):
@@ -39,7 +42,7 @@ while idir < len(list_of_subdirs):
       if not test:
         os.makedirs(outpath)
     except:
-      pass
+      pass                     
     try:
       print "Preparing to hadd {0} files".format(len(list_of_files))
       if len(list_of_files) < batch_size:
