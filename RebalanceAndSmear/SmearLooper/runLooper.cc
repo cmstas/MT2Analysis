@@ -41,14 +41,20 @@ int main(int argc, char **argv) {
   int tflag = 0;
   int wflag = 0;
   int dflag = 0;
+  int qflag = 0;
+  int gflag = 0;
+  int uflag = 0;
   int max_events = -1;
   float core_scale = 1.;
   float tail_scale = 1.;
   float mean_shift = 0.;
+  int jer_unc_var = 0;
   int cut_level = 1;
+  string jet_weights_file = "";
+  string config_tag = "";
 
   int c;
-  while ((c = getopt(argc, argv, "bc:dhjl:m:n:rt:w")) != -1) {
+  while ((c = getopt(argc, argv, "bc:dhjl:m:n:rt:wq:g:u:")) != -1) {
     switch (c) {
     case 'b':
       bflag = 1;
@@ -87,6 +93,18 @@ int main(int argc, char **argv) {
     case 'd':
       dflag = 1;            
       break;
+    case 'q':
+      qflag = 1;            
+      jet_weights_file = string(optarg);
+      break;
+    case 'g':
+      gflag = 1;
+      config_tag = string(optarg);
+      break;
+    case 'u':
+      uflag = 1;
+      jer_unc_var = atoi(optarg);
+      break;
     case '?':
       if (isprint(optopt))
         fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -98,8 +116,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  printf ("running on %d events with bflag = %d, rflag = %d, wflag = %d, hflag = %d, jflag = %d and core_scale = %1.2f, tail_scale = %1.2f, mean_shift = %1.2f\n",
-          max_events, bflag, rflag, wflag, hflag, jflag, core_scale, tail_scale, mean_shift);
+  printf ("running on %d events with bflag = %d, rflag = %d, wflag = %d, hflag = %d, jflag = %d and core_scale = %1.2f, tail_scale = %1.2f, mean_shift = %1.2f, config=%s\n",
+          max_events, bflag, rflag, wflag, hflag, jflag, core_scale, tail_scale, mean_shift, config_tag.c_str());
   
     
   TChain *ch = new TChain("mt2");
@@ -125,6 +143,12 @@ int main(int argc, char **argv) {
   if (wflag) looper->ApplyWeights();
   if (lflag) looper->SetCutLevel(cut_level);
   if (dflag) looper->SetIsData(true);
+  if (qflag){
+      looper->DoNJetReweighting(true);
+      looper->SetNJetWeightFile(jet_weights_file);
+  }
+  if (gflag) looper->SetMT2ConfigTag(config_tag);
+  if (uflag) looper->SetJERUncertVar(jer_unc_var);
 
   looper->loop(ch, output_dir + "/" + samples.at(0) + ".root", max_events);
   return 0;

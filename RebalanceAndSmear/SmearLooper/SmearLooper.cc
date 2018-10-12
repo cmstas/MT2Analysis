@@ -31,6 +31,7 @@
 
 //MT2
 #include "../../MT2CORE/Plotting/PlotUtilities.h"
+// #include "../../MT2CORE/Plotting/configurations.h"
 
 
 using namespace std;
@@ -69,6 +70,10 @@ bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
 bool doHFJetVeto = false;
 bool prescalesByEvent = true;
+bool doNTrueIntReweight = true;
+bool doCustomHEMsmear = false;
+bool doHEMregionVeto = false;
+float HEMvetoPtThresh = 20.0;
 
 const int numberOfSmears = 100;
 const float smearNormalization = 1.0/float(numberOfSmears);
@@ -99,15 +104,18 @@ inline bool sortByPt(const LorentzVector &vec1, const LorentzVector &vec2 ) {
 }
 
 SmearLooper::SmearLooper() :
+    config_tag_(""),
     applyWeights_(false),
     doRebalanceAndSmear_(false),
     makeSmearBaby_(false),
     useRawHists_(false),
     useBjetResponse_(true),
     isData_(false),
+    doNJetReweighting_(false),
     coreScale_(1.),
     tailScale_(1.),
     meanShift_(0.),
+    JER_uncert_var_(0),
     CUT_LEVEL_(1) 
 {
   
@@ -127,6 +135,7 @@ SmearLooper::~SmearLooper(){
 void SmearLooper::SetSignalRegions(){
 
     SRVec =  getSignalRegions2017_RS();
+    SRVecMonojet =  getSignalRegionsMonojet_RS();
 
     //store histograms with cut values for all variables
     for(unsigned int i = 0; i < SRVec.size(); i++){
@@ -249,6 +258,57 @@ void SmearLooper::SetSignalRegions(){
             plot1D("h_"+varsCRRSDPhiMT2.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSDPhiMT2(varsCRRSDPhiMT2.at(j)), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
         }
         plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
+
+        dir = (TDirectory*)outfile_->Get(("crRSDPhiMT2SL"+SRVec.at(i).GetName()).c_str());
+        if (dir == 0) {
+            dir = outfile_->mkdir(("crRSDPhiMT2SL"+SRVec.at(i).GetName()).c_str());
+        }
+        dir->cd();
+        std::vector<std::string> varsCRRSDPhiMT2SL = SRVec.at(i).GetListOfVariablesCRRSDPhiMT2();
+        for(unsigned int j = 0; j < varsCRRSDPhiMT2SL.size(); j++){
+            plot1D("h_"+varsCRRSDPhiMT2.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRRSDPhiMT2(varsCRRSDPhiMT2.at(j)), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
+            plot1D("h_"+varsCRRSDPhiMT2.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSDPhiMT2(varsCRRSDPhiMT2.at(j)), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
+        }
+        plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSDPhiMT2SLHistMap, "", 1, 0, 2);
+
+        dir = (TDirectory*)outfile_->Get(("crRSDPhiMT2DY"+SRVec.at(i).GetName()).c_str());
+        if (dir == 0) {
+            dir = outfile_->mkdir(("crRSDPhiMT2DY"+SRVec.at(i).GetName()).c_str());
+        } 
+        dir->cd();
+        std::vector<std::string> varsCRRSDPhiMT2DY = SRVec.at(i).GetListOfVariablesCRRSDPhiMT2();
+        for(unsigned int j = 0; j < varsCRRSDPhiMT2DY.size(); j++){
+            plot1D("h_"+varsCRRSDPhiMT2.at(j)+"_"+"LOW",  1, SRVec.at(i).GetLowerBoundCRRSDPhiMT2(varsCRRSDPhiMT2.at(j)), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
+            plot1D("h_"+varsCRRSDPhiMT2.at(j)+"_"+"HI",   1, SRVec.at(i).GetUpperBoundCRRSDPhiMT2(varsCRRSDPhiMT2.at(j)), SRVec.at(i).crRSDPhiMT2HistMap, "", 1, 0, 2);
+        }
+        plot1D("h_n_mt2bins",  1, SRVec.at(i).GetNumberOfMT2Bins(), SRVec.at(i).crRSDPhiMT2DYHistMap, "", 1, 0, 2);
+    }
+
+    // MONOJET
+    for(unsigned int i = 0; i < SRVecMonojet.size(); i++){
+        std::vector<std::string> vars = SRVecMonojet.at(i).GetListOfVariables();
+        TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVecMonojet.at(i).GetName()).c_str());
+        if (dir == 0) {
+            dir = outfile_->mkdir(("sr"+SRVecMonojet.at(i).GetName()).c_str());
+        } 
+        dir->cd();
+        for(unsigned int j = 0; j < vars.size(); j++){
+            plot1D("h_"+vars.at(j)+"_"+"LOW",  1, SRVecMonojet.at(i).GetLowerBound(vars.at(j)), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
+            plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBound(vars.at(j)), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
+        }
+        plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
+
+        dir = (TDirectory*)outfile_->Get(("crRSInvertDPhi"+SRVecMonojet.at(i).GetName()).c_str());
+        if (dir == 0) {
+            dir = outfile_->mkdir(("crRSInvertDPhi"+SRVecMonojet.at(i).GetName()).c_str());
+        } 
+        dir->cd();
+        std::vector<std::string> varsCRRSInvertDPhi = SRVecMonojet.at(i).GetListOfVariablesCRRSInvertDPhi();
+        for(unsigned int j = 0; j < varsCRRSInvertDPhi.size(); j++){
+            plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"LOW",  1, SRVecMonojet.at(i).GetLowerBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVecMonojet.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+            plot1D("h_"+varsCRRSInvertDPhi.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBoundCRRSInvertDPhi(varsCRRSInvertDPhi.at(j)), SRVecMonojet.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
+        }
+        plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).crRSInvertDPhiHistMap, "", 1, 0, 2);
     }
 
     SRBase.SetName("srbase");
@@ -442,6 +502,21 @@ void SmearLooper::SetSignalRegions(){
         } 
     }
 
+    SRVecMonojet_temp = SRVecMonojet;
+    for(unsigned int srN = 0; srN < SRVecMonojet_temp.size(); srN++){
+        SRVecMonojet_temp.at(srN).SetName("temp_"+SRVecMonojet_temp.at(srN).GetName());
+        SRVecMonojet_temp.at(srN).srHistMap.clear();
+        SRVecMonojet_temp.at(srN).crRSInvertDPhiHistMap.clear();
+        SRVecMonojet_temp.at(srN).crRSMT2SideBandHistMap.clear();
+        SRVecMonojet_temp.at(srN).crRSDPhiMT2HistMap.clear();
+    }
+    for(unsigned int i=0; i<SRVecMonojet_temp.size(); i++){
+        TDirectory * dir = (TDirectory*)outfile_->Get((SRVecMonojet_temp.at(i).GetName()).c_str());
+        if (dir == 0) {
+            dir = outfile_->mkdir((SRVecMonojet_temp.at(i).GetName()).c_str());
+        } 
+    }
+
     InclusiveRegions_temp = InclusiveRegions;
     for(unsigned int srN = 0; srN < InclusiveRegions_temp.size(); srN++){
         InclusiveRegions_temp.at(srN).SetName("temp_"+InclusiveRegions_temp.at(srN).GetName());
@@ -475,14 +550,40 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
     TRandom3 *random = new TRandom3();
 
+    if(config_tag_ == ""){
+        cout << "ERROR! need to set the MT2Configuration. use SmearLooper::SetMT2Config()" << endl;
+        return;
+    }
+
+    // Load the configuration and output to screen
+    config_ = GetMT2Config(config_tag_);
+    cout << "[SmearLooper::loop] using configuration tag: " << config_tag_ << endl;
+    cout << "                  JSON: " << config_.json << endl;
+    cout << "                  lumi: " << config_.lumi << " fb-1" << endl;
+    if (config_.pu_weights_file != ""){
+        cout << "                  PU weights file: " << config_.pu_weights_file << endl;
+    }
+    cout << "                  Filters applied:" << endl;
+    for(map<string,bool>::iterator it=config_.filters.begin(); it!=config_.filters.end(); it++){
+        if(it->second)
+            cout << "                      " << it->first << endl;
+    }    
+
     // setup template reader
     reader.SetCoreScale(coreScale_);
     reader.SetTailScale(tailScale_);
     reader.SetMeanShift(meanShift_);
     reader.UseRawHistograms(useRawHists_);
-    reader.Init("JetResponseTemplates.root",isData_);
-    // reader.Init("JetResponseTemplates.root",isData_);
-  
+    if(isData_){
+        cout << "[SmearLooper::loop] Applying JER correction factors" << endl;
+        if(JER_uncert_var_==1)
+            cout << "[SmearLooper::loop] Varying JER uncertainty UP" << endl;
+        if(JER_uncert_var_==-1)
+            cout << "[SmearLooper::loop] Varying JER uncertainty DOWN" << endl;
+    }
+    reader.Init("JetResponseTemplates.root", isData_, JER_uncert_var_);
+    // reader.Init("/home/users/bemarsh/analysis/jet_response_templates/CMSSW_9_4_7/src/JetResponseTemplates/JetResponseTemplates/output/JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",isData_);
+
     // draw all of the templates for debugging. Uncomment the drawing code in JRTreader.cc:GetRandomResponse
     // for(int ipt=0; ipt<23; ipt++){
     //     for(int ieta=0; ieta<17; ieta++){
@@ -490,6 +591,44 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
     //     }
     // }
     // return;
+
+    if(doNJetReweighting_){
+        const uint n_ht_regs = 5;
+        string ht_regs[n_ht_regs] = {"ht250to450", "ht450to575", "ht575to1200", "ht1200to1500", "ht1500to2000"};
+        TFile *fid_njet_weights_ = new TFile(njet_weights_file_.c_str());
+        for(uint iht=0; iht<n_ht_regs; iht++){
+            nJetWeights_[ht_regs[iht]] = (TH1D*)fid_njet_weights_->Get((ht_regs[iht] + "/h_weights").c_str());
+            nJetWeights_[ht_regs[iht]]->SetDirectory(0);
+        }
+        fid_njet_weights_->Close();
+    }
+    
+    vector<TH1D*> HEMsmears;
+    if(doCustomHEMsmear){
+        TFile* fid_hem_smears = new TFile("HEM_smears.root");
+        for(int i=0; i<8; i++){
+            string hname = "reg0/h_reg_0_pT_"+to_string(i);
+            HEMsmears.push_back((TH1D*)fid_hem_smears->Get(hname.c_str()));
+            if(!HEMsmears.at(i)){
+                cout << "INVALID HEM HIST NAME " << hname <<  endl;
+                return;
+            }
+            HEMsmears.at(i)->SetDirectory(0);
+        }
+        fid_hem_smears->Close();
+    }
+
+    // load PU reweighting weights
+    TH1D* h_nTrueInt_weights_ = 0;
+    if (doNTrueIntReweight && config_.pu_weights_file != "") {
+        cout << "Applying nTrueInt reweighting from weight file " << config_.pu_weights_file << endl;
+        TFile* f_weights = new TFile(config_.pu_weights_file.c_str());
+        TH1D* h_nTrueInt_weights_temp = (TH1D*) f_weights->Get("pileupWeight");
+        h_nTrueInt_weights_ = (TH1D*) h_nTrueInt_weights_temp->Clone("h_pileupWeight");
+        h_nTrueInt_weights_->SetDirectory(0);
+        f_weights->Close();
+        delete f_weights;
+    }
 
     // Benchmark
     TBenchmark *bmark = new TBenchmark();
@@ -500,11 +639,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
     outfile_ = new TFile(output_name.c_str(),"RECREATE") ; 
 
-    const char* json_file = "jsons/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
-    // const char* json_file = "";
-    if (applyJSON) {
-        cout << "Loading json file: " << json_file << endl;
-        set_goodrun_file(json_file);
+    if (applyJSON && config_.json != "") {
+        cout << "[SmearLooper::loop] Loading json file: " << config_.json << endl;
+        set_goodrun_file(("jsons/"+config_.json).c_str());
     }
 
     cout << "[SmearLooper::loop] setting up histos" << endl;
@@ -641,7 +778,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         // Event Loop
         unsigned int nEventsTree = tree->GetEntriesFast();
         // if (maxEvents > 0) nEventsTree = (unsigned int)maxEvents;
-        // nEventsTree = 50000;
+        // nEventsTree = 10000;
         for( unsigned int event = 0; event < nEventsTree; ++event) {
             ++nTotalEvents;
             if (maxEvents > 0 && nTotalEvents > maxEvents) break;
@@ -651,6 +788,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             int prescale = 1; //FIX THIS
 
             bool doDYplots = false;
+            bool doOFplots = false;
+            bool doLowPtSFplots = false;
+            bool doLowPtOFplots = false;
             bool doSLplots = false;
 
             if(t.nLepLowMT == 1){
@@ -658,18 +798,25 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             }
 
             if(t.nlep == 2){
-                bool passTrig = (!t.isData || t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33);
-                if(passTrig && (t.lep_charge[0] * t.lep_charge[1] == -1)
+                bool passSFtrig = passesTriggerSF();
+                bool passOFtrig = passesTriggerOF();
+                if((t.lep_charge[0] * t.lep_charge[1] == -1)
                    && (abs(t.lep_pdgId[0]) == 13 ||  t.lep_tightId[0] > 0 )
                    && (abs(t.lep_pdgId[1]) == 13 ||  t.lep_tightId[1] > 0 )
-                   && t.lep_pt[0] > 100 && t.lep_pt[1] > 30 ) {
+                   && t.lep_pt[0] > 100 && t.lep_pt[1] > 35 ) {
 
-                    if(abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) && t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)
-                        doDYplots = true;
+                    if(abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) && passSFtrig){
+                        if     (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                    doDYplots = true;
+                        else if(t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50) doLowPtSFplots = true;
+                    }
+                    else if(abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) && passOFtrig){
+                        if     (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                    doOFplots = true;
+                        else if(t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50) doLowPtOFplots = true;
+                    }
                 }
             }
 
-            //---------------------
+            //--------------------
             // bookkeeping and progress report
             //---------------------
             ++nEventsTotal;
@@ -712,42 +859,49 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
       
             if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht) || t.jet_pt[0] > 13000.) continue;
-      
+
             if (t.nVert == 0) continue;
             if (!doRebalanceAndSmear_ && CUT_LEVEL_<4){
-                if(t.nJet30 < 2) continue;
+                if(t.nJet30 < 1) continue;
                 if(t.ht < 250.0 && (t.nlep!=2 || t.zll_ht < 250)) continue;
                 if(t.ht < 1200.0 && t.met_pt < 30.0 && (t.nlep!=2 || (t.zll_ht<1200 && t.zll_met_pt<30))) continue;
                 if(t.ht >= 1200.0 && t.met_pt < 30.0 && (t.nlep!=2 || (t.zll_ht>=1200 && t.zll_met_pt<30))) continue;
-                if(t.mt2 < 50 && (t.nlep!=2 || t.zll_mt2<50)) continue;
+                if(t.nJet30>=3 && t.mt2 < 50 && (t.nlep!=2 || t.zll_mt2<50)) continue;
                 //if((t.diffMetMht/t.met_pt) > 0.5) continue;
                 //if(t.deltaPhiMin < 0.3) continue;
             }
 
-            // MET filters
-            if (t.isData) {
-                if (!t.Flag_globalTightHalo2016Filter) continue;
-                if (!t.Flag_badMuonFilter) continue;
-            }
-            if (!t.Flag_goodVertices) continue;
-            if (!t.Flag_eeBadScFilter) continue;
-            if (!t.Flag_HBHENoiseFilter) continue;
-            if (!t.Flag_HBHENoiseIsoFilter) continue;
-            if (!t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
-            if (!t.Flag_ecalBadCalibFilter) continue;
-            if (!t.Flag_badChargedCandidateFilter) continue;            
 
-            if (!doRebalanceAndSmear_ && CUT_LEVEL_<4) 
-                if (t.met_miniaodPt / t.met_caloPt > 5.0) continue;
+            if (config_.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
+            if (config_.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+            if (config_.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+            if (config_.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+            if (config_.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+            if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+            if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+            if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+            if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+            if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+            if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+            if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+
+
+            if (!doRebalanceAndSmear_ && CUT_LEVEL_<4) {
+                if (t.met_miniaodPt>200 && t.met_miniaodPt / t.met_caloPt > 5.0) continue;
+                if (t.nJet200MuFrac50DphiMet > 0) continue;
+            }
 
             // flag signal samples
             if (t.evt_id >= 1000) isSignal_ = true;
             else isSignal_ = false; 
 
             // remove spiky qcd mc events
+            if(t.evt_id >=150 && t.evt_id<153) continue;
             if(t.evt_id == 153 && t.ht > 600) continue;  //ht300to500
             if(t.evt_id == 154 && t.ht > 1000) continue;  //ht500to700
             if(t.evt_id == 155 && t.ht > 1500) continue;  //ht700to1000
+
+            passMonojetId_ = isSignal_ || (t.nJet30>=1 && t.jet_id[0]>=4);
 
             //---------------------
             // set weights and start making plots
@@ -759,7 +913,19 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             // apply relevant weights to MC
             if (!t.isData) {
                 evtweight_ = t.evt_scale1fb * lumi;
-                if (applyWeights_) evtweight_ *= t.weight_lepsf * t.weight_btagsf * t.weight_isr * t.weight_pu;
+
+                if (applyWeights_) {
+                    evtweight_ *= t.weight_lepsf * t.weight_btagsf;
+                    if(doNTrueIntReweight){
+                        if(h_nTrueInt_weights_==0){
+                            cout << "[SmearLooper::loop] WARNING! You requested to do nTrueInt reweighting but didn't supply a PU weights file. Turning off." << endl;
+                        }else{
+                            int nTrueInt_input = t.nTrueInt;
+                            float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
+                            evtweight_ *= puWeight;
+                        }
+                    }
+                }
             } // !isData
 
             plot1D("h_nvtx",       t.nVert,       evtweight_, h_1d_global, ";N(vtx)", 80, 0, 80);
@@ -773,7 +939,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             nJet30Eta3_ = 0;
             for (int ijet = 0; ijet < t.njet; ++ijet) {
                 if (t.jet_pt[ijet] > 30. && fabs(t.jet_eta[ijet]) > 3.0) ++nJet30Eta3_;
-            }
+            }            
 
             // veto on forward jets
             if (doHFJetVeto && nJet30Eta3_ > 0) continue;
@@ -782,17 +948,6 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             // if (t.nJet30FailId && !doRebalanceAndSmear_) continue;
             if (t.nJet30FailId) continue;
       
-
-            // //re-compute nBJet20 since the babymaker filled with wrong working point
-            // int nbjet = 0;
-            // for(int i=0; i<t.njet; i++){
-            //     if(t.jet_pt[i] < 20)
-            //         break;
-            //     if(t.jet_btagCSV[i] >= 0.8838)
-            //         nbjet++;
-            // }
-            // t.nBJet20 = nbjet;
-
             ////////////////////////////////////
             /// done with overall selection  /// 
             ////////////////////////////////////
@@ -942,15 +1097,34 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         
                 random->SetSeed();
 
+                float orig_weight = evtweight_;
                 for(int iSmear=0; iSmear<numSmears; iSmear++){
-                    evtweight_ = 1;
+                    evtweight_ = 1.0;
 
                     std::vector<float> jet_pt_smeared = jet_pt;
 
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
-                        float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>0.8838) : false);
+                        float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>config_.btag_med_threshold) : false);
                         plot1D("h_smear",      smear,   evtweight_, h_1d_global, ";smear", 10000, 0, 10);
                         jet_pt_smeared.at(i) *= smear;
+                        
+                        if(doCustomHEMsmear){
+                            if(jet_eta[i] < -1.5 && jet_phi[i] > -1.6 && jet_phi[i] < -0.8){
+                                float smearfact = 1.0;
+                                float pt = jet_pt_smeared.at(i);
+                                // smearfact = HEMsmears.at(0)->GetRandom();
+                                if(20 <= pt  && pt < 30)  smearfact = HEMsmears.at(1)->GetRandom();
+                                if(30 <= pt  && pt < 50)  smearfact = HEMsmears.at(2)->GetRandom();
+                                if(50 <= pt  && pt < 80)  smearfact = HEMsmears.at(3)->GetRandom();
+                                if(80 <= pt  && pt < 120) smearfact = HEMsmears.at(4)->GetRandom();
+                                if(120 <= pt && pt < 170) smearfact = HEMsmears.at(5)->GetRandom();
+                                if(170 <= pt && pt < 300) smearfact = HEMsmears.at(6)->GetRandom();
+                                if(300 <= pt)             smearfact = HEMsmears.at(7)->GetRandom();
+
+                                // cout << endl << "HEM smear! " << smearfact << endl;
+                                jet_pt_smeared.at(i) *= smearfact;
+                            }
+                        }
                     }
 
                     new_met_x = t.met_pt*cos(t.met_phi);
@@ -966,6 +1140,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     float deltaPhiMin;
                     float jet1_pt;
                     float jet2_pt;
+                    float jet1_eta;
+                    float jet2_eta;
+                    float jet1_phi;
+                    float jet2_phi;
 
                     float jet_x = 0;
                     float jet_y = 0;
@@ -981,18 +1159,18 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         new_met_y -= jet_pt_smeared.at(i)*sin(jet_phi.at(i));
                         jet_x += (jet_pt_smeared.at(i))*cos(jet_phi.at(i));
                         jet_y += (jet_pt_smeared.at(i))*sin(jet_phi.at(i));
-                        if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.5) ) ht += jet_pt_smeared.at(i);
-                        if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.5) ) nJet30++;
-                        if( (jet_pt_smeared.at(i) > 20.0) && (fabs(jet_eta.at(i)) < 2.5) && (jet_btagCSV.at(i) > 0.8838) ) nBJet20++;
+                        if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.4) ) ht += jet_pt_smeared.at(i);
+                        if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.4) ) nJet30++;
+                        if( (jet_pt_smeared.at(i) > 20.0) && (fabs(jet_eta.at(i)) < 2.4) && (jet_btagCSV.at(i) > config_.btag_med_threshold) ) nBJet20++;
                     }
                     for(unsigned int i=0; i<PU_passes_id_jet_pt.size(); i++){
                         new_met_x -= PU_passes_id_jet_pt.at(i)*cos(PU_passes_id_jet_phi.at(i));
                         new_met_y -= PU_passes_id_jet_pt.at(i)*sin(PU_passes_id_jet_phi.at(i));
                         jet_x += (PU_passes_id_jet_pt.at(i))*cos(PU_passes_id_jet_phi.at(i));
                         jet_y += (PU_passes_id_jet_pt.at(i))*sin(PU_passes_id_jet_phi.at(i));
-                        if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) ) ht += PU_passes_id_jet_pt.at(i);
-                        if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) ) nJet30++;
-                        if( (PU_passes_id_jet_pt.at(i) > 20.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.5) && (PU_passes_id_jet_btagCSV.at(i) > 0.8838) ) nBJet20++;
+                        if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) ) ht += PU_passes_id_jet_pt.at(i);
+                        if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) ) nJet30++;
+                        if( (PU_passes_id_jet_pt.at(i) > 20.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) && (PU_passes_id_jet_btagCSV.at(i) > config_.btag_med_threshold) ) nBJet20++;
                     }
                     for(unsigned int i=0; i<PU_fails_id_jet_pt.size(); i++){
                         new_met_x -= PU_fails_id_jet_pt.at(i)*cos(PU_fails_id_jet_phi.at(i));
@@ -1007,7 +1185,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     met_phi = met_vec.Phi();
 
 
-                    if(nJet30 < 2 && CUT_LEVEL_<3) continue;
+                    if(nJet30 < 1 && CUT_LEVEL_<3) continue;
                     if(ht < 250.0 && CUT_LEVEL_<3) continue;
                     if (met_pt < 30. && CUT_LEVEL_<3) continue;
                     if (met_pt<250. && ht<1200 && CUT_LEVEL_<2) continue;
@@ -1020,9 +1198,16 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     s_jet2_eta[iSmear] = -1;
                     s_max_smearfact[iSmear] = -1;
                     float max_ptdiff = 0;
-
+                    
+                    bool foundHEMjet = false;
                     std::vector<LorentzVector> p4sForDphi;
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){                        
+                        if(doHEMregionVeto){
+                            if(jet_eta[i] < -1.5 && jet_eta[i] > -4.7 && 
+                               jet_phi[i] < -0.8 && jet_phi[i] > -1.6 && 
+                               jet_pt_smeared[i] > HEMvetoPtThresh)
+                                foundHEMjet = true;
+                        }
                         if(jet_pt_smeared.at(i) < 30.0 || fabs(jet_eta.at(i)) > 4.7) continue;
                         if(jet_pt_smeared.at(i) > s_jet1_pt[iSmear]){
                             s_jet2_pt[iSmear] = s_jet1_pt[iSmear];
@@ -1051,6 +1236,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         p4sForDphi.push_back(tempVec);
                     }
                     for(unsigned int i=0; i<PU_passes_id_jet_pt.size(); i++){
+                        if(doHEMregionVeto){
+                            if(PU_passes_id_jet_eta[i] < -1.5 && PU_passes_id_jet_eta[i] > -4.7 && 
+                               PU_passes_id_jet_phi[i] < -0.8 && PU_passes_id_jet_phi[i] > -1.6 && 
+                               PU_passes_id_jet_pt[i] > HEMvetoPtThresh)
+                                foundHEMjet = true;
+                        }
                         if(PU_passes_id_jet_pt.at(i) < 30.0 || fabs(PU_passes_id_jet_eta.at(i)) > 4.7) continue;
                         LorentzVector tempVec;
                         tempVec.SetPx((PU_passes_id_jet_pt.at(i))*cos(PU_passes_id_jet_phi.at(i)));
@@ -1059,6 +1250,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         tempVec.SetE(tempVec.P());
                         p4sForDphi.push_back(tempVec);
                     }
+
+                    if(doHEMregionVeto && foundHEMjet)
+                        continue;
+
                     sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
 
                     deltaPhiMin = 999;
@@ -1071,7 +1266,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     std::vector<LorentzVector> p4sForHems;
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
                         if(jet_pt_smeared.at(i) < 30.0) continue;
-                        if(fabs(jet_eta.at(i)) > 2.5) continue;
+                        if(fabs(jet_eta.at(i)) > 2.4) continue;
                         LorentzVector tempVec;
                         tempVec.SetPx((jet_pt_smeared.at(i))*cos(jet_phi.at(i)));
                         tempVec.SetPy((jet_pt_smeared.at(i))*sin(jet_phi.at(i)));
@@ -1081,7 +1276,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     }
                     for(unsigned int i=0; i<PU_passes_id_jet_pt.size(); i++){
                         if(PU_passes_id_jet_pt.at(i) < 30.0) continue;
-                        if(fabs(PU_passes_id_jet_eta.at(i)) > 2.5) continue;
+                        if(fabs(PU_passes_id_jet_eta.at(i)) > 2.4) continue;
                         LorentzVector tempVec;
                         tempVec.SetPx((PU_passes_id_jet_pt.at(i))*cos(PU_passes_id_jet_phi.at(i)));
                         tempVec.SetPy((PU_passes_id_jet_pt.at(i))*sin(PU_passes_id_jet_phi.at(i)));
@@ -1109,16 +1304,28 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         mt2 = HemMT2(met_pt, met_phi, hemJets.at(0), hemJets.at(1));
                         jet1_pt = p4sForHems.at(0).pt();
                         jet2_pt = p4sForHems.at(1).pt();
+                        jet1_eta = p4sForHems.at(0).eta();
+                        jet2_eta = p4sForHems.at(1).eta();
+                        jet1_phi = p4sForHems.at(0).phi();
+                        jet2_phi = p4sForHems.at(1).phi();
                     }else{
-                        // std::cout << "Problem with jets for hemispheres!" << std::endl;
-                        // return;
+                        if(p4sForHems.size() == 1){
+                            jet1_pt = p4sForHems.at(0).pt();
+                            jet1_eta = p4sForHems.at(0).eta();
+                            jet1_phi = p4sForHems.at(0).phi();
+                        }else{
+                            jet1_pt = -1;
+                            jet1_eta = -1;
+                            jet1_phi = -1;
+                        }
                         mt2 = -1;
-                        jet1_pt = -1;
                         jet2_pt = -1;
+                        jet2_eta = -1;
+                        jet2_phi = -1;
                     }
 
-                    if(mt2 < 50.0 && CUT_LEVEL_<3) continue;
-                    if(mt2 < 100.0 && CUT_LEVEL_<2) continue;
+                    if(nJet30>=3 && mt2 < 50.0 && CUT_LEVEL_<3) continue;
+                    if(nJet30>=3 && mt2 < 100.0 && CUT_LEVEL_<2) continue;
 
                     RS_vars_["mt2"] = mt2;
                     RS_vars_["reb_met_pt"] = reb_met_pt;
@@ -1131,6 +1338,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     RS_vars_["diffMetMht"] = diffMetMht;
                     RS_vars_["jet1_pt"] = jet1_pt;
                     RS_vars_["jet2_pt"] = jet2_pt;
+                    RS_vars_["jet1_eta"] = jet1_eta;
+                    RS_vars_["jet2_eta"] = jet2_eta;
+                    RS_vars_["jet1_phi"] = jet1_phi;
+                    RS_vars_["jet2_phi"] = jet2_phi;
 
                     if (makeSmearBaby_) {
                         s_nJet30[iSmear]            = nJet30;
@@ -1142,33 +1353,43 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         s_met_pt[iSmear]            = met_pt;
                     }
                     
-                    // ELECTROWEAK CORRECTIONS. Hard-coded based on comparisons of QCD/EWK MC.
-                    if(t.isData){
-                        if(RS_vars_["ht"] >=250  && RS_vars_["ht"]<450)  evtweight_*=1.02;
-                        if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
-                        if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) evtweight_*=1.17;
-                        if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) evtweight_*=1.11;
-                        if(RS_vars_["ht"] >=1500)                        evtweight_*=1.07;
+                    // // ELECTROWEAK CORRECTIONS. Hard-coded based on comparisons of QCD/EWK MC.
+                    // if(t.isData){
+                    //     if(RS_vars_["ht"] >=250  && RS_vars_["ht"]<450)  evtweight_*=1.02;
+                    //     if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
+                    //     if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) evtweight_*=1.17;
+                    //     if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) evtweight_*=1.11;
+                    //     if(RS_vars_["ht"] >=1500)                        evtweight_*=1.07;
+                    // }
+
+                    if(doNJetReweighting_){
+                        TH1D* weights = 0;
+                        if(                         RS_vars_["ht"]<450)  weights = nJetWeights_["ht250to450"];
+                        if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  weights = nJetWeights_["ht450to575"];
+                        if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) weights = nJetWeights_["ht575to1200"];
+                        if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) weights = nJetWeights_["ht1200to1500"];
+                        if(RS_vars_["ht"] >=1500)                        weights = nJetWeights_["ht1500to2000"];
+                        evtweight_ *= weights->GetBinContent(weights->FindBin(RS_vars_["nJet30"]));
                     }
 
                     //fill temp histograms
                     fillHistos(SRNoCut_temp.srHistMap, SRNoCut_temp.GetNumberOfMT2Bins(), SRNoCut_temp.GetMT2Bins(), SRNoCut_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=450 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=450 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT1_temp.srHistMap, SRJustHT1_temp.GetNumberOfMT2Bins(), SRJustHT1_temp.GetMT2Bins(), SRJustHT1_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
-                    // if(RS_vars_["ht"]>=1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>100 && RS_vars_["diffMetMht"]/RS_vars_["met_pt"]<0.5) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    // if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>100 && RS_vars_["diffMetMht"]/RS_vars_["met_pt"]<0.5) 
                         fillHistos(SRJustHT2_temp.srHistMap, SRJustHT2_temp.GetNumberOfMT2Bins(), SRJustHT2_temp.GetMT2Bins(), SRJustHT2_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=250 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=250 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT3_temp.srHistMap, SRJustHT3_temp.GetNumberOfMT2Bins(), SRJustHT3_temp.GetMT2Bins(), SRJustHT3_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=250 && RS_vars_["ht"]<450 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=250 && RS_vars_["ht"]<450 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT4_temp.srHistMap, SRJustHT4_temp.GetNumberOfMT2Bins(), SRJustHT4_temp.GetMT2Bins(), SRJustHT4_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=450 && RS_vars_["ht"]<575 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=450 && RS_vars_["ht"]<575 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT5_temp.srHistMap, SRJustHT5_temp.GetNumberOfMT2Bins(), SRJustHT5_temp.GetMT2Bins(), SRJustHT5_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=575 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=575 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT6_temp.srHistMap, SRJustHT6_temp.GetNumberOfMT2Bins(), SRJustHT6_temp.GetMT2Bins(), SRJustHT6_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=1200 && RS_vars_["ht"]<1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["ht"]<1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT7_temp.srHistMap, SRJustHT7_temp.GetNumberOfMT2Bins(), SRJustHT7_temp.GetMT2Bins(), SRJustHT7_temp.GetName(), "");
-                    if(RS_vars_["ht"]>=1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT8_temp.srHistMap, SRJustHT8_temp.GetNumberOfMT2Bins(), SRJustHT8_temp.GetMT2Bins(), SRJustHT8_temp.GetName(), "");          
                     fillHistosSignalRegion("sr");
                     fillHistosSRBase();
@@ -1178,7 +1399,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     fillHistosCRRSDPhiMT2();
                 }//numberOfSmears
 
-                if(!t.isData) evtweight_ = t.evt_scale1fb * lumi;
+                if(!t.isData) evtweight_ = orig_weight;
                 //now fill histograms once per event with appropriate weights to get correct stat uncertainty
                 plotRS(SRNoCut_temp.srHistMap, SRNoCut.srHistMap, SRNoCut.GetName());
                 plotRS(SRJustHT1_temp.srHistMap, SRJustHT1.srHistMap, SRJustHT1.GetName());
@@ -1198,6 +1419,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     plotRS(SRVec_temp.at(srN).crRSInvertDPhiHistMap, SRVec.at(srN).crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRVec.at(srN).GetName());
                     plotRS(SRVec_temp.at(srN).crRSMT2SideBandHistMap, SRVec.at(srN).crRSMT2SideBandHistMap, "crRSMT2SideBand"+SRVec.at(srN).GetName());
                     plotRS(SRVec_temp.at(srN).crRSDPhiMT2HistMap, SRVec.at(srN).crRSDPhiMT2HistMap, "crRSDPhiMT2"+SRVec.at(srN).GetName());
+                }
+                for(unsigned int srN = 0; srN < SRVecMonojet_temp.size(); srN++){
+                    plotRS(SRVecMonojet_temp.at(srN).srHistMap, SRVecMonojet.at(srN).srHistMap, "sr"+SRVecMonojet.at(srN).GetName());
+                    plotRS(SRVecMonojet_temp.at(srN).crRSInvertDPhiHistMap, SRVecMonojet.at(srN).crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRVecMonojet.at(srN).GetName());
                 }
                 for(unsigned int srN = 0; srN < InclusiveRegions_temp.size(); srN++){
                     plotRS(InclusiveRegions_temp.at(srN).srHistMap, InclusiveRegions.at(srN).srHistMap, InclusiveRegions.at(srN).GetName());
@@ -1226,6 +1451,10 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     resetHistmap(SRVec_temp.at(srN).crRSMT2SideBandHistMap, "crRSMT2SideBand"+SRVec_temp.at(srN).GetName());
                     resetHistmap(SRVec_temp.at(srN).crRSDPhiMT2HistMap, "crRSDPhiMT2"+SRVec_temp.at(srN).GetName());
                 }
+                for(unsigned int srN = 0; srN < SRVecMonojet_temp.size(); srN++){
+                    resetHistmap(SRVecMonojet_temp.at(srN).srHistMap, SRVecMonojet_temp.at(srN).GetName());
+                    resetHistmap(SRVecMonojet_temp.at(srN).crRSInvertDPhiHistMap, "crRSInvertDPhi"+SRVecMonojet_temp.at(srN).GetName());
+                }
                 for(unsigned int srN = 0; srN < InclusiveRegions_temp.size(); srN++){
                     resetHistmap(InclusiveRegions_temp.at(srN).srHistMap, InclusiveRegions_temp.at(srN).GetName());
                     resetHistmap(InclusiveRegions_temp.at(srN).crRSInvertDPhiHistMap, "crRSInvertDPhi"+InclusiveRegions_temp.at(srN).GetName());
@@ -1233,24 +1462,61 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     resetHistmap(InclusiveRegions_temp.at(srN).crRSDPhiMT2HistMap, "crRSDPhiMT2"+InclusiveRegions_temp.at(srN).GetName());
                 }
             }
+
+
             else {
+
+                if(doHEMregionVeto){
+                    bool foundjet = false;
+                    for(int ijet=0; ijet<t.njet; ijet++){
+                        if(t.jet_eta[ijet] > -1.5 || t.jet_eta[ijet] < -4.7) continue;
+                        if(t.jet_phi[ijet] > -0.8 || t.jet_phi[ijet] < -1.6) continue;
+                        if(t.jet_pt[ijet] < HEMvetoPtThresh) continue;
+                        foundjet = true;
+                        break;
+                    }
+                    if(foundjet) continue;
+                }
+
+                int lead_jet_idx = -1, sublead_jet_idx = -1;
+                for(int i=0; i<t.njet; i++){
+                    if(fabs(t.jet_eta[i]) > 2.4 || t.jet_pt[i] < 30)
+                        continue;
+                    if(lead_jet_idx == -1){
+                        lead_jet_idx = i;
+                    }else if(sublead_jet_idx == -1){
+                        sublead_jet_idx = i;
+                        break;
+                    }
+                }
+
+                if(lead_jet_idx != -1){
+                    jet1_eta_ = t.jet_eta[lead_jet_idx];
+                    jet1_phi_ = t.jet_phi[lead_jet_idx];
+                }
+                if(sublead_jet_idx != -1){
+                    jet2_eta_ = t.jet_eta[sublead_jet_idx];
+                    jet2_phi_ = t.jet_phi[sublead_jet_idx];
+                }
+                
+
                 fillHistos(SRNoCut.srHistMap, SRNoCut.GetNumberOfMT2Bins(), SRNoCut.GetMT2Bins(), SRNoCut.GetName(), "");
-                if(t.ht>=450 && t.ht<1200 && t.met_pt>30 && t.mt2>50)
+                if(t.nJet30>=2 && t.ht>=450 && t.ht<1200 && t.met_pt>30 && t.mt2>50)
                     fillHistos(SRJustHT1.srHistMap, SRJustHT1.GetNumberOfMT2Bins(), SRJustHT1.GetMT2Bins(), SRJustHT1.GetName(), "");
-                if(t.ht>=1200 && t.met_pt>30 && t.mt2>50)
-                // if(t.ht>=1200 && t.met_pt>30 && t.mt2>100 && t.diffMetMht/t.met_pt<0.5) 
+                if(t.nJet30>=2 && t.ht>=1200 && t.met_pt>30 && t.mt2>50)
+                // if(t.nJet30>=2 && t.ht>=1200 && t.met_pt>30 && t.mt2>100 && t.diffMetMht/t.met_pt<0.5) 
                     fillHistos(SRJustHT2.srHistMap, SRJustHT2.GetNumberOfMT2Bins(), SRJustHT2.GetMT2Bins(), SRJustHT2.GetName(), "");
-                if(t.ht>=250 && t.ht<1200 && t.met_pt>30 && t.mt2>50)
+                if(t.nJet30>=2 && t.ht>=250 && t.ht<1200 && t.met_pt>30 && t.mt2>50)
                     fillHistos(SRJustHT3.srHistMap, SRJustHT3.GetNumberOfMT2Bins(), SRJustHT3.GetMT2Bins(), SRJustHT3.GetName(), "");
-                if(t.ht>=250 && t.ht<450 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=250 && t.ht<450 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT4.srHistMap, SRJustHT4.GetNumberOfMT2Bins(), SRJustHT4.GetMT2Bins(), SRJustHT4.GetName(), "");
-                if(t.ht>=450 && t.ht<575 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=450 && t.ht<575 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT5.srHistMap, SRJustHT5.GetNumberOfMT2Bins(), SRJustHT5.GetMT2Bins(), SRJustHT5.GetName(), "");
-                if(t.ht>=575 && t.ht<1200 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=575 && t.ht<1200 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT6.srHistMap, SRJustHT6.GetNumberOfMT2Bins(), SRJustHT6.GetMT2Bins(), SRJustHT6.GetName(), "");
-                if(t.ht>=1200 && t.ht<1500 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=1200 && t.ht<1500 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT7.srHistMap, SRJustHT7.GetNumberOfMT2Bins(), SRJustHT7.GetMT2Bins(), SRJustHT7.GetName(), "");
-                if(t.ht>=1500 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=1500 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT8.srHistMap, SRJustHT8.GetNumberOfMT2Bins(), SRJustHT8.GetMT2Bins(), SRJustHT8.GetName(), "");                  
                 fillHistosSignalRegion("sr");
                 fillHistosSRBase();
@@ -1264,6 +1530,13 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                 if(doDYplots){
                     fillHistosCRDY();
                 }
+                if(doOFplots){
+                    fillHistosCRDY("OF");
+                    // cout << "FOUNDEVENT: OF1" << endl;                    
+                }
+                if(doLowPtSFplots) fillHistosCRDY("LowPtSF");
+                if(doLowPtOFplots) fillHistosCRDY("LowPtOF");
+
             }
 
             if (makeSmearBaby_)
@@ -1324,48 +1597,45 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         if(!SRVec.at(srN).srHistMap.empty()){
             savePlotsDir(SRVec.at(srN).srHistMap, outfile_, ("sr"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crslHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crslHistMap, outfile_, ("crsl"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crdyHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crdyHistMap, outfile_, ("crdy"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crRSInvertDPhiHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crRSInvertDPhiHistMap, outfile_, ("crRSInvertDPhi"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crRSInvertDPhiSLHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crRSInvertDPhiSLHistMap, outfile_, ("crRSInvertDPhiSL"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crRSInvertDPhiDYHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crRSInvertDPhiDYHistMap, outfile_, ("crRSInvertDPhiDY"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crRSMT2SideBandSLHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crRSMT2SideBandSLHistMap, outfile_, ("crRSMT2SideBandSL"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crRSMT2SideBandDYHistMap.empty()){
             savePlotsDir(SRVec.at(srN).crRSMT2SideBandDYHistMap, outfile_, ("crRSMT2SideBandDY"+SRVec.at(srN).GetName()).c_str());
         }
-    }
-    for(unsigned int srN = 0; srN < SRVec.size(); srN++){
         if(!SRVec.at(srN).crRSDPhiMT2HistMap.empty()){
             savePlotsDir(SRVec.at(srN).crRSDPhiMT2HistMap, outfile_, ("crRSDPhiMT2"+SRVec.at(srN).GetName()).c_str());
         }
+        if(!SRVec.at(srN).crRSDPhiMT2SLHistMap.empty()){
+            savePlotsDir(SRVec.at(srN).crRSDPhiMT2SLHistMap, outfile_, ("crRSDPhiMT2SL"+SRVec.at(srN).GetName()).c_str());
+        }
+        if(!SRVec.at(srN).crRSDPhiMT2DYHistMap.empty()){
+            savePlotsDir(SRVec.at(srN).crRSDPhiMT2DYHistMap, outfile_, ("crRSDPhiMT2DY"+SRVec.at(srN).GetName()).c_str());
+        }
     }
-
+    for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
+        if(!SRVecMonojet.at(srN).srHistMap.empty()){
+            savePlotsDir(SRVecMonojet.at(srN).srHistMap, outfile_, ("sr"+SRVecMonojet.at(srN).GetName()).c_str());
+        }
+        if(!SRVecMonojet.at(srN).crRSInvertDPhiHistMap.empty()){
+            savePlotsDir(SRVecMonojet.at(srN).crRSInvertDPhiHistMap, outfile_, ("crRSInvertDPhi"+SRVecMonojet.at(srN).GetName()).c_str());
+        }
+    }
 
     //---------------------
     // Write and Close file
@@ -1389,7 +1659,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 void SmearLooper::fillHistosSRBase() {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return;
  
     std::map<std::string, float> values;
     if(doRebalanceAndSmear_){
@@ -1434,7 +1704,7 @@ void SmearLooper::fillHistosSRBase() {
 void SmearLooper::fillHistosCRSL() {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return; 
 
     std::map<std::string, float> values;
     values["deltaPhiMin"] = t.deltaPhiMin;
@@ -1457,13 +1727,14 @@ void SmearLooper::fillHistosCRSL() {
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){   
         if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)) fillHistos(SRVec.at(srN).crRSInvertDPhiSLHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSInvertDPhiSL"+SRVec.at(srN).GetName(), "");
         if(SRVec.at(srN).PassesSelectionCRRSMT2SideBand(values)) fillHistos(SRVec.at(srN).crRSMT2SideBandSLHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSMT2SideBandSL"+SRVec.at(srN).GetName(), "");
+        if(SRVec.at(srN).PassesSelectionCRRSDPhiMT2(values)) fillHistos(SRVec.at(srN).crRSDPhiMT2SLHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSDPhiMT2SL"+SRVec.at(srN).GetName(), "");
     }
 
     return;
 
 }
 
-void SmearLooper::fillHistosCRDY() {
+void SmearLooper::fillHistosCRDY(const std::string& suffix) {
 
     std::map<std::string, float> values;
     values["deltaPhiMin"] = t.zll_deltaPhiMin;
@@ -1478,13 +1749,17 @@ void SmearLooper::fillHistosCRDY() {
     values["met"]         = t.zll_met_pt;
   
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-        if(SRVec.at(srN).PassesSelection(values)){
-            // if(SRVec.at(srN).GetName()=="1H")
-            //     cout << t.run << ":" << t.lumi << ":" << t.evt << endl;
-            fillHistos(SRVec.at(srN).crdyHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crdy"+SRVec.at(srN).GetName(), "");
+        if(SRVec.at(srN).PassesSelectionCRDY(values)){
+            // if(suffix=="" && SRVec.at(srN).GetName()=="4L")
+            //     cout << endl << "FOUNDEVENT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+            fillHistos(SRVec.at(srN).crdyHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crdy"+SRVec.at(srN).GetName(), suffix);
         }
-        if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)) fillHistos(SRVec.at(srN).crRSInvertDPhiDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSInvertDPhiDY"+SRVec.at(srN).GetName(), "");
-        if(SRVec.at(srN).PassesSelectionCRRSMT2SideBand(values)) fillHistos(SRVec.at(srN).crRSMT2SideBandDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSMT2SideBandDY"+SRVec.at(srN).GetName(), "");
+        if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)){
+            fillHistos(SRVec.at(srN).crRSInvertDPhiDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSInvertDPhiDY"+SRVec.at(srN).GetName(), suffix);
+            // if(suffix=="OF") cout << "FOUNDEVENT: OF2 " << SRVec.at(srN).GetName() << " " << t.nJet30 << " " << t.nBJet20 <<  endl;
+        }
+        if(SRVec.at(srN).PassesSelectionCRRSMT2SideBand(values)) fillHistos(SRVec.at(srN).crRSMT2SideBandDYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSMT2SideBandDY"+SRVec.at(srN).GetName(), suffix);
+        if(SRVec.at(srN).PassesSelectionCRRSDPhiMT2(values)) fillHistos(SRVec.at(srN).crRSDPhiMT2DYHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), "crRSDPhiMT2DY"+SRVec.at(srN).GetName(), suffix);
     }
 
     return;
@@ -1495,7 +1770,7 @@ void SmearLooper::fillHistosCRDY() {
 void SmearLooper::fillHistosInclusive() {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return; 
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear_){
@@ -1538,8 +1813,6 @@ void SmearLooper::fillHistosInclusive() {
                 fillHistos(InclusiveRegions.at(srN).srHistMap, InclusiveRegions.at(srN).GetNumberOfMT2Bins(), InclusiveRegions.at(srN).GetMT2Bins(), InclusiveRegions.at(srN).GetName(), "");
             }
             if(InclusiveRegions.at(srN).PassesSelectionCRRSInvertDPhi(values_temp)){
-                if(srN==2 && evtweight_ > 100.)
-                    cout << endl << "FOUNDEVENT " << t.run << ":" << t.lumi << ":" << t.evt << endl;
                 fillHistos(InclusiveRegions.at(srN).crRSInvertDPhiHistMap, InclusiveRegions.at(srN).GetNumberOfMT2Bins(), InclusiveRegions.at(srN).GetMT2Bins(), "crRSInvertDPhi"+InclusiveRegions.at(srN).GetName(), "");
             }
             if(InclusiveRegions.at(srN).PassesSelectionCRRSMT2SideBand(values_temp)){
@@ -1587,7 +1860,7 @@ void SmearLooper::fillHistosInclusive() {
 void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return; 
 
     std::map<std::string, float> values;
 
@@ -1620,7 +1893,6 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
     if(!doRebalanceAndSmear_){
         for(unsigned int srN = 0; srN < SRVec.size(); srN++){
             if(SRVec.at(srN).PassesSelection(values)){
-                // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;        
                 fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
                 break;//signal regions are orthogonal, event cannot be in more than one
             }
@@ -1635,16 +1907,56 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
         }
     }
 
-    //plot1D("h_SignalRegion",  sr_jets+sr_htmet,   evtweight_, h_1d_global, ";Signal Region", 100, 0, 100);
+    if(passMonojetId_){
+
+        std::map<std::string, float> valuesMonojet;
+
+        if(doRebalanceAndSmear_){
+            valuesMonojet["deltaPhiMin"] = RS_vars_["deltaPhiMin"];
+            valuesMonojet["diffMetMhtOverMet"]  = RS_vars_["diffMetMht"]/RS_vars_["met_pt"];
+            valuesMonojet["nlep"]        = nlepveto_;
+            valuesMonojet["jet1_pt"]        = RS_vars_["jet1_pt"];
+            valuesMonojet["njets"]       = RS_vars_["nJet30"];
+            valuesMonojet["nbjets"]      = RS_vars_["nBJet20"];
+            valuesMonojet["ht"]          = RS_vars_["ht"];
+            valuesMonojet["met"]         = RS_vars_["met_pt"];
+        }
+        else{
+            valuesMonojet["deltaPhiMin"] = t.deltaPhiMin;
+            valuesMonojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+            valuesMonojet["nlep"]        = nlepveto_;
+            valuesMonojet["jet1_pt"]        = t.jet1_pt;
+            valuesMonojet["njets"]       = t.nJet30;
+            valuesMonojet["nbjets"]      = t.nBJet20;
+            valuesMonojet["ht"]          = t.ht;
+            valuesMonojet["met"]         = t.met_pt;
+        }
+
+        if(!doRebalanceAndSmear_){
+            for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
+                if(SRVecMonojet.at(srN).PassesSelection(valuesMonojet)){
+                    fillHistosMonojet(SRVecMonojet.at(srN).srHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+                }
+            }
+        }
+        else{
+            for(unsigned int srN = 0; srN < SRVecMonojet_temp.size(); srN++){
+                if(SRVecMonojet_temp.at(srN).PassesSelection(valuesMonojet)){
+                    fillHistosMonojet(SRVecMonojet_temp.at(srN).srHistMap, SRVecMonojet_temp.at(srN).GetNumberOfMT2Bins(), SRVecMonojet_temp.at(srN).GetMT2Bins(), prefix+SRVecMonojet_temp.at(srN).GetName(), suffix);
+                }
+            }
+        }
+    }
 
     return;
 }
+
 
 // hists for R&S inverted deltaPhiMin region
 void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return; 
       
     std::map<std::string, float> values;
     if(doRebalanceAndSmear_){
@@ -1689,13 +2001,58 @@ void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std:
         }
     }
 
+    if(passMonojetId_){
+
+        std::map<std::string, float> valuesMonojet;
+
+        if(doRebalanceAndSmear_){
+            valuesMonojet["deltaPhiMin"] = RS_vars_["deltaPhiMin"];
+            valuesMonojet["diffMetMhtOverMet"]  = RS_vars_["diffMetMht"]/RS_vars_["met_pt"];
+            valuesMonojet["nlep"]        = nlepveto_;
+            valuesMonojet["jet1_pt"]        = RS_vars_["jet1_pt"];
+            valuesMonojet["jet2_pt"]        = RS_vars_["jet2_pt"];
+            valuesMonojet["njets"]       = RS_vars_["nJet30"];
+            valuesMonojet["nbjets"]      = RS_vars_["nBJet20"];
+            valuesMonojet["ht"]          = RS_vars_["ht"];
+            valuesMonojet["met"]         = RS_vars_["met_pt"];
+        }
+        else{
+            valuesMonojet["deltaPhiMin"] = t.deltaPhiMin;
+            valuesMonojet["diffMetMhtOverMet"]  = t.diffMetMht/t.met_pt;
+            valuesMonojet["nlep"]        = nlepveto_;
+            valuesMonojet["jet1_pt"]        = t.jet1_pt;
+            valuesMonojet["jet2_pt"]        = t.jet2_pt;
+            valuesMonojet["njets"]       = t.nJet30;
+            valuesMonojet["nbjets"]      = t.nBJet20;
+            valuesMonojet["ht"]          = t.ht;
+            valuesMonojet["met"]         = t.met_pt;
+        }
+
+        if(!doRebalanceAndSmear_){
+            for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
+                if(SRVecMonojet.at(srN).PassesSelectionCRRSInvertDPhi(valuesMonojet)){
+                    // if(SRVecMonojet.at(srN).GetName()=="baseJ")
+                    //     cout << endl << "FOUNDEVENT: " << t.run << ":" << t.lumi << ":" << t.evt << " " << t.evt_id << endl;
+                    fillHistosMonojet(SRVecMonojet.at(srN).crRSInvertDPhiHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+                }
+            }
+        }
+        else{
+            for(unsigned int srN = 0; srN < SRVecMonojet_temp.size(); srN++){
+                if(SRVecMonojet_temp.at(srN).PassesSelectionCRRSInvertDPhi(valuesMonojet)){
+                    fillHistosMonojet(SRVecMonojet_temp.at(srN).crRSInvertDPhiHistMap, SRVecMonojet_temp.at(srN).GetNumberOfMT2Bins(), SRVecMonojet_temp.at(srN).GetMT2Bins(), prefix+SRVecMonojet_temp.at(srN).GetName(), suffix);
+                }
+            }
+        }
+    }
+
     return;
 }
 
 void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return; 
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear_){
@@ -1746,7 +2103,7 @@ void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std
 void SmearLooper::fillHistosCRRSDPhiMT2(const std::string& prefix, const std::string& suffix) {
 
     // trigger requirement on data
-    if (!doRebalanceAndSmear_ && t.isData && !(t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120)) return;
+    if (!doRebalanceAndSmear_ && !passesTriggerSR()) return; 
 
     std::map<std::string, float> values;
     if(doRebalanceAndSmear_){
@@ -1800,6 +2157,10 @@ void SmearLooper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
         dir = outfile_->mkdir(dirname.c_str());
     } 
     dir->cd();
+    
+    bool do_zll = false;
+    if(dirname.find("DY") != string::npos || dirname.find("crdy") != string::npos)
+        do_zll = true;
   
     if(doRebalanceAndSmear_){
         plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
@@ -1811,31 +2172,49 @@ void SmearLooper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
         plot1D("h_ht"+s,       RS_vars_["ht"],   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
         plot1D("h_nJet30"+s,       RS_vars_["nJet30"],   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
         plot1D("h_nBJet20"+s,      RS_vars_["nBJet20"],   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
-        plot1D("h_deltaPhiMin"+s,  RS_vars_["deltaPhiMin"],   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
+        plot1D("h_deltaPhiMin"+s,  RS_vars_["deltaPhiMin"],   evtweight_, h_1d, ";#Delta#phi_{min}", 96, 0, 3.2);
         plot1D("h_diffMetMht"+s,   RS_vars_["diffMetMht"],   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
         plot1D("h_diffMetMhtOverMet"+s,   RS_vars_["diffMetMht"]/RS_vars_["met_pt"],   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 5.);
         plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
         plot1D("h_J0pt"+s,       RS_vars_["jet1_pt"],   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
         plot1D("h_J1pt"+s,       RS_vars_["jet2_pt"],   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+        plot1D("h_J0eta"+s,       RS_vars_["jet1_eta"],   evtweight_, h_1d, ";eta(jet1) [GeV]", 100, -5, 5);
+        plot1D("h_J1eta"+s,       RS_vars_["jet2_eta"],   evtweight_, h_1d, ";eta(jet2) [GeV]", 100, -5, 5);
+        plot1D("h_J0phi"+s,       RS_vars_["jet1_phi"],   evtweight_, h_1d, ";phi(jet1) [GeV]", 100, -3.2, 3.2);
+        plot1D("h_J1phi"+s,       RS_vars_["jet2_phi"],   evtweight_, h_1d, ";phi(jet2) [GeV]", 100, -3.2, 3.2);
         plot1D("h_mt2bins"+s,       RS_vars_["mt2"],   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     }
     else{
         plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
         plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
-        plot1D("h_mt2"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
-        plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
-        plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
         plot1D("h_nJet30"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
-        plot1D("h_nJet30Eta3"+s,       nJet30Eta3_,   evtweight_, h_1d, ";N(jets, |#eta| > 3.0)", 10, 0, 10);
         plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
-        plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 32, 0, 3.2);
-        plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
-        plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 5.);
         plot1D("h_minMTBMet"+s,   t.minMTBMet,   evtweight_, h_1d, ";min M_{T}(b, E_{T}^{miss}) [GeV]", 150, 0, 1500);
         plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
         plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
         plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
-        plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+        plot1D("h_J0eta"+s,       jet1_eta_,   evtweight_, h_1d, ";eta(jet1) [GeV]", 100, -5, 5);
+        plot1D("h_J1eta"+s,       jet2_eta_,   evtweight_, h_1d, ";eta(jet2) [GeV]", 100, -5, 5);
+        plot1D("h_J0phi"+s,       jet1_phi_,   evtweight_, h_1d, ";phi(jet1) [GeV]", 100, -3.2, 3.2);
+        plot1D("h_J1phi"+s,       jet2_phi_,   evtweight_, h_1d, ";phi(jet2) [GeV]", 100, -3.2, 3.2);
+        if(!do_zll){
+            plot1D("h_mt2"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+            plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+            plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+            plot1D("h_mt2bins"+s,       t.mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+            plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 96, 0, 3.2);
+            plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+            plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 5.);
+        }else{
+            plot1D("h_mt2"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+            plot1D("h_met"+s,       t.zll_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+            plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
+            plot1D("h_mt2bins"+s,       t.zll_mt2,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+            plot1D("h_deltaPhiMin"+s,  t.zll_deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 96, 0, 3.2);
+            plot1D("h_diffMetMht"+s,   t.zll_diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+            plot1D("h_diffMetMhtOverMet"+s,   t.zll_diffMetMht/t.zll_met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 5.);
+        }
+
 
         if (isSignal_) {
             plot3D("h_mt2bins_sigscan"+s, t.GenSusyMScan1, t.GenSusyMScan2, t.mt2, evtweight_, h_1d, "mass1 [GeV];mass2 [GeV];M_{T2} [GeV]", n_m1bins, m1bins, n_m2bins, m2bins, n_mt2bins, mt2bins);
@@ -1856,6 +2235,69 @@ void SmearLooper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
             plot1D("h_mt2bins_pdfs_UP"+s,       t.mt2,   evtweight_  * t.weight_pdfs_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
             plot1D("h_mt2bins_pdfs_DN"+s,       t.mt2,   evtweight_  * t.weight_pdfs_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
         }
+    } 
+
+    outfile_->cd();
+    return;
+}
+
+void SmearLooper::fillHistosMonojet(std::map<std::string, TH1*>& h_1d, int n_htbins, float* htbins, const std::string& dirname, const std::string& s) {
+    TDirectory * dir = (TDirectory*)outfile_->Get(dirname.c_str());
+    if (dir == 0) {
+        dir = outfile_->mkdir(dirname.c_str());
+    } 
+    dir->cd();
+  
+    if(doRebalanceAndSmear_){
+        plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+        plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+        plot1D("h_met"+s,       RS_vars_["met_pt"],   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+        plot1D("h_reb_met"+s,       RS_vars_["reb_met_pt"],   evtweight_, h_1d, ";Rebalanced E_{T}^{miss} [GeV]", 50, 0, 500);
+        plot1D("h_mht"+s,       RS_vars_["mht_pt"],   evtweight_, h_1d, ";H_{T}^{miss} [GeV]", 150, 0, 1500);
+        plot1D("h_ht"+s,       RS_vars_["ht"],   evtweight_, h_1d, ";H_{T} [GeV]", 100, 0, 2000);
+        plot1D("h_nJet30"+s,       RS_vars_["nJet30"],   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+        plot1D("h_nBJet20"+s,      RS_vars_["nBJet20"],   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+        plot1D("h_deltaPhiMin"+s,  RS_vars_["deltaPhiMin"],   evtweight_, h_1d, ";#Delta#phi_{min}", 96, 0, 3.2);
+        plot1D("h_diffMetMht"+s,   RS_vars_["diffMetMht"],   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+        plot1D("h_diffMetMhtOverMet"+s,   RS_vars_["diffMetMht"]/RS_vars_["met_pt"],   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 5.);
+        plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+        plot1D("h_J0pt"+s,       RS_vars_["jet1_pt"],   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
+        plot1D("h_J1pt"+s,       RS_vars_["jet2_pt"],   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+        plot1D("h_J0eta"+s,       RS_vars_["jet1_eta"],   evtweight_, h_1d, ";eta(jet1) [GeV]", 100, -5, 5);
+        plot1D("h_J1eta"+s,       RS_vars_["jet2_eta"],   evtweight_, h_1d, ";eta(jet2) [GeV]", 100, -5, 5);
+        plot1D("h_J0phi"+s,       RS_vars_["jet1_phi"],   evtweight_, h_1d, ";phi(jet1) [GeV]", 100, -3.2, 3.2);
+        plot1D("h_J1phi"+s,       RS_vars_["jet2_phi"],   evtweight_, h_1d, ";phi(jet2) [GeV]", 100, -3.2, 3.2);
+        plot1D("h_htbins"+s,       RS_vars_["ht"],   evtweight_, h_1d, "; H_{T} [GeV]", n_htbins, htbins);
+        if(RS_vars_["nJet30"]==2 && RS_vars_["jet2_pt"]>30 && RS_vars_["jet2_pt"]<60)
+            plot1D("h_htbins_jet2pt_30_60"+s,       RS_vars_["ht"],   evtweight_, h_1d, "; H_{T} [GeV]", n_htbins, htbins);
+        plot1D("h_J0ptbins"+s,       RS_vars_["jet1_pt"],   evtweight_, h_1d, "; p_{T}(jet1) [GeV]", n_htbins, htbins);
+        if(RS_vars_["nJet30"]==2 && RS_vars_["jet2_pt"]>30 && RS_vars_["jet2_pt"]<60)
+            plot1D("h_J0ptbins_jet2pt_30_60"+s,       RS_vars_["jet1_pt"],   evtweight_, h_1d, "; p_{T}(jet1) [GeV]", n_htbins, htbins);
+    }
+    else{
+        plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
+        plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
+        plot1D("h_met"+s,       t.met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
+        plot1D("h_ht"+s,       t.ht,   evtweight_, h_1d, ";H_{T} [GeV]", 100, 0, 2000);
+        plot1D("h_nJet30"+s,       t.nJet30,   evtweight_, h_1d, ";N(jets)", 15, 0, 15);
+        plot1D("h_nBJet20"+s,      t.nBJet20,   evtweight_, h_1d, ";N(bjets)", 6, 0, 6);
+        plot1D("h_deltaPhiMin"+s,  t.deltaPhiMin,   evtweight_, h_1d, ";#Delta#phi_{min}", 96, 0, 3.2);
+        plot1D("h_diffMetMht"+s,   t.diffMetMht,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| [GeV]", 120, 0, 300);
+        plot1D("h_diffMetMhtOverMet"+s,   t.diffMetMht/t.met_pt,   evtweight_, h_1d, ";|E_{T}^{miss} - MHT| / E_{T}^{miss}", 100, 0, 5.);
+        plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
+        plot1D("h_J0pt"+s,       t.jet1_pt,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
+        plot1D("h_J1pt"+s,       t.jet2_pt,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+        plot1D("h_J0eta"+s,       jet1_eta_,   evtweight_, h_1d, ";eta(jet1) [GeV]", 100, -5, 5);
+        plot1D("h_J1eta"+s,       jet2_eta_,   evtweight_, h_1d, ";eta(jet2) [GeV]", 100, -5, 5);
+        plot1D("h_J0phi"+s,       jet1_phi_,   evtweight_, h_1d, ";phi(jet1) [GeV]", 100, -3.2, 3.2);
+        plot1D("h_J1phi"+s,       jet2_phi_,   evtweight_, h_1d, ";phi(jet2) [GeV]", 100, -3.2, 3.2);
+        plot1D("h_htbins"+s,       t.ht,   evtweight_, h_1d, "; H_{T} [GeV]", n_htbins, htbins);
+        if(t.nJet30==2 && t.jet2_pt>30 && t.jet2_pt<60)
+            plot1D("h_htbins_jet2pt_30_60"+s,       t.ht,   evtweight_, h_1d, "; H_{T} [GeV]", n_htbins, htbins);
+        plot1D("h_J0ptbins"+s,       t.jet1_pt,   evtweight_, h_1d, "; p_{T}(jet1) [GeV]", n_htbins, htbins);
+        if(t.nJet30==2 && t.jet2_pt>30 && t.jet2_pt<60)
+            plot1D("h_J0ptbins_jet2pt_30_60"+s,       t.jet1_pt,   evtweight_, h_1d, "; p_{T}(jet1) [GeV]", n_htbins, htbins);
+
     } 
 
     outfile_->cd();
@@ -2060,43 +2502,45 @@ bool SmearLooper::passesTrigger() {
 
     if (not t.isData) return true;
 
-    // // 2016
-    // if (t.ht < 300)
-    //     return t.HLT_PFHT125_Prescale;
-    // else if (t.ht < 400)
-    //     return t.HLT_PFHT200_Prescale;
-    // else if (t.ht < 450)
-    //     return t.HLT_PFHT300_Prescale;
-    // else if (t.ht < 575)
-    //     return t.HLT_PFHT350_Prescale;
-    // else if (t.ht < 700)
-    //     return (t.HLT_PFHT475_Prescale or t.HLT_PFJet450);
-    // else if (t.ht < 1000)
-    //     return (t.HLT_PFHT600_Prescale or t.HLT_PFJet450);
-    // else
-    //     return (t.HLT_PFHT900 or t.HLT_PFJet450);
-
-    // 2017
-    if(t.ht < 250)
-        return false;
-    if(t.ht >= 250 && t.ht < 440)
-        return t.HLT_PFHT180_Prescale;
-    if(t.ht >= 440 && t.ht < 520)
-        return t.HLT_PFHT370_Prescale;
-    if(t.ht >= 520 && t.ht < 620)
-        return t.HLT_PFHT430_Prescale;
-    if(t.ht >= 620 && t.ht < 700)
-        return t.HLT_PFHT510_Prescale || t.HLT_PFJet500;
-    if(t.ht >= 700 && t.ht < 800)
-        return t.HLT_PFHT590_Prescale || t.HLT_PFJet500;
-    if(t.ht >= 800 && t.ht < 900)
-        return t.HLT_PFHT680_Prescale || t.HLT_PFJet500;
-    if(t.ht >= 900 && t.ht < 1000)
-        return t.HLT_PFHT780_Prescale || t.HLT_PFJet500;
-    if(t.ht >= 1000 && t.ht < 1200)
-        return t.HLT_PFHT890_Prescale || t.HLT_PFJet500;
-    if(t.ht >= 1200)
-        return t.HLT_PFHT1050 || t.HLT_PFJet500;
+    // 2016
+    if(config_tag_.find("2016") != string::npos){
+        if (t.ht < 300)
+            return t.HLT_PFHT125_Prescale;
+        else if (t.ht < 400)
+            return t.HLT_PFHT200_Prescale;
+        else if (t.ht < 450)
+            return t.HLT_PFHT300_Prescale;
+        else if (t.ht < 575)
+            return t.HLT_PFHT350_Prescale;
+        else if (t.ht < 700)
+            return (t.HLT_PFHT475_Prescale or t.HLT_PFJet450);
+        else if (t.ht < 1000)
+            return (t.HLT_PFHT600_Prescale or t.HLT_PFJet450);
+        else
+            return (t.HLT_PFHT900 or t.HLT_PFJet450);
+    }else{
+        // 2017
+        if(t.ht < 250)
+            return false;
+        if(t.ht >= 250 && t.ht < 440)
+            return t.HLT_PFHT180_Prescale;
+        if(t.ht >= 440 && t.ht < 520)
+            return t.HLT_PFHT370_Prescale;
+        if(t.ht >= 520 && t.ht < 620)
+            return t.HLT_PFHT430_Prescale;
+        if(t.ht >= 620 && t.ht < 700)
+            return t.HLT_PFHT510_Prescale || t.HLT_PFJet500;
+        if(t.ht >= 700 && t.ht < 800)
+            return t.HLT_PFHT590_Prescale || t.HLT_PFJet500;
+        if(t.ht >= 800 && t.ht < 900)
+            return t.HLT_PFHT680_Prescale || t.HLT_PFJet500;
+        if(t.ht >= 900 && t.ht < 1000)
+            return t.HLT_PFHT780_Prescale || t.HLT_PFJet500;
+        if(t.ht >= 1000 && t.ht < 1200)
+            return t.HLT_PFHT890_Prescale || t.HLT_PFJet500;
+        if(t.ht >= 1200)
+            return t.HLT_PFHT1050 || t.HLT_PFJet500;
+    }
 
     return false;
 }
@@ -2104,75 +2548,125 @@ bool SmearLooper::passesTrigger() {
 // for full year
 float SmearLooper::getTriggerPrescale () {
 
-    // // 2016 full year
-    // if (not t.isData) return 1;
-    // if (t.ht < 300)
-    //   return 9421;
-    // else if (t.ht < 400)
-    //   return 5410;
-    // else if (t.ht < 450)
-    //   return 917;
-    // else if (t.ht < 575)
-    //   return 458;
-    // else if (t.ht < 700) {
-    //   if (t.HLT_PFJet450) return 1;
-    //   return 115;
-    // }
-    // else if (t.ht < 1000) {
-    //   if (t.HLT_PFJet450) return 1;
-    //   return 29;
-    // }
-    // else
-    //   return 1;
+    if (not t.isData) return 1;
 
-
-    if(!prescalesByEvent){
-        if(t.ht < 250)
-            return -1;
-        else if(t.ht >= 250 && t.ht < 440)
-            return 1316.;
-        else if(t.ht >= 440 && t.ht < 520)
-            return 707.;
-        else if(t.ht >= 520 && t.ht < 620)
-            return 307.;
-        else if(t.HLT_PFJet500)
-            return 1;
-        else if(t.ht >= 620 && t.ht < 700)
-            return 145.;
-        else if(t.ht >= 700 && t.ht < 800)
-            return 67.4;
-        else if(t.ht >= 800 && t.ht < 900)
-            return 47.4;
-        else if(t.ht >= 900 && t.ht < 1000)
-            return 29.5;
-        else if(t.ht >= 1000 && t.ht < 1200)
-            return 17.1;
-        else
-            return 1;
+    if(config_tag_.find("2016") != string::npos){
+        if(!prescalesByEvent){
+            if (t.ht < 250)
+                return -1;
+            else if (t.ht < 300)
+                return 9421;
+            else if (t.ht < 400)
+                return 5410;
+            else if (t.ht < 450)
+                return 917;
+            else if (t.ht < 575)
+                return 458;
+            else if(t.HLT_PFJet450)
+                return 1;
+            else if (t.ht < 700)
+                return 115;
+            else if (t.ht < 1000)
+                return 29;
+            else
+                return 1;
+        }else{
+            if (t.ht < 250)
+                return -1;
+            else if (t.ht < 300)
+                return t.HLT_PFHT125_Prescale;
+            else if (t.ht < 400)
+                return t.HLT_PFHT200_Prescale;
+            else if (t.ht < 450)
+                return t.HLT_PFHT300_Prescale;
+            else if (t.ht < 575)
+                return t.HLT_PFHT350_Prescale;
+            else if(t.HLT_PFJet450)
+                return 1;
+            else if (t.ht < 700)
+                return t.HLT_PFHT475_Prescale;
+            else if (t.ht < 1000)
+                return t.HLT_PFHT600_Prescale;
+            else
+                return 1;
+        }
     }else{
-        if(t.ht < 250)
-            return -1;
-        else if(t.ht >= 250 && t.ht < 440)
-            return t.HLT_PFHT180_Prescale;
-        else if(t.ht >= 440 && t.ht < 520)
-            return t.HLT_PFHT370_Prescale;
-        else if(t.ht >= 520 && t.ht < 620)
-            return t.HLT_PFHT430_Prescale; 
-        else if(t.HLT_PFJet500)
-            return 1;
-       else if(t.ht >= 620 && t.ht < 700)
-            return t.HLT_PFHT510_Prescale;
-        else if(t.ht >= 700 && t.ht < 800)
-            return t.HLT_PFHT590_Prescale;
-        else if(t.ht >= 800 && t.ht < 900)
-            return t.HLT_PFHT680_Prescale;
-        else if(t.ht >= 900 && t.ht < 1000)
-            return t.HLT_PFHT780_Prescale;
-        else if(t.ht >= 1000 && t.ht < 1200)
-            return t.HLT_PFHT890_Prescale;
-        else
-            return 1;
+        if(!prescalesByEvent){
+            if(t.ht < 250)
+                return -1;
+            else if(t.ht >= 250 && t.ht < 440)
+                return 1316.;
+            else if(t.ht >= 440 && t.ht < 520)
+                return 707.;
+            else if(t.ht >= 520 && t.ht < 620)
+                return 307.;
+            else if(t.HLT_PFJet500)
+                return 1;
+            else if(t.ht >= 620 && t.ht < 700)
+                return 145.;
+            else if(t.ht >= 700 && t.ht < 800)
+                return 67.4;
+            else if(t.ht >= 800 && t.ht < 900)
+                return 47.4;
+            else if(t.ht >= 900 && t.ht < 1000)
+                return 29.5;
+            else if(t.ht >= 1000 && t.ht < 1200)
+                return 17.1;
+            else
+                return 1;
+        }else{
+            if(t.ht < 250)
+                return -1;
+            else if(t.ht >= 250 && t.ht < 440)
+                return t.HLT_PFHT180_Prescale;
+            else if(t.ht >= 440 && t.ht < 520)
+                return t.HLT_PFHT370_Prescale;
+            else if(t.ht >= 520 && t.ht < 620)
+                return t.HLT_PFHT430_Prescale; 
+            else if(t.HLT_PFJet500)
+                return 1;
+            else if(t.ht >= 620 && t.ht < 700)
+                return t.HLT_PFHT510_Prescale;
+            else if(t.ht >= 700 && t.ht < 800)
+                return t.HLT_PFHT590_Prescale;
+            else if(t.ht >= 800 && t.ht < 900)
+                return t.HLT_PFHT680_Prescale;
+            else if(t.ht >= 900 && t.ht < 1000)
+                return t.HLT_PFHT780_Prescale;
+            else if(t.ht >= 1000 && t.ht < 1200)
+                return t.HLT_PFHT890_Prescale;
+            else
+                return 1;
+        }
     }
-    
+}
 
+bool SmearLooper::passesTriggerSR(){
+    if(not t.isData) return 1;
+
+    if(config_tag_.find("2016") != string::npos){
+        return t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
+    }else{
+        return t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMET120_PFMHT120_PFHT60 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
+    }    
+}
+
+bool SmearLooper::passesTriggerSF(){
+    if(not t.isData) return 1;
+
+    if(config_tag_.find("2016") != string::npos){
+        return t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon165_HE10 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33;
+    }else{
+        return t.HLT_DoubleEl || t.HLT_DoubleMu || t.HLT_Photon200 || t.HLT_DoubleMu_NonIso || t.HLT_SingleMu_NonIso || t.HLT_DoubleEl33;
+    }
+}
+
+bool SmearLooper::passesTriggerOF(){
+    if(not t.isData) return 1;
+
+    if(config_tag_.find("2016") != string::npos){
+        return t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu30_Ele30_NonIso || t.HLT_Mu33_Ele33_NonIso || t.HLT_Photon165_HE10 || t.HLT_SingleMu_NonIso;
+    }else{
+        return t.HLT_MuX_Ele12 || t.HLT_Mu8_EleX || t.HLT_Mu12_EleX || t.HLT_Mu37_Ele27_NonIso || t.HLT_Mu27_Ele37_NonIso || t.HLT_Photon200 || t.HLT_SingleMu_NonIso;
+    }
 }

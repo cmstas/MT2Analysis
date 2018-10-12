@@ -15,6 +15,7 @@
 
 //MT2
 #include "../../MT2CORE/mt2tree.h"
+#include "../../MT2CORE/configurations.h"
 #include "../../MT2CORE/RebalSmear/sigSelections_RebalSmear.h"
 #include "../../MT2CORE/RebalSmear/SR_RebalSmear.h"
 
@@ -44,12 +45,14 @@ class SmearLooper {
   void fillHistosInclusive();
   void fillHistosSignalRegion(const std::string& prefix = "", const std::string& suffix = "");
   void fillHistosCRSL();
-  void fillHistosCRDY();
+  void fillHistosCRDY(const std::string& suffix = "");
   void fillHistosCRRSInvertDPhi(const std::string& prefix = "crRSInvertDPhi", const std::string& suffix = "");
   void fillHistosCRRSMT2SideBand(const std::string& prefix = "crRSMT2SideBand", const std::string& suffix = "");
   void fillHistosCRRSDPhiMT2(const std::string& prefix = "crRSDPhiMT2", const std::string& suffix = "");
   void fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 		  const std::string& dir = "", const std::string& suffix = ""); 
+  void fillHistosMonojet(std::map<std::string, TH1*>& h_1d, int n_htbins, float* htbins,
+                         const std::string& dir = "", const std::string& suffix = ""); 
   void setupResponseHists();
   std::vector<float> GetResponseVector(float, float);
   void plotRS(std::map<std::string, TH1*>& inmap, std::map<std::string, TH1*>& outmap, std::string outdir);
@@ -66,27 +69,41 @@ class SmearLooper {
   void SetCoreScale (float coreScale) {coreScale_ = coreScale;}
   void SetTailScale (float tailScale) {tailScale_ = tailScale;}
   void SetMeanShift (float meanShift) {meanShift_ = meanShift;}
+  void SetJERUncertVar(int unc_var) { JER_uncert_var_ = unc_var; }
   void SetCutLevel(int cut_level) {CUT_LEVEL_ = cut_level;}       // 1=analysis cuts, 2=weaker HT cuts for closure plots, 3=no cuts at smearing step, but still event selection before, 4=no cuts at all
   void UseRawHists () {useRawHists_ = true;}
   void UseBjetResponse (bool use) {useBjetResponse_ = use;}
   void SetIsData(bool isData) { isData_ = isData; }
+  void DoNJetReweighting(bool dorw) { doNJetReweighting_ = dorw; }
+  void SetNJetWeightFile(std::string fn) { njet_weights_file_ = fn; }
+  void SetMT2ConfigTag(std::string config_tag) { config_tag_ = config_tag; }
   bool passesTrigger ();
+  bool passesTriggerSR ();
+  bool passesTriggerSF ();
+  bool passesTriggerOF ();
   float getTriggerPrescale ();
   
  private:
 
   JRTreader reader;
 
+  std::map<std::string, TH1D*> nJetWeights_;
+  std::string njet_weights_file_;
+
   TFile * outfile_;
   mt2tree t;
+  MT2Configuration config_;
+  std::string config_tag_;
   float evtweight_;
   int nlepveto_;
   float leppt_;
   float mt_;
   int nJet30Eta3_;
   bool isSignal_;
+  bool passMonojetId_;
   std::map<std::string, TH1*> h_1d_global;
   std::vector<SRRS> SRVec;
+  std::vector<SRRS> SRVecMonojet;
   std::vector<SRRS> InclusiveRegions;
   SRRS SRBase;
   SRRS SRNoCut;  
@@ -104,6 +121,7 @@ class SmearLooper {
   std::map<std::string, float> RS_vars_; 
 
   std::vector<SRRS> SRVec_temp;
+  std::vector<SRRS> SRVecMonojet_temp;
   std::vector<SRRS> InclusiveRegions_temp;
   SRRS SRBase_temp;
   SRRS SRNoCut_temp;
@@ -122,15 +140,21 @@ class SmearLooper {
   bool useRawHists_;
   bool useBjetResponse_;
   bool isData_;
+  bool doNJetReweighting_;
   
   float coreScale_;
   float tailScale_;
   float meanShift_;
-
+  int JER_uncert_var_;
   int CUT_LEVEL_;
   
   TFile *SmearBabyFile_;
   TTree *SmearBabyTree_;
+
+    float jet1_eta_;
+    float jet2_eta_;
+    float jet1_phi_;
+    float jet2_phi_;
 
   // baby ntuple variables
   Int_t           run;

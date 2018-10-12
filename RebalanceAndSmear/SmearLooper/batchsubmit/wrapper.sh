@@ -4,7 +4,8 @@
 # parse command line options
 #
 OPTIONS=""
-while getopts "bc:dhm:n:rt:wl:" opt; do
+JRTFILE="JetResponseTemplates"
+while getopts "bc:dhm:n:rt:wl:jf:q:g:u:" opt; do
     case "$opt" in
         b) OPTIONS+="-b "
            ;;
@@ -12,9 +13,9 @@ while getopts "bc:dhm:n:rt:wl:" opt; do
            ;;
         h) OPTIONS+="-h "
            ;;
-        j) OPTIONS+="-j "
-           ;;
         r) OPTIONS+="-r "
+           ;;
+        j) OPTIONS+="-j "
            ;;
         w) OPTIONS+="-w "
            ;;
@@ -28,6 +29,14 @@ while getopts "bc:dhm:n:rt:wl:" opt; do
            ;;
         t) OPTIONS+="-t ${OPTARG} "
            ;;
+        q) OPTIONS+="-q ${OPTARG} "
+           ;;
+        g) OPTIONS+="-g ${OPTARG} "
+           ;;
+        u) OPTIONS+="-u ${OPTARG} "
+           ;;
+        f) JRTFILE=${OPTARG}
+           ;;
         esac
 done
 
@@ -40,20 +49,20 @@ INDIR=${@: -3:1}
 FILEID=${@: -2:1}
 COPYDIR=${@: -1:1}
 
-echo "[wrapper] INDIR    = " ${INDIR}
-echo "[wrapper] FILEID     = " ${FILEID}
+echo "[wrapper] INDIR     = " ${INDIR}
+echo "[wrapper] FILEID    = " ${FILEID}
 echo "[wrapper] COPYDIR   = " ${COPYDIR}
 echo "[wrapper] OPTIONS   = " ${OPTIONS}
-
+echo "[wrapper] JRTFILE   = " ${JRTFILE}
 
 #
 # set up environment
 #
-CMSSW_VERSION=CMSSW_8_0_5
+CMSSW_VERSION=CMSSW_9_4_1
 
 ###version using cvmfs install of CMSSW
 echo "[wrapper] setting env"
-export SCRAM_ARCH=slc6_amd64_gcc530
+export SCRAM_ARCH=slc6_amd64_gcc630
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 OLDDIR=`pwd`
 cd /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/cmssw/$CMSSW_VERSION/src
@@ -73,9 +82,9 @@ cd $OLDDIR
 
 echo
 
-echo "[wrapper] printing env"
-printenv
-echo 
+# echo "[wrapper] printing env"
+# printenv
+# echo 
 
 echo "[wrapper] hostname  = " `hostname`
 echo "[wrapper] date      = " `date`
@@ -86,12 +95,12 @@ IFS=','
 read -ra FILES <<< "${FILEID}"
 for file in "${FILES[@]}";
 do
-    ls -alrth ${INDIR}/${file}.root    
+    ls -alrth ${INDIR}/${file}root    
 
     # catch exit code
     if [ $? -ne 0 ]; then
         echo "[wrapper] could not find input file, trying xrootd instead"
-        FILESHORT=${INDIR#/hadoop/cms}/${file}.root
+        FILESHORT=${INDIR#/hadoop/cms}/${file}root
         xrdfs xrootd.t2.ucsd.edu ls ${FILESHORT}
         if [ $? -ne 0 ]; then
 	    echo "[wrapper] could not find input file with xrootd either, exiting"
@@ -120,6 +129,9 @@ ls -a
 
 echo "[wrapper] directory contents are"
 ls
+
+echo "[wrapper] copying JRT file: ${JRTFILE}.root -> JetResponseTemplates.root"
+cp ${JRTFILE}.root JetResponseTemplates.root
 
 #
 # run it
@@ -167,9 +179,9 @@ for outfile in "${OUTPUT[@]}";
 do
     if [[ ${outfile} =~ .*baby.* ]]
     then
-        gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/smearbaby/${outfile}
+        gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/smearbaby/${outfile}
     else
-        gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${outfile}        
+        gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/${outfile}        
     fi
 done
                

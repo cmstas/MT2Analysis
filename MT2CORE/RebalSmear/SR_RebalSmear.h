@@ -88,6 +88,8 @@ class SRRS {
     std::map<std::string, TH1*> crRSMT2SideBandSLHistMap;
     std::map<std::string, TH1*> crRSMT2SideBandDYHistMap;
     std::map<std::string, TH1*> crRSDPhiMT2HistMap;
+    std::map<std::string, TH1*> crRSDPhiMT2SLHistMap;
+    std::map<std::string, TH1*> crRSDPhiMT2DYHistMap;
 
   private:
 

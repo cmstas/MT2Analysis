@@ -107,20 +107,23 @@ clean:
 	*.o \
 	$(LIBS) \
 	$(EXE) \
-        ../MT2CORE/*.o \
-        ../MT2CORE/*.d \
-        ../MT2CORE/*.so \
-        ../MT2CORE/Plotting/*.o \
-        ../MT2CORE/Plotting/*.d \
-        ../MT2CORE/Plotting/*.so \
-        ../CORE/Tools/*.o \
-	../CORE/Tools/*.d \
-        ../CORE/Tools/*.so \
-        ../CORE/Tools/MT2/*.o \
-	../CORE/Tools/MT2/*.d \
-        ../CORE/Tools/MT2/*.so \
-        ../CORE/Tools/dorky/*.o \
-	../CORE/Tools/dorky/*.d \
-        ../CORE/Tools/dorky/*.so 
+        ../../MT2CORE/*.o \
+        ../../MT2CORE/*.d \
+        ../../MT2CORE/*.so \
+        ../../MT2CORE/Plotting/*.o \
+        ../../MT2CORE/Plotting/*.d \
+        ../../MT2CORE/Plotting/*.so \
+        ../../MTCORE/RebalSmear/*.o \
+        ../../MTCORE/RebalSmear/*.d \
+        ../../MTCORE/RebalSmear/*.so \
+        ../../CORE/Tools/*.o \
+	../../CORE/Tools/*.d \
+        ../../CORE/Tools/*.so \
+        ../../CORE/Tools/MT2/*.o \
+	../../CORE/Tools/MT2/*.d \
+        ../../CORE/Tools/MT2/*.so \
+        ../../CORE/Tools/dorky/*.o \
+	../../CORE/Tools/dorky/*.d \
+        ../../CORE/Tools/dorky/*.so 
 
 endif
