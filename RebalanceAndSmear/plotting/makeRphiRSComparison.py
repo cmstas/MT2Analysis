@@ -14,11 +14,12 @@ def getRatioAndError (h1, h2):
   err = val * math.sqrt((err1/val1)*(err1/val1) + (err2/val2)*(err2/val2))
   return {'val':val, 'err':err}
   
-r.gROOT.SetBatch(1)
+# r.gROOT.SetBatch(1)
 
-rphi_file = "/home/users/fgolf/mt2/devel/MT2Analysis/MT2looper/output/full2016/qcdFromCRs.root"
-rs_file = "looper_output/v10/data/merged_hists.root"
-data_file = "looper_output/v10/data_noRS/merged_hists_skims.root"
+rphi_file = "/home/users/jguiang/public_html/dump/qcdEstimate.root"
+# rphi_file = "../../scripts/qcdEstimate/output/V00-10-04_94x_Fall17_MC/qcdEstimate.root"
+rs_file = "looper_output/V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear_jetReweight/data/merged_hists.root"
+data_file = "../SmearLooper/output/V00-10-01_noRS/data_Run2017.root"
 
 hrphi = r.TH1D("hrphi","",51,0,51)
 hrs = r.TH1D("hrs","",51,0,51)
@@ -30,11 +31,14 @@ h_evts_data = r.TH1D("h_evts_data","",1,0,2)
 
 top_regs_vl=[1,2,3,12,13,14,15]
 
+ht_reg_names = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
+top_reg_names = ["j2to3_b0", "j2to3_b1", "j2to3_b2", "j4to6_b0", "j4to6_b1", "j4to6_b2", "j7toInf_b0", "j7toInf_b1", "j7toInf_b2", "j2to6_b3toInf", "j7toInf_b3toInf", "j4toInf_b0", "j4toInf_b1", "j4to3Inf_b2", "j2toInf_b3toInf"]
+
 frphi = r.TFile(rphi_file)
 frs = r.TFile(rs_file)
 fdata = r.TFile(data_file)
 ibin = 0
-for ht_reg in ["VL","L","M","H","UH"]:
+for iht,ht_reg in enumerate(["VL","L","M","H","UH"]):
   sum_rphi = 0
   sum_rs = 0
   top_regs = []
@@ -53,7 +57,11 @@ for ht_reg in ["VL","L","M","H","UH"]:
     if h_evts_data:
       h_evts_data.Reset()
     try:
-      h_evts_rphi = frphi.Get("sr{0}{1}/h_mt2bins".format(top_reg,ht_reg))
+      # h_evts_rphi = frphi.Get("sr{0}{1}/h_mt2bins".format(top_reg,ht_reg))
+      h_evts_rphi = frphi.Get("qcdEstimate/{0}_{1}/yield_qcdEstimate_{0}_{1}".format(ht_reg_names[iht], top_reg_names[top_reg-1]))
+      if ht_reg=="L" and top_reg==4:
+        print ht_reg_names[iht], top_reg_names[top_reg-1]
+        print h_evts_rphi.Integral(1,99)
     except:
       pass
     try:
@@ -82,7 +90,7 @@ for ht_reg in ["VL","L","M","H","UH"]:
         hrs.SetBinError(ibin, 0)        
     else:
       if h_evts_rphi:
-        hrphi.SetBinContent(ibin, h_evts_rphi.IntegralAndError(0,99,rphi_err))
+        hrphi.SetBinContent(ibin, h_evts_rphi.IntegralAndError(1,99,rphi_err))
         hrphi.SetBinError(ibin, rphi_err)
       else:
         hrphi.SetBinContent(ibin, 0)
@@ -189,11 +197,12 @@ for ibin in range(11):
 
 ## ratio
 pads[1].cd()
+pads[1].SetLogy(1)
 
-h_ratio = hrs.Clone("h_ratio")
-h_ratio.Divide(hrphi)
+h_ratio = hrphi.Clone("h_ratio")
+h_ratio.Divide(hrs)
 
-h_ratio.GetYaxis().SetRangeUser(0,5)
+h_ratio.GetYaxis().SetRangeUser(0.1,20)
 h_ratio.GetYaxis().SetNdivisions(505)
 h_ratio.GetYaxis().SetTitle("R&S/rphi")
 h_ratio.GetYaxis().SetTitleSize(0.16)
@@ -207,6 +216,7 @@ h_ratio.GetXaxis().SetNdivisions(51,0,0)
 h_ratio.GetXaxis().SetTickSize(0.06)
 h_ratio.SetMarkerStyle(20)
 h_ratio.SetMarkerSize(1.0)
+h_ratio.SetMarkerColor(r.kBlack)
 h_ratio.SetLineWidth(1)
 
 h_ratio.Draw("PE")
@@ -216,9 +226,9 @@ line.DrawLine(0,1,51,1)
 
 username = os.environ["USER"]
 suffix = "_rat" if doRatioToTotal else ""
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.pdf".format(username,suffix))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.png".format(username,suffix))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.root".format(username,suffix))
+# c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.pdf".format(username,suffix))
+# c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.png".format(username,suffix))
+# c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/data_tests2/comparison{1}.root".format(username,suffix))
 
 raw_input()
 

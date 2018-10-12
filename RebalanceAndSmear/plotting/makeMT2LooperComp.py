@@ -4,10 +4,13 @@ import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir_rs = "looper_output/v10/qcd_noRS/"
-dir_mt2 = "/home/users/fgolf/mt2/devel/MT2Analysis/MT2looper/output/full2016/"
+dir_rs = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+dir_mt2 = "../../MT2Looper/output/V00-10-04_94x_2016_2017/"
 
-frs = ROOT.TFile(os.path.join(dir_rs,"merged_hists.root"))
+# frs = ROOT.TFile(os.path.join(dir_rs,"qcd_ht2000toInf.root"))
+# fms = ROOT.TFile(os.path.join(dir_mt2,"qcd_ht2000toInf.root"))
+
+frs = ROOT.TFile(os.path.join(dir_rs,"qcd_ht.root"))
 fms = ROOT.TFile(os.path.join(dir_mt2,"qcd_ht.root"))
 
 hrs = ROOT.TH1D("hrs","",51,0,51)
@@ -27,7 +30,6 @@ for ht_reg in ["VL","L","M","H","UH"]:
     top_regs.extend(range(1,12))
   for top_reg in top_regs:      
     ibin+=1
-    print ibin
 
     if h_evts_rs:
       h_evts_rs.Reset()
@@ -43,7 +45,7 @@ for ht_reg in ["VL","L","M","H","UH"]:
       pass
 
     if h_evts_rs:
-      h_evts_rs.Scale(36.5)
+      h_evts_rs.Scale(41.52)
       hrs.SetBinContent(ibin, h_evts_rs.GetBinContent(1))
       hrs.SetBinError(ibin, h_evts_rs.GetBinError(1))
     else:
@@ -99,8 +101,8 @@ hrs.Draw("PE SAME")
 line = ROOT.TLine()
 line.SetLineStyle(2)
 for ix in [7,18,29,40]:
-    x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
-    line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
+  x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
+  line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
 leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
 leg.AddEntry(hrs, "R&S looper")
@@ -130,15 +132,15 @@ text.SetTextAngle(90)
 text.SetTextSize(min(binWidth * 1.3,0.027))
 text.SetTextFont(42)
 for ibin in range(11):
-    x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
-    y = pads[0].GetBottomMargin()-0.009
+  x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
+  y = pads[0].GetBottomMargin()-0.009
   if ibin < 7:
     text.DrawLatex(x,y,binLabels_vl[ibin])
-  text.DrawLatex(x+7*binWidth,y,binLabels[ibin])    
-  text.DrawLatex(x+18*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+29*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+40*binWidth,y,binLabels[ibin])
-
+    text.DrawLatex(x+7*binWidth,y,binLabels[ibin])    
+    text.DrawLatex(x+18*binWidth,y,binLabels[ibin])
+    text.DrawLatex(x+29*binWidth,y,binLabels[ibin])
+    text.DrawLatex(x+40*binWidth,y,binLabels[ibin])
+    
 
 ## ratio
 pads[1].cd()
@@ -168,9 +170,8 @@ line = ROOT.TLine()
 line.DrawLine(0,1,51,1)
 
 username = os.environ["USER"]
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/MT2Looper_comp.pdf".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/MT2Looper_comp.png".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/MT2Looper_comp.root".format(username))
+c.SaveAs("/home/users/{0}/public_html/mt2/test.pdf".format(username))
+# c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/MT2Looper_comp.png".format(username))
 
 
 raw_input()

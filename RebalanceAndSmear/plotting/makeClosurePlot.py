@@ -1,11 +1,26 @@
+import numpy as np
 import ROOT
 import glob
 import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/v10/qcd/"
-dir_noRS = "looper_output/v10/qcd_noRS/"
+# tag = "V00-10-01_31Mar2018_ptBinned_94x_fixMatching5_ecalDeadCell_tail0p66_noJERsmear"
+tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
+# tag = "V00-10-01_31Mar2018_2016JRTs_try2"
+
+# prefix = "sr"
+# prefix = "crRSMT2SideBand"
+# prefix = "crRSInvertDPhi"
+prefix = "crRSDPhiMT2"
+
+dir = "looper_output/{0}/qcd/".format(tag)
+dir_noRS = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+# dir_noRS = "../../MT2Looper/output/V00-10-04_94x_2016_2017/"
+
+username = os.environ["USER"]
+os.system("mkdir -p /home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/".format(username, tag))
+os.system("cp ~/scripts/index.php /home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/".format(username, tag))
 
 hrs = ROOT.TH1D("hrs","",51,0,51)
 hnrs = ROOT.TH1D("hnrs","",51,0,51)
@@ -14,7 +29,7 @@ h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 frs = ROOT.TFile(os.path.join(dir,"merged_hists.root"))
-fnrs = ROOT.TFile(os.path.join(dir_noRS,"merged_hists.root"))
+fnrs = ROOT.TFile(os.path.join(dir_noRS,"qcd_ht.root"))
 
 top_regs_vl=[1,2,3,12,13,14,15]
 
@@ -36,11 +51,12 @@ for ht_reg in ["VL","L","M","H","UH"]:
     if h_evts_nrs:
       h_evts_nrs.Reset()
     try:
-      h_evts_rs = frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg))
+      h_evts_rs = frs.Get("{0}{1}{2}/h_Events_w".format(prefix,top_reg,ht_reg))
     except:
       pass
     try:
-      h_evts_nrs = fnrs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg))
+      h_evts_nrs = fnrs.Get("{0}{1}{2}/h_Events_w".format(prefix,top_reg,ht_reg))
+      # h_evts_nrs.Scale(1.0/41.4)
     except:
       pass
 
@@ -97,15 +113,19 @@ hnrs.SetLineColor(401)
 hnrs.SetMarkerColor(401)
 hnrs.SetMarkerStyle(20)
 
-hnrs.GetYaxis().SetRangeUser(1e-3,1e3)
+hnrs.GetYaxis().SetRangeUser(1e-3, 1e3 if prefix=="sr" else 1e5)
 hnrs.GetXaxis().SetLabelSize(0)
 
 hnrs.Draw("PE")
 hrs.Draw("PE SAME")
 
+NBINS = hrs.GetNbinsX()
+bindivs = [7,18,29,40]
+binwidth = (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin()) / NBINS
+
 line = ROOT.TLine()
 line.SetLineStyle(2)
-for ix in [7,18,29,40]:
+for ix in bindivs:
   x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
   line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
@@ -114,14 +134,29 @@ leg.AddEntry(hrs, "R&S from MC")
 leg.AddEntry(hnrs, "QCD MC")
 leg.Draw()
 
+ratios = []
+ratioerrs = []
+modbindivs = [0] + bindivs + [hrs.GetNbinsX()]
+for i in range(len(modbindivs)-1):
+  err_rs = ROOT.Double(0.0)
+  yield_rs = hrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], err_rs)
+  err_nrs = ROOT.Double(0.0)
+  yield_nrs = hnrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], err_nrs)
+  ratios.append(yield_nrs / yield_rs)
+  ratioerrs.append(ratios[-1] * np.sqrt((err_rs/yield_rs)**2 + (err_nrs/yield_nrs)**2))
+  
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
-text.DrawLatex(0.12,0.79,"Very Low H_{T}")
-text.DrawLatex(0.3,0.79,"Low H_{T}")
-text.DrawLatex(0.45,0.79,"Medium H_{T}")
-text.DrawLatex(0.65,0.79,"High H_{T}")
-text.DrawLatex(0.8,0.73,"Extreme H_{T}")
+text.SetTextAlign(22)
+names = ["Very Low", "Low", "Medium", "High", "Extreme"]
+xposs = [pads[0].GetLeftMargin() + 0.5*(modbindivs[i]+modbindivs[i+1])*binwidth for i in range(len(modbindivs)-1)]
+for i in range(len(modbindivs)-1):
+  ypos = 0.79
+  if names[i]=="Extreme":
+    ypos = 0.69
+  text.DrawLatex(xposs[i],ypos,"{0} H_{{T}}".format(names[i]))
+  text.DrawLatex(xposs[i], ypos-0.05, "{0:.2f} #pm {1:.2f}".format(ratios[i], ratioerrs[i]))
 text.SetTextFont(42)
 text.SetTextSize(0.04)
 text.DrawLatex(0.8,0.93,"1 fb^{-1} (13 TeV)")
@@ -153,7 +188,7 @@ pads[1].cd()
 h_ratio = hrs.Clone("h_ratio")
 h_ratio.Divide(hnrs)
 
-h_ratio.GetYaxis().SetRangeUser(0,5)
+h_ratio.GetYaxis().SetRangeUser(0,2)
 h_ratio.GetYaxis().SetNdivisions(505)
 h_ratio.GetYaxis().SetTitle("R&S/MC")
 h_ratio.GetYaxis().SetTitleSize(0.16)
@@ -174,9 +209,7 @@ h_ratio.Draw("PE")
 line = ROOT.TLine()
 line.DrawLine(0,1,51,1)
 
-username = os.environ["USER"]
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/closure.pdf".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/closure.png".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/closure.root".format(username))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/mc_closure_{2}.pdf".format(username, tag, prefix))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/mc_closure_{2}.png".format(username, tag, prefix))
 
 raw_input()

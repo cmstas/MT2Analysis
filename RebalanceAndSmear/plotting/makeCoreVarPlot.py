@@ -1,18 +1,21 @@
+import numpy as np
 import ROOT
 import glob
 import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag_v2"
-dir_core10 = "looper_output/RebalanceAndSmear_V00-08-12_core10"
-dir_core25 = "looper_output/RebalanceAndSmear_V00-08-12_core25"
-dir_noRS = "looper_output/RebalanceAndSmear_V00-08-12_noRS"
+tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
 
-hrs = ROOT.TH1D("hrs","",44,0,44)
-h10 = ROOT.TH1D("h10","",44,0,44)
-h25 = ROOT.TH1D("h25","",44,0,44)
-hnrs = ROOT.TH1D("hnrs","",44,0,44)
+dir = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/qcd"
+dir_core10 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core10/qcd"
+dir_core25 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core25/qcd"
+dir_noRS = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+
+hrs = ROOT.TH1D("hrs","",51,0,51)
+h10 = ROOT.TH1D("h10","",51,0,51)
+h25 = ROOT.TH1D("h25","",51,0,51)
+hnrs = ROOT.TH1D("hnrs","",51,0,51)
 
 h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
 h_evts_10 = ROOT.TH1D("h_evts_10","",1,0,2)
@@ -20,11 +23,14 @@ h_evts_25 = ROOT.TH1D("h_evts_25","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 ibin = 0
-for ht_reg in ["L","M","H","UH"]:
+for ht_reg in ["VL","L","M","H","UH"]:
     sum_rs = 0
     sum_rs10 = 0
     sum_rs25 = 0    
-    for top_reg in range(1,12):
+    top_regs = range(1,12)
+    if ht_reg=="VL":
+        top_regs = [1,2,3,12,13,14,15]
+    for top_reg in top_regs:
         ibin+=1
         # print ibin
 
@@ -32,31 +38,27 @@ for ht_reg in ["L","M","H","UH"]:
         h_evts_10.Reset()
         h_evts_25.Reset()
         h_evts_nrs.Reset()
-        for fn in [os.path.join(dir,"qcd_ht_nonext.root"), os.path.join(dir,"qcd_ht_ext.root")]:
-            fact = 0.686
-            if fn.find("nonext") > -1:
-                fact = 1-0.686
-            bn = fn.split("/")[-1]
-            frs = ROOT.TFile(os.path.join(dir,bn))
-            f10 = ROOT.TFile(os.path.join(dir_core10,bn))
-            f25 = ROOT.TFile(os.path.join(dir_core25,bn))
-            fnrs = ROOT.TFile(os.path.join(dir_noRS,bn))
-            try:
-                h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
-            try:
-                h_evts_10.Add(f10.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
-            try:
-                h_evts_25.Add(f25.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
-            try:
-                h_evts_nrs.Add(fnrs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
+        bn = "merged_hists.root"
+        frs = ROOT.TFile(os.path.join(dir,bn))
+        f10 = ROOT.TFile(os.path.join(dir_core10,bn))
+        f25 = ROOT.TFile(os.path.join(dir_core25,bn))
+        fnrs = ROOT.TFile(os.path.join(dir_noRS,"qcd_ht.root"))
+        try:
+            h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
+        try:
+            h_evts_10.Add(f10.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
+        try:
+            h_evts_25.Add(f25.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
+        try:
+            h_evts_nrs.Add(fnrs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
 
         hrs.SetBinContent(ibin, h_evts_rs.GetBinContent(1))
         hrs.SetBinError(ibin, h_evts_rs.GetBinError(1))
@@ -70,7 +72,6 @@ for ht_reg in ["L","M","H","UH"]:
         hnrs.SetBinContent(ibin, h_evts_nrs.GetBinContent(1))
         hnrs.SetBinError(ibin, h_evts_nrs.GetBinError(1))
         
-        if "UH" in ht_reg and top_reg == 5: continue            
         sum_rs += h_evts_rs.GetBinContent(1)
         sum_rs10 += h_evts_10.GetBinContent(1)
         sum_rs25 += h_evts_25.GetBinContent(1)
@@ -127,13 +128,17 @@ hrs.Draw("PE SAME")
 h10.Draw("PE SAME")
 h25.Draw("PE SAME")
 
+NBINS = hrs.GetNbinsX()
+bindivs = [7,18,29,40]
+binwidth = (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin()) / NBINS
+
 line = ROOT.TLine()
 line.SetLineStyle(2)
-for ix in [11,22,33]:
-    x = pads[0].GetLeftMargin() + ix/44.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
-    line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
+for ix in bindivs:
+  x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
+  line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
-leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
+leg = ROOT.TLegend(0.78,0.75,0.94,0.9)
 leg.AddEntry(hnrs, "QCD MC")
 leg.AddEntry(hrs, "R&S from MC")
 leg.AddEntry(h10, "Core Width +10%")
@@ -143,30 +148,57 @@ leg.Draw()
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
-text.DrawLatex(0.18,0.79,"Low H_{T}")
-text.DrawLatex(0.39,0.79,"Medium H_{T}")
-text.DrawLatex(0.60,0.79,"High H_{T}")
-text.DrawLatex(0.81,0.73,"Extreme H_{T}")
+text.SetTextAlign(22)
+modbindivs = [0] + bindivs + [hrs.GetNbinsX()]
+names = ["Very Low", "Low", "Medium", "High", "Extreme"]
+xposs = [pads[0].GetLeftMargin() + 0.5*(modbindivs[i]+modbindivs[i+1])*binwidth for i in range(len(modbindivs)-1)]
+for i in range(len(modbindivs)-1):
+  ypos = 0.79
+  if names[i]=="Extreme":
+    ypos = 0.72
+  text.SetTextColor(ROOT.kBlack)
+  text.DrawLatex(xposs[i],ypos,"{0} H_{{T}}".format(names[i]))
+  yrs, ers = 0.0, ROOT.Double(0.0)
+  y10, e10 = 0.0, ROOT.Double(0.0)
+  y25, e25 = 0.0, ROOT.Double(0.0)
+  yrs = hrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], ers)
+  y10 = h10.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], e10)
+  y25 = h25.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], e25)
+  r10 = y10 / yrs
+  r25 = y25 / yrs
+  e10 = r10 * np.sqrt((e10/y10)**2 + (ers/yrs)**2)
+  e25 = r25 * np.sqrt((e25/y25)**2 + (ers/yrs)**2)
+  text.SetTextColor(ROOT.kBlue)
+  text.DrawLatex(xposs[i], ypos-0.03, "{0:.2f} #pm {1:.2f}".format(r10,e10))
+  text.SetTextColor(ROOT.kRed)
+  text.DrawLatex(xposs[i], ypos-0.06, "{0:.2f} #pm {1:.2f}".format(r25,e25))
+
 text.SetTextFont(42)
 text.SetTextSize(0.04)
-text.DrawLatex(0.8,0.93,"1 fb^{-1} (13 TeV)")
+text.SetTextAlign(31)
+text.SetTextColor(ROOT.kBlack)
+text.DrawLatex(1.0-pads[0].GetRightMargin(), 1.0-pads[0].GetTopMargin()+0.01,"1 fb^{-1} (13 TeV)")
+text.SetTextAlign(11)
+text.SetTextFont(62)
+text.DrawLatex(pads[0].GetLeftMargin()+0.01, 1.0-pads[0].GetTopMargin()+0.01,"CMS Preliminary")
 
-
-binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/44.0
+binLabels_vl = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "#geq4j, 0b", "#geq4j, 1b", "#geq4j, 2b", "#geq2j, #geq3b"] 
 binLabels = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "4-6j, 0b", "4-6j, 1b", "4-6j, 2b", "#geq7j, 0b", "#geq7j, 1b", "#geq7j, 2b", "2-6j, #geq3b", "#geq7j, #geq3b"]
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextAlign(32)
 text.SetTextAngle(90)
-text.SetTextSize(min(binWidth * 1.3,0.027))
+text.SetTextSize(min(binwidth * 1.3,0.027))
 text.SetTextFont(42)
 for ibin in range(11):
-    x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
-    y = pads[0].GetBottomMargin()-0.009
-    text.DrawLatex(x,y,binLabels[ibin])
-    text.DrawLatex(x+11*binWidth,y,binLabels[ibin])
-    text.DrawLatex(x+22*binWidth,y,binLabels[ibin])
-    text.DrawLatex(x+33*binWidth,y,binLabels[ibin])
+  x = pads[0].GetLeftMargin() + (ibin+0.5)*binwidth
+  y = pads[0].GetBottomMargin()-0.009
+  if ibin < 7:
+    text.DrawLatex(x,y,binLabels_vl[ibin])
+  text.DrawLatex(x+7*binwidth,y,binLabels[ibin])    
+  text.DrawLatex(x+18*binwidth,y,binLabels[ibin])
+  text.DrawLatex(x+29*binwidth,y,binLabels[ibin])
+  text.DrawLatex(x+40*binwidth,y,binLabels[ibin])
 
 
 
@@ -189,7 +221,7 @@ h_ratio10.GetYaxis().CenterTitle()
 h_ratio10.GetYaxis().SetTickLength(0.02)
 h_ratio10.GetXaxis().SetLabelSize(0)
 h_ratio10.GetXaxis().SetTitle("")
-h_ratio10.GetXaxis().SetNdivisions(44,0,0)
+h_ratio10.GetXaxis().SetNdivisions(51,0,0)
 h_ratio10.GetXaxis().SetTickSize(0.06)
 h_ratio10.SetMarkerStyle(20)
 h_ratio10.SetMarkerSize(1.0)
@@ -199,9 +231,9 @@ h_ratio10.Draw("PE")
 h_ratio25.Draw("PE SAME")
 
 line = ROOT.TLine()
-line.DrawLine(0,1,44,1)
+line.DrawLine(0,1,51,1)
 
-c.SaveAs("/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/core_var.pdf")
-c.SaveAs("/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/core_var.png")
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/{0}/mc_core_var.pdf".format(tag))
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/{0}/mc_core_var.png".format(tag))
 
 

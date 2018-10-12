@@ -1,67 +1,69 @@
+import numpy as np
 import ROOT
 import glob
 import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/RebalanceAndSmear_V00-08-12_fixedBtag_v2"
-dir_shift = "looper_output/RebalanceAndSmear_V00-08-12_mean04"
-dir_noRS = "looper_output/RebalanceAndSmear_V00-08-12_noRS"
+tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
 
-hrs = ROOT.TH1D("hrs","",44,0,44)
-hms = ROOT.TH1D("hms","",44,0,44)
-hnrs = ROOT.TH1D("hnrs","",44,0,44)
+dir = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/qcd"
+dir_mean04 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_mean04/qcd"
+dir_noRS = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+
+hrs = ROOT.TH1D("hrs","",51,0,51)
+h04 = ROOT.TH1D("h04","",51,0,51)
+hnrs = ROOT.TH1D("hnrs","",51,0,51)
 
 h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
-h_evts_ms = ROOT.TH1D("h_evts_ms","",1,0,2)
+h_evts_04 = ROOT.TH1D("h_evts_04","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 ibin = 0
-for ht_reg in ["L","M","H","UH"]:
+for ht_reg in ["VL","L","M","H","UH"]:
     sum_rs = 0
-    sum_ms = 0
-    for top_reg in range(1,12):
+    sum_rs04 = 0
+    top_regs = range(1,12)
+    if ht_reg=="VL":
+        top_regs = [1,2,3,12,13,14,15]
+    for top_reg in top_regs:
         ibin+=1
         # print ibin
 
         h_evts_rs.Reset()
-        h_evts_ms.Reset()
+        h_evts_04.Reset()
         h_evts_nrs.Reset()
-        for fn in [os.path.join(dir,"qcd_ht_nonext.root"), os.path.join(dir,"qcd_ht_ext.root")]:
-            fact = 0.686
-            if fn.find("nonext") > -1:
-                fact = 1-0.686
-            bn = fn.split("/")[-1]
-            frs = ROOT.TFile(os.path.join(dir,bn))
-            fms = ROOT.TFile(os.path.join(dir_shift,bn))
-            fnrs = ROOT.TFile(os.path.join(dir_noRS,bn))
-            try:
-                h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
-            try:
-                h_evts_ms.Add(fms.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
-            try:
-                h_evts_nrs.Add(fnrs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)),fact)
-            except:
-                pass
+        bn = "merged_hists.root"
+        frs = ROOT.TFile(os.path.join(dir,bn))
+        f04 = ROOT.TFile(os.path.join(dir_mean04,bn))
+        fnrs = ROOT.TFile(os.path.join(dir_noRS,"qcd_ht.root"))
+        try:
+            h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
+        try:
+            h_evts_04.Add(f04.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
+        try:
+            h_evts_nrs.Add(fnrs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+        except:
+            pass
 
         hrs.SetBinContent(ibin, h_evts_rs.GetBinContent(1))
         hrs.SetBinError(ibin, h_evts_rs.GetBinError(1))
 
-        hms.SetBinContent(ibin, h_evts_ms.GetBinContent(1))
-        hms.SetBinError(ibin, h_evts_ms.GetBinError(1))
+        h04.SetBinContent(ibin, h_evts_04.GetBinContent(1))
+        h04.SetBinError(ibin, h_evts_04.GetBinError(1))
 
         hnrs.SetBinContent(ibin, h_evts_nrs.GetBinContent(1))
         hnrs.SetBinError(ibin, h_evts_nrs.GetBinError(1))
-
+        
         sum_rs += h_evts_rs.GetBinContent(1)
-        sum_ms += h_evts_ms.GetBinContent(1)
+        sum_rs04 += h_evts_04.GetBinContent(1)
+        
+    print "{0} HT: rs = {1}, rs04 = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_rs04, sum_rs04/sum_rs)
 
-    print "{0} HT: rs = {1}, ms = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_ms, sum_ms/sum_rs)
-    
 ROOT.gStyle.SetOptStat(0)
 
 c = ROOT.TCanvas("c","c",900,600)
@@ -91,9 +93,9 @@ hrs.SetLineColor(ROOT.kBlack)
 hrs.SetMarkerColor(ROOT.kBlack)
 hrs.SetMarkerStyle(20)
 
-hms.SetLineColor(ROOT.kBlue)
-hms.SetMarkerColor(ROOT.kBlue)
-hms.SetMarkerStyle(20)
+h04.SetLineColor(ROOT.kBlue)
+h04.SetMarkerColor(ROOT.kBlue)
+h04.SetMarkerStyle(20)
 
 hnrs.SetLineColor(401)
 hnrs.SetMarkerColor(401)
@@ -103,80 +105,104 @@ hnrs.GetYaxis().SetRangeUser(1e-3,1e3)
 hnrs.GetXaxis().SetLabelSize(0)
 
 hnrs.Draw("PE")
-hms.Draw("PE SAME")
 hrs.Draw("PE SAME")
+h04.Draw("PE SAME")
+
+NBINS = hrs.GetNbinsX()
+bindivs = [7,18,29,40]
+binwidth = (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin()) / NBINS
 
 line = ROOT.TLine()
 line.SetLineStyle(2)
-for ix in [11,22,33]:
-    x = pads[0].GetLeftMargin() + ix/44.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
-    line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
+for ix in bindivs:
+  x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
+  line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
-leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
+leg = ROOT.TLegend(0.78,0.75,0.94,0.9)
 leg.AddEntry(hnrs, "QCD MC")
 leg.AddEntry(hrs, "R&S from MC")
-leg.AddEntry(hms, "Template Mean +4%")
+leg.AddEntry(h04, "Template Mean +4%")
 leg.Draw()
 
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
-text.DrawLatex(0.18,0.79,"Low H_{T}")
-text.DrawLatex(0.39,0.79,"Medium H_{T}")
-text.DrawLatex(0.60,0.79,"High H_{T}")
-text.DrawLatex(0.81,0.73,"Extreme H_{T}")
+text.SetTextAlign(22)
+modbindivs = [0] + bindivs + [hrs.GetNbinsX()]
+names = ["Very Low", "Low", "Medium", "High", "Extreme"]
+xposs = [pads[0].GetLeftMargin() + 0.5*(modbindivs[i]+modbindivs[i+1])*binwidth for i in range(len(modbindivs)-1)]
+for i in range(len(modbindivs)-1):
+  ypos = 0.79
+  if names[i]=="Extreme":
+    ypos = 0.72
+  text.SetTextColor(ROOT.kBlack)
+  text.DrawLatex(xposs[i],ypos,"{0} H_{{T}}".format(names[i]))
+  yrs, ers = 0.0, ROOT.Double(0.0)
+  y04, e04 = 0.0, ROOT.Double(0.0)
+  yrs = hrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], ers)
+  y04 = h04.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], e04)
+  r04 = y04 / yrs
+  e04 = r04 * np.sqrt((e04/y04)**2 + (ers/yrs)**2)
+  text.SetTextColor(ROOT.kBlue)
+  text.DrawLatex(xposs[i], ypos-0.03, "{0:.2f} #pm {1:.2f}".format(r04,e04))
+
 text.SetTextFont(42)
 text.SetTextSize(0.04)
-text.DrawLatex(0.8,0.93,"1 fb^{-1} (13 TeV)")
+text.SetTextAlign(31)
+text.SetTextColor(ROOT.kBlack)
+text.DrawLatex(1.0-pads[0].GetRightMargin(), 1.0-pads[0].GetTopMargin()+0.01,"1 fb^{-1} (13 TeV)")
+text.SetTextAlign(11)
+text.SetTextFont(62)
+text.DrawLatex(pads[0].GetLeftMargin()+0.01, 1.0-pads[0].GetTopMargin()+0.01,"CMS Preliminary")
 
-
-binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/44.0
+binLabels_vl = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "#geq4j, 0b", "#geq4j, 1b", "#geq4j, 2b", "#geq2j, #geq3b"] 
 binLabels = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "4-6j, 0b", "4-6j, 1b", "4-6j, 2b", "#geq7j, 0b", "#geq7j, 1b", "#geq7j, 2b", "2-6j, #geq3b", "#geq7j, #geq3b"]
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextAlign(32)
 text.SetTextAngle(90)
-text.SetTextSize(min(binWidth * 1.3,0.027))
+text.SetTextSize(min(binwidth * 1.3,0.027))
 text.SetTextFont(42)
 for ibin in range(11):
-    x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
-    y = pads[0].GetBottomMargin()-0.009
-    text.DrawLatex(x,y,binLabels[ibin])
-    text.DrawLatex(x+11*binWidth,y,binLabels[ibin])
-    text.DrawLatex(x+22*binWidth,y,binLabels[ibin])
-    text.DrawLatex(x+33*binWidth,y,binLabels[ibin])
+  x = pads[0].GetLeftMargin() + (ibin+0.5)*binwidth
+  y = pads[0].GetBottomMargin()-0.009
+  if ibin < 7:
+    text.DrawLatex(x,y,binLabels_vl[ibin])
+  text.DrawLatex(x+7*binwidth,y,binLabels[ibin])    
+  text.DrawLatex(x+18*binwidth,y,binLabels[ibin])
+  text.DrawLatex(x+29*binwidth,y,binLabels[ibin])
+  text.DrawLatex(x+40*binwidth,y,binLabels[ibin])
 
 
 
 ## ratio
 pads[1].cd()
 
-h_ratio = hms.Clone("h_ratio")
-h_ratio.Divide(hrs)
+h_ratio04 = h04.Clone("h_ratio")
+h_ratio04.Divide(hrs)
 
-h_ratio.GetYaxis().SetRangeUser(0,2)
-h_ratio.GetYaxis().SetNdivisions(505)
-h_ratio.GetYaxis().SetTitle("Shift/R&S")
-h_ratio.GetYaxis().SetTitleSize(0.16)
-h_ratio.GetYaxis().SetTitleOffset(0.18)
-h_ratio.GetYaxis().SetLabelSize(0.13)
-h_ratio.GetYaxis().CenterTitle()
-h_ratio.GetYaxis().SetTickLength(0.02)
-h_ratio.GetXaxis().SetLabelSize(0)
-h_ratio.GetXaxis().SetTitle("")
-h_ratio.GetXaxis().SetNdivisions(44,0,0)
-h_ratio.GetXaxis().SetTickSize(0.06)
-h_ratio.SetMarkerStyle(20)
-h_ratio.SetMarkerSize(1.0)
-h_ratio.SetLineWidth(1)
+h_ratio04.GetYaxis().SetRangeUser(0,2)
+h_ratio04.GetYaxis().SetNdivisions(505)
+h_ratio04.GetYaxis().SetTitle("Shift/R&S")
+h_ratio04.GetYaxis().SetTitleSize(0.16)
+h_ratio04.GetYaxis().SetTitleOffset(0.18)
+h_ratio04.GetYaxis().SetLabelSize(0.13)
+h_ratio04.GetYaxis().CenterTitle()
+h_ratio04.GetYaxis().SetTickLength(0.02)
+h_ratio04.GetXaxis().SetLabelSize(0)
+h_ratio04.GetXaxis().SetTitle("")
+h_ratio04.GetXaxis().SetNdivisions(51,0,0)
+h_ratio04.GetXaxis().SetTickSize(0.06)
+h_ratio04.SetMarkerStyle(20)
+h_ratio04.SetMarkerSize(1.0)
+h_ratio04.SetLineWidth(1)
 
-h_ratio.Draw("PE")
+h_ratio04.Draw("PE")
 
 line = ROOT.TLine()
-line.DrawLine(0,1,44,1)
+line.DrawLine(0,1,51,1)
 
-c.SaveAs("/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/mean_shift.pdf")
-c.SaveAs("/home/users/fgolf/public_html/mt2/RebalanceAndSmear/MCtests/mean_shift.png")
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/{0}/mc_mean_var.pdf".format(tag))
+c.SaveAs("/home/users/bemarsh/public_html/mt2/RebalanceAndSmear/{0}/mc_mean_var.png".format(tag))
 
 
-raw_input()

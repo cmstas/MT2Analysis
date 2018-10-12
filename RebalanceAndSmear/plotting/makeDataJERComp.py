@@ -1,11 +1,17 @@
+import numpy as np
 import ROOT
 import glob
 import os
 
 ROOT.gROOT.SetBatch(1)
 
-dir = "looper_output/v10/data/"
-dir_noRS = "looper_output/v10/data_noRS/"
+tag = "V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
+
+dir = "looper_output/V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma/data/"
+dir_noRS = "looper_output/V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/data/"
+
+year = 2017
+lumi = 41.5
 
 hrs = ROOT.TH1D("hrs","",51,0,51)
 hnrs = ROOT.TH1D("hnrs","",51,0,51)
@@ -16,7 +22,7 @@ h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 top_regs_vl=[1,2,3,12,13,14,15]
 
 frs = ROOT.TFile(os.path.join(dir,"merged_hists.root"))
-fnrs = ROOT.TFile(os.path.join(dir_noRS,"merged_hists_skims.root"))
+fnrs = ROOT.TFile(os.path.join(dir_noRS,"merged_hists.root"))
 ibin = 0
 for ht_reg in ["VL","L","M","H","UH"]:
   sum_rs = 0
@@ -101,28 +107,51 @@ hnrs.GetXaxis().SetLabelSize(0)
 hnrs.Draw("PE")
 hrs.Draw("PE SAME")
 
+NBINS = hrs.GetNbinsX()
+bindivs = [7,18,29,40]
+binwidth = (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin()) / NBINS
+
 line = ROOT.TLine()
 line.SetLineStyle(2)
-for ix in [7,18,29,40]:
+for ix in bindivs:
   x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
   line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
-leg = ROOT.TLegend(0.815,0.78,0.94,0.9)
-leg.AddEntry(hrs, "R&S from data")
-leg.AddEntry(hnrs, "Data observation")
+leg = ROOT.TLegend(0.76,0.78,0.94,0.9)
+leg.AddEntry(hrs, "R&S, w/ JER corr")
+leg.AddEntry(hnrs, "R&S, no JER corr")
 leg.Draw()
 
 text = ROOT.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
-text.DrawLatex(0.12,0.79,"Very Low H_{T}")
-text.DrawLatex(0.3,0.79,"Low H_{T}")
-text.DrawLatex(0.45,0.79,"Medium H_{T}")
-text.DrawLatex(0.65,0.79,"High H_{T}")
-text.DrawLatex(0.8,0.73,"Extreme H_{T}")
+text.SetTextAlign(22)
+modbindivs = [0] + bindivs + [hrs.GetNbinsX()]
+names = ["Very Low", "Low", "Medium", "High", "Extreme"]
+xposs = [pads[0].GetLeftMargin() + 0.5*(modbindivs[i]+modbindivs[i+1])*binwidth for i in range(len(modbindivs)-1)]
+for i in range(len(modbindivs)-1):
+  ypos = 0.79
+  if names[i]=="Extreme":
+    ypos = 0.72
+  text.SetTextColor(ROOT.kBlack)
+  text.DrawLatex(xposs[i],ypos,"{0} H_{{T}}".format(names[i]))
+  yrs, ers = 0.0, ROOT.Double(0.0)
+  ynrs, enrs = 0.0, ROOT.Double(0.0)
+  yrs = hrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], ers)
+  ynrs = hnrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], enrs)
+  rnrs = yrs / ynrs
+  enrs = rnrs * np.sqrt((enrs/ynrs)**2 + (ers/yrs)**2)
+  text.SetTextColor(ROOT.kBlack)
+  text.DrawLatex(xposs[i], ypos-0.03, "{0:.2f} #pm {1:.2f}".format(rnrs,enrs))
+
 text.SetTextFont(42)
 text.SetTextSize(0.04)
-text.DrawLatex(0.8,0.93,"36.5 fb^{-1} (13 TeV)")
+text.SetTextAlign(31)
+text.SetTextColor(ROOT.kBlack)
+text.DrawLatex(1.0-pads[0].GetRightMargin(), 1.0-pads[0].GetTopMargin()+0.01,"{0} fb^{{-1}} (13 TeV)".format(lumi))
+text.SetTextAlign(11)
+text.SetTextFont(62)
+text.DrawLatex(pads[0].GetLeftMargin()+0.01, 1.0-pads[0].GetTopMargin()+0.01,"CMS Preliminary")
 
 
 binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/51.0
@@ -151,7 +180,7 @@ pads[1].cd()
 h_ratio = hrs.Clone("h_ratio")
 h_ratio.Divide(hnrs)
 
-h_ratio.GetYaxis().SetRangeUser(0,1)
+h_ratio.GetYaxis().SetRangeUser(0,2)
 h_ratio.GetYaxis().SetNdivisions(505)
 h_ratio.GetYaxis().SetTitle("R&S/Obs")
 h_ratio.GetYaxis().SetTitleSize(0.16)
@@ -173,8 +202,7 @@ line = ROOT.TLine()
 line.DrawLine(0,1,51,1)
 
 username = os.environ["USER"]
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/data_closure.pdf".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/data_closure.png".format(username))
-c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests2/data_closure.root".format(username))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/data_JER_comp.pdf".format(username, tag))
+c.SaveAs("/home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/data_JER_comp.png".format(username, tag))
 
-raw_input()
+# raw_input()
