@@ -6,6 +6,9 @@ using namespace duplicate_removal;
 class mt2tree;
 
 const bool recalculate = true; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
+// only with recalculate = true
+const int applyRecoVeto = 0; // 0: None, 1: use MT2 ID leptons for the reco veto, 2: use any Reco ID (Default: 2)
+const bool increment17 = false;
 const float isoSTC = 6, qualSTC = 3; // change these if recalculating Fshort
 
 // turn on to apply json file to data
@@ -23,7 +26,7 @@ bool FshortLooper::FillHists(const vector<TH2D*> hists, const double weight, con
   return true;
 }
 
-int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
+int FshortLooper::loop (TChain* ch, char * outtag, char* config_tag) {
   string tag(outtag);
 
   // Book histograms
@@ -36,6 +39,27 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
   TH2D* h_etaphi_STC_P = new TH2D("h_etaphi_STC_P","#eta and #phi of P STCs",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
   TH2D* h_etaphi_STC_M = new TH2D("h_etaphi_STC_M","#eta and #phi of M STCs",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
   TH2D* h_etaphi_STC_L = new TH2D("h_etaphi_STC_L","#eta and #phi of L STCs",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
+
+  TH2D* h_mtpt_ST_P = new TH2D("h_mtpt_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_P = new TH2D("h_mtpt_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtpt_ST_M = new TH2D("h_mtpt_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_M = new TH2D("h_mtpt_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtpt_ST_L = new TH2D("h_mtpt_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_L = new TH2D("h_mtpt_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+
+  TH2D* h_mtpt_ST_P_23 = new TH2D("h_mtpt_ST_P_23","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_P_23 = new TH2D("h_mtpt_STC_P_23","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtpt_ST_M_23 = new TH2D("h_mtpt_ST_M_23","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_M_23 = new TH2D("h_mtpt_STC_M_23","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtpt_ST_L_23 = new TH2D("h_mtpt_ST_L_23","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_L_23 = new TH2D("h_mtpt_STC_L_23","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+
+  TH2D* h_mtpt_ST_P_4 = new TH2D("h_mtpt_ST_P_4","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_P_4 = new TH2D("h_mtpt_STC_P_4","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtpt_ST_M_4 = new TH2D("h_mtpt_ST_M_4","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_M_4 = new TH2D("h_mtpt_STC_M_4","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtpt_ST_L_4 = new TH2D("h_mtpt_ST_L_4","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtpt_STC_L_4 = new TH2D("h_mtpt_STC_L_4","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   double mt2bins[9] = {60,68,76,84,92,100,120,140,200};
 
@@ -91,12 +115,17 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
   TH2D* h_FSR_gt1000HT_4 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_gt1000HT_4");
   TH2D* h_FSR_lt1000HT_4 = (TH2D*) h_FSR_60to100MT2->Clone("h_FSR_lt1000HT_4");
 
+  // These hists are more generic, before we added no lep and dphi > 0.3 to the region definition, and also before we split by NJ
   //vector<TH2D*> fsrhists = {h_FSR_60to100MT2, h_FSR_100to200MT2, h_FSR_gt200MT2, h_FSR_gt0p3dphi, h_FSR_lt0p3dphi, h_FSR_0nlep, h_FSR_gt0nlep, h_FSR_2to3njet, h_FSR_gt3njet, h_FSR_lt1000HT, h_FSR_gt1000HT};
 
   vector<TH2D*> fsrhists = {h_FSR_60to100MT2, h_FSR_2to3njet, h_FSR_gt3njet, 
 			    h_FSR_100to200MT2, h_FSR_100to200MT2_23, h_FSR_100to200MT2_4, 
 			    h_FSR_gt200MT2, h_FSR_gt200MT2_23, h_FSR_gt200MT2_4,
 			    h_FSR_lt1000HT, h_FSR_gt1000HT, h_FSR_lt1000HT_23, h_FSR_gt1000HT_4, h_FSR_lt1000HT_23, h_FSR_gt1000HT_4};
+
+  vector<TH2D*> mtpthists = { h_mtpt_ST_P, h_mtpt_ST_M, h_mtpt_ST_L, h_mtpt_STC_P, h_mtpt_STC_M, h_mtpt_STC_L,
+			      h_mtpt_ST_P_23, h_mtpt_ST_M_23, h_mtpt_ST_L_23, h_mtpt_STC_P_23, h_mtpt_STC_M_23, h_mtpt_STC_L_23,
+			      h_mtpt_ST_P_4, h_mtpt_ST_M_4, h_mtpt_ST_L_4, h_mtpt_STC_P_4, h_mtpt_STC_M_4, h_mtpt_STC_L_4};
 
   vector<TH1D*> mt2hists =  { h_mt2_ST_P, h_mt2_ST_M, h_mt2_ST_L, h_mt2_STC_P, h_mt2_STC_M, h_mt2_STC_L,
 			      h_mt2_ST_P_23, h_mt2_ST_M_23, h_mt2_ST_L_23, h_mt2_STC_P_23, h_mt2_STC_M_23, h_mt2_STC_L_23,
@@ -105,7 +134,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
   vector<TH2D*> etaphihists = {h_etaphi_ST_P, h_etaphi_ST_M, h_etaphi_ST_L,h_etaphi_STC_P, h_etaphi_STC_M, h_etaphi_STC_L};
 			    
   mt2tree t;
-  t.Init(ch_st);
+  t.Init(ch);
 
   // Load the configuration and output to screen
   config_ = GetMT2Config(string(config_tag));
@@ -116,11 +145,13 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 
   if (applyJSON && config_.json != "") {
     cout << "[FshortLooper::loop] Loading json file: " << config_.json << endl;
-    //set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
-    set_goodrun_file((config_.json).c_str());
+    set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
+    //    set_goodrun_file((config_.json).c_str());
   }
 
-  const unsigned int nEventsTree = ch_st->GetEntries();
+  const int year = config_.year;
+
+  const unsigned int nEventsTree = ch->GetEntries();
   int nDuplicates = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
     //    if (event % 1000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
@@ -150,7 +181,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
     if (t.nJet30 < 2) {
       continue;
     }
-    if (t.ht < 300) {
+    if (t.ht < 250) {
       continue;
     }
     if (unlikely(t.nJet30FailId != 0)) {
@@ -186,22 +217,83 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
       continue;
     }
 
+
     // Triggers
-    bool passPrescaleTrigger = t.HLT_PFHT125_Prescale || t.HLT_PFHT200_Prescale || t.HLT_PFHT300_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale || t.HLT_PFHT600_Prescale;
-    bool passUnPrescaleTrigger = t.HLT_PFHT900 || t.HLT_PFJet450;
-    bool passMetTrigger = t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
+    const bool passPrescaleTrigger = (year == 2016) ? 
+      t.HLT_PFHT125_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale : 
+      t.HLT_PFHT180_Prescale || t.HLT_PFHT370_Prescale || t.HLT_PFHT430_Prescale || t.HLT_PFHT510_Prescale || t.HLT_PFHT590_Prescale || t.HLT_PFHT680_Prescale || t.HLT_PFHT780_Prescale || t.HLT_PFHT890_Prescale;
+    const bool passUnPrescaleTrigger = (year == 2016) ? 
+      t.HLT_PFHT900 || t.HLT_PFJet450 :
+      t.HLT_PFHT1050 || t.HLT_PFJet500;
+    const bool passMetTrigger = t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
     
     if (! (passPrescaleTrigger || passUnPrescaleTrigger || passMetTrigger) ) {
       continue;
     }
 
-    const float lumi = config_.lumi; // 2016
-    double weight = t.isData ? 1.0 : t.evt_scale1fb * lumi;
+    const float lumi = config_.lumi;
+    double weight = t.isData ? 1.0 : (t.evt_scale1fb != 1 ? t.evt_scale1fb * lumi : 1.9099e-06 * lumi); // manually fix the scale1fb for wjets_ht2500toInf
     // if these are true, assume that data trigger is prescaled JetHT trigger
-    if (!t.isData && (passPrescaleTrigger && !(passUnPrescaleTrigger || passMetTrigger)) ) {
-      if (t.HLT_PFHT475_Prescale) weight *= 1.0 / 115.2;
-      else if (t.HLT_PFHT350_Prescale) weight *= 1.0 / 460.6;
-      else weight *= 1.0 / 9200.0; // t.HLT_PFHT125_Prescale
+    if (!t.isData) {
+      if ( !(passUnPrescaleTrigger || passMetTrigger) ) {
+	if (year == 2016) {
+	  if (t.HLT_PFHT475_Prescale) {
+	    weight /= 115.2;
+	  }
+	  else if (t.HLT_PFHT350_Prescale) {
+	    weight /= 460.6;
+	  }
+	  else { //125
+	    weight /= 9200.0; 
+	  }
+	}
+	else { // 2017 and 2018
+	  if (t.HLT_PFHT180_Prescale) {
+	    weight /= 1316.0;
+	  }
+	  else if (t.HLT_PFHT250_Prescale) {
+	    weight /= 824.0;
+	  }
+	  else if (t.HLT_PFHT370_Prescale) {
+	    weight /= 707.0;
+	  }
+	  else if (t.HLT_PFHT430_Prescale) {
+	    weight /= 307.0;
+	  }
+	  else if (t.HLT_PFHT510_Prescale) {
+	    weight /= 145.0;
+	  }
+	  else if (t.HLT_PFHT590_Prescale) {
+	    weight /= 67.4;
+	  }
+	  else if (t.HLT_PFHT680_Prescale) {
+	    weight /= 47.4;
+	  }	
+	  else if (t.HLT_PFHT780_Prescale) {
+	    weight /= 29.5;
+	  }	
+	  else { // 890
+	    weight /= 17.1;
+	  }
+	}
+      }
+      else { // not prescaled, but may not be in the 100% efficiency region
+	if (year == 2016 && (t.met_pt < 250 && t.ht < 1000)) {
+	  if (t.met_pt < 200) {
+	    weight = ((0.8/100) * (t.met_pt - 100)) + 0.1;
+	  } else {
+	    weight = ((0.1/50) * (t.met_pt - 200)) + 0.9;
+	  }
+	}
+	else if (year == 2017 && (t.met_pt < 250 && t.ht < 1200)) {
+	  // use same values for 2017 for now
+	  if (t.met_pt < 200) {
+	    weight = ((0.8/100) * (t.met_pt - 100)) + 0.1;
+	  } else {
+	    weight = ((0.1/50) * (t.met_pt - 200)) + 0.9;
+	  }	  
+	}
+      }
     }
 
     // 60to100MT2, 100to200MT2, gt200MT2, gt0p3dphi, lt0p3dphi, 0nlep, gt0nlep, 2to3njet, gt3njet, gt1000HT, lt1000HT
@@ -226,8 +318,8 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
       t.nJet30 < 4 ? histsToFill.push_back(h_FSR_100to200MT2_23) : histsToFill.push_back(h_FSR_100to200MT2_4);
     }
     // Signal Region
-    else if ( !(blind && t.isData) ) {
-      histsToFill.push_back(h_FSR_gt200MT2); // Only look at MT2 > 200 GeV in data if unblinded
+    else if ( !(blind && t.isData) ) { // Only look at MT2 > 200 GeV in data if unblinded
+      histsToFill.push_back(h_FSR_gt200MT2); 
       t.nJet30 < 4 ? histsToFill.push_back(h_FSR_gt200MT2_23) : histsToFill.push_back(h_FSR_gt200MT2_4);
     }
     // Should only get here if looking at data while blinded
@@ -261,8 +353,8 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	// Length and categorization
 	const bool lostOuterHitsSel = t.track_nLostOuterHits[i_trk] >= 2;
 	const int nLayers = t.track_nLayersWithMeasurement[i_trk];
-	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[ntracks] && lostOuterHitsSel;
-	const bool isLong = nLayers >= 7;
+	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[ntracks] && lostOuterHitsSel && nLayers == (increment17 ? (year == 2016 ? 3 : 4) : 3);
+	const bool isLong = nLayers >= (increment17 ? (year == 2016 ? 7 : 8) : 7);
 	const bool isM = !isP && !isLong && lostOuterHitsSel;
 	const bool isL = isLong && lostOuterHitsSel;
 	const bool isShort = isP || isM || isL;
@@ -272,30 +364,29 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 
 	fillIndex = isP ? 1 : (isM ? 2 : 3);
 	
-	const float nearestPF_DR = t.track_nearestPF_DR[i_trk];
-	const int nearestPF_id = abs(t.track_nearestPF_id[i_trk]);
-	const bool nearestPFSel = !(nearestPF_DR < 0.1 && (nearestPF_id == 11 || nearestPF_id == 13));
-	float mindr = 100;
-	for (int iL = 0; iL < t.nlep; iL++) {
-	  float dr = DeltaR(t.lep_eta[iL],t.track_eta[i_trk],t.lep_phi[iL],t.track_phi[i_trk]);
-	  if (mindr < dr) mindr = dr;
+	if (applyRecoVeto == 1) {	
+	  const float nearestPF_DR = t.track_nearestPF_DR[i_trk];
+	  const int nearestPF_id = abs(t.track_nearestPF_id[i_trk]);
+	  const bool nearestPFSel = !(nearestPF_DR < 0.1 && (nearestPF_id == 11 || nearestPF_id == 13));
+	  float mindr = 100;
+	  for (int iL = 0; iL < t.nlep; iL++) {
+	    float dr = DeltaR(t.lep_eta[iL],t.track_eta[i_trk],t.lep_phi[iL],t.track_phi[i_trk]);
+	    if (mindr < dr) mindr = dr;
+	  }
+	  const float minrecodr = mindr;
+	  const bool recoVeto = minrecodr < 0.1;
+	  const bool PassesRecoVeto = !recoVeto && nearestPFSel && !t.track_isLepOverlap[i_trk];
+	  if (!PassesRecoVeto) {
+	    continue;
+	  }	  
 	}
-	const float minrecodr = mindr;
-	const bool recoVeto = minrecodr < 0.1;
-	const bool PassesRecoVeto = !recoVeto && nearestPFSel && !t.track_isLepOverlap[i_trk];
-	
-	if (!PassesRecoVeto) {
-	  if (t.track_isshort[i_trk]) {
-	    cout << "ST: " << endl;
+	else if (applyRecoVeto == 2) {
+	  const bool PassesRecoVeto = t.track_recoveto[i_trk] == 0;
+	  if (!PassesRecoVeto) {
+	    continue;
 	  }
-	  else if (t.track_iscandidate[i_trk]) {
-	    cout << "STC: " << endl;
-	  }
-	  else continue;
-	  cout << "LepOverlap: " << t.track_isLepOverlap[i_trk] << endl;
-	  cout << "Reco<0.1: " << recoVeto << endl;
-	  cout << "nearestPF: " << nearestPFSel << endl;
-	  continue;
+	} else {
+	  // do nothing
 	}
 
 	// Isolation
@@ -319,9 +410,9 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	}
 	
 	// Quality
-	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= 2;
-	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= 3;
-	const bool pixLayersSel4 = nLayers > 4 ? pixLayersSelLoose : pixLayersSelTight; // Apply 2 layer selection to tracks with 5+ layers
+	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 2 : 3) : 2);
+	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
+	const bool pixLayersSel4 = nLayers > ((increment17 ? (year == 2016 ? 4 : 5) : 4) ? pixLayersSelLoose : pixLayersSelTight); // Apply 2 layer selection to tracks with 5 (6) or more layers in 2016 (17/18)
 	
 	const int lostInnerHits = t.track_nLostInnerPixelHits[i_trk];
 	const bool lostInnerHitsSel = lostInnerHits == 0;
@@ -374,6 +465,30 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	}
       }
 
+      if (!isST && !isSTC) {
+	continue;
+      }
+
+      if (!t.track_isHighPurity[i_trk]) {
+	continue;
+      }
+
+      // One final cut for L tracks to catch lost leptons
+      // These tracks are probably background, likely a lost muon from W+jets
+      const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );
+      if (fillIndex == 3 && (t.track_pt[i_trk] < 150 && mt < 100)) {
+	// in this case, just fill the mtpt hists and continue
+	if (isSTC) {
+	  h_mtpt_STC_L->Fill(mt < 100, t.track_pt[i_trk]);
+	  t.nJet30 < 4 ? h_mtpt_STC_L_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_STC_L_4->Fill(mt < 100, t.track_pt[i_trk]);
+	}
+	else {
+	  h_mtpt_ST_L->Fill(mt < 100, t.track_pt[i_trk]);
+	  t.nJet30 < 4 ? h_mtpt_ST_L_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_ST_L_4->Fill(mt < 100, t.track_pt[i_trk]);
+	}
+	continue;
+      }
+
       // Fills
       if (isSTC) {
 	FillHists(histsToFill,weight,2,fillIndex);
@@ -383,16 +498,22 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	    h_mt2_STC_P->Fill(t.mt2,weight); 
 	    t.nJet30 < 4 ? h_mt2_STC_P_23->Fill(t.mt2,weight) : h_mt2_STC_P_4->Fill(t.mt2,weight); 
 	    h_etaphi_STC_P->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight); 
+	    h_mtpt_STC_P->Fill(mt < 100, t.track_pt[i_trk]);
+	    t.nJet30 < 4 ? h_mtpt_STC_P_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_STC_P_4->Fill(mt < 100, t.track_pt[i_trk]);
 	    break;
 	  case 2: 
 	    h_mt2_STC_M->Fill(t.mt2,weight); 
 	    t.nJet30 < 4 ? h_mt2_STC_M_23->Fill(t.mt2,weight) : h_mt2_STC_M_4->Fill(t.mt2,weight); 
 	    h_etaphi_STC_M->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight); 
+	    h_mtpt_STC_M->Fill(mt < 100, t.track_pt[i_trk]);
+	    t.nJet30 < 4 ? h_mtpt_STC_M_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_STC_M_4->Fill(mt < 100, t.track_pt[i_trk]);
 	    break;
 	  case 3: 
 	    h_mt2_STC_L->Fill(t.mt2,weight); 
 	    t.nJet30 < 4 ? h_mt2_STC_L_23->Fill(t.mt2,weight) : h_mt2_STC_L_4->Fill(t.mt2,weight); 
 	    h_etaphi_STC_L->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight); 
+	    h_mtpt_STC_L->Fill(mt < 100, t.track_pt[i_trk]);
+	    t.nJet30 < 4 ? h_mtpt_STC_L_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_STC_L_4->Fill(mt < 100, t.track_pt[i_trk]);
 	    break;
 	  }
 	}
@@ -405,16 +526,22 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
 	    h_mt2_ST_P->Fill(t.mt2,weight); 
 	    t.nJet30 < 4 ? h_mt2_ST_P_23->Fill(t.mt2,weight) : h_mt2_ST_P_4->Fill(t.mt2,weight); 
 	    h_etaphi_ST_P->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight); 
+	    h_mtpt_ST_P->Fill(mt < 100, t.track_pt[i_trk]);
+	    t.nJet30 < 4 ? h_mtpt_ST_P_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_ST_P_4->Fill(mt < 100, t.track_pt[i_trk]);
 	    break;
 	  case 2: 
 	    h_mt2_ST_M->Fill(t.mt2,weight); 
 	    t.nJet30 < 4 ? h_mt2_ST_M_23->Fill(t.mt2,weight) : h_mt2_ST_M_4->Fill(t.mt2,weight); 
 	    h_etaphi_ST_M->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight); 
+	    h_mtpt_ST_M->Fill(mt < 100, t.track_pt[i_trk]);
+	    t.nJet30 < 4 ? h_mtpt_ST_M_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_ST_M_4->Fill(mt < 100, t.track_pt[i_trk]);
 	    break;
 	  case 3: 
 	    h_mt2_ST_L->Fill(t.mt2,weight); 
 	    t.nJet30 < 4 ? h_mt2_ST_L_23->Fill(t.mt2,weight) : h_mt2_ST_L_4->Fill(t.mt2,weight); 
 	    h_etaphi_ST_L->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight); 
+	    h_mtpt_ST_L->Fill(mt < 100, t.track_pt[i_trk]);
+	    t.nJet30 < 4 ? h_mtpt_ST_L_23->Fill(mt < 100, t.track_pt[i_trk]) : h_mtpt_ST_L_4->Fill(mt < 100, t.track_pt[i_trk]);
 	    break;
 	  }
 	}
@@ -458,6 +585,7 @@ int FshortLooper::loop (TChain* ch_st, char * outtag, char* config_tag) {
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
   for (vector<TH2D*>::iterator hist = fsrhists.begin(); hist != fsrhists.end(); hist++) (*hist)->Write();
+  for (vector<TH2D*>::iterator hist = mtpthists.begin(); hist != mtpthists.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = etaphihists.begin(); hist != etaphihists.end(); hist++) (*hist)->Write();
   for (vector<TH1D*>::iterator hist = mt2hists.begin(); hist != mt2hists.end(); hist++) (*hist)->Write();
   outfile_.Close();
@@ -474,7 +602,7 @@ int main (int argc, char ** argv) {
   }
 
   TChain *ch = new TChain("mt2");
-  ch->Add(argv[2]);
+  ch->Add(Form("%s*.root",argv[2]));
 
   FshortLooper * fsl = new FshortLooper();
   fsl->loop(ch,argv[1],argv[3]);

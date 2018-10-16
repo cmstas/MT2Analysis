@@ -77,6 +77,11 @@ for rawname in names:
         h_mt2.SetTitle(h_mt2.GetTitle()+";M_{T2} (GeV);Count")
         h_mt2.Draw()
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+    elif name.find("mtpt") > 0:
+        h_mtpt = tfile.Get(name)
+        h_mtpt.SetLineWidth(3)
+        h_mtpt.Draw("colz")
+        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
 
 mt2_STC_L=tfile.Get("h_mt2_STC_L")
 mt2_ST_L=tfile.Get("h_mt2_ST_L")
