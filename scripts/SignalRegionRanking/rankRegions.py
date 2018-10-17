@@ -41,8 +41,8 @@ for line in open(filename):
 output=open('Ranking_'+signal_point+'_ranked.txt', 'w+')
 limits=sorted(exp.items(), key=operator.itemgetter(1))    
 for l in limits:
-    output.write(str(l[0])+' & '+str(l[1])+' & '+str(obs[l[0]]) + ' & ' + str(sigyield[l[0]]) + ' & ' + ('%.3f' % (float(b[l[0]])/(xsec*1000)*100.)) +'\\\\\n') # acceptance assumes 1/fb, will be corrected in makeRankingTables
+    output.write(str(l[0])+' & '+str(l[1])+' & '+str(obs[l[0]]) + ' & ' + str(sigyield[l[0]]) + ' & ' + ('%.3f' % (float(sigyield[l[0]])/(xsec*1000*lumi)*100.)) +'\\\\\n')
 
-print "Percentage of ALL signal events falling into this bin:", str(float(sigyield[l[0]])/(xsec*1000*lumi)*100.)+"%" 
-print "Signal yield in this bin:", sigyield[l[0]] 
+print "Percentage of ALL signal events falling into best bin:", str(float(sigyield[l[0]])/(xsec*1000*lumi)*100.)+"%" 
+print "Signal yield in best bin:", sigyield[l[0]] 
 print "Signal cross section:", str(xsec)

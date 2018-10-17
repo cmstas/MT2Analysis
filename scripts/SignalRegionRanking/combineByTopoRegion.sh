@@ -8,15 +8,14 @@ inputDir=$homeDir/cards_NoPJmergedCRlowMT2atUHWithQCD_T1tttt/
 tag=RegionTesting
 
 thisDir=$PWD
-copyDir=$thisDir'/ranking_'${Model[0]}'/'
-
-workDir=$thisDir/scratch/ranking_${Model[0]}
-
-mkdir -p $workDir
-cd $workDir
 
 for model in ${Models[@]}
 do
+    copyDir=$thisDir'/ranking_'${model}'/'
+    workDir=$thisDir/scratch/ranking_${model}    
+    mkdir -p $workDir
+    cd $workDir
+
 	regionNum=0
 	for datacard in $inputDir/*'datacard_'*${model}*
 	do

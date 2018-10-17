@@ -1,10 +1,12 @@
 #!bin/bash
 
-Model=T1tttt_1200_800
+#Model=T1tttt_1200_800
+#Model=T1tttt_1600_1000
+Model=T1tttt_1900_200
 tag=RegionTesting
 
 thisDir=`pwd`
-inputDir=$thisDir/../cards_WithSigContam/cards_DefaultWithQCD_T1tttt/
+inputDir=$thisDir/../cards_NoPJmergedCRlowMT2atUHWithQCD_T1tttt/
 
 for i in $(ls $thisDir/scratch/ranking_${Model}/log_${Model}*${tag}.txt)
 do
