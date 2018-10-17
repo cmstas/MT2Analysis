@@ -1,8 +1,9 @@
 #!bin/bash
 
-Models=(T1tttt_1200_800)
-homeDir=..
-inputDir=$homeDir/cards_WithSigContam/cards_DefaultWithQCD_T1tttt/
+declare -a Models=(T1tttt_1200_800 T1tttt_1900_200 T1tttt_1600_1000)
+homeDir=`pwd`
+homeDir=${homeDir%/SignalRegionRanking}
+inputDir=$homeDir/cards_NoPJmergedCRlowMT2atUHWithQCD_T1tttt/
 
 tag=RegionTesting
 
@@ -14,12 +15,10 @@ workDir=$thisDir/scratch/ranking_${Model[0]}
 mkdir -p $workDir
 cd $workDir
 
-modelNum=0
-while [ "x${Models[modelNum]}" != "x" ]
+for model in ${Models[@]}
 do
-	model=${Models[$modelNum]}
 	regionNum=0
-	for datacard in $(ls $inputDir/*'datacard_'*${Model[$modelNum]}*)
+	for datacard in $inputDir/*'datacard_'*${model}*
 	do
 	    if [[ $datacard != *'combine'* && $datacard != *'list'* && $datacard != *'partialCombination'* ]]
 	    then
@@ -47,8 +46,7 @@ do
 	unset TopoRegions
 	unset listOfCards
     
-     modelNum=$(( $modelNum + 1 ))
 done
-unset Model
+
 
 cd -
