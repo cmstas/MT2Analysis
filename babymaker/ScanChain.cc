@@ -1076,6 +1076,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       vector<LorentzVector> p4sForHemsZllUP;
       vector<LorentzVector> p4sForHemsZllDN;
       vector<LorentzVector> p4sForHemsZllMT;
+      p4sForHems
       vector<LorentzVector> p4sForHemsRl;
 
       vector<LorentzVector> p4sForDphi;
@@ -1294,7 +1295,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         zll_met_px += lep_pt[1] * cos(lep_phi[1]);
         zll_met_py += lep_pt[0] * sin(lep_phi[0]);
         zll_met_py += lep_pt[1] * sin(lep_phi[1]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons added
         TVector2 zll_met_vec(zll_met_px, zll_met_py);
         zll_met_pt = zll_met_vec.Mod();
         zll_met_phi = TVector2::Phi_mpi_pi(zll_met_vec.Phi()); 
@@ -1303,7 +1304,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         zll_met_pxUP += lep_pt[1] * cos(lep_phi[1]);
         zll_met_pyUP += lep_pt[0] * sin(lep_phi[0]);
         zll_met_pyUP += lep_pt[1] * sin(lep_phi[1]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons
         TVector2 zll_met_vecUP(zll_met_pxUP, zll_met_pyUP);
         zll_met_ptJECup = zll_met_vecUP.Mod();
         zll_met_phiJECup = TVector2::Phi_mpi_pi(zll_met_vecUP.Phi()); 
@@ -1312,7 +1313,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         zll_met_pxDN += lep_pt[1] * cos(lep_phi[1]);
         zll_met_pyDN += lep_pt[0] * sin(lep_phi[0]);
         zll_met_pyDN += lep_pt[1] * sin(lep_phi[1]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons added
         TVector2 zll_met_vecDN(zll_met_pxDN, zll_met_pyDN);
         zll_met_ptJECdn = zll_met_vecDN.Mod();
         zll_met_phiJECdn = TVector2::Phi_mpi_pi(zll_met_vecDN.Phi()); 
@@ -1336,7 +1337,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         float zllmt_met_py  = met_pt * sin(met_phi);	
         zllmt_met_px += lep_pt[kill_lep] * cos(lep_phi[kill_lep]);
         zllmt_met_py += lep_pt[kill_lep] * sin(lep_phi[kill_lep]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons added
         TVector2 zllmt_met_vec(zllmt_met_px, zllmt_met_py);
         zllmt_met_pt = zllmt_met_vec.Mod();
         zllmt_met_phi = TVector2::Phi_mpi_pi(zllmt_met_vec.Phi());      
@@ -1358,7 +1359,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         float rl_met_py  = met_pt * sin(met_phi);	
         rl_met_px += lep_pt[0] * cos(lep_phi[0]);
         rl_met_py += lep_pt[0] * sin(lep_phi[0]);
-        // recalculated MET with photons added
+        // recalculated MET with lepton added
         TVector2 rl_met_vec(rl_met_px, rl_met_py);
         rl_met_pt = rl_met_vec.Mod();
         rl_met_phi = TVector2::Phi_mpi_pi(rl_met_vec.Phi());      
