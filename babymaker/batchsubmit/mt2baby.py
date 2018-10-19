@@ -39,7 +39,7 @@ if __name__ == "__main__":
             condor_submit_params = {"use_xrootd":True},
             cmssw_version = "CMSSW_9_4_9",
             input_executable = mt2home+"/metis_executable.sh", # your condor executable here
-            tarfile = mt2home+"/job_input/input_metis.tar.xz", # your tarfile with assorted goodies here
+            tarfile = mt2home+"/job_input/input.tar.xz", # your tarfile with assorted goodies here
             special_dir = "mt2babies/{}".format(tag), # output files into /hadoop/cms/store/<user>/<special_dir>
             )
         tasks[dsname] = task
