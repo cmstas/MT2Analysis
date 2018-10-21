@@ -68,8 +68,7 @@ class MT2Looper {
 			const std::string& dir = "", const std::string& suffix = ""); 
   float getAverageISRWeight(const int evt_id, const int var = 0);
 
-  void fillTriggerVectors(std::vector<int*>& trigs, std::vector<std::string> trig_names);    
-  bool passTrigger(std::vector<int*>& trigs, bool debug=false);
+
   
  private:
 
@@ -137,12 +136,12 @@ class MT2Looper {
   float evtweight_renormUp_;
   float evtweight_renormDn_;
 
-  std::vector<int*> trigs_SR_;
-  std::vector<int*> trigs_Photon_;
-  std::vector<int*> trigs_DilepSF_;
-  std::vector<int*> trigs_DilepOF_;
-  std::vector<int*> trigs_SingleMu_;
-  std::vector<int*> trigs_SingleEl_;
+  std::vector<const Int_t*> trigs_SR_;
+  std::vector<const Int_t*> trigs_Photon_;
+  std::vector<const Int_t*> trigs_DilepSF_;
+  std::vector<const Int_t*> trigs_DilepOF_;
+  std::vector<const Int_t*> trigs_SingleMu_;
+  std::vector<const Int_t*> trigs_SingleEl_;
   
 };
 
