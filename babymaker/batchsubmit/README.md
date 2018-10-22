@@ -161,24 +161,23 @@ The directory also contains other skimming scripts for specific purposes.
 #                                                                               #
 #################################################################################
 
-1. Get Project Metis and mt2 babymaking submissions scripts
+1. Get Project Metis. You can skip this step if you already have a Metis install set up elsewhere.
 ``` bash
 source metis_setup.sh
 ```
 
-2. Edit the datasets you wish to run on inside the appropriate ProjectMetis/examples/mt2baby*.py submissions script, point the mt2homevariable in this script towards your base MT2Analysis directory, choose the tag for this babymaking run, and set the output directory for the unmerged babies (hadoop) and the merged babies (nfs). Metis will run on the most recent CMS4 version of this dataset by default. If you want to force a different tag, uncomment the 'tag = "CMS4_X_Y_Z"' line and set it to to the desired version.
+2. Edit the datasets you wish to run on inside the appropriate mt2baby.py submissions script, point the mt2homevariable in this script towards your base MT2Analysis directory if it's not this one, choose the tag for this babymaking run, and set the output directory for the unmerged babies (hadoop) and the merged babies (nfs). Metis will run on the most recent CMS4 version of your chosen datasets by default. If you want to force a different tag, uncomment the 'tag = "CMS4_X_Y_Z"' line and set it to to the desired version.
 
 3. Make a tar file of inputs for Metis
 ``` bash
 source createTarFile.sh
 ```
 
-4. Metis feeds its own generalized inputs to the exectuable, so we can't use MT2's wrapper.sh. There is a separate metis_executable.sh that interfaces between Metis and processBaby. If you need to make any edits to the workflow (for example, maybe you edited the arguments taken by processBaby, or want to do rebalance and smear regardless of whether the output name contains "RebalanceAndSmear"), edit this file, not wrapper.sh.
+4. Metis feeds its own generalized inputs to the exectuable, so we can't use MT2's old wrapper.sh. There is a separate metis_executable.sh that interfaces between Metis and processBaby. If you need to make any edits to the workflow (for example, maybe you edited the arguments taken by processBaby, or want to do rebalance and smear regardless of whether the output name contains "RebalanceAndSmear"), edit this file, not wrapper.sh.
 
 5. Run Metis
 ``` bash
-cd ProjectMetis
-nohup python examples/my_mt2baby_submission_script.py &> metis.log &
+nohup python mt2baby.py &> metis.log &
 ```
 
 Remember when using Metis to delete the corresponding tasks directory if you make a rerun on the same dataset. Otherwise, it will re-load the same old job from backup and execute the same thing over again.

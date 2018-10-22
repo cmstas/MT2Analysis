@@ -691,6 +691,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         int nHardScatter = 0;
 	genTop_pt = -1.;
 	genTbar_pt = -1.;
+	if (cms3.genps_p4().size() != cms3.genps_isLastCopy().size()) {
+	  std::cout << "WARNING: The gen particle isLastCopy branch does not have the same number of entries as the other gen particle branches. This can happen when you run on cms4 including the packed gen particles, which are appended to a subset of gen particle branches. Add a protection to the isLastCopy access line or modify the NtupleMaker and reproduce cms4 if you wish to avoid the exception that's about to happen."
+	}
         for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
           if (ngenPart >= max_ngenPart) {
             std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
@@ -708,7 +711,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           ngenPart++;
 
           int pdgId = abs(cms3.genps_id().at(iGen));
-          int status = cms3.genps_status().at(iGen);
+          int status = cms3.genps_status().at(iGen);	  
           int isLastCopy = cms3.genps_isLastCopy().at(iGen);
 
           // find hard scatter products to get recoil pt
@@ -1296,7 +1299,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         zll_met_px += lep_pt[1] * cos(lep_phi[1]);
         zll_met_py += lep_pt[0] * sin(lep_phi[0]);
         zll_met_py += lep_pt[1] * sin(lep_phi[1]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons added
         TVector2 zll_met_vec(zll_met_px, zll_met_py);
         zll_met_pt = zll_met_vec.Mod();
         zll_met_phi = TVector2::Phi_mpi_pi(zll_met_vec.Phi()); 
@@ -1305,7 +1308,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         zll_met_pxUP += lep_pt[1] * cos(lep_phi[1]);
         zll_met_pyUP += lep_pt[0] * sin(lep_phi[0]);
         zll_met_pyUP += lep_pt[1] * sin(lep_phi[1]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons
         TVector2 zll_met_vecUP(zll_met_pxUP, zll_met_pyUP);
         zll_met_ptJECup = zll_met_vecUP.Mod();
         zll_met_phiJECup = TVector2::Phi_mpi_pi(zll_met_vecUP.Phi()); 
@@ -1314,7 +1317,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         zll_met_pxDN += lep_pt[1] * cos(lep_phi[1]);
         zll_met_pyDN += lep_pt[0] * sin(lep_phi[0]);
         zll_met_pyDN += lep_pt[1] * sin(lep_phi[1]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons added
         TVector2 zll_met_vecDN(zll_met_pxDN, zll_met_pyDN);
         zll_met_ptJECdn = zll_met_vecDN.Mod();
         zll_met_phiJECdn = TVector2::Phi_mpi_pi(zll_met_vecDN.Phi()); 
@@ -1338,7 +1341,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         float zllmt_met_py  = met_pt * sin(met_phi);	
         zllmt_met_px += lep_pt[kill_lep] * cos(lep_phi[kill_lep]);
         zllmt_met_py += lep_pt[kill_lep] * sin(lep_phi[kill_lep]);
-        // recalculated MET with photons added
+        // recalculated MET with leptons added
         TVector2 zllmt_met_vec(zllmt_met_px, zllmt_met_py);
         zllmt_met_pt = zllmt_met_vec.Mod();
         zllmt_met_phi = TVector2::Phi_mpi_pi(zllmt_met_vec.Phi());      
@@ -1360,7 +1363,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         float rl_met_py  = met_pt * sin(met_phi);	
         rl_met_px += lep_pt[0] * cos(lep_phi[0]);
         rl_met_py += lep_pt[0] * sin(lep_phi[0]);
-        // recalculated MET with photons added
+        // recalculated MET with lepton added
         TVector2 rl_met_vec(rl_met_px, rl_met_py);
         rl_met_pt = rl_met_vec.Mod();
         rl_met_phi = TVector2::Phi_mpi_pi(rl_met_vec.Phi());      
@@ -3171,8 +3174,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	    }
 	  }
 	  const bool recoVeto = minrecodr < 0.1;
-	  if (recoVeto && !track_isLepOverlap[ntracks] && verbose) 
-	    std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
+	  if (verbose && recoVeto && !track_isLepOverlap[ntracks]) 
+              std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
 	  // Get rid of anything near or overlapping a lepton
 	  const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
 	

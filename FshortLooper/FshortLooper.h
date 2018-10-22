@@ -35,7 +35,7 @@ class FshortLooper {
   FshortLooper();
   ~FshortLooper();
   bool FillHists(const std::vector<TH2D*> hist, const double weight, const int fill_type, const int len_index=1);
-  int loop(TChain* ch_st, char* infile, char* config_tag);
+  int loop(TChain* ch_st, char* infile, std::string config_tag);
  private:
   MT2Configuration config_;
 };

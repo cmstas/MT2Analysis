@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 
+#include "mt2tree.h"
+
 struct MT2Configuration {
     std::string json;
     int year = -1;
@@ -22,5 +24,9 @@ struct MT2Configuration {
 };
 
 MT2Configuration GetMT2Config(std::string tag);
+
+void fillTriggerVector(const mt2tree& t, std::vector<const Int_t*>& trigs, std::vector<std::string>& trig_names);
+
+bool passTrigger(const mt2tree& t, std::vector<const Int_t*>& trigs, bool debug=false);
 
 #endif
