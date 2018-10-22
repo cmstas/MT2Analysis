@@ -1076,7 +1076,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       vector<LorentzVector> p4sForHemsZllUP;
       vector<LorentzVector> p4sForHemsZllDN;
       vector<LorentzVector> p4sForHemsZllMT;
-      p4sForHems
       vector<LorentzVector> p4sForHemsRl;
 
       vector<LorentzVector> p4sForDphi;
