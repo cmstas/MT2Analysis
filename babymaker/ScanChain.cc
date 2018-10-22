@@ -689,6 +689,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         int nHardScatter = 0;
 	genTop_pt = -1.;
 	genTbar_pt = -1.;
+	if (cms3.genps_p4().size() != cms3.genps_isLastCopy().size()) {
+	  std::cout << "WARNING: The gen particle isLastCopy branch does not have the same number of entries as the other gen particle branches. This can happen when you run on cms4 including the packed gen particles, which are appended to a subset of gen particle branches. Add a protection to the isLastCopy access line or modify the NtupleMaker and reproduce cms4 if you wish to avoid the exception that's about to happen."
+	}
         for(unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++){
           if (ngenPart >= max_ngenPart) {
             std::cout << "WARNING: attempted to fill more than " << max_ngenPart << " gen particles" << std::endl;
@@ -706,7 +709,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           ngenPart++;
 
           int pdgId = abs(cms3.genps_id().at(iGen));
-          int status = cms3.genps_status().at(iGen);
+          int status = cms3.genps_status().at(iGen);	  
           int isLastCopy = cms3.genps_isLastCopy().at(iGen);
 
           // find hard scatter products to get recoil pt
