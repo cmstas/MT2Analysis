@@ -84,6 +84,8 @@ const bool saveLHEweightsScaleOnly = true;
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
 
+float rebal_sigma_soft_ = 20.0;
+
 // Short Track Candidate isolation and quality loosening factors
 const float isoSTC = 6, qualSTC = 3;
 
@@ -3169,7 +3171,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	    }
 	  }
 	  const bool recoVeto = minrecodr < 0.1;
-	  if (recoVeto && !track_isLepOverlap[ntracks]) 
+	  if (recoVeto && !track_isLepOverlap[ntracks] && verbose) 
 	    std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
 	  // Get rid of anything near or overlapping a lepton
 	  const bool PassesRecoVeto = nearestPFSel && !track_isLepOverlap[ntracks] && !recoVeto;
@@ -4675,8 +4677,8 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
   }
   //float x1 = (pt_soft_x - pt_constrained_x)/sigma_soft;
   //float x2 = (pt_soft_y - pt_constrained_y)/sigma_soft;
-  float x1 = (t->rebal_pt_soft_x - pt_constrained_x)/20.0;
-  float x2 = (t->rebal_pt_soft_y - pt_constrained_y)/20.0;
+  float x1 = (t->rebal_pt_soft_x - pt_constrained_x)/rebal_sigma_soft_;
+  float x2 = (t->rebal_pt_soft_y - pt_constrained_y)/rebal_sigma_soft_;
   likelihood += -x1*x1/2;
   likelihood += -x2*x2/2;
 
