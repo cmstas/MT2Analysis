@@ -391,3 +391,60 @@ MT2Configuration GetMT2Config(std::string tag){
 }
 """)
 
+    fout.write("""
+void fillTriggerVector(const mt2tree& t, std::vector<const Int_t*>& trigs, std::vector<std::string>& trig_names) {
+
+    trigs.clear();
+
+    for(uint i=0; i<trig_names.size(); i++){
+        std::string s = trig_names.at(i);
+""")
+
+    unique_trigs = set()
+    for conf in c:
+        if "triggers" not in c[conf]:
+            continue
+        for cat in c[conf]["triggers"]:
+            unique_trigs |= set(c[conf]["triggers"][cat])
+
+    unique_trigs = sorted(unique_trigs)
+    maxlen = 0
+    for trig in unique_trigs:
+        maxlen = max(maxlen, len(trig))
+    fout.write("        if     (s==\"{0}\")".format(unique_trigs[0]))
+    fout.write(" "*(maxlen-len(unique_trigs[0])+1))
+    fout.write("trigs.push_back(&t.HLT_{0});\n".format(unique_trigs[0]))
+    for trig in unique_trigs[1:]:
+        fout.write("        else if(s==\"{0}\")".format(trig))
+        fout.write(" "*(maxlen-len(trig)+1))
+        fout.write("trigs.push_back(&t.HLT_{0});\n".format(trig))
+
+    fout.write("        else\n")
+    fout.write("            std::cout << \"[MT2Looper::fillTriggerVectors] WARNING: unknown trigger \" << s << \"! Not applying.\" << std::endl;\n")
+
+    fout.write("""
+    }
+}
+
+// perform an "OR" of all triggers stored in "trigs" vector 
+// this vector is just a list of pointers to ints (t.HLT_*)
+bool passTrigger(const mt2tree& t, std::vector<const Int_t*> &trigs, bool debug) {
+ 
+    if(!t.isData) return true; 
+
+    if(debug){
+        for(uint i=0; i<trigs.size(); i++){
+            std::cout << *trigs.at(i) << " ";
+        }
+        std::cout << std::endl;
+    }
+  
+    for(uint i=0; i<trigs.size(); i++){
+        if(*trigs.at(i))
+            return true;
+    }
+  
+    return false;
+  
+}
+""")

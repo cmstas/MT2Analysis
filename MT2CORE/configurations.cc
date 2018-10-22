@@ -443,62 +443,76 @@ MT2Configuration GetMT2Config(std::string tag){
 
 void fillTriggerVector(const mt2tree& t, std::vector<const Int_t*>& trigs, std::vector<std::string>& trig_names) {
 
-  trigs.clear();
+    trigs.clear();
 
-  for(uint i=0; i<trig_names.size(); i++){
-    std::string s = trig_names.at(i);
-    if     (s=="PFHT1050")                              trigs.push_back(&t.HLT_PFHT1050);
-    else if(s=="PFHT900")                          trigs.push_back(&t.HLT_PFHT900);
-    else if(s=="PFJet450")                         trigs.push_back(&t.HLT_PFJet450);
-    else if(s=="PFHT500_PFMET100_PFMHT100")        trigs.push_back(&t.HLT_PFHT500_PFMET100_PFMHT100);
-    else if(s=="PFHT800_PFMET75_PFMHT75")          trigs.push_back(&t.HLT_PFHT800_PFMET75_PFMHT75);
-    else if(s=="PFHT300_PFMET110")                 trigs.push_back(&t.HLT_PFHT300_PFMET110);
-    else if(s=="PFMET120_PFMHT120")                trigs.push_back(&t.HLT_PFMET120_PFMHT120);
-    else if(s=="PFMET120_PFMHT120_PFHT60")         trigs.push_back(&t.HLT_PFMET120_PFMHT120_PFHT60);
-    else if(s=="PFMETNoMu120_PFMHTNoMu120")        trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120);
-    else if(s=="PFMETNoMu120_PFMHTNoMu120_PFHT60") trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60);
-    else if(s=="Photon200")                        trigs.push_back(&t.HLT_Photon200);
-    else if(s=="Photon165_HE10")                   trigs.push_back(&t.HLT_Photon165_HE10);
-    else if(s=="SingleEl")                         trigs.push_back(&t.HLT_SingleEl);
-    else if(s=="SingleEl_NonIso")                  trigs.push_back(&t.HLT_SingleEl_NonIso);
-    else if(s=="SingleMu")                         trigs.push_back(&t.HLT_SingleMu);
-    else if(s=="SingleMu_NonIso")                  trigs.push_back(&t.HLT_SingleMu_NonIso);
-    else if(s=="DoubleEl")                         trigs.push_back(&t.HLT_DoubleEl);
-    else if(s=="DoubleMu")                         trigs.push_back(&t.HLT_DoubleMu);
-    else if(s=="Photon200")                        trigs.push_back(&t.HLT_Photon200);
-    else if(s=="DoubleMu_NonIso")                  trigs.push_back(&t.HLT_DoubleMu_NonIso);
-    else if(s=="DoubleEl33")                       trigs.push_back(&t.HLT_DoubleEl33);
-    else if(s=="MuX_Ele12")                        trigs.push_back(&t.HLT_MuX_Ele12);
-    else if(s=="Mu8_EleX")                         trigs.push_back(&t.HLT_Mu8_EleX);
-    else if(s=="Mu12_EleX")                        trigs.push_back(&t.HLT_Mu12_EleX);
-    else if(s=="Mu30_Ele30_NonIso")                trigs.push_back(&t.HLT_Mu30_Ele30_NonIso);
-    else if(s=="Mu33_Ele33_NonIso")                trigs.push_back(&t.HLT_Mu33_Ele33_NonIso);
-    else if(s=="Mu37_Ele27_NonIso")                trigs.push_back(&t.HLT_Mu37_Ele27_NonIso);
-    else if(s=="Mu27_Ele37_NonIso")                trigs.push_back(&t.HLT_Mu27_Ele37_NonIso);
-    else
-      std::cout << "[MT2Looper::fillTriggerVectors] WARNING: unknown trigger " << s << "! Not applying." << std::endl;
-  }
+    for(uint i=0; i<trig_names.size(); i++){
+        std::string s = trig_names.at(i);
+        if     (s=="DoubleEl")                         trigs.push_back(&t.HLT_DoubleEl);
+        else if(s=="DoubleEl33")                       trigs.push_back(&t.HLT_DoubleEl33);
+        else if(s=="DoubleMu")                         trigs.push_back(&t.HLT_DoubleMu);
+        else if(s=="DoubleMu_NonIso")                  trigs.push_back(&t.HLT_DoubleMu_NonIso);
+        else if(s=="Mu12_EleX")                        trigs.push_back(&t.HLT_Mu12_EleX);
+        else if(s=="Mu27_Ele37_NonIso")                trigs.push_back(&t.HLT_Mu27_Ele37_NonIso);
+        else if(s=="Mu30_Ele30_NonIso")                trigs.push_back(&t.HLT_Mu30_Ele30_NonIso);
+        else if(s=="Mu33_Ele33_NonIso")                trigs.push_back(&t.HLT_Mu33_Ele33_NonIso);
+        else if(s=="Mu37_Ele27_NonIso")                trigs.push_back(&t.HLT_Mu37_Ele27_NonIso);
+        else if(s=="Mu8_EleX")                         trigs.push_back(&t.HLT_Mu8_EleX);
+        else if(s=="MuX_Ele12")                        trigs.push_back(&t.HLT_MuX_Ele12);
+        else if(s=="PFHT1050")                         trigs.push_back(&t.HLT_PFHT1050);
+        else if(s=="PFHT125_Prescale")                 trigs.push_back(&t.HLT_PFHT125_Prescale);
+        else if(s=="PFHT180_Prescale")                 trigs.push_back(&t.HLT_PFHT180_Prescale);
+        else if(s=="PFHT200_Prescale")                 trigs.push_back(&t.HLT_PFHT200_Prescale);
+        else if(s=="PFHT250_Prescale")                 trigs.push_back(&t.HLT_PFHT250_Prescale);
+        else if(s=="PFHT300_PFMET110")                 trigs.push_back(&t.HLT_PFHT300_PFMET110);
+        else if(s=="PFHT300_Prescale")                 trigs.push_back(&t.HLT_PFHT300_Prescale);
+        else if(s=="PFHT350_Prescale")                 trigs.push_back(&t.HLT_PFHT350_Prescale);
+        else if(s=="PFHT370_Prescale")                 trigs.push_back(&t.HLT_PFHT370_Prescale);
+        else if(s=="PFHT430_Prescale")                 trigs.push_back(&t.HLT_PFHT430_Prescale);
+        else if(s=="PFHT475_Prescale")                 trigs.push_back(&t.HLT_PFHT475_Prescale);
+        else if(s=="PFHT500_PFMET100_PFMHT100")        trigs.push_back(&t.HLT_PFHT500_PFMET100_PFMHT100);
+        else if(s=="PFHT510_Prescale")                 trigs.push_back(&t.HLT_PFHT510_Prescale);
+        else if(s=="PFHT590_Prescale")                 trigs.push_back(&t.HLT_PFHT590_Prescale);
+        else if(s=="PFHT600_Prescale")                 trigs.push_back(&t.HLT_PFHT600_Prescale);
+        else if(s=="PFHT680_Prescale")                 trigs.push_back(&t.HLT_PFHT680_Prescale);
+        else if(s=="PFHT780_Prescale")                 trigs.push_back(&t.HLT_PFHT780_Prescale);
+        else if(s=="PFHT800_PFMET75_PFMHT75")          trigs.push_back(&t.HLT_PFHT800_PFMET75_PFMHT75);
+        else if(s=="PFHT890_Prescale")                 trigs.push_back(&t.HLT_PFHT890_Prescale);
+        else if(s=="PFHT900")                          trigs.push_back(&t.HLT_PFHT900);
+        else if(s=="PFJet450")                         trigs.push_back(&t.HLT_PFJet450);
+        else if(s=="PFMET120_PFMHT120")                trigs.push_back(&t.HLT_PFMET120_PFMHT120);
+        else if(s=="PFMET120_PFMHT120_PFHT60")         trigs.push_back(&t.HLT_PFMET120_PFMHT120_PFHT60);
+        else if(s=="PFMETNoMu120_PFMHTNoMu120")        trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120);
+        else if(s=="PFMETNoMu120_PFMHTNoMu120_PFHT60") trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60);
+        else if(s=="Photon165_HE10")                   trigs.push_back(&t.HLT_Photon165_HE10);
+        else if(s=="Photon200")                        trigs.push_back(&t.HLT_Photon200);
+        else if(s=="SingleEl")                         trigs.push_back(&t.HLT_SingleEl);
+        else if(s=="SingleEl_NonIso")                  trigs.push_back(&t.HLT_SingleEl_NonIso);
+        else if(s=="SingleMu")                         trigs.push_back(&t.HLT_SingleMu);
+        else if(s=="SingleMu_NonIso")                  trigs.push_back(&t.HLT_SingleMu_NonIso);
+        else
+            std::cout << "[MT2Looper::fillTriggerVectors] WARNING: unknown trigger " << s << "! Not applying." << std::endl;
+
+    }
 }
 
-// perform an "OR" of all triggers stored in "trigs" vector
+// perform an "OR" of all triggers stored in "trigs" vector 
 // this vector is just a list of pointers to ints (t.HLT_*)
 bool passTrigger(const mt2tree& t, std::vector<const Int_t*> &trigs, bool debug) {
+ 
+    if(!t.isData) return true; 
 
-  
-  if(!t.isData) return true; 
-
-  if(debug){
-    for(uint i=0; i<trigs.size(); i++){
-      std::cout << *trigs.at(i) << " ";
+    if(debug){
+        for(uint i=0; i<trigs.size(); i++){
+            std::cout << *trigs.at(i) << " ";
+        }
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
-  }
   
-  for(uint i=0; i<trigs.size(); i++){
-    if(*trigs.at(i))
-      return true;
-  }
+    for(uint i=0; i<trigs.size(); i++){
+        if(*trigs.at(i))
+            return true;
+    }
   
-  return false;
+    return false;
   
 }
