@@ -3486,7 +3486,7 @@ namespace mt2 {
     sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3496,7 +3496,7 @@ namespace mt2 {
     sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3506,7 +3506,7 @@ namespace mt2 {
     sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 3, 4);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3516,7 +3516,7 @@ namespace mt2 {
     sr.SetVar("njets", 7, 10);
     sr.SetVar("nbjets", 4, -1);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3536,7 +3536,7 @@ namespace mt2 {
     sr.SetVar("njets", 10, -1);
     sr.SetVar("nbjets", 1, 2);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3546,7 +3546,7 @@ namespace mt2 {
     sr.SetVar("njets", 10, -1);
     sr.SetVar("nbjets", 2, 3);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3556,7 +3556,7 @@ namespace mt2 {
     sr.SetVar("njets", 10, -1);
     sr.SetVar("nbjets", 3, 4);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);
@@ -3566,7 +3566,7 @@ namespace mt2 {
     sr.SetVar("njets", 10, -1);
     sr.SetVar("nbjets", 4, -1);
     sr.SetVarCRSL("njets", 7, -1);
-    sr.SetVarCRSL("nbjets", 1, -1);
+    sr.SetVarCRSL("nbjets", 1, 3);
     sr.SetVarCRDY("njets", 7, -1);
     sr.SetVarCRDY("nbjets", 1, -1);
     temp_SR_vec.push_back(sr);

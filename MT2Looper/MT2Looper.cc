@@ -153,9 +153,7 @@ MT2Looper::~MT2Looper(){
 };
 
 void MT2Looper::SetSignalRegions(){
-   // SRVec =  getSignalRegions2017(); 
-  //  SRVec =  getSignalRegions2018(); 
-  SRVec = getSignalRegions2017();
+  SRVec =  getSignalRegions2018(); 
   SRVecMonojet = getSignalRegionsMonojet2017(); 
 
   //store histograms with cut values for all variables
