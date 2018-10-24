@@ -34,7 +34,7 @@ class ShortTrackLooper {
  public:
   ShortTrackLooper();
   ~ShortTrackLooper();
-  int loop(TChain* ch_st, char* infile, char* config);
+  int loop(TChain* ch_st, char* infile, std::string config);
  private:
   MT2Configuration config_;
 };

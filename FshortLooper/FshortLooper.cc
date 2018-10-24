@@ -32,6 +32,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
 
+  TH1D* h_ht = new TH1D("h_ht","H_{T} of Input Events",100,0,3000);
+
   TH2D* h_etaphi_ST_P = new TH2D("h_etaphi_ST_P","#eta and #phi of P Short Tracks",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
   TH2D* h_etaphi_ST_M = new TH2D("h_etaphi_ST_M","#eta and #phi of M Short Tracks",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
   TH2D* h_etaphi_ST_L = new TH2D("h_etaphi_ST_L","#eta and #phi of L Short Tracks",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
@@ -296,6 +298,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       }
     }
 
+    if (!t.isData) h_ht->Fill(t.ht,(t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi); // manually correct high HT WJets
+
     //---------------------
     // basic event selection and cleaning
     //---------------------
@@ -347,7 +351,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (!match) continue;
 	}
 			
-	float weight = t.isData ? 1.0 : t.evt_scale1fb * lumi;
+	float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
 
 	const float lepMT = MT( t.lep_pt[0], t.lep_phi[0], t.rl_met_pt, t.rl_met_phi );
 	if (t.rl_mt2 < 100) {
@@ -407,7 +411,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
     if (! (passPrescaleTrigger || passSRTrigger)) continue;
 
-    double weight = t.isData ? 1.0 : t.evt_scale1fb * lumi;
+    float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
     // simulate turn-on curves and prescales in MC
     if (!t.isData) {
       if ( !passSRTrigger ) {
@@ -856,6 +860,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   for (vector<TH2D*>::iterator hist = etaphihists.begin(); hist != etaphihists.end(); hist++) (*hist)->Write();
   for (vector<TH1D*>::iterator hist = mt2hists.begin(); hist != mt2hists.end(); hist++) (*hist)->Write();
   for (vector<TH1D*>::iterator hist = dphiMethists.begin(); hist != dphiMethists.end(); hist++) (*hist)->Write();
+  h_ht->Write();
   outfile_.Close();
   cout << "Wrote everything" << endl;
 
