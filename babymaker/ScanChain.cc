@@ -1598,9 +1598,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       // count number of unique lowMT leptons (e/mu)
       //  same collection as those used for jet/lepton overlap, but require MT < 100 explicitly
       nLepLowMT = 0;
+      nLepHighMT = 0;
       for (unsigned int ilep = 0; ilep < p4sUniqueLeptons.size(); ++ilep) {
         float mt = MT(p4sUniqueLeptons.at(ilep).pt(),p4sUniqueLeptons.at(ilep).phi(),met_pt,met_phi);
         if (mt < 100.) ++nLepLowMT;
+        else           ++nLepHighMT;
       }
 
       if (verbose) cout << "before lost gen leptons" << endl;
@@ -3345,6 +3347,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nBadMuons20", &nBadMuons20 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
+  BabyTree_->Branch("nLepHighMT", &nLepHighMT );
   BabyTree_->Branch("nLepLowMT", &nLepLowMT );
   BabyTree_->Branch("nTaus20", &nTaus20 );
   BabyTree_->Branch("nGammas20", &nGammas20 );
@@ -3992,6 +3995,7 @@ void babyMaker::InitBabyNtuple () {
   nBadMuons20 = -999;
   nElectrons10 = -999;
   nLepLowMT = -999;
+  nLepHighMT = -999;
   nTaus20 = -999;
   nGammas20 = -999;
   nPFCHCand3 = -999;

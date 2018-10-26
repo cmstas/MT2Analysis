@@ -58,6 +58,7 @@ public :
    Int_t           nMuons10;
    Int_t           nElectrons10;
    Int_t           nLepLowMT;
+   Int_t           nLepHighMT;
    Int_t           nTaus20;
    Int_t           nGammas20;
    Int_t           nPFCHCand3;
