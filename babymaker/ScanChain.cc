@@ -3216,8 +3216,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	  if (!QualitySelBase) {ntracks++; continue;}
 	  
-	  const bool ptErrOverPt2Sel = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.001));
-	  const bool ptErrOverPt2SelSTC = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.001)) * qualSTC;
+	  const bool ptErrOverPt2Sel = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.005));
+	  const bool ptErrOverPt2SelSTC = track_ptErr[ntracks] / (track_pt[ntracks]*track_pt[ntracks]) < (isP ? 0.2 : (isM ? 0.02 : 0.005)) * qualSTC;
 	  const bool dxySel = fabs(track_dxy[ntracks]) < (isP ? 0.02 : 0.01);
 	  const bool dxySelSTC = fabs(track_dxy[ntracks]) < (isP ? 0.02 : 0.01) * qualSTC; 
 	  const bool dzSel = fabs(track_dz[ntracks]) < 0.05;
