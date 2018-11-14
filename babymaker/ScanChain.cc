@@ -80,6 +80,8 @@ const bool applyLeptonIso = true;
 const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
+// use isotracks collection in cms4 for veto counting (as opposed to pfcands)
+const bool useIsotrackCollectionForVeto = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
@@ -1380,6 +1382,33 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (verbose) cout << "before isotracks" << endl;
 
       //ISOTRACK
+      std::vector<std::tuple<LorentzVector, float, int, uint> > isoTrackCandidates; // p4, iso, abs(pdgId), idx
+
+      if(useIsotrackCollectionForVeto){
+          for(unsigned int iit = 0; iit < cms3.isotracks_p4().size(); iit++){
+              if(!cms3.isotracks_isPFCand().at(iit)) continue;
+              if(cms3.isotracks_charge().at(iit) == 0) continue;
+              if(fabs(cms3.isotracks_dz().at(iit)) > 0.1) continue;
+              if(cms3.isotracks_fromPV().at(iit) <= 1) continue;
+                            
+              float absiso = cms3.isotracks_pfIso_ch().at(iit);
+              int pdgId = abs(cms3.isotracks_particleId().at(iit));
+
+              isoTrackCandidates.push_back(std::make_tuple(cms3.isotracks_p4().at(iit), absiso, pdgId, iit));
+          }
+      }else{
+          for (unsigned int ipf = 0; ipf < cms3.pfcands_p4().size(); ipf++) {              
+              if(cms3.pfcands_charge().at(ipf) == 0) continue;
+              if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+              if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
+              
+              float absiso  = cms3.pfcands_trackIso().at(ipf);              
+              int pdgId = abs(cms3.pfcands_particleId().at(ipf));
+
+              isoTrackCandidates.push_back(std::make_tuple(cms3.pfcands_p4().at(ipf), absiso, pdgId, ipf));
+          }
+      }
+
       std::vector<std::pair<int, float> > pt_ordering;
       vector<float>vec_isoTrack_pt;
       vector<float>vec_isoTrack_eta;
@@ -1395,82 +1424,85 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       nPFLep5LowMT = 0;
       nPFHad10LowMT = 0;
       nPFCHCand3 = 0;
-      for (unsigned int ipf = 0; ipf < cms3.pfcands_p4().size(); ipf++) {
+      for(unsigned int iit = 0; iit < isoTrackCandidates.size(); iit++){
+          LorentzVector p4;
+          float absiso;
+          int pdgId;
+          unsigned int idx;
+          std::tie(p4, absiso, pdgId, idx) = isoTrackCandidates.at(iit);
 
-        if(cms3.pfcands_charge().at(ipf) == 0) continue;
-        if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
-        if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
+          float cand_pt = p4.pt();
+          if(cand_pt > 3) ++nPFCHCand3;
+          if(cand_pt < 5) continue;
 
-        float cand_pt = cms3.pfcands_p4().at(ipf).pt();
-        if(cand_pt > 3) ++nPFCHCand3;
-        if(cand_pt < 5) continue;
+          if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
 
-        float absiso  = cms3.pfcands_trackIso().at(ipf);
-        if(applyLeptonIso && absiso >= min(0.2*cand_pt, 8.0)) continue;
+          float mt = MT(cand_pt, p4.phi(), met_pt, met_phi);
 
-        float mt = MT(cand_pt,cms3.pfcands_p4().at(ipf).phi(),met_pt,met_phi);
-        int pdgId = abs(cms3.pfcands_particleId().at(ipf));
-        // float an04 = PFCandRelIsoAn04(ipf);
+          if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
+              ++nPFLep5LowMT;
 
-        if ((cand_pt > 5.) && (pdgId == 11 || pdgId == 13) && (absiso/cand_pt < 0.2) && (mt < 100.)) {
-          ++nPFLep5LowMT;
+              // use PF leptons for hemispheres etc same as reco leptons
+              //  BUT first do overlap removal with reco leptons to avoid double counting
+              bool overlap = false;
+              for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
+                  float thisDR = DeltaR(p4.eta(), p4sUniqueLeptons.at(iLep).eta(), p4.phi(), p4sUniqueLeptons.at(iLep).phi());
+                  // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
+                  if (thisDR < 0.01) {
+                      overlap = true;
+                      lep_isPF[iLep] = true;
+                      break;
+                  }
+              } // loop over reco leps
+              if (!overlap) {
+                  
+                  p4sUniqueLeptons.push_back(p4);
+                  if (doJetLepOverlapRemoval) {
+                      p4sForHems.push_back(p4);
+                      p4sForHemsUP.push_back(p4);
+                      p4sForHemsDN.push_back(p4);
+                      p4sForDphi.push_back(p4);
+                      p4sForDphiUP.push_back(p4);
+                      p4sForDphiDN.push_back(p4);
+                  }
+                  
+                  // update scale factor and uncertainty.  Assume SFs are 1, based on isolation T&P results.  use only uncertainty.
+                  if (!isData && applyLeptonSFs) {
+                      weightStruct weights = getLepSFFromFile(p4.pt(), p4.eta(), pdgId);
+                      weight_lepsf_UP *= (1.0 + (weights.up - weights.cent));
+                      weight_lepsf_DN *= (1.0 - (weights.cent - weights.dn));
+                      if (isFastsim) {
+                          weightStruct weights_fastsim = getLepSFFromFile_fastsim(p4.pt(), p4.eta(), pdgId);
+                          weight_lepsf_UP *= (1.0 + (weights_fastsim.up - weights_fastsim.cent));
+                          weight_lepsf_DN *= (1.0 - (weights_fastsim.cent - weights_fastsim.dn));
+                      }
+                  }
+                  
+              }
+          } // passing pflepton 
+          
+          if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
+          
+          pt_ordering.push_back(std::pair<int,float>(nisoTrack,cand_pt));
+          
+          vec_isoTrack_pt.push_back    ( cand_pt                          );
+          vec_isoTrack_eta.push_back   ( p4.eta()  );
+          vec_isoTrack_phi.push_back   ( p4.phi()  );
+          vec_isoTrack_absIso.push_back( absiso                           );
+          vec_isoTrack_mcMatchId.push_back ( 0 );
+          if(useIsotrackCollectionForVeto){
+              vec_isoTrack_mass.push_back  ( cms3.isotracks_p4().at(idx).mass() );
+              vec_isoTrack_dz.push_back    ( cms3.isotracks_dz().at(idx)        );
+              vec_isoTrack_pdgId.push_back ( cms3.isotracks_particleId().at(idx));
+          }else{
+              vec_isoTrack_mass.push_back  ( cms3.pfcands_mass().at(idx)      );
+              vec_isoTrack_dz.push_back    ( cms3.pfcands_dz().at(idx)        );
+              vec_isoTrack_pdgId.push_back ( cms3.pfcands_particleId().at(idx));
+          }          
+          nisoTrack++;
+      }
 
-          // use PF leptons for hemispheres etc same as reco leptons
-          //  BUT first do overlap removal with reco leptons to avoid double counting
-          bool overlap = false;
-          for(unsigned int iLep = 0; iLep < p4sUniqueLeptons.size(); iLep++){
-            float thisDR = DeltaR(pfcands_p4().at(ipf).eta(), p4sUniqueLeptons.at(iLep).eta(), pfcands_p4().at(ipf).phi(), p4sUniqueLeptons.at(iLep).phi());
-            // use small DR threshold to ONLY remove objects that are exactly the same (reco/pf leptons)
-            if (thisDR < 0.01) {
-              overlap = true;
-	      lep_isPF[iLep] = true;
-              break;
-            }
-          } // loop over reco leps
-          if (!overlap) {
-
-            p4sUniqueLeptons.push_back(cms3.pfcands_p4().at(ipf));
-            if (doJetLepOverlapRemoval) {
-              p4sForHems.push_back(cms3.pfcands_p4().at(ipf));
-              p4sForHemsUP.push_back(cms3.pfcands_p4().at(ipf));
-              p4sForHemsDN.push_back(cms3.pfcands_p4().at(ipf));
-              p4sForDphi.push_back(cms3.pfcands_p4().at(ipf));
-              p4sForDphiUP.push_back(cms3.pfcands_p4().at(ipf));
-              p4sForDphiDN.push_back(cms3.pfcands_p4().at(ipf));
-            }
-
-	    // update scale factor and uncertainty.  Assume SFs are 1, based on isolation T&P results.  use only uncertainty.
-	    if (!isData && applyLeptonSFs) {
-	      weightStruct weights = getLepSFFromFile(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	      weight_lepsf_UP *= (1.0 + (weights.up - weights.cent));
-	      weight_lepsf_DN *= (1.0 - (weights.cent - weights.dn));
-	      if (isFastsim) {
-	    	weightStruct weights_fastsim = getLepSFFromFile_fastsim(cms3.pfcands_p4().at(ipf).pt(), cms3.pfcands_p4().at(ipf).eta(), pdgId);
-	    	weight_lepsf_UP *= (1.0 + (weights_fastsim.up - weights_fastsim.cent));
-	    	weight_lepsf_DN *= (1.0 - (weights_fastsim.cent - weights_fastsim.dn));
-	      }
-	    }
-	    
-          }
-        } // passing pflepton 
-
-        if ((cand_pt > 10.) && (pdgId == 211) && (absiso/cand_pt < 0.1) && (mt < 100.)) ++nPFHad10LowMT;
-
-        pt_ordering.push_back(std::pair<int,float>(nisoTrack,cand_pt));
-
-        vec_isoTrack_pt.push_back    ( cand_pt                          );
-        vec_isoTrack_eta.push_back   ( cms3.pfcands_p4().at(ipf).eta()  );
-        vec_isoTrack_phi.push_back   ( cms3.pfcands_p4().at(ipf).phi()  );
-        vec_isoTrack_mass.push_back  ( cms3.pfcands_mass().at(ipf)      );
-        vec_isoTrack_absIso.push_back( absiso                           );
-        // vec_isoTrack_relIsoAn04.push_back( an04                         );
-        vec_isoTrack_dz.push_back    ( cms3.pfcands_dz().at(ipf)        );
-        vec_isoTrack_pdgId.push_back ( cms3.pfcands_particleId().at(ipf));
-        vec_isoTrack_mcMatchId.push_back ( 0 );
-
-        nisoTrack++;
-      }  
-
+      
       //now fill arrays from vectors, isotracks with largest pt first
       i = 0;
       std::sort(pt_ordering.begin(), pt_ordering.end(), sortByValue);
