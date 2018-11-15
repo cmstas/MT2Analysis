@@ -55,7 +55,7 @@ int n_m2bins = 93;
 float* m2bins;
 
 const int n_htbins = 5;
-const float htbins[n_htbins+1] = {250, 450., 575., 1200., 1500., 3000.};
+const float htbins[n_htbins+1] = {250, 450., 575., 1200., 1700., 3000.};
 const int n_htbins2 = 6;
 const float htbins2[n_htbins2+1] = {250., 350., 450., 575., 700., 1000., 3000.};
 const int n_njbins = 4;
@@ -355,17 +355,17 @@ void MT2Looper::SetSignalRegions(){
   InclusiveHT575to1200.SetVarCRSL("ht", 575, 1200);
   InclusiveRegions.push_back(InclusiveHT575to1200);
 
-  SR InclusiveHT1200to1500 = SRBase;
-  InclusiveHT1200to1500.SetName("srbaseH");
-  InclusiveHT1200to1500.SetVar("ht", 1200, 1500);
-  InclusiveHT1200to1500.SetVarCRSL("ht", 1200, 1500);
-  InclusiveRegions.push_back(InclusiveHT1200to1500);
+  SR InclusiveHT1200to1700 = SRBase;
+  InclusiveHT1200to1700.SetName("srbaseH");
+  InclusiveHT1200to1700.SetVar("ht", 1200, 1700);
+  InclusiveHT1200to1700.SetVarCRSL("ht", 1200, 1700);
+  InclusiveRegions.push_back(InclusiveHT1200to1700);
 
-  SR InclusiveHT1500toInf = SRBase;
-  InclusiveHT1500toInf.SetName("srbaseUH");
-  InclusiveHT1500toInf.SetVar("ht", 1500, -1);
-  InclusiveHT1500toInf.SetVarCRSL("ht", 1500, -1);
-  InclusiveRegions.push_back(InclusiveHT1500toInf);
+  SR InclusiveHT1700toInf = SRBase;
+  InclusiveHT1700toInf.SetName("srbaseUH");
+  InclusiveHT1700toInf.SetVar("ht", 1700, -1);
+  InclusiveHT1700toInf.SetVarCRSL("ht", 1700, -1);
+  InclusiveRegions.push_back(InclusiveHT1700toInf);
 
   SR InclusiveNJets2to3 = SRBase;
   InclusiveNJets2to3.SetName("InclusiveNJets2to3");
@@ -646,7 +646,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       cout << "WARNING: could not open rphi file: " << rphi_file_name << endl;
       doReffCalculation = false;
     }else{
-      string ht_strs[6] = {"ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"};
+      string ht_strs[6] = {"ht250to450","ht450to575","ht575to1200","ht1200to1700","ht1700toInf","ht1200toInf"};
       string syst_strs[3] = {"","_systUp","_systDown"};
       for(int i=0; i<6; i++){
         for(int j=0; j<3; j++){
@@ -1159,8 +1159,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       passMonojetId_ = false;
       if ( nJet30_ >= 1 && (isSignal_ || (t.jet_id[0] >= 4)) ) passMonojetId_ = true;
 
+      // can kill this once using babies with nLepHighMT stored
+      int nLepHighMT = 0;
+      for(int i=0; i<t.nlep; i++){
+          float mt = MT(t.lep_pt[i], t.lep_phi[i], t.met_pt, t.met_phi);
+          if(mt >= 100.)
+              nLepHighMT++;
+      }
+      // nLepHighMT = t.nLepHighMT; // switch to this once using babies with this variable stored
+
       // simple counter to check for 1L CR
-      if (t.nLepLowMT == 1) {
+      if (t.nLepLowMT == 1 && nLepHighMT == 0){
 	doSLplots = true;
 
 	// find unique lepton to plot pt,MT and get flavor
@@ -1743,8 +1752,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
       if(ht_ > 250.  && ht_ < 450.)  fillHistosSingleLepton(InclusiveRegions.at(0).crslHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseVL", suffix);
       if(ht_ > 450.  && ht_ < 575.)  fillHistosSingleLepton(InclusiveRegions.at(1).crslHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseL", suffix);
       if(ht_ > 575.  && ht_ < 1200.) fillHistosSingleLepton(InclusiveRegions.at(2).crslHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseM", suffix);
-      if(ht_ > 1200. && ht_ < 1500.) fillHistosSingleLepton(InclusiveRegions.at(3).crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseH", suffix);
-      if(ht_ > 1500.                 ) fillHistosSingleLepton(InclusiveRegions.at(4).crslHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseUH", suffix);
+      if(ht_ > 1200. && ht_ < 1700.) fillHistosSingleLepton(InclusiveRegions.at(3).crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseH", suffix);
+      if(ht_ > 1700.                 ) fillHistosSingleLepton(InclusiveRegions.at(4).crslHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbaseUH", suffix);
     }
   }
 
@@ -2000,8 +2009,8 @@ void MT2Looper::fillHistosCRGJ(const std::string& prefix, const std::string& suf
     if(passBase && t.gamma_ht > 250.  && t.gamma_ht < 450.)  fillHistosGammaJets(InclusiveRegions.at(0).crgjHistMap,   InclusiveRegions.at(0).crgjRooDataSetMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseVL", suffix+add);
     if(passBase && t.gamma_ht > 450.  && t.gamma_ht < 575.)  fillHistosGammaJets(InclusiveRegions.at(1).crgjHistMap,   InclusiveRegions.at(1).crgjRooDataSetMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseL", suffix+add);
     if(passBase && t.gamma_ht > 575.  && t.gamma_ht < 1200.) fillHistosGammaJets(InclusiveRegions.at(2).crgjHistMap,  InclusiveRegions.at(2).crgjRooDataSetMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseM", suffix+add);
-    if(passBase && t.gamma_ht > 1200. && t.gamma_ht < 1500.) fillHistosGammaJets(InclusiveRegions.at(3).crgjHistMap, InclusiveRegions.at(3).crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseH", suffix+add);
-    if(passBase && t.gamma_ht > 1500.                  ) fillHistosGammaJets(InclusiveRegions.at(4).crgjHistMap,  InclusiveRegions.at(4).crgjRooDataSetMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseUH", suffix+add);
+    if(passBase && t.gamma_ht > 1200. && t.gamma_ht < 1700.) fillHistosGammaJets(InclusiveRegions.at(3).crgjHistMap, InclusiveRegions.at(3).crgjRooDataSetMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseH", suffix+add);
+    if(passBase && t.gamma_ht > 1700.                  ) fillHistosGammaJets(InclusiveRegions.at(4).crgjHistMap,  InclusiveRegions.at(4).crgjRooDataSetMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crgjbaseUH", suffix+add);
     for(unsigned int srN = 0; srN < SRVec.size(); srN++){
       if(SRVec.at(srN).PassesSelection(values)){
         // if(add=="")
@@ -2147,8 +2156,8 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   if(passBase && t.zll_ht > 250.  && t.zll_ht < 450.)  fillHistosDY(InclusiveRegions.at(0).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseVL", suffix);
   if(passBase && t.zll_ht > 450.  && t.zll_ht < 575.)  fillHistosDY(InclusiveRegions.at(1).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseL", suffix);
   if(passBase && t.zll_ht > 575.  && t.zll_ht < 1200.) fillHistosDY(InclusiveRegions.at(2).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseM", suffix);
-  if(passBase && t.zll_ht > 1200. && t.zll_ht < 1500.) fillHistosDY(InclusiveRegions.at(3).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseH", suffix);
-  if(passBase && t.zll_ht > 1500.                  ) fillHistosDY(InclusiveRegions.at(4).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseUH", suffix);
+  if(passBase && t.zll_ht > 1200. && t.zll_ht < 1700.) fillHistosDY(InclusiveRegions.at(3).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseH", suffix);
+  if(passBase && t.zll_ht > 1700.                  ) fillHistosDY(InclusiveRegions.at(4).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseUH", suffix);
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelectionCRDY(values)){
@@ -2243,8 +2252,8 @@ void MT2Looper::fillHistosCRRL(const std::string& prefix, const std::string& suf
   if(passBase && t.rl_ht > 250.  && t.rl_ht < 450.)  fillHistosRemovedLepton(InclusiveRegions.at(0).crrlHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseVL", suffix);
   if(passBase && t.rl_ht > 450.  && t.rl_ht < 575.)  fillHistosRemovedLepton(InclusiveRegions.at(1).crrlHistMap,   SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseL", suffix);
   if(passBase && t.rl_ht > 575.  && t.rl_ht < 1200.) fillHistosRemovedLepton(InclusiveRegions.at(2).crrlHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseM", suffix);
-  if(passBase && t.rl_ht > 1200. && t.rl_ht < 1500.) fillHistosRemovedLepton(InclusiveRegions.at(3).crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseH", suffix);
-  if(passBase && t.rl_ht > 1500.                 ) fillHistosRemovedLepton(InclusiveRegions.at(4).crrlHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseUH", suffix);
+  if(passBase && t.rl_ht > 1200. && t.rl_ht < 1700.) fillHistosRemovedLepton(InclusiveRegions.at(3).crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseH", suffix);
+  if(passBase && t.rl_ht > 1700.                 ) fillHistosRemovedLepton(InclusiveRegions.at(4).crrlHistMap,  SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbaseUH", suffix);
 
   // if(passBase && t.evt_id == 400 ) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", "TsChan");
   // if(passBase && t.evt_id == 401 ) fillHistosRemovedLepton(SRBase.crrlHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crrlbase", "TtChan");
