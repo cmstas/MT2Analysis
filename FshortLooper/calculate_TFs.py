@@ -92,6 +92,16 @@ for rawname in names:
         h_mtpt.GetXaxis().SetTitleOffset(2.2)
         h_mtpt.GetYaxis().SetTitle("p_{T} (GeV)")
         h_mtpt.GetYaxis().SetTitleOffset(2.2)
+        xmax = h_mtpt.GetNbinsX()
+        ymax = h_mtpt.GetNbinsY()
+        for xbin in range(1,xmax+1):
+            overflow = h_mtpt.GetBinContent(xbin,ymax+1)
+            h_mtpt.SetBinContent(xbin,ymax,h_mtpt.GetBinContent(xbin,ymax)+overflow)
+        for ybin in range(1,ymax+1):
+            overflow = h_mtpt.GetBinContent(xmax+1,ybin)
+            h_mtpt.SetBinContent(xmax,ybin,h_mtpt.GetBinContent(xmax,ybin)+overflow)
+        upper_right_overflow = h_mtpt.GetBinContent(xmax+1,ymax+1)
+        h_mtpt.SetBinContent(xmax,ymax,h_mtpt.GetBinContent(xmax,ymax)+upper_right_overflow)            
         h_mtpt.Draw("LEGO2Z")
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
         # L tracks have electroweak contamination and need a more involved procedure using Rmtpt
