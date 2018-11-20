@@ -2157,7 +2157,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     const bool lepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0;
 
     // if we would veto a lepton, we just want to fill the removed lepton and DY plots if appropriate and then continue
-    if (lepveto) {
+    if (lepveto && false) {
       float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
 
       // Make sure there's exactly 1 lepton passing IDs, and apply analysis lepton veto (allowing only the reco lepton we're deleting)
@@ -2216,7 +2216,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
       }
       // DY study
-      else if (t.nlep == 2) {
+      else if (t.nlep == 2 && false) {
 	if (t.isData && !passTrigger(t, trigs_doubleLep_)) continue; 
 	if (t.zll_ht < 250) continue;
 	if (t.zll_mt2 < 60) continue;
@@ -2814,21 +2814,43 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       }
       else { // not prescaled, but may not be in the 100% efficiency region
 	if (year == 2016 && (t.met_pt < 250 && t.ht < 1000)) {
-	  if (t.met_pt < 200) {
+	  if (t.met_pt < 100) {
+	    // assume 0.1 for everything below 100 GeV
+	    weight *= 0.1;
+	  }
+	  else if (t.met_pt < 200) {
 	    weight *= (((0.8/100) * (t.met_pt - 100)) + 0.1);
 	  } else {
 	    weight *= (((0.1/50) * (t.met_pt - 200)) + 0.9);
 	  }
 	}
+	// BUG
 	else if (year == 2017 && (t.met_pt < 250 && t.ht < 1200)) {
 	  // use same values for 2017 for now
-	  if (t.met_pt < 200) {
-	    weight *= ((0.8/100) * (t.met_pt - 100)) + 0.1;
+	  if (t.met_pt < 75) {
+	    // assume 0.1 for everything below 100 GeV
+	    weight *= 0.1;
+	    //weight = ( (0.1/25) * (t.met_pt - 100) ); 
+	  }
+	  else if (t.met_pt < 100) {
+	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
+	    weight *= 0.1;
+	    //weight *= ( (0.1/25) * (t.met_pt - 75) ); 
+	    //weight = ( (0.1/25) * (t.met_pt - 100) ); 
+	  }
+	  else if (t.met_pt < 200) {
+	    weight *= (((0.8/100) * (t.met_pt - 100)) + 0.1);
+	    //weight = (((0.8/100) * (t.met_pt - 100)) + 0.1);
 	  } else {
-	    weight *= ((0.1/50) * (t.met_pt - 200)) + 0.9;
+	    weight *= (((0.1/50) * (t.met_pt - 200)) + 0.9);
+	    //weight = (((0.1/50) * (t.met_pt - 200)) + 0.9);
 	  }	  
 	}
       }
+    }
+
+    if (weight < 0.0) {
+      cout << "Negative weight: " << weight << ", " << t.run << ":" << t.lumi << ":" << t.evt << endl;
     }
 
     vector<TH2D*> histsToFill;
