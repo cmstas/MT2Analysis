@@ -26,6 +26,7 @@
 
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/configurations.h"
+#include "../MT2CORE/applyWeights.h"
 
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
@@ -34,9 +35,11 @@ class ShortTrackLooper {
  public:
   ShortTrackLooper();
   ~ShortTrackLooper();
-  int loop(TChain* ch_st, char* infile, std::string config);
+  int InEtaPhiVetoRegion(float eta, float phi);
+  int loop(TChain* ch_st, char* infile, std::string config, char* runtag);
  private:
   MT2Configuration config_;
+  MT2Configuration data_config_;
 };
 
 #endif
