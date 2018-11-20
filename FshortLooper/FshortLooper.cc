@@ -2833,8 +2833,9 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    //weight = ( (0.1/25) * (t.met_pt - 100) ); 
 	  }
 	  else if (t.met_pt < 100) {
-	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
+	    // assume 0.1 for everything below 100 GeV
 	    weight *= 0.1;
+	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
 	    //weight *= ( (0.1/25) * (t.met_pt - 75) ); 
 	    //weight = ( (0.1/25) * (t.met_pt - 100) ); 
 	  }
