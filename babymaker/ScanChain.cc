@@ -3144,8 +3144,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  track_reliso_uncorrected[ntracks] = track_iso_uncorrected[ntracks] / track_pt[ntracks];
 	  track_iso_correction[ntracks] = 0.5 * cms3.isotracks_pfIso_db().at(i_it);
 	  track_reliso_correction[ntracks] = track_iso_correction[ntracks] / track_pt[ntracks];
-	  track_iso[ntracks] = track_iso_uncorrected[ntracks] - max(0.0,(double) track_iso_correction[ntracks]);
-	  track_reliso[ntracks] = track_reliso_uncorrected[ntracks] - max(0.0,(double) track_reliso_correction[ntracks]);
+	  track_iso[ntracks] = max(0.0, (double) track_iso_uncorrected[ntracks]- track_iso_correction[ntracks]);
+	  track_reliso[ntracks] = max(0.0, (double) track_reliso_uncorrected[ntracks] - track_reliso_correction[ntracks]);
 	  track_isonomin[ntracks] = track_iso_uncorrected[ntracks] - track_iso_correction[ntracks];
 	  track_relisonomin[ntracks] = track_reliso_uncorrected[ntracks] - track_reliso_correction[ntracks];
 	  
@@ -3154,8 +3154,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  track_minireliso_uncorrected[ntracks] = track_miniiso_uncorrected[ntracks] / track_pt[ntracks];
 	  track_miniiso_correction[ntracks] = 0.5 * cms3.isotracks_miniIso_db().at(i_it);
 	  track_minireliso_correction[ntracks] = track_miniiso_correction[ntracks] / track_pt[ntracks];
-	  track_miniiso[ntracks] = track_miniiso_uncorrected[ntracks] - max(0.0,(double) track_miniiso_correction[ntracks]);
-	  track_minireliso[ntracks] = track_minireliso_uncorrected[ntracks] - max(0.0,(double) track_minireliso_correction[ntracks]);
+	  track_miniiso[ntracks] = max(0.0, (double) track_miniiso_uncorrected[ntracks] - track_miniiso_correction[ntracks]);
+	  track_minireliso[ntracks] = max(0.0, (double) track_minireliso_uncorrected[ntracks] - track_minireliso_correction[ntracks]);
 	  track_miniisonomin[ntracks] = track_miniiso_uncorrected[ntracks] - track_miniiso_correction[ntracks];
 	  track_minirelisonomin[ntracks] = track_minireliso_uncorrected[ntracks] - track_minireliso_correction[ntracks];
 	  
