@@ -2019,6 +2019,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   cout << "                  JSON: " << config_.json << endl;
   cout << "                  lumi: " << config_.lumi << " fb-1" << endl;
 
+  cout << "                  Filters applied:" << endl;
+  for(map<string,bool>::iterator it=config_.filters.begin(); it!=config_.filters.end(); it++){
+      if(it->second)
+          cout << "                      " << it->first << endl;
+  }
+
 
   if (applyJSON && config_.json != "") {
     cout << "[FshortLooper::loop] Loading json file: " << config_.json << endl;
@@ -2115,10 +2121,46 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   const unsigned int nEventsTree = ch->GetEntries();
   int nDuplicates = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
+  //  for( unsigned int event = 0; event < 10; ++event) {    
     if (event % 100000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
 
     t.GetEntry(event); 
+    /*
+    if (passTrigger(t, trigs_prescaled_, true)) cout << "Prescaled" << endl;
+    if (passTrigger(t, trigs_SR_, true)) cout << "SR" << endl;
+    if (t.HLT_PFHT1050) cout << "PFHT1050" << endl;
+    */
 
+    /*
+    if ( (t.run == 302240 && t.lumi == 477 && t.evt == 484948818) ||
+	 (t.run == 306125 && t.lumi == 1129 && t.evt == 2027235240) ||
+	 (t.run == 305313 && t.lumi == 284 && t.evt == 495985454)) {
+      std::cout << t.run << ":" << t.lumi << ":" << t.evt << std::endl;
+    }
+    else continue;
+
+    if (passTrigger(t, trigs_prescaled_, true)) cout << "Prescaled" << endl;
+    if (passTrigger(t, trigs_SR_, true)) cout << "SR" << endl;
+    if (t.HLT_PFHT1050) cout << "PFHT1050" << endl;
+    if (t.HLT_PFHT890_Prescale) cout << "890" << endl;
+    if (t.HLT_PFHT780_Prescale) cout << "780" << endl;
+    if (t.HLT_PFHT680_Prescale) cout << "680" << endl;
+    if (t.HLT_PFHT590_Prescale) cout << "590" << endl;
+    if (t.HLT_PFHT510_Prescale) cout << "510" << endl;
+    if (t.HLT_PFHT430_Prescale) cout << "430" << endl;
+    if (t.HLT_PFHT370_Prescale) cout << "370" << endl;
+    if (t.HLT_PFHT250_Prescale) cout << "250" << endl;
+    if (t.HLT_PFHT180_Prescale) cout << "180" << endl;
+    if (t.HLT_PFHT500_PFMET100_PFMHT100) cout << "PFHT500_PFMET100_PFMHT100" << endl;
+    if (t.HLT_PFMET120_PFMHT120_PFHT60) cout << "PFMET120_PFMHT120_PFHT60" << endl;
+    if (t.HLT_PFMET120_PFMHT120) cout << "PFMET120_PFMHT120" << endl;
+    if (t.HLT_PFMETNoMu120_PFMHTNoMu120) cout << "PFMETNoMu120_PFMHTNoMu120" << endl;
+    if (t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60) cout << "PFMETNoMu120_PFMHTNoMu120_PFHT60" << endl;
+    if (t.HLT_PFHT800_PFMET75_PFMHT75) cout << "PFHT800_PFMET75_PFMHT75" << endl;
+
+    continue;
+    */
+    
     //---------------------
     // skip duplicates -- needed when running on mutiple streams in data
     //---------------------
@@ -2138,16 +2180,49 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     
     if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
 
-    if (unlikely(t.nVert == 0)) {
+    // changed from == 0 for cross-check
+    if (unlikely(t.nVert <= 0)) {
+      //      if (t.nVert < 0) cout << "CHANGE: nVert < 0" << endl;
       continue;
     }
+
+    if (config_.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
+    if (config_.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+    if (config_.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+    if (config_.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+    if (config_.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+    if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+    if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+    if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+    if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+    if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+    
+    // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
+    if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
+      cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
+      continue;
+    }
+
     if (t.nJet30 < 2) {
       continue;
     }
+    
+    // catch events with unphysical jet pt
+    if(t.jet_pt[0] > 13000.){
+      cout << endl << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
+      continue;
+    }
+    
     if (unlikely(t.nJet30FailId != 0)) {
       continue;
     }
-    if (unlikely(t.met_miniaodPt / t.met_caloPt > 5.0)) {
+    // changed from > 5.0 for cross-check
+    if (unlikely(t.met_miniaodPt / t.met_caloPt >= 5.0)) {
+      //      if (t.met_miniaodPt / t.met_caloPt == 5.0) cout << "CHANGE: met_miniaodPt / met_caloPt == 5.0" << endl;
       continue;
     }
     if (unlikely(t.nJet200MuFrac50DphiMet > 0)) {
@@ -2736,8 +2811,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
     const bool passSRTrigger = passTrigger(t, trigs_SR_);
 
-    if (! (passPrescaleTrigger || passSRTrigger)) continue;
-    
+    //if (! (passPrescaleTrigger || passSRTrigger)) continue;
+    //    if (! passSRTrigger) continue;
+        if ( ! passPrescaleTrigger) continue;
+    //if(!((t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120 || t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 || t.HLT_PFHT800_PFMET75_PFMHT75))) continue;
+
     bool isSignal_ = t.evt_id >= 1000;
 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
@@ -2830,12 +2908,14 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (t.met_pt < 75) {
 	    // assume 0.1 for everything below 100 GeV
 	    weight *= 0.1;
+	    //weight *= ( (0.1/25) * (t.met_pt - 100) ); 
 	    //weight = ( (0.1/25) * (t.met_pt - 100) ); 
 	  }
 	  else if (t.met_pt < 100) {
 	    // assume 0.1 for everything below 100 GeV
 	    weight *= 0.1;
 	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
+	    //weight *= ( (0.1/25) * (t.met_pt - 75) ); 
 	    //weight *= ( (0.1/25) * (t.met_pt - 75) ); 
 	    //weight = ( (0.1/25) * (t.met_pt - 100) ); 
 	  }
@@ -2853,6 +2933,10 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     if (weight < 0.0) {
       cout << "Negative weight: " << weight << ", " << t.run << ":" << t.lumi << ":" << t.evt << endl;
     }
+
+    //weight = 1.0;
+    // VR and SR are at MET > 250 GeV
+    //if (t.mt2 > 100 && t.met_pt < 250 && t.ht < 1200) continue;
 
     vector<TH2D*> histsToFill;
     // Fshort region
@@ -2901,8 +2985,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) );
 	//	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]);
 	const float pt = t.track_pt[i_trk];
-	const bool ptSel = pt > 15;
-	const bool etaSel = fabs(t.track_eta[i_trk]) < 2.4;
+	// changed from pt > 15
+	const bool ptSel = pt >= 15.0;
+	//if (pt == 15.0) cout << "CHANGE: pt == 15.0" << endl;
+	const bool etaSel = fabs(t.track_eta[i_trk]) <= 2.4;
+	//if (fabs(t.track_eta[i_trk]) == 2.4) cout << "CHANGE: eta == 2.4" << endl;
 	const bool BaseSel = CaloSel && ptSel && etaSel;
 	
 	if (!BaseSel) {
@@ -2915,7 +3002,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	// Length and categorization
 	const bool lostOuterHitsSel = t.track_nLostOuterHits[i_trk] >= 2;
 	const int nLayers = t.track_nLayersWithMeasurement[i_trk];
-	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[i_trk] && lostOuterHitsSel && nLayers == (increment17 ? (year == 2016 ? 3 : 4) : 3);
+	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[i_trk] && lostOuterHitsSel && nLayers >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
 	const bool isLong = nLayers >= (increment17 ? (year == 2016 ? 7 : 8) : 7);
 	const bool isM = !isP && !isLong && lostOuterHitsSel;
 	const bool isL = isLong && lostOuterHitsSel;
@@ -2957,7 +3044,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const float niso = t.track_neuIso0p05[i_trk];
 	const bool NeuIso0p05Sel = niso < 10;
 	const bool NeuIso0p05SelSTC = niso < 10*isoSTC;
-	const bool nreliso = t.track_neuRelIso0p05[i_trk];
+	const float nreliso = t.track_neuRelIso0p05[i_trk];
 	const bool NeuRelIso0p05Sel =  nreliso < 0.1;
 	const bool NeuRelIso0p05SelSTC = nreliso < 0.1*isoSTC;
 	const float iso = t.track_iso[i_trk];
@@ -2972,11 +3059,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	if (!PassesFullIsoSelSTC) {
 	  continue;
 	}
-	
+
 	// Quality
 	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 2 : 3) : 2);
 	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
-	const bool pixLayersSel4 = nLayers > ((increment17 ? (year == 2016 ? 4 : 5) : 4) ? pixLayersSelLoose : pixLayersSelTight); // Apply 2 layer selection to tracks with 5 (6) or more layers in 2016 (17/18)
+	const bool pixLayersSel4 = (nLayers > (increment17 ? (year == 2016 ? 4 : 5) : 4) ? pixLayersSelLoose : pixLayersSelTight); // Apply 2 layer selection to tracks with 5 (6) or more layers in 2016 (17/18)
 	
 	const int lostInnerHits = t.track_nLostInnerPixelHits[i_trk];
 	const bool lostInnerHitsSel = lostInnerHits == 0;
@@ -3011,7 +3098,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	if (!isQualityTrackSTC) {
 	  continue;
 	}
-	
+
 	// Full Short Track
 	isST = PassesFullIsoSel && isQualityTrack && !is1L;
 	isST1 = PassesFullIsoSel && isQualityTrack && is1L;
@@ -3053,7 +3140,18 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       if (!isST && !isSTC && !isST1 && !isSTC1) {
 	continue;
       }
-
+      /*
+      // debug printouts
+      if (fillIndex == 1 && t.mt2 < 100 && t.nJet30 >= 4) {
+	if (isSTC) std::cout << "P STC F4: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk] << std::endl;
+      }
+      if (fillIndex == 1 && t.mt2 < 100 && t.nJet30 < 4) {
+	if (isSTC) std::cout << "P STC F23: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk] << std::endl;
+      }
+      if (fillIndex == 1 && t.mt2 > 100 && t.mt2 < 200 && t.nJet30 < 4) {
+	if (isST) std::cout << "P ST VR23: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk] << std::endl;
+      }
+      */
       if (isSTC1 || isST1) fillIndex = 4;
 
       const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );
