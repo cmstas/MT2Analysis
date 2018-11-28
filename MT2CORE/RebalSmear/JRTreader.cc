@@ -43,7 +43,7 @@ JRTreader::~JRTreader(){
     DeleteFitVec(fits_nonb);
 }
 
-int JRTreader::Init(const char *fname, bool correctDataResponse, int unc_var){
+int JRTreader::Init(const char *fname, bool correctDataResponse, int unc_var, string conf_tag){
     TFile *f = TFile::Open(fname);
     if(f->IsZombie())
         return 0;
@@ -71,7 +71,7 @@ int JRTreader::Init(const char *fname, bool correctDataResponse, int unc_var){
                 if(useFits){
                     core = (TH1D*)f->Get(fitname+"_core");
                     tail = (TH1D*)f->Get(fitname+"_tail");
-                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001, unc_var) : 1.0;
+                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001, unc_var, conf_tag) : 1.0;
                     coreScale *= corr;
                     TransformFit(fits_b->at(ipt)->at(ieta), core, tail);
                     coreScale /= corr;
@@ -89,7 +89,7 @@ int JRTreader::Init(const char *fname, bool correctDataResponse, int unc_var){
                 if(useFits){
                     core = (TH1D*)f->Get(fitname+"_core");
                     tail = (TH1D*)f->Get(fitname+"_tail");
-                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001, unc_var) : 1.0;
+                    float corr = correctDataResponse ? GetJERCorrection(eta_bins[ieta]+0.001, unc_var, conf_tag) : 1.0;
                     coreScale *= corr;
                     TransformFit(fits_nonb->at(ipt)->at(ieta), core, tail);
                     coreScale /= corr;
@@ -179,44 +179,47 @@ void JRTreader::UseRawHistograms(bool use){
     useFits = !use;
 }
 
-float JRTreader::GetJERCorrection(float eta, int unc_var){
+float JRTreader::GetJERCorrection(float eta, int unc_var, string conf_tag){
     // jet-energy resolution is larger in data than MC by the following 
     // eta-dependent factors.
     // We broaden the JRT around 1 by the same factor for data
     // numbers from: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
     // set unc_var=0 for central value, +1 to vary up, and -1 to vary down
 
-    // // 80x prompt reco
-    // if      (eta >= 0.0 && eta < 0.5) return 1.109;
-    // else if (eta >= 0.5 && eta < 0.8) return 1.138;
-    // else if (eta >= 0.8 && eta < 1.1) return 1.114;
-    // else if (eta >= 1.1 && eta < 1.3) return 1.123;
-    // else if (eta >= 1.3 && eta < 1.7) return 1.084;
-    // else if (eta >= 1.7 && eta < 1.9) return 1.082;
-    // else if (eta >= 1.9 && eta < 2.1) return 1.140;
-    // else if (eta >= 2.1 && eta < 2.3) return 1.067;
-    // else if (eta >= 2.3 && eta < 2.5) return 1.177;
-    // else if (eta >= 2.5 && eta < 2.8) return 1.364;
-    // else if (eta >= 2.8 && eta < 3.0) return 1.857;
-    // // else if (eta >= 2.8 && eta < 3.0) return 1.346; //try average of neighbors to see if 1.9 value is affecting things
-    // else if (eta >= 3.0 && eta < 3.2) return 1.328;
-    // else                              return 1.160;
-
     // // 80x re-reco
-    if      (eta >= 0.0 && eta < 0.5) return 1.160 + unc_var * 0.0645;
-    else if (eta >= 0.5 && eta < 0.8) return 1.195 + unc_var * 0.0652;
-    else if (eta >= 0.8 && eta < 1.1) return 1.146 + unc_var * 0.0632;
-    else if (eta >= 1.1 && eta < 1.3) return 1.161 + unc_var * 0.1025;
-    else if (eta >= 1.3 && eta < 1.7) return 1.128 + unc_var * 0.0986;
-    else if (eta >= 1.7 && eta < 1.9) return 1.100 + unc_var * 0.1079;
-    else if (eta >= 1.9 && eta < 2.1) return 1.143 + unc_var * 0.1214;
-    else if (eta >= 2.1 && eta < 2.3) return 1.151 + unc_var * 0.1140;
-    else if (eta >= 2.3 && eta < 2.5) return 1.296 + unc_var * 0.2371;
-    else if (eta >= 2.5 && eta < 2.8) return 1.342 + unc_var * 0.2091;
-    else if (eta >= 2.8 && eta < 3.0) return 1.779 + unc_var * 0.2008;
-    else if (eta >= 3.0 && eta < 3.2) return 1.187 + unc_var * 0.1243;
-    else                              return 1.192 + unc_var * 0.1488;
-
+    if(conf_tag == "data_2016_94x"){
+        if      (eta >= 0.0 && eta < 0.5) return 1.160 + unc_var * 0.0645;
+        else if (eta >= 0.5 && eta < 0.8) return 1.195 + unc_var * 0.0652;
+        else if (eta >= 0.8 && eta < 1.1) return 1.146 + unc_var * 0.0632;
+        else if (eta >= 1.1 && eta < 1.3) return 1.161 + unc_var * 0.1025;
+        else if (eta >= 1.3 && eta < 1.7) return 1.128 + unc_var * 0.0986;
+        else if (eta >= 1.7 && eta < 1.9) return 1.100 + unc_var * 0.1079;
+        else if (eta >= 1.9 && eta < 2.1) return 1.143 + unc_var * 0.1214;
+        else if (eta >= 2.1 && eta < 2.3) return 1.151 + unc_var * 0.1140;
+        else if (eta >= 2.3 && eta < 2.5) return 1.296 + unc_var * 0.2371;
+        else if (eta >= 2.5 && eta < 2.8) return 1.342 + unc_var * 0.2091;
+        else if (eta >= 2.8 && eta < 3.0) return 1.779 + unc_var * 0.2008;
+        else if (eta >= 3.0 && eta < 3.2) return 1.187 + unc_var * 0.1243;
+        else                              return 1.192 + unc_var * 0.1488;
+    }
+    else if(conf_tag == "data_2017_31Mar2018"){
+        if      (eta >= 0.0 && eta < 0.5) return 1.143 + unc_var * 0.0222;
+        else if (eta >= 0.5 && eta < 0.8) return 1.182 + unc_var * 0.0484;
+        else if (eta >= 0.8 && eta < 1.1) return 1.099 + unc_var * 0.0456;
+        else if (eta >= 1.1 && eta < 1.3) return 1.114 + unc_var * 0.1397;
+        else if (eta >= 1.3 && eta < 1.7) return 1.131 + unc_var * 0.1470;
+        else if (eta >= 1.7 && eta < 1.9) return 1.160 + unc_var * 0.0967;
+        else if (eta >= 1.9 && eta < 2.1) return 1.239 + unc_var * 0.1909;
+        else if (eta >= 2.1 && eta < 2.3) return 1.260 + unc_var * 0.1501;
+        else if (eta >= 2.3 && eta < 2.5) return 1.409 + unc_var * 0.2020;
+        else if (eta >= 2.5 && eta < 2.8) return 1.991 + unc_var * 0.5684;
+        else if (eta >= 2.8 && eta < 3.0) return 2.292 + unc_var * 0.3743;
+        else if (eta >= 3.0 && eta < 3.2) return 1.270 + unc_var * 0.1089;
+        else                              return 1.154 + unc_var * 0.1524;
+    }else{
+        cout << "WARNING: config tag " << conf_tag << " doesn't have any define JER scale factors! Not applying any." << endl;
+        return 1.0;
+    }
 }
 
 // certain high-eta bins have no statistics and hence no template. So decrease eta bin

@@ -357,8 +357,8 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2018_Prompt"){
 
         c.year               = 2018;
-        c.json               = "Cert_314472-321221_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-        c.lumi               = 19.26;
+        c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+        c.lumi               = 58.83;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold = 0.8838;

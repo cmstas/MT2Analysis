@@ -55,7 +55,7 @@ const int n_m2bins = 33;
 float m2bins[n_m2bins+1];
 
 const int n_htbins = 5;
-const float htbins[n_htbins+1] = {250., 450., 575., 1200., 1500., 3000.};
+const float htbins[n_htbins+1] = {250., 450., 575., 1200., 1700., 3000.};
 const int n_njbins = 3;
 const float njbins[n_njbins+1] = {2, 4, 7, 12};
 const int n_nbjbins = 4;
@@ -134,11 +134,12 @@ SmearLooper::~SmearLooper(){
 
 void SmearLooper::SetSignalRegions(){
 
-    SRVec =  getSignalRegions2017_RS();
+    SRVec =  getSignalRegions2018_RS();
     SRVecMonojet =  getSignalRegionsMonojet_RS();
 
     //store histograms with cut values for all variables
     for(unsigned int i = 0; i < SRVec.size(); i++){
+        cout << "SR: " << SRVec.at(i).GetName() << endl;
         std::vector<std::string> vars = SRVec.at(i).GetListOfVariables();
         TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVec.at(i).GetName()).c_str());
         if (dir == 0) {
@@ -581,7 +582,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         if(JER_uncert_var_==-1)
             cout << "[SmearLooper::loop] Varying JER uncertainty DOWN" << endl;
     }
-    reader.Init("JetResponseTemplates.root", isData_, JER_uncert_var_);
+    reader.Init("JetResponseTemplates.root", isData_, JER_uncert_var_, config_tag_);
     // reader.Init("/home/users/bemarsh/analysis/jet_response_templates/CMSSW_9_4_7/src/JetResponseTemplates/JetResponseTemplates/output/JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",isData_);
 
     // draw all of the templates for debugging. Uncomment the drawing code in JRTreader.cc:GetRandomResponse
@@ -594,7 +595,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
     if(doNJetReweighting_){
         const uint n_ht_regs = 5;
-        string ht_regs[n_ht_regs] = {"ht250to450", "ht450to575", "ht575to1200", "ht1200to1500", "ht1500to2000"};
+        string ht_regs[n_ht_regs] = {"ht250to450", "ht450to575", "ht575to1200", "ht1200to1700", "ht1700to2000"};
         TFile *fid_njet_weights_ = new TFile(njet_weights_file_.c_str());
         for(uint iht=0; iht<n_ht_regs; iht++){
             nJetWeights_[ht_regs[iht]] = (TH1D*)fid_njet_weights_->Get((ht_regs[iht] + "/h_weights").c_str());
@@ -725,7 +726,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         dir_SRJustHT6_temp = outfile_->mkdir((SRJustHT6_temp.GetName()).c_str());
     } 
 
-    SRJustHT7.SetName("ht1200to1500");
+    SRJustHT7.SetName("ht1200to1700");
     float SRJustHT7_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
     SRJustHT7.SetMT2Bins(7, SRJustHT7_mt2bins);
 
@@ -736,7 +737,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         dir_SRJustHT7_temp = outfile_->mkdir((SRJustHT7_temp.GetName()).c_str());
     } 
 
-    SRJustHT8.SetName("ht1500to2000");
+    SRJustHT8.SetName("ht1700to2000");
     float SRJustHT8_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
     SRJustHT8.SetMT2Bins(7, SRJustHT8_mt2bins);
 
@@ -1358,8 +1359,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     //     if(RS_vars_["ht"] >=250  && RS_vars_["ht"]<450)  evtweight_*=1.02;
                     //     if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
                     //     if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) evtweight_*=1.17;
-                    //     if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) evtweight_*=1.11;
-                    //     if(RS_vars_["ht"] >=1500)                        evtweight_*=1.07;
+                    //     if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1700) evtweight_*=1.11;
+                    //     if(RS_vars_["ht"] >=1700)                        evtweight_*=1.07;
                     // }
 
                     if(doNJetReweighting_){
@@ -1367,8 +1368,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         if(                         RS_vars_["ht"]<450)  weights = nJetWeights_["ht250to450"];
                         if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  weights = nJetWeights_["ht450to575"];
                         if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) weights = nJetWeights_["ht575to1200"];
-                        if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) weights = nJetWeights_["ht1200to1500"];
-                        if(RS_vars_["ht"] >=1500)                        weights = nJetWeights_["ht1500to2000"];
+                        if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1700) weights = nJetWeights_["ht1200to1700"];
+                        if(RS_vars_["ht"] >=1700)                        weights = nJetWeights_["ht1700to2000"];
                         evtweight_ *= weights->GetBinContent(weights->FindBin(RS_vars_["nJet30"]));
                     }
 
@@ -1387,9 +1388,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         fillHistos(SRJustHT5_temp.srHistMap, SRJustHT5_temp.GetNumberOfMT2Bins(), SRJustHT5_temp.GetMT2Bins(), SRJustHT5_temp.GetName(), "");
                     if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=575 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT6_temp.srHistMap, SRJustHT6_temp.GetNumberOfMT2Bins(), SRJustHT6_temp.GetMT2Bins(), SRJustHT6_temp.GetName(), "");
-                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["ht"]<1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["ht"]<1700 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT7_temp.srHistMap, SRJustHT7_temp.GetNumberOfMT2Bins(), SRJustHT7_temp.GetMT2Bins(), SRJustHT7_temp.GetName(), "");
-                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1700 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT8_temp.srHistMap, SRJustHT8_temp.GetNumberOfMT2Bins(), SRJustHT8_temp.GetMT2Bins(), SRJustHT8_temp.GetName(), "");          
                     fillHistosSignalRegion("sr");
                     fillHistosSRBase();
@@ -1514,9 +1515,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     fillHistos(SRJustHT5.srHistMap, SRJustHT5.GetNumberOfMT2Bins(), SRJustHT5.GetMT2Bins(), SRJustHT5.GetName(), "");
                 if(t.nJet30>=2 && t.ht>=575 && t.ht<1200 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT6.srHistMap, SRJustHT6.GetNumberOfMT2Bins(), SRJustHT6.GetMT2Bins(), SRJustHT6.GetName(), "");
-                if(t.nJet30>=2 && t.ht>=1200 && t.ht<1500 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=1200 && t.ht<1700 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT7.srHistMap, SRJustHT7.GetNumberOfMT2Bins(), SRJustHT7.GetMT2Bins(), SRJustHT7.GetName(), "");
-                if(t.nJet30>=2 && t.ht>=1500 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=1700 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT8.srHistMap, SRJustHT8.GetNumberOfMT2Bins(), SRJustHT8.GetMT2Bins(), SRJustHT8.GetName(), "");                  
                 fillHistosSignalRegion("sr");
                 fillHistosSRBase();

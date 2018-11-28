@@ -118,8 +118,8 @@ MT2Config_defs["data_2017_Prompt"] = {
 
 MT2Config_defs["data_2018_Prompt"] = {
     "year" : 2018,
-    "json" : "Cert_314472-321221_13TeV_PromptReco_Collisions18_JSON_snt.txt",
-    "lumi" : 19.26,
+    "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
+    "lumi" : 58.83,
     "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
     "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold" : 0.8838,

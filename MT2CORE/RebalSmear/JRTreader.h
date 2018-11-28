@@ -18,10 +18,10 @@ class JRTreader {
     
     JRTreader(const char *fname=0);
     ~JRTreader();
-    int Init(const char *fname, bool correctDataResponse=false, int unc_var=0);
+    int Init(const char *fname, bool correctDataResponse=false, int unc_var=0, string conf_tag="");
     float GetRandomResponse(float pt, float eta, bool isBjet);
     float GetValue(float pt, float eta, bool isBjet, float smearfact);
-    static float GetJERCorrection(float eta, int unc_var=0);
+    static float GetJERCorrection(float eta, int unc_var=0, string conf_tag="");
     static int GetPtBin(float pt);
     static int GetEtaBin(float eta);
     static void GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin);
