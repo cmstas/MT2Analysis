@@ -212,6 +212,10 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2018B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018B_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2018C") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018C_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2018D") && infile.Contains("PromptReco"))                 sample = Form("data_Run2018D_PromptReco_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018A") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018A_17Sep2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018B") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018B_17Sep2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018C") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018C_17Sep2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018D") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018D_17Sep2018_%s" , outfileid.Data());
   else if (infile.Contains("dataRun2") && infile.Contains("2018B"))                      sample = Form("data_Run2018B_RelVal_%s" , outfileid.Data());
 
   //otherwise
@@ -227,6 +231,7 @@ int main(int argc, char **argv) {
   else if(infile.Contains("Run2017") && infile.Contains("PromptReco")) config_tag = "data_2017_Prompt";
   else if(infile.Contains("Run2017") && infile.Contains("31Mar2018"))  config_tag = "data_2017_31Mar2018";
   else if(infile.Contains("Run2018") && infile.Contains("PromptReco")) config_tag = "data_2018_Prompt";
+  else if(infile.Contains("Run2018") && infile.Contains("17Sep2018"))  config_tag = "data_2018_17Sep2018";
   else if(infile.Contains("dataRun2") && infile.Contains("2018"))      config_tag = "data_2018_Prompt";
   else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Moriond17";
   else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";

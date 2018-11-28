@@ -6,50 +6,95 @@
 
 # TAG="V00-10-03_2018_HEmiss_MC"
 # TAG="V00-10-03_2018_HEmiss_data_relval"
-TAG="V00-10-04_2018_json_314472-317696"
+TAG="V00-10-06_2018fullYear_17Sep2018"
 
 #
 # DATA
 #
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_JetHT_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MET_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_DoubleMuon_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_EGamma_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MuonEG_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_SingleMuon_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_JetHT_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MET_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_DoubleMuon_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_EGamma_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MuonEG_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018A-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_SingleMuon_PromptReco-v1
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_JetHT_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MET_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_DoubleMuon_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_EGamma_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MuonEG_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_SingleMuon_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_JetHT_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MET_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_DoubleMuon_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_EGamma_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MuonEG_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018A-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_SingleMuon_PromptReco-v2
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_JetHT_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MET_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_DoubleMuon_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_EGamma_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MuonEG_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_SingleMuon_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_JetHT_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MET_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_DoubleMuon_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_EGamma_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_MuonEG_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018A-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018A_SingleMuon_PromptReco-v3
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_JetHT_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MET_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_DoubleMuon_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_EGamma_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MuonEG_PromptReco-v1
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_SingleMuon_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_JetHT_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MET_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_DoubleMuon_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_EGamma_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MuonEG_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018B-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_SingleMuon_PromptReco-v1
 
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_JetHT_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MET_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_DoubleMuon_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_EGamma_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MuonEG_PromptReco-v2
-./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_SingleMuon_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/JetHT_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_JetHT_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MET_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MET_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_DoubleMuon_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_EGamma_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_MuonEG_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/SingleMuon_Run2018B-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018B_SingleMuon_PromptReco-v2
 
-./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/MET_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_MET_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/JetHT_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_JetHT_PromptReco-v3
-./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/EGamma_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_EGamma_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018C-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_DoubleMuon_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018C-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_EGamma_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018C-PromptReco-v1_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_MuonEG_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/JetHT_Run2018C-PromptReco-v1_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_JetHT_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/MET_Run2018C-PromptReco-v1_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_MET_PromptReco-v1
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/SingleMuon_Run2018C-PromptReco-v1_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_SingleMuon_PromptReco-v1
+
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018C-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_DoubleMuon_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018C-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_EGamma_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018C-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_MuonEG_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/JetHT_Run2018C-PromptReco-v2_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_JetHT_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/MET_Run2018C-PromptReco-v2_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_MET_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/SingleMuon_Run2018C-PromptReco-v2_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_SingleMuon_PromptReco-v2
+
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_DoubleMuon_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_EGamma_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018C_MuonEG_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/JetHT_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_JetHT_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/MET_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_MET_PromptReco-v3
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/SingleMuon_Run2018C-PromptReco-v3_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018C_SingleMuon_PromptReco-v3
+
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/DoubleMuon_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018D_DoubleMuon_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/EGamma_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018D_EGamma_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018_prompt/MuonEG_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00 ${TAG}_data_Run2018D_MuonEG_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/JetHT_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018D_JetHT_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/MET_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018D_MET_PromptReco-v2
+# ./writeConfig.sh /hadoop/cms/store/user/bemarsh/ProjectMetis/SingleMuon_Run2018D-PromptReco-v2_MINIAOD_CMS4_V10-01-00/ ${TAG}_data_Run2018D_SingleMuon_PromptReco-v2
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/JetHT_Run2018A-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/      ${TAG}_data_Run2018A_JetHT_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/MET_Run2018A-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/        ${TAG}_data_Run2018A_MET_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/SingleMuon_Run2018A-17Sep2018-v2_MINIAOD_CMS4_V10-02-01/ ${TAG}_data_Run2018A_SingleMuon_17Sep2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/EGamma_Run2018A-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/     ${TAG}_data_Run2018A_EGamma_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/DoubleMuon_Run2018A-17Sep2018-v2_MINIAOD_CMS4_V10-02-01/ ${TAG}_data_Run2018A_DoubleMuon_17Sep2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/MuonEG_Run2018A-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/     ${TAG}_data_Run2018A_MuonEG_17Sep2018
+
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/JetHT_Run2018B-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/      ${TAG}_data_Run2018B_JetHT_17Sep2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/MET_Run2018B-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/        ${TAG}_data_Run2018B_MET_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/SingleMuon_Run2018B-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/ ${TAG}_data_Run2018B_SingleMuon_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/EGamma_Run2018B-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/     ${TAG}_data_Run2018B_EGamma_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/DoubleMuon_Run2018B-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/ ${TAG}_data_Run2018B_DoubleMuon_17Sep2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/MuonEG_Run2018B-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/     ${TAG}_data_Run2018B_MuonEG_17Sep2018
+
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/JetHT_Run2018C-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/      ${TAG}_data_Run2018C_JetHT_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/MET_Run2018C-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/        ${TAG}_data_Run2018C_MET_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/SingleMuon_Run2018C-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/ ${TAG}_data_Run2018C_SingleMuon_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/EGamma_Run2018C-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/     ${TAG}_data_Run2018C_EGamma_17Sep2018
+./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/DoubleMuon_Run2018C-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/ ${TAG}_data_Run2018C_DoubleMuon_17Sep2018
+# ./writeConfig.sh /hadoop/cms/store/group/snt/run2_data2018/MuonEG_Run2018C-17Sep2018-v1_MINIAOD_CMS4_V10-02-01/     ${TAG}_data_Run2018C_MuonEG_17Sep2018
 
 
 # # # special HE miss MC

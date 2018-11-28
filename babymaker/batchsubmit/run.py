@@ -6,24 +6,25 @@ import time
 import sys
 
 # tag = "V00-10-01_json_314472-317696_2017C_JECs"
+# tag = "V00-10-04_2016_80x_MC"
 # tag = "V00-10-04_2016fullYear_17Jul2018"
-# tag = "V00-10-04_2017fullYear_31Mar2018"
-tag = "V00-10-04_2018_json_314472-317696"
+# tag = "V00-10-05_2017fullYear_31Mar2018"
+tag = "V00-10-06_2018fullYear_17Sep2018"
 # tag = "V00-10-03_94x_2017_mc"
 # tag = "V00-10-03_2018_HEmiss_MC"
 # tag = "V00-10-03_2018_HEmiss_data_relval"
 # tag = "V00-10-01_json_294927-306462_31Mar2018_correctJECs"
 # tag = "RebalanceAndSmear_V00-10-01_json_294927-306462_31Mar2018_correctJECs"
-# tag = "RebalanceAndSmear_V00-10-01_94X_mc"
+# tag = "RebalanceAndSmear_V00-10-05_sigmasoft25"
 
 submitJobs        = True  # set to False if you've already submitted jobs and just want to monitor, or if you just want to check for missing files
 sweeprootExisting = False # set to False to skip sweeprooting on existing files. For if you just want to check for new cms4/resubmit
 removeLogs        = False # remove all condor log files after successful completion
 doMerge           = True  # set to False to stop after all jobs have been finished/sweeprooted
-doSkim            = True  # set to False to stop after merging
-doQCDSkim         = True
-doRSSkim          = True
-doTriggerSkim     = False
+doSkim            = False # set to False to stop after merging
+doQCDSkim         = False
+doRSSkim          = False
+doTriggerSkim     = True
 
 MAXLOCALJOBS = 20
 
@@ -156,7 +157,8 @@ hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
 outdir = "/nfs-6/userdata/mt2/"+tag
 logdir = "mergeLogs"
 subprocess.call("mkdir -p "+outdir, shell=True)
-subprocess.call("rm -f "+outdir+"/*.root", shell=True)
+for s in samples:
+    subprocess.call("rm -f {0}/{1}*.root".format(outdir,s), shell=True)
 subprocess.call("mkdir -p "+logdir, shell=True)
 subprocess.call("chmod -R a+wrx "+outdir, shell=True)
 mergePs = []
@@ -190,16 +192,20 @@ triggerskimdir = "/nfs-6/userdata/mt2/{0}_trigger_skim".format(tag)
 logdir = "/nfs-6/userdata/mt2/skimLogs_bemarsh"
 if doSkim:    
     subprocess.call("mkdir -p "+skimdir, shell=True)
-    subprocess.call("rm -f "+skimdir+"/*.root", shell=True)
+    for s in samples:
+        subprocess.call("rm -f {0}/{1}*.root".format(skimdir,s), shell=True)
 if doQCDSkim: 
     subprocess.call("mkdir -p "+qcdskimdir, shell=True)
-    subprocess.call("rm -f "+qcdskimdir+"/*.root", shell=True)
+    for s in samples:
+        subprocess.call("rm -f {0}/{1}*.root".format(qcdskimdir,s), shell=True)
 if doRSSkim:  
     subprocess.call("mkdir -p "+RSskimdir, shell=True)
-    subprocess.call("rm -f "+RSskimdir+"/*.root", shell=True)
+    for s in samples:
+        subprocess.call("rm -f {0}/{1}*.root".format(RSskimdir,s), shell=True)
 if doTriggerSkim:  
     subprocess.call("mkdir -p "+Triggerskimdir, shell=True)
-    subprocess.call("rm -f "+Triggerskimdir+"/*.root", shell=True)
+    for s in samples:
+        subprocess.call("rm -f {0}/{1}*.root".format(triggerskimdir,s), shell=True)
 skim_commands = []
 for s in samples:
     if doSkim:

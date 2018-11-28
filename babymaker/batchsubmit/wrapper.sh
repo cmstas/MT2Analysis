@@ -98,13 +98,55 @@ echo "[wrapper] running: ./processBaby ${FILEID} ${FILE}"
 echo "[wrapper] output is"
 ls -lh
 
-#
-# clean up
-#
 
 echo "[wrapper] copying file"
 OUTPUT=`ls | grep ${FILEID}`
 echo "[wrapper] OUTPUT = " ${OUTPUT}
+echo "[wrapper] moving output to output.root"
+mv ${OUTPUT} output.root
+
+# Rigorous sweeproot which checks ALL branches for ALL events.
+# If GetEntry() returns -1, then there was an I/O problem, so we will delete it
+cat > rigorousSweepRoot.py << EOL
+import ROOT as r
+import os, sys
+
+f1 = r.TFile("output.root")
+if not f1 or not f1.IsOpen() or f1.IsZombie():
+    print "[RSR] removing zombie output.root because it does not deserve to live"
+    os.system("rm output.root")
+    sys.exit()
+
+t = f1.Get("mt2")
+if type(t)==type(r.TObject()):
+    print "[RSR] no tree named 'mt2' in file! Deleting."
+    os.system("rm output.root")
+    sys.exit()
+
+print "[RSR] ntuple has %i events" % t.GetEntries()
+
+foundBad = False
+for i in range(0,t.GetEntries(),1):
+    if t.GetEntry(i) < 0:
+        foundBad = True
+        print "[RSR] found bad event %i" % i
+        break
+
+if foundBad:
+    print "[RSR] removing output.root because it does not deserve to live"
+    os.system("rm output.root")
+else:
+    print "[RSR] passed the rigorous sweeproot"
+EOL
+
+date +%s
+echo "[wrapper] running rigorousSweepRoot.py"
+python rigorousSweepRoot.py
+date +%s
+
+#
+# clean up
+#
 
 if [ ! -d "${COPYDIR}" ]; then
     echo "creating output directory " ${COPYDIR}
@@ -112,7 +154,7 @@ if [ ! -d "${COPYDIR}" ]; then
 fi
 
 export LD_PRELOAD=/usr/lib64/gfal2-plugins/libgfal_plugin_xrootd.so
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/${OUTPUT}
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/output.root gsiftp://gftp.t2.ucsd.edu${COPYDIR}/${OUTPUT}
 
 echo "[wrapper] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done

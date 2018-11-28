@@ -131,6 +131,21 @@ MT2Config_defs["data_2018_Prompt"] = {
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
     }
 
+MT2Config_defs["data_2018_17Sep2018"] = {
+    "year" : 2018,
+    "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
+    "lumi" : 58.83,
+    "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
+    "btag_med_threshold" : 0.8838,
+    "ea_version" : 3,
+    "jet_id": "2017_v1",
+    "JECs" : [ ["", "Fall17_17Nov2017C_V6_DATA"]
+               ],
+    "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
+    "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
+    }
+
 MT2Config_defs["data_2016_Moriond17"] = {
     "year" : 2016,
     "json" : "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt",

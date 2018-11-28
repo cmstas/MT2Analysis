@@ -81,7 +81,7 @@ const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
 // use isotracks collection in cms4 for veto counting (as opposed to pfcands)
-const bool useIsotrackCollectionForVeto = false;
+const bool useIsotrackCollectionForVeto = true;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;

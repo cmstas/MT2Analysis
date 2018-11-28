@@ -291,6 +291,69 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("Photon200");
         c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
+    }else if(tag == "data_2018_17Sep2018"){
+
+        c.year               = 2018;
+        c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+        c.lumi               = 58.83;
+        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
+        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold = 0.8838;
+        c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V6_DATA"));
+        c.filters["eeBadScFilter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
+        c.triggers["SR"] = std::vector<std::string> ();
+        c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
+        c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120");
+        c.triggers["SR"].push_back("PFMET120_PFMHT120_PFHT60");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120");
+        c.triggers["SR"].push_back("PFMETNoMu120_PFMHTNoMu120_PFHT60");
+        c.triggers["Photon"] = std::vector<std::string> ();
+        c.triggers["Photon"].push_back("Photon200");
+        c.triggers["DilepSF"] = std::vector<std::string> ();
+        c.triggers["DilepSF"].push_back("DoubleEl");
+        c.triggers["DilepSF"].push_back("DoubleMu");
+        c.triggers["DilepSF"].push_back("Photon200");
+        c.triggers["DilepSF"].push_back("DoubleMu_NonIso");
+        c.triggers["DilepSF"].push_back("SingleMu_NonIso");
+        c.triggers["DilepSF"].push_back("DoubleEl33");
+        c.triggers["SingleMu"] = std::vector<std::string> ();
+        c.triggers["SingleMu"].push_back("SingleMu");
+        c.triggers["SingleMu"].push_back("SingleMu_NonIso");
+        c.triggers["SingleEl"] = std::vector<std::string> ();
+        c.triggers["SingleEl"].push_back("SingleEl");
+        c.triggers["SingleEl"].push_back("SingleEl_NonIso");
+        c.triggers["prescaledHT"] = std::vector<std::string> ();
+        c.triggers["prescaledHT"].push_back("PFHT180_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT250_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT370_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT430_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT510_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT590_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT680_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT780_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT890_Prescale");
+        c.triggers["prescaledHT"].push_back("PFHT1050");
+        c.triggers["DilepOF"] = std::vector<std::string> ();
+        c.triggers["DilepOF"].push_back("MuX_Ele12");
+        c.triggers["DilepOF"].push_back("Mu8_EleX");
+        c.triggers["DilepOF"].push_back("Mu12_EleX");
+        c.triggers["DilepOF"].push_back("Mu37_Ele27_NonIso");
+        c.triggers["DilepOF"].push_back("Mu27_Ele37_NonIso");
+        c.triggers["DilepOF"].push_back("Photon200");
+        c.triggers["DilepOF"].push_back("SingleMu_NonIso");
+
     }else if(tag == "data_2018_Prompt"){
 
         c.year               = 2018;
