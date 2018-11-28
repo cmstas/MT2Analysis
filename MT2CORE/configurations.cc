@@ -174,11 +174,11 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
-        c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V6_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2017C", "Fall17_17Nov2017C_V6_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2017D", "Fall17_17Nov2017D_V6_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2017E", "Fall17_17Nov2017E_V6_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2017F", "Fall17_17Nov2017F_V6_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V32_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2017C", "Fall17_17Nov2017C_V32_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2017D", "Fall17_17Nov2017DE_V32_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2017E", "Fall17_17Nov2017DE_V32_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2017F", "Fall17_17Nov2017F_V32_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -301,7 +301,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V6_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -364,7 +364,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V6_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;

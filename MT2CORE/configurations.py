@@ -25,11 +25,11 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "btag_med_threshold" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
-    "JECs" : [ ["2017B", "Fall17_17Nov2017B_V6_DATA"],
-               ["2017C", "Fall17_17Nov2017C_V6_DATA"],
-               ["2017D", "Fall17_17Nov2017D_V6_DATA"],
-               ["2017E", "Fall17_17Nov2017E_V6_DATA"],
-               ["2017F", "Fall17_17Nov2017F_V6_DATA"]
+    "JECs" : [ ["2017B", "Fall17_17Nov2017B_V32_DATA"],
+               ["2017C", "Fall17_17Nov2017C_V32_DATA"],
+               ["2017D", "Fall17_17Nov2017DE_V32_DATA"],
+               ["2017E", "Fall17_17Nov2017DE_V32_DATA"],
+               ["2017F", "Fall17_17Nov2017F_V32_DATA"]
                ],
     "filters" : [ "eeBadScFilter",
                   "globalSuperTightHalo2016Filter",
@@ -125,7 +125,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     "btag_med_threshold" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
-    "JECs" : [ ["", "Fall17_17Nov2017C_V6_DATA"]
+    "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
@@ -140,7 +140,7 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "btag_med_threshold" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
-    "JECs" : [ ["", "Fall17_17Nov2017C_V6_DATA"]
+    "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
