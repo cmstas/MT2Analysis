@@ -71,7 +71,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
@@ -81,7 +81,7 @@ const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
 // use isotracks collection in cms4 for veto counting (as opposed to pfcands)
-const bool useIsotrackCollectionForVeto = true;
+const bool useIsotrackCollectionForVeto = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
@@ -353,6 +353,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
       // get CMS3 version number to use later
       TString cms3_version = cms3.evt_CMS3tag().at(0);     
+      //TString cms3_version = "CMS4_V09-04-17";
       // convert last two digits of version number to int
       int small_cms3_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
       bool recent_cms3_version = true;
@@ -448,7 +449,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       HLT_Photon250_NoHE = passHLTTriggerPattern("HLT_Photon250_NoHE_v"); 
       HLT_DiCentralPFJet70_PFMET120  = passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet70_PFMET120_JetIdCleaned_v"); 
       HLT_DiCentralPFJet55_PFMET110  = passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v") || passHLTTriggerPattern("HLT_DiCentralPFJet55_PFMET110_JetIdCleaned_v"); 
-      /* 2017,18 prescaled HT triggers */
+      // 2017,18 prescaled HT triggers
+      
       HLT_PFHT180_Prescale  = passHLTTriggerPattern("HLT_PFHT180_v") ? HLT_prescale(triggerName("HLT_PFHT180_v"), true) : 0; 
       HLT_PFHT250_Prescale  = passHLTTriggerPattern("HLT_PFHT250_v") ? HLT_prescale(triggerName("HLT_PFHT250_v"), true) : 0; 
       HLT_PFHT370_Prescale  = passHLTTriggerPattern("HLT_PFHT370_v") ? HLT_prescale(triggerName("HLT_PFHT370_v"), true) : 0; 
@@ -458,7 +460,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       HLT_PFHT680_Prescale  = passHLTTriggerPattern("HLT_PFHT680_v") ? HLT_prescale(triggerName("HLT_PFHT680_v"), false) : 0; 
       HLT_PFHT780_Prescale  = passHLTTriggerPattern("HLT_PFHT780_v") ? HLT_prescale(triggerName("HLT_PFHT780_v"), false) : 0; 
       HLT_PFHT890_Prescale  = passHLTTriggerPattern("HLT_PFHT890_v") ? HLT_prescale(triggerName("HLT_PFHT890_v"), false) : 0; 
-      /* 2016 prescaled HT triggers */
+      // 2016 prescaled HT triggers
       HLT_PFHT125_Prescale  = passHLTTriggerPattern("HLT_PFHT125_v") ? HLT_prescale(triggerName("HLT_PFHT125_v")) : 0; 
       HLT_PFHT200_Prescale  = passHLTTriggerPattern("HLT_PFHT200_v") ? HLT_prescale(triggerName("HLT_PFHT200_v")) : 0; 
       HLT_PFHT300_Prescale  = passHLTTriggerPattern("HLT_PFHT300_v") ? HLT_prescale(triggerName("HLT_PFHT300_v")) : 0; 
@@ -603,7 +605,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       }
       met_rawPt  = cms3.evt_pfmet_raw();
       met_rawPhi = cms3.evt_pfmetPhi_raw();
-      
       if (!isData) {
         met_genPt  = cms3.gen_met();
         met_genPhi = cms3.gen_metPhi();
@@ -3068,10 +3069,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  bool isChargino = false; float minGenDR = 0.01; int genPdgId = -1; int genIdx = -1;
 	  
 	  if (!isData) {
-	    for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {
+	    for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
 	      if (cms3.genps_status().at(iGen) != 1) continue;
-	      if (fabs(cms3.genps_charge().at(iGen)) < 0.01) continue;	    
-	      const float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),track_eta[ntracks],cms3.genps_p4().at(iGen).phi(),track_phi[ntracks]);
+	      if (fabs(cms3.genps_charge().at(iGen)) < 0.01) continue;
+	      const float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),cms3.isotracks_etatrk().at(i_it),cms3.genps_p4().at(iGen).phi(),cms3.isotracks_phitrk().at(i_it));
 	      if (dr < minGenDR) {
 		minGenDR = dr;
 		genIdx = iGen;
@@ -3080,6 +3081,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	    if (genIdx >= 0) {
 	      genPdgId = cms3.genps_id().at(genIdx);
 	      isChargino = abs(genPdgId) == 1000024;
+	      if (isChargino && !cms3.isotracks_isLostTrack().at(i_it)) {
+		cout << "Non-lostTrack chargino" << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand" : "") << endl;
+	      }
 	    }	  
 	  }
 
@@ -3095,8 +3099,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	    track_genMatchDR[ntracks] = minGenDR;
 	    track_genPdgId[ntracks] = genPdgId;
 	    track_isChargino[ntracks] = isChargino;
+	    // for charginos, find the transverse decay length
+	    if (isChargino) {
+	      track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
+	    }
 	  }
-	  
+
 	  // Candidate kinematics
 	  //	const LorentzVector& cand_p4 = cms3.isotracks_p4().at(i_it);
 	  
@@ -3197,6 +3205,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  
 	  track_isLepOverlap[ntracks] = cms3.isotracks_lepOverlap().at(i_it);
 	  
+
 	  // Apply ST and STC selections	
 	  
 	  // Apply reco veto first so we can store the result for all tracks. We can't fully reconsider the short track definition  without remaking babies otherwise.
@@ -3992,6 +4001,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("track_isChargino", track_isChargino, "track_isChargino[ntracks]/I");
   BabyTree_->Branch("track_genPdgId", track_genPdgId, "track_genPdgId[ntracks]/I");
   BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
+  BabyTree_->Branch("track_decayXY", track_decayXY, "track_decayXY[ntracks]/F");
   BabyTree_->Branch("track_nCharginos", &nCharginos);
 
   // also make counter histogram
@@ -4663,6 +4673,7 @@ void babyMaker::InitBabyNtuple () {
     track_isChargino[i] = 0;
     track_genPdgId[i] = -999;
     track_genMatchDR[i] = -999;
+    track_decayXY[i] = -999;
   }
   nCharginos = 0;
 
