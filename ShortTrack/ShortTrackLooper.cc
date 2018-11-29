@@ -7,9 +7,9 @@ class mt2tree;
 
 const bool recalculate = true; // to use a non standard (ie not in babies) Fshort, change the iso and qual cuts and provide a new Fshort input file below
 const int applyRecoVeto = 2; // 0: None, 1: use MT2 ID leptons for the reco veto, 2: use any Reco ID (Default: 2)
-const bool increment17 = false;
+const bool increment17 = true;
 const float isoSTC = 6, qualSTC = 3;
-const bool useL = false;
+const bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 
 // turn on to apply json file to data
 const bool applyJSON = true;
@@ -43,29 +43,15 @@ int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi) {
 int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, char * runtag) {
   string tag(outtag);
 
+  cout << "Using runtag: " << runtag << endl;
+
   const TString FshortName16Data = Form("../FshortLooper/output/Fshort_data_2016_%s.root",runtag);
   const TString FshortName16MC = Form("../FshortLooper/output/Fshort_mc_2016_%s.root",runtag);
   const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017_%s.root",runtag);
   const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_2017_%s.root",runtag);
-  //const TString RmtptName16 = Form("../FshortLooper/output/Fshort_mc2016_%s.root",runtag);
-  const TString RmtptName16 = Form("../FshortLooper/output/Fshort_mc_2017_%s.root",runtag); // For now, use 2017 MC in 2016
-  const TString RmtptName17 = Form("../FshortLooper/output/Fshort_mc_2017_%s.root",runtag);
 
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
-
-  /*
-  TH2D h_eventwise_counts ("h_eventwise_counts","Events Counts by Length",5,0,5,3,0,3);
-  h_eventwise_counts.GetYaxis()->SetTitleOffset(3.0);
-  h_eventwise_counts.GetXaxis()->SetBinLabel(1,"P");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(2,"M");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(3,"L (rej)");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(4,"L (acc)");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(5,"L (acc; plus EWK)");
-  h_eventwise_counts.GetYaxis()->SetBinLabel(1,"Obs SR Events");
-  h_eventwise_counts.GetYaxis()->SetBinLabel(2,"Pred SR Events");
-  h_eventwise_counts.GetYaxis()->SetBinLabel(3,"STC CR Events");
-  */
 
   TH2D h_eventwise_counts ("h_eventwise_counts","Events Counts by Length",4,0,4,3,0,3);
   h_eventwise_counts.GetYaxis()->SetTitleOffset(3.0);
@@ -102,6 +88,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_LH_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23");
   TH2D* h_HL_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_4");
   TH2D* h_HH_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4");
+
+
+  // Save Fshorts used with errors
+  TH1D* h_FS = new TH1D("h_FS","f_{short}",3,0,3);
+  TH1D* h_FS_23 = (TH1D*) h_FS->Clone("h_FS_23");
+  TH1D* h_FS_4 = (TH1D*) h_FS->Clone("h_FS_4");
 
   mt2tree t;
 
@@ -203,14 +195,14 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << "Getting transfer factors" << endl;
 
-  TString FshortName = "", RmtptName = "";
+  TString FshortName = "", FshortNameMC = "";
   if (year == 2016) {
     if (isMC) {
       FshortName = FshortName16MC;
     } else {
       FshortName = FshortName16Data;
     }
-    RmtptName = RmtptName16;
+    FshortNameMC = FshortName16MC;
   }
   else if (year == 2017) {
     if (isMC) {
@@ -218,7 +210,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     } else {
       FshortName = FshortName17Data;
     }
-    RmtptName = RmtptName17;
+    FshortNameMC = FshortName17MC;
   }
   else {
     cout << "Check configuration" << endl;
@@ -226,50 +218,62 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   }
 
   TFile* FshortFile = TFile::Open(FshortName,"READ");
-  TFile* RmtptFile  = TFile::Open(RmtptName,"READ");
+  TFile* FshortFileMC = TFile::Open(FshortNameMC,"READ");
   TH1D* h_fs = ((TH2D*) FshortFile->Get("h_fsFSR"))->ProjectionX("h_fs",1,1);
   TH1D* h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsFSR_23"))->ProjectionX("h_fs_23",1,1);
   TH1D* h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsFSR_4"))->ProjectionX("h_fs_4",1,1);
+  TH1D* h_fs_MC = ((TH2D*) FshortFileMC->Get("h_fsFSR"))->ProjectionX("h_fs_MC",1,1);
+  TH1D* h_fs_Nj23_MC = ((TH2D*) FshortFileMC->Get("h_fsFSR_23"))->ProjectionX("h_fs_23_MC",1,1);
+  TH1D* h_fs_Nj4_MC = ((TH2D*) FshortFileMC->Get("h_fsFSR_4"))->ProjectionX("h_fs_4_MC",1,1);
+  const float mc_L_corr = adjL ? h_fs_MC->GetBinContent(4) / h_fs_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
+  const float mc_L_corr_err = sqrt( pow((h_fs_MC->GetBinError(4) / h_fs_MC->GetBinContent(4)),2) + pow((h_fs_MC->GetBinError(3) / h_fs_MC->GetBinContent(3)),2)) * mc_L_corr;
+  const float mc_L_corr_23 = adjL ? h_fs_Nj23_MC->GetBinContent(4) / h_fs_Nj23_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
+  const float mc_L_corr_err_23 = sqrt( pow((h_fs_Nj23_MC->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr;
+  const float mc_L_corr_4 = adjL ? h_fs_Nj4_MC->GetBinContent(4) / h_fs_Nj4_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
+  const float mc_L_corr_err_4 = sqrt( pow((h_fs_Nj4_MC->GetBinError(4) / h_fs_Nj4_MC->GetBinContent(4)),2) + pow((h_fs_Nj4_MC->GetBinError(3) / h_fs_Nj4_MC->GetBinContent(3)),2)) * mc_L_corr;
   // bin 1 is inclusive, then P, M, L
   const double fs_P = h_fs->GetBinContent(2);
+  const double fs_P_err = h_fs->GetBinError(2);
   const double fs_M = h_fs->GetBinContent(3);
-  const double fs_L = useL ? h_fs->GetBinContent(4) : fs_M;
-  //  const double fs_La = h_fs->GetBinContent(5);
-  const double fs_P_23 = h_fs_Nj23->GetBinContent(2);
-  const double fs_M_23 = h_fs_Nj23->GetBinContent(3);
-  const double fs_L_23 = useL ? h_fs_Nj23->GetBinContent(4) : fs_M_23;
-  //const double fs_La_23 = h_fs_Nj23->GetBinContent(5);
-  const double fs_P_4 = h_fs_Nj4->GetBinContent(2);
-  const double fs_M_4 = h_fs_Nj4->GetBinContent(3);
-  const double fs_L_4 = useL ? h_fs_Nj4->GetBinContent(4) : fs_M_4;
-  //const double fs_La_4 = h_fs_Nj4->GetBinContent(5);
-
-  // Rmtpt is the ratio of accepted to vetoed electroweak tracks, taken from removed-lepton MC for each (rl_)MT2 band.
-  TH2D* h_RmtptFSR = (TH2D*) RmtptFile->Get("h_RmtptFSR");
-  TH2D* h_RmtptFSR_Nj23 = (TH2D*) RmtptFile->Get("h_RmtptFSR_23");
-  TH2D* h_RmtptFSR_Nj4 = (TH2D*) RmtptFile->Get("h_RmtptFSR_4");
-  const double RmtptFSR = h_RmtptFSR->GetBinContent(1,1);
-  const double RmtptFSR_23 = h_RmtptFSR_Nj23->GetBinContent(1,1);
-  const double RmtptFSR_4 = h_RmtptFSR_Nj4->GetBinContent(1,1);
-
-  TH2D* h_RmtptVR = (TH2D*) RmtptFile->Get("h_RmtptVR");
-  TH2D* h_RmtptVR_Nj23 = (TH2D*) RmtptFile->Get("h_RmtptVR_23");
-  TH2D* h_RmtptVR_Nj4 = (TH2D*) RmtptFile->Get("h_RmtptVR_4");
-  const double RmtptVR = h_RmtptVR->GetBinContent(1,1);
-  const double RmtptVR_23 = h_RmtptVR_Nj23->GetBinContent(1,1);
-  const double RmtptVR_4 = h_RmtptVR_Nj4->GetBinContent(1,1);
-
-  TH2D* h_RmtptSR = (TH2D*) RmtptFile->Get("h_RmtptSR");
-  TH2D* h_RmtptSR_Nj23 = (TH2D*) RmtptFile->Get("h_RmtptSR_23");
-  TH2D* h_RmtptSR_Nj4 = (TH2D*) RmtptFile->Get("h_RmtptSR_4");
-  const double RmtptSR = h_RmtptSR->GetBinContent(1,1);
-  const double RmtptSR_23 = h_RmtptSR_Nj23->GetBinContent(1,1);
-  const double RmtptSR_4 = h_RmtptSR_Nj4->GetBinContent(1,1);
+  const double fs_M_err = h_fs->GetBinError(3);
+  const double fs_L = h_fs->GetBinContent(3) * mc_L_corr;
+  const double fs_L_err = adjL ? sqrt( pow((fs_M_err/fs_M),2) + pow((mc_L_corr_err / mc_L_corr),2) ) * fs_L : fs_M_err;
+  const double fs_Nj23_P = h_fs_Nj23->GetBinContent(2);
+  const double fs_Nj23_P_err = h_fs_Nj23->GetBinError(2);
+  const double fs_Nj23_M = h_fs_Nj23->GetBinContent(3);
+  const double fs_Nj23_M_err = h_fs_Nj23->GetBinError(3);
+  const double fs_Nj23_L = h_fs_Nj23->GetBinContent(3) * mc_L_corr;
+  const double fs_Nj23_L_err = adjL ? sqrt( pow((fs_Nj23_M_err/fs_Nj23_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj23_L : fs_Nj23_M_err;
+  const double fs_Nj4_P = h_fs_Nj4->GetBinContent(2);
+  const double fs_Nj4_P_err = h_fs_Nj4->GetBinError(2);
+  const double fs_Nj4_M = h_fs_Nj4->GetBinContent(3);
+  const double fs_Nj4_M_err = h_fs_Nj4->GetBinError(3);
+  const double fs_Nj4_L = h_fs_Nj4->GetBinContent(3) * mc_L_corr;
+  const double fs_Nj4_L_err = adjL ? sqrt( pow((fs_Nj4_M_err/fs_Nj4_M),2) + pow((mc_L_corr_err_4 / mc_L_corr_4),2) ) * fs_Nj4_L : fs_Nj4_M_err;
 
   cout << "Loaded transfer factors" << endl;
 
+  cout << "fs_P    : " << fs_P << endl;
+  cout << "fs_P err: " << fs_P_err << endl;
+  cout << "fs_M    : " << fs_M << endl;
+  cout << "fs_M err: " << fs_M_err << endl;
+  cout << "fs_L    : " << fs_L << endl;
+  cout << "fs_L err: " << fs_L_err << endl;
+  cout << "fs_Nj23_P    : " << fs_Nj23_P << endl;
+  cout << "fs_Nj23_P err: " << fs_Nj23_P_err << endl;
+  cout << "fs_Nj23_M    : " << fs_Nj23_M << endl;
+  cout << "fs_Nj23_M err: " << fs_Nj23_M_err << endl;
+  cout << "fs_Nj23_L    : " << fs_Nj23_L << endl;
+  cout << "fs_Nj23_L err: " << fs_Nj23_L_err << endl;
+  cout << "fs_Nj4_P    : " << fs_Nj4_P << endl;
+  cout << "fs_Nj4_P err: " << fs_Nj4_P_err << endl;
+  cout << "fs_Nj4_M    : " << fs_Nj4_M << endl;
+  cout << "fs_Nj4_M err: " << fs_Nj4_M_err << endl;
+  cout << "fs_Nj4_L    : " << fs_Nj4_L << endl;
+  cout << "fs_Nj4_L err: " << fs_Nj4_L_err << endl;
+  
   FshortFile->Close();
-  RmtptFile->Close();
+  FshortFileMC->Close();
 
   const unsigned int nEventsTree = ch->GetEntries();
   int nDuplicates = 0;
@@ -298,10 +302,33 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (unlikely(t.nVert == 0)) {
       continue;
     }
+
+    if (config_.filters["eeBadScFilter"] && !t.Flag_eeBadScFilter) continue; 
+    if (config_.filters["globalSuperTightHalo2016Filter"] && !t.Flag_globalSuperTightHalo2016Filter) continue; 
+    if (config_.filters["globalTightHalo2016Filter"] && !t.Flag_globalTightHalo2016Filter) continue; 
+    if (config_.filters["goodVertices"] && !t.Flag_goodVertices) continue;
+    if (config_.filters["HBHENoiseFilter"] && !t.Flag_HBHENoiseFilter) continue;
+    if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
+    if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
+    if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+    if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
+    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
+    if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+    
+    // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
+    if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
+      cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
+      continue;
+    }
+
     if (t.nJet30 < 2) {
       continue;
     }
     if (t.ht < 250) {
+    //if (t.ht < 250 || t.ht > 450) {
+    //if (t.ht < 450) {
       continue;
     }
     if (unlikely(t.nJet30FailId != 0)) {
@@ -311,6 +338,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       continue;
     }
     if (t.met_pt < 30) {
+    //    if (t.met_pt < 30 || t.met_pt > 100) {
+    //if (t.met_pt < 100 || t.met_pt > 250) {
+    //    if (t.met_pt < 250) {
+    //if (t.met_pt < 100) {
 	continue;
     }
 
@@ -318,7 +349,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       continue;
     }
 
-    if (unlikely(t.met_miniaodPt / t.met_caloPt > 5.0)) {
+    if (unlikely(t.met_miniaodPt / t.met_caloPt >= 5.0)) {
       continue;
     }
     if (unlikely(t.nJet200MuFrac50DphiMet > 0)) {
@@ -369,6 +400,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
       }
     }
+
+    if (weight > 1.0) continue;
+
+    /*
     // simulate turn-on curves and prescales in MC
     if (!t.isData) {
       if ( !passSRTrigger ) {
@@ -415,24 +450,35 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
       else { // not prescaled, but may not be in the 100% efficiency region
 	if (year == 2016 && (t.met_pt < 250 && t.ht < 1000)) {
-	  if (t.met_pt < 200) {
-	    weight *= ((0.8/100) * (t.met_pt - 100)) + 0.1;
+	  if (t.met_pt < 100) {
+	    // assume 0.1 for everything below 100 GeV
+	    weight *= 0.1;
+	  }
+	  else if (t.met_pt < 200) {
+	    weight *= (((0.8/100) * (t.met_pt - 100)) + 0.1);
 	  } else {
-	    weight *= ((0.1/50) * (t.met_pt - 200)) + 0.9;
+	    weight *= (((0.1/50) * (t.met_pt - 200)) + 0.9);
 	  }
 	}
 	else if (year == 2017 && (t.met_pt < 250 && t.ht < 1200)) {
 	  // use same values for 2017 for now
-	  if (t.met_pt < 200) {
-	    weight *= ((0.8/100) * (t.met_pt - 100)) + 0.1;
+	  if (t.met_pt < 75) {
+	    // assume 0.1 for everything below 100 GeV
+	    weight *= 0.1;
+	  }
+	  else if (t.met_pt < 100) {
+	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
+	    weight *= ( (0.1/25) * (t.met_pt - 75) ); 
+	  }
+	  else if (t.met_pt < 200) {
+	    weight *= (((0.8/100) * (t.met_pt - 100)) + 0.1);
 	  } else {
-	    weight *= ((0.1/50) * (t.met_pt - 200)) + 0.9;
+	    weight *= (((0.1/50) * (t.met_pt - 200)) + 0.9);
 	  }	  
 	}
       }
     }
-
-    cout << "Adjusted: " << weight << ", scale1fb * lumi: " << t.evt_scale1fb * lumi << endl;
+    */
 
     TH2D* hist;
     TH2D* hist_Nj;
@@ -440,7 +486,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     // L*
     if (t.nJet30 < 4) {
       // LH
-      if (t.ht > 1000) {
+      if (t.ht >= 1000) {
 	// VR
 	if (t.mt2 < 200) {
 	  hist = h_LH_VR;
@@ -471,7 +517,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     // H*
     else {
       // HH
-      if (t.ht > 1000) {
+      if (t.ht >= 1000) {
 	// VR
 	if (t.mt2 < 200) {
 	  hist = h_HH_VR;
@@ -548,8 +594,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.50 && t.track_eta[i_trk] > 0.40 && t.track_phi[i_trk] > -0.7 && t.track_phi[i_trk] < -0.5  ) )
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) );
 	const float pt = t.track_pt[i_trk];
-	const bool ptSel = pt > 15;
-	const bool etaSel = fabs(t.track_eta[i_trk]) < 2.4;
+	const bool ptSel = pt >= 15.0;
+	const bool etaSel = fabs(t.track_eta[i_trk]) <= 2.4;
 	const bool BaseSel = CaloSel && ptSel && etaSel;
 	
 	if (!BaseSel) {
@@ -560,9 +606,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	// Length and categorization
 	const bool lostOuterHitsSel = t.track_nLostOuterHits[i_trk] >= 2;
 	const int nLayers = t.track_nLayersWithMeasurement[i_trk];
-	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[i_trk] && lostOuterHitsSel && nLayers == (increment17 ? (year == 2016 ? 3 : 4) : 3);
-	const bool isLong = nLayers >= (increment17 ? (year == 2016 ? 7 : 8) : 7);
-	const bool isM = !isP && !isLong && lostOuterHitsSel;
+	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[i_trk] && lostOuterHitsSel && nLayers >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
+	const bool isLong = nLayers >= 7;
+	const bool isM = nLayers != t.track_nPixelLayersWithMeasurement[i_trk] && !isLong && lostOuterHitsSel;
 	const bool isL = isLong && lostOuterHitsSel;
 	const bool isShort = isP || isM || isL;
 	if (!isShort) {
@@ -600,7 +646,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	const float niso = t.track_neuIso0p05[i_trk];
 	const bool NeuIso0p05Sel = niso < 10;
 	const bool NeuIso0p05SelSTC = niso < 10*isoSTC;
-	const bool nreliso = t.track_neuRelIso0p05[i_trk];
+	const float nreliso = t.track_neuRelIso0p05[i_trk];
 	const bool NeuRelIso0p05Sel =  nreliso < 0.1;
 	const bool NeuRelIso0p05SelSTC = nreliso < 0.1*isoSTC;
 	const float iso = t.track_iso[i_trk];
@@ -617,9 +663,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
 	
 	// Quality
-	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 2 : 3) : 2);
-	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
-	const bool pixLayersSel4 = nLayers > ((increment17 ? (year == 2016 ? 4 : 5) : 4) ? pixLayersSelLoose : pixLayersSelTight); // Apply 2 layer selection to tracks with 5 (6) or more layers in 2016 (17/18)
+	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= 2;
+	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= 3;
+	const bool pixLayersSel4 = nLayers > 4 ? pixLayersSelLoose : pixLayersSelTight; // Apply 2 layer selection to tracks with 5 or more layers
 	
 	const int lostInnerHits = t.track_nLostInnerPixelHits[i_trk];
 	const bool lostInnerHitsSel = lostInnerHits == 0;
@@ -661,7 +707,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
 	isSTC = !isST;
 	//	isSTC = !isST && (isP || iso > 30 || reliso > 0.4);
-
 	if (! (isST || isSTC)) continue;
 	
 	const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );	
@@ -682,15 +727,14 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	      nSTCl_acc++;
 	    }
 	  }
-	}
-	
-	if (isSTC) {
+	}	
+	else if (isSTC) {
 	  switch(lenIndex) {
 	  case 1: nSTCp++; break;
 	  case 2: nSTCm++; break;
 	  }
 	}
-	if (isST) {
+	else if (isST) {
 	  switch(lenIndex) {
 	  case 1: nSTp++; break;
 	  case 2: nSTm++; break;
@@ -698,7 +742,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
       } // Track loop
     } // recalculate
-
+    
     // Eventwise STC Region fills
     // Chance of at least 1 track of given length being tagged is 1 - (1-p)^n
     /*
@@ -712,23 +756,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     else 
     */
     if (nSTCl_acc > 0) {
-      // For L tracks, we fill separately based on MtPt veto region, and extrapolate from STCs to STs with the L fshort
+      // For L tracks, we fill separately based on MtPt veto region, and extrapolate from STCs to STs based on M fshort
       hist->Fill(2.0,2.0,weight); // Fill CR
       hist_Nj->Fill(2.0,2.0,weight); // Fill CR      
       hist->Fill(2.0,1.0, weight * ( 1 - pow(1-fs_L,nSTCl_acc) ) ); // Fill expected SR count
-      hist_Nj->Fill(2.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_L_4 : fs_L_23),nSTCl_acc) ) ); // Fill expected SR count with separate Nj fshort
+      hist_Nj->Fill(2.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_L : fs_Nj23_L),nSTCl_acc) ) ); // Fill expected SR count with separate Nj fshort
     }
-    else if (nSTCm > 0) {
+    if (nSTCm > 0) {
       hist->Fill(1.0,2.0,weight); // Fill CR
       hist_Nj->Fill(1.0,2.0,weight); // Fill CR
       hist->Fill(1.0,1.0, weight * ( 1 - pow(1-fs_M,nSTCm) ) ); // Fill expected SR count
-      hist_Nj->Fill(1.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_M_4 : fs_M_23),nSTCm) ) ); // Fill expected SR count with separate Nj fs
+      hist_Nj->Fill(1.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M : fs_Nj23_M),nSTCm) ) ); // Fill expected SR count with separate Nj fs
     }
-    else if (nSTCp > 0) {
+    if (nSTCp > 0) {
       hist->Fill(0.0,2.0,weight); // Fill CR
       hist_Nj->Fill(0.0,2.0,weight); // Fill CR
       hist->Fill(0.0,1.0, weight * ( 1 - pow(1-fs_P,nSTCp) ) ); // Fill expected SR count
-      hist_Nj->Fill(0.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_P_4 : fs_P_23),nSTCp) ) ); // Fill expected SR count with separate Nj fs
+      hist_Nj->Fill(0.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P : fs_Nj23_P),nSTCp) ) ); // Fill expected SR count with separate Nj fs
     }
     // Eventwise ST fills
     // Only full STs when counting "observed" SR
@@ -743,83 +787,54 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       hist->Fill(2.0,0.0,weight);
       hist_Nj->Fill(2.0,0.0,weight);
     }
-    else if (nSTm > 0) {
+    if (nSTm > 0) {
       hist->Fill(1.0,0.0,weight);
       hist_Nj->Fill(1.0,0.0,weight);
     }
-    else if (nSTp > 0) {
+    if (nSTp > 0) {
       hist->Fill(0.0,0.0,weight);
       hist_Nj->Fill(0.0,0.0,weight);
     }
   }//end loop on events in a file
-
+  
   // Post-processing
-
-  vector<TH2D*> hists = {h_LL_SR, h_LH_SR, h_HL_SR, h_HH_SR, h_LL_VR, h_LH_VR, h_HL_VR, h_HH_VR,
-			 h_LL_SR_23, h_LH_SR_23, h_HL_SR_4, h_HH_SR_4, h_LL_VR_23, h_LH_VR_23, h_HL_VR_4, h_HH_VR_4};
-
-  // Now we subtract the STC->ST expected counts from the observed counts at in the mtpt veto region, and add some more L tracks to the accepted mtpt region
-  /*
-  for (vector<TH2D*>::iterator hist = hists.begin(); hist != hists.end(); hist++) {
-    TH2D* h = (*hist);
-    TString name = h->GetName();
-    bool nj23 = name.Contains("23");
-    bool nj4 = name.Contains("4");
-    bool isFSR = name.Contains("FSR");
-    bool isVR = name.Contains("VR");
-    float Rmtpt = 0;
-    if (nj23) {
-      if (isFSR) {
-	Rmtpt = RmtptFSR_23;
-      }
-      else if (isVR) {
-	Rmtpt = RmtptVR_23;
-      }
-      else {
-	Rmtpt = RmtptSR_23;
-      }
-    }
-    else if (nj4) {
-      if (isFSR) {
-	Rmtpt = RmtptFSR_4;
-      }
-      else if (isVR) {
-	Rmtpt = RmtptVR_4;
-      }
-      else {
-	Rmtpt = RmtptSR_4;
-      }
-    }
-    else {
-      if (isFSR) {
-	Rmtpt = RmtptFSR;
-      }
-      else if (isVR) {
-	Rmtpt = RmtptVR;
-      }
-      else {
-	Rmtpt = RmtptSR;
-      }
-    }
-    const float obsRejST = h->GetBinContent(3,1);
-    const float expRejST = h->GetBinContent(3,2);
-    const float ewkRejST = max(obsRejST - expRejST, 0.0f);
-    // Assume the excess rejected STs are from electroweak sources, and extrapolate these to the accepted region with Rmtpt from MC
-    const float extraAccST = ewkRejST * Rmtpt;
-    // 4,2 is the expectation of non-electroweak accepted STs. Add this to the expected accepted STs from electroweak sources.
-    const float corrected_exp_Acc_ST = h->GetBinContent(4,2) + extraAccST;
-    h->SetBinContent(5,1,h->GetBinContent(4,1)); // observed accepted STs is unchanged
-    h->SetBinError(5,1,h->GetBinError(4,1)); // observed accepted STs is unchanged
-    h->SetBinContent(5,2,corrected_exp_Acc_ST); // set the expected counts to the counts extrapolated from STCs plus the counts extrapolated from electroweak residual in mtpt veto region
-    h->SetBinContent(5,3,ewkRejST); // The CR in this case is the residual STs in the mtpt veto region
-  }
-  */
-
+  
+  vector<TH2D*> hists   = {h_LL_SR, h_LH_SR, h_HL_SR, h_HH_SR, h_LL_VR, h_LH_VR, h_HL_VR, h_HH_VR};
+  vector<TH2D*> hists23 = {h_LL_SR_23, h_LH_SR_23, h_LL_VR_23, h_LH_VR_23};
+  vector<TH2D*> hists4  = {h_HL_SR_4, h_HH_SR_4, h_HL_VR_4, h_HH_VR_4};
+  
+  // save fshorts so we can easily propagate errors on fshort to errors on the predicted ST counts
+  h_FS->SetBinContent(1,fs_P);
+  h_FS->SetBinContent(2,fs_M);
+  h_FS->SetBinContent(3,fs_L);
+  h_FS->SetBinError(1,fs_P_err);
+  h_FS->SetBinError(2,fs_M_err);
+  h_FS->SetBinError(3,fs_L_err);
+  
+  h_FS_23->SetBinContent(1,fs_Nj23_P);
+  h_FS_23->SetBinContent(2,fs_Nj23_M);
+  h_FS_23->SetBinContent(3,fs_Nj23_L);
+  h_FS_23->SetBinError(1,fs_Nj23_P_err);
+  h_FS_23->SetBinError(2,fs_Nj23_M_err);
+  h_FS_23->SetBinError(3,fs_Nj23_L_err);
+  
+  h_FS_4->SetBinContent(1,fs_Nj4_P);
+  h_FS_4->SetBinContent(2,fs_Nj4_M);
+  h_FS_4->SetBinContent(3,fs_Nj4_L);
+  h_FS_4->SetBinError(1,fs_Nj4_P_err);
+  h_FS_4->SetBinError(2,fs_Nj4_M_err);
+  h_FS_4->SetBinError(3,fs_Nj4_L_err);
+  
   cout << "About to write" << endl;
-
+  
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
   for (vector<TH2D*>::iterator hist = hists.begin(); hist != hists.end(); hist++) (*hist)->Write();
+  for (vector<TH2D*>::iterator hist = hists23.begin(); hist != hists23.end(); hist++) (*hist)->Write();
+  for (vector<TH2D*>::iterator hist = hists4.begin(); hist != hists4.end(); hist++) (*hist)->Write();
+  h_FS->Write();
+  h_FS_23->Write();
+  h_FS_4->Write();
   outfile_.Close();
   cout << "Wrote everything" << endl;
 

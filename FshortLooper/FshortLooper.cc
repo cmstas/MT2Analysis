@@ -8,7 +8,7 @@ class mt2tree;
 const bool recalculate = true; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
 // only with recalculate = true
 const int applyRecoVeto = 2; // 0: None, 1: use MT2 ID leptons for the reco veto, 2: use any Reco ID (Default: 2)
-const bool increment17 = false;
+const bool increment17 = true;
 const float isoSTC = 6, qualSTC = 3; // change these if recalculating Fshort
 
 // turn on to apply json file to data
@@ -19,6 +19,8 @@ const bool applyISRWeights = false; // evt_id is messed up in current babies, an
 const bool doNTrueIntReweight = true; // evt_id is messed up in current babies
 
 const bool blind = true;
+
+const bool skipHighWeights = true; // turn on to skip MC events with weight > 1, to keep errors reasonable
 
 TFile VetoFile("VetoHists.root");
 TH2F* veto_bar = (TH2F*) VetoFile.Get("h_VetoEtaPhi_bar");
@@ -55,6 +57,8 @@ bool FshortLooper::FillHists(const vector<TH2D*> hists, const double weight, con
 int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   string tag(outtag);
 
+  bool isSignal = tag.find("sim") != std::string::npos;
+
   cout << "FshortLooper::loop" << endl;
 
   // Book histograms
@@ -85,12 +89,29 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_fsFSR_23_lt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_23_lt1000HT");
   TH2D* h_fsFSR_4_gt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_4_gt1000HT");
   TH2D* h_fsFSR_4_lt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_4_lt1000HT");
+  TH2D* h_fsVR_gt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_gt1000HT");
+  TH2D* h_fsVR_lt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_lt1000HT");
+  TH2D* h_fsVR_23_gt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_23_gt1000HT");
+  TH2D* h_fsVR_23_lt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_23_lt1000HT");
+  TH2D* h_fsVR_4_gt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_4_gt1000HT");
+  TH2D* h_fsVR_4_lt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_4_lt1000HT");
+  TH2D* h_fsSR_gt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_gt1000HT");
+  TH2D* h_fsSR_lt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_lt1000HT");
+  TH2D* h_fsSR_23_gt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_23_gt1000HT");
+  TH2D* h_fsSR_23_lt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_23_lt1000HT");
+  TH2D* h_fsSR_4_gt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_4_gt1000HT");
+  TH2D* h_fsSR_4_lt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_4_lt1000HT");
 
   std::vector<TH2D*> fsrhists = {h_fsFSR, h_fsFSR_23, h_fsFSR_4, 
-			    h_fsVR, h_fsVR_23, h_fsVR_4, 
-			    h_fsSR, h_fsSR_23, h_fsSR_4,
-			    h_fsFSR_lt1000HT, h_fsFSR_gt1000HT, h_fsFSR_23_lt1000HT, h_fsFSR_4_gt1000HT, h_fsFSR_23_lt1000HT, h_fsFSR_4_gt1000HT};
+				 h_fsVR, h_fsVR_23, h_fsVR_4, 
+				 h_fsSR, h_fsSR_23, h_fsSR_4,
+				 h_fsFSR_lt1000HT, h_fsFSR_gt1000HT, h_fsFSR_23_lt1000HT, h_fsFSR_4_lt1000HT, h_fsFSR_23_gt1000HT, h_fsFSR_4_gt1000HT,
+				 h_fsVR_lt1000HT, h_fsVR_gt1000HT, h_fsVR_23_lt1000HT, h_fsVR_4_lt1000HT, h_fsVR_23_gt1000HT, h_fsVR_4_gt1000HT,
+				 h_fsSR_lt1000HT, h_fsSR_gt1000HT, h_fsSR_23_lt1000HT, h_fsSR_4_lt1000HT, h_fsSR_23_gt1000HT, h_fsSR_4_gt1000HT};
 
+  // Signal efficiency
+  TH1D* p_sigeffST = new TProfile("p_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
+  TH1D* p_sigeffSTC = new TProfile("p_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
 
   // Cut hists
   TH1D* h_reliso_ST_L = new TH1D("h_reliso_ST_L","RelIso of L STs",4,0,0.2);
@@ -183,11 +204,13 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH1D* h_nb_ST_L_250 = new TH1D("h_nb_ST_L_250","N_{Tag} in L ST Events",4,0,4);
   TH1D* h_nb_ST_L_300 = new TH1D("h_nb_ST_L_300","N_{Tag} in L ST Events",4,0,4);
 
+  /*
   TH1D* h_rlnb_ST_L_30 = new TH1D("h_rlnb_ST_L_30","N_{Tag} in Removed Lepton Events",4,0,4);
   TH1D* h_rlnb_ST_L_100 = new TH1D("h_rlnb_ST_L_100","N_{Tag} in Removed Lepton Events",4,0,4);
   TH1D* h_rlnb_ST_L_200 = new TH1D("h_rlnb_ST_L_200","N_{Tag} in Removed Lepton Events",4,0,4);
   TH1D* h_rlnb_ST_L_250 = new TH1D("h_rlnb_ST_L_250","N_{Tag} in Removed Lepton Events",4,0,4);
   TH1D* h_rlnb_ST_L_300 = new TH1D("h_rlnb_ST_L_300","N_{Tag} in Removed Lepton Events",4,0,4);
+  */
 
   // MtPt
   TH2D* h_mtptFSR_ST_P = new TH2D("h_mtptFSR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
@@ -1405,6 +1428,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_3newk_ST_1L_4H = new TH2D("h_mtptSR_3newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptSR_3newk_STC_1L_4H = new TH2D("h_mtptSR_3newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
+  /*
   // Zll hists 
   TH2D* h_zll_mtptFSR_ST_P = new TH2D("h_zll_mtptFSR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_zll_mtptFSR_STC_P = new TH2D("h_zll_mtptFSR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -1735,7 +1759,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_rlmtptSR = new TH2D("h_rlmtptSR","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
   TH2D* h_rlmtptSR_23 = new TH2D("h_rlmtptSR_23","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
   TH2D* h_rlmtptSR_4 = new TH2D("h_rlmtptSR_4","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
-
+  */
 
   double mt2bins[9] = {60,68,76,84,92,100,120,140,200};
 
@@ -1800,7 +1824,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH1D* h_dphiMet_STC_Lrej_4 = new TH1D("h_dphiMet_STC_Lrej_4", "#Delta#phi(MET,STC)",10,0,TMath::Pi());  
 
   std::vector<TH1D*> nbhists = {h_nb_ST_L_30, h_nb_ST_L_100, h_nb_ST_L_200, h_nb_ST_L_250, h_nb_ST_L_300};
-  std::vector<TH1D*> rlnbhists = {h_rlnb_ST_L_30, h_rlnb_ST_L_100, h_rlnb_ST_L_200, h_rlnb_ST_L_250, h_rlnb_ST_L_300};
+  //  std::vector<TH1D*> rlnbhists = {h_rlnb_ST_L_30, h_rlnb_ST_L_100, h_rlnb_ST_L_200, h_rlnb_ST_L_250, h_rlnb_ST_L_300};
 
   std::vector<TH2D*> mtpthists = { h_mtptFSR_ST_P, h_mtptFSR_ST_M, h_mtptFSR_ST_L, h_mtptFSR_ST_1L, h_mtptFSR_STC_P, h_mtptFSR_STC_M, h_mtptFSR_STC_L, h_mtptFSR_STC_1L,
 				 h_mtptFSR_ST_P_23L, h_mtptFSR_ST_M_23L, h_mtptFSR_ST_L_23L, h_mtptFSR_ST_1L_23L, h_mtptFSR_ST_P_4L, h_mtptFSR_ST_M_4L, h_mtptFSR_ST_L_4L, h_mtptFSR_ST_1L_4L,
@@ -1930,7 +1954,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_1newk_STC_P_23L, h_mtptSR_1newk_STC_M_23L, h_mtptSR_1newk_STC_L_23L, h_mtptSR_1newk_STC_1L_23L, h_mtptSR_1newk_STC_P_4L, h_mtptSR_1newk_STC_M_4L, h_mtptSR_1newk_STC_L_4L, h_mtptSR_1newk_STC_1L_4L,
 				 h_mtptSR_1newk_STC_P_23H, h_mtptSR_1newk_STC_M_23H, h_mtptSR_1newk_STC_L_23H, h_mtptSR_1newk_STC_1L_23H, h_mtptSR_1newk_STC_P_4H, h_mtptSR_1newk_STC_M_4H, h_mtptSR_1newk_STC_L_4H, h_mtptSR_1newk_STC_1L_4H};
 
-  std::vector<TH2D*> mtpthists_zll = { h_zll_mtptFSR_ST_P, h_zll_mtptFSR_ST_M, h_zll_mtptFSR_ST_L, h_zll_mtptFSR_STC_P, h_zll_mtptFSR_STC_M, h_zll_mtptFSR_STC_L,
+  /*  std::vector<TH2D*> mtpthists_zll = { h_zll_mtptFSR_ST_P, h_zll_mtptFSR_ST_M, h_zll_mtptFSR_ST_L, h_zll_mtptFSR_STC_P, h_zll_mtptFSR_STC_M, h_zll_mtptFSR_STC_L,
 				  h_zll_mtptFSR_ST_P_23L, h_zll_mtptFSR_ST_M_23L, h_zll_mtptFSR_ST_L_23L, h_zll_mtptFSR_ST_P_4L, h_zll_mtptFSR_ST_M_4L, h_zll_mtptFSR_ST_L_4L,
 				  h_zll_mtptFSR_ST_P_23H, h_zll_mtptFSR_ST_M_23H, h_zll_mtptFSR_ST_L_23H, h_zll_mtptFSR_ST_P_4H, h_zll_mtptFSR_ST_M_4H, h_zll_mtptFSR_ST_L_4H,
 				  h_zll_mtptFSR_STC_P_23L, h_zll_mtptFSR_STC_M_23L, h_zll_mtptFSR_STC_L_23L, h_zll_mtptFSR_STC_P_4L, h_zll_mtptFSR_STC_M_4L, h_zll_mtptFSR_STC_L_4L,
@@ -1982,6 +2006,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   std::vector<TH2D*> rlmtpthists = { h_rlmtptFSR, h_rlmtptFSR_23, h_rlmtptFSR_4,
 				h_rlmtptVR, h_rlmtptVR_23, h_rlmtptVR_4, 
 				h_rlmtptSR, h_rlmtptSR_23, h_rlmtptSR_4};
+  */
 
   std::vector<TH1D*> mt2hists =  { h_mt2_ST_P, h_mt2_ST_M, h_mt2_ST_L, h_mt2_ST_Lrej, 
 				   h_mt2_STC_P, h_mt2_STC_M, h_mt2_STC_L, h_mt2_STC_Lrej,
@@ -2231,8 +2256,9 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
     const bool lepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0;
 
+    /*
     // if we would veto a lepton, we just want to fill the removed lepton and DY plots if appropriate and then continue
-    if (lepveto && false) {
+    if (lepveto) {
       float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
 
       // Make sure there's exactly 1 lepton passing IDs, and apply analysis lepton veto (allowing only the reco lepton we're deleting)
@@ -2771,9 +2797,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       } // DY
       continue;
     }
+    */
+    // End lepton studies
     
-
     if (t.ht < 250) {
+    //if (t.ht < 450) {
+    //if (t.ht < 250 || t.ht > 450) {
       continue;
     }
 
@@ -2782,6 +2811,10 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     }
 
     if (t.met_pt < 30) {
+      //if (t.met_pt < 100) {
+    //if (t.met_pt < 250) {
+    //if (t.met_pt < 30 || t.met_pt > 100) {
+    //if (t.met_pt < 100 || t.met_pt > 250) {
       continue;
     }
 
@@ -2811,28 +2844,28 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
     const bool passSRTrigger = passTrigger(t, trigs_SR_);
 
-    //if (! (passPrescaleTrigger || passSRTrigger)) continue;
-    //    if (! passSRTrigger) continue;
-        if ( ! passPrescaleTrigger) continue;
+    if (! (passPrescaleTrigger || passSRTrigger) && !isSignal) continue;
+    //if (! passSRTrigger) continue;
+    //        if ( ! passPrescaleTrigger) continue;
     //if(!((t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120 || t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 || t.HLT_PFHT800_PFMET75_PFMHT75))) continue;
 
-    bool isSignal_ = t.evt_id >= 1000;
+    //    bool isSignal_ = t.evt_id >= 1000;
 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
     if (!t.isData) {
+      /*
       if (isSignal_ && applyISRWeights) {
-	/* // Not processing signal for now
+        // Not processing signal for now
 	int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
 	int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
 	weight_ *= t.weight_isr / avgweight_isr;
-	*/
       }
       else if (applyISRWeights && t.evt_id >= 301 && t.evt_id <= 303) { // ttbar
  	float avgweight_isr = getAverageISRWeight(t.evt_id, 0);
 	weight *= t.weight_isr / avgweight_isr;
       }
-      
+      */
       weight *= t.weight_btagsf;
 
       if (doNTrueIntReweight) {
@@ -2845,7 +2878,10 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
       }
 
+      if (skipHighWeights && weight > 1.0) continue; // skip high weighted events
+
     }
+    /*
     // simulate turn-on curves and prescales in MC
     if (!t.isData) {
       if ( !passSRTrigger ) {
@@ -2929,6 +2965,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
       }
     }
+    */
 
     if (weight < 0.0) {
       cout << "Negative weight: " << weight << ", " << t.run << ":" << t.lumi << ":" << t.evt << endl;
@@ -2954,12 +2991,26 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     // Validation Region
     else if (t.mt2 < 200) {
       histsToFill.push_back(h_fsVR);
-      t.nJet30 < 4 ? histsToFill.push_back(h_fsVR_23) : histsToFill.push_back(h_fsVR_4);
+      if (t.nJet30 < 4) {
+	histsToFill.push_back(h_fsVR_23);
+	t.ht < 1000 ? histsToFill.push_back(h_fsVR_23_lt1000HT) : histsToFill.push_back(h_fsVR_23_gt1000HT);
+      } else {
+	histsToFill.push_back(h_fsVR_4);
+	t.ht < 1000 ? histsToFill.push_back(h_fsVR_4_lt1000HT) : histsToFill.push_back(h_fsVR_4_gt1000HT);
+      }
+      t.ht < 1000 ? histsToFill.push_back(h_fsVR_lt1000HT) : histsToFill.push_back(h_fsVR_gt1000HT);
     }
     // Signal Region
     else if ( !(blind && t.isData) ) { // Only look at MT2 > 200 GeV in data if unblinded
-      histsToFill.push_back(h_fsSR); 
-      t.nJet30 < 4 ? histsToFill.push_back(h_fsSR_23) : histsToFill.push_back(h_fsSR_4);
+      histsToFill.push_back(h_fsSR);
+      if (t.nJet30 < 4) {
+	histsToFill.push_back(h_fsSR_23);
+	t.ht < 1000 ? histsToFill.push_back(h_fsSR_23_lt1000HT) : histsToFill.push_back(h_fsSR_23_gt1000HT);
+      } else {
+	histsToFill.push_back(h_fsSR_4);
+	t.ht < 1000 ? histsToFill.push_back(h_fsSR_4_lt1000HT) : histsToFill.push_back(h_fsSR_4_gt1000HT);
+      }
+      t.ht < 1000 ? histsToFill.push_back(h_fsSR_lt1000HT) : histsToFill.push_back(h_fsSR_gt1000HT);
     }
     // Should only get here if looking at data while blinded
     else {
@@ -2977,6 +3028,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       bool isST = false, isSTC = false, isST1 = false, isSTC1 = false;
       if (recalculate) {
 
+	const bool isChargino = t.track_isChargino[i_trk];
+
 	// Apply basic selections
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) == 0 
 	  && (year == 2016 || !(t.track_eta[i_trk] < -0.7 && t.track_eta[i_trk] > -0.9 && t.track_phi[i_trk] > 1.5 && t.track_phi[i_trk] < 1.7 ) )
@@ -2993,6 +3046,9 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const bool BaseSel = CaloSel && ptSel && etaSel;
 	
 	if (!BaseSel) {
+	  if (isChargino) {
+	    cout << "Chargino failed base selection" << endl;
+	  }
 	  continue;
 	}
 	
@@ -3003,13 +3059,14 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const bool lostOuterHitsSel = t.track_nLostOuterHits[i_trk] >= 2;
 	const int nLayers = t.track_nLayersWithMeasurement[i_trk];
 	const bool isP = nLayers == t.track_nPixelLayersWithMeasurement[i_trk] && lostOuterHitsSel && nLayers >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
-	const bool isLong = nLayers >= (increment17 ? (year == 2016 ? 7 : 8) : 7);
-	const bool isM = !isP && !isLong && lostOuterHitsSel;
+	const bool isLong = nLayers >= 7;
+	const bool isM = nLayers != t.track_nPixelLayersWithMeasurement[i_trk] && !isLong && lostOuterHitsSel;
 	const bool isL = isLong && lostOuterHitsSel;
 	const bool is1L = isLong && t.track_nLostOuterHits[i_trk] == 1;
 	const bool isShort = isP || isM || isL;
 
 	if (!isShort && !is1L) {
+	  if (isChargino && !isShort) cout << "Chargino failed shortness selection. Layers: " << nLayers << ", MOH: " << t.track_nLostOuterHits[i_trk] << endl;
 	  continue;
 	}
 
@@ -3034,6 +3091,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	else if (applyRecoVeto == 2) {
 	  const bool PassesRecoVeto = t.track_recoveto[i_trk] == 0;
 	  if (!PassesRecoVeto) {
+	    if (isChargino) cout << "Chargino failed reco veto, " << t.track_recoveto[i_trk] << endl;
 	    continue;
 	  }
 	} else {
@@ -3057,24 +3115,25 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const bool PassesFullIsoSelSTC = NeuIso0p05SelSTC && NeuRelIso0p05SelSTC && isoSelSTC && relisoSelSTC;
 
 	if (!PassesFullIsoSelSTC) {
+	  if (isChargino) cout << "Chargino failed isolation" << endl;
 	  continue;
 	}
 
 	// Quality
-	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 2 : 3) : 2);
-	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= (increment17 ? (year == 2016 ? 3 : 4) : 3);
-	const bool pixLayersSel4 = (nLayers > (increment17 ? (year == 2016 ? 4 : 5) : 4) ? pixLayersSelLoose : pixLayersSelTight); // Apply 2 layer selection to tracks with 5 (6) or more layers in 2016 (17/18)
+	const bool pixLayersSelLoose = t.track_nPixelLayersWithMeasurement[i_trk] >= 2;
+	const bool pixLayersSelTight = t.track_nPixelLayersWithMeasurement[i_trk] >= 3;
+	const bool pixLayersSel4 = nLayers > 4 ? pixLayersSelLoose : pixLayersSelTight; // Apply 2 layer selection to tracks with 5 or more layers
 	
 	const int lostInnerHits = t.track_nLostInnerPixelHits[i_trk];
 	const bool lostInnerHitsSel = lostInnerHits == 0;
 	const float pterr = t.track_ptErr[i_trk];
 	const float pterrOverPt2 = pterr / (pt*pt);
-	const bool pterrSelLoose = pterrOverPt2 < 0.2;
-	const bool pterrSelMedium = pterrOverPt2 < 0.02;
-	const bool pterrSelTight = pterrOverPt2 < 0.005;
-	const bool pterrSelLooseSTC = pterrOverPt2 < 0.2 * qualSTC;
-	const bool pterrSelMediumSTC = pterrOverPt2 < 0.02 * qualSTC;
-	const bool pterrSelTightSTC = pterrOverPt2 < 0.005 * qualSTC;
+	const bool pterrSelLoose = pterrOverPt2 <= 0.2;
+	const bool pterrSelMedium = pterrOverPt2 <= 0.02;
+	const bool pterrSelTight = pterrOverPt2 <= 0.005;
+	const bool pterrSelLooseSTC = pterrOverPt2 <= 0.2 * qualSTC;
+	const bool pterrSelMediumSTC = pterrOverPt2 <= 0.02 * qualSTC;
+	const bool pterrSelTightSTC = pterrOverPt2 <= 0.005 * qualSTC;
 	bool pterrSel = pterrSelTight;
 	bool pterrSelSTC = pterrSelTightSTC;
 	if (isP) {pterrSel = pterrSelLoose; pterrSelSTC = pterrSelLooseSTC;}
@@ -3096,6 +3155,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const bool isQualityTrackSTC = pixLayersSel4 && QualityTrackSTCBase;
 
 	if (!isQualityTrackSTC) {
+	  if (isChargino) cout << "Chargino failed quality" << endl;
 	  continue;
 	}
 
@@ -3106,6 +3166,22 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
 	isSTC = !isST && !is1L;
 	isSTC1 = !isST && is1L;
+
+	if (isSTC || isST) {	  
+	  if (isST) cout << "Found " << (t.track_isChargino[i_trk] ? "Chargino " : "") << "ST: " << nLayers << endl;
+	  else {
+	    cout << "Found " << (t.track_isChargino[i_trk] ? "Chargino " : "") << "STC: " << nLayers << endl;
+	    cout << (PassesFullIsoSel ? "Passes Iso" : "Fails Iso") << " and " << (isQualityTrack ? "Passes Quality" : "Fails Quality") << endl;
+	    if (!PassesFullIsoSel) {
+	      cout << "neu: " << niso << ", nrel: " << nreliso << ", abs: " << iso << ", rel: " << reliso << endl;
+	    } 
+	    if (!isQualityTrack) {
+	      cout << "dxy: " << t.track_dxy[i_trk] << ", dz: " << t.track_dz[i_trk] << ", pterr/pt^2: " << pterrOverPt2 << endl;
+	    }
+	  }
+	  cout << "Fill Index: " << fillIndex << endl;
+	}
+
 	// Put a floor on isolation at 30 GeV or reliso 0.4 to suppress electroweak STCs, for M and L tracks
 	//isSTC = !isST && (isP || iso > 30 || reliso > 0.4) && !is1L;
 	//isSTC1 = !isST1 && (iso > 30 || reliso > 0.4) && is1L;
@@ -3140,6 +3216,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       if (!isST && !isSTC && !isST1 && !isSTC1) {
 	continue;
       }
+
       /*
       // debug printouts
       if (fillIndex == 1 && t.mt2 < 100 && t.nJet30 >= 4) {
