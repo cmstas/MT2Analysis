@@ -531,7 +531,7 @@ class babyMaker {
   Float_t         rl_ht;
 
 //----- GEN PARTICLES
-  static const int max_ngenPart = 300;
+  static const int max_ngenPart = 7500;
   Int_t           ngenPart;
   Float_t         genPart_pt[max_ngenPart];   //[ngenPart]
   Float_t         genPart_eta[max_ngenPart];   //[ngenPart]
@@ -792,7 +792,12 @@ class babyMaker {
   Int_t           track_genPdgId[maxntracks];
   Float_t         track_genMatchDR[maxntracks];
   Float_t         track_decayXY[maxntracks];
-  
+  Float_t         chargino_minDR[2];
+  Float_t         chargino_matchpt[2];
+  Float_t         chargino_eta[2];
+  Float_t         chargino_phi[2];
+  Float_t         chargino_pt[2];  
+
   Int_t           nCharginos;
   
 
