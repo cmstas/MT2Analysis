@@ -638,7 +638,13 @@ public :
   Int_t           track_isChargino[maxntracks];
   Int_t           track_genPdgId[maxntracks];
   Float_t         track_genMatchDR[maxntracks];
-  
+  Float_t         track_decayXY[maxntracks];
+  Float_t         chargino_matchpt[2];
+  Float_t         chargino_minDR[2];
+  Float_t         chargino_eta[2];
+  Float_t         chargino_phi[2];
+  Float_t         chargino_pt[2];
+
   Int_t           nCharginos;
 
 
@@ -1234,6 +1240,12 @@ public :
    TBranch        *b_track_isChargino;
    TBranch        *b_track_genPdgId;
    TBranch        *b_track_genMatchDR;
+   TBranch        *b_track_decayXY;
+   TBranch        *b_chargino_minDR;
+   TBranch        *b_chargino_matchpt;
+   TBranch        *b_chargino_pt;
+   TBranch        *b_chargino_eta;
+   TBranch        *b_chargino_phi;
    TBranch        *b_nCharginos;
 
    mt2tree(TTree *tree=0);
@@ -1884,6 +1896,12 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("track_isChargino"))                       fChain->SetBranchAddress("track_isChargino", track_isChargino, &b_track_isChargino);
    if(bs->FindObject("track_genPdgId"))                         fChain->SetBranchAddress("track_genPdgId", track_genPdgId, &b_track_genPdgId); 
    if(bs->FindObject("track_genMatchDR"))                       fChain->SetBranchAddress("track_genMatchDR", track_genMatchDR, &b_track_genMatchDR); 
+   if(bs->FindObject("track_decayXY"))                          fChain->SetBranchAddress("track_decayXY", track_decayXY, &b_track_decayXY); 
+   if(bs->FindObject("chargino_minDR"))                         fChain->SetBranchAddress("chargino_minDR", chargino_minDR, &b_chargino_minDR); 
+   if(bs->FindObject("chargino_matchpt"))                       fChain->SetBranchAddress("chargino_matchpt", chargino_matchpt, &b_chargino_matchpt); 
+   if(bs->FindObject("chargino_pt"))                            fChain->SetBranchAddress("chargino_pt", chargino_pt, &b_chargino_pt); 
+   if(bs->FindObject("chargino_eta"))                           fChain->SetBranchAddress("chargino_eta", chargino_eta, &b_chargino_eta); 
+   if(bs->FindObject("chargino_phi"))                           fChain->SetBranchAddress("chargino_phi", chargino_phi, &b_chargino_phi); 
    if(bs->FindObject("nCharginos"))                             fChain->SetBranchAddress("nCharginos", &nCharginos, &b_nCharginos); 
    Notify();
 }
