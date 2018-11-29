@@ -3060,9 +3060,42 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	nshorttracks_P = 0; nshorttracks_M = 0; nshorttracks_L = 0;
 	nshorttrackcandidates_P = 0; nshorttrackcandidates_M = 0; nshorttrackcandidates_L = 0;
 	for (unsigned int i_it = 0; i_it < cms3.isotracks_p4().size(); i_it++) {
-	  if (!cms3.isotracks_isLostTrack().at(i_it)) continue;
-	  if (!cms3.isotracks_fromPV().at(i_it)) continue;
-	  if (cms3.isotracks_pttrk().at(i_it) < 15) continue;
+
+	  if (verbose) std::cout << "Before short track gen matching" << std::endl;
+
+	  // Do gen matching first so we can save ALL chargino tracks
+
+	  bool isChargino = false; float minGenDR = 0.01; int genPdgId = -1; int genIdx = -1;
+	  
+	  if (!isData) {
+	    for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {
+	      if (cms3.genps_status().at(iGen) != 1) continue;
+	      if (fabs(cms3.genps_charge().at(iGen)) < 0.01) continue;	    
+	      const float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),track_eta[ntracks],cms3.genps_p4().at(iGen).phi(),track_phi[ntracks]);
+	      if (dr < minGenDR) {
+		minGenDR = dr;
+		genIdx = iGen;
+	      }
+	    }
+	    if (genIdx >= 0) {
+	      genPdgId = cms3.genps_id().at(genIdx);
+	      isChargino = abs(genPdgId) == 1000024;
+	    }	  
+	  }
+
+	  // If not a chargino, need to pass some requirements
+	  if (!isChargino) {
+	    if (!cms3.isotracks_isLostTrack().at(i_it)) continue;
+	    if (!cms3.isotracks_fromPV().at(i_it)) continue;
+	    if (cms3.isotracks_pttrk().at(i_it) < 15) continue;
+	  }
+
+	  // Now that we know we're saving this track, write the gen matching variables if appropriate
+	  if (genIdx >= 0) {
+	    track_genMatchDR[ntracks] = minGenDR;
+	    track_genPdgId[ntracks] = genPdgId;
+	    track_isChargino[ntracks] = isChargino;
+	  }
 	  
 	  // Candidate kinematics
 	  //	const LorentzVector& cand_p4 = cms3.isotracks_p4().at(i_it);
@@ -3164,26 +3197,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  
 	  track_isLepOverlap[ntracks] = cms3.isotracks_lepOverlap().at(i_it);
 	  
-	  if (verbose) std::cout << "Before short track gen matching" << std::endl;
-	  
-	  if (!isData) {
-	    float minGenDR = 0.01; int genIdx = -1;
-	    for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {
-	      if (cms3.genps_status().at(iGen) != 1) continue;
-	      if (fabs(cms3.genps_charge().at(iGen)) < 0.01) continue;	    
-	      const float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),track_eta[ntracks],cms3.genps_p4().at(iGen).phi(),track_phi[ntracks]);
-	      if (dr < minGenDR) {
-		minGenDR = dr;
-		genIdx = iGen;
-	      }
-	    }
-	    if (genIdx >= 0) {
-	      track_genMatchDR[ntracks] = minGenDR;
-	      track_genPdgId[ntracks] = cms3.genps_id().at(genIdx);
-	      track_isChargino[ntracks] = abs(track_genPdgId[ntracks]) == 1000024;
-	    }	  
-	  }
-
 	  // Apply ST and STC selections	
 	  
 	  // Apply reco veto first so we can store the result for all tracks. We can't fully reconsider the short track definition  without remaking babies otherwise.
