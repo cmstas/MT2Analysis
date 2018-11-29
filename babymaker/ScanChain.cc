@@ -81,7 +81,7 @@ const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
 // use isotracks collection in cms4 for veto counting (as opposed to pfcands)
-const bool useIsotrackCollectionForVeto = false;
+const bool useIsotrackCollectionForVeto = true;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
@@ -3057,6 +3057,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (verbose) std::cout << "Before short tracks" << std::endl;
 
       if (doShortTrackInfo) {
+
+	if (!isData) {
+	  // find charginos
+	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
+	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != 1) continue;
+	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
+	    chargino_phi[nCharginos] = cms3.genps_p4().at(iGen).phi();
+	    chargino_pt[nCharginos] = cms3.genps_p4().at(iGen).pt();
+	    float minDR = 10000; float matchpt = -1;
+	    // Find nearest isotrack, no restrictions
+	    for (unsigned int i_it = 0; i_it < cms3.isotracks_p4().size(); i_it++) {
+	      float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),cms3.isotracks_etatrk().at(i_it),cms3.genps_p4().at(iGen).phi(),cms3.isotracks_phitrk().at(i_it));
+	      if (dr < minDR) {
+		minDR = dr;
+		matchpt = cms3.isotracks_pttrk().at(i_it);
+	      }
+	    }
+	    chargino_minDR[nCharginos] = minDR;
+	    chargino_matchpt[nCharginos] = matchpt;
+	    nCharginos++;
+	  }
+	}
+
 	ntracks = 0; nshorttracks = 0; nshorttrackcandidates = 0;
 	nshorttracks_P = 0; nshorttracks_M = 0; nshorttracks_L = 0;
 	nshorttrackcandidates_P = 0; nshorttrackcandidates_M = 0; nshorttrackcandidates_L = 0;
@@ -4003,6 +4026,11 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
   BabyTree_->Branch("track_decayXY", track_decayXY, "track_decayXY[ntracks]/F");
   BabyTree_->Branch("track_nCharginos", &nCharginos);
+  BabyTree_->Branch("chargino_minDR", chargino_minDR, "chargino_minDR[nCharginos]/F");
+  BabyTree_->Branch("chargino_matchpt", chargino_matchpt, "chargino_matchpt[nCharginos]/F");
+  BabyTree_->Branch("chargino_eta", chargino_eta, "chargino_eta[nCharginos]/F");
+  BabyTree_->Branch("chargino_phi", chargino_phi, "chargino_phi[nCharginos]/F");
+  BabyTree_->Branch("chargino_pt", chargino_pt, "chargino_pt[nCharginos]/F");
 
   // also make counter histogram
   count_hist_ = new TH1D("Count","Count",1,0,2);
@@ -4674,6 +4702,13 @@ void babyMaker::InitBabyNtuple () {
     track_genPdgId[i] = -999;
     track_genMatchDR[i] = -999;
     track_decayXY[i] = -999;
+  }
+  for (int i = 0; i < 2; i++) {
+    chargino_minDR[i] = -999;
+    chargino_matchpt[i] = -999;
+    chargino_eta[i] = -999;
+    chargino_phi[i] = -999;
+    chargino_pt[i] = -999;
   }
   nCharginos = 0;
 
