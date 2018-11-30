@@ -789,14 +789,22 @@ class babyMaker {
 
   // Gen info
   Int_t           track_isChargino[maxntracks];
+  Int_t           track_isDisappearingChargino[maxntracks];
+  Int_t           track_isBadCharginoTrack[maxntracks];
+  Int_t           track_matchedCharginoIdx[maxntracks];
   Int_t           track_genPdgId[maxntracks];
   Float_t         track_genMatchDR[maxntracks];
+  Float_t         track_nearestCharginoDR[maxntracks];
   Float_t         track_decayXY[maxntracks];
-  Float_t         chargino_minDR[2];
-  Float_t         chargino_matchpt[2];
-  Float_t         chargino_eta[2];
-  Float_t         chargino_phi[2];
-  Float_t         chargino_pt[2];  
+
+  static const int max_nchargino = 2;
+  Float_t         chargino_minDR[max_nchargino];
+  Float_t         chargino_decayXY[max_nchargino];
+  Float_t         chargino_eta[max_nchargino];
+  Float_t         chargino_phi[max_nchargino];
+  Float_t         chargino_pt[max_nchargino];  
+  Int_t           chargino_isDisappearing[max_nchargino];
+  Int_t           chargino_matchedTrackIdx[max_nchargino];
 
   Int_t           nCharginos;
   

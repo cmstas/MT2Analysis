@@ -3056,27 +3056,39 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
       if (verbose) std::cout << "Before short tracks" << std::endl;
 
-      if (doShortTrackInfo) {
+      if (doShortTrackInfo) {	
 
+	unsigned int Ch1_idx = 1000000; unsigned int Ch2_idx = 1000000;
 	if (!isData) {
-	  // find charginos
+	  if (verbose) cout << "Before chargino matching" << endl;
+	  // find charginos and see if they have decay lengths in the range of interest, 10 to 100 cm
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
-	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != 1) continue;
+	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != 1) continue; // looking for final state charginos
+	    chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
 	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
 	    chargino_phi[nCharginos] = cms3.genps_p4().at(iGen).phi();
-	    chargino_pt[nCharginos] = cms3.genps_p4().at(iGen).pt();
-	    float minDR = 10000; float matchpt = -1;
-	    // Find nearest isotrack, no restrictions
+	    chargino_pt[nCharginos] = cms3.genps_p4().at(iGen).pt();  
+	    // Charginos outside this volume usually don't leave disappearing tracks
+	    chargino_isDisappearing[nCharginos] = chargino_decayXY[nCharginos] > 10 && chargino_decayXY[nCharginos] < 100 && fabs(chargino_eta[nCharginos]) < 2.4;
+	    float minDR = 10000; int matchIdx = -1;
 	    for (unsigned int i_it = 0; i_it < cms3.isotracks_p4().size(); i_it++) {
+	      if (!cms3.isotracks_fromPV().at(i_it)) continue; // don't consider pileup
+	      if (cms3.isotracks_numberOfLostPixelHitsInner().at(i_it) > 1) continue; // tracks with many MIHs are just noise
 	      float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),cms3.isotracks_etatrk().at(i_it),cms3.genps_p4().at(iGen).phi(),cms3.isotracks_phitrk().at(i_it));
 	      if (dr < minDR) {
 		minDR = dr;
-		matchpt = cms3.isotracks_pttrk().at(i_it);
-	      }
+		matchIdx = i_it;
+	      }	
 	    }
+	    // Save DR to nearest isotracks
 	    chargino_minDR[nCharginos] = minDR;
-	    chargino_matchpt[nCharginos] = matchpt;
 	    nCharginos++;
+	    // if it's a good match, save which track it was
+	    if (minDR < 0.01) {
+	      if (nCharginos == 1) Ch1_idx = matchIdx;
+	      else if (nCharginos == 2) Ch2_idx = matchIdx;
+	      else cout << "Found more than 2 charginos!!!!" << endl;
+	    }
 	  }
 	}
 
@@ -3084,49 +3096,77 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	nshorttracks_P = 0; nshorttracks_M = 0; nshorttracks_L = 0;
 	nshorttrackcandidates_P = 0; nshorttrackcandidates_M = 0; nshorttrackcandidates_L = 0;
 	for (unsigned int i_it = 0; i_it < cms3.isotracks_p4().size(); i_it++) {
+	  if (!cms3.isotracks_fromPV().at(i_it)) continue;
+
+	  // If not a chargino, need to pass some requirements
+	  if (i_it != Ch1_idx && i_it != Ch2_idx) {
+	    if (!cms3.isotracks_isLostTrack().at(i_it)) continue;
+	    if (cms3.isotracks_pttrk().at(i_it) < 15) continue;
+	  }
+	  else if (i_it == Ch1_idx) {
+	    chargino_matchedTrackIdx[0] = ntracks;
+	    track_matchedCharginoIdx[ntracks] = 0;
+	  }
+	  else {
+	    chargino_matchedTrackIdx[1] = ntracks;
+	    track_matchedCharginoIdx[ntracks] = 1;
+	  }
+
+	  // If this track is to be saved only because a chargino matches to it, set bits indicating why it wouldn't normally be saved.
+	  if (!cms3.isotracks_isLostTrack().at(i_it)) {
+	    track_isBadCharginoTrack[ntracks] += 1<<0;
+	    cout << "Non-lostTrack chargino, track " << i_it << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand "  : ": General " ) << cms3.isotracks_particleId().at(i_it) << " decayXY " << chargino_decayXY[track_matchedCharginoIdx[ntracks]] << " nLayers " << cms3.isotracks_trackerLayersWithMeasurement().at(i_it) << " genpt " << chargino_pt[track_matchedCharginoIdx[ntracks]] << " recopt " << cms3.isotracks_pttrk().at(i_it) << endl;
+	  }
+	  if (cms3.isotracks_pttrk().at(i_it) < 15) {
+	    track_isBadCharginoTrack[ntracks] += 1<<1;
+	    cout << "Chargino with pt < 15 GeV" << endl;
+	  }
 
 	  if (verbose) std::cout << "Before short track gen matching" << std::endl;
 
-	  // Do gen matching first so we can save ALL chargino tracks
+	  //	  cout << "matched chargino index for track " << i_it << " (cms4) " << ntracks << " (baby): " << track_matchedCharginoIdx[ntracks] << ", ch1 = " << Ch1_idx << ", ch2 = " << Ch2_idx << endl;
 
-	  bool isChargino = false; float minGenDR = 0.01; int genPdgId = -1; int genIdx = -1;
-	  
+	  // Now that we know we're saving this track, do full gen matching.
+	  // Empirical fact: when a chargino's nearest track is within 0.01, that track is always also nearest the chargino.
+	  // Empirical fact: essentially all charginos that leave a good track are within DR ~ 0.008 of the track.
 	  if (!isData) {
+	    float minGenDR = 0.01; int genIdx = -1; float minChgDR = 10000;
 	    for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
-	      if (cms3.genps_status().at(iGen) != 1) continue;
-	      if (fabs(cms3.genps_charge().at(iGen)) < 0.01) continue;
+	      // Only consider charged, status 1 GPs
+	      if (fabs(cms3.genps_charge().at(iGen)) < 0.01 || cms3.genps_status().at(iGen) != 1) continue;
 	      const float dr = DeltaR(cms3.genps_p4().at(iGen).eta(),cms3.isotracks_etatrk().at(i_it),cms3.genps_p4().at(iGen).phi(),cms3.isotracks_phitrk().at(i_it));
 	      if (dr < minGenDR) {
 		minGenDR = dr;
 		genIdx = iGen;
 	      }
-	    }
-	    if (genIdx >= 0) {
-	      genPdgId = cms3.genps_id().at(genIdx);
-	      isChargino = abs(genPdgId) == 1000024;
-	      if (isChargino && !cms3.isotracks_isLostTrack().at(i_it)) {
-		cout << "Non-lostTrack chargino" << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand" : "") << endl;
+	      if (abs(cms3.genps_id().at(iGen)) == 1000024 && dr < minChgDR) {
+		minChgDR = dr;
 	      }
-	    }	  
-	  }
-
-	  // If not a chargino, need to pass some requirements
-	  if (!isChargino) {
-	    if (!cms3.isotracks_isLostTrack().at(i_it)) continue;
-	    if (!cms3.isotracks_fromPV().at(i_it)) continue;
-	    if (cms3.isotracks_pttrk().at(i_it) < 15) continue;
-	  }
-
-	  // Now that we know we're saving this track, write the gen matching variables if appropriate
-	  if (genIdx >= 0) {
-	    track_genMatchDR[ntracks] = minGenDR;
-	    track_genPdgId[ntracks] = genPdgId;
-	    track_isChargino[ntracks] = isChargino;
-	    // for charginos, find the transverse decay length
-	    if (isChargino) {
-	      track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
 	    }
-	  }
+	    track_nearestCharginoDR[ntracks] = minChgDR;
+	    // If *any* charged, status 1 GP was within DR < 0.01 of the track...
+	    if (genIdx >= 0) {
+	      track_genMatchDR[ntracks] = minGenDR;
+	      track_genPdgId[ntracks] = cms3.genps_id().at(genIdx);
+	      // If we matched a chargino ...
+	      if (abs(track_genPdgId[ntracks]) == 1000024) {
+		track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
+		track_isDisappearingChargino[ntracks] = track_decayXY[ntracks] > 10 && track_decayXY[ntracks] < 100;
+	      } 
+	      // if a chargino matched this track, but this track did not match a chargino...
+	      else if (track_matchedCharginoIdx[ntracks] >= 0 && chargino_decayXY[track_matchedCharginoIdx[ntracks]] >= 10) {
+		cout << "A chargino with > 10cm decay length is matched to a track that matches to a non-chargino. " << run << ":" << lumi << ":" << evt << endl;
+		cout << "Gen idx: " << genIdx << endl;
+		cout << "Matched ID: " << track_genPdgId[ntracks] << endl;
+		cout << "Track MIHs: " << cms3.isotracks_numberOfLostPixelHitsInner().at(i_it) << endl;
+		cout << "Matched chargino idx: " << track_matchedCharginoIdx[ntracks] << endl;
+		cout << "Chargino decayXY: " << chargino_decayXY[track_matchedCharginoIdx[ntracks]] << endl;
+		cout << "Chargino DR: " << chargino_minDR[track_matchedCharginoIdx[ntracks]] << " Matched DR: " << minGenDR << " Min Chg DR: " << minChgDR << endl;
+		cout << "Track idx (baby): " << ntracks << endl;
+		cout << "Track idx (cms4): " << (track_matchedCharginoIdx[ntracks] == 0 ? Ch1_idx : Ch2_idx) << endl;
+	      } // special cases for chargino matches
+	    } // we found a good gen match	  
+	  } // not data
 
 	  // Candidate kinematics
 	  //	const LorentzVector& cand_p4 = cms3.isotracks_p4().at(i_it);
@@ -3231,6 +3271,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
 	  // Apply ST and STC selections	
 	  
+	  // Bad chargino tracks aren't ST(C)s
+	  if (track_isBadCharginoTrack[ntracks]) {
+	    ntracks++;
+	    continue;
+	  }
+
 	  // Apply reco veto first so we can store the result for all tracks. We can't fully reconsider the short track definition  without remaking babies otherwise.
 	  if (verbose) std::cout << "Before short track lepton rejection" << std::endl;
 	  
@@ -4022,12 +4068,18 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("track_miniiso_correction", track_miniiso_correction, "track_miniiso_correction[ntracks]/F");
   BabyTree_->Branch("track_minireliso_correction", track_minireliso_correction, "track_minireliso_correction[ntracks]/F");
   BabyTree_->Branch("track_isChargino", track_isChargino, "track_isChargino[ntracks]/I");
+  BabyTree_->Branch("track_isDisappearingChargino", track_isDisappearingChargino, "track_isDisappearingChargino[ntracks]/I");
+  BabyTree_->Branch("track_isBadCharginoTrack", track_isBadCharginoTrack, "track_isBadCharginoTrack[ntracks]/I");
+  BabyTree_->Branch("track_matchedCharginoIdx", track_matchedCharginoIdx, "track_matchedCharginoIdx[ntracks]/I");
   BabyTree_->Branch("track_genPdgId", track_genPdgId, "track_genPdgId[ntracks]/I");
   BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
+  BabyTree_->Branch("track_nearestCharginoDR", track_nearestCharginoDR, "track_nearestCharginoDR[ntracks]/F");
   BabyTree_->Branch("track_decayXY", track_decayXY, "track_decayXY[ntracks]/F");
-  BabyTree_->Branch("track_nCharginos", &nCharginos);
+  BabyTree_->Branch("nCharginos", &nCharginos);
   BabyTree_->Branch("chargino_minDR", chargino_minDR, "chargino_minDR[nCharginos]/F");
-  BabyTree_->Branch("chargino_matchpt", chargino_matchpt, "chargino_matchpt[nCharginos]/F");
+  BabyTree_->Branch("chargino_isDisappearing", chargino_isDisappearing, "chargino_isDisappearing[nCharginos]/I");
+  BabyTree_->Branch("chargino_matchedTrackIdx", chargino_matchedTrackIdx, "chargino_matchedTrackIdx[nCharginos]/I");
+  BabyTree_->Branch("chargino_decayXY", chargino_decayXY, "chargino_decayXY[nCharginos]/F");
   BabyTree_->Branch("chargino_eta", chargino_eta, "chargino_eta[nCharginos]/F");
   BabyTree_->Branch("chargino_phi", chargino_phi, "chargino_phi[nCharginos]/F");
   BabyTree_->Branch("chargino_pt", chargino_pt, "chargino_pt[nCharginos]/F");
@@ -4699,16 +4751,22 @@ void babyMaker::InitBabyNtuple () {
     track_miniiso_correction[i] = -999;
     track_minireliso_correction[i] = -999;      
     track_isChargino[i] = 0;
+    track_isDisappearingChargino[i] = 0;
+    track_matchedCharginoIdx[i] = -999;
+    track_isBadCharginoTrack[i] = 0;
+    track_nearestCharginoDR[i] = -999;
     track_genPdgId[i] = -999;
     track_genMatchDR[i] = -999;
     track_decayXY[i] = -999;
   }
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < max_nchargino; i++) {
     chargino_minDR[i] = -999;
-    chargino_matchpt[i] = -999;
+    chargino_decayXY[i] = -999;
     chargino_eta[i] = -999;
     chargino_phi[i] = -999;
     chargino_pt[i] = -999;
+    chargino_isDisappearing[i] = -999;
+    chargino_matchedTrackIdx[i] = -999;
   }
   nCharginos = 0;
 
