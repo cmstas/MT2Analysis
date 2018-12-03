@@ -1254,8 +1254,9 @@ public :
    TBranch        *b_track_nearestCharginoDR;
    TBranch        *b_track_decayXY;
    TBranch        *b_chargino_minDR;
-   TBranch        *b_isDisappearing;
-   TBranch        *b_matchedTrackIdx;
+   TBranch        *b_chargino_decayXY;
+   TBranch        *b_chargino_isDisappearing;
+   TBranch        *b_chargino_matchedTrackIdx;
    TBranch        *b_chargino_pt;
    TBranch        *b_chargino_eta;
    TBranch        *b_chargino_phi;
