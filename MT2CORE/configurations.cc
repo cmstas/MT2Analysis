@@ -427,7 +427,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V4_MC"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
@@ -485,7 +485,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2017.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V4_MC"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;

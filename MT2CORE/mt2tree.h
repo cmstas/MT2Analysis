@@ -34,6 +34,9 @@ public :
    ULong64_t       evt_nEvts;
    Int_t           evt_id;
    Float_t         genWeight;
+   Float_t         weight_L1prefire;
+   Float_t         weight_L1prefire_UP;
+   Float_t         weight_L1prefire_DN;
    Float_t         puWeight;
    Int_t           nVert;
    Int_t           nTrueInt;
@@ -669,6 +672,9 @@ public :
    TBranch        *b_evt_nEvts;   //!
    TBranch        *b_evt_id;   //!
    TBranch        *b_genWeight;   //!
+   TBranch        *b_weight_L1prefire;   //!
+   TBranch        *b_weight_L1prefire_UP;   //!
+   TBranch        *b_weight_L1prefire_DN;   //!
    TBranch        *b_puWeight;   //!
    TBranch        *b_nVert;   //!
    TBranch        *b_nTrueInt;   //!
@@ -1335,6 +1341,9 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("evt_nEvts"))                              fChain->SetBranchAddress("evt_nEvts", &evt_nEvts, &b_evt_nEvts);
    if(bs->FindObject("evt_id"))                                 fChain->SetBranchAddress("evt_id", &evt_id, &b_evt_id);
    if(bs->FindObject("genWeight"))                              fChain->SetBranchAddress("genWeight", &genWeight, &b_genWeight);
+   if(bs->FindObject("weight_L1prefire"))                       fChain->SetBranchAddress("weight_L1prefire", &weight_L1prefire, &b_weight_L1prefire);
+   if(bs->FindObject("weight_L1prefire_UP"))                    fChain->SetBranchAddress("weight_L1prefire_UP", &weight_L1prefire_UP, &b_weight_L1prefire_UP);
+   if(bs->FindObject("weight_L1prefire_DN"))                    fChain->SetBranchAddress("weight_L1prefire_DN", &weight_L1prefire_DN, &b_weight_L1prefire_DN);
    if(bs->FindObject("puWeight"))                               fChain->SetBranchAddress("puWeight", &puWeight, &b_puWeight);
    if(bs->FindObject("nVert"))                                  fChain->SetBranchAddress("nVert", &nVert, &b_nVert);
    if(bs->FindObject("nTrueInt"))                               fChain->SetBranchAddress("nTrueInt", &nTrueInt, &b_nTrueInt);

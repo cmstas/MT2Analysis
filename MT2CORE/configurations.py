@@ -240,7 +240,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "pu_weights_file" : "puWeight2017.root",
     "ea_version" : 3,
     "jet_id": "2017_v1",
-    "JECs" : [ ["", "Fall17_17Nov2017_V4_MC"]
+    "JECs" : [ ["", "Fall17_17Nov2017_V32_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
                   "goodVertices",

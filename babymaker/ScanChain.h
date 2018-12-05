@@ -94,6 +94,9 @@ class babyMaker {
   ULong64_t       evt_nEvts;
   Int_t           evt_id;
   Float_t         genWeight;
+  Float_t         weight_L1prefire;
+  Float_t         weight_L1prefire_UP;
+  Float_t         weight_L1prefire_DN;
   Float_t         puWeight;
   Int_t           nVert;
   Int_t           nTrueInt;

@@ -524,6 +524,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       }
       if (!isData) {
         genWeight = cms3.genps_weight();
+        if(config_.year==2016 || config_.year==2017)
+            std::tie(weight_L1prefire, weight_L1prefire_UP, weight_L1prefire_DN) = getPrefireInfo(config_.year);
         puWeight = 1.;
         nTrueInt = -1;
 	if (cms3.puInfo_trueNumInteractions().size() > 0) nTrueInt = cms3.puInfo_trueNumInteractions().at(0);
@@ -3445,6 +3447,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("evt_nEvts", &evt_nEvts, "evt_nEvts/l" );
   BabyTree_->Branch("evt_id", &evt_id );
   BabyTree_->Branch("genWeight", &genWeight );
+  BabyTree_->Branch("weight_L1prefire", &weight_L1prefire );
+  BabyTree_->Branch("weight_L1prefire_UP", &weight_L1prefire_UP );
+  BabyTree_->Branch("weight_L1prefire_DN", &weight_L1prefire_DN );
   BabyTree_->Branch("puWeight", &puWeight );
   BabyTree_->Branch("nVert", &nVert );
   BabyTree_->Branch("nTrueInt", &nTrueInt );
@@ -4104,6 +4109,9 @@ void babyMaker::InitBabyNtuple () {
   evt_nEvts = 0;
   //evt_id = -1; // don't reset every event
   genWeight = 0;
+  weight_L1prefire = 1;
+  weight_L1prefire_UP = 1;
+  weight_L1prefire_DN = 1;
   puWeight = -999.0;
   nVert = -999;
   nTrueInt = -999;
