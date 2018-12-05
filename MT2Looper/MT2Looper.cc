@@ -62,8 +62,8 @@ const int n_njbins = 4;
 const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
 const int n_nbjbins = 4;
 const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
-const int n_mt2bins_SRBase = 9;
-const float SRBase_mt2bins[n_mt2bins_SRBase+1] = {200, 300, 400, 500, 600, 800, 1000, 1200, 1400, 1800}; 
+const int n_mt2bins_SRBase = 15;
+const float SRBase_mt2bins[n_mt2bins_SRBase+1] = {200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1400, 1600, 1700, 1800, 2400}; 
 const int n_ptVbins = 19;
 float logstep(int i) {
   return TMath::Power(10, 2+4.5e-02*i);
@@ -154,6 +154,7 @@ MT2Looper::~MT2Looper(){
 
 void MT2Looper::SetSignalRegions(){
   SRVec =  getSignalRegions2018(); 
+  // SRVec =  getSignalRegions2017(); 
   SRVecMonojet = getSignalRegionsMonojet2017(); 
 
   //store histograms with cut values for all variables
@@ -2381,41 +2382,41 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
   // Templates for hybrid method
   //const std::string&  NB = nBJet20_ == 0 ? "_0" : ( nBJet20_ == 1 ? "_1" : ( nBJet20_ == 2 ? "_2" : "_3") );
-  if (dirname=="srbaseVL") {
-    if (nJet30_ < 4) {
-      plot1D("h_mt2bins23J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins23J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    else {
-      plot1D("h_mt2bins4J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins4J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    if (nJet30_ > 2) {
+  if (nJet30_ >= 3) {
       plot1D("h_mt2bins3J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins3J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
   }
-  if (dirname=="srbaseL" || dirname=="srbaseM" || dirname=="srbaseH" || dirname=="srbaseUH") {
-    if (nJet30_ < 7) {
-      plot1D("h_mt2bins26J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
-      //plot1D("h_mt2bins26J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
-    }
-    if (nJet30_ < 4) {
-      plot1D("h_mt2bins23J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins23J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    else if (nJet30_ < 7) {
-      plot1D("h_mt2bins46J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins46J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    else {
+  if (nJet30_ >= 4){
+      plot1D("h_mt2bins4J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins4J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ >= 7) {
       plot1D("h_mt2bins7J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins7J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    if (nJet30_ > 2 && nJet30_ < 7) {
+  }
+  if (nJet30_ >= 10) {
+      plot1D("h_mt2bins10J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins7J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ < 7) {
+      plot1D("h_mt2bins26J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
+      //plot1D("h_mt2bins26J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
+  }
+  if (nJet30_ < 4) {
+      plot1D("h_mt2bins23J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins23J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ >= 4 && nJet30_ <= 6) {
+      plot1D("h_mt2bins46J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins46J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ >= 3 && nJet30_ <= 6) {
       plot1D("h_mt2bins36J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins36J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
+  }
+  if (nJet30_ >= 7 && nJet30_ <= 9) {
+      plot1D("h_mt2bins79J"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins36J"+NB+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   if (dirname=="sr20") { // Special plot to get MT2 template for 3B aggregate region
     if (nJet30_ > 2) {
@@ -2795,47 +2796,51 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   plot1D("h_mt2bins"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   //plot1D("h_mt2bins"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   
-  if (dirname=="crdybaseVL") {
-    if (nJet30_ < 4) {
-      plot1D("h_mt2bins23J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins23J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    else {
-      plot1D("h_mt2bins4J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins4J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    if (nJet30_ > 3) {
+
+  // Templates for hybrid method
+  //const std::string&  NB = nBJet20_ == 0 ? "_0" : ( nBJet20_ == 1 ? "_1" : ( nBJet20_ == 2 ? "_2" : "_3") );
+  if (nJet30_ >= 3) {
       plot1D("h_mt2bins3J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins3J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
   }
-  if (dirname=="crdybaseL" || dirname=="crdybaseM" || dirname=="crdybaseH") {
-    if (nJet30_ < 7) {
-      plot1D("h_mt2bins26J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
-      //plot1D("h_mt2bins26J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
-    }
-    if (nJet30_ < 4) {
-      plot1D("h_mt2bins23J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins23J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    else if (nJet30_ < 7) {
-      plot1D("h_mt2bins46J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-      //plot1D("h_mt2bins46J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    else {
+  if (nJet30_ >= 4){
+      plot1D("h_mt2bins4J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins4J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ >= 7) {
       plot1D("h_mt2bins7J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins7J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
-    if (nJet30_ > 3 && nJet30_ < 7) {
+  }
+  if (nJet30_ >= 10) {
+      plot1D("h_mt2bins10J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins7J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ < 7) {
+      plot1D("h_mt2bins26J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
+      //plot1D("h_mt2bins26J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);  // used for 26J 3B
+  }
+  if (nJet30_ < 4) {
+      plot1D("h_mt2bins23J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins23J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ >= 4 && nJet30_ <= 6) {
+      plot1D("h_mt2bins46J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins46J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+  if (nJet30_ >= 3 && nJet30_ <= 6) {
       plot1D("h_mt2bins36J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
       //plot1D("h_mt2bins36J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    }
+  }
+  if (nJet30_ >= 7 && nJet30_ <= 9) {
+      plot1D("h_mt2bins79J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+      //plot1D("h_mt2bins36J"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   if (dirname=="crdy20") { // Special plot to get MT2 template for 3B aggregate region
     if (nJet30_ > 2) {
       plot1D("h_mt2bins3J"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     }
   }
+
   
   if (dirname=="crdynocut" || TString(dirname).Contains("crdybase") || dirname=="crdyL" || dirname=="crdyM" || dirname=="crdyH") {
 
