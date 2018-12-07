@@ -106,6 +106,8 @@ bool doSystVariationPlots = true;
 bool doNvtxReweight = false;
 // turn on to apply nTrueInt reweighting to MC
 bool doNTrueIntReweight = true;
+// turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
+bool applyL1PrefireWeights = false;
 // turn on to apply json file to data
 bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -1105,6 +1107,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	if (applyTopPtReweight && t.evt_id >= 300 && t.evt_id < 400) {
 	  evtweight_ *= t.weight_toppt;
 	}
+
+        if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017))
+            evtweight_ *= t.weight_L1prefire;
 
       } // !isData
 
