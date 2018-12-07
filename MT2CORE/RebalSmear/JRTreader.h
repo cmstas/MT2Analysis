@@ -21,10 +21,10 @@ class JRTreader {
     int Init(const char *fname, bool correctDataResponse=false, int unc_var=0, string conf_tag="");
     float GetRandomResponse(float pt, float eta, bool isBjet);
     float GetValue(float pt, float eta, bool isBjet, float smearfact);
-    static float GetJERCorrection(float eta, int unc_var=0, string conf_tag="");
+    float GetJERCorrection(float eta, int unc_var=0);
+    void GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin);
     static int GetPtBin(float pt);
     static int GetEtaBin(float eta);
-    static void GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptbin, int *new_etabin);
     void SetCoreScale(float);
     void SetTailScale(float);
     void SetMeanShift(float);
@@ -54,6 +54,7 @@ class JRTreader {
 
     vector< vector<TH1D*>* > *fits_b;
     vector< vector<TH1D*>* > *fits_nonb;
+    string config_tag;
     bool useFits = true;
     float BINWIDTH = 0.02;
     float coreScale = 1.0;
