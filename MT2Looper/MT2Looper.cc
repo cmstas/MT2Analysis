@@ -1037,7 +1037,11 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
 	} else {
-	  if (!ignoreScale1fb) evtweight_ = t.evt_scale1fb * lumi;
+            if (!ignoreScale1fb){
+                evtweight_ = t.evt_scale1fb * lumi;
+                if(t.genWeight < 0 && evtweight_ > 0)
+                    evtweight_ *= -1.0;
+            }
 	}
 	if (verbose) cout<<__LINE__<<endl;
 	if (applyBtagSF) {

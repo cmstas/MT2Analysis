@@ -495,6 +495,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      evt_scale1fb = datasetInfoFromFile.getScale1fbFromFile(dataset_name, cms3_version.Data());
 	      evt_nEvts    = datasetInfoFromFile.getnEventsTotalFromFile(dataset_name, cms3_version.Data());
 	      evt_xsec     = datasetInfoFromFile.getXsecFromFile(dataset_name, cms3_version.Data());
+              if(cms3.genps_weight() < 0.0)
+                  evt_scale1fb *= -1.0;
 	    } catch (const exception& e) {
 	      if (event == 0) {
 		cout << "WARNING: " << e.what() << endl;
