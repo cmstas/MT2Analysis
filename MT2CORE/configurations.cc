@@ -417,14 +417,14 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("Photon200");
         c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
-    }else if(tag == "mc_101x_Spring18"){
+    }else if(tag == "mc_101x_Autumn18"){
 
         c.year               = 2018;
         c.lumi               = 41.529;
         c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
         c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold = 0.8838;
-        c.pu_weights_file    = "";
+        c.pu_weights_file    = "puWeight2018.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
@@ -437,7 +437,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
 
-    }else if(tag == "mc_80x_Moriond17"){
+    }else if(tag == "mc_80x_Summer16"){
 
         c.year               = 2016;
         c.lumi               = 35.922;
@@ -492,6 +492,26 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["ecalBadCalibFilter"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
+
+    }else if(tag == "mc_94x_Summer16"){
+
+        c.year               = 2016;
+        c.lumi               = 35.922;
+        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
+        c.btag_med_threshold = 0.8484;
+        c.pu_weights_file    = "puWeight2016.root";
+        c.ea_version         = 1;
+        c.jet_id             = "50nsV1";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
+        c.filters["eeBadScFilter"] = true;
+        c.filters["globalSuperTightHalo2016Filter"] = true;
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
 

@@ -253,12 +253,12 @@ MT2Config_defs["mc_94x_Fall17"] = {
                   ],
 }
 
-MT2Config_defs["mc_101x_Spring18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
-MT2Config_defs["mc_101x_Spring18"]["year"] = 2018
-MT2Config_defs["mc_101x_Spring18"]["pu_weights_file"] = ""
+MT2Config_defs["mc_101x_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_101x_Autumn18"]["year"] = 2018
+MT2Config_defs["mc_101x_Autumn18"]["pu_weights_file"] = 58.83
+MT2Config_defs["mc_101x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
 
-
-MT2Config_defs["mc_80x_Moriond17"] = {
+MT2Config_defs["mc_80x_Summer16"] = {
     "year" : 2016,
     "lumi" : 35.922,
     "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
@@ -279,7 +279,29 @@ MT2Config_defs["mc_80x_Moriond17"] = {
                   ],
 }
 
-MT2Config_defs["mc_80x_fastsim_Moriond17"] = copy.deepcopy(MT2Config_defs["mc_80x_Moriond17"])
+MT2Config_defs["mc_94x_Summer16"] = {
+    "year" : 2016,
+    "lumi" : 35.922,
+    "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
+    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
+    "btag_med_threshold" : 0.8484,
+    "pu_weights_file" : "puWeight2016.root",
+    "ea_version" : 1,
+    "jet_id": "50nsV1",
+    "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
+               ],
+    "filters" : [ "eeBadScFilter",
+                  "globalSuperTightHalo2016Filter",
+                  "goodVertices",
+                  "HBHENoiseFilter",
+                  "HBHENoiseIsoFilter",
+                  "EcalDeadCellTriggerPrimitiveFilter",
+                  "badMuonFilter",
+                  "badChargedCandidateFilter"
+                  ],
+}
+
+MT2Config_defs["mc_80x_fastsim_Moriond17"] = copy.deepcopy(MT2Config_defs["mc_80x_Summer16"])
 MT2Config_defs["mc_80x_fastsim_Moriond17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
 
 
