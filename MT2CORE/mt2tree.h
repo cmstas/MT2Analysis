@@ -54,7 +54,6 @@ public :
    Int_t           nBJet20JECup;
    Int_t           nBJet20JECdn;
    Int_t           nBJet20csv;
-   Int_t           nBJet20mva;
    Int_t           nBJet25;
    Int_t           nBJet30;
    Int_t           nBJet40;
@@ -478,8 +477,8 @@ public :
    Float_t         jet_eta[100];   //[njet]
    Float_t         jet_phi[100];   //[njet]
    Float_t         jet_mass[100];   //[njet]
+   Float_t         jet_btagDeepCSV[100];   //[njet]
    Float_t         jet_btagCSV[100];   //[njet]
-   Float_t         jet_btagMVA[100];   //[njet]
    Float_t         jet_chf[100];  //[njet]
    Float_t         jet_nhf[100];  //[njet]
    Float_t         jet_cemf[100];  //[njet]
@@ -536,7 +535,7 @@ public :
    Float_t         rebal_jetpt[100];
    Float_t         rebal_jeteta[100];
    Float_t         rebal_jetphi[100];
-   Float_t         rebal_jetbtagcsv[100];
+   Float_t         rebal_jetbtagdeepcsv[100];
    Float_t         rebal_factors[100];
    Float_t         rebal_met_pt;
    Float_t         rebal_met_phi;
@@ -692,7 +691,6 @@ public :
    TBranch        *b_nBJet20JECup;   //!
    TBranch        *b_nBJet20JECdn;   //!
    TBranch        *b_nBJet20csv;   //!
-   TBranch        *b_nBJet20mva;   //!
    TBranch        *b_nBJet25;   //!
    TBranch        *b_nBJet30;   //!
    TBranch        *b_nBJet40;   //!
@@ -1115,7 +1113,7 @@ public :
    TBranch        *b_jet_phi;   //!
    TBranch        *b_jet_mass;   //!
    TBranch        *b_jet_btagCSV;   //!
-   TBranch        *b_jet_btagMVA;   //!
+   TBranch        *b_jet_btagDeepCSV;   //!
    TBranch        *b_jet_chf;   //!
    TBranch        *b_jet_nhf;   //!
    TBranch        *b_jet_cemf;   //!
@@ -1171,7 +1169,7 @@ public :
    TBranch        *b_rebal_jetpt;
    TBranch        *b_rebal_jeteta;
    TBranch        *b_rebal_jetphi;
-   TBranch        *b_rebal_jetbtagcsv;
+   TBranch        *b_rebal_jetbtagdeepcsv;
    TBranch        *b_rebal_factors;
    TBranch        *b_rebal_met_pt;
    TBranch        *b_rebal_met_phi;
@@ -1361,7 +1359,6 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("nBJet20JECup"))                           fChain->SetBranchAddress("nBJet20JECup", &nBJet20JECup, &b_nBJet20JECup);
    if(bs->FindObject("nBJet20JECdn"))                           fChain->SetBranchAddress("nBJet20JECdn", &nBJet20JECdn, &b_nBJet20JECdn);
    if(bs->FindObject("nBJet20csv"))                             fChain->SetBranchAddress("nBJet20csv", &nBJet20csv, &b_nBJet20csv);
-   if(bs->FindObject("nBJet20mva"))                             fChain->SetBranchAddress("nBJet20mva", &nBJet20mva, &b_nBJet20mva);
    if(bs->FindObject("nBJet25"))                                fChain->SetBranchAddress("nBJet25", &nBJet25, &b_nBJet25);
    if(bs->FindObject("nBJet30"))                                fChain->SetBranchAddress("nBJet30", &nBJet30, &b_nBJet30);
    if(bs->FindObject("nBJet40"))                                fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
@@ -1784,7 +1781,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("jet_phi"))                                fChain->SetBranchAddress("jet_phi", jet_phi, &b_jet_phi);
    if(bs->FindObject("jet_mass"))                               fChain->SetBranchAddress("jet_mass", jet_mass, &b_jet_mass);
    if(bs->FindObject("jet_btagCSV"))                            fChain->SetBranchAddress("jet_btagCSV", jet_btagCSV, &b_jet_btagCSV);
-   if(bs->FindObject("jet_btagMVA"))                            fChain->SetBranchAddress("jet_btagMVA", jet_btagMVA, &b_jet_btagMVA);
+   if(bs->FindObject("jet_btagDeepCSV"))                        fChain->SetBranchAddress("jet_btagDeepCSV", jet_btagDeepCSV, &b_jet_btagDeepCSV);
    if(bs->FindObject("jet_chf"))                                fChain->SetBranchAddress("jet_chf", jet_chf, &b_jet_chf);
    if(bs->FindObject("jet_nhf"))                                fChain->SetBranchAddress("jet_nhf", jet_nhf, &b_jet_nhf);
    if(bs->FindObject("jet_nemf"))                               fChain->SetBranchAddress("jet_nemf", jet_cemf, &b_jet_cemf);
@@ -1840,7 +1837,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("rebal_jetpt"))                            fChain->SetBranchAddress("rebal_jetpt", rebal_jetpt, &b_rebal_jetpt);
    if(bs->FindObject("rebal_jeteta"))                           fChain->SetBranchAddress("rebal_jeteta", rebal_jeteta, &b_rebal_jeteta);
    if(bs->FindObject("rebal_jetphi"))                           fChain->SetBranchAddress("rebal_jetphi", rebal_jetphi, &b_rebal_jetphi);
-   if(bs->FindObject("rebal_jetbtagcsv"))                       fChain->SetBranchAddress("rebal_jetbtagcsv", rebal_jetbtagcsv, &b_rebal_jetbtagcsv);
+   if(bs->FindObject("rebal_jetbtagdeepcsv"))                   fChain->SetBranchAddress("rebal_jetbtagdeepcsv", rebal_jetbtagdeepcsv, &b_rebal_jetbtagdeepcsv);
    if(bs->FindObject("rebal_factors"))                          fChain->SetBranchAddress("rebal_factors", rebal_factors, &b_rebal_factors);
    if(bs->FindObject("rebal_met_pt"))                           fChain->SetBranchAddress("rebal_met_pt", &rebal_met_pt, &b_rebal_met_pt);
    if(bs->FindObject("rebal_met_phi"))                          fChain->SetBranchAddress("rebal_met_phi", &rebal_met_phi, &b_rebal_met_phi);

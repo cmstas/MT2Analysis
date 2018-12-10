@@ -20,9 +20,10 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "year" : 2017,
     "json" : "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt",
     "lumi" : 41.37,
-    "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold" : 0.8838,
+    "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
+    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
     "JECs" : [ ["2017B", "Fall17_17Nov2017B_V32_DATA"],
@@ -99,9 +100,10 @@ MT2Config_defs["data_2017_Prompt"] = {
     "year" : 2017,
     "json" : "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt",
     "lumi" : 41.97,
-    "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold" : 0.8838,
+    "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
+    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
     "JECs" : [ ["", "Summer16_23Sep2016HV4_DATA"] 
@@ -120,9 +122,10 @@ MT2Config_defs["data_2018_Prompt"] = {
     "year" : 2018,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
     "lumi" : 58.83,
-    "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold" : 0.8838,
+    "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
+    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
     "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
@@ -135,9 +138,10 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "year" : 2018,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
     "lumi" : 58.83,
-    "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold" : 0.8838,
+    "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
+    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
     "jet_id": "2017_v1",
     "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
@@ -150,9 +154,10 @@ MT2Config_defs["data_2016_Moriond17"] = {
     "year" : 2016,
     "json" : "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt",
     "lumi" : 35.922,
-    "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
-    "btag_med_threshold" : 0.8484,
+    "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
+    "btag_med_threshold_DeepCSV" : 0.6324,
+    "btag_med_threshold_CSVv2" : 0.8484,
     "ea_version" : 1,
     "jet_id": "50nsV1",
     "JECs" : [ ["2016B", "Summer16_23Sep2016BCDV4_DATA"],
@@ -234,9 +239,10 @@ MT2Config_defs["data_2016_94x"]["filters"] = [
 MT2Config_defs["mc_94x_Fall17"] = {
     "year" : 2017,
     "lumi" : 41.529,
-    "btagcalib_csv" : "CSVv2_94XSF_V2_B_F.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold" : 0.8838,
+    "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
+    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
     "ea_version" : 3,
     "jet_id": "2017_v1",
@@ -253,17 +259,18 @@ MT2Config_defs["mc_94x_Fall17"] = {
                   ],
 }
 
-MT2Config_defs["mc_101x_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
-MT2Config_defs["mc_101x_Autumn18"]["year"] = 2018
-MT2Config_defs["mc_101x_Autumn18"]["pu_weights_file"] = 58.83
-MT2Config_defs["mc_101x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
+MT2Config_defs["mc_102x_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_102x_Autumn18"]["year"] = 2018
+MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = 58.83
+MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
 
 MT2Config_defs["mc_80x_Summer16"] = {
     "year" : 2016,
     "lumi" : 35.922,
-    "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
-    "btag_med_threshold" : 0.8484,
+    "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
+    "btag_med_threshold_DeepCSV" : 0.6324,
+    "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
     "ea_version" : 1,
     "jet_id": "50nsV1",
@@ -282,9 +289,10 @@ MT2Config_defs["mc_80x_Summer16"] = {
 MT2Config_defs["mc_94x_Summer16"] = {
     "year" : 2016,
     "lumi" : 35.922,
-    "btagcalib_csv" : "CSVv2_Moriond17_B_H.csv",
-    "btageff_file" : "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root",
-    "btag_med_threshold" : 0.8484,
+    "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
+    "btag_med_threshold_DeepCSV" : 0.6324,
+    "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
     "ea_version" : 1,
     "jet_id": "50nsV1",
@@ -400,7 +408,8 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.lumi               = {0};\n".format(c[tag]["lumi"]))
         fout.write("        c.btagcalib_csv      = \"{0}\";\n".format(c[tag]["btagcalib_csv"]))
         fout.write("        c.btageff_file       = \"{0}\";\n".format(c[tag]["btageff_file"]))
-        fout.write("        c.btag_med_threshold = {0};\n".format(c[tag]["btag_med_threshold"]))
+        fout.write("        c.btag_med_threshold_DeepCSV = {0};\n".format(c[tag]["btag_med_threshold_DeepCSV"]))
+        fout.write("        c.btag_med_threshold_CSVv2   = {0};\n".format(c[tag]["btag_med_threshold_CSVv2"]))
         if "pu_weights_file" in c[tag]:
             fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))

@@ -84,6 +84,8 @@ int sampleID (const string& name) {
     if (name.find("TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 300;
     else if (name.find("TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 301;
     else if (name.find("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
+    else if (name.find("TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8") != string::npos) return 301;
+    else if (name.find("TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
     else if (name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
     else if (name.find("TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8") != string::npos) return 306;
     

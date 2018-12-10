@@ -45,9 +45,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2016;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
-        c.btag_med_threshold = 0.8484;
+        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
+        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_CSVv2   = 0.8484;
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
@@ -107,9 +108,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2016;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
-        c.btag_med_threshold = 0.8484;
+        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
+        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_CSVv2   = 0.8484;
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
@@ -169,9 +171,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2017;
         c.json               = "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
         c.lumi               = 41.37;
-        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold = 0.8838;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V32_DATA"));
@@ -236,9 +239,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2017;
         c.json               = "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
         c.lumi               = 41.97;
-        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold = 0.8838;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016HV4_DATA"));
@@ -296,9 +300,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2018;
         c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         c.lumi               = 58.83;
-        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold = 0.8838;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
@@ -359,9 +364,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2018;
         c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         c.lumi               = 58.83;
-        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold = 0.8838;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
@@ -417,13 +423,14 @@ MT2Configuration GetMT2Config(std::string tag){
         c.triggers["DilepOF"].push_back("Photon200");
         c.triggers["DilepOF"].push_back("SingleMu_NonIso");
 
-    }else if(tag == "mc_101x_Autumn18"){
+    }else if(tag == "mc_102x_Autumn18"){
 
         c.year               = 2018;
         c.lumi               = 41.529;
-        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold = 0.8838;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
         c.pu_weights_file    = "puWeight2018.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
@@ -441,9 +448,10 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2016;
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
-        c.btag_med_threshold = 0.8484;
+        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
+        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_CSVv2   = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
@@ -460,9 +468,10 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2016;
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
-        c.btag_med_threshold = 0.8484;
+        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
+        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_CSVv2   = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
@@ -479,9 +488,10 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2017;
         c.lumi               = 41.529;
-        c.btagcalib_csv      = "CSVv2_94XSF_V2_B_F.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold = 0.8838;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
         c.pu_weights_file    = "puWeight2017.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
@@ -499,9 +509,10 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2016;
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "CSVv2_Moriond17_B_H.csv";
-        c.btageff_file       = "btageff__ttbar_powheg_pythia8_25ns_Moriond17.root";
-        c.btag_med_threshold = 0.8484;
+        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
+        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_CSVv2   = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
