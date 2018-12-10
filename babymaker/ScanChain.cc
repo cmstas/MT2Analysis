@@ -3302,7 +3302,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      overlap_id = 13;
 	    }
 	  }
-	  const bool recoVeto = minrecodr < 0.1;
+	  const bool recoVeto = minrecodr < 0.2;
 	  if (verbose && recoVeto && !track_isLepOverlap[ntracks]) 
               std::cout << "Rejected a short track due to lepton reco veto (DR = " << minrecodr << ") without corresponding PF lep. " << run << ":" << lumi << ":" << evt << std::endl;
 	  // Get rid of anything near or overlapping a lepton
