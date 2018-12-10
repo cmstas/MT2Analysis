@@ -113,9 +113,7 @@ class babyMaker {
   Int_t           nBJet30;
   Int_t           nBJet40;
   Int_t           nBJet20csv;
-  Int_t           nBJet20mva;
   Int_t           nBJet30csv;
-  Int_t           nBJet30mva;
   Int_t           nJet30FailId;
   Int_t           nJet100FailId;
   Int_t           nJet20BadFastsim;
@@ -464,7 +462,6 @@ class babyMaker {
   Int_t           gamma_nJet100FailId;
   Int_t           gamma_nBJet20;
   Int_t           gamma_nBJet20csv;
-  Int_t           gamma_nBJet20mva;
   Int_t           gamma_nBJet25;
   Int_t           gamma_nBJet30;
   Int_t           gamma_nBJet40;
@@ -615,7 +612,6 @@ class babyMaker {
   Float_t         jet_phi[max_njet];   //[njet]
   Float_t         jet_mass[max_njet];   //[njet]
   Float_t         jet_btagCSV[max_njet];   //[njet] 
-  Float_t         jet_btagMVA[max_njet];   //[njet]
   Float_t         jet_btagDeepCSV[max_njet];   //[njet]
   Float_t         jet_chf[max_njet];   //[njet]
   Float_t         jet_nhf[max_njet];   //[njet]
@@ -688,7 +684,7 @@ class babyMaker {
   Float_t         rebal_jetpt[max_njet];
   Float_t         rebal_jeteta[max_njet];
   Float_t         rebal_jetphi[max_njet];
-  Float_t         rebal_jetbtagcsv[max_njet];
+  Float_t         rebal_jetbtagdeepcsv[max_njet];
   Float_t         rebal_factors[max_njet];
   Float_t         rebal_met_pt;
   Float_t         rebal_met_phi;

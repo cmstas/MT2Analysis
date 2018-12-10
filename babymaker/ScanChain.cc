@@ -71,7 +71,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
@@ -1999,9 +1999,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       nBJet30 = 0;
       nBJet40 = 0;
       nBJet20csv = 0;    // counters for 2 different algorithms
-      nBJet20mva = 0;
       nBJet30csv = 0;    // counters for 2 different algorithms
-      nBJet30mva = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
       nJet20BadFastsim = 0;
@@ -2021,7 +2019,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       gamma_nJet100FailId = 0;
       gamma_nBJet20 = 0;
       gamma_nBJet20csv = 0;
-      gamma_nBJet20mva = 0;
       gamma_nBJet25 = 0;
       gamma_nBJet30 = 0;
       gamma_nBJet40 = 0;
@@ -2116,9 +2113,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  const float jet_etaDN =  p4sCorrJetsDN.at(iJet).eta();
           jet_mass[njet] = cms3.pfjets_p4().at(iJet).M();
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
-          jet_btagMVA[njet] = cms3.getbtagvalue("pfCombinedMVAV2BJetTags",iJet);
-          if(config_tag != "mc_80x_Moriond17") jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
-          // jet_btagMVA[njet] = cms3.pfjets_pfCombinedMVAV2BJetTags().at(iJet);
+          jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
 
           jet_chf[njet] = cms3.pfjets_chargedHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
           jet_nhf[njet] = cms3.pfjets_neutralHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
@@ -2184,16 +2179,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               if (jet_pt[njet] > 40.) 
                   nJet40++;
             } // pt30
-            if(jet_btagMVA[njet] >= 0.4432) {
-              nBJet20mva++;
-	      if (jet_pt[njet] > 30.0) nBJet30mva++;
-            }
-            //CSVv2IVFM
-            if(jet_btagCSV[njet] >= config_.btag_med_threshold){
-              nBJet20++; 
-              good_bjet_idxs[nBJet20-1] = njet;
+            if(jet_btagCSV[njet] >= config_.btag_med_threshold_CSVv2) {
               nBJet20csv++;
 	      if (jet_pt[njet] > 30.0) nBJet30csv++;
+            }
+            //CSVv2IVFM
+            if(jet_btagDeepCSV[njet] >= config_.btag_med_threshold_DeepCSV){
+              nBJet20++; 
+              good_bjet_idxs[nBJet20-1] = njet;
               // btag SF - not final yet
               if (!isData && applyBtagSFs) {
                 float eff = getBtagEffFromFile(jet_pt[njet], jet_eta[njet], jet_hadronFlavour[njet], isFastsim);
@@ -2293,7 +2286,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               nJet30JECup++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= config_.btag_med_threshold) {
+            if(jet_btagDeepCSV[njet] >= config_.btag_med_threshold_DeepCSV) {
               nBJet20JECup++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2318,7 +2311,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               nJet30JECdn++;
             } // pt40
             //CSVv2IVFM
-            if(jet_btagCSV[njet] >= config_.btag_med_threshold) {
+            if(jet_btagDeepCSV[njet] >= config_.btag_med_threshold_DeepCSV) {
               nBJet20JECdn++;
             } // pass med btag
           } // pt 20 eta 2.5
@@ -2341,12 +2334,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
                 gamma_nJet30++;
                 if (p4sCorrJets.at(iJet).pt() > 40.0) gamma_nJet40++;
               } // pt30
-              if(jet_btagMVA[njet] >= 0.4432){ // CombinedMVAv2
-                  gamma_nBJet20mva++;
+              if(jet_btagCSV[njet] >= config_.btag_med_threshold_CSVv2){
+                  gamma_nBJet20csv++;
               }
-              if(jet_btagCSV[njet] >= config_.btag_med_threshold) { 
+              if(jet_btagDeepCSV[njet] >= config_.btag_med_threshold_DeepCSV) { 
                 gamma_nBJet20++; 
-                gamma_nBJet20csv++;
                 if (p4sCorrJets.at(iJet).pt() > 25.0) gamma_nBJet25++; 
                 if (p4sCorrJets.at(iJet).pt() > 30.0) {
                   gamma_nBJet30++;
@@ -2971,7 +2963,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
                   rebal_jetpt[nRebalJets] = jet_pt[iJet];
                   rebal_jeteta[nRebalJets] = jet_eta[iJet];
                   rebal_jetphi[nRebalJets] = jet_phi[iJet];
-                  rebal_jetbtagcsv[nRebalJets] = jet_btagCSV[iJet];
+                  rebal_jetbtagdeepcsv[nRebalJets] = jet_btagDeepCSV[iJet];
                   nRebalJets++;                  
               }
 
@@ -3462,13 +3454,11 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nJet40", &nJet40 );
   BabyTree_->Branch("nBJet20", &nBJet20 );
   BabyTree_->Branch("nBJet20csv", &nBJet20csv );
-  BabyTree_->Branch("nBJet20mva", &nBJet20mva );
   BabyTree_->Branch("nBJet20JECup", &nBJet20JECup );
   BabyTree_->Branch("nBJet20JECdn", &nBJet20JECdn );
   BabyTree_->Branch("nBJet25", &nBJet25 );
   BabyTree_->Branch("nBJet30", &nBJet30 );
   BabyTree_->Branch("nBJet30csv", &nBJet30csv );
-  BabyTree_->Branch("nBJet30mva", &nBJet30mva );
   BabyTree_->Branch("nBJet40", &nBJet40 );
   BabyTree_->Branch("nJet30FailId", &nJet30FailId );
   BabyTree_->Branch("nJet100FailId", &nJet100FailId );
@@ -3797,7 +3787,6 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("gamma_nJet100FailId", &gamma_nJet100FailId );
   BabyTree_->Branch("gamma_nBJet20", &gamma_nBJet20 );
   BabyTree_->Branch("gamma_nBJet20csv", &gamma_nBJet20csv );
-  BabyTree_->Branch("gamma_nBJet20mva", &gamma_nBJet20mva );
   BabyTree_->Branch("gamma_nBJet25", &gamma_nBJet25 );
   BabyTree_->Branch("gamma_nBJet30", &gamma_nBJet30 );
   BabyTree_->Branch("gamma_nBJet40", &gamma_nBJet40 );
@@ -3937,7 +3926,6 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("jet_phi", jet_phi, "jet_phi[njet]/F" );
   BabyTree_->Branch("jet_mass", jet_mass, "jet_mass[njet]/F" );
   BabyTree_->Branch("jet_btagCSV", jet_btagCSV, "jet_btagCSV[njet]/F" );
-  BabyTree_->Branch("jet_btagMVA", jet_btagMVA, "jet_btagMVA[njet]/F" );
   BabyTree_->Branch("jet_btagDeepCSV", jet_btagDeepCSV, "jet_btagDeepCSV[njet]/F" );
   BabyTree_->Branch("jet_chf", jet_chf, "jet_chf[njet]/F" );
   BabyTree_->Branch("jet_nhf", jet_nhf, "jet_nhf[njet]/F" );
@@ -3994,7 +3982,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
     BabyTree_->Branch("rebal_jetpt", rebal_jetpt, "rebal_jetpt[nRebalJets]/F");
     BabyTree_->Branch("rebal_jeteta", rebal_jeteta, "rebal_jeteta[nRebalJets]/F");
     BabyTree_->Branch("rebal_jetphi", rebal_jetphi, "rebal_jetphi[nRebalJets]/F");
-    BabyTree_->Branch("rebal_jetbtagcsv", rebal_jetbtagcsv, "rebal_jetbtagcsv[nRebalJets]/F");
+    BabyTree_->Branch("rebal_jetbtagdeepcsv", rebal_jetbtagdeepcsv, "rebal_jetbtagdeepcsv[nRebalJets]/F");
     BabyTree_->Branch("rebal_factors", rebal_factors, "rebal_factors[nRebalJets]/F");
     BabyTree_->Branch("rebal_met_pt", &rebal_met_pt);
     BabyTree_->Branch("rebal_met_phi", &rebal_met_phi);
@@ -4124,13 +4112,11 @@ void babyMaker::InitBabyNtuple () {
   nJet40 = -999;
   nBJet20 = -999;
   nBJet20csv = -999;
-  nBJet20mva = -999;
   nBJet20JECup = -999;
   nBJet20JECdn = -999;
   nBJet25 = -999;
   nBJet30 = -999;
   nBJet30csv = -999;
-  nBJet30mva = -999;
   nBJet40 = -999;
   nJet30FailId = -999;
   nJet100FailId = -999;
@@ -4395,7 +4381,6 @@ void babyMaker::InitBabyNtuple () {
   gamma_nJet100FailId = -999;
   gamma_nBJet20 = -999;
   gamma_nBJet20csv = -999;
-  gamma_nBJet20mva = -999;
   gamma_nBJet25 = -999;
   gamma_nBJet30 = -999;
   gamma_nBJet40 = -999;
@@ -4648,7 +4633,6 @@ void babyMaker::InitBabyNtuple () {
     jet_phi[i] = -999;
     jet_mass[i] = -999;
     jet_btagCSV[i] = -999;
-    jet_btagMVA[i] = -999;
     jet_btagDeepCSV[i] = -999;
     jet_chf[i] = -999;
     jet_nhf[i] = -999;
@@ -4676,7 +4660,7 @@ void babyMaker::InitBabyNtuple () {
     rebal_jetpt[i] = -999;
     rebal_jeteta[i] = -999;
     rebal_jetphi[i] = -999;
-    rebal_jetbtagcsv[i] = -999;
+    rebal_jetbtagdeepcsv[i] = -999;
     rebal_factors[i] = -999;
   }
 
@@ -4834,7 +4818,7 @@ void babyMaker::minuitFunction(int& nDim, double* gout, double& result, double p
   float pt_constrained_y = 0.0;
   float min_prob = 1E-20;
   for(int i=0; i < t->nRebalJets; i++){
-    bool isBjet = (t->rebal_jetbtagcsv[i] > config_.btag_med_threshold);        
+    bool isBjet = (t->rebal_jetbtagdeepcsv[i] > config_.btag_med_threshold_DeepCSV);        
     float prob = t->rebal_reader.GetValue(t->rebal_jetpt[i]/par[i], fabs(t->rebal_jeteta[i]), isBjet, par[i]);
     prob = max(prob, min_prob);
     likelihood += log(prob);
