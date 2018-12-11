@@ -9,16 +9,30 @@ make b
 
 Then, edit do.sh to point to the babies you wish to run on, and execute the script.
 
-Output root files will be placed in output_unmerged/<year>_<TAG>.
+Output root files will be placed in 
 
-Execute haddall.sh (possibly edited, if you only ran on a subset of datasets). This will combine files into output_merged/<mc or data>_<year>_<tag>.root
+``` bash
+output_unmerged/<year>_<TAG>
+```
+
+Execute haddall.sh (possibly edited, if you only ran on a subset of datasets). This will combine files into 
+
+``` bash
+output_merged/<mc or data>_<year>_<tag>.root
+```
 
 Execute postprocess.sh to produce output Fshort histograms in the output/ directory, plus plots in pngs/, etc.
 ``` bash
 . postprocess.sh <TAG>
 ```
 
-This will produce a merged output/Fshort_<mc or data>_<year>_<TAG>.root file for use with ShortTrackLooper.
+This will produce a merged 
+
+``` bash
+output/Fshort_<mc or data>_<year>_<TAG>.root 
+```
+
+file to serve as input to ShortTrackLooper.
 
 You can produce Fshort kinematic invariance plots and tables with
 

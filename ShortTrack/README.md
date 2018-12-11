@@ -9,7 +9,11 @@ make b
 
 Then edit do.sh to point to the babies you wish to run on, and execute it.
 
-Output root files containing various STC->ST histograms will be placed in output_unmerged/<year>_<TAG>.
+Output root files containing various STC->ST histograms will be placed in 
+
+``` bash
+output_unmerged/<year>_<TAG>
+```
 
 Then do
 
@@ -17,7 +21,13 @@ Then do
 python shorttrack_merge.py <TAG>
 ```
 
-This will produce a merged output_merged/<data or mc>_<year>_<TAG>.root file containing the final estimate, and some pngs.
+This will produce a merged 
+
+``` bash
+output_merged/<data or mc>_<year>_<TAG>.root 
+```
+
+file containing the final estimate, and some pngs.
 
 You can make tables and plots of fshort and estimates with
 
