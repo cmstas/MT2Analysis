@@ -328,6 +328,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
 
+    // some invalid trees only have eventMaker branches. Check if that is the case here; skip below
+    bool hasAllBranches = (tree->GetListOfBranches()->FindObject("float_pfmetMaker_evtpfmet_CMS3.") != NULL);
+
     // Event Loop
     unsigned int nEventsToLoop = tree->GetEntriesFast();
     if (max_events > 0) nEventsToLoop = (unsigned int) max_events;
@@ -361,6 +364,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       bool isCMS4 = cms3_version.Contains("CMS4");
       if (cms3_version.Contains("V10-01-00")) doShortTrackInfo = false;
       if (cms3_version.Contains("V00-00-03")) doShortTrackInfo = false;
+
+      run  = cms3.evt_run();
+      lumi = cms3.evt_lumiBlock();
+      evt  = cms3.evt_event();
+
+      isGolden = -1;
+      if ( isData && applyJSON ) {
+	if ( goodrun(run, lumi) ) isGolden = 1;
+	else isGolden = 0;
+      }
+
+      if(!isGolden && !hasAllBranches){
+          cout << "WARNING: not all branches found in tree, but event isn't in golden json anyway so skipping." << endl;
+          FillBabyNtuple();
+          continue;
+      }
 
       if (verbose) cout << "before trigger" << endl;
 
@@ -470,15 +489,6 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
       if (!isData && applyTriggerCuts && !(HLT_PFHT1050 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
             || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
-
-      run  = cms3.evt_run();
-      lumi = cms3.evt_lumiBlock();
-      evt  = cms3.evt_event();
-
-      if ( isData && applyJSON ) {
-	if ( goodrun(run, lumi) ) isGolden = 1;
-	else isGolden = 0;
-      }
 
       // set jet corrector based on run number for data
       if (isData && run >= 278802 && run <= 278808) {
