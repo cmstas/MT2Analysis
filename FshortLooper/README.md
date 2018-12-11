@@ -7,24 +7,21 @@ Do
 make b
 ```
 
-Then
+Then, edit do.sh to point to the babies you wish to run on, and execute the script.
+
+Output root files will be placed in output_unmerged/<year>_<TAG>.
+
+Execute haddall.sh (possibly edited, if you only ran on a subset of datasets). This will combine files into output_merged/<mc or data>_<year>_<tag>.root
+
+Execute postprocess.sh to produce output Fshort histograms in the output/ directory, plus plots in pngs/, etc.
 ``` bash
-./FshortLooper.exe <tag_for_this_run> <input_file>
+. postprocess.sh <TAG>
 ```
 
-Alternatively
+This will produce a merged output/Fshort_<mc or data>_<year>_<TAG>.root file for use with ShortTrackLooper.
+
+You can produce Fshort kinematic invariance plots and tables with
+
 ``` bash
-./writeConfig.sh <directory_containing_many_input_files> <tag_for_this_run>
-condor_submit condor/condor_<TAG>.cmd
+python print_variations.py
 ```
-
-As is, the script submits UAF jobs, so keep the number of input files below ~200 at most.
-
-In either case, output root files containing various Fshort histograms will be placed in output/<TAG>.
-
-Edit postprocess.py to set the sample names you wish to include in your Fshort calculation. Then
-``` bash
-python postprocess.py <TAG>
-```
-
-This will produce a merged output/Fshort_<TAG>.root file for use with ShortTrackLooper, as well as some pngs.

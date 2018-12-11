@@ -7,24 +7,20 @@ Do
 make b
 ```
 
-Then
+Then edit do.sh to point to the babies you wish to run on, and execute it.
+
+Output root files containing various STC->ST histograms will be placed in output_unmerged/<year>_<TAG>.
+
+Then do
+
 ``` bash
-./ShortTrackLooper.exe <tag_for_this_run> <input_file>
+python shorttrack_merge.py <TAG>
 ```
 
-Alternatively
+This will produce a merged output_merged/<data or mc>_<year>_<TAG>.root file containing the final estimate, and some pngs.
+
+You can make tables and plots of fshort and estimates with
+
 ``` bash
-./writeConfig.sh <directory_containing_many_input_files> <tag_for_this_run>
-condor_submit condor/condor_<TAG>.cmd
+python print_counts.py
 ```
-
-As is, the script submits UAF jobs, so keep the number of input files below ~200 at most.
-
-In either case, output root files containing various STC->ST histograms will be placed in output/<TAG>.
-
-Edit postprocess.py to set the sample names you wish to include in your Fshort calculation. Then
-``` bash
-python postprocess.py <TAG>
-```
-
-This will produce a merged output/Results_<TAG>.root file containing the final estimate, as well as some pngs.
