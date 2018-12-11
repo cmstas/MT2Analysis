@@ -37,9 +37,10 @@ class FshortLooper {
   FshortLooper();
   ~FshortLooper();
   int InEtaPhiVetoRegion(float eta, float phi);
-  bool FillHists(const std::vector<TH2D*> hist, const double weight, const int fill_type, const int len_index=1);
+  bool FillHists(const std::vector<TH2D*>& hist, const double weight, const int fill_type, const int len_index=1);
   int loop(TChain* ch_st, char* infile, std::string config_tag);
-  float getAverageISRWeight(const int evt_id, const int var);
+  //  float getAverageISRWeight(const int evt_id, const int var);
+  float getAverageISRWeight(const std::string sample, const std::string config_tag);
  private:
   MT2Configuration config_;
   MT2Configuration data_config_;

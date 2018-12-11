@@ -13,6 +13,19 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 verbose = False # Print more status messages
 
 ROOT.gROOT.SetBatch(True)
+ROOT.gStyle.SetOptStat(False)
+ROOT.gStyle.SetLegendTextSize(0.03)
+ROOT.gStyle.SetPaintTextFormat("#3.3g")
+ROOT.gStyle.SetLegendBorderSize(0)
+simplecanvas = ROOT.TCanvas("plotter")
+simplecanvas.SetCanvasSize(600,600)
+simplecanvas.SetTicks(1,1)
+simplecanvas.SetLeftMargin(0.16)
+simplecanvas.SetTopMargin(0.12)
+simplecanvas.SetRightMargin(0.16)
+simplecanvas.SetBottomMargin(0.12)
+
+tl=ROOT.TLegend(0.2,0.7,0.4,0.8)
 
 if len(sys.argv) < 2: 
     print "Which tag?"
@@ -51,13 +64,33 @@ def startRegionTableData(outfile):
     outfile.write("\chead{Background Estimation Table}\n")
     outfile.write("\\begin{document}\n\n")
 
+    outfile.write("\\begin{tabular}{l | *2c | *2c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("\multirow{2}{*}{Region} & \multicolumn{2}{c}{2017 Data} & \multicolumn{2}{c}{2016 Data}\\\\ \n")
+    outfile.write(" & Pred ST & Obs ST & Pred ST & Obs ST\\\\ \n ")
+    outfile.write("\hline\n")
+
+def startRegionTableMC(outfile):
+    outfile.write("\chead{Background Estimation Table}\n")
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | *2c | *2c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("\multirow{2}{*}{Region} & \multicolumn{2}{c}{2017 MC} & \multicolumn{2}{c}{2016 MC}\\\\ \n")
+    outfile.write(" & Pred ST & Obs ST & Pred ST & Obs ST \\\\ \n ")
+    outfile.write("\hline\n")
+
+def startRegionTableDataSTC(outfile):
+    outfile.write("\chead{Background Estimation Table}\n")
+    outfile.write("\\begin{document}\n\n")
+
     outfile.write("\\begin{tabular}{l | *3c | *3c}\n")
     outfile.write("\\toprule\n")
     outfile.write("\multirow{2}{*}{Region} & \multicolumn{3}{c}{2017 Data} & \multicolumn{3}{c}{2016 Data}\\\\ \n")
     outfile.write(" & STC & Pred ST & Obs ST & STC & Pred ST & Obs ST\\\\ \n ")
     outfile.write("\hline\n")
 
-def startRegionTableMC(outfile):
+def startRegionTableMCSTC(outfile):
     outfile.write("\chead{Background Estimation Table}\n")
     outfile.write("\\begin{document}\n\n")
 
@@ -67,12 +100,62 @@ def startRegionTableMC(outfile):
     outfile.write(" & STC & Pred ST & Obs ST & STC & Pred ST & Obs ST \\\\ \n ")
     outfile.write("\hline\n")
 
+def startFshortTableData(outfile):
+    outfile.write("\chead{f$_{\text{short}}$ Table}\n")
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | c | c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("Category & 2017 Data & 2016 Data\\\\ \n")
+    outfile.write("\hline\n")
+
+def startFshortTableMC(outfile):
+    outfile.write("\chead{f$_{\text{short}}$ Table}\n")
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | c | c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("Category & 2017 MC & 2016 MC\\\\ \n")
+    outfile.write("\hline\n")
+
 def printFooter(outfile):
     outfile.write("\\bottomrule\n")
     outfile.write("\end{tabular}\n\n")
     outfile.write("\\bigskip\n\n")
 
     outfile.write("\end{document}\n\n")
+
+def getFshorts(f):
+    h_FS = f.Get("h_FS")
+    h_FS_23 = f.Get("h_FS_23")
+    h_FS_4 = f.Get("h_FS_4")
+    vals = {}
+    errs = {}
+    vals["P"] = h_FS.GetBinContent(1)
+    vals["M"] = h_FS.GetBinContent(2)
+    vals["L"] = h_FS.GetBinContent(3)
+
+    vals["P 23"] = h_FS_23.GetBinContent(1)
+    vals["M 23"] = h_FS_23.GetBinContent(2)
+    vals["L 23"] = h_FS_23.GetBinContent(3)
+
+    vals["P 4"] = h_FS_4.GetBinContent(1)
+    vals["M 4"] = h_FS_4.GetBinContent(2)
+    vals["L 4"] = h_FS_4.GetBinContent(3)
+
+    errs["P"] = h_FS.GetBinError(1)
+    errs["M"] = h_FS.GetBinError(2)
+    errs["L"] = h_FS.GetBinError(3)
+
+    errs["P 23"] = h_FS_23.GetBinError(1)
+    errs["M 23"] = h_FS_23.GetBinError(2)
+    errs["L 23"] = h_FS_23.GetBinError(3)
+
+    errs["P 4"] = h_FS_4.GetBinError(1)
+    errs["M 4"] = h_FS_4.GetBinError(2)
+    errs["L 4"] = h_FS_4.GetBinError(3)
+
+    return vals,errs
 
 def getCounts(f):
     h_LL_VR_23 = f.Get("h_LL_VR_23")
@@ -253,6 +336,85 @@ def getCounts(f):
 
     return vals,errs
 
+def makePlot(regions,vals,errs,desc): 
+    simplecanvas.cd()
+    tl.Clear()
+    nregions=len(regions)
+    hobs=ROOT.TH1D(desc,desc+";;Normalized Short Track Counts",nregions,0,nregions)
+    hobs.SetLineWidth(3)
+    hpred=hobs.Clone(hobs.GetName()+"_prediction")
+    tag_index = 1
+    for region in regions:
+        hpred.GetXaxis().SetBinLabel(tag_index,region)
+        pred = vals[region+" pre"]
+        perr = errs[region+" pre"]
+        obs = vals[region+" obs"]
+        oerr = 1.83 if obs == 0 else errs[region+" obs"]
+        if obs == 0:
+            print "In region",region,"of",desc,", observation was 0, so setting oerr to 1.83"
+        if pred > 0:
+            hpred.SetBinContent(tag_index,1) # Set pred to 1 and rescale error below
+            hpred.SetBinError(tag_index,perr/pred)
+            hobs.SetBinContent(tag_index,obs/pred)
+            hobs.SetBinError(tag_index,oerr/pred)
+        else: # if prediction is 0, just plot the raw counts
+            hpred.SetBinContent(tag_index,0)
+            hpred.SetBinError(tag_index,perr)
+            hobs.SetBinContent(tag_index,obs)
+            hobs.SetBinError(tag_index,oerr)
+        tag_index += 1    
+    hpred.GetXaxis().LabelsOption("v")
+    hpred.GetXaxis().SetTitleOffset(4.8)
+    hpred.SetMinimum(-0.001)
+    hpred.SetMaximum(3)
+    hobs.SetLineColor(ROOT.kRed)
+    hpred.SetLineColor(ROOT.kBlack)
+    hpred_nofill = hpred.Clone(hpred.GetName()+"nofill")
+    hpred.SetFillColor(ROOT.kGray)
+    tl.AddEntry(hobs,"Observation")
+    tl.AddEntry(hpred,"Prediction")
+    hpred.Draw("E2")
+    hpred_nofill.Draw("hist same")
+    hobs.Draw("same E0")
+    tl.Draw()
+    simplecanvas.SaveAs("region_plots/{}.png".format(desc.replace(" ","_")))
+
+def makePlotRaw(regions,vals,errs,desc): # Don't rescale counts
+    simplecanvas.cd()
+    tl.Clear()
+    nregions=len(regions)
+    hobs=ROOT.TH1D(desc,desc+";;Short Track Counts",nregions,0,nregions)
+    hobs.SetLineWidth(3)
+    hpred=hobs.Clone(hobs.GetName()+"_prediction")
+    tag_index = 1
+    for region in regions:
+        hpred.GetXaxis().SetBinLabel(tag_index,region)
+        pred = vals[region+" pre"]
+        perr = errs[region+" pre"]
+        obs = vals[region+" obs"]
+        oerr = 1.83 if obs == 0 else errs[region+" obs"]
+        if obs == 0:
+            print "In region",region,"of",desc,", observation was 0, so setting oerr to 1.83"
+        hpred.SetBinContent(tag_index,pred)
+        hpred.SetBinError(tag_index,perr)
+        hobs.SetBinContent(tag_index,obs)
+        hobs.SetBinError(tag_index,oerr)
+        tag_index += 1    
+    hpred.GetXaxis().LabelsOption("v")
+    hpred.GetXaxis().SetTitleOffset(4.8)
+    hpred.SetMinimum(-0.001)
+    hpred.SetMaximum(1.5*max(hpred.GetMaximum(),hobs.GetMaximum()))
+    hobs.SetLineColor(ROOT.kRed)
+    hpred.SetLineColor(ROOT.kBlack)
+    hpred_nofill = hpred.Clone(hpred.GetName()+"nofill")
+    hpred.SetFillColor(ROOT.kGray)
+    tl.AddEntry(hobs,"Observation")
+    tl.AddEntry(hpred,"Prediction")
+    hpred.Draw("E2")
+    hpred_nofill.Draw("hist same")
+    hobs.Draw("same E0")
+    tl.Draw()
+    simplecanvas.SaveAs("region_plots/{}_raw.png".format(desc.replace(" ","_")))
 
 tag = sys.argv[1]
 
@@ -266,22 +428,55 @@ D16,eD16=getCounts(d16)
 M17,eM17=getCounts(m17)
 M16,eM16=getCounts(m16)
 
+D17f,eD17f=getFshorts(d17)
+D16f,eD16f=getFshorts(d16)
+M17f,eM17f=getFshorts(m17)
+M16f,eM16f=getFshorts(m16)
+
 d17.Close()
 d16.Close()
 m17.Close()
 m16.Close()
 
-
 def getLineData(region):
-    return "{} & {:.0f} & {:.2f} $\pm$ {:.2f} & {:.0f} & {:.0f} & {:.2f} $\pm$ {:.2f} & {:.0f}\\\\ \n".format(region,
+    return "{} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region,
+                                                                                                                                                                                                                                    D17[region+" pre"], eD17[region+" pre"], D17[region+" obs"],
+                                                                                                                                                                                                                                    D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
+
+def getLineMC(region):
+    return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region,
+                                                                                                                                                                                                                                    M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
+                                  M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
+
+def getLineDataSTC(region):
+    return "{} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region,
                                                                                                                                                                                                                                     D17[region+" STC"], D17[region+" pre"], eD17[region+" pre"], D17[region+" obs"],
                                                                                                                                                                                                                                     D16[region+" STC"], D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
 
-def getLineMC(region):
-    return "{} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} \\\\ \n".format(region,
+def getLineMCSTC(region):
+    return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region,
                                                                                                                                                                                                                                     M17[region+" STC"], eM17[region+" STC"], M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
-                                                 M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
+                                  M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
+
+def getFSLineData(cat):
+    return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(cat,D17f[cat],eD17f[cat],D16f[cat],eD16f[cat])
+
+def getFSLineMC(cat):
+    return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(cat,M17f[cat],eM17f[cat],M16f[cat],eM16f[cat])
+
+regionsData = [cat + " " + kin + " VR" for cat in ["P","M","L"] for kin in ["LL","LH","HL","HH"]]
+regionsDataNoL = [cat + " " + kin + " VR" for cat in ["P","M"] for kin in ["LL","LH","HL","HH"]]
+regionsDataL = ["L " + kin + " VR" for kin in ["LL","LH","HL","HH"]]
+
+makePlot(regionsData,D17,eD17,"2017 DATA")
+makePlot(regionsData,D16,eD16,"2016 DATA")
+
+makePlot(regionsDataNoL,D17,eD17,"2017 DATA No L")
+makePlot(regionsDataNoL,D16,eD16,"2016 DATA No L")
+
+makePlotRaw(regionsDataL,D17,eD17,"2017 DATA L")
+makePlotRaw(regionsDataL,D16,eD16,"2016 DATA L")
 
 output = open("tables/regions_data_{}.tex".format(tag),"w")
 printHeader(output)
@@ -313,6 +508,37 @@ output.write(getLineData("L HH VR"))
 output.write("\\rowcolor{green!75}")
 printFooter(output)
 output.close()
+
+output = open("tables/fshorts_data_{}.tex".format(tag),"w")
+printHeader(output)
+startFshortTableData(output)
+output.write("\\rowcolor{green!10}")
+output.write(getFSLineData("P 23"))
+output.write("\\rowcolor{green!10}")
+output.write(getFSLineData("P 4"))
+output.write("\\rowcolor{blue!10}")
+output.write(getFSLineData("M 23"))
+output.write("\\rowcolor{blue!10}")
+output.write(getFSLineData("M 4"))
+output.write("\\rowcolor{red!10}")
+output.write(getFSLineData("L 23"))
+output.write("\\rowcolor{red!10}")
+output.write(getFSLineData("L 4"))
+printFooter(output)
+output.close()
+
+regionsMC = [cat + " " + kin + " " + mt2 for mt2 in ["VR","SR"] for cat in ["P","M","L"] for kin in ["LL","LH","HL","HH"]]
+regionsMCNoL = [cat + " " + kin + " " + mt2 for mt2 in ["VR","SR"] for cat in ["P","M"] for kin in ["LL","LH","HL","HH"]]
+regionsMCL = ["L " + kin + " " + mt2 for mt2 in ["VR","SR"] for kin in ["LL","LH","HL","HH"]]
+
+makePlot(regionsMC,M17,eM17,"2017 MC")
+makePlot(regionsMC,M16,eM16,"2016 MC")
+
+makePlot(regionsMCNoL,M17,eM17,"2017 MC No L")
+makePlot(regionsMCNoL,M16,eM16,"2016 MC No L")
+
+makePlotRaw(regionsMCL,M17,eM17,"2017 MC L")
+makePlotRaw(regionsMCL,M16,eM16,"2016 MC L")
 
 output = open("tables/regions_mc_{}.tex".format(tag),"w")
 printHeader(output)
@@ -367,5 +593,24 @@ output.write("\\rowcolor{red!75}")
 output.write(getLineMC("L HH SR"))
 printFooter(output)
 output.close()
+
+output = open("tables/fshorts_mc_{}.tex".format(tag),"w")
+printHeader(output)
+startFshortTableMC(output)
+output.write("\\rowcolor{green!10}")
+output.write(getFSLineMC("P 23"))
+output.write("\\rowcolor{green!10}")
+output.write(getFSLineMC("P 4"))
+output.write("\\rowcolor{blue!10}")
+output.write(getFSLineMC("M 23"))
+output.write("\\rowcolor{blue!10}")
+output.write(getFSLineMC("M 4"))
+output.write("\\rowcolor{red!10}")
+output.write(getFSLineMC("L 23"))
+output.write("\\rowcolor{red!10}")
+output.write(getFSLineMC("L 4"))
+printFooter(output)
+output.close()
+
 
 print "Done"

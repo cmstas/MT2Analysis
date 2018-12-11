@@ -8,13 +8,13 @@ class mt2tree;
 const bool recalculate = true; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
 // only with recalculate = true
 const int applyRecoVeto = 2; // 0: None, 1: use MT2 ID leptons for the reco veto, 2: use any Reco ID (Default: 2)
-const bool increment17 = true;
+const bool increment17 = false;
 const float isoSTC = 6, qualSTC = 3; // change these if recalculating Fshort
 
 // turn on to apply json file to data
 const bool applyJSON = true;
 
-const bool applyISRWeights = false; // evt_id is messed up in current babies, and we don't have isr weights implemented for 2017 MC anyway
+const bool applyISRWeights = true; // evt_id is messed up in current babies, and we don't have isr weights implemented for 2017 MC anyway
 
 const bool doNTrueIntReweight = true; // evt_id is messed up in current babies
 
@@ -43,7 +43,7 @@ int FshortLooper::InEtaPhiVetoRegion(float eta, float phi) {
   return 0;
 }
 
-bool FshortLooper::FillHists(const vector<TH2D*> hists, const double weight, const int fill_type, const int len_index) {
+bool FshortLooper::FillHists(const vector<TH2D*>& hists, const double weight, const int fill_type, const int len_index) {
   if (unlikely(len_index < 1 || len_index > 3)) return false;
   if (unlikely(fill_type < 1 || fill_type > 3)) return false;
   for (vector<TH2D*>::const_iterator hist = hists.begin(); hist != hists.end(); hist++) {
@@ -59,6 +59,17 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
   bool isSignal = tag.find("sim") != std::string::npos;
 
+  cout << (isSignal ? "isSignal True" : "isSignal False") << endl;
+
+  TH1F* h_xsec = 0;
+  if (isSignal) {
+    TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev.root");
+    TH1F* h_xsec_orig = (TH1F*) f_xsec->Get("h_xsec_gluino");
+    h_xsec = (TH1F*) h_xsec_orig->Clone("h_xsec");
+    h_xsec->SetDirectory(0);
+    f_xsec->Close();
+  }
+
   cout << "FshortLooper::loop" << endl;
 
   // Book histograms
@@ -66,52 +77,129 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
   TH1D* h_ht = new TH1D("h_ht","H_{T} of Input Events",100,0,3000);
 
-  TH2D* h_fsFSR = new TH2D("h_fsFSR","ST and STC Counts by Length",4,0,4,4,0,4);
-  h_fsFSR->GetXaxis()->SetBinLabel(1,"Incl");
-  h_fsFSR->GetXaxis()->SetBinLabel(2,"P");
-  h_fsFSR->GetXaxis()->SetBinLabel(3,"M");
-  h_fsFSR->GetXaxis()->SetBinLabel(4,"L");
-  h_fsFSR->GetYaxis()->SetBinLabel(1,"f_{short}");
-  h_fsFSR->GetYaxis()->SetBinLabel(2,"ST");
-  h_fsFSR->GetYaxis()->SetBinLabel(3,"STC");
-  h_fsFSR->GetYaxis()->SetBinLabel(4,"Tracks");
-  TH2D* h_fsFSR_23 = (TH2D*) h_fsFSR->Clone("h_fsFSR_23");
-  TH2D* h_fsFSR_4 = (TH2D*) h_fsFSR->Clone("h_fsFSR_4");
-  TH2D* h_fsVR = (TH2D*) h_fsFSR->Clone("h_fsVR");
-  TH2D* h_fsVR_23 = (TH2D*) h_fsFSR->Clone("h_fsVR_23");
-  TH2D* h_fsVR_4 = (TH2D*) h_fsFSR->Clone("h_fsVR_4");
-  TH2D* h_fsSR = (TH2D*) h_fsFSR->Clone("h_fsSR");
-  TH2D* h_fsSR_23 = (TH2D*) h_fsFSR->Clone("h_fsSR_23");
-  TH2D* h_fsSR_4 = (TH2D*) h_fsFSR->Clone("h_fsSR_4");
-  TH2D* h_fsFSR_gt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_gt1000HT");
-  TH2D* h_fsFSR_lt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_lt1000HT");
-  TH2D* h_fsFSR_23_gt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_23_gt1000HT");
-  TH2D* h_fsFSR_23_lt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_23_lt1000HT");
-  TH2D* h_fsFSR_4_gt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_4_gt1000HT");
-  TH2D* h_fsFSR_4_lt1000HT = (TH2D*) h_fsFSR->Clone("h_fsFSR_4_lt1000HT");
-  TH2D* h_fsVR_gt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_gt1000HT");
-  TH2D* h_fsVR_lt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_lt1000HT");
-  TH2D* h_fsVR_23_gt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_23_gt1000HT");
-  TH2D* h_fsVR_23_lt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_23_lt1000HT");
-  TH2D* h_fsVR_4_gt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_4_gt1000HT");
-  TH2D* h_fsVR_4_lt1000HT = (TH2D*) h_fsVR->Clone("h_fsVR_4_lt1000HT");
-  TH2D* h_fsSR_gt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_gt1000HT");
-  TH2D* h_fsSR_lt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_lt1000HT");
-  TH2D* h_fsSR_23_gt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_23_gt1000HT");
-  TH2D* h_fsSR_23_lt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_23_lt1000HT");
-  TH2D* h_fsSR_4_gt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_4_gt1000HT");
-  TH2D* h_fsSR_4_lt1000HT = (TH2D*) h_fsSR->Clone("h_fsSR_4_lt1000HT");
+  TH2D* h_fsMR_Baseline = new TH2D("h_fsMR_Baseline","ST and STC Counts by Length",4,0,4,4,0,4);
+  h_fsMR_Baseline->GetXaxis()->SetBinLabel(1,"Incl");
+  h_fsMR_Baseline->GetXaxis()->SetBinLabel(2,"P");
+  h_fsMR_Baseline->GetXaxis()->SetBinLabel(3,"M");
+  h_fsMR_Baseline->GetXaxis()->SetBinLabel(4,"L");
+  h_fsMR_Baseline->GetYaxis()->SetBinLabel(1,"f_{short}");
+  h_fsMR_Baseline->GetYaxis()->SetBinLabel(2,"ST");
+  h_fsMR_Baseline->GetYaxis()->SetBinLabel(3,"STC");
+  h_fsMR_Baseline->GetYaxis()->SetBinLabel(4,"Tracks");
+  TH2D* h_fsMR_23_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_Baseline");
+  TH2D* h_fsMR_4_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_Baseline");
+  TH2D* h_fsVR_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsVR_Baseline");
+  TH2D* h_fsVR_23_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsVR_23_Baseline");
+  TH2D* h_fsVR_4_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsVR_4_Baseline");
+  TH2D* h_fsSR_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsSR_Baseline");
+  TH2D* h_fsSR_23_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsSR_23_Baseline");
+  TH2D* h_fsSR_4_Baseline = (TH2D*) h_fsMR_Baseline->Clone("h_fsSR_4_Baseline");
+  TH2D* h_fsMR_gt1000HT = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_gt1000HT");
+  TH2D* h_fsMR_lt1000HT = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_lt1000HT");
+  TH2D* h_fsMR_23_gt1000HT = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_gt1000HT");
+  TH2D* h_fsMR_23_lt1000HT = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_lt1000HT");
+  TH2D* h_fsMR_4_gt1000HT = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_gt1000HT");
+  TH2D* h_fsMR_4_lt1000HT = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_lt1000HT");
+  TH2D* h_fsVR_gt1000HT = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_gt1000HT");
+  TH2D* h_fsVR_lt1000HT = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_lt1000HT");
+  TH2D* h_fsVR_23_gt1000HT = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_gt1000HT");
+  TH2D* h_fsVR_23_lt1000HT = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_lt1000HT");
+  TH2D* h_fsVR_4_gt1000HT = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_gt1000HT");
+  TH2D* h_fsVR_4_lt1000HT = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_lt1000HT");
+  TH2D* h_fsSR_gt1000HT = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_gt1000HT");
+  TH2D* h_fsSR_lt1000HT = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_lt1000HT");
+  TH2D* h_fsSR_23_gt1000HT = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_gt1000HT");
+  TH2D* h_fsSR_23_lt1000HT = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_lt1000HT");
+  TH2D* h_fsSR_4_gt1000HT = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_gt1000HT");
+  TH2D* h_fsSR_4_lt1000HT = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_lt1000HT");
 
-  std::vector<TH2D*> fsrhists = {h_fsFSR, h_fsFSR_23, h_fsFSR_4, 
-				 h_fsVR, h_fsVR_23, h_fsVR_4, 
-				 h_fsSR, h_fsSR_23, h_fsSR_4,
-				 h_fsFSR_lt1000HT, h_fsFSR_gt1000HT, h_fsFSR_23_lt1000HT, h_fsFSR_4_lt1000HT, h_fsFSR_23_gt1000HT, h_fsFSR_4_gt1000HT,
+  TH2D* h_fsMR_MET30 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_MET30");
+  TH2D* h_fsMR_23_MET30 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_MET30");
+  TH2D* h_fsMR_4_MET30 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_MET30");
+  TH2D* h_fsVR_MET30 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_MET30");
+  TH2D* h_fsVR_23_MET30 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_MET30");
+  TH2D* h_fsVR_4_MET30 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_MET30");
+  TH2D* h_fsSR_MET30 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_MET30");
+  TH2D* h_fsSR_23_MET30 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_MET30");
+  TH2D* h_fsSR_4_MET30 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_MET30");
+
+  TH2D* h_fsMR_MET100 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_MET100");
+  TH2D* h_fsMR_23_MET100 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_MET100");
+  TH2D* h_fsMR_4_MET100 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_MET100");
+  TH2D* h_fsVR_MET100 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_MET100");
+  TH2D* h_fsVR_23_MET100 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_MET100");
+  TH2D* h_fsVR_4_MET100 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_MET100");
+  TH2D* h_fsSR_MET100 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_MET100");
+  TH2D* h_fsSR_23_MET100 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_MET100");
+  TH2D* h_fsSR_4_MET100 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_MET100");
+
+  TH2D* h_fsMR_MET250 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_MET250");
+  TH2D* h_fsMR_23_MET250 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_MET250");
+  TH2D* h_fsMR_4_MET250 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_MET250");
+  TH2D* h_fsVR_MET250 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_MET250");
+  TH2D* h_fsVR_23_MET250 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_MET250");
+  TH2D* h_fsVR_4_MET250 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_MET250");
+  TH2D* h_fsSR_MET250 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_MET250");
+  TH2D* h_fsSR_23_MET250 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_MET250");
+  TH2D* h_fsSR_4_MET250 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_MET250");
+
+  TH2D* h_fsMR_HT250 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_HT250");
+  TH2D* h_fsMR_23_HT250 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_HT250");
+  TH2D* h_fsMR_4_HT250 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_HT250");
+  TH2D* h_fsVR_HT250 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_HT250");
+  TH2D* h_fsVR_23_HT250 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_HT250");
+  TH2D* h_fsVR_4_HT250 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_HT250");
+  TH2D* h_fsSR_HT250 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_HT250");
+  TH2D* h_fsSR_23_HT250 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_HT250");
+  TH2D* h_fsSR_4_HT250 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_HT250");
+
+  TH2D* h_fsMR_HT450 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_HT450");
+  TH2D* h_fsMR_23_HT450 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_HT450");
+  TH2D* h_fsMR_4_HT450 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_HT450");
+  TH2D* h_fsVR_HT450 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_HT450");
+  TH2D* h_fsVR_23_HT450 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_HT450");
+  TH2D* h_fsVR_4_HT450 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_HT450");
+  TH2D* h_fsSR_HT450 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_HT450");
+  TH2D* h_fsSR_23_HT450 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_HT450");
+  TH2D* h_fsSR_4_HT450 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_HT450");
+
+  TH2D* h_fsMR_HT450MET100 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_HT450MET100");
+  TH2D* h_fsMR_23_HT450MET100 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_23_HT450MET100");
+  TH2D* h_fsMR_4_HT450MET100 = (TH2D*) h_fsMR_Baseline->Clone("h_fsMR_4_HT450MET100");
+  TH2D* h_fsVR_HT450MET100 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_HT450MET100");
+  TH2D* h_fsVR_23_HT450MET100 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_23_HT450MET100");
+  TH2D* h_fsVR_4_HT450MET100 = (TH2D*) h_fsVR_Baseline->Clone("h_fsVR_4_HT450MET100");
+  TH2D* h_fsSR_HT450MET100 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_HT450MET100");
+  TH2D* h_fsSR_23_HT450MET100 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_23_HT450MET100");
+  TH2D* h_fsSR_4_HT450MET100 = (TH2D*) h_fsSR_Baseline->Clone("h_fsSR_4_HT450MET100");
+
+  std::vector<TH2D*> fshists = {h_fsMR_Baseline, h_fsMR_23_Baseline, h_fsMR_4_Baseline, 
+				 h_fsVR_Baseline, h_fsVR_23_Baseline, h_fsVR_4_Baseline, 
+				 h_fsSR_Baseline, h_fsSR_23_Baseline, h_fsSR_4_Baseline,
+				 h_fsMR_lt1000HT, h_fsMR_gt1000HT, h_fsMR_23_lt1000HT, h_fsMR_4_lt1000HT, h_fsMR_23_gt1000HT, h_fsMR_4_gt1000HT,
 				 h_fsVR_lt1000HT, h_fsVR_gt1000HT, h_fsVR_23_lt1000HT, h_fsVR_4_lt1000HT, h_fsVR_23_gt1000HT, h_fsVR_4_gt1000HT,
-				 h_fsSR_lt1000HT, h_fsSR_gt1000HT, h_fsSR_23_lt1000HT, h_fsSR_4_lt1000HT, h_fsSR_23_gt1000HT, h_fsSR_4_gt1000HT};
+				 h_fsSR_lt1000HT, h_fsSR_gt1000HT, h_fsSR_23_lt1000HT, h_fsSR_4_lt1000HT, h_fsSR_23_gt1000HT, h_fsSR_4_gt1000HT,
+				 h_fsMR_MET30, h_fsMR_23_MET30, h_fsMR_4_MET30, h_fsVR_MET30, h_fsVR_23_MET30, h_fsVR_4_MET30, h_fsSR_MET30, h_fsSR_23_MET30, h_fsSR_4_MET30,
+				 h_fsMR_MET100, h_fsMR_23_MET100, h_fsMR_4_MET100, h_fsVR_MET100, h_fsVR_23_MET100, h_fsVR_4_MET100, h_fsSR_MET100, h_fsSR_23_MET100, h_fsSR_4_MET100,
+				 h_fsMR_MET250, h_fsMR_23_MET250, h_fsMR_4_MET250, h_fsVR_MET250, h_fsVR_23_MET250, h_fsVR_4_MET250, h_fsSR_MET250, h_fsSR_23_MET250, h_fsSR_4_MET250,
+				 h_fsMR_HT250, h_fsMR_23_HT250, h_fsMR_4_HT250, h_fsVR_HT250, h_fsVR_23_HT250, h_fsVR_4_HT250, h_fsSR_HT250, h_fsSR_23_HT250, h_fsSR_4_HT250,
+				 h_fsMR_HT450, h_fsMR_23_HT450, h_fsMR_4_HT450, h_fsVR_HT450, h_fsVR_23_HT450, h_fsVR_4_HT450, h_fsSR_HT450, h_fsSR_23_HT450, h_fsSR_4_HT450,
+				 h_fsMR_HT450MET100, h_fsMR_23_HT450MET100, h_fsMR_4_HT450MET100, h_fsVR_HT450MET100, h_fsVR_23_HT450MET100, h_fsVR_4_HT450MET100, h_fsSR_HT450MET100, h_fsSR_23_HT450MET100, h_fsSR_4_HT450MET100};
+
+  std::map<TH2D*, TH1D*> max_stc_weights;
+  std::map<TH2D*, TH1D*> max_st_weights;
+  for (std::vector<TH2D*>::iterator fshist = fshists.begin(); fshist != fshists.end(); fshist++) {
+    TH2D* fsh = *fshist;
+    TH1D* max_weight = new TH1D(Form("%s_max_weight",fsh->GetName()),"Maximum STC Weight",3,0,3);
+    TH1D* max_weight_ST = new TH1D(Form("%s_max_weight_ST",fsh->GetName()),"Maximum ST Weight",3,0,3);
+    max_stc_weights[fsh] = max_weight;
+    max_st_weights[fsh] = max_weight_ST;
+  }
 
   // Signal efficiency
-  TH1D* p_sigeffST = new TProfile("p_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
-  TH1D* p_sigeffSTC = new TProfile("p_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
+  TH1D* h_sigeffST = new TH1D("h_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
+  TH1D* h_sigeffSTC = new TH1D("h_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
+  TH1D* h_CharLength = new TH1D("h_CharLength","Chargino Track Length",10,0,100);
 
   // Cut hists
   TH1D* h_reliso_ST_L = new TH1D("h_reliso_ST_L","RelIso of L STs",4,0,0.2);
@@ -213,40 +301,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   */
 
   // MtPt
-  TH2D* h_mtptFSR_ST_P = new TH2D("h_mtptFSR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_P = new TH2D("h_mtptFSR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_M = new TH2D("h_mtptFSR_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_M = new TH2D("h_mtptFSR_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_L = new TH2D("h_mtptFSR_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_L = new TH2D("h_mtptFSR_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_P = new TH2D("h_mtptMR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_P = new TH2D("h_mtptMR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_M = new TH2D("h_mtptMR_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_M = new TH2D("h_mtptMR_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_L = new TH2D("h_mtptMR_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_L = new TH2D("h_mtptMR_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_P_23L = new TH2D("h_mtptFSR_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_P_23L = new TH2D("h_mtptFSR_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_M_23L = new TH2D("h_mtptFSR_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_M_23L = new TH2D("h_mtptFSR_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_L_23L = new TH2D("h_mtptFSR_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_L_23L = new TH2D("h_mtptFSR_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_P_23L = new TH2D("h_mtptMR_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_P_23L = new TH2D("h_mtptMR_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_M_23L = new TH2D("h_mtptMR_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_M_23L = new TH2D("h_mtptMR_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_L_23L = new TH2D("h_mtptMR_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_L_23L = new TH2D("h_mtptMR_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_P_23H = new TH2D("h_mtptFSR_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_P_23H = new TH2D("h_mtptFSR_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_M_23H = new TH2D("h_mtptFSR_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_M_23H = new TH2D("h_mtptFSR_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_L_23H = new TH2D("h_mtptFSR_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_L_23H = new TH2D("h_mtptFSR_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_P_23H = new TH2D("h_mtptMR_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_P_23H = new TH2D("h_mtptMR_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_M_23H = new TH2D("h_mtptMR_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_M_23H = new TH2D("h_mtptMR_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_L_23H = new TH2D("h_mtptMR_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_L_23H = new TH2D("h_mtptMR_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_P_4L = new TH2D("h_mtptFSR_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_P_4L = new TH2D("h_mtptFSR_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_M_4L = new TH2D("h_mtptFSR_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_M_4L = new TH2D("h_mtptFSR_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_L_4L = new TH2D("h_mtptFSR_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_L_4L = new TH2D("h_mtptFSR_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_P_4L = new TH2D("h_mtptMR_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_P_4L = new TH2D("h_mtptMR_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_M_4L = new TH2D("h_mtptMR_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_M_4L = new TH2D("h_mtptMR_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_L_4L = new TH2D("h_mtptMR_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_L_4L = new TH2D("h_mtptMR_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_P_4H = new TH2D("h_mtptFSR_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_P_4H = new TH2D("h_mtptFSR_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_M_4H = new TH2D("h_mtptFSR_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_M_4H = new TH2D("h_mtptFSR_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ST_L_4H = new TH2D("h_mtptFSR_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_L_4H = new TH2D("h_mtptFSR_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_P_4H = new TH2D("h_mtptMR_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_P_4H = new TH2D("h_mtptMR_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_M_4H = new TH2D("h_mtptMR_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_M_4H = new TH2D("h_mtptMR_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_L_4H = new TH2D("h_mtptMR_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_L_4H = new TH2D("h_mtptMR_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_ST_P = new TH2D("h_mtptVR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_STC_P = new TH2D("h_mtptVR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -319,40 +407,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_STC_L_4H = new TH2D("h_mtptSR_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // EWK mtpt
-  TH2D* h_mtptFSR_ewke_ST_P = new TH2D("h_mtptFSR_ewke_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_P = new TH2D("h_mtptFSR_ewke_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_M = new TH2D("h_mtptFSR_ewke_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_M = new TH2D("h_mtptFSR_ewke_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_L = new TH2D("h_mtptFSR_ewke_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_L = new TH2D("h_mtptFSR_ewke_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_P = new TH2D("h_mtptMR_ewke_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_P = new TH2D("h_mtptMR_ewke_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_M = new TH2D("h_mtptMR_ewke_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_M = new TH2D("h_mtptMR_ewke_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_L = new TH2D("h_mtptMR_ewke_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_L = new TH2D("h_mtptMR_ewke_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_P_23L = new TH2D("h_mtptFSR_ewke_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_P_23L = new TH2D("h_mtptFSR_ewke_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_M_23L = new TH2D("h_mtptFSR_ewke_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_M_23L = new TH2D("h_mtptFSR_ewke_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_L_23L = new TH2D("h_mtptFSR_ewke_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_L_23L = new TH2D("h_mtptFSR_ewke_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_P_23L = new TH2D("h_mtptMR_ewke_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_P_23L = new TH2D("h_mtptMR_ewke_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_M_23L = new TH2D("h_mtptMR_ewke_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_M_23L = new TH2D("h_mtptMR_ewke_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_L_23L = new TH2D("h_mtptMR_ewke_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_L_23L = new TH2D("h_mtptMR_ewke_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_P_23H = new TH2D("h_mtptFSR_ewke_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_P_23H = new TH2D("h_mtptFSR_ewke_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_M_23H = new TH2D("h_mtptFSR_ewke_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_M_23H = new TH2D("h_mtptFSR_ewke_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_L_23H = new TH2D("h_mtptFSR_ewke_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_L_23H = new TH2D("h_mtptFSR_ewke_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_P_23H = new TH2D("h_mtptMR_ewke_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_P_23H = new TH2D("h_mtptMR_ewke_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_M_23H = new TH2D("h_mtptMR_ewke_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_M_23H = new TH2D("h_mtptMR_ewke_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_L_23H = new TH2D("h_mtptMR_ewke_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_L_23H = new TH2D("h_mtptMR_ewke_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_P_4L = new TH2D("h_mtptFSR_ewke_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_P_4L = new TH2D("h_mtptFSR_ewke_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_M_4L = new TH2D("h_mtptFSR_ewke_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_M_4L = new TH2D("h_mtptFSR_ewke_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_L_4L = new TH2D("h_mtptFSR_ewke_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_L_4L = new TH2D("h_mtptFSR_ewke_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_P_4L = new TH2D("h_mtptMR_ewke_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_P_4L = new TH2D("h_mtptMR_ewke_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_M_4L = new TH2D("h_mtptMR_ewke_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_M_4L = new TH2D("h_mtptMR_ewke_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_L_4L = new TH2D("h_mtptMR_ewke_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_L_4L = new TH2D("h_mtptMR_ewke_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_P_4H = new TH2D("h_mtptFSR_ewke_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_P_4H = new TH2D("h_mtptFSR_ewke_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_M_4H = new TH2D("h_mtptFSR_ewke_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_M_4H = new TH2D("h_mtptFSR_ewke_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_ST_L_4H = new TH2D("h_mtptFSR_ewke_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_L_4H = new TH2D("h_mtptFSR_ewke_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_P_4H = new TH2D("h_mtptMR_ewke_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_P_4H = new TH2D("h_mtptMR_ewke_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_M_4H = new TH2D("h_mtptMR_ewke_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_M_4H = new TH2D("h_mtptMR_ewke_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_L_4H = new TH2D("h_mtptMR_ewke_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_L_4H = new TH2D("h_mtptMR_ewke_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_ewke_ST_P = new TH2D("h_mtptVR_ewke_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_ewke_STC_P = new TH2D("h_mtptVR_ewke_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -425,40 +513,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_ewke_STC_L_4H = new TH2D("h_mtptSR_ewke_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // EWK mtpt
-  TH2D* h_mtptFSR_ewkm_ST_P = new TH2D("h_mtptFSR_ewkm_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_P = new TH2D("h_mtptFSR_ewkm_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_M = new TH2D("h_mtptFSR_ewkm_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_M = new TH2D("h_mtptFSR_ewkm_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_L = new TH2D("h_mtptFSR_ewkm_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_L = new TH2D("h_mtptFSR_ewkm_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_P = new TH2D("h_mtptMR_ewkm_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_P = new TH2D("h_mtptMR_ewkm_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_M = new TH2D("h_mtptMR_ewkm_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_M = new TH2D("h_mtptMR_ewkm_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_L = new TH2D("h_mtptMR_ewkm_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_L = new TH2D("h_mtptMR_ewkm_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_P_23L = new TH2D("h_mtptFSR_ewkm_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_P_23L = new TH2D("h_mtptFSR_ewkm_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_M_23L = new TH2D("h_mtptFSR_ewkm_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_M_23L = new TH2D("h_mtptFSR_ewkm_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_L_23L = new TH2D("h_mtptFSR_ewkm_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_L_23L = new TH2D("h_mtptFSR_ewkm_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_P_23L = new TH2D("h_mtptMR_ewkm_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_P_23L = new TH2D("h_mtptMR_ewkm_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_M_23L = new TH2D("h_mtptMR_ewkm_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_M_23L = new TH2D("h_mtptMR_ewkm_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_L_23L = new TH2D("h_mtptMR_ewkm_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_L_23L = new TH2D("h_mtptMR_ewkm_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_P_23H = new TH2D("h_mtptFSR_ewkm_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_P_23H = new TH2D("h_mtptFSR_ewkm_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_M_23H = new TH2D("h_mtptFSR_ewkm_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_M_23H = new TH2D("h_mtptFSR_ewkm_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_L_23H = new TH2D("h_mtptFSR_ewkm_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_L_23H = new TH2D("h_mtptFSR_ewkm_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_P_23H = new TH2D("h_mtptMR_ewkm_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_P_23H = new TH2D("h_mtptMR_ewkm_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_M_23H = new TH2D("h_mtptMR_ewkm_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_M_23H = new TH2D("h_mtptMR_ewkm_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_L_23H = new TH2D("h_mtptMR_ewkm_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_L_23H = new TH2D("h_mtptMR_ewkm_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_P_4L = new TH2D("h_mtptFSR_ewkm_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_P_4L = new TH2D("h_mtptFSR_ewkm_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_M_4L = new TH2D("h_mtptFSR_ewkm_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_M_4L = new TH2D("h_mtptFSR_ewkm_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_L_4L = new TH2D("h_mtptFSR_ewkm_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_L_4L = new TH2D("h_mtptFSR_ewkm_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_P_4L = new TH2D("h_mtptMR_ewkm_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_P_4L = new TH2D("h_mtptMR_ewkm_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_M_4L = new TH2D("h_mtptMR_ewkm_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_M_4L = new TH2D("h_mtptMR_ewkm_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_L_4L = new TH2D("h_mtptMR_ewkm_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_L_4L = new TH2D("h_mtptMR_ewkm_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_P_4H = new TH2D("h_mtptFSR_ewkm_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_P_4H = new TH2D("h_mtptFSR_ewkm_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_M_4H = new TH2D("h_mtptFSR_ewkm_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_M_4H = new TH2D("h_mtptFSR_ewkm_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_ST_L_4H = new TH2D("h_mtptFSR_ewkm_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_L_4H = new TH2D("h_mtptFSR_ewkm_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_P_4H = new TH2D("h_mtptMR_ewkm_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_P_4H = new TH2D("h_mtptMR_ewkm_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_M_4H = new TH2D("h_mtptMR_ewkm_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_M_4H = new TH2D("h_mtptMR_ewkm_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_L_4H = new TH2D("h_mtptMR_ewkm_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_L_4H = new TH2D("h_mtptMR_ewkm_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_ewkm_ST_P = new TH2D("h_mtptVR_ewkm_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_ewkm_STC_P = new TH2D("h_mtptVR_ewkm_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -531,40 +619,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_ewkm_STC_L_4H = new TH2D("h_mtptSR_ewkm_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // Tau EWK mtpt
-  TH2D* h_mtptFSR_tewke_ST_P = new TH2D("h_mtptFSR_tewke_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_P = new TH2D("h_mtptFSR_tewke_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_M = new TH2D("h_mtptFSR_tewke_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_M = new TH2D("h_mtptFSR_tewke_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_L = new TH2D("h_mtptFSR_tewke_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_L = new TH2D("h_mtptFSR_tewke_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_P = new TH2D("h_mtptMR_tewke_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_P = new TH2D("h_mtptMR_tewke_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_M = new TH2D("h_mtptMR_tewke_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_M = new TH2D("h_mtptMR_tewke_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_L = new TH2D("h_mtptMR_tewke_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_L = new TH2D("h_mtptMR_tewke_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_P_23L = new TH2D("h_mtptFSR_tewke_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_P_23L = new TH2D("h_mtptFSR_tewke_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_M_23L = new TH2D("h_mtptFSR_tewke_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_M_23L = new TH2D("h_mtptFSR_tewke_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_L_23L = new TH2D("h_mtptFSR_tewke_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_L_23L = new TH2D("h_mtptFSR_tewke_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_P_23L = new TH2D("h_mtptMR_tewke_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_P_23L = new TH2D("h_mtptMR_tewke_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_M_23L = new TH2D("h_mtptMR_tewke_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_M_23L = new TH2D("h_mtptMR_tewke_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_L_23L = new TH2D("h_mtptMR_tewke_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_L_23L = new TH2D("h_mtptMR_tewke_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_P_23H = new TH2D("h_mtptFSR_tewke_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_P_23H = new TH2D("h_mtptFSR_tewke_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_M_23H = new TH2D("h_mtptFSR_tewke_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_M_23H = new TH2D("h_mtptFSR_tewke_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_L_23H = new TH2D("h_mtptFSR_tewke_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_L_23H = new TH2D("h_mtptFSR_tewke_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_P_23H = new TH2D("h_mtptMR_tewke_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_P_23H = new TH2D("h_mtptMR_tewke_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_M_23H = new TH2D("h_mtptMR_tewke_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_M_23H = new TH2D("h_mtptMR_tewke_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_L_23H = new TH2D("h_mtptMR_tewke_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_L_23H = new TH2D("h_mtptMR_tewke_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_P_4L = new TH2D("h_mtptFSR_tewke_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_P_4L = new TH2D("h_mtptFSR_tewke_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_M_4L = new TH2D("h_mtptFSR_tewke_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_M_4L = new TH2D("h_mtptFSR_tewke_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_L_4L = new TH2D("h_mtptFSR_tewke_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_L_4L = new TH2D("h_mtptFSR_tewke_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_P_4L = new TH2D("h_mtptMR_tewke_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_P_4L = new TH2D("h_mtptMR_tewke_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_M_4L = new TH2D("h_mtptMR_tewke_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_M_4L = new TH2D("h_mtptMR_tewke_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_L_4L = new TH2D("h_mtptMR_tewke_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_L_4L = new TH2D("h_mtptMR_tewke_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_P_4H = new TH2D("h_mtptFSR_tewke_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_P_4H = new TH2D("h_mtptFSR_tewke_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_M_4H = new TH2D("h_mtptFSR_tewke_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_M_4H = new TH2D("h_mtptFSR_tewke_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_ST_L_4H = new TH2D("h_mtptFSR_tewke_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_L_4H = new TH2D("h_mtptFSR_tewke_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_P_4H = new TH2D("h_mtptMR_tewke_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_P_4H = new TH2D("h_mtptMR_tewke_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_M_4H = new TH2D("h_mtptMR_tewke_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_M_4H = new TH2D("h_mtptMR_tewke_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_L_4H = new TH2D("h_mtptMR_tewke_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_L_4H = new TH2D("h_mtptMR_tewke_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_tewke_ST_P = new TH2D("h_mtptVR_tewke_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_tewke_STC_P = new TH2D("h_mtptVR_tewke_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -637,40 +725,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_tewke_STC_L_4H = new TH2D("h_mtptSR_tewke_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // Tau EWK mtpt
-  TH2D* h_mtptFSR_tewkm_ST_P = new TH2D("h_mtptFSR_tewkm_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_P = new TH2D("h_mtptFSR_tewkm_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_M = new TH2D("h_mtptFSR_tewkm_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_M = new TH2D("h_mtptFSR_tewkm_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_L = new TH2D("h_mtptFSR_tewkm_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_L = new TH2D("h_mtptFSR_tewkm_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_P = new TH2D("h_mtptMR_tewkm_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_P = new TH2D("h_mtptMR_tewkm_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_M = new TH2D("h_mtptMR_tewkm_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_M = new TH2D("h_mtptMR_tewkm_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_L = new TH2D("h_mtptMR_tewkm_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_L = new TH2D("h_mtptMR_tewkm_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_P_23L = new TH2D("h_mtptFSR_tewkm_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_P_23L = new TH2D("h_mtptFSR_tewkm_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_M_23L = new TH2D("h_mtptFSR_tewkm_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_M_23L = new TH2D("h_mtptFSR_tewkm_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_L_23L = new TH2D("h_mtptFSR_tewkm_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_L_23L = new TH2D("h_mtptFSR_tewkm_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_P_23L = new TH2D("h_mtptMR_tewkm_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_P_23L = new TH2D("h_mtptMR_tewkm_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_M_23L = new TH2D("h_mtptMR_tewkm_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_M_23L = new TH2D("h_mtptMR_tewkm_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_L_23L = new TH2D("h_mtptMR_tewkm_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_L_23L = new TH2D("h_mtptMR_tewkm_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_P_23H = new TH2D("h_mtptFSR_tewkm_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_P_23H = new TH2D("h_mtptFSR_tewkm_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_M_23H = new TH2D("h_mtptFSR_tewkm_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_M_23H = new TH2D("h_mtptFSR_tewkm_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_L_23H = new TH2D("h_mtptFSR_tewkm_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_L_23H = new TH2D("h_mtptFSR_tewkm_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_P_23H = new TH2D("h_mtptMR_tewkm_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_P_23H = new TH2D("h_mtptMR_tewkm_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_M_23H = new TH2D("h_mtptMR_tewkm_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_M_23H = new TH2D("h_mtptMR_tewkm_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_L_23H = new TH2D("h_mtptMR_tewkm_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_L_23H = new TH2D("h_mtptMR_tewkm_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_P_4L = new TH2D("h_mtptFSR_tewkm_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_P_4L = new TH2D("h_mtptFSR_tewkm_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_M_4L = new TH2D("h_mtptFSR_tewkm_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_M_4L = new TH2D("h_mtptFSR_tewkm_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_L_4L = new TH2D("h_mtptFSR_tewkm_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_L_4L = new TH2D("h_mtptFSR_tewkm_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_P_4L = new TH2D("h_mtptMR_tewkm_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_P_4L = new TH2D("h_mtptMR_tewkm_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_M_4L = new TH2D("h_mtptMR_tewkm_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_M_4L = new TH2D("h_mtptMR_tewkm_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_L_4L = new TH2D("h_mtptMR_tewkm_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_L_4L = new TH2D("h_mtptMR_tewkm_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_P_4H = new TH2D("h_mtptFSR_tewkm_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_P_4H = new TH2D("h_mtptFSR_tewkm_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_M_4H = new TH2D("h_mtptFSR_tewkm_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_M_4H = new TH2D("h_mtptFSR_tewkm_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_ST_L_4H = new TH2D("h_mtptFSR_tewkm_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_L_4H = new TH2D("h_mtptFSR_tewkm_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_P_4H = new TH2D("h_mtptMR_tewkm_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_P_4H = new TH2D("h_mtptMR_tewkm_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_M_4H = new TH2D("h_mtptMR_tewkm_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_M_4H = new TH2D("h_mtptMR_tewkm_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_L_4H = new TH2D("h_mtptMR_tewkm_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_L_4H = new TH2D("h_mtptMR_tewkm_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_tewkm_ST_P = new TH2D("h_mtptVR_tewkm_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_tewkm_STC_P = new TH2D("h_mtptVR_tewkm_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -743,40 +831,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_tewkm_STC_L_4H = new TH2D("h_mtptSR_tewkm_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // Non-EWK mtpt
-  TH2D* h_mtptFSR_newk_ST_P = new TH2D("h_mtptFSR_newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_P = new TH2D("h_mtptFSR_newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_M = new TH2D("h_mtptFSR_newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_M = new TH2D("h_mtptFSR_newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_L = new TH2D("h_mtptFSR_newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_L = new TH2D("h_mtptFSR_newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_P = new TH2D("h_mtptMR_newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_P = new TH2D("h_mtptMR_newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_M = new TH2D("h_mtptMR_newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_M = new TH2D("h_mtptMR_newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_L = new TH2D("h_mtptMR_newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_L = new TH2D("h_mtptMR_newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_P_23L = new TH2D("h_mtptFSR_newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_P_23L = new TH2D("h_mtptFSR_newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_M_23L = new TH2D("h_mtptFSR_newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_M_23L = new TH2D("h_mtptFSR_newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_L_23L = new TH2D("h_mtptFSR_newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_L_23L = new TH2D("h_mtptFSR_newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_P_23L = new TH2D("h_mtptMR_newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_P_23L = new TH2D("h_mtptMR_newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_M_23L = new TH2D("h_mtptMR_newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_M_23L = new TH2D("h_mtptMR_newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_L_23L = new TH2D("h_mtptMR_newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_L_23L = new TH2D("h_mtptMR_newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_P_23H = new TH2D("h_mtptFSR_newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_P_23H = new TH2D("h_mtptFSR_newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_M_23H = new TH2D("h_mtptFSR_newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_M_23H = new TH2D("h_mtptFSR_newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_L_23H = new TH2D("h_mtptFSR_newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_L_23H = new TH2D("h_mtptFSR_newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_P_23H = new TH2D("h_mtptMR_newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_P_23H = new TH2D("h_mtptMR_newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_M_23H = new TH2D("h_mtptMR_newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_M_23H = new TH2D("h_mtptMR_newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_L_23H = new TH2D("h_mtptMR_newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_L_23H = new TH2D("h_mtptMR_newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_P_4L = new TH2D("h_mtptFSR_newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_P_4L = new TH2D("h_mtptFSR_newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_M_4L = new TH2D("h_mtptFSR_newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_M_4L = new TH2D("h_mtptFSR_newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_L_4L = new TH2D("h_mtptFSR_newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_L_4L = new TH2D("h_mtptFSR_newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_P_4L = new TH2D("h_mtptMR_newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_P_4L = new TH2D("h_mtptMR_newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_M_4L = new TH2D("h_mtptMR_newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_M_4L = new TH2D("h_mtptMR_newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_L_4L = new TH2D("h_mtptMR_newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_L_4L = new TH2D("h_mtptMR_newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_P_4H = new TH2D("h_mtptFSR_newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_P_4H = new TH2D("h_mtptFSR_newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_M_4H = new TH2D("h_mtptFSR_newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_M_4H = new TH2D("h_mtptFSR_newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_ST_L_4H = new TH2D("h_mtptFSR_newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_L_4H = new TH2D("h_mtptFSR_newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_P_4H = new TH2D("h_mtptMR_newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_P_4H = new TH2D("h_mtptMR_newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_M_4H = new TH2D("h_mtptMR_newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_M_4H = new TH2D("h_mtptMR_newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_L_4H = new TH2D("h_mtptMR_newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_L_4H = new TH2D("h_mtptMR_newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_newk_ST_P = new TH2D("h_mtptVR_newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_newk_STC_P = new TH2D("h_mtptVR_newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -849,40 +937,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_newk_STC_L_4H = new TH2D("h_mtptSR_newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // 1-prong Non-EWK mtpt
-  TH2D* h_mtptFSR_1newk_ST_P = new TH2D("h_mtptFSR_1newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_P = new TH2D("h_mtptFSR_1newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_M = new TH2D("h_mtptFSR_1newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_M = new TH2D("h_mtptFSR_1newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_L = new TH2D("h_mtptFSR_1newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_L = new TH2D("h_mtptFSR_1newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_P = new TH2D("h_mtptMR_1newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_P = new TH2D("h_mtptMR_1newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_M = new TH2D("h_mtptMR_1newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_M = new TH2D("h_mtptMR_1newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_L = new TH2D("h_mtptMR_1newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_L = new TH2D("h_mtptMR_1newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_P_23L = new TH2D("h_mtptFSR_1newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_P_23L = new TH2D("h_mtptFSR_1newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_M_23L = new TH2D("h_mtptFSR_1newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_M_23L = new TH2D("h_mtptFSR_1newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_L_23L = new TH2D("h_mtptFSR_1newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_L_23L = new TH2D("h_mtptFSR_1newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_P_23L = new TH2D("h_mtptMR_1newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_P_23L = new TH2D("h_mtptMR_1newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_M_23L = new TH2D("h_mtptMR_1newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_M_23L = new TH2D("h_mtptMR_1newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_L_23L = new TH2D("h_mtptMR_1newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_L_23L = new TH2D("h_mtptMR_1newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_P_23H = new TH2D("h_mtptFSR_1newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_P_23H = new TH2D("h_mtptFSR_1newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_M_23H = new TH2D("h_mtptFSR_1newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_M_23H = new TH2D("h_mtptFSR_1newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_L_23H = new TH2D("h_mtptFSR_1newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_L_23H = new TH2D("h_mtptFSR_1newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_P_23H = new TH2D("h_mtptMR_1newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_P_23H = new TH2D("h_mtptMR_1newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_M_23H = new TH2D("h_mtptMR_1newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_M_23H = new TH2D("h_mtptMR_1newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_L_23H = new TH2D("h_mtptMR_1newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_L_23H = new TH2D("h_mtptMR_1newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_P_4L = new TH2D("h_mtptFSR_1newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_P_4L = new TH2D("h_mtptFSR_1newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_M_4L = new TH2D("h_mtptFSR_1newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_M_4L = new TH2D("h_mtptFSR_1newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_L_4L = new TH2D("h_mtptFSR_1newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_L_4L = new TH2D("h_mtptFSR_1newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_P_4L = new TH2D("h_mtptMR_1newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_P_4L = new TH2D("h_mtptMR_1newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_M_4L = new TH2D("h_mtptMR_1newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_M_4L = new TH2D("h_mtptMR_1newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_L_4L = new TH2D("h_mtptMR_1newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_L_4L = new TH2D("h_mtptMR_1newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_P_4H = new TH2D("h_mtptFSR_1newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_P_4H = new TH2D("h_mtptFSR_1newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_M_4H = new TH2D("h_mtptFSR_1newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_M_4H = new TH2D("h_mtptFSR_1newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_ST_L_4H = new TH2D("h_mtptFSR_1newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_L_4H = new TH2D("h_mtptFSR_1newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_P_4H = new TH2D("h_mtptMR_1newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_P_4H = new TH2D("h_mtptMR_1newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_M_4H = new TH2D("h_mtptMR_1newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_M_4H = new TH2D("h_mtptMR_1newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_L_4H = new TH2D("h_mtptMR_1newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_L_4H = new TH2D("h_mtptMR_1newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_1newk_ST_P = new TH2D("h_mtptVR_1newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_1newk_STC_P = new TH2D("h_mtptVR_1newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -955,40 +1043,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_1newk_STC_L_4H = new TH2D("h_mtptSR_1newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // 3-prong Non-EWK mtpt
-  TH2D* h_mtptFSR_3newk_ST_P = new TH2D("h_mtptFSR_3newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_P = new TH2D("h_mtptFSR_3newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_M = new TH2D("h_mtptFSR_3newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_M = new TH2D("h_mtptFSR_3newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_L = new TH2D("h_mtptFSR_3newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_L = new TH2D("h_mtptFSR_3newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_P = new TH2D("h_mtptMR_3newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_P = new TH2D("h_mtptMR_3newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_M = new TH2D("h_mtptMR_3newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_M = new TH2D("h_mtptMR_3newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_L = new TH2D("h_mtptMR_3newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_L = new TH2D("h_mtptMR_3newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_P_23L = new TH2D("h_mtptFSR_3newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_P_23L = new TH2D("h_mtptFSR_3newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_M_23L = new TH2D("h_mtptFSR_3newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_M_23L = new TH2D("h_mtptFSR_3newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_L_23L = new TH2D("h_mtptFSR_3newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_L_23L = new TH2D("h_mtptFSR_3newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_P_23L = new TH2D("h_mtptMR_3newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_P_23L = new TH2D("h_mtptMR_3newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_M_23L = new TH2D("h_mtptMR_3newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_M_23L = new TH2D("h_mtptMR_3newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_L_23L = new TH2D("h_mtptMR_3newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_L_23L = new TH2D("h_mtptMR_3newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_P_23H = new TH2D("h_mtptFSR_3newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_P_23H = new TH2D("h_mtptFSR_3newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_M_23H = new TH2D("h_mtptFSR_3newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_M_23H = new TH2D("h_mtptFSR_3newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_L_23H = new TH2D("h_mtptFSR_3newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_L_23H = new TH2D("h_mtptFSR_3newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_P_23H = new TH2D("h_mtptMR_3newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_P_23H = new TH2D("h_mtptMR_3newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_M_23H = new TH2D("h_mtptMR_3newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_M_23H = new TH2D("h_mtptMR_3newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_L_23H = new TH2D("h_mtptMR_3newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_L_23H = new TH2D("h_mtptMR_3newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_P_4L = new TH2D("h_mtptFSR_3newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_P_4L = new TH2D("h_mtptFSR_3newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_M_4L = new TH2D("h_mtptFSR_3newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_M_4L = new TH2D("h_mtptFSR_3newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_L_4L = new TH2D("h_mtptFSR_3newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_L_4L = new TH2D("h_mtptFSR_3newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_P_4L = new TH2D("h_mtptMR_3newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_P_4L = new TH2D("h_mtptMR_3newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_M_4L = new TH2D("h_mtptMR_3newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_M_4L = new TH2D("h_mtptMR_3newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_L_4L = new TH2D("h_mtptMR_3newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_L_4L = new TH2D("h_mtptMR_3newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_P_4H = new TH2D("h_mtptFSR_3newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_P_4H = new TH2D("h_mtptFSR_3newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_M_4H = new TH2D("h_mtptFSR_3newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_M_4H = new TH2D("h_mtptFSR_3newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_ST_L_4H = new TH2D("h_mtptFSR_3newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_L_4H = new TH2D("h_mtptFSR_3newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_P_4H = new TH2D("h_mtptMR_3newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_P_4H = new TH2D("h_mtptMR_3newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_M_4H = new TH2D("h_mtptMR_3newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_M_4H = new TH2D("h_mtptMR_3newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_L_4H = new TH2D("h_mtptMR_3newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_L_4H = new TH2D("h_mtptMR_3newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_3newk_ST_P = new TH2D("h_mtptVR_3newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_3newk_STC_P = new TH2D("h_mtptVR_3newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -1061,20 +1149,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_3newk_STC_L_4H = new TH2D("h_mtptSR_3newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // mtpt for lostOuterHit = 1 tracks
-  TH2D* h_mtptFSR_ST_1L = new TH2D("h_mtptFSR_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_1L = new TH2D("h_mtptFSR_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_1L = new TH2D("h_mtptMR_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_1L = new TH2D("h_mtptMR_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_1L_23L = new TH2D("h_mtptFSR_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_1L_23L = new TH2D("h_mtptFSR_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_1L_23L = new TH2D("h_mtptMR_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_1L_23L = new TH2D("h_mtptMR_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_1L_23H = new TH2D("h_mtptFSR_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_1L_23H = new TH2D("h_mtptFSR_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_1L_23H = new TH2D("h_mtptMR_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_1L_23H = new TH2D("h_mtptMR_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_1L_4L = new TH2D("h_mtptFSR_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_1L_4L = new TH2D("h_mtptFSR_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_1L_4L = new TH2D("h_mtptMR_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_1L_4L = new TH2D("h_mtptMR_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ST_1L_4H = new TH2D("h_mtptFSR_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_STC_1L_4H = new TH2D("h_mtptFSR_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ST_1L_4H = new TH2D("h_mtptMR_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_STC_1L_4H = new TH2D("h_mtptMR_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_ST_1L = new TH2D("h_mtptVR_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_STC_1L = new TH2D("h_mtptVR_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1107,20 +1195,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_STC_1L_4H = new TH2D("h_mtptSR_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // EWK e
-  TH2D* h_mtptFSR_ewke_ST_1L = new TH2D("h_mtptFSR_ewke_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_1L = new TH2D("h_mtptFSR_ewke_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_1L = new TH2D("h_mtptMR_ewke_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_1L = new TH2D("h_mtptMR_ewke_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_1L_23L = new TH2D("h_mtptFSR_ewke_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_1L_23L = new TH2D("h_mtptFSR_ewke_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_1L_23L = new TH2D("h_mtptMR_ewke_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_1L_23L = new TH2D("h_mtptMR_ewke_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_1L_23H = new TH2D("h_mtptFSR_ewke_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_1L_23H = new TH2D("h_mtptFSR_ewke_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_1L_23H = new TH2D("h_mtptMR_ewke_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_1L_23H = new TH2D("h_mtptMR_ewke_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_1L_4L = new TH2D("h_mtptFSR_ewke_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_1L_4L = new TH2D("h_mtptFSR_ewke_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_1L_4L = new TH2D("h_mtptMR_ewke_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_1L_4L = new TH2D("h_mtptMR_ewke_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewke_ST_1L_4H = new TH2D("h_mtptFSR_ewke_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewke_STC_1L_4H = new TH2D("h_mtptFSR_ewke_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_ST_1L_4H = new TH2D("h_mtptMR_ewke_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewke_STC_1L_4H = new TH2D("h_mtptMR_ewke_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_ewke_ST_1L = new TH2D("h_mtptVR_ewke_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_ewke_STC_1L = new TH2D("h_mtptVR_ewke_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1153,20 +1241,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_ewke_STC_1L_4H = new TH2D("h_mtptSR_ewke_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // Tau EWKE e
-  TH2D* h_mtptFSR_tewke_ST_1L = new TH2D("h_mtptFSR_tewke_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_1L = new TH2D("h_mtptFSR_tewke_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_1L = new TH2D("h_mtptMR_tewke_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_1L = new TH2D("h_mtptMR_tewke_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_1L_23L = new TH2D("h_mtptFSR_tewke_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_1L_23L = new TH2D("h_mtptFSR_tewke_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_1L_23L = new TH2D("h_mtptMR_tewke_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_1L_23L = new TH2D("h_mtptMR_tewke_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_1L_23H = new TH2D("h_mtptFSR_tewke_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_1L_23H = new TH2D("h_mtptFSR_tewke_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_1L_23H = new TH2D("h_mtptMR_tewke_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_1L_23H = new TH2D("h_mtptMR_tewke_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_1L_4L = new TH2D("h_mtptFSR_tewke_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_1L_4L = new TH2D("h_mtptFSR_tewke_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_1L_4L = new TH2D("h_mtptMR_tewke_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_1L_4L = new TH2D("h_mtptMR_tewke_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewke_ST_1L_4H = new TH2D("h_mtptFSR_tewke_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewke_STC_1L_4H = new TH2D("h_mtptFSR_tewke_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_ST_1L_4H = new TH2D("h_mtptMR_tewke_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewke_STC_1L_4H = new TH2D("h_mtptMR_tewke_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_tewke_ST_1L = new TH2D("h_mtptVR_tewke_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_tewke_STC_1L = new TH2D("h_mtptVR_tewke_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1199,20 +1287,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_tewke_STC_1L_4H = new TH2D("h_mtptSR_tewke_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // EWK m
-  TH2D* h_mtptFSR_ewkm_ST_1L = new TH2D("h_mtptFSR_ewkm_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_1L = new TH2D("h_mtptFSR_ewkm_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_1L = new TH2D("h_mtptMR_ewkm_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_1L = new TH2D("h_mtptMR_ewkm_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_1L_23L = new TH2D("h_mtptFSR_ewkm_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_1L_23L = new TH2D("h_mtptFSR_ewkm_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_1L_23L = new TH2D("h_mtptMR_ewkm_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_1L_23L = new TH2D("h_mtptMR_ewkm_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_1L_23H = new TH2D("h_mtptFSR_ewkm_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_1L_23H = new TH2D("h_mtptFSR_ewkm_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_1L_23H = new TH2D("h_mtptMR_ewkm_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_1L_23H = new TH2D("h_mtptMR_ewkm_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_1L_4L = new TH2D("h_mtptFSR_ewkm_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_1L_4L = new TH2D("h_mtptFSR_ewkm_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_1L_4L = new TH2D("h_mtptMR_ewkm_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_1L_4L = new TH2D("h_mtptMR_ewkm_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_ewkm_ST_1L_4H = new TH2D("h_mtptFSR_ewkm_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_ewkm_STC_1L_4H = new TH2D("h_mtptFSR_ewkm_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_ST_1L_4H = new TH2D("h_mtptMR_ewkm_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_ewkm_STC_1L_4H = new TH2D("h_mtptMR_ewkm_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_ewkm_ST_1L = new TH2D("h_mtptVR_ewkm_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_ewkm_STC_1L = new TH2D("h_mtptVR_ewkm_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1245,20 +1333,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_ewkm_STC_1L_4H = new TH2D("h_mtptSR_ewkm_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // Tau EWKM m
-  TH2D* h_mtptFSR_tewkm_ST_1L = new TH2D("h_mtptFSR_tewkm_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_1L = new TH2D("h_mtptFSR_tewkm_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_1L = new TH2D("h_mtptMR_tewkm_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_1L = new TH2D("h_mtptMR_tewkm_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_1L_23L = new TH2D("h_mtptFSR_tewkm_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_1L_23L = new TH2D("h_mtptFSR_tewkm_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_1L_23L = new TH2D("h_mtptMR_tewkm_ST_1L_23L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_1L_23L = new TH2D("h_mtptMR_tewkm_STC_1L_23L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_1L_23H = new TH2D("h_mtptFSR_tewkm_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_1L_23H = new TH2D("h_mtptFSR_tewkm_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_1L_23H = new TH2D("h_mtptMR_tewkm_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_1L_23H = new TH2D("h_mtptMR_tewkm_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_1L_4L = new TH2D("h_mtptFSR_tewkm_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_1L_4L = new TH2D("h_mtptFSR_tewkm_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_1L_4L = new TH2D("h_mtptMR_tewkm_ST_1L_4L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_1L_4L = new TH2D("h_mtptMR_tewkm_STC_1L_4L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_tewkm_ST_1L_4H = new TH2D("h_mtptFSR_tewkm_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_tewkm_STC_1L_4H = new TH2D("h_mtptFSR_tewkm_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_ST_1L_4H = new TH2D("h_mtptMR_tewkm_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_tewkm_STC_1L_4H = new TH2D("h_mtptMR_tewkm_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_tewkm_ST_1L = new TH2D("h_mtptVR_tewkm_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_tewkm_STC_1L = new TH2D("h_mtptVR_tewkm_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1291,20 +1379,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_tewkm_STC_1L_4H = new TH2D("h_mtptSR_tewkm_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // Non-EWK mtpt
-  TH2D* h_mtptFSR_newk_ST_1L = new TH2D("h_mtptFSR_newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_1L = new TH2D("h_mtptFSR_newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_1L = new TH2D("h_mtptMR_newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_1L = new TH2D("h_mtptMR_newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_1L_23L = new TH2D("h_mtptFSR_newk_ST_1L_231L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_1L_23L = new TH2D("h_mtptFSR_newk_STC_1L_231L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_1L_23L = new TH2D("h_mtptMR_newk_ST_1L_231L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_1L_23L = new TH2D("h_mtptMR_newk_STC_1L_231L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_1L_23H = new TH2D("h_mtptFSR_newk_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_1L_23H = new TH2D("h_mtptFSR_newk_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_1L_23H = new TH2D("h_mtptMR_newk_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_1L_23H = new TH2D("h_mtptMR_newk_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_1L_4L = new TH2D("h_mtptFSR_newk_ST_1L_41L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_1L_4L = new TH2D("h_mtptFSR_newk_STC_1L_41L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_1L_4L = new TH2D("h_mtptMR_newk_ST_1L_41L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_1L_4L = new TH2D("h_mtptMR_newk_STC_1L_41L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_newk_ST_1L_4H = new TH2D("h_mtptFSR_newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_newk_STC_1L_4H = new TH2D("h_mtptFSR_newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_ST_1L_4H = new TH2D("h_mtptMR_newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_newk_STC_1L_4H = new TH2D("h_mtptMR_newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_newk_ST_1L = new TH2D("h_mtptVR_newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_newk_STC_1L = new TH2D("h_mtptVR_newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1337,20 +1425,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_newk_STC_1L_4H = new TH2D("h_mtptSR_newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // 1-prong mtpt
-  TH2D* h_mtptFSR_1newk_ST_1L = new TH2D("h_mtptFSR_1newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_1L = new TH2D("h_mtptFSR_1newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_1L = new TH2D("h_mtptMR_1newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_1L = new TH2D("h_mtptMR_1newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_1L_23L = new TH2D("h_mtptFSR_1newk_ST_1L_231L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_1L_23L = new TH2D("h_mtptFSR_1newk_STC_1L_231L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_1L_23L = new TH2D("h_mtptMR_1newk_ST_1L_231L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_1L_23L = new TH2D("h_mtptMR_1newk_STC_1L_231L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_1L_23H = new TH2D("h_mtptFSR_1newk_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_1L_23H = new TH2D("h_mtptFSR_1newk_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_1L_23H = new TH2D("h_mtptMR_1newk_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_1L_23H = new TH2D("h_mtptMR_1newk_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_1L_4L = new TH2D("h_mtptFSR_1newk_ST_1L_41L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_1L_4L = new TH2D("h_mtptFSR_1newk_STC_1L_41L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_1L_4L = new TH2D("h_mtptMR_1newk_ST_1L_41L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_1L_4L = new TH2D("h_mtptMR_1newk_STC_1L_41L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_1newk_ST_1L_4H = new TH2D("h_mtptFSR_1newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_1newk_STC_1L_4H = new TH2D("h_mtptFSR_1newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_ST_1L_4H = new TH2D("h_mtptMR_1newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_1newk_STC_1L_4H = new TH2D("h_mtptMR_1newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_1newk_ST_1L = new TH2D("h_mtptVR_1newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_1newk_STC_1L = new TH2D("h_mtptVR_1newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1383,20 +1471,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_mtptSR_1newk_STC_1L_4H = new TH2D("h_mtptSR_1newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   // 3-prong mtpt
-  TH2D* h_mtptFSR_3newk_ST_1L = new TH2D("h_mtptFSR_3newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_1L = new TH2D("h_mtptFSR_3newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_1L = new TH2D("h_mtptMR_3newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_1L = new TH2D("h_mtptMR_3newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_1L_23L = new TH2D("h_mtptFSR_3newk_ST_1L_231L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_1L_23L = new TH2D("h_mtptFSR_3newk_STC_1L_231L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_1L_23L = new TH2D("h_mtptMR_3newk_ST_1L_231L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_1L_23L = new TH2D("h_mtptMR_3newk_STC_1L_231L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_1L_23H = new TH2D("h_mtptFSR_3newk_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_1L_23H = new TH2D("h_mtptFSR_3newk_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_1L_23H = new TH2D("h_mtptMR_3newk_ST_1L_23H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_1L_23H = new TH2D("h_mtptMR_3newk_STC_1L_23H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_1L_4L = new TH2D("h_mtptFSR_3newk_ST_1L_41L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_1L_4L = new TH2D("h_mtptFSR_3newk_STC_1L_41L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_1L_4L = new TH2D("h_mtptMR_3newk_ST_1L_41L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_1L_4L = new TH2D("h_mtptMR_3newk_STC_1L_41L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
-  TH2D* h_mtptFSR_3newk_ST_1L_4H = new TH2D("h_mtptFSR_3newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
-  TH2D* h_mtptFSR_3newk_STC_1L_4H = new TH2D("h_mtptFSR_3newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_ST_1L_4H = new TH2D("h_mtptMR_3newk_ST_1L_4H","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
+  TH2D* h_mtptMR_3newk_STC_1L_4H = new TH2D("h_mtptMR_3newk_STC_1L_4H","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
 
   TH2D* h_mtptVR_3newk_ST_1L = new TH2D("h_mtptVR_3newk_ST_1L","p_{T} x M_{T}(ST,MET) of 1L STs",10,0,200,10,0,500);
   TH2D* h_mtptVR_3newk_STC_1L = new TH2D("h_mtptVR_3newk_STC_1L","p_{T} x M_{T}(STC,MET) of 1L STCs",10,0,200,10,0,500);
@@ -1430,40 +1518,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
   /*
   // Zll hists 
-  TH2D* h_zll_mtptFSR_ST_P = new TH2D("h_zll_mtptFSR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_P = new TH2D("h_zll_mtptFSR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_M = new TH2D("h_zll_mtptFSR_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_M = new TH2D("h_zll_mtptFSR_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_L = new TH2D("h_zll_mtptFSR_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_L = new TH2D("h_zll_mtptFSR_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_P = new TH2D("h_zll_mtptMR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_P = new TH2D("h_zll_mtptMR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_M = new TH2D("h_zll_mtptMR_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_M = new TH2D("h_zll_mtptMR_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_L = new TH2D("h_zll_mtptMR_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_L = new TH2D("h_zll_mtptMR_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ST_P_23L = new TH2D("h_zll_mtptFSR_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_P_23L = new TH2D("h_zll_mtptFSR_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_M_23L = new TH2D("h_zll_mtptFSR_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_M_23L = new TH2D("h_zll_mtptFSR_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_L_23L = new TH2D("h_zll_mtptFSR_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_L_23L = new TH2D("h_zll_mtptFSR_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_P_23L = new TH2D("h_zll_mtptMR_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_P_23L = new TH2D("h_zll_mtptMR_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_M_23L = new TH2D("h_zll_mtptMR_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_M_23L = new TH2D("h_zll_mtptMR_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_L_23L = new TH2D("h_zll_mtptMR_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_L_23L = new TH2D("h_zll_mtptMR_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ST_P_23H = new TH2D("h_zll_mtptFSR_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_P_23H = new TH2D("h_zll_mtptFSR_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_M_23H = new TH2D("h_zll_mtptFSR_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_M_23H = new TH2D("h_zll_mtptFSR_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_L_23H = new TH2D("h_zll_mtptFSR_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_L_23H = new TH2D("h_zll_mtptFSR_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_P_23H = new TH2D("h_zll_mtptMR_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_P_23H = new TH2D("h_zll_mtptMR_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_M_23H = new TH2D("h_zll_mtptMR_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_M_23H = new TH2D("h_zll_mtptMR_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_L_23H = new TH2D("h_zll_mtptMR_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_L_23H = new TH2D("h_zll_mtptMR_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ST_P_4L = new TH2D("h_zll_mtptFSR_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_P_4L = new TH2D("h_zll_mtptFSR_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_M_4L = new TH2D("h_zll_mtptFSR_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_M_4L = new TH2D("h_zll_mtptFSR_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_L_4L = new TH2D("h_zll_mtptFSR_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_L_4L = new TH2D("h_zll_mtptFSR_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_P_4L = new TH2D("h_zll_mtptMR_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_P_4L = new TH2D("h_zll_mtptMR_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_M_4L = new TH2D("h_zll_mtptMR_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_M_4L = new TH2D("h_zll_mtptMR_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_L_4L = new TH2D("h_zll_mtptMR_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_L_4L = new TH2D("h_zll_mtptMR_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ST_P_4H = new TH2D("h_zll_mtptFSR_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_P_4H = new TH2D("h_zll_mtptFSR_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_M_4H = new TH2D("h_zll_mtptFSR_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_M_4H = new TH2D("h_zll_mtptFSR_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ST_L_4H = new TH2D("h_zll_mtptFSR_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_STC_L_4H = new TH2D("h_zll_mtptFSR_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_P_4H = new TH2D("h_zll_mtptMR_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_P_4H = new TH2D("h_zll_mtptMR_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_M_4H = new TH2D("h_zll_mtptMR_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_M_4H = new TH2D("h_zll_mtptMR_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ST_L_4H = new TH2D("h_zll_mtptMR_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_STC_L_4H = new TH2D("h_zll_mtptMR_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_zll_mtptVR_ST_P = new TH2D("h_zll_mtptVR_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_zll_mtptVR_STC_P = new TH2D("h_zll_mtptVR_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -1536,40 +1624,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_zll_mtptSR_STC_L_4H = new TH2D("h_zll_mtptSR_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // EWK mtpt
-  TH2D* h_zll_mtptFSR_ewk_ST_P = new TH2D("h_zll_mtptFSR_ewk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_P = new TH2D("h_zll_mtptFSR_ewk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_M = new TH2D("h_zll_mtptFSR_ewk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_M = new TH2D("h_zll_mtptFSR_ewk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_L = new TH2D("h_zll_mtptFSR_ewk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_L = new TH2D("h_zll_mtptFSR_ewk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_P = new TH2D("h_zll_mtptMR_ewk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_P = new TH2D("h_zll_mtptMR_ewk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_M = new TH2D("h_zll_mtptMR_ewk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_M = new TH2D("h_zll_mtptMR_ewk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_L = new TH2D("h_zll_mtptMR_ewk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_L = new TH2D("h_zll_mtptMR_ewk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ewk_ST_P_23L = new TH2D("h_zll_mtptFSR_ewk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_P_23L = new TH2D("h_zll_mtptFSR_ewk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_M_23L = new TH2D("h_zll_mtptFSR_ewk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_M_23L = new TH2D("h_zll_mtptFSR_ewk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_L_23L = new TH2D("h_zll_mtptFSR_ewk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_L_23L = new TH2D("h_zll_mtptFSR_ewk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_P_23L = new TH2D("h_zll_mtptMR_ewk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_P_23L = new TH2D("h_zll_mtptMR_ewk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_M_23L = new TH2D("h_zll_mtptMR_ewk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_M_23L = new TH2D("h_zll_mtptMR_ewk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_L_23L = new TH2D("h_zll_mtptMR_ewk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_L_23L = new TH2D("h_zll_mtptMR_ewk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ewk_ST_P_23H = new TH2D("h_zll_mtptFSR_ewk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_P_23H = new TH2D("h_zll_mtptFSR_ewk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_M_23H = new TH2D("h_zll_mtptFSR_ewk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_M_23H = new TH2D("h_zll_mtptFSR_ewk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_L_23H = new TH2D("h_zll_mtptFSR_ewk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_L_23H = new TH2D("h_zll_mtptFSR_ewk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_P_23H = new TH2D("h_zll_mtptMR_ewk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_P_23H = new TH2D("h_zll_mtptMR_ewk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_M_23H = new TH2D("h_zll_mtptMR_ewk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_M_23H = new TH2D("h_zll_mtptMR_ewk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_L_23H = new TH2D("h_zll_mtptMR_ewk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_L_23H = new TH2D("h_zll_mtptMR_ewk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ewk_ST_P_4L = new TH2D("h_zll_mtptFSR_ewk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_P_4L = new TH2D("h_zll_mtptFSR_ewk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_M_4L = new TH2D("h_zll_mtptFSR_ewk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_M_4L = new TH2D("h_zll_mtptFSR_ewk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_L_4L = new TH2D("h_zll_mtptFSR_ewk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_L_4L = new TH2D("h_zll_mtptFSR_ewk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_P_4L = new TH2D("h_zll_mtptMR_ewk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_P_4L = new TH2D("h_zll_mtptMR_ewk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_M_4L = new TH2D("h_zll_mtptMR_ewk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_M_4L = new TH2D("h_zll_mtptMR_ewk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_L_4L = new TH2D("h_zll_mtptMR_ewk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_L_4L = new TH2D("h_zll_mtptMR_ewk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_ewk_ST_P_4H = new TH2D("h_zll_mtptFSR_ewk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_P_4H = new TH2D("h_zll_mtptFSR_ewk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_M_4H = new TH2D("h_zll_mtptFSR_ewk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_M_4H = new TH2D("h_zll_mtptFSR_ewk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_ST_L_4H = new TH2D("h_zll_mtptFSR_ewk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_ewk_STC_L_4H = new TH2D("h_zll_mtptFSR_ewk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_P_4H = new TH2D("h_zll_mtptMR_ewk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_P_4H = new TH2D("h_zll_mtptMR_ewk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_M_4H = new TH2D("h_zll_mtptMR_ewk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_M_4H = new TH2D("h_zll_mtptMR_ewk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_ST_L_4H = new TH2D("h_zll_mtptMR_ewk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_ewk_STC_L_4H = new TH2D("h_zll_mtptMR_ewk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_zll_mtptVR_ewk_ST_P = new TH2D("h_zll_mtptVR_ewk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_zll_mtptVR_ewk_STC_P = new TH2D("h_zll_mtptVR_ewk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -1642,40 +1730,40 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_zll_mtptSR_ewk_STC_L_4H = new TH2D("h_zll_mtptSR_ewk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // Non-EWK mtpt
-  TH2D* h_zll_mtptFSR_newk_ST_P = new TH2D("h_zll_mtptFSR_newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_P = new TH2D("h_zll_mtptFSR_newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_M = new TH2D("h_zll_mtptFSR_newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_M = new TH2D("h_zll_mtptFSR_newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_L = new TH2D("h_zll_mtptFSR_newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_L = new TH2D("h_zll_mtptFSR_newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_P = new TH2D("h_zll_mtptMR_newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_P = new TH2D("h_zll_mtptMR_newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_M = new TH2D("h_zll_mtptMR_newk_ST_M","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_M = new TH2D("h_zll_mtptMR_newk_STC_M","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_L = new TH2D("h_zll_mtptMR_newk_ST_L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_L = new TH2D("h_zll_mtptMR_newk_STC_L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_newk_ST_P_23L = new TH2D("h_zll_mtptFSR_newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_P_23L = new TH2D("h_zll_mtptFSR_newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_M_23L = new TH2D("h_zll_mtptFSR_newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_M_23L = new TH2D("h_zll_mtptFSR_newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_L_23L = new TH2D("h_zll_mtptFSR_newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_L_23L = new TH2D("h_zll_mtptFSR_newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_P_23L = new TH2D("h_zll_mtptMR_newk_ST_P_23L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_P_23L = new TH2D("h_zll_mtptMR_newk_STC_P_23L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_M_23L = new TH2D("h_zll_mtptMR_newk_ST_M_23L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_M_23L = new TH2D("h_zll_mtptMR_newk_STC_M_23L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_L_23L = new TH2D("h_zll_mtptMR_newk_ST_L_23L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_L_23L = new TH2D("h_zll_mtptMR_newk_STC_L_23L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_newk_ST_P_23H = new TH2D("h_zll_mtptFSR_newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_P_23H = new TH2D("h_zll_mtptFSR_newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_M_23H = new TH2D("h_zll_mtptFSR_newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_M_23H = new TH2D("h_zll_mtptFSR_newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_L_23H = new TH2D("h_zll_mtptFSR_newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_L_23H = new TH2D("h_zll_mtptFSR_newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_P_23H = new TH2D("h_zll_mtptMR_newk_ST_P_23H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_P_23H = new TH2D("h_zll_mtptMR_newk_STC_P_23H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_M_23H = new TH2D("h_zll_mtptMR_newk_ST_M_23H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_M_23H = new TH2D("h_zll_mtptMR_newk_STC_M_23H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_L_23H = new TH2D("h_zll_mtptMR_newk_ST_L_23H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_L_23H = new TH2D("h_zll_mtptMR_newk_STC_L_23H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_newk_ST_P_4L = new TH2D("h_zll_mtptFSR_newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_P_4L = new TH2D("h_zll_mtptFSR_newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_M_4L = new TH2D("h_zll_mtptFSR_newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_M_4L = new TH2D("h_zll_mtptFSR_newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_L_4L = new TH2D("h_zll_mtptFSR_newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_L_4L = new TH2D("h_zll_mtptFSR_newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_P_4L = new TH2D("h_zll_mtptMR_newk_ST_P_4L","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_P_4L = new TH2D("h_zll_mtptMR_newk_STC_P_4L","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_M_4L = new TH2D("h_zll_mtptMR_newk_ST_M_4L","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_M_4L = new TH2D("h_zll_mtptMR_newk_STC_M_4L","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_L_4L = new TH2D("h_zll_mtptMR_newk_ST_L_4L","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_L_4L = new TH2D("h_zll_mtptMR_newk_STC_L_4L","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
-  TH2D* h_zll_mtptFSR_newk_ST_P_4H = new TH2D("h_zll_mtptFSR_newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_P_4H = new TH2D("h_zll_mtptFSR_newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_M_4H = new TH2D("h_zll_mtptFSR_newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_M_4H = new TH2D("h_zll_mtptFSR_newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_ST_L_4H = new TH2D("h_zll_mtptFSR_newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
-  TH2D* h_zll_mtptFSR_newk_STC_L_4H = new TH2D("h_zll_mtptFSR_newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_P_4H = new TH2D("h_zll_mtptMR_newk_ST_P_4H","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_P_4H = new TH2D("h_zll_mtptMR_newk_STC_P_4H","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_M_4H = new TH2D("h_zll_mtptMR_newk_ST_M_4H","p_{T} x M_{T}(ST,MET) of M STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_M_4H = new TH2D("h_zll_mtptMR_newk_STC_M_4H","p_{T} x M_{T}(STC,MET) of M STCs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_ST_L_4H = new TH2D("h_zll_mtptMR_newk_ST_L_4H","p_{T} x M_{T}(ST,MET) of L STs",10,0,200,10,0,500);
+  TH2D* h_zll_mtptMR_newk_STC_L_4H = new TH2D("h_zll_mtptMR_newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   TH2D* h_zll_mtptVR_newk_ST_P = new TH2D("h_zll_mtptVR_newk_ST_P","p_{T} x M_{T}(ST,MET) of P STs",10,0,200,10,0,500);
   TH2D* h_zll_mtptVR_newk_STC_P = new TH2D("h_zll_mtptVR_newk_STC_P","p_{T} x M_{T}(STC,MET) of P STCs",10,0,200,10,0,500);
@@ -1748,9 +1836,9 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TH2D* h_zll_mtptSR_newk_STC_L_4H = new TH2D("h_zll_mtptSR_newk_STC_L_4H","p_{T} x M_{T}(STC,MET) of L STCs",10,0,200,10,0,500);
 
   // MtPt of removed lepton events
-  TH2D* h_rlmtptFSR = new TH2D("h_rlmtptFSR","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
-  TH2D* h_rlmtptFSR_23 = new TH2D("h_rlmtptFSR_23","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
-  TH2D* h_rlmtptFSR_4 = new TH2D("h_rlmtptFSR_4","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
+  TH2D* h_rlmtptMR = new TH2D("h_rlmtptMR","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
+  TH2D* h_rlmtptMR_23 = new TH2D("h_rlmtptMR_23","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
+  TH2D* h_rlmtptMR_4 = new TH2D("h_rlmtptMR_4","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
 
   TH2D* h_rlmtptVR = new TH2D("h_rlmtptVR","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
   TH2D* h_rlmtptVR_23 = new TH2D("h_rlmtptVR_23","p_{T} x M_{T}(ST,MET) of Removed Lepton \"STs\"",10,0,200,10,0,500);
@@ -1826,11 +1914,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   std::vector<TH1D*> nbhists = {h_nb_ST_L_30, h_nb_ST_L_100, h_nb_ST_L_200, h_nb_ST_L_250, h_nb_ST_L_300};
   //  std::vector<TH1D*> rlnbhists = {h_rlnb_ST_L_30, h_rlnb_ST_L_100, h_rlnb_ST_L_200, h_rlnb_ST_L_250, h_rlnb_ST_L_300};
 
-  std::vector<TH2D*> mtpthists = { h_mtptFSR_ST_P, h_mtptFSR_ST_M, h_mtptFSR_ST_L, h_mtptFSR_ST_1L, h_mtptFSR_STC_P, h_mtptFSR_STC_M, h_mtptFSR_STC_L, h_mtptFSR_STC_1L,
-				 h_mtptFSR_ST_P_23L, h_mtptFSR_ST_M_23L, h_mtptFSR_ST_L_23L, h_mtptFSR_ST_1L_23L, h_mtptFSR_ST_P_4L, h_mtptFSR_ST_M_4L, h_mtptFSR_ST_L_4L, h_mtptFSR_ST_1L_4L,
-				 h_mtptFSR_ST_P_23H, h_mtptFSR_ST_M_23H, h_mtptFSR_ST_L_23H, h_mtptFSR_ST_1L_23H, h_mtptFSR_ST_P_4H, h_mtptFSR_ST_M_4H, h_mtptFSR_ST_L_4H, h_mtptFSR_ST_1L_4H,
-				 h_mtptFSR_STC_P_23L, h_mtptFSR_STC_M_23L, h_mtptFSR_STC_L_23L, h_mtptFSR_STC_1L_23L, h_mtptFSR_STC_P_4L, h_mtptFSR_STC_M_4L, h_mtptFSR_STC_L_4L, h_mtptFSR_STC_1L_4L,
-				 h_mtptFSR_STC_P_23H, h_mtptFSR_STC_M_23H, h_mtptFSR_STC_L_23H, h_mtptFSR_STC_1L_23H, h_mtptFSR_STC_P_4H, h_mtptFSR_STC_M_4H, h_mtptFSR_STC_L_4H, h_mtptFSR_STC_1L_4H,
+  std::vector<TH2D*> mtpthists = { h_mtptMR_ST_P, h_mtptMR_ST_M, h_mtptMR_ST_L, h_mtptMR_ST_1L, h_mtptMR_STC_P, h_mtptMR_STC_M, h_mtptMR_STC_L, h_mtptMR_STC_1L,
+				 h_mtptMR_ST_P_23L, h_mtptMR_ST_M_23L, h_mtptMR_ST_L_23L, h_mtptMR_ST_1L_23L, h_mtptMR_ST_P_4L, h_mtptMR_ST_M_4L, h_mtptMR_ST_L_4L, h_mtptMR_ST_1L_4L,
+				 h_mtptMR_ST_P_23H, h_mtptMR_ST_M_23H, h_mtptMR_ST_L_23H, h_mtptMR_ST_1L_23H, h_mtptMR_ST_P_4H, h_mtptMR_ST_M_4H, h_mtptMR_ST_L_4H, h_mtptMR_ST_1L_4H,
+				 h_mtptMR_STC_P_23L, h_mtptMR_STC_M_23L, h_mtptMR_STC_L_23L, h_mtptMR_STC_1L_23L, h_mtptMR_STC_P_4L, h_mtptMR_STC_M_4L, h_mtptMR_STC_L_4L, h_mtptMR_STC_1L_4L,
+				 h_mtptMR_STC_P_23H, h_mtptMR_STC_M_23H, h_mtptMR_STC_L_23H, h_mtptMR_STC_1L_23H, h_mtptMR_STC_P_4H, h_mtptMR_STC_M_4H, h_mtptMR_STC_L_4H, h_mtptMR_STC_1L_4H,
 				 h_mtptVR_ST_P, h_mtptVR_ST_M, h_mtptVR_ST_L, h_mtptVR_ST_1L, h_mtptVR_STC_P, h_mtptVR_STC_M, h_mtptVR_STC_L, h_mtptVR_STC_1L,
 				 h_mtptVR_ST_P_23L, h_mtptVR_ST_M_23L, h_mtptVR_ST_L_23L, h_mtptVR_ST_1L_23L, h_mtptVR_ST_P_4L, h_mtptVR_ST_M_4L, h_mtptVR_ST_L_4L, h_mtptVR_ST_1L_4L,
 				 h_mtptVR_ST_P_23H, h_mtptVR_ST_M_23H, h_mtptVR_ST_L_23H, h_mtptVR_ST_1L_23H, h_mtptVR_ST_P_4H, h_mtptVR_ST_M_4H, h_mtptVR_ST_L_4H, h_mtptVR_ST_1L_4H,
@@ -1842,11 +1930,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_STC_P_23L, h_mtptSR_STC_M_23L, h_mtptSR_STC_L_23L, h_mtptSR_STC_1L_23L, h_mtptSR_STC_P_4L, h_mtptSR_STC_M_4L, h_mtptSR_STC_L_4L, h_mtptSR_STC_1L_4L,
 				 h_mtptSR_STC_P_23H, h_mtptSR_STC_M_23H, h_mtptSR_STC_L_23H, h_mtptSR_STC_1L_23H, h_mtptSR_STC_P_4H, h_mtptSR_STC_M_4H, h_mtptSR_STC_L_4H, h_mtptSR_STC_1L_4H};
 
-  std::vector<TH2D*> mtptewkehists = { h_mtptFSR_ewke_ST_P, h_mtptFSR_ewke_ST_M, h_mtptFSR_ewke_ST_L, h_mtptFSR_ewke_ST_1L, h_mtptFSR_ewke_STC_P, h_mtptFSR_ewke_STC_M, h_mtptFSR_ewke_STC_L, h_mtptFSR_ewke_STC_1L,
-				 h_mtptFSR_ewke_ST_P_23L, h_mtptFSR_ewke_ST_M_23L, h_mtptFSR_ewke_ST_L_23L, h_mtptFSR_ewke_ST_1L_23L, h_mtptFSR_ewke_ST_P_4L, h_mtptFSR_ewke_ST_M_4L, h_mtptFSR_ewke_ST_L_4L, h_mtptFSR_ewke_ST_1L_4L,
-				 h_mtptFSR_ewke_ST_P_23H, h_mtptFSR_ewke_ST_M_23H, h_mtptFSR_ewke_ST_L_23H, h_mtptFSR_ewke_ST_1L_23H, h_mtptFSR_ewke_ST_P_4H, h_mtptFSR_ewke_ST_M_4H, h_mtptFSR_ewke_ST_L_4H, h_mtptFSR_ewke_ST_1L_4H,
-				 h_mtptFSR_ewke_STC_P_23L, h_mtptFSR_ewke_STC_M_23L, h_mtptFSR_ewke_STC_L_23L, h_mtptFSR_ewke_STC_1L_23L, h_mtptFSR_ewke_STC_P_4L, h_mtptFSR_ewke_STC_M_4L, h_mtptFSR_ewke_STC_L_4L, h_mtptFSR_ewke_STC_1L_4L,
-				 h_mtptFSR_ewke_STC_P_23H, h_mtptFSR_ewke_STC_M_23H, h_mtptFSR_ewke_STC_L_23H, h_mtptFSR_ewke_STC_1L_23H, h_mtptFSR_ewke_STC_P_4H, h_mtptFSR_ewke_STC_M_4H, h_mtptFSR_ewke_STC_L_4H, h_mtptFSR_ewke_STC_1L_4H,
+  std::vector<TH2D*> mtptewkehists = { h_mtptMR_ewke_ST_P, h_mtptMR_ewke_ST_M, h_mtptMR_ewke_ST_L, h_mtptMR_ewke_ST_1L, h_mtptMR_ewke_STC_P, h_mtptMR_ewke_STC_M, h_mtptMR_ewke_STC_L, h_mtptMR_ewke_STC_1L,
+				 h_mtptMR_ewke_ST_P_23L, h_mtptMR_ewke_ST_M_23L, h_mtptMR_ewke_ST_L_23L, h_mtptMR_ewke_ST_1L_23L, h_mtptMR_ewke_ST_P_4L, h_mtptMR_ewke_ST_M_4L, h_mtptMR_ewke_ST_L_4L, h_mtptMR_ewke_ST_1L_4L,
+				 h_mtptMR_ewke_ST_P_23H, h_mtptMR_ewke_ST_M_23H, h_mtptMR_ewke_ST_L_23H, h_mtptMR_ewke_ST_1L_23H, h_mtptMR_ewke_ST_P_4H, h_mtptMR_ewke_ST_M_4H, h_mtptMR_ewke_ST_L_4H, h_mtptMR_ewke_ST_1L_4H,
+				 h_mtptMR_ewke_STC_P_23L, h_mtptMR_ewke_STC_M_23L, h_mtptMR_ewke_STC_L_23L, h_mtptMR_ewke_STC_1L_23L, h_mtptMR_ewke_STC_P_4L, h_mtptMR_ewke_STC_M_4L, h_mtptMR_ewke_STC_L_4L, h_mtptMR_ewke_STC_1L_4L,
+				 h_mtptMR_ewke_STC_P_23H, h_mtptMR_ewke_STC_M_23H, h_mtptMR_ewke_STC_L_23H, h_mtptMR_ewke_STC_1L_23H, h_mtptMR_ewke_STC_P_4H, h_mtptMR_ewke_STC_M_4H, h_mtptMR_ewke_STC_L_4H, h_mtptMR_ewke_STC_1L_4H,
 				 h_mtptVR_ewke_ST_P, h_mtptVR_ewke_ST_M, h_mtptVR_ewke_ST_L, h_mtptVR_ewke_ST_1L, h_mtptVR_ewke_STC_P, h_mtptVR_ewke_STC_M, h_mtptVR_ewke_STC_L, h_mtptVR_ewke_STC_1L,
 				 h_mtptVR_ewke_ST_P_23L, h_mtptVR_ewke_ST_M_23L, h_mtptVR_ewke_ST_L_23L, h_mtptVR_ewke_ST_1L_23L, h_mtptVR_ewke_ST_P_4L, h_mtptVR_ewke_ST_M_4L, h_mtptVR_ewke_ST_L_4L, h_mtptVR_ewke_ST_1L_4L,
 				 h_mtptVR_ewke_ST_P_23H, h_mtptVR_ewke_ST_M_23H, h_mtptVR_ewke_ST_L_23H, h_mtptVR_ewke_ST_1L_23H, h_mtptVR_ewke_ST_P_4H, h_mtptVR_ewke_ST_M_4H, h_mtptVR_ewke_ST_L_4H, h_mtptVR_ewke_ST_1L_4H,
@@ -1858,11 +1946,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_ewke_STC_P_23L, h_mtptSR_ewke_STC_M_23L, h_mtptSR_ewke_STC_L_23L, h_mtptSR_ewke_STC_1L_23L, h_mtptSR_ewke_STC_P_4L, h_mtptSR_ewke_STC_M_4L, h_mtptSR_ewke_STC_L_4L, h_mtptSR_ewke_STC_1L_4L,
 				 h_mtptSR_ewke_STC_P_23H, h_mtptSR_ewke_STC_M_23H, h_mtptSR_ewke_STC_L_23H, h_mtptSR_ewke_STC_1L_23H, h_mtptSR_ewke_STC_P_4H, h_mtptSR_ewke_STC_M_4H, h_mtptSR_ewke_STC_L_4H, h_mtptSR_ewke_STC_1L_4H};
 
-  std::vector<TH2D*> mtptewkmhists = { h_mtptFSR_ewkm_ST_P, h_mtptFSR_ewkm_ST_M, h_mtptFSR_ewkm_ST_L, h_mtptFSR_ewkm_ST_1L, h_mtptFSR_ewkm_STC_P, h_mtptFSR_ewkm_STC_M, h_mtptFSR_ewkm_STC_L, h_mtptFSR_ewkm_STC_1L,
-				 h_mtptFSR_ewkm_ST_P_23L, h_mtptFSR_ewkm_ST_M_23L, h_mtptFSR_ewkm_ST_L_23L, h_mtptFSR_ewkm_ST_1L_23L, h_mtptFSR_ewkm_ST_P_4L, h_mtptFSR_ewkm_ST_M_4L, h_mtptFSR_ewkm_ST_L_4L, h_mtptFSR_ewkm_ST_1L_4L,
-				 h_mtptFSR_ewkm_ST_P_23H, h_mtptFSR_ewkm_ST_M_23H, h_mtptFSR_ewkm_ST_L_23H, h_mtptFSR_ewkm_ST_1L_23H, h_mtptFSR_ewkm_ST_P_4H, h_mtptFSR_ewkm_ST_M_4H, h_mtptFSR_ewkm_ST_L_4H, h_mtptFSR_ewkm_ST_1L_4H,
-				 h_mtptFSR_ewkm_STC_P_23L, h_mtptFSR_ewkm_STC_M_23L, h_mtptFSR_ewkm_STC_L_23L, h_mtptFSR_ewkm_STC_1L_23L, h_mtptFSR_ewkm_STC_P_4L, h_mtptFSR_ewkm_STC_M_4L, h_mtptFSR_ewkm_STC_L_4L, h_mtptFSR_ewkm_STC_1L_4L,
-				 h_mtptFSR_ewkm_STC_P_23H, h_mtptFSR_ewkm_STC_M_23H, h_mtptFSR_ewkm_STC_L_23H, h_mtptFSR_ewkm_STC_1L_23H, h_mtptFSR_ewkm_STC_P_4H, h_mtptFSR_ewkm_STC_M_4H, h_mtptFSR_ewkm_STC_L_4H, h_mtptFSR_ewkm_STC_1L_4H,
+  std::vector<TH2D*> mtptewkmhists = { h_mtptMR_ewkm_ST_P, h_mtptMR_ewkm_ST_M, h_mtptMR_ewkm_ST_L, h_mtptMR_ewkm_ST_1L, h_mtptMR_ewkm_STC_P, h_mtptMR_ewkm_STC_M, h_mtptMR_ewkm_STC_L, h_mtptMR_ewkm_STC_1L,
+				 h_mtptMR_ewkm_ST_P_23L, h_mtptMR_ewkm_ST_M_23L, h_mtptMR_ewkm_ST_L_23L, h_mtptMR_ewkm_ST_1L_23L, h_mtptMR_ewkm_ST_P_4L, h_mtptMR_ewkm_ST_M_4L, h_mtptMR_ewkm_ST_L_4L, h_mtptMR_ewkm_ST_1L_4L,
+				 h_mtptMR_ewkm_ST_P_23H, h_mtptMR_ewkm_ST_M_23H, h_mtptMR_ewkm_ST_L_23H, h_mtptMR_ewkm_ST_1L_23H, h_mtptMR_ewkm_ST_P_4H, h_mtptMR_ewkm_ST_M_4H, h_mtptMR_ewkm_ST_L_4H, h_mtptMR_ewkm_ST_1L_4H,
+				 h_mtptMR_ewkm_STC_P_23L, h_mtptMR_ewkm_STC_M_23L, h_mtptMR_ewkm_STC_L_23L, h_mtptMR_ewkm_STC_1L_23L, h_mtptMR_ewkm_STC_P_4L, h_mtptMR_ewkm_STC_M_4L, h_mtptMR_ewkm_STC_L_4L, h_mtptMR_ewkm_STC_1L_4L,
+				 h_mtptMR_ewkm_STC_P_23H, h_mtptMR_ewkm_STC_M_23H, h_mtptMR_ewkm_STC_L_23H, h_mtptMR_ewkm_STC_1L_23H, h_mtptMR_ewkm_STC_P_4H, h_mtptMR_ewkm_STC_M_4H, h_mtptMR_ewkm_STC_L_4H, h_mtptMR_ewkm_STC_1L_4H,
 				 h_mtptVR_ewkm_ST_P, h_mtptVR_ewkm_ST_M, h_mtptVR_ewkm_ST_L, h_mtptVR_ewkm_ST_1L, h_mtptVR_ewkm_STC_P, h_mtptVR_ewkm_STC_M, h_mtptVR_ewkm_STC_L, h_mtptVR_ewkm_STC_1L,
 				 h_mtptVR_ewkm_ST_P_23L, h_mtptVR_ewkm_ST_M_23L, h_mtptVR_ewkm_ST_L_23L, h_mtptVR_ewkm_ST_1L_23L, h_mtptVR_ewkm_ST_P_4L, h_mtptVR_ewkm_ST_M_4L, h_mtptVR_ewkm_ST_L_4L, h_mtptVR_ewkm_ST_1L_4L,
 				 h_mtptVR_ewkm_ST_P_23H, h_mtptVR_ewkm_ST_M_23H, h_mtptVR_ewkm_ST_L_23H, h_mtptVR_ewkm_ST_1L_23H, h_mtptVR_ewkm_ST_P_4H, h_mtptVR_ewkm_ST_M_4H, h_mtptVR_ewkm_ST_L_4H, h_mtptVR_ewkm_ST_1L_4H,
@@ -1874,11 +1962,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_ewkm_STC_P_23L, h_mtptSR_ewkm_STC_M_23L, h_mtptSR_ewkm_STC_L_23L, h_mtptSR_ewkm_STC_1L_23L, h_mtptSR_ewkm_STC_P_4L, h_mtptSR_ewkm_STC_M_4L, h_mtptSR_ewkm_STC_L_4L, h_mtptSR_ewkm_STC_1L_4L,
 				 h_mtptSR_ewkm_STC_P_23H, h_mtptSR_ewkm_STC_M_23H, h_mtptSR_ewkm_STC_L_23H, h_mtptSR_ewkm_STC_1L_23H, h_mtptSR_ewkm_STC_P_4H, h_mtptSR_ewkm_STC_M_4H, h_mtptSR_ewkm_STC_L_4H, h_mtptSR_ewkm_STC_1L_4H};
 
-  std::vector<TH2D*> mtpttewkehists = { h_mtptFSR_tewke_ST_P, h_mtptFSR_tewke_ST_M, h_mtptFSR_tewke_ST_L, h_mtptFSR_tewke_ST_1L, h_mtptFSR_tewke_STC_P, h_mtptFSR_tewke_STC_M, h_mtptFSR_tewke_STC_L, h_mtptFSR_tewke_STC_1L,
-				 h_mtptFSR_tewke_ST_P_23L, h_mtptFSR_tewke_ST_M_23L, h_mtptFSR_tewke_ST_L_23L, h_mtptFSR_tewke_ST_1L_23L, h_mtptFSR_tewke_ST_P_4L, h_mtptFSR_tewke_ST_M_4L, h_mtptFSR_tewke_ST_L_4L, h_mtptFSR_tewke_ST_1L_4L,
-				 h_mtptFSR_tewke_ST_P_23H, h_mtptFSR_tewke_ST_M_23H, h_mtptFSR_tewke_ST_L_23H, h_mtptFSR_tewke_ST_1L_23H, h_mtptFSR_tewke_ST_P_4H, h_mtptFSR_tewke_ST_M_4H, h_mtptFSR_tewke_ST_L_4H, h_mtptFSR_tewke_ST_1L_4H,
-				 h_mtptFSR_tewke_STC_P_23L, h_mtptFSR_tewke_STC_M_23L, h_mtptFSR_tewke_STC_L_23L, h_mtptFSR_tewke_STC_1L_23L, h_mtptFSR_tewke_STC_P_4L, h_mtptFSR_tewke_STC_M_4L, h_mtptFSR_tewke_STC_L_4L, h_mtptFSR_tewke_STC_1L_4L,
-				 h_mtptFSR_tewke_STC_P_23H, h_mtptFSR_tewke_STC_M_23H, h_mtptFSR_tewke_STC_L_23H, h_mtptFSR_tewke_STC_1L_23H, h_mtptFSR_tewke_STC_P_4H, h_mtptFSR_tewke_STC_M_4H, h_mtptFSR_tewke_STC_L_4H, h_mtptFSR_tewke_STC_1L_4H,
+  std::vector<TH2D*> mtpttewkehists = { h_mtptMR_tewke_ST_P, h_mtptMR_tewke_ST_M, h_mtptMR_tewke_ST_L, h_mtptMR_tewke_ST_1L, h_mtptMR_tewke_STC_P, h_mtptMR_tewke_STC_M, h_mtptMR_tewke_STC_L, h_mtptMR_tewke_STC_1L,
+				 h_mtptMR_tewke_ST_P_23L, h_mtptMR_tewke_ST_M_23L, h_mtptMR_tewke_ST_L_23L, h_mtptMR_tewke_ST_1L_23L, h_mtptMR_tewke_ST_P_4L, h_mtptMR_tewke_ST_M_4L, h_mtptMR_tewke_ST_L_4L, h_mtptMR_tewke_ST_1L_4L,
+				 h_mtptMR_tewke_ST_P_23H, h_mtptMR_tewke_ST_M_23H, h_mtptMR_tewke_ST_L_23H, h_mtptMR_tewke_ST_1L_23H, h_mtptMR_tewke_ST_P_4H, h_mtptMR_tewke_ST_M_4H, h_mtptMR_tewke_ST_L_4H, h_mtptMR_tewke_ST_1L_4H,
+				 h_mtptMR_tewke_STC_P_23L, h_mtptMR_tewke_STC_M_23L, h_mtptMR_tewke_STC_L_23L, h_mtptMR_tewke_STC_1L_23L, h_mtptMR_tewke_STC_P_4L, h_mtptMR_tewke_STC_M_4L, h_mtptMR_tewke_STC_L_4L, h_mtptMR_tewke_STC_1L_4L,
+				 h_mtptMR_tewke_STC_P_23H, h_mtptMR_tewke_STC_M_23H, h_mtptMR_tewke_STC_L_23H, h_mtptMR_tewke_STC_1L_23H, h_mtptMR_tewke_STC_P_4H, h_mtptMR_tewke_STC_M_4H, h_mtptMR_tewke_STC_L_4H, h_mtptMR_tewke_STC_1L_4H,
 				 h_mtptVR_tewke_ST_P, h_mtptVR_tewke_ST_M, h_mtptVR_tewke_ST_L, h_mtptVR_tewke_ST_1L, h_mtptVR_tewke_STC_P, h_mtptVR_tewke_STC_M, h_mtptVR_tewke_STC_L, h_mtptVR_tewke_STC_1L,
 				 h_mtptVR_tewke_ST_P_23L, h_mtptVR_tewke_ST_M_23L, h_mtptVR_tewke_ST_L_23L, h_mtptVR_tewke_ST_1L_23L, h_mtptVR_tewke_ST_P_4L, h_mtptVR_tewke_ST_M_4L, h_mtptVR_tewke_ST_L_4L, h_mtptVR_tewke_ST_1L_4L,
 				 h_mtptVR_tewke_ST_P_23H, h_mtptVR_tewke_ST_M_23H, h_mtptVR_tewke_ST_L_23H, h_mtptVR_tewke_ST_1L_23H, h_mtptVR_tewke_ST_P_4H, h_mtptVR_tewke_ST_M_4H, h_mtptVR_tewke_ST_L_4H, h_mtptVR_tewke_ST_1L_4H,
@@ -1890,11 +1978,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_tewke_STC_P_23L, h_mtptSR_tewke_STC_M_23L, h_mtptSR_tewke_STC_L_23L, h_mtptSR_tewke_STC_1L_23L, h_mtptSR_tewke_STC_P_4L, h_mtptSR_tewke_STC_M_4L, h_mtptSR_tewke_STC_L_4L, h_mtptSR_tewke_STC_1L_4L,
 				 h_mtptSR_tewke_STC_P_23H, h_mtptSR_tewke_STC_M_23H, h_mtptSR_tewke_STC_L_23H, h_mtptSR_tewke_STC_1L_23H, h_mtptSR_tewke_STC_P_4H, h_mtptSR_tewke_STC_M_4H, h_mtptSR_tewke_STC_L_4H, h_mtptSR_tewke_STC_1L_4H};
 
-  std::vector<TH2D*> mtpttewkmhists = { h_mtptFSR_tewkm_ST_P, h_mtptFSR_tewkm_ST_M, h_mtptFSR_tewkm_ST_L, h_mtptFSR_tewkm_ST_1L, h_mtptFSR_tewkm_STC_P, h_mtptFSR_tewkm_STC_M, h_mtptFSR_tewkm_STC_L, h_mtptFSR_tewkm_STC_1L,
-				 h_mtptFSR_tewkm_ST_P_23L, h_mtptFSR_tewkm_ST_M_23L, h_mtptFSR_tewkm_ST_L_23L, h_mtptFSR_tewkm_ST_1L_23L, h_mtptFSR_tewkm_ST_P_4L, h_mtptFSR_tewkm_ST_M_4L, h_mtptFSR_tewkm_ST_L_4L, h_mtptFSR_tewkm_ST_1L_4L,
-				 h_mtptFSR_tewkm_ST_P_23H, h_mtptFSR_tewkm_ST_M_23H, h_mtptFSR_tewkm_ST_L_23H, h_mtptFSR_tewkm_ST_1L_23H, h_mtptFSR_tewkm_ST_P_4H, h_mtptFSR_tewkm_ST_M_4H, h_mtptFSR_tewkm_ST_L_4H, h_mtptFSR_tewkm_ST_1L_4H,
-				 h_mtptFSR_tewkm_STC_P_23L, h_mtptFSR_tewkm_STC_M_23L, h_mtptFSR_tewkm_STC_L_23L, h_mtptFSR_tewkm_STC_1L_23L, h_mtptFSR_tewkm_STC_P_4L, h_mtptFSR_tewkm_STC_M_4L, h_mtptFSR_tewkm_STC_L_4L, h_mtptFSR_tewkm_STC_1L_4L,
-				 h_mtptFSR_tewkm_STC_P_23H, h_mtptFSR_tewkm_STC_M_23H, h_mtptFSR_tewkm_STC_L_23H, h_mtptFSR_tewkm_STC_1L_23H, h_mtptFSR_tewkm_STC_P_4H, h_mtptFSR_tewkm_STC_M_4H, h_mtptFSR_tewkm_STC_L_4H, h_mtptFSR_tewkm_STC_1L_4H,
+  std::vector<TH2D*> mtpttewkmhists = { h_mtptMR_tewkm_ST_P, h_mtptMR_tewkm_ST_M, h_mtptMR_tewkm_ST_L, h_mtptMR_tewkm_ST_1L, h_mtptMR_tewkm_STC_P, h_mtptMR_tewkm_STC_M, h_mtptMR_tewkm_STC_L, h_mtptMR_tewkm_STC_1L,
+				 h_mtptMR_tewkm_ST_P_23L, h_mtptMR_tewkm_ST_M_23L, h_mtptMR_tewkm_ST_L_23L, h_mtptMR_tewkm_ST_1L_23L, h_mtptMR_tewkm_ST_P_4L, h_mtptMR_tewkm_ST_M_4L, h_mtptMR_tewkm_ST_L_4L, h_mtptMR_tewkm_ST_1L_4L,
+				 h_mtptMR_tewkm_ST_P_23H, h_mtptMR_tewkm_ST_M_23H, h_mtptMR_tewkm_ST_L_23H, h_mtptMR_tewkm_ST_1L_23H, h_mtptMR_tewkm_ST_P_4H, h_mtptMR_tewkm_ST_M_4H, h_mtptMR_tewkm_ST_L_4H, h_mtptMR_tewkm_ST_1L_4H,
+				 h_mtptMR_tewkm_STC_P_23L, h_mtptMR_tewkm_STC_M_23L, h_mtptMR_tewkm_STC_L_23L, h_mtptMR_tewkm_STC_1L_23L, h_mtptMR_tewkm_STC_P_4L, h_mtptMR_tewkm_STC_M_4L, h_mtptMR_tewkm_STC_L_4L, h_mtptMR_tewkm_STC_1L_4L,
+				 h_mtptMR_tewkm_STC_P_23H, h_mtptMR_tewkm_STC_M_23H, h_mtptMR_tewkm_STC_L_23H, h_mtptMR_tewkm_STC_1L_23H, h_mtptMR_tewkm_STC_P_4H, h_mtptMR_tewkm_STC_M_4H, h_mtptMR_tewkm_STC_L_4H, h_mtptMR_tewkm_STC_1L_4H,
 				 h_mtptVR_tewkm_ST_P, h_mtptVR_tewkm_ST_M, h_mtptVR_tewkm_ST_L, h_mtptVR_tewkm_ST_1L, h_mtptVR_tewkm_STC_P, h_mtptVR_tewkm_STC_M, h_mtptVR_tewkm_STC_L, h_mtptVR_tewkm_STC_1L,
 				 h_mtptVR_tewkm_ST_P_23L, h_mtptVR_tewkm_ST_M_23L, h_mtptVR_tewkm_ST_L_23L, h_mtptVR_tewkm_ST_1L_23L, h_mtptVR_tewkm_ST_P_4L, h_mtptVR_tewkm_ST_M_4L, h_mtptVR_tewkm_ST_L_4L, h_mtptVR_tewkm_ST_1L_4L,
 				 h_mtptVR_tewkm_ST_P_23H, h_mtptVR_tewkm_ST_M_23H, h_mtptVR_tewkm_ST_L_23H, h_mtptVR_tewkm_ST_1L_23H, h_mtptVR_tewkm_ST_P_4H, h_mtptVR_tewkm_ST_M_4H, h_mtptVR_tewkm_ST_L_4H, h_mtptVR_tewkm_ST_1L_4H,
@@ -1906,11 +1994,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_tewkm_STC_P_23L, h_mtptSR_tewkm_STC_M_23L, h_mtptSR_tewkm_STC_L_23L, h_mtptSR_tewkm_STC_1L_23L, h_mtptSR_tewkm_STC_P_4L, h_mtptSR_tewkm_STC_M_4L, h_mtptSR_tewkm_STC_L_4L, h_mtptSR_tewkm_STC_1L_4L,
 				 h_mtptSR_tewkm_STC_P_23H, h_mtptSR_tewkm_STC_M_23H, h_mtptSR_tewkm_STC_L_23H, h_mtptSR_tewkm_STC_1L_23H, h_mtptSR_tewkm_STC_P_4H, h_mtptSR_tewkm_STC_M_4H, h_mtptSR_tewkm_STC_L_4H, h_mtptSR_tewkm_STC_1L_4H};
 
-  std::vector<TH2D*> mtptnewkhists = { h_mtptFSR_newk_ST_P, h_mtptFSR_newk_ST_M, h_mtptFSR_newk_ST_L, h_mtptFSR_newk_ST_1L, h_mtptFSR_newk_STC_P, h_mtptFSR_newk_STC_M, h_mtptFSR_newk_STC_L, h_mtptFSR_newk_STC_1L,
-				 h_mtptFSR_newk_ST_P_23L, h_mtptFSR_newk_ST_M_23L, h_mtptFSR_newk_ST_L_23L, h_mtptFSR_newk_ST_1L_23L, h_mtptFSR_newk_ST_P_4L, h_mtptFSR_newk_ST_M_4L, h_mtptFSR_newk_ST_L_4L, h_mtptFSR_newk_ST_1L_4L,
-				 h_mtptFSR_newk_ST_P_23H, h_mtptFSR_newk_ST_M_23H, h_mtptFSR_newk_ST_L_23H, h_mtptFSR_newk_ST_1L_23H, h_mtptFSR_newk_ST_P_4H, h_mtptFSR_newk_ST_M_4H, h_mtptFSR_newk_ST_L_4H, h_mtptFSR_newk_ST_1L_4H,
-				 h_mtptFSR_newk_STC_P_23L, h_mtptFSR_newk_STC_M_23L, h_mtptFSR_newk_STC_L_23L, h_mtptFSR_newk_STC_1L_23L, h_mtptFSR_newk_STC_P_4L, h_mtptFSR_newk_STC_M_4L, h_mtptFSR_newk_STC_L_4L, h_mtptFSR_newk_STC_1L_4L,
-				 h_mtptFSR_newk_STC_P_23H, h_mtptFSR_newk_STC_M_23H, h_mtptFSR_newk_STC_L_23H, h_mtptFSR_newk_STC_1L_23H, h_mtptFSR_newk_STC_P_4H, h_mtptFSR_newk_STC_M_4H, h_mtptFSR_newk_STC_L_4H, h_mtptFSR_newk_STC_1L_4H,
+  std::vector<TH2D*> mtptnewkhists = { h_mtptMR_newk_ST_P, h_mtptMR_newk_ST_M, h_mtptMR_newk_ST_L, h_mtptMR_newk_ST_1L, h_mtptMR_newk_STC_P, h_mtptMR_newk_STC_M, h_mtptMR_newk_STC_L, h_mtptMR_newk_STC_1L,
+				 h_mtptMR_newk_ST_P_23L, h_mtptMR_newk_ST_M_23L, h_mtptMR_newk_ST_L_23L, h_mtptMR_newk_ST_1L_23L, h_mtptMR_newk_ST_P_4L, h_mtptMR_newk_ST_M_4L, h_mtptMR_newk_ST_L_4L, h_mtptMR_newk_ST_1L_4L,
+				 h_mtptMR_newk_ST_P_23H, h_mtptMR_newk_ST_M_23H, h_mtptMR_newk_ST_L_23H, h_mtptMR_newk_ST_1L_23H, h_mtptMR_newk_ST_P_4H, h_mtptMR_newk_ST_M_4H, h_mtptMR_newk_ST_L_4H, h_mtptMR_newk_ST_1L_4H,
+				 h_mtptMR_newk_STC_P_23L, h_mtptMR_newk_STC_M_23L, h_mtptMR_newk_STC_L_23L, h_mtptMR_newk_STC_1L_23L, h_mtptMR_newk_STC_P_4L, h_mtptMR_newk_STC_M_4L, h_mtptMR_newk_STC_L_4L, h_mtptMR_newk_STC_1L_4L,
+				 h_mtptMR_newk_STC_P_23H, h_mtptMR_newk_STC_M_23H, h_mtptMR_newk_STC_L_23H, h_mtptMR_newk_STC_1L_23H, h_mtptMR_newk_STC_P_4H, h_mtptMR_newk_STC_M_4H, h_mtptMR_newk_STC_L_4H, h_mtptMR_newk_STC_1L_4H,
 				 h_mtptVR_newk_ST_P, h_mtptVR_newk_ST_M, h_mtptVR_newk_ST_L, h_mtptVR_newk_ST_1L, h_mtptVR_newk_STC_P, h_mtptVR_newk_STC_M, h_mtptVR_newk_STC_L, h_mtptVR_newk_STC_1L,
 				 h_mtptVR_newk_ST_P_23L, h_mtptVR_newk_ST_M_23L, h_mtptVR_newk_ST_L_23L, h_mtptVR_newk_ST_1L_23L, h_mtptVR_newk_ST_P_4L, h_mtptVR_newk_ST_M_4L, h_mtptVR_newk_ST_L_4L, h_mtptVR_newk_ST_1L_4L,
 				 h_mtptVR_newk_ST_P_23H, h_mtptVR_newk_ST_M_23H, h_mtptVR_newk_ST_L_23H, h_mtptVR_newk_ST_1L_23H, h_mtptVR_newk_ST_P_4H, h_mtptVR_newk_ST_M_4H, h_mtptVR_newk_ST_L_4H, h_mtptVR_newk_ST_1L_4H,
@@ -1922,11 +2010,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_newk_STC_P_23L, h_mtptSR_newk_STC_M_23L, h_mtptSR_newk_STC_L_23L, h_mtptSR_newk_STC_1L_23L, h_mtptSR_newk_STC_P_4L, h_mtptSR_newk_STC_M_4L, h_mtptSR_newk_STC_L_4L, h_mtptSR_newk_STC_1L_4L,
 				 h_mtptSR_newk_STC_P_23H, h_mtptSR_newk_STC_M_23H, h_mtptSR_newk_STC_L_23H, h_mtptSR_newk_STC_1L_23H, h_mtptSR_newk_STC_P_4H, h_mtptSR_newk_STC_M_4H, h_mtptSR_newk_STC_L_4H, h_mtptSR_newk_STC_1L_4H};
 
-  std::vector<TH2D*> mtpt3newkhists = { h_mtptFSR_3newk_ST_P, h_mtptFSR_3newk_ST_M, h_mtptFSR_3newk_ST_L, h_mtptFSR_3newk_ST_1L, h_mtptFSR_3newk_STC_P, h_mtptFSR_3newk_STC_M, h_mtptFSR_3newk_STC_L, h_mtptFSR_3newk_STC_1L,
-				 h_mtptFSR_3newk_ST_P_23L, h_mtptFSR_3newk_ST_M_23L, h_mtptFSR_3newk_ST_L_23L, h_mtptFSR_3newk_ST_1L_23L, h_mtptFSR_3newk_ST_P_4L, h_mtptFSR_3newk_ST_M_4L, h_mtptFSR_3newk_ST_L_4L, h_mtptFSR_3newk_ST_1L_4L,
-				 h_mtptFSR_3newk_ST_P_23H, h_mtptFSR_3newk_ST_M_23H, h_mtptFSR_3newk_ST_L_23H, h_mtptFSR_3newk_ST_1L_23H, h_mtptFSR_3newk_ST_P_4H, h_mtptFSR_3newk_ST_M_4H, h_mtptFSR_3newk_ST_L_4H, h_mtptFSR_3newk_ST_1L_4H,
-				 h_mtptFSR_3newk_STC_P_23L, h_mtptFSR_3newk_STC_M_23L, h_mtptFSR_3newk_STC_L_23L, h_mtptFSR_3newk_STC_1L_23L, h_mtptFSR_3newk_STC_P_4L, h_mtptFSR_3newk_STC_M_4L, h_mtptFSR_3newk_STC_L_4L, h_mtptFSR_3newk_STC_1L_4L,
-				 h_mtptFSR_3newk_STC_P_23H, h_mtptFSR_3newk_STC_M_23H, h_mtptFSR_3newk_STC_L_23H, h_mtptFSR_3newk_STC_1L_23H, h_mtptFSR_3newk_STC_P_4H, h_mtptFSR_3newk_STC_M_4H, h_mtptFSR_3newk_STC_L_4H, h_mtptFSR_3newk_STC_1L_4H,
+  std::vector<TH2D*> mtpt3newkhists = { h_mtptMR_3newk_ST_P, h_mtptMR_3newk_ST_M, h_mtptMR_3newk_ST_L, h_mtptMR_3newk_ST_1L, h_mtptMR_3newk_STC_P, h_mtptMR_3newk_STC_M, h_mtptMR_3newk_STC_L, h_mtptMR_3newk_STC_1L,
+				 h_mtptMR_3newk_ST_P_23L, h_mtptMR_3newk_ST_M_23L, h_mtptMR_3newk_ST_L_23L, h_mtptMR_3newk_ST_1L_23L, h_mtptMR_3newk_ST_P_4L, h_mtptMR_3newk_ST_M_4L, h_mtptMR_3newk_ST_L_4L, h_mtptMR_3newk_ST_1L_4L,
+				 h_mtptMR_3newk_ST_P_23H, h_mtptMR_3newk_ST_M_23H, h_mtptMR_3newk_ST_L_23H, h_mtptMR_3newk_ST_1L_23H, h_mtptMR_3newk_ST_P_4H, h_mtptMR_3newk_ST_M_4H, h_mtptMR_3newk_ST_L_4H, h_mtptMR_3newk_ST_1L_4H,
+				 h_mtptMR_3newk_STC_P_23L, h_mtptMR_3newk_STC_M_23L, h_mtptMR_3newk_STC_L_23L, h_mtptMR_3newk_STC_1L_23L, h_mtptMR_3newk_STC_P_4L, h_mtptMR_3newk_STC_M_4L, h_mtptMR_3newk_STC_L_4L, h_mtptMR_3newk_STC_1L_4L,
+				 h_mtptMR_3newk_STC_P_23H, h_mtptMR_3newk_STC_M_23H, h_mtptMR_3newk_STC_L_23H, h_mtptMR_3newk_STC_1L_23H, h_mtptMR_3newk_STC_P_4H, h_mtptMR_3newk_STC_M_4H, h_mtptMR_3newk_STC_L_4H, h_mtptMR_3newk_STC_1L_4H,
 				 h_mtptVR_3newk_ST_P, h_mtptVR_3newk_ST_M, h_mtptVR_3newk_ST_L, h_mtptVR_3newk_ST_1L, h_mtptVR_3newk_STC_P, h_mtptVR_3newk_STC_M, h_mtptVR_3newk_STC_L, h_mtptVR_3newk_STC_1L,
 				 h_mtptVR_3newk_ST_P_23L, h_mtptVR_3newk_ST_M_23L, h_mtptVR_3newk_ST_L_23L, h_mtptVR_3newk_ST_1L_23L, h_mtptVR_3newk_ST_P_4L, h_mtptVR_3newk_ST_M_4L, h_mtptVR_3newk_ST_L_4L, h_mtptVR_3newk_ST_1L_4L,
 				 h_mtptVR_3newk_ST_P_23H, h_mtptVR_3newk_ST_M_23H, h_mtptVR_3newk_ST_L_23H, h_mtptVR_3newk_ST_1L_23H, h_mtptVR_3newk_ST_P_4H, h_mtptVR_3newk_ST_M_4H, h_mtptVR_3newk_ST_L_4H, h_mtptVR_3newk_ST_1L_4H,
@@ -1938,11 +2026,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_3newk_STC_P_23L, h_mtptSR_3newk_STC_M_23L, h_mtptSR_3newk_STC_L_23L, h_mtptSR_3newk_STC_1L_23L, h_mtptSR_3newk_STC_P_4L, h_mtptSR_3newk_STC_M_4L, h_mtptSR_3newk_STC_L_4L, h_mtptSR_3newk_STC_1L_4L,
 				 h_mtptSR_3newk_STC_P_23H, h_mtptSR_3newk_STC_M_23H, h_mtptSR_3newk_STC_L_23H, h_mtptSR_3newk_STC_1L_23H, h_mtptSR_3newk_STC_P_4H, h_mtptSR_3newk_STC_M_4H, h_mtptSR_3newk_STC_L_4H, h_mtptSR_3newk_STC_1L_4H};
 
-  std::vector<TH2D*> mtpt1newkhists = { h_mtptFSR_1newk_ST_P, h_mtptFSR_1newk_ST_M, h_mtptFSR_1newk_ST_L, h_mtptFSR_1newk_ST_1L, h_mtptFSR_1newk_STC_P, h_mtptFSR_1newk_STC_M, h_mtptFSR_1newk_STC_L, h_mtptFSR_1newk_STC_1L,
-				 h_mtptFSR_1newk_ST_P_23L, h_mtptFSR_1newk_ST_M_23L, h_mtptFSR_1newk_ST_L_23L, h_mtptFSR_1newk_ST_1L_23L, h_mtptFSR_1newk_ST_P_4L, h_mtptFSR_1newk_ST_M_4L, h_mtptFSR_1newk_ST_L_4L, h_mtptFSR_1newk_ST_1L_4L,
-				 h_mtptFSR_1newk_ST_P_23H, h_mtptFSR_1newk_ST_M_23H, h_mtptFSR_1newk_ST_L_23H, h_mtptFSR_1newk_ST_1L_23H, h_mtptFSR_1newk_ST_P_4H, h_mtptFSR_1newk_ST_M_4H, h_mtptFSR_1newk_ST_L_4H, h_mtptFSR_1newk_ST_1L_4H,
-				 h_mtptFSR_1newk_STC_P_23L, h_mtptFSR_1newk_STC_M_23L, h_mtptFSR_1newk_STC_L_23L, h_mtptFSR_1newk_STC_1L_23L, h_mtptFSR_1newk_STC_P_4L, h_mtptFSR_1newk_STC_M_4L, h_mtptFSR_1newk_STC_L_4L, h_mtptFSR_1newk_STC_1L_4L,
-				 h_mtptFSR_1newk_STC_P_23H, h_mtptFSR_1newk_STC_M_23H, h_mtptFSR_1newk_STC_L_23H, h_mtptFSR_1newk_STC_1L_23H, h_mtptFSR_1newk_STC_P_4H, h_mtptFSR_1newk_STC_M_4H, h_mtptFSR_1newk_STC_L_4H, h_mtptFSR_1newk_STC_1L_4H,
+  std::vector<TH2D*> mtpt1newkhists = { h_mtptMR_1newk_ST_P, h_mtptMR_1newk_ST_M, h_mtptMR_1newk_ST_L, h_mtptMR_1newk_ST_1L, h_mtptMR_1newk_STC_P, h_mtptMR_1newk_STC_M, h_mtptMR_1newk_STC_L, h_mtptMR_1newk_STC_1L,
+				 h_mtptMR_1newk_ST_P_23L, h_mtptMR_1newk_ST_M_23L, h_mtptMR_1newk_ST_L_23L, h_mtptMR_1newk_ST_1L_23L, h_mtptMR_1newk_ST_P_4L, h_mtptMR_1newk_ST_M_4L, h_mtptMR_1newk_ST_L_4L, h_mtptMR_1newk_ST_1L_4L,
+				 h_mtptMR_1newk_ST_P_23H, h_mtptMR_1newk_ST_M_23H, h_mtptMR_1newk_ST_L_23H, h_mtptMR_1newk_ST_1L_23H, h_mtptMR_1newk_ST_P_4H, h_mtptMR_1newk_ST_M_4H, h_mtptMR_1newk_ST_L_4H, h_mtptMR_1newk_ST_1L_4H,
+				 h_mtptMR_1newk_STC_P_23L, h_mtptMR_1newk_STC_M_23L, h_mtptMR_1newk_STC_L_23L, h_mtptMR_1newk_STC_1L_23L, h_mtptMR_1newk_STC_P_4L, h_mtptMR_1newk_STC_M_4L, h_mtptMR_1newk_STC_L_4L, h_mtptMR_1newk_STC_1L_4L,
+				 h_mtptMR_1newk_STC_P_23H, h_mtptMR_1newk_STC_M_23H, h_mtptMR_1newk_STC_L_23H, h_mtptMR_1newk_STC_1L_23H, h_mtptMR_1newk_STC_P_4H, h_mtptMR_1newk_STC_M_4H, h_mtptMR_1newk_STC_L_4H, h_mtptMR_1newk_STC_1L_4H,
 				 h_mtptVR_1newk_ST_P, h_mtptVR_1newk_ST_M, h_mtptVR_1newk_ST_L, h_mtptVR_1newk_ST_1L, h_mtptVR_1newk_STC_P, h_mtptVR_1newk_STC_M, h_mtptVR_1newk_STC_L, h_mtptVR_1newk_STC_1L,
 				 h_mtptVR_1newk_ST_P_23L, h_mtptVR_1newk_ST_M_23L, h_mtptVR_1newk_ST_L_23L, h_mtptVR_1newk_ST_1L_23L, h_mtptVR_1newk_ST_P_4L, h_mtptVR_1newk_ST_M_4L, h_mtptVR_1newk_ST_L_4L, h_mtptVR_1newk_ST_1L_4L,
 				 h_mtptVR_1newk_ST_P_23H, h_mtptVR_1newk_ST_M_23H, h_mtptVR_1newk_ST_L_23H, h_mtptVR_1newk_ST_1L_23H, h_mtptVR_1newk_ST_P_4H, h_mtptVR_1newk_ST_M_4H, h_mtptVR_1newk_ST_L_4H, h_mtptVR_1newk_ST_1L_4H,
@@ -1954,11 +2042,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				 h_mtptSR_1newk_STC_P_23L, h_mtptSR_1newk_STC_M_23L, h_mtptSR_1newk_STC_L_23L, h_mtptSR_1newk_STC_1L_23L, h_mtptSR_1newk_STC_P_4L, h_mtptSR_1newk_STC_M_4L, h_mtptSR_1newk_STC_L_4L, h_mtptSR_1newk_STC_1L_4L,
 				 h_mtptSR_1newk_STC_P_23H, h_mtptSR_1newk_STC_M_23H, h_mtptSR_1newk_STC_L_23H, h_mtptSR_1newk_STC_1L_23H, h_mtptSR_1newk_STC_P_4H, h_mtptSR_1newk_STC_M_4H, h_mtptSR_1newk_STC_L_4H, h_mtptSR_1newk_STC_1L_4H};
 
-  /*  std::vector<TH2D*> mtpthists_zll = { h_zll_mtptFSR_ST_P, h_zll_mtptFSR_ST_M, h_zll_mtptFSR_ST_L, h_zll_mtptFSR_STC_P, h_zll_mtptFSR_STC_M, h_zll_mtptFSR_STC_L,
-				  h_zll_mtptFSR_ST_P_23L, h_zll_mtptFSR_ST_M_23L, h_zll_mtptFSR_ST_L_23L, h_zll_mtptFSR_ST_P_4L, h_zll_mtptFSR_ST_M_4L, h_zll_mtptFSR_ST_L_4L,
-				  h_zll_mtptFSR_ST_P_23H, h_zll_mtptFSR_ST_M_23H, h_zll_mtptFSR_ST_L_23H, h_zll_mtptFSR_ST_P_4H, h_zll_mtptFSR_ST_M_4H, h_zll_mtptFSR_ST_L_4H,
-				  h_zll_mtptFSR_STC_P_23L, h_zll_mtptFSR_STC_M_23L, h_zll_mtptFSR_STC_L_23L, h_zll_mtptFSR_STC_P_4L, h_zll_mtptFSR_STC_M_4L, h_zll_mtptFSR_STC_L_4L,
-				  h_zll_mtptFSR_STC_P_23H, h_zll_mtptFSR_STC_M_23H, h_zll_mtptFSR_STC_L_23H, h_zll_mtptFSR_STC_P_4H, h_zll_mtptFSR_STC_M_4H, h_zll_mtptFSR_STC_L_4H,
+  /*  std::vector<TH2D*> mtpthists_zll = { h_zll_mtptMR_ST_P, h_zll_mtptMR_ST_M, h_zll_mtptMR_ST_L, h_zll_mtptMR_STC_P, h_zll_mtptMR_STC_M, h_zll_mtptMR_STC_L,
+				  h_zll_mtptMR_ST_P_23L, h_zll_mtptMR_ST_M_23L, h_zll_mtptMR_ST_L_23L, h_zll_mtptMR_ST_P_4L, h_zll_mtptMR_ST_M_4L, h_zll_mtptMR_ST_L_4L,
+				  h_zll_mtptMR_ST_P_23H, h_zll_mtptMR_ST_M_23H, h_zll_mtptMR_ST_L_23H, h_zll_mtptMR_ST_P_4H, h_zll_mtptMR_ST_M_4H, h_zll_mtptMR_ST_L_4H,
+				  h_zll_mtptMR_STC_P_23L, h_zll_mtptMR_STC_M_23L, h_zll_mtptMR_STC_L_23L, h_zll_mtptMR_STC_P_4L, h_zll_mtptMR_STC_M_4L, h_zll_mtptMR_STC_L_4L,
+				  h_zll_mtptMR_STC_P_23H, h_zll_mtptMR_STC_M_23H, h_zll_mtptMR_STC_L_23H, h_zll_mtptMR_STC_P_4H, h_zll_mtptMR_STC_M_4H, h_zll_mtptMR_STC_L_4H,
 				  h_zll_mtptVR_ST_P, h_zll_mtptVR_ST_M, h_zll_mtptVR_ST_L, h_zll_mtptVR_STC_P, h_zll_mtptVR_STC_M, h_zll_mtptVR_STC_L,
 				  h_zll_mtptVR_ST_P_23L, h_zll_mtptVR_ST_M_23L, h_zll_mtptVR_ST_L_23L, h_zll_mtptVR_ST_P_4L, h_zll_mtptVR_ST_M_4L, h_zll_mtptVR_ST_L_4L,
 				  h_zll_mtptVR_ST_P_23H, h_zll_mtptVR_ST_M_23H, h_zll_mtptVR_ST_L_23H, h_zll_mtptVR_ST_P_4H, h_zll_mtptVR_ST_M_4H, h_zll_mtptVR_ST_L_4H,
@@ -1970,11 +2058,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				  h_zll_mtptSR_STC_P_23L, h_zll_mtptSR_STC_M_23L, h_zll_mtptSR_STC_L_23L, h_zll_mtptSR_STC_P_4L, h_zll_mtptSR_STC_M_4L, h_zll_mtptSR_STC_L_4L,
 				  h_zll_mtptSR_STC_P_23H, h_zll_mtptSR_STC_M_23H, h_zll_mtptSR_STC_L_23H, h_zll_mtptSR_STC_P_4H, h_zll_mtptSR_STC_M_4H, h_zll_mtptSR_STC_L_4H};
 
-  std::vector<TH2D*> mtptewkhists_zll = { h_zll_mtptFSR_ewk_ST_P, h_zll_mtptFSR_ewk_ST_M, h_zll_mtptFSR_ewk_ST_L, h_zll_mtptFSR_ewk_STC_P, h_zll_mtptFSR_ewk_STC_M, h_zll_mtptFSR_ewk_STC_L,
-				  h_zll_mtptFSR_ewk_ST_P_23L, h_zll_mtptFSR_ewk_ST_M_23L, h_zll_mtptFSR_ewk_ST_L_23L, h_zll_mtptFSR_ewk_ST_P_4L, h_zll_mtptFSR_ewk_ST_M_4L, h_zll_mtptFSR_ewk_ST_L_4L,
-				  h_zll_mtptFSR_ewk_ST_P_23H, h_zll_mtptFSR_ewk_ST_M_23H, h_zll_mtptFSR_ewk_ST_L_23H, h_zll_mtptFSR_ewk_ST_P_4H, h_zll_mtptFSR_ewk_ST_M_4H, h_zll_mtptFSR_ewk_ST_L_4H,
-				  h_zll_mtptFSR_ewk_STC_P_23L, h_zll_mtptFSR_ewk_STC_M_23L, h_zll_mtptFSR_ewk_STC_L_23L, h_zll_mtptFSR_ewk_STC_P_4L, h_zll_mtptFSR_ewk_STC_M_4L, h_zll_mtptFSR_ewk_STC_L_4L,
-				  h_zll_mtptFSR_ewk_STC_P_23H, h_zll_mtptFSR_ewk_STC_M_23H, h_zll_mtptFSR_ewk_STC_L_23H, h_zll_mtptFSR_ewk_STC_P_4H, h_zll_mtptFSR_ewk_STC_M_4H, h_zll_mtptFSR_ewk_STC_L_4H,
+  std::vector<TH2D*> mtptewkhists_zll = { h_zll_mtptMR_ewk_ST_P, h_zll_mtptMR_ewk_ST_M, h_zll_mtptMR_ewk_ST_L, h_zll_mtptMR_ewk_STC_P, h_zll_mtptMR_ewk_STC_M, h_zll_mtptMR_ewk_STC_L,
+				  h_zll_mtptMR_ewk_ST_P_23L, h_zll_mtptMR_ewk_ST_M_23L, h_zll_mtptMR_ewk_ST_L_23L, h_zll_mtptMR_ewk_ST_P_4L, h_zll_mtptMR_ewk_ST_M_4L, h_zll_mtptMR_ewk_ST_L_4L,
+				  h_zll_mtptMR_ewk_ST_P_23H, h_zll_mtptMR_ewk_ST_M_23H, h_zll_mtptMR_ewk_ST_L_23H, h_zll_mtptMR_ewk_ST_P_4H, h_zll_mtptMR_ewk_ST_M_4H, h_zll_mtptMR_ewk_ST_L_4H,
+				  h_zll_mtptMR_ewk_STC_P_23L, h_zll_mtptMR_ewk_STC_M_23L, h_zll_mtptMR_ewk_STC_L_23L, h_zll_mtptMR_ewk_STC_P_4L, h_zll_mtptMR_ewk_STC_M_4L, h_zll_mtptMR_ewk_STC_L_4L,
+				  h_zll_mtptMR_ewk_STC_P_23H, h_zll_mtptMR_ewk_STC_M_23H, h_zll_mtptMR_ewk_STC_L_23H, h_zll_mtptMR_ewk_STC_P_4H, h_zll_mtptMR_ewk_STC_M_4H, h_zll_mtptMR_ewk_STC_L_4H,
 				  h_zll_mtptVR_ewk_ST_P, h_zll_mtptVR_ewk_ST_M, h_zll_mtptVR_ewk_ST_L, h_zll_mtptVR_ewk_STC_P, h_zll_mtptVR_ewk_STC_M, h_zll_mtptVR_ewk_STC_L,
 				  h_zll_mtptVR_ewk_ST_P_23L, h_zll_mtptVR_ewk_ST_M_23L, h_zll_mtptVR_ewk_ST_L_23L, h_zll_mtptVR_ewk_ST_P_4L, h_zll_mtptVR_ewk_ST_M_4L, h_zll_mtptVR_ewk_ST_L_4L,
 				  h_zll_mtptVR_ewk_ST_P_23H, h_zll_mtptVR_ewk_ST_M_23H, h_zll_mtptVR_ewk_ST_L_23H, h_zll_mtptVR_ewk_ST_P_4H, h_zll_mtptVR_ewk_ST_M_4H, h_zll_mtptVR_ewk_ST_L_4H,
@@ -1986,11 +2074,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				  h_zll_mtptSR_ewk_STC_P_23L, h_zll_mtptSR_ewk_STC_M_23L, h_zll_mtptSR_ewk_STC_L_23L, h_zll_mtptSR_ewk_STC_P_4L, h_zll_mtptSR_ewk_STC_M_4L, h_zll_mtptSR_ewk_STC_L_4L,
 				  h_zll_mtptSR_ewk_STC_P_23H, h_zll_mtptSR_ewk_STC_M_23H, h_zll_mtptSR_ewk_STC_L_23H, h_zll_mtptSR_ewk_STC_P_4H, h_zll_mtptSR_ewk_STC_M_4H, h_zll_mtptSR_ewk_STC_L_4H};
 
-  std::vector<TH2D*> mtptnewkhists_zll = { h_zll_mtptFSR_newk_ST_P, h_zll_mtptFSR_newk_ST_M, h_zll_mtptFSR_newk_ST_L, h_zll_mtptFSR_newk_STC_P, h_zll_mtptFSR_newk_STC_M, h_zll_mtptFSR_newk_STC_L,
-				  h_zll_mtptFSR_newk_ST_P_23L, h_zll_mtptFSR_newk_ST_M_23L, h_zll_mtptFSR_newk_ST_L_23L, h_zll_mtptFSR_newk_ST_P_4L, h_zll_mtptFSR_newk_ST_M_4L, h_zll_mtptFSR_newk_ST_L_4L,
-				  h_zll_mtptFSR_newk_ST_P_23H, h_zll_mtptFSR_newk_ST_M_23H, h_zll_mtptFSR_newk_ST_L_23H, h_zll_mtptFSR_newk_ST_P_4H, h_zll_mtptFSR_newk_ST_M_4H, h_zll_mtptFSR_newk_ST_L_4H,
-				  h_zll_mtptFSR_newk_STC_P_23L, h_zll_mtptFSR_newk_STC_M_23L, h_zll_mtptFSR_newk_STC_L_23L, h_zll_mtptFSR_newk_STC_P_4L, h_zll_mtptFSR_newk_STC_M_4L, h_zll_mtptFSR_newk_STC_L_4L,
-				  h_zll_mtptFSR_newk_STC_P_23H, h_zll_mtptFSR_newk_STC_M_23H, h_zll_mtptFSR_newk_STC_L_23H, h_zll_mtptFSR_newk_STC_P_4H, h_zll_mtptFSR_newk_STC_M_4H, h_zll_mtptFSR_newk_STC_L_4H,
+  std::vector<TH2D*> mtptnewkhists_zll = { h_zll_mtptMR_newk_ST_P, h_zll_mtptMR_newk_ST_M, h_zll_mtptMR_newk_ST_L, h_zll_mtptMR_newk_STC_P, h_zll_mtptMR_newk_STC_M, h_zll_mtptMR_newk_STC_L,
+				  h_zll_mtptMR_newk_ST_P_23L, h_zll_mtptMR_newk_ST_M_23L, h_zll_mtptMR_newk_ST_L_23L, h_zll_mtptMR_newk_ST_P_4L, h_zll_mtptMR_newk_ST_M_4L, h_zll_mtptMR_newk_ST_L_4L,
+				  h_zll_mtptMR_newk_ST_P_23H, h_zll_mtptMR_newk_ST_M_23H, h_zll_mtptMR_newk_ST_L_23H, h_zll_mtptMR_newk_ST_P_4H, h_zll_mtptMR_newk_ST_M_4H, h_zll_mtptMR_newk_ST_L_4H,
+				  h_zll_mtptMR_newk_STC_P_23L, h_zll_mtptMR_newk_STC_M_23L, h_zll_mtptMR_newk_STC_L_23L, h_zll_mtptMR_newk_STC_P_4L, h_zll_mtptMR_newk_STC_M_4L, h_zll_mtptMR_newk_STC_L_4L,
+				  h_zll_mtptMR_newk_STC_P_23H, h_zll_mtptMR_newk_STC_M_23H, h_zll_mtptMR_newk_STC_L_23H, h_zll_mtptMR_newk_STC_P_4H, h_zll_mtptMR_newk_STC_M_4H, h_zll_mtptMR_newk_STC_L_4H,
 				  h_zll_mtptVR_newk_ST_P, h_zll_mtptVR_newk_ST_M, h_zll_mtptVR_newk_ST_L, h_zll_mtptVR_newk_STC_P, h_zll_mtptVR_newk_STC_M, h_zll_mtptVR_newk_STC_L,
 				  h_zll_mtptVR_newk_ST_P_23L, h_zll_mtptVR_newk_ST_M_23L, h_zll_mtptVR_newk_ST_L_23L, h_zll_mtptVR_newk_ST_P_4L, h_zll_mtptVR_newk_ST_M_4L, h_zll_mtptVR_newk_ST_L_4L,
 				  h_zll_mtptVR_newk_ST_P_23H, h_zll_mtptVR_newk_ST_M_23H, h_zll_mtptVR_newk_ST_L_23H, h_zll_mtptVR_newk_ST_P_4H, h_zll_mtptVR_newk_ST_M_4H, h_zll_mtptVR_newk_ST_L_4H,
@@ -2003,7 +2091,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 				  h_zll_mtptSR_newk_STC_P_23H, h_zll_mtptSR_newk_STC_M_23H, h_zll_mtptSR_newk_STC_L_23H, h_zll_mtptSR_newk_STC_P_4H, h_zll_mtptSR_newk_STC_M_4H, h_zll_mtptSR_newk_STC_L_4H};
 
 
-  std::vector<TH2D*> rlmtpthists = { h_rlmtptFSR, h_rlmtptFSR_23, h_rlmtptFSR_4,
+  std::vector<TH2D*> rlmtpthists = { h_rlmtptMR, h_rlmtptMR_23, h_rlmtptMR_4,
 				h_rlmtptVR, h_rlmtptVR_23, h_rlmtptVR_4, 
 				h_rlmtptSR, h_rlmtptSR_23, h_rlmtptSR_4};
   */
@@ -2144,6 +2232,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   const float lumi = config_.lumi;
 
   const unsigned int nEventsTree = ch->GetEntries();
+  cout << "processing " << nEventsTree << " events" << endl;
   int nDuplicates = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
   //  for( unsigned int event = 0; event < 10; ++event) {    
@@ -2289,8 +2378,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
 	const float lepMT = MT( t.lep_pt[0], t.lep_phi[0], t.rl_met_pt, t.rl_met_phi );
 	if (t.rl_mt2 < 100) {
-	  h_rlmtptFSR->Fill( lepMT, t.lep_pt[0], weight );
-	  t.nJet30 < 4 ? h_rlmtptFSR_23->Fill( lepMT, t.lep_pt[0], weight ): h_rlmtptFSR_4->Fill( lepMT, t.lep_pt[0], weight );
+	  h_rlmtptMR->Fill( lepMT, t.lep_pt[0], weight );
+	  t.nJet30 < 4 ? h_rlmtptMR_23->Fill( lepMT, t.lep_pt[0], weight ): h_rlmtptMR_4->Fill( lepMT, t.lep_pt[0], weight );
 	}
 	else if (t.rl_mt2 < 200) {
 	  h_rlmtptVR->Fill( lepMT, t.lep_pt[0], weight);
@@ -2345,11 +2434,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 3) {
 	    if (isSTC) {
 	      if (t.zll_mt2 < 100) {
-		h_zll_mtptFSR_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_zll_mtptMR_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.zll_mt2 < 200) {
 		h_zll_mtptVR_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -2368,11 +2457,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.zll_mt2 < 100) {
-		h_zll_mtptFSR_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_zll_mtptMR_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.zll_mt2 < 200) {
 		h_zll_mtptVR_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -2393,11 +2482,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.zll_mt2 < 100) {
-		h_zll_mtptFSR_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_zll_mtptMR_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.zll_mt2 < 200) {
 		h_zll_mtptVR_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -2416,11 +2505,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.zll_mt2 < 100) {
-		h_zll_mtptFSR_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_zll_mtptMR_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.zll_mt2 < 200) {
 		h_zll_mtptVR_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -2441,11 +2530,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.zll_mt2 < 100) {
-		h_zll_mtptFSR_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_zll_mtptMR_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.zll_mt2 < 200) {
 		h_zll_mtptVR_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -2464,11 +2553,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.zll_mt2 < 100) {
-		h_zll_mtptFSR_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_zll_mtptMR_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.zll_mt2 < 200) {
 		h_zll_mtptVR_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -2504,11 +2593,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      if (fillIndex == 3) {
 		if (isSTC) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_ewk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_ewk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_ewk_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -2527,11 +2616,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		}
 		else if (isST) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_ewk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_ewk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_ewk_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -2552,11 +2641,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      else if (fillIndex == 2) {
 		if (isSTC) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_ewk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_ewk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_ewk_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -2575,11 +2664,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		}
 		else if (isST) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_ewk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_ewk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_ewk_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -2600,11 +2689,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      else if (fillIndex == 1) {
 		if (isSTC) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_ewk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_ewk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_ewk_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -2623,11 +2712,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		}
 		else if (isST) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_ewk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_ewk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_ewk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_ewk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_ewk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_ewk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_ewk_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -2650,11 +2739,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      if (fillIndex == 3) {
 		if (isSTC) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_newk_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -2673,11 +2762,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		}
 		else if (isST) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_newk_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -2698,11 +2787,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      else if (fillIndex == 2) {
 		if (isSTC) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_newk_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -2721,11 +2810,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		}
 		else if (isST) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_newk_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -2746,11 +2835,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      else if (fillIndex == 1) {
 		if (isSTC) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		    if      (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_newk_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -2769,11 +2858,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		}
 		else if (isST) {
 		  if (t.zll_mt2 < 100) {
-		    h_zll_mtptFSR_newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptFSR_newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptFSR_newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		    h_zll_mtptMR_newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		    if (t.nJet30 < 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 < 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht < 1000) h_zll_mtptMR_newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		    else if (t.nJet30 > 4 && t.zll_ht > 1000) h_zll_mtptMR_newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 		  }
 		  else if (t.zll_mt2 < 200) {
 		    h_zll_mtptVR_newk_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -2799,6 +2888,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     }
     */
     // End lepton studies
+
+    if (lepveto) continue;
     
     if (t.ht < 250) {
     //if (t.ht < 450) {
@@ -2841,10 +2932,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     }
     */
 
-    const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
+    //    const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
     const bool passSRTrigger = passTrigger(t, trigs_SR_);
 
-    if (! (passPrescaleTrigger || passSRTrigger) && !isSignal) continue;
+    //    if (! (passPrescaleTrigger || passSRTrigger) && !isSignal) continue;
+    if (!passSRTrigger && !isSignal) continue;
     //if (! passSRTrigger) continue;
     //        if ( ! passPrescaleTrigger) continue;
     //if(!((t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120 || t.HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 || t.HLT_PFHT800_PFMET75_PFMHT75))) continue;
@@ -2852,6 +2944,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     //    bool isSignal_ = t.evt_id >= 1000;
 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
+
+    if (isSignal) {
+      int bin = h_xsec->GetXaxis()->FindBin(1800);      
+      weight = h_xsec->GetBinContent(bin) * 1000 * lumi / nEventsTree;
+    }
+
     if (!t.isData) {
       /*
       if (isSignal_ && applyISRWeights) {
@@ -2866,7 +2964,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	weight *= t.weight_isr / avgweight_isr;
       }
       */
-      weight *= t.weight_btagsf;
+
+      if (applyISRWeights && (tag == "ttsl" || tag == "ttdl")) {
+	weight *= t.weight_isr / getAverageISRWeight(outtag,config_tag);
+      }
+
+      //      weight *= t.weight_btagsf;
 
       if (doNTrueIntReweight) {
 	if(h_nTrueInt_weights_==0){
@@ -2978,39 +3081,84 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     vector<TH2D*> histsToFill;
     // Fshort region
     if (t.mt2 < 100) {
-      histsToFill.push_back(h_fsFSR);
+      histsToFill.push_back(h_fsMR_Baseline);
+      t.ht < 1000 ? histsToFill.push_back(h_fsMR_lt1000HT) : histsToFill.push_back(h_fsMR_gt1000HT);
+      t.ht < 450 ? histsToFill.push_back(h_fsMR_HT250) : histsToFill.push_back(h_fsMR_HT450);
+      if (t.met_pt < 100) histsToFill.push_back(h_fsMR_MET30);
+      else if (t.met_pt < 250) histsToFill.push_back(h_fsMR_MET100);
+      else histsToFill.push_back(h_fsMR_MET250);
+      if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsMR_HT450MET100);
       if (t.nJet30 < 4) {
-	histsToFill.push_back(h_fsFSR_23);
-	t.ht < 1000 ? histsToFill.push_back(h_fsFSR_23_lt1000HT) : histsToFill.push_back(h_fsFSR_23_gt1000HT);
+	histsToFill.push_back(h_fsMR_23_Baseline);
+	t.ht < 1000 ? histsToFill.push_back(h_fsMR_23_lt1000HT) : histsToFill.push_back(h_fsMR_23_gt1000HT);
+	t.ht < 450 ? histsToFill.push_back(h_fsMR_23_HT250) : histsToFill.push_back(h_fsMR_23_HT450);
+	if (t.met_pt < 100) histsToFill.push_back(h_fsMR_23_MET30);
+	else if (t.met_pt < 250) histsToFill.push_back(h_fsMR_23_MET100);
+	else histsToFill.push_back(h_fsMR_23_MET250);
+	if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsMR_23_HT450MET100);
       } else {
-	histsToFill.push_back(h_fsFSR_4);
-	t.ht < 1000 ? histsToFill.push_back(h_fsFSR_4_lt1000HT) : histsToFill.push_back(h_fsFSR_4_gt1000HT);
+	histsToFill.push_back(h_fsMR_4_Baseline);
+	t.ht < 1000 ? histsToFill.push_back(h_fsMR_4_lt1000HT) : histsToFill.push_back(h_fsMR_4_gt1000HT);
+	t.ht < 450 ? histsToFill.push_back(h_fsMR_4_HT250) : histsToFill.push_back(h_fsMR_4_HT450);
+	if (t.met_pt < 100) histsToFill.push_back(h_fsMR_4_MET30);
+	else if (t.met_pt < 250) histsToFill.push_back(h_fsMR_4_MET100);
+	else histsToFill.push_back(h_fsMR_4_MET250);
+	if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsMR_4_HT450MET100);
       }
-      t.ht < 1000 ? histsToFill.push_back(h_fsFSR_lt1000HT) : histsToFill.push_back(h_fsFSR_gt1000HT);
     }
     // Validation Region
     else if (t.mt2 < 200) {
-      histsToFill.push_back(h_fsVR);
-      if (t.nJet30 < 4) {
-	histsToFill.push_back(h_fsVR_23);
-	t.ht < 1000 ? histsToFill.push_back(h_fsVR_23_lt1000HT) : histsToFill.push_back(h_fsVR_23_gt1000HT);
-      } else {
-	histsToFill.push_back(h_fsVR_4);
-	t.ht < 1000 ? histsToFill.push_back(h_fsVR_4_lt1000HT) : histsToFill.push_back(h_fsVR_4_gt1000HT);
-      }
+      histsToFill.push_back(h_fsVR_Baseline);
       t.ht < 1000 ? histsToFill.push_back(h_fsVR_lt1000HT) : histsToFill.push_back(h_fsVR_gt1000HT);
+      t.ht < 450 ? histsToFill.push_back(h_fsVR_HT250) : histsToFill.push_back(h_fsVR_HT450);
+      if (t.met_pt < 100) histsToFill.push_back(h_fsVR_MET30);
+      else if (t.met_pt < 250) histsToFill.push_back(h_fsVR_MET100);
+      else histsToFill.push_back(h_fsVR_MET250);
+      if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsVR_HT450MET100);
+      if (t.nJet30 < 4) {
+	histsToFill.push_back(h_fsVR_23_Baseline);
+	t.ht < 1000 ? histsToFill.push_back(h_fsVR_23_lt1000HT) : histsToFill.push_back(h_fsVR_23_gt1000HT);
+	t.ht < 450 ? histsToFill.push_back(h_fsVR_23_HT250) : histsToFill.push_back(h_fsVR_23_HT450);
+	if (t.met_pt < 100) histsToFill.push_back(h_fsVR_23_MET30);
+	else if (t.met_pt < 250) histsToFill.push_back(h_fsVR_23_MET100);
+	else histsToFill.push_back(h_fsVR_23_MET250);
+	if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsVR_23_HT450MET100);
+      } else {
+	histsToFill.push_back(h_fsVR_4_Baseline);
+	t.ht < 1000 ? histsToFill.push_back(h_fsVR_4_lt1000HT) : histsToFill.push_back(h_fsVR_4_gt1000HT);
+	t.ht < 450 ? histsToFill.push_back(h_fsVR_4_HT250) : histsToFill.push_back(h_fsVR_4_HT450);
+	if (t.met_pt < 100) histsToFill.push_back(h_fsVR_4_MET30);
+	else if (t.met_pt < 250) histsToFill.push_back(h_fsVR_4_MET100);
+	else histsToFill.push_back(h_fsVR_4_MET250);
+	if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsVR_4_HT450MET100);
+      }
     }
     // Signal Region
     else if ( !(blind && t.isData) ) { // Only look at MT2 > 200 GeV in data if unblinded
-      histsToFill.push_back(h_fsSR);
-      if (t.nJet30 < 4) {
-	histsToFill.push_back(h_fsSR_23);
-	t.ht < 1000 ? histsToFill.push_back(h_fsSR_23_lt1000HT) : histsToFill.push_back(h_fsSR_23_gt1000HT);
-      } else {
-	histsToFill.push_back(h_fsSR_4);
-	t.ht < 1000 ? histsToFill.push_back(h_fsSR_4_lt1000HT) : histsToFill.push_back(h_fsSR_4_gt1000HT);
-      }
+      histsToFill.push_back(h_fsSR_Baseline);
       t.ht < 1000 ? histsToFill.push_back(h_fsSR_lt1000HT) : histsToFill.push_back(h_fsSR_gt1000HT);
+      t.ht < 450 ? histsToFill.push_back(h_fsSR_HT250) : histsToFill.push_back(h_fsSR_HT450);
+      if (t.met_pt < 100) histsToFill.push_back(h_fsSR_MET30);
+      else if (t.met_pt < 250) histsToFill.push_back(h_fsSR_MET100);
+      else histsToFill.push_back(h_fsSR_MET250);
+      if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsSR_HT450MET100);
+      if (t.nJet30 < 4) {
+	histsToFill.push_back(h_fsSR_23_Baseline);
+	t.ht < 1000 ? histsToFill.push_back(h_fsSR_23_lt1000HT) : histsToFill.push_back(h_fsSR_23_gt1000HT);
+	t.ht < 450 ? histsToFill.push_back(h_fsSR_23_HT250) : histsToFill.push_back(h_fsSR_23_HT450);
+	if (t.met_pt < 100) histsToFill.push_back(h_fsSR_23_MET30);
+	else if (t.met_pt < 250) histsToFill.push_back(h_fsSR_23_MET100);
+	else histsToFill.push_back(h_fsSR_23_MET250);
+	if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsSR_23_HT450MET100);
+      } else {
+	histsToFill.push_back(h_fsSR_4_Baseline);
+	t.ht < 1000 ? histsToFill.push_back(h_fsSR_4_lt1000HT) : histsToFill.push_back(h_fsSR_4_gt1000HT);
+	t.ht < 450 ? histsToFill.push_back(h_fsSR_4_HT250) : histsToFill.push_back(h_fsSR_4_HT450);
+	if (t.met_pt < 100) histsToFill.push_back(h_fsSR_4_MET30);
+	else if (t.met_pt < 250) histsToFill.push_back(h_fsSR_4_MET100);
+	else histsToFill.push_back(h_fsSR_4_MET250);
+	if (t.met_pt >= 100 && t.ht >= 450) histsToFill.push_back(h_fsSR_4_HT450MET100);
+      }
     }
     // Should only get here if looking at data while blinded
     else {
@@ -3025,10 +3173,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
 
       int fillIndex = -1;
+      const bool isChargino = t.track_matchedCharginoIdx[i_trk] >= 0;
+      if (isChargino) {
+	h_CharLength->Fill( t.track_decayXY[i_trk], weight );
+      }
       bool isST = false, isSTC = false, isST1 = false, isSTC1 = false;
       if (recalculate) {
-
-	const bool isChargino = t.track_isChargino[i_trk];
 
 	// Apply basic selections
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) == 0 
@@ -3045,7 +3195,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	//if (fabs(t.track_eta[i_trk]) == 2.4) cout << "CHANGE: eta == 2.4" << endl;
 	const bool BaseSel = CaloSel && ptSel && etaSel;
 	
-	if (!BaseSel) {
+	if (!BaseSel || (isSignal && t.track_isBadCharginoTrack[i_trk])) {
 	  if (isChargino) {
 	    cout << "Chargino failed base selection" << endl;
 	  }
@@ -3167,6 +3317,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	isSTC = !isST && !is1L;
 	isSTC1 = !isST && is1L;
 
+
+	/*
 	if (isSTC || isST) {	  
 	  if (isST) cout << "Found " << (t.track_isChargino[i_trk] ? "Chargino " : "") << "ST: " << nLayers << endl;
 	  else {
@@ -3181,6 +3333,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  }
 	  cout << "Fill Index: " << fillIndex << endl;
 	}
+	*/
 
 	// Put a floor on isolation at 30 GeV or reliso 0.4 to suppress electroweak STCs, for M and L tracks
 	//isSTC = !isST && (isP || iso > 30 || reliso > 0.4) && !is1L;
@@ -3214,21 +3367,31 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       }
 
       if (!isST && !isSTC && !isST1 && !isSTC1) {
+	if (isChargino) {
+	  cout << "Chargino failed selection" << endl;
+	}
 	continue;
       }
 
-      /*
+      if (isChargino) {
+	if (isST) {
+	  h_sigeffST->Fill( t.track_decayXY[i_trk], weight);
+	}
+	else if (isSTC) {
+	  h_sigeffSTC->Fill( t.track_decayXY[i_trk], weight);
+	}
+      }
+
       // debug printouts
-      if (fillIndex == 1 && t.mt2 < 100 && t.nJet30 >= 4) {
-	if (isSTC) std::cout << "P STC F4: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk] << std::endl;
-      }
+      /*
       if (fillIndex == 1 && t.mt2 < 100 && t.nJet30 < 4) {
-	if (isSTC) std::cout << "P STC F23: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk] << std::endl;
-      }
-      if (fillIndex == 1 && t.mt2 > 100 && t.mt2 < 200 && t.nJet30 < 4) {
-	if (isST) std::cout << "P ST VR23: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk] << std::endl;
+	if (isST) std::cout << "P ST F23: run == " << t.run << " && lumi == " << t.lumi << " && evt == " << t.evt << " && pt == " << t.track_pt[i_trk]
+			     << " && iso == " << t.track_iso[i_trk] << " && reliso " << t.track_iso[i_trk] / t.track_pt[i_trk] << " && niso " << t.track_neuIso0p05[i_trk]
+			     << " && nreliso == " << t.track_neuRelIso0p05[i_trk] << " dxy " << t.track_dxy[i_trk] << " dz " << t.track_dz[i_trk] << " && pterr/pt^2 " << t.track_ptErr[i_trk]/(t.track_pt[i_trk]*t.track_pt[i_trk]) 
+			     << " && MOH " << t.track_nLostOuterHits[i_trk] << " && MIH " << t.track_nLostInnerPixelHits[i_trk] << std::endl;
       }
       */
+
       if (isSTC1 || isST1) fillIndex = 4;
 
       const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );
@@ -3297,11 +3460,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewke_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3320,11 +3483,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    } // isSTC1
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewke_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3346,11 +3509,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_ewke_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewke_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3370,11 +3533,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_ewke_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewke_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3395,11 +3558,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_ewke_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -3418,11 +3581,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewke_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -3443,11 +3606,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_ewke_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -3466,11 +3629,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewke_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewke_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewke_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewke_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewke_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewke_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewke_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewke_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewke_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewke_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewke_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -3493,11 +3656,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewkm_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3516,11 +3679,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    } // isSTC1
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewkm_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3542,11 +3705,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_ewkm_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewkm_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3566,11 +3729,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_ewkm_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewkm_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3591,11 +3754,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_ewkm_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -3614,11 +3777,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewkm_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -3639,11 +3802,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_ewkm_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -3662,11 +3825,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_ewkm_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ewkm_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ewkm_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_ewkm_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ewkm_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ewkm_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ewkm_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ewkm_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_ewkm_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -3689,11 +3852,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewke_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3712,11 +3875,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    } // isSTC1
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewke_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3738,11 +3901,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_tewke_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewke_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3762,11 +3925,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_tewke_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewke_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3787,11 +3950,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_tewke_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -3810,11 +3973,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewke_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -3835,11 +3998,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_tewke_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -3858,11 +4021,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewke_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewke_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewke_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewke_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewke_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewke_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewke_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewke_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewke_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewke_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewke_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -3885,11 +4048,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewkm_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3908,11 +4071,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    } // isSTC1
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewkm_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3934,11 +4097,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_tewkm_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewkm_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3958,11 +4121,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_tewkm_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewkm_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -3983,11 +4146,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_tewkm_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4006,11 +4169,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewkm_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4031,11 +4194,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_tewkm_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4054,11 +4217,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_tewkm_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_tewkm_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_tewkm_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_tewkm_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_tewkm_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_tewkm_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_tewkm_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_tewkm_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_tewkm_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4081,11 +4244,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_1newk_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4104,11 +4267,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_1newk_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4130,11 +4293,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_1newk_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_1newk_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4154,11 +4317,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_1newk_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_1newk_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4179,11 +4342,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_1newk_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4202,11 +4365,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_1newk_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4227,11 +4390,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_1newk_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4250,11 +4413,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_1newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_1newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_1newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_1newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_1newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_1newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_1newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_1newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_1newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_1newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_1newk_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4277,11 +4440,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_3newk_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4300,11 +4463,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_3newk_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4326,11 +4489,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_3newk_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_3newk_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4350,11 +4513,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_3newk_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_3newk_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4375,11 +4538,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_3newk_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4398,11 +4561,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_3newk_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4423,11 +4586,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_3newk_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4446,11 +4609,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_3newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_3newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_3newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_3newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_3newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_3newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_3newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_3newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_3newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_3newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_3newk_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4473,11 +4636,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  if (fillIndex == 4) {
 	    if (isSTC1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_newk_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4496,11 +4659,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST1) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_newk_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4522,11 +4685,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    if (isSTC) {
 	      h_etaphi_newk_STC_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_newk_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4546,11 +4709,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    else if (isST) {
 	      h_etaphi_newk_ST_L->Fill( t.track_eta[i_trk], t.track_phi[i_trk] );
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_newk_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4571,11 +4734,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 2) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_newk_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4594,11 +4757,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_newk_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4619,11 +4782,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	  else if (fillIndex == 1) {
 	    if (isSTC) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+		if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	    }
 	    else if (t.mt2 < 200) {
 	      h_mtptVR_newk_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4642,11 +4805,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	    }
 	    else if (isST) {
 	      if (t.mt2 < 100) {
-		h_mtptFSR_newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-		if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+		h_mtptMR_newk_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+		if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_newk_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_newk_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_newk_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+		else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_newk_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	      }
 	      else if (t.mt2 < 200) {
 		h_mtptVR_newk_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4686,11 +4849,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       if (fillIndex == 1) {
 	if (isSTC) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_STC_P->Fill(mt, t.track_pt[i_trk], weight);
-	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_STC_P->Fill(mt, t.track_pt[i_trk], weight);
+	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_STC_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_STC_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_STC_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_STC_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_STC_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4709,11 +4872,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
 	else if (isST) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_ST_P->Fill(mt, t.track_pt[i_trk], weight);
-	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_ST_P->Fill(mt, t.track_pt[i_trk], weight);
+	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ST_P_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ST_P_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ST_P_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ST_P_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_ST_P->Fill( mt, t.track_pt[i_trk], weight);
@@ -4734,11 +4897,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       if (fillIndex == 2) {
 	if (isSTC) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_STC_M->Fill(mt, t.track_pt[i_trk], weight);
-	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_STC_M->Fill(mt, t.track_pt[i_trk], weight);
+	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_STC_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_STC_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_STC_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_STC_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_STC_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4757,11 +4920,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
 	else if (isST) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_ST_M->Fill(mt, t.track_pt[i_trk], weight);
-	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_ST_M->Fill(mt, t.track_pt[i_trk], weight);
+	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ST_M_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ST_M_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ST_M_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ST_M_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_ST_M->Fill( mt, t.track_pt[i_trk], weight);
@@ -4782,11 +4945,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       if (fillIndex == 3) {
 	if (isSTC) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_STC_L->Fill(mt, t.track_pt[i_trk], weight);
-	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_STC_L->Fill(mt, t.track_pt[i_trk], weight);
+	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_STC_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_STC_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_STC_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_STC_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_STC_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4805,11 +4968,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
 	else if (isST) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_ST_L->Fill(mt, t.track_pt[i_trk], weight);
-	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_ST_L->Fill(mt, t.track_pt[i_trk], weight);
+	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ST_L_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ST_L_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ST_L_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ST_L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_ST_L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4830,11 +4993,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       if (fillIndex == 4) {
 	if (isSTC1) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
-	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_STC_1L->Fill(mt, t.track_pt[i_trk], weight);
+	    if      (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_STC_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_STC_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_STC_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_STC_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_STC_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4853,11 +5016,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	}
 	else if (isST1) {
 	  if (t.mt2 < 100) {
-	    h_mtptFSR_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
-	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptFSR_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptFSR_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptFSR_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
-	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptFSR_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
+	    h_mtptMR_ST_1L->Fill(mt, t.track_pt[i_trk], weight);
+	    if (t.nJet30 < 4 && t.ht < 1000) h_mtptMR_ST_1L_23L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 < 4 && t.ht > 1000) h_mtptMR_ST_1L_23H->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht < 1000) h_mtptMR_ST_1L_4L->Fill(mt, t.track_pt[i_trk], weight);
+	    else if (t.nJet30 > 4 && t.ht > 1000) h_mtptMR_ST_1L_4H->Fill(mt, t.track_pt[i_trk], weight);
 	  }
 	  else if (t.mt2 < 200) {
 	    h_mtptVR_ST_1L->Fill( mt, t.track_pt[i_trk], weight);
@@ -4882,11 +5045,23 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       bool rejected = (t.track_pt[i_trk] < 150 && mt < 100);
       if (fillIndex == 3 && rejected) fillIndex = 4;
       
+      /*
+      if (isST && fillIndex == 3 && t.mt2 > 100 && t.mt2 < 200 && t.nJet30 > 3 && t.ht < 1000) {
+	cout << "L HL VR event: " << t.run << " && " << t.lumi << " && " << t.evt << endl;
+      }
+      */
+
       const float dphiMet = DeltaPhi(t.track_phi[i_trk],t.met_phi);
       
       // Fills
       if (isSTC) {
 	FillHists(histsToFill,weight,2,fillIndex);
+	// keep track of max weight we've filled for STC
+	for (std::vector<TH2D*>::iterator fshist = histsToFill.begin(); fshist != histsToFill.end(); fshist++) {
+	  TH2D* fsh = *fshist;
+	  float max_weight = max_stc_weights[fsh]->GetBinContent(fillIndex);
+	  if (weight > max_weight) max_stc_weights[fsh]->SetBinContent(fillIndex,weight);
+	}
 	if (!blind || t.mt2 < 200 || !t.isData) {
 	  switch (fillIndex) {
 	  case 1: 
@@ -4922,6 +5097,11 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       }
       if (isST) {
 	FillHists(histsToFill,weight,1,fillIndex);
+	for (std::vector<TH2D*>::iterator fshist = histsToFill.begin(); fshist != histsToFill.end(); fshist++) {
+	  TH2D* fsh = *fshist;
+	  float max_weight = max_st_weights[fsh]->GetBinContent(fillIndex);
+	  if (weight > max_weight) max_st_weights[fsh]->SetBinContent(fillIndex,weight);
+	}
 	if (!blind || t.mt2 < 200 || !t.isData) {
 	  switch (fillIndex) {
 	  case 1: 
@@ -4961,8 +5141,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     
   // Post-processing
 
+  // Chargino efficiency division
+  h_sigeffST->Divide(h_CharLength);
+  h_sigeffSTC->Divide(h_CharLength);
+
   // Calculate Fshort for this particular sample
-  for (vector<TH2D*>::iterator hist = fsrhists.begin(); hist != fsrhists.end(); hist++) {
+  for (vector<TH2D*>::iterator hist = fshists.begin(); hist != fshists.end(); hist++) {
     TH2D* h = *hist;
     for (int len = 1; len < 5; len++) {
       double den = h->GetBinContent((double) len, 3); // STC count
@@ -4992,9 +5176,14 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
   h_ht->Write();
-  for (vector<TH2D*>::iterator hist = fsrhists.begin(); hist != fsrhists.end(); hist++) (*hist)->Write();
+  for (vector<TH2D*>::iterator hist = fshists.begin(); hist != fshists.end(); hist++) {
+    (*hist)->Write();
+    max_stc_weights[(*hist)]->Write();
+    max_st_weights[(*hist)]->Write();
+  }
   for (vector<TH1D*>::iterator hist = nbhists.begin(); hist != nbhists.end(); hist++) (*hist)->Write();
-  for (vector<TH1D*>::iterator hist = rlnbhists.begin(); hist != rlnbhists.end(); hist++) (*hist)->Write();
+  //  for (vector<TH1D*>::iterator hist = rlnbhists.begin(); hist != rlnbhists.end(); hist++) (*hist)->Write();
+  //  for (vector<TH2D*>::iterator hist = rlmtpthists.begin(); hist != rlmtpthists.end(); hist++) (*hist)->Write();
 
   for (vector<TH2D*>::iterator hist = mtpthists.begin(); hist != mtpthists.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = mtptewkmhists.begin(); hist != mtptewkmhists.end(); hist++) (*hist)->Write();
@@ -5004,16 +5193,20 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   for (vector<TH2D*>::iterator hist = mtptnewkhists.begin(); hist != mtptnewkhists.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = mtpt1newkhists.begin(); hist != mtpt1newkhists.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = mtpt3newkhists.begin(); hist != mtpt3newkhists.end(); hist++) (*hist)->Write();
-
+  /*
   for (vector<TH2D*>::iterator hist = mtpthists_zll.begin(); hist != mtpthists_zll.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = mtptewkhists_zll.begin(); hist != mtptewkhists_zll.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = mtptnewkhists_zll.begin(); hist != mtptnewkhists_zll.end(); hist++) (*hist)->Write();
+  */
 
-  for (vector<TH2D*>::iterator hist = rlmtpthists.begin(); hist != rlmtpthists.end(); hist++) (*hist)->Write();
   for (vector<TH2D*>::iterator hist = etaphihists.begin(); hist != etaphihists.end(); hist++) (*hist)->Write();
   for (vector<TH1D*>::iterator hist = mt2hists.begin(); hist != mt2hists.end(); hist++) (*hist)->Write();
   for (vector<TH1D*>::iterator hist = dphiMethists.begin(); hist != dphiMethists.end(); hist++) (*hist)->Write();
   for (vector<TH1D*>::iterator hist = cuthists.begin(); hist != cuthists.end(); hist++) (*hist)->Write();
+
+  h_sigeffST->Write();
+  h_sigeffSTC->Write();
+  h_CharLength->Write();
   outfile_.Close();
   cout << "Wrote everything" << endl;
 
@@ -5035,6 +5228,7 @@ int main (int argc, char ** argv) {
   return 0;
 }
 
+/*
 float FshortLooper::getAverageISRWeight(const int evt_id, const int var) {
 
   // madgraph ttsl, from RunIISummer16MiniAODv2
@@ -5053,6 +5247,33 @@ float FshortLooper::getAverageISRWeight(const int evt_id, const int var) {
   std::cout << "WARNING: FshortLooper::getAverageISRWeight: didn't recognize either evt_id: " << evt_id
 	    << " or variation: " << var << std::endl;
   return 1.;
+}
+*/
+float FshortLooper::getAverageISRWeight(const string sample, const string config_tag) {
+  // 2016 94x ttsl 0.908781126143
+  // 2016 94x ttdl 0.895473127249
+  if (config_tag == "mc_94x_Summer16") {
+    if (sample.compare("ttsl") == 0) {
+      return 0.909;
+    }
+    else {
+      return 0.895;
+    }
+  }
+  // 2017 94x ttsl 0.915829735522
+  // 2017 94x ttdl 0.903101272148
+  else if (config_tag == "mc_94x_Fall17") {
+    if (sample == "ttsl") {
+      return 0.916;
+    }
+    else {
+      return 0.903;
+    }
+  }
+  else {
+    cout << "Didn't recognize config " << config_tag << endl;
+    return 1.0;
+  }
 }
 
 FshortLooper::FshortLooper() {}

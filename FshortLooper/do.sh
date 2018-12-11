@@ -3,18 +3,12 @@
 make -j 12 || return $?
 
 doD16=0
-doM16=0
+doM16=1
 doD17=0
-doM17=0
-doS17=1
+doM17=1
+doS17=0
 
-tag=fsvarDefault_weight1
-#tag=fsvarHT250_weight1
-#tag=fsvarHT450_weight1
-#tag=fsvarMET30_weight1
-#tag=fsvarMET100_weight1
-#tag=fsvarMET250_weight1
-#tag=fsvarHT450MET100_weight1
+tag=weight1_noPrescale
 
 LOGDIR=logs/${tag}
 mkdir -p ${LOGDIR}

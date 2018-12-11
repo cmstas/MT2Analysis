@@ -5,7 +5,9 @@ from math import sqrt
 import re
 import sys
 import os
+from os.path import isfile,join
 import subprocess
+
 
 sys.path.append("../Nifty")
 
@@ -30,12 +32,23 @@ simplecanvas.SetRightMargin(0.16)
 
 ROOT.gPad.SetPhi(-135)
 
+fullPropagate = False
+
 if len(sys.argv) < 2: 
     print "Which file?"
     exit()
 
 filename = sys.argv[1]
 shortname = filename[filename.rfind("/")+1:filename.find(".")]
+
+isData = shortname.split("_")[0] == "data"
+year = shortname.split("_")[1]
+tag = shortname[shortname.find(year)+5:] # e.g. 2016_
+
+filepath = "output_unmerged/{0}_{1}/".format(year,tag)
+if isData: filepath += "data/"
+inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+filelist = [ROOT.TFile.Open(infile) for infile in inputlist]
 
 os.system("mkdir -p output")
 os.system("mkdir -p pngs/{0}".format(shortname))
@@ -50,9 +63,10 @@ outfile.cd()
 for rawname in names:
     name = rawname[1:] # Get rid of leading /
     # Fshort histograms
-    if name.find("fs") > 0:        
+    if name.find("fs") > 0 and name.find("max_weight") < 0:        
         h_fs = tfile.Get(name)
         # Get fshort for inclusive, P, M, L
+        h_alt_rel_err = ROOT.TH1D(name+"_alt_rel_err","Alternative f_{short} Relative Error",4,0,4)
         for length in range(1,5):
             den = h_fs.GetBinContent(length,3)
             if den == 0:
@@ -60,14 +74,36 @@ for rawname in names:
                 h_fs.SetBinError(length,1,0)
                 continue
             num = h_fs.GetBinContent(length,2)
+            if num == 0:
+                h_fs.SetBinContent(length,1,0)
+                h_fs.SetBinError(length,1,0) # these errors are handled by the ShortTrackLooper workflow
+                continue
             h_fs.SetBinContent(length,1,num / den)
             derr = h_fs.GetBinError(length, 3)
             nerr = h_fs.GetBinError(length, 2)
-            numsq = num * num
-            densq = den * den
-            # binomial errors
-            newerr = sqrt((derr*derr * numsq + nerr*nerr * densq) / (densq * densq))
+#            numsq = num * num
+#            densq = den * den
+#            newerr = sqrt((derr*derr * numsq + nerr*nerr * densq) / (densq * densq))
+            if not isData: # Additional error term for MC, accounting for large weights appearing in STC denominator, but not ST numerator
+                max_weight = 0
+                max_f = None
+                for f in filelist:
+                    h_max_weight = f.Get(name+"_max_weight")
+                    this_max_weight = h_max_weight.GetBinContent(length)
+                    if this_max_weight > max_weight:
+                        max_weight = this_max_weight
+                        max_f = f
+                # there's an additional statistical error in the MC numerator coming from high weight events in the denominator not entering the numerator                        
+#                nerr_alt = sqrt( nerr**2 + max_weight**2 )
+                print "max_weight for",name,max_weight,"from",f.GetName()
+                fs_alt = (num + max_weight)/den                
+                alt_rel_err = (fs_alt/(num/den)) - 1
+                h_alt_rel_err.SetBinContent(length,max_weight)
+                if fullPropagate:
+                    nerr = sqrt( nerr**2 + max_weight**2 )
+            newerr = sqrt( (derr/den)**2 + (nerr/num)**2 ) * num/den
             h_fs.SetBinError(length, 1, newerr)
+        h_alt_rel_err.Write()
         h_fs.SetMarkerSize(1.8)
         h_fs.Draw("text E")
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
@@ -112,8 +148,8 @@ for rawname in names:
             elif name.find("23") > 0:
                 njet = "_23"
             else: njet = ""
-            if name.find("FSR") > 0:
-                reg = "FSR"
+            if name.find("MR") > 0:
+                reg = "MR"
             elif name.find("VR") > 0:
                 reg = "VR"
             else: 
@@ -148,13 +184,13 @@ simplecanvas.SaveAs("pngs/{0}/fs_by_mt2_L.png".format(shortname))
 dphi_L = tfile.Get("h_dphiMet_ST_L")
 dphi_M = tfile.Get("h_dphiMet_ST_M")
 dphi_P = tfile.Get("h_dphiMet_ST_P")
-dphi_L.Scale(1/dphi_L.Integral())
+if dphi_L.Integral() > 0: dphi_L.Scale(1/dphi_L.Integral())
 dphi_L.SetLineWidth(3)
 dphi_L.SetLineColor(ROOT.kGreen)
-dphi_M.Scale(1/dphi_M.Integral())
+if dphi_M.Integral() > 0: dphi_M.Scale(1/dphi_M.Integral())
 dphi_M.SetLineWidth(3)
 dphi_M.SetLineColor(ROOT.kRed)
-dphi_P.Scale(1/dphi_P.Integral())
+if dphi_P.Integral() > 0: dphi_P.Scale(1/dphi_P.Integral())
 dphi_P.SetLineWidth(3)
 dphi_P.SetLineColor(ROOT.kBlue)
 dphi_P.SetMaximum(1.2 * max( [h.GetMaximum() for h in [dphi_P,dphi_M,dphi_L]] ) )
@@ -172,5 +208,8 @@ simplecanvas.SaveAs("pngs/{0}/dphiMet.png".format(shortname))
 outfile.Close()
 
 tfile.Close()
+
+for f in filelist:
+    f.Close()
 
 print "Done"

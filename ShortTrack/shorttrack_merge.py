@@ -5,6 +5,7 @@ from math import sqrt
 import re
 import sys
 import os
+from os.path import isfile,join
 import subprocess
 
 sys.path.append("../Nifty")
@@ -16,6 +17,8 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more status messages
 doRmtpt = False
+fullPropagate = True
+
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
@@ -29,159 +32,164 @@ simplecanvas.SetRightMargin(0.2)
 simplecanvas.SetTopMargin(0.12)
 
 if len(sys.argv) < 2: 
-    print "Which file to run on?"
+    print "Which tag?"
     exit(1)
 
-filename = sys.argv[1]
-shortname = filename[filename.rfind("/")+1:filename.find(".")]
+tag = sys.argv[1]
 
-os.system("mkdir -p pngs/{0}".format(shortname))
+d17 = "output_merged/data_2017_{}.root".format(tag)
+d16 = "output_merged/data_2016_{}.root".format(tag)
+m17 = "output_merged/mc_2017_{}.root".format(tag)
+m16 = "output_merged/mc_2016_{}.root".format(tag)
 
-if doRmtpt:
-    if filename.find("16") >= 0:
-        #    RmtptName = "../FshortLooper/output/Fshort_mc_2016_fullveto.root"
-        RmtptName = "../FshortLooper/output/Fshort_mc_2017_fullveto.root" # for now, use 2017 MC in 2016
-    elif filename.find("17") >= 0:
-        RmtptName = "../FshortLooper/output/Fshort_mc_2017_fullveto.root";
-    else:
-        print "Unsure which Rmtpt file to use, exiting"
-        exit(1)
+filenames = [d17, m17, d16, m16]
+#filenames = [d17, m17, d16]
+#filenames = [m17]
+#filenames = [d17]
 
-    RmtptFile = ROOT.TFile.Open(RmtptName,"READ")
+for filename in filenames:
 
-    h_RmtptFSR = RmtptFile.Get("h_RmtptFSR")
-    h_RmtptFSR_Nj23 = RmtptFile.Get("h_RmtptFSR")
-    h_RmtptFSR_Nj4 = RmtptFile.Get("h_RmtptFSR")
-    h_RmtptVR = RmtptFile.Get("h_RmtptVR")
-    h_RmtptVR_Nj23 = RmtptFile.Get("h_RmtptVR")
-    h_RmtptVR_Nj4 = RmtptFile.Get("h_RmtptVR")
-    h_RmtptSR = RmtptFile.Get("h_RmtptSR")
-    h_RmtptSR_Nj23 = RmtptFile.Get("h_RmtptSR")
-    h_RmtptSR_Nj4 = RmtptFile.Get("h_RmtptSR")
+    outfile = ROOT.TFile.Open(filename,"RECREATE")
 
-    Rmtpt = { "h_LL_FSR" : h_RmtptFSR.GetBinContent(1,1),
-              "h_LH_FSR" : h_RmtptFSR.GetBinContent(1,1),
-              "h_HL_FSR" : h_RmtptFSR.GetBinContent(1,1),
-              "h_HH_FSR" : h_RmtptFSR.GetBinContent(1,1),
-              "h_LL_FSR_23" : h_RmtptFSR_Nj23.GetBinContent(1,1),
-              "h_LH_FSR_23" : h_RmtptFSR_Nj23.GetBinContent(1,1),
-              "h_HL_FSR_4" : h_RmtptFSR_Nj4.GetBinContent(1,1),
-              "h_HH_FSR_4" : h_RmtptFSR_Nj4.GetBinContent(1,1),
+    if filename == d17:
+        print "2017 Data"
+        filepath = "output_unmerged/2017_{}/data/".format(tag)
+        inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+    elif filename == d16:
+        print "2016 Data"
+        filepath = "output_unmerged/2016_{}/data/".format(tag)
+        inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+    elif filename == m17:
+        print "2017 MC"
+        filepath = "output_unmerged/2017_{}/".format(tag)
+        inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+    elif filename == m16:
+        print "2016 MC"
+        filepath = "output_unmerged/2016_{}/".format(tag)
+        inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
 
-              "h_LL_VR" : h_RmtptVR.GetBinContent(1,1),
-              "h_LH_VR" : h_RmtptVR.GetBinContent(1,1),
-              "h_HL_VR" : h_RmtptVR.GetBinContent(1,1),
-              "h_HH_VR" : h_RmtptVR.GetBinContent(1,1),
-              "h_LL_VR_23" : h_RmtptVR_Nj23.GetBinContent(1,1),
-              "h_LH_VR_23" : h_RmtptVR_Nj23.GetBinContent(1,1),
-              "h_HL_VR_4" : h_RmtptVR_Nj4.GetBinContent(1,1),
-              "h_HH_VR_4" : h_RmtptVR_Nj4.GetBinContent(1,1),
+    filelist = [ROOT.TFile.Open(infile) for infile in inputlist]
 
-              "h_LL_SR" : h_RmtptSR.GetBinContent(1,1),
-              "h_LH_SR" : h_RmtptSR.GetBinContent(1,1),
-              "h_HL_SR" : h_RmtptSR.GetBinContent(1,1),
-              "h_HH_SR" : h_RmtptSR.GetBinContent(1,1),
-              "h_LL_SR_23" : h_RmtptSR_Nj23.GetBinContent(1,1),
-              "h_LH_SR_23" : h_RmtptSR_Nj23.GetBinContent(1,1),
-              "h_HL_SR_4" : h_RmtptSR_Nj4.GetBinContent(1,1),
-              "h_HH_SR_4" : h_RmtptSR_Nj4.GetBinContent(1,1)
+    h_fsMR = filelist[0].Get("h_FS")
+    h_fsMR_Nj23 = filelist[0].Get("h_FS_23")
+    h_fsMR_Nj4 = filelist[0].Get("h_FS_4")
+#    h_fsMR_alt = filelist[0].Get("h_FS_alt_rel_err")
+#    h_fsMR_Nj23_alt = filelist[0].Get("h_FS_23_alt_rel_err")
+#    h_fsMR_Nj4_alt = filelist[0].Get("h_FS_4_alt_rel_err")
+    if verbose:    
+        h_fsMR.Print("all")
+        h_fsMR_Nj23.Print("all")
+        h_fsMR_Nj4.Print("all")
+
+    fserr = { "h_LL_VR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_LH_VR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_HL_VR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_HH_VR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_LL_VR_23" : (h_fsMR_Nj23.GetBinError(1,1),h_fsMR_Nj23.GetBinError(2,1),h_fsMR_Nj23.GetBinError(3,1)),
+              "h_LH_VR_23" : (h_fsMR_Nj23.GetBinError(1,1),h_fsMR_Nj23.GetBinError(2,1),h_fsMR_Nj23.GetBinError(3,1)),
+              "h_HL_VR_4" : (h_fsMR_Nj4.GetBinError(1,1),h_fsMR_Nj4.GetBinError(2,1),h_fsMR_Nj4.GetBinError(3,1)),
+              "h_HH_VR_4" : (h_fsMR_Nj4.GetBinError(1,1),h_fsMR_Nj4.GetBinError(2,1),h_fsMR_Nj4.GetBinError(3,1)),
+              
+              "h_LL_SR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_LH_SR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_HL_SR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_HH_SR" : (h_fsMR.GetBinError(1,1),h_fsMR.GetBinError(2,1),h_fsMR.GetBinError(3,1)),
+              "h_LL_SR_23" : (h_fsMR_Nj23.GetBinError(1,1),h_fsMR_Nj23.GetBinError(2,1),h_fsMR_Nj23.GetBinError(3,1)),
+              "h_LH_SR_23" : (h_fsMR_Nj23.GetBinError(1,1),h_fsMR_Nj23.GetBinError(2,1),h_fsMR_Nj23.GetBinError(3,1)),
+              "h_HL_SR_4" : (h_fsMR_Nj4.GetBinError(1,1),h_fsMR_Nj4.GetBinError(2,1),h_fsMR_Nj4.GetBinError(3,1)),
+              "h_HH_SR_4" : (h_fsMR_Nj4.GetBinError(1,1),h_fsMR_Nj4.GetBinError(2,1),h_fsMR_Nj4.GetBinError(3,1))                  
               }
+        
+    fs = { "h_LL_VR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_LH_VR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_HL_VR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_HH_VR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_LL_VR_23" : (h_fsMR_Nj23.GetBinContent(1,1),h_fsMR_Nj23.GetBinContent(2,1),h_fsMR_Nj23.GetBinContent(3,1)),
+           "h_LH_VR_23" : (h_fsMR_Nj23.GetBinContent(1,1),h_fsMR_Nj23.GetBinContent(2,1),h_fsMR_Nj23.GetBinContent(3,1)),
+           "h_HL_VR_4" : (h_fsMR_Nj4.GetBinContent(1,1),h_fsMR_Nj4.GetBinContent(2,1),h_fsMR_Nj4.GetBinContent(3,1)),
+           "h_HH_VR_4" : (h_fsMR_Nj4.GetBinContent(1,1),h_fsMR_Nj4.GetBinContent(2,1),h_fsMR_Nj4.GetBinContent(3,1)),
+           
+           "h_LL_SR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_LH_SR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_HL_SR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_HH_SR" : (h_fsMR.GetBinContent(1,1),h_fsMR.GetBinContent(2,1),h_fsMR.GetBinContent(3,1)),
+           "h_LL_SR_23" : (h_fsMR_Nj23.GetBinContent(1,1),h_fsMR_Nj23.GetBinContent(2,1),h_fsMR_Nj23.GetBinContent(3,1)),
+           "h_LH_SR_23" : (h_fsMR_Nj23.GetBinContent(1,1),h_fsMR_Nj23.GetBinContent(2,1),h_fsMR_Nj23.GetBinContent(3,1)),
+           "h_HL_SR_4" : (h_fsMR_Nj4.GetBinContent(1,1),h_fsMR_Nj4.GetBinContent(2,1),h_fsMR_Nj4.GetBinContent(3,1)),
+           "h_HH_SR_4" : (h_fsMR_Nj4.GetBinContent(1,1),h_fsMR_Nj4.GetBinContent(2,1),h_fsMR_Nj4.GetBinContent(3,1))
+           }
 
-tfile = ROOT.TFile.Open(filename,"UPDATE")
-names = tfile.GetKeyNames()
+#    fsalterr = { "h_LL_VR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_LH_VR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_HL_VR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_HH_VR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_LL_VR_23" : (h_fsMR_Nj23_alt.GetBinContent(1),h_fsMR_Nj23_alt.GetBinContent(2),h_fsMR_Nj23_alt.GetBinContent(3)),
+#              "h_LH_VR_23" : (h_fsMR_Nj23_alt.GetBinContent(1),h_fsMR_Nj23_alt.GetBinContent(2),h_fsMR_Nj23_alt.GetBinContent(3)),
+#              "h_HL_VR_4" : (h_fsMR_Nj4_alt.GetBinContent(1),h_fsMR_Nj4_alt.GetBinContent(2),h_fsMR_Nj4_alt.GetBinContent(3)),
+#              "h_HH_VR_4" : (h_fsMR_Nj4_alt.GetBinContent(1),h_fsMR_Nj4_alt.GetBinContent(2),h_fsMR_Nj4_alt.GetBinContent(3)),
+              
+#              "h_LL_SR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_LH_SR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_HL_SR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_HH_SR" : (h_fsMR_alt.GetBinContent(1),h_fsMR_alt.GetBinContent(2),h_fsMR_alt.GetBinContent(3)),
+#              "h_LL_SR_23" : (h_fsMR_Nj23_alt.GetBinContent(1),h_fsMR_Nj23_alt.GetBinContent(2),h_fsMR_Nj23_alt.GetBinContent(3)),
+#              "h_LH_SR_23" : (h_fsMR_Nj23_alt.GetBinContent(1),h_fsMR_Nj23_alt.GetBinContent(2),h_fsMR_Nj23_alt.GetBinContent(3)),
+#              "h_HL_SR_4" : (h_fsMR_Nj4_alt.GetBinContent(1),h_fsMR_Nj4_alt.GetBinContent(2),h_fsMR_Nj4_alt.GetBinContent(3)),
+#              "h_HH_SR_4" : (h_fsMR_Nj4_alt.GetBinContent(1),h_fsMR_Nj4_alt.GetBinContent(2),h_fsMR_Nj4_alt.GetBinContent(3))                  
+#              }
 
-counts_names = []
-for rawname in names:
-    if rawname.find("SR") < 0 and rawname.find("VR") < 0: continue    
-    if rawname.find("final") >= 0: continue
-    name = rawname[1:] # Get rid of leading /
-    counts_names.append(name)
+    for histname in ["h_LL_VR","h_LH_VR","h_HL_VR","h_HH_VR","h_LL_SR","h_LH_SR","h_HL_SR","h_HH_SR","h_LL_VR_23","h_LH_VR_23","h_HL_VR_4","h_HH_VR_4","h_LL_SR_23","h_LH_SR_23","h_HL_SR_4","h_HH_SR_4"]:
+#    for histname in ["h_LH_VR_23"]:
+        print histname
+        h = filelist[0].Get(histname)
+        # First, sum all region histograms
+        for f in filelist[1:]:
+            h.Add(f.Get(histname))
+        # Now, propagate fshort errors to the predicted counts of these histograms (y bin 2)
+        # ROOT takes care of observed STC and ST counts for us, and tracks the error in bin 2 coming from STC statistics, but not that coming from fshort
+        # if CR count is 0, then take upper STC count as 1.83, and upper end of predicted error as 1.83 * (fshort+fshorterr)
+        fs_P = fs[histname][0]
+        fs_P_err = fserr[histname][0]
+        fs_M = fs[histname][1]
+        fs_M_err = fserr[histname][1]
+        fs_L = fs[histname][2]
+        fs_L_err = fserr[histname][2]
 
-simplecanvas.SetLeftMargin(0.22)
-simplecanvas.SetRightMargin(0.22)
+        # Errors generated by considering the largest weight in the denominator of fshort, and varying fshort by adding that weight to the numerator
+ #       alt_P_err = fsalterr[histname][0] if not fullPropagate else 0
+ #       alt_M_err = fsalterr[histname][1] if not fullPropagate else 0
+ #       alt_L_err = fsalterr[histname][2] if not fullPropagate else 0
 
-fsName = "../FshortLooper/output/Fshort_{}.root".format(shortname if shortname.find("_M") < 0 else shortname[:shortname.find("_M")])
-
-fsFile = ROOT.TFile.Open(fsName,"READ")
-
-if fsFile == None:
-    print "Can't find", fsName
-
-h_fsFSR = fsFile.Get("h_fsFSR")
-h_fsFSR_Nj23 = fsFile.Get("h_fsFSR_23")
-h_fsFSR_Nj4 = fsFile.Get("h_fsFSR_4")
-
-fserr = { "h_LL_VR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_LH_VR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_HL_VR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_HH_VR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_LL_VR_23" : (h_fsFSR_Nj23.GetBinError(1,1),h_fsFSR_Nj23.GetBinError(2,1),h_fsFSR_Nj23.GetBinError(3,1)),
-          "h_LH_VR_23" : (h_fsFSR_Nj23.GetBinError(1,1),h_fsFSR_Nj23.GetBinError(2,1),h_fsFSR_Nj23.GetBinError(3,1)),
-          "h_HL_VR_4" : (h_fsFSR_Nj4.GetBinError(1,1),h_fsFSR_Nj4.GetBinError(2,1),h_fsFSR_Nj4.GetBinError(3,1)),
-          "h_HH_VR_4" : (h_fsFSR_Nj4.GetBinError(1,1),h_fsFSR_Nj4.GetBinError(2,1),h_fsFSR_Nj4.GetBinError(3,1)),
-
-          "h_LL_SR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_LH_SR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_HL_SR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_HH_SR" : (h_fsFSR.GetBinError(1,1),h_fsFSR.GetBinError(2,1),h_fsFSR.GetBinError(3,1)),
-          "h_LL_SR_23" : (h_fsFSR_Nj23.GetBinError(1,1),h_fsFSR_Nj23.GetBinError(2,1),h_fsFSR_Nj23.GetBinError(3,1)),
-          "h_LH_SR_23" : (h_fsFSR_Nj23.GetBinError(1,1),h_fsFSR_Nj23.GetBinError(2,1),h_fsFSR_Nj23.GetBinError(3,1)),
-          "h_HL_SR_4" : (h_fsFSR_Nj4.GetBinError(1,1),h_fsFSR_Nj4.GetBinError(2,1),h_fsFSR_Nj4.GetBinError(3,1)),
-          "h_HH_SR_4" : (h_fsFSR_Nj4.GetBinError(1,1),h_fsFSR_Nj4.GetBinError(2,1),h_fsFSR_Nj4.GetBinError(3,1))
-
-          }
-
-fs = { "h_LL_VR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_LH_VR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_HL_VR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_HH_VR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_LL_VR_23" : (h_fsFSR_Nj23.GetBinContent(1,1),h_fsFSR_Nj23.GetBinContent(2,1),h_fsFSR_Nj23.GetBinContent(3,1)),
-          "h_LH_VR_23" : (h_fsFSR_Nj23.GetBinContent(1,1),h_fsFSR_Nj23.GetBinContent(2,1),h_fsFSR_Nj23.GetBinContent(3,1)),
-          "h_HL_VR_4" : (h_fsFSR_Nj4.GetBinContent(1,1),h_fsFSR_Nj4.GetBinContent(2,1),h_fsFSR_Nj4.GetBinContent(3,1)),
-          "h_HH_VR_4" : (h_fsFSR_Nj4.GetBinContent(1,1),h_fsFSR_Nj4.GetBinContent(2,1),h_fsFSR_Nj4.GetBinContent(3,1)),
-
-          "h_LL_SR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_LH_SR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_HL_SR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_HH_SR" : (h_fsFSR.GetBinContent(1,1),h_fsFSR.GetBinContent(2,1),h_fsFSR.GetBinContent(3,1)),
-          "h_LL_SR_23" : (h_fsFSR_Nj23.GetBinContent(1,1),h_fsFSR_Nj23.GetBinContent(2,1),h_fsFSR_Nj23.GetBinContent(3,1)),
-          "h_LH_SR_23" : (h_fsFSR_Nj23.GetBinContent(1,1),h_fsFSR_Nj23.GetBinContent(2,1),h_fsFSR_Nj23.GetBinContent(3,1)),
-          "h_HL_SR_4" : (h_fsFSR_Nj4.GetBinContent(1,1),h_fsFSR_Nj4.GetBinContent(2,1),h_fsFSR_Nj4.GetBinContent(3,1)),
-          "h_HH_SR_4" : (h_fsFSR_Nj4.GetBinContent(1,1),h_fsFSR_Nj4.GetBinContent(2,1),h_fsFSR_Nj4.GetBinContent(3,1))
-
-          }
-
-fsFile.Close()
-
-tfile.cd()
-for name in counts_names:
-    print name
-    h_counts = tfile.Get(name).Clone(name+"_final")
-    h_counts.SetTitle("Event Counts by Length")
-    h_counts.GetXaxis().SetBinLabel(3,"L (acc)")
-    h_counts.GetXaxis().SetRange(1,3)
-    h_counts.SetMarkerSize(1.5)
-    for i in range(1,4):
-        count = h_counts.GetBinError(i,2)
-        if count > 0:
-            # propagate fshort error: total absolute error = bin content * sqrt( bin statistical relative error ^2 + fshort relative error ^2 )
-            h_counts.SetBinError(i,2,count*sqrt((h_counts.GetBinError(i,1)/count)**2 + ( (fserr[name][i-1])/(fs[name][i-1]) )**2))
-    if doRmtpt:
-        obsRejST = h_counts.GetBinContent(3,1)
-        expRejST = h_counts.GetBinContent(3,2)
-        ewkRejST = max(obsRejST - expRejST, 0.0)
-        extraAccST = ewkRejST * Rmtpt[name]
-        corrected_expected_accepted_STs = h_counts.GetBinContent(4,2) + extraAccST
-        h_counts.SetBinContent(5,1,h_counts.GetBinContent(4,1))
-        h_counts.SetBinError(5,1,h_counts.GetBinError(4,1))
-        h_counts.SetBinContent(5,2,corrected_expected_accepted_STs)
-        h_counts.SetBinContent(5,3,ewkRejST)
-    h_counts.Write()
-    h_counts.Draw("text E")
-    simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
-
-tfile.Purge()
-
-tfile.Close()
+        Perr = h.GetBinError(1,2) # pred ST err for P, currently based only on STC stats
+        Pcount = h.GetBinContent(1,2) # pred ST counts for P
+ #       new_Perr = 1.83 * (fs_P + sqrt(fs_P_err**2 + (alt_P_err*fs_P)**2)) if Pcount == 0 else sqrt( (Perr/Pcount)**2 + (fs_P_err / fs_P)**2 ) * Pcount # total relative error is rel error from STC counts and rel error from fshort, in quadrature
+        new_Perr = 1.83 * (fs_P + fs_P_err) if Pcount == 0 else sqrt( (Perr/Pcount)**2 + (fs_P_err / fs_P)**2 ) * Pcount # total relative error is rel error from STC counts and rel error from fshort, in quadrature
+#        h.SetBinError(1,2,sqrt( new_Perr**2 + (alt_P_err * Pcount )**2) if Pcount > 0 else new_Perr) 
+        h.SetBinError(1,2,new_Perr if Pcount > 0 else new_Perr) 
+        Merr = h.GetBinError(2,2) # pred ST err for M, currently based only on STC stats
+        Mcount = h.GetBinContent(2,2) # pred ST counts for M
+#        new_Merr = 1.83 * (fs_M + sqrt(fs_M_err + (alt_M_err*fs_M)**2)) if Mcount == 0 else sqrt( (Merr/Mcount)**2 + (fs_M_err / fs_M)**2 ) * Mcount # total relative error is rel error from STC counts and rel error from fshort, in quadrature
+        new_Merr = 1.83 * (fs_M + fs_M_err) if Mcount == 0 else sqrt( (Merr/Mcount)**2 + (fs_M_err / fs_M)**2 ) * Mcount # total relative error is rel error from STC counts and rel error from fshort, in quadrature
+#        h.SetBinError(2,2,sqrt( new_Merr**2 + (alt_M_err * Mcount)**2) if Mcount > 0 else new_Merr)
+        h.SetBinError(2,2,new_Merr if Mcount > 0 else new_Merr)
+        Lerr = h.GetBinError(3,2) # pred ST err for L, currently based only on STC stats
+        Lcount = h.GetBinContent(3,2) # pred ST counts for L
+#        new_Lerr = 1.83 * (fs_L + sqrt(fs_L_err + (alt_L_err*fs_L)**2)) if Lcount == 0 else sqrt( (Lerr/Lcount)**2 + (fs_L_err / fs_L)**2 ) * Lcount # total relative error is rel error from STC counts and rel error from fshort, in quadrature
+        new_Lerr = 1.83 * (fs_L + fs_L_err) if Lcount == 0 else sqrt( (Lerr/Lcount)**2 + (fs_L_err / fs_L)**2 ) * Lcount # total relative error is rel error from STC counts and rel error from fshort, in quadrature
+#        h.SetBinError(3,2,sqrt( new_Lerr**2 + (alt_L_err * Lcount)**2) if Lcount > 0 else new_Lerr )
+        h.SetBinError(3,2,new_Lerr if Lcount > 0 else new_Lerr )
+        outfile.cd()
+#        print histname
+#        print "P",new_Perr,alt_P_err * Pcount
+#        print "M",new_Merr,alt_M_err * Mcount
+#        print "L",new_Lerr,alt_L_err * Lcount
+        h.Write()
+    outfile.cd()
+    h_fsMR.Write()
+    h_fsMR_Nj23.Write()
+    h_fsMR_Nj4.Write()
+    for f in filelist:
+        f.Close()
+    outfile.Close()
 
 print "Done"

@@ -7,9 +7,9 @@ class mt2tree;
 
 const bool recalculate = true; // to use a non standard (ie not in babies) Fshort, change the iso and qual cuts and provide a new Fshort input file below
 const int applyRecoVeto = 2; // 0: None, 1: use MT2 ID leptons for the reco veto, 2: use any Reco ID (Default: 2)
-const bool increment17 = true;
+const bool increment17 = false;
 const float isoSTC = 6, qualSTC = 3;
-const bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
+bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 
 // turn on to apply json file to data
 const bool applyJSON = true;
@@ -42,6 +42,7 @@ int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi) {
 
 int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, char * runtag) {
   string tag(outtag);
+  const bool isMC = config_tag.find("mc") != std::string::npos;
 
   cout << "Using runtag: " << runtag << endl;
 
@@ -67,6 +68,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_eventwise_countsVR.GetYaxis()->SetBinLabel(1,"Obs VR Events");
   h_eventwise_countsVR.GetYaxis()->SetBinLabel(2,"Pred VR Events");
 
+  // Nlep = 0 hists
+
   // NjHt
   TH2D* h_LL_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR");
   TH2D* h_LH_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR");
@@ -89,11 +92,39 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HL_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_4");
   TH2D* h_HH_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4");
 
+  // Nlep = 1 hists
+
+  // NjHt
+  TH2D* h_LLlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LLlep_VR");
+  TH2D* h_LHlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LHlep_VR");
+  TH2D* h_HLlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HLlep_VR");
+  TH2D* h_HHlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HHlep_VR");
+
+  TH2D* h_LLlep_SR = (TH2D*)h_eventwise_counts.Clone("h_LLlep_SR");
+  TH2D* h_LHlep_SR = (TH2D*)h_eventwise_counts.Clone("h_LHlep_SR");
+  TH2D* h_HLlep_SR = (TH2D*)h_eventwise_counts.Clone("h_HLlep_SR");
+  TH2D* h_HHlep_SR = (TH2D*)h_eventwise_counts.Clone("h_HHlep_SR");
+
+  // Separate fshorts
+  TH2D* h_LLlep_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LLlep_VR_23");
+  TH2D* h_LHlep_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LHlep_VR_23");
+  TH2D* h_HLlep_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HLlep_VR_4");
+  TH2D* h_HHlep_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HHlep_VR_4");
+
+  TH2D* h_LLlep_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LLlep_SR_23");
+  TH2D* h_LHlep_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LHlep_SR_23");
+  TH2D* h_HLlep_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HLlep_SR_4");
+  TH2D* h_HHlep_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HHlep_SR_4");
+
 
   // Save Fshorts used with errors
   TH1D* h_FS = new TH1D("h_FS","f_{short}",3,0,3);
   TH1D* h_FS_23 = (TH1D*) h_FS->Clone("h_FS_23");
   TH1D* h_FS_4 = (TH1D*) h_FS->Clone("h_FS_4");
+
+  TH1D* h_FS_alt_rel_err = new TH1D("h_FS_alt_rel_err","Alternative Relative Error",3,0,3);
+  TH1D* h_FS_23_alt_rel_err = new TH1D("h_FS_23_alt_rel_err","Alternative Relative Error",3,0,3);
+  TH1D* h_FS_4_alt_rel_err = new TH1D("h_FS_4_alt_rel_err","Alternative Relative Error",3,0,3);
 
   mt2tree t;
 
@@ -115,7 +146,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	config_.triggers.find("prescaledHT")       == config_.triggers.end() || 
 	config_.triggers.find("SingleMu") == config_.triggers.end() || 
 	config_.triggers.find("SingleEl") == config_.triggers.end() ){
-      cout << "[FshortLooper::loop] ERROR: invalid trigger map in configuration '" << config_tag << "'!" << endl;
+      cout << "[ShortTrackLooper::loop] ERROR: invalid trigger map in configuration '" << config_tag << "'!" << endl;
       cout << "                         Make sure you have trigger vectors for 'SR', 'SingleMu', 'SingleEl', 'prescaledHT" << endl;
       return -1;
     }
@@ -146,7 +177,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
         data_config_.triggers.find("prescaledHT")       == data_config_.triggers.end() ||
         data_config_.triggers.find("SingleMu") == data_config_.triggers.end() ||
         data_config_.triggers.find("SingleEl") == data_config_.triggers.end() ){
-      cout << "[FshortLooper::loop] ERROR: invalid trigger map in configuration '" << data_config_tag << "'!" << endl;
+      cout << "[ShortTrackLooper::loop] ERROR: invalid trigger map in configuration '" << data_config_tag << "'!" << endl;
       cout << "                         Make sure you have trigger vectors for 'SR', 'SingleMu', 'SingleEl', 'prescaledHT" << endl;
       return -1;
     }
@@ -191,7 +222,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   }
 
   const int year = config_.year;  
-  const bool isMC = config_tag.find("mc") != std::string::npos;
+
+  if (isMC) adjL = false;
 
   cout << "Getting transfer factors" << endl;
 
@@ -219,56 +251,103 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   TFile* FshortFile = TFile::Open(FshortName,"READ");
   TFile* FshortFileMC = TFile::Open(FshortNameMC,"READ");
-  TH1D* h_fs = ((TH2D*) FshortFile->Get("h_fsFSR"))->ProjectionX("h_fs",1,1);
-  TH1D* h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsFSR_23"))->ProjectionX("h_fs_23",1,1);
-  TH1D* h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsFSR_4"))->ProjectionX("h_fs_4",1,1);
-  TH1D* h_fs_MC = ((TH2D*) FshortFileMC->Get("h_fsFSR"))->ProjectionX("h_fs_MC",1,1);
-  TH1D* h_fs_Nj23_MC = ((TH2D*) FshortFileMC->Get("h_fsFSR_23"))->ProjectionX("h_fs_23_MC",1,1);
-  TH1D* h_fs_Nj4_MC = ((TH2D*) FshortFileMC->Get("h_fsFSR_4"))->ProjectionX("h_fs_4_MC",1,1);
+  TH1D* h_fs = ((TH2D*) FshortFile->Get("h_fsMR_Baseline"))->ProjectionX("h_fs",1,1);
+  TH1D* h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23",1,1);
+  TH1D* h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4",1,1);
+  TH1D* h_fs_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline"))->ProjectionX("h_fs_MC",1,1);
+  TH1D* h_fs_Nj23_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23_MC",1,1);
+  TH1D* h_fs_Nj4_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4_MC",1,1);
   const float mc_L_corr = adjL ? h_fs_MC->GetBinContent(4) / h_fs_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err = sqrt( pow((h_fs_MC->GetBinError(4) / h_fs_MC->GetBinContent(4)),2) + pow((h_fs_MC->GetBinError(3) / h_fs_MC->GetBinContent(3)),2)) * mc_L_corr;
+  const float mc_L_corr_err = adjL ? sqrt( pow((h_fs_MC->GetBinError(4) / h_fs_MC->GetBinContent(4)),2) + pow((h_fs_MC->GetBinError(3) / h_fs_MC->GetBinContent(3)),2)) * mc_L_corr : 0;
   const float mc_L_corr_23 = adjL ? h_fs_Nj23_MC->GetBinContent(4) / h_fs_Nj23_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err_23 = sqrt( pow((h_fs_Nj23_MC->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr;
+  const float mc_L_corr_err_23 = adjL ? sqrt( pow((h_fs_Nj23_MC->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
   const float mc_L_corr_4 = adjL ? h_fs_Nj4_MC->GetBinContent(4) / h_fs_Nj4_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err_4 = sqrt( pow((h_fs_Nj4_MC->GetBinError(4) / h_fs_Nj4_MC->GetBinContent(4)),2) + pow((h_fs_Nj4_MC->GetBinError(3) / h_fs_Nj4_MC->GetBinContent(3)),2)) * mc_L_corr;
+  const float mc_L_corr_err_4 = adjL ? sqrt( pow((h_fs_Nj4_MC->GetBinError(4) / h_fs_Nj4_MC->GetBinContent(4)),2) + pow((h_fs_Nj4_MC->GetBinError(3) / h_fs_Nj4_MC->GetBinContent(3)),2)) * mc_L_corr_4 : 0;
   // bin 1 is inclusive, then P, M, L
   const double fs_P = h_fs->GetBinContent(2);
   const double fs_P_err = h_fs->GetBinError(2);
   const double fs_M = h_fs->GetBinContent(3);
   const double fs_M_err = h_fs->GetBinError(3);
-  const double fs_L = h_fs->GetBinContent(3) * mc_L_corr;
-  const double fs_L_err = adjL ? sqrt( pow((fs_M_err/fs_M),2) + pow((mc_L_corr_err / mc_L_corr),2) ) * fs_L : fs_M_err;
+  const double fs_L = adjL ? h_fs->GetBinContent(3) * mc_L_corr : h_fs->GetBinContent(4);
+  const double fs_L_err = adjL ? sqrt( pow((fs_M_err/fs_M),2) + pow((mc_L_corr_err / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(4);
   const double fs_Nj23_P = h_fs_Nj23->GetBinContent(2);
   const double fs_Nj23_P_err = h_fs_Nj23->GetBinError(2);
   const double fs_Nj23_M = h_fs_Nj23->GetBinContent(3);
   const double fs_Nj23_M_err = h_fs_Nj23->GetBinError(3);
-  const double fs_Nj23_L = h_fs_Nj23->GetBinContent(3) * mc_L_corr;
-  const double fs_Nj23_L_err = adjL ? sqrt( pow((fs_Nj23_M_err/fs_Nj23_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj23_L : fs_Nj23_M_err;
+  const double fs_Nj23_L = adjL ? h_fs_Nj23->GetBinContent(3) * mc_L_corr_23 : h_fs_Nj23->GetBinContent(4);
+  const double fs_Nj23_L_err = adjL ? sqrt( pow((fs_Nj23_M_err/fs_Nj23_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj23_L : h_fs_Nj23->GetBinError(4);
   const double fs_Nj4_P = h_fs_Nj4->GetBinContent(2);
   const double fs_Nj4_P_err = h_fs_Nj4->GetBinError(2);
   const double fs_Nj4_M = h_fs_Nj4->GetBinContent(3);
   const double fs_Nj4_M_err = h_fs_Nj4->GetBinError(3);
-  const double fs_Nj4_L = h_fs_Nj4->GetBinContent(3) * mc_L_corr;
-  const double fs_Nj4_L_err = adjL ? sqrt( pow((fs_Nj4_M_err/fs_Nj4_M),2) + pow((mc_L_corr_err_4 / mc_L_corr_4),2) ) * fs_Nj4_L : fs_Nj4_M_err;
+  const double fs_Nj4_L = adjL ? h_fs_Nj4->GetBinContent(3) * mc_L_corr_4 : h_fs_Nj4->GetBinContent(4);
+  const double fs_Nj4_L_err = adjL ? sqrt( pow((fs_Nj4_M_err/fs_Nj4_M),2) + pow((mc_L_corr_err_4 / mc_L_corr_4),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(4);
+
+  TH1D* h_FS_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_Baseline_alt_rel_err"))->Clone("h_FS_alt_rel_err_clone");
+  TH1D* h_FS_23_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_23_Baseline_alt_rel_err"))->Clone("h_FS_23_alt_rel_err_clone");
+  TH1D* h_FS_4_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_4_Baseline_alt_rel_err"))->Clone("h_FS_4_alt_rel_err_clone");
+ 
+  h_FS_alt_rel_err->SetBinContent(1,h_FS_alt_rel_err_clone->GetBinContent(2));
+  h_FS_alt_rel_err->SetBinContent(2,h_FS_alt_rel_err_clone->GetBinContent(3));
+  h_FS_alt_rel_err->SetBinContent(3,h_FS_alt_rel_err_clone->GetBinContent(4));
+  h_FS_23_alt_rel_err->SetBinContent(1,h_FS_23_alt_rel_err_clone->GetBinContent(2));
+  h_FS_23_alt_rel_err->SetBinContent(2,h_FS_23_alt_rel_err_clone->GetBinContent(3));
+  h_FS_23_alt_rel_err->SetBinContent(3,h_FS_23_alt_rel_err_clone->GetBinContent(4));
+  h_FS_4_alt_rel_err->SetBinContent(1,h_FS_4_alt_rel_err_clone->GetBinContent(2));
+  h_FS_4_alt_rel_err->SetBinContent(2,h_FS_4_alt_rel_err_clone->GetBinContent(3));
+  h_FS_4_alt_rel_err->SetBinContent(3,h_FS_4_alt_rel_err_clone->GetBinContent(4));
+
+  if (!isMC) {
+    TH1D* h_FS_alt_rel_err_MC = (TH1D*) (FshortFileMC->Get("h_fsMR_Baseline_alt_rel_err"))->Clone("h_FS_alt_rel_err_MC");
+    TH1D* h_FS_23_alt_rel_err_MC = (TH1D*) (FshortFileMC->Get("h_fsMR_23_Baseline_alt_rel_err"))->Clone("h_FS_23_alt_rel_err_MC");
+    TH1D* h_FS_4_alt_rel_err_MC = (TH1D*) (FshortFileMC->Get("h_fsMR_4_Baseline_alt_rel_err"))->Clone("h_FS_4_alt_rel_err_MC");
+    h_FS_alt_rel_err->SetBinContent(3,h_FS_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
+    h_FS_23_alt_rel_err->SetBinContent(3,h_FS_23_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
+    h_FS_4_alt_rel_err->SetBinContent(3,h_FS_4_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
+  }
 
   cout << "Loaded transfer factors" << endl;
+
+  cout << "alt Perr : " << h_FS_alt_rel_err->GetBinContent(1) << endl;
+  cout << "alt Merr : " << h_FS_alt_rel_err->GetBinContent(2) << endl;
+  cout << "alt Lerr : " << h_FS_alt_rel_err->GetBinContent(3) << endl;
+  cout << "altPerr23: " << h_FS_23_alt_rel_err->GetBinContent(1) << endl;
+  cout << "altMerr23: " << h_FS_23_alt_rel_err->GetBinContent(2) << endl;
+  cout << "altLerr23: " << h_FS_23_alt_rel_err->GetBinContent(3) << endl;
+  cout << "alt Perr4: " << h_FS_4_alt_rel_err->GetBinContent(1) << endl;
+  cout << "alt Merr4: " << h_FS_4_alt_rel_err->GetBinContent(2) << endl;
+  cout << "alt Lerr4: " << h_FS_4_alt_rel_err->GetBinContent(3) << endl;
+ 
+  cout << "corr     : " << mc_L_corr << endl;
+  cout << "corr err : " << mc_L_corr_err << endl;
+  cout << "corr23   : " << mc_L_corr_23 << endl;
+  cout << "corr23err: " << mc_L_corr_err_23 << endl;
+  cout << "corr4    : " << mc_L_corr_4 << endl;
+  cout << "corr4 err: " << mc_L_corr_err_4 << endl;
+
 
   cout << "fs_P    : " << fs_P << endl;
   cout << "fs_P err: " << fs_P_err << endl;
   cout << "fs_M    : " << fs_M << endl;
   cout << "fs_M err: " << fs_M_err << endl;
+  cout << "fs_L (uncorrected): " << h_fs->GetBinContent(4) << endl;
+  cout << "fs_L err (uncorrected): " << h_fs->GetBinError(4) << endl;
   cout << "fs_L    : " << fs_L << endl;
   cout << "fs_L err: " << fs_L_err << endl;
   cout << "fs_Nj23_P    : " << fs_Nj23_P << endl;
   cout << "fs_Nj23_P err: " << fs_Nj23_P_err << endl;
   cout << "fs_Nj23_M    : " << fs_Nj23_M << endl;
   cout << "fs_Nj23_M err: " << fs_Nj23_M_err << endl;
+  cout << "fs_Nj23_L (uncorrected): " << h_fs_Nj23->GetBinContent(4) << endl;
+  cout << "fs_Nj23_L err (uncorrected): " << h_fs_Nj23->GetBinError(4) << endl;
   cout << "fs_Nj23_L    : " << fs_Nj23_L << endl;
   cout << "fs_Nj23_L err: " << fs_Nj23_L_err << endl;
   cout << "fs_Nj4_P    : " << fs_Nj4_P << endl;
   cout << "fs_Nj4_P err: " << fs_Nj4_P_err << endl;
   cout << "fs_Nj4_M    : " << fs_Nj4_M << endl;
   cout << "fs_Nj4_M err: " << fs_Nj4_M_err << endl;
+  cout << "fs_Nj4_L (uncorrected): " << h_fs_Nj4->GetBinContent(4) << endl;
+  cout << "fs_Nj4_L err (uncorrected): " << h_fs_Nj4->GetBinError(4) << endl;
   cout << "fs_Nj4_L    : " << fs_Nj4_L << endl;
   cout << "fs_Nj4_L err: " << fs_Nj4_L_err << endl;
   
@@ -358,6 +437,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
     const bool lepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0;
 
+    /*
     if (lepveto) {
       continue;
     }
@@ -365,7 +445,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (t.deltaPhiMin < 0.3) {
       continue;
     }
-      
+    */
+
     // Triggers
     /*    const bool passPrescaleTrigger = (year == 2016) ? 
       t.HLT_PFHT125_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale : 
@@ -379,16 +460,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       continue;
     }
     */
-    const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
+    //    const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
     const bool passSRTrigger = passTrigger(t, trigs_SR_);
 
-    if (! (passPrescaleTrigger || passSRTrigger)) continue;
+    //    if (! (passPrescaleTrigger || passSRTrigger)) continue;
+    if (!passSRTrigger) continue;
 
     const float lumi = config_.lumi; 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
 
     if (!t.isData) {
-      weight *= t.weight_btagsf;
+      //      weight *= t.weight_btagsf;
+
+
+      if (applyISRWeights && (tag == "ttsl" || tag == "ttdl")) {
+	weight *= t.weight_isr / getAverageISRWeight(outtag,config_tag);
+      }
+
 
       if (doNTrueIntReweight) {
 	if(h_nTrueInt_weights_==0){
@@ -482,69 +570,136 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
     TH2D* hist;
     TH2D* hist_Nj;
-    
-    // L*
-    if (t.nJet30 < 4) {
-      // LH
-      if (t.ht >= 1000) {
-	// VR
-	if (t.mt2 < 200) {
-	  hist = h_LH_VR;
-	  hist_Nj = h_LH_VR_23;
+
+    if (!lepveto) {
+      // L*
+      if (t.nJet30 < 4) {
+	// LH
+	if (t.ht >= 1000) {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_LH_VR;
+	    hist_Nj = h_LH_VR_23;
+	  }
+	  // SR 
+	  else if ( !(blind && t.isData) ) {
+	    hist = h_LH_SR;
+	    hist_Nj = h_LH_SR_23;
+	  }
+	  else continue;
 	}
-	// SR 
-	else if ( !(blind && t.isData) ) {
-	  hist = h_LH_SR;
-	  hist_Nj = h_LH_SR_23;
+	// LL
+	else {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_LL_VR;
+	    hist_Nj = h_LL_VR_23;
+	  }
+	  // SR 
+	  else if (! (blind && t.isData) ){
+	    hist = h_LL_SR;
+	    hist_Nj = h_LL_SR_23;
+	  }
+	  else continue;
 	}
-	else continue;
-      }
-      // LL
+      } 
+      // H*
       else {
-	// VR
-	if (t.mt2 < 200) {
-	  hist = h_LL_VR;
-	  hist_Nj = h_LL_VR_23;
-	}
-	// SR 
-	else if (! (blind && t.isData) ){
-	  hist = h_LL_SR;
-	  hist_Nj = h_LL_SR_23;
-	}
-	else continue;
-      }
-    } 
-    // H*
-    else {
-      // HH
-      if (t.ht >= 1000) {
-	// VR
-	if (t.mt2 < 200) {
-	  hist = h_HH_VR;
-	  hist_Nj = h_HH_VR_4;
-	}
-	// SR 
-	else if (! (blind && t.isData) ) {
+	// HH
+	if (t.ht >= 1000) {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_HH_VR;
+	    hist_Nj = h_HH_VR_4;
+	  }
+	  // SR 
+	  else if (! (blind && t.isData) ) {
 	    hist = h_HH_SR;
 	    hist_Nj = h_HH_SR_4;
+	  }
+	  else continue;
 	}
-	else continue;
-      }
-      // HL
-      else {
-	// VR
-	if (t.mt2 < 200) {
-	  hist = h_HL_VR;
-	  hist_Nj = h_HL_VR_4;
+	// HL
+	else {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_HL_VR;
+	    hist_Nj = h_HL_VR_4;
+	  }
+	  // SR 
+	  else if (! (blind && t.isData) ){
+	    hist = h_HL_SR;
+	    hist_Nj = h_HL_SR_4;
+	  }
+	  else continue;
 	}
-	// SR 
-	else if (! (blind && t.isData) ){
-	  hist = h_HL_SR;
-	  hist_Nj = h_HL_SR_4;
-	}
-	else continue;
       }
     }
+    else if (t.nlep == 1) {
+      // L*
+      if (t.nJet30 < 4) {
+	// LH
+	if (t.ht >= 1000) {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_LHlep_VR;
+	    hist_Nj = h_LHlep_VR_23;
+	  }
+	  // SR 
+	  // don't need to blind in data at nlep = 1
+	  else {
+	    hist = h_LHlep_SR;
+	    hist_Nj = h_LHlep_SR_23;
+	  }
+	}
+	// LL
+	else {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_LLlep_VR;
+	    hist_Nj = h_LLlep_VR_23;
+	  }
+	  // SR 
+	  // don't need to blind in data at nlep = 1
+	  else {
+	    hist = h_LLlep_SR;
+	    hist_Nj = h_LLlep_SR_23;
+	  }
+	}
+      } 
+      // H*
+      else {
+	// HH
+	if (t.ht >= 1000) {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_HHlep_VR;
+	    hist_Nj = h_HHlep_VR_4;
+	  }
+	  // SR 
+	  // don't need to blind in data at nlep = 1
+	  else {
+	    hist = h_HHlep_SR;
+	    hist_Nj = h_HHlep_SR_4;
+	  }
+	}
+	// HL
+	else {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_HLlep_VR;
+	    hist_Nj = h_HLlep_VR_4;
+	  }
+	  // SR
+	  // don't need to blind in data at nlep = 1
+	  else {
+	    hist = h_HLlep_SR;
+	    hist_Nj = h_HLlep_SR_4;
+	  }
+	}
+      }
+    }        
+    else continue;
 
     // Analysis code
 
@@ -799,9 +954,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   
   // Post-processing
   
-  vector<TH2D*> hists   = {h_LL_SR, h_LH_SR, h_HL_SR, h_HH_SR, h_LL_VR, h_LH_VR, h_HL_VR, h_HH_VR};
-  vector<TH2D*> hists23 = {h_LL_SR_23, h_LH_SR_23, h_LL_VR_23, h_LH_VR_23};
-  vector<TH2D*> hists4  = {h_HL_SR_4, h_HH_SR_4, h_HL_VR_4, h_HH_VR_4};
+  vector<TH2D*> hists   = {h_LL_SR, h_LH_SR, h_HL_SR, h_HH_SR, h_LL_VR, h_LH_VR, h_HL_VR, h_HH_VR,
+			   h_LLlep_SR, h_LHlep_SR, h_HLlep_SR, h_HHlep_SR, h_LLlep_VR, h_LHlep_VR, h_HLlep_VR, h_HHlep_VR};
+  vector<TH2D*> hists23 = {h_LL_SR_23, h_LH_SR_23, h_LL_VR_23, h_LH_VR_23,
+			   h_LLlep_SR_23, h_LHlep_SR_23, h_LLlep_VR_23, h_LHlep_VR_23};
+  vector<TH2D*> hists4  = {h_HL_SR_4, h_HH_SR_4, h_HL_VR_4, h_HH_VR_4,
+			   h_HLlep_SR_4, h_HHlep_SR_4, h_HLlep_VR_4, h_HHlep_VR_4};
   
   // save fshorts so we can easily propagate errors on fshort to errors on the predicted ST counts
   h_FS->SetBinContent(1,fs_P);
@@ -824,7 +982,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_4->SetBinError(1,fs_Nj4_P_err);
   h_FS_4->SetBinError(2,fs_Nj4_M_err);
   h_FS_4->SetBinError(3,fs_Nj4_L_err);
-  
+
   cout << "About to write" << endl;
   
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
@@ -835,6 +993,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS->Write();
   h_FS_23->Write();
   h_FS_4->Write();
+  h_FS_alt_rel_err->Write();
+  h_FS_23_alt_rel_err->Write();
+  h_FS_4_alt_rel_err->Write();
   outfile_.Close();
   cout << "Wrote everything" << endl;
 
@@ -855,6 +1016,34 @@ int main (int argc, char ** argv) {
   stl->loop(ch,argv[1],string(argv[3]),argv[4]);
   return 0;
 }
+
+float ShortTrackLooper::getAverageISRWeight(const string sample, const string config_tag) {
+  // 2016 94x ttsl 0.908781126143
+  // 2016 94x ttdl 0.895473127249
+  if (config_tag == "mc_94x_Summer16") {
+    if (sample.compare("ttsl") == 0) {
+      return 0.909;
+    }
+    else {
+      return 0.895;
+    }
+  }
+  // 2017 94x ttsl 0.915829735522
+  // 2017 94x ttdl 0.903101272148
+  else if (config_tag == "mc_94x_Fall17") {
+    if (sample == "ttsl") {
+      return 0.916;
+    }
+    else {
+      return 0.903;
+    }
+  }
+  else {
+    cout << "Didn't recognize config " << config_tag << endl;
+    return 1.0;
+  }
+}
+
 
 ShortTrackLooper::ShortTrackLooper() {}
 
