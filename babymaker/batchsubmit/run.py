@@ -9,28 +9,23 @@ import sys
 # tag = "V00-10-04_2016_80x_MC"
 # tag = "V00-10-07_2016fullYear_17Jul2018"
 # tag = "V00-10-07_2017fullYear_31Mar2018"
-# tag = "V00-10-07_2018fullYear_17Sep2018"
-tag = "V00-10-07_2018B_specialHEM_26Sep2018"
-# tag = "V00-10-03_94x_2017_mc"
+tag = "V00-10-07_2018fullYear_17Sep2018"
+# tag = "V00-10-07_2018B_specialHEM_26Sep2018"
 # tag = "V00-10-03_2018_HEmiss_MC"
 # tag = "V00-10-03_2018_HEmiss_data_relval"
 # tag = "RebalanceAndSmear_V00-10-05_sigmasoft25"
 
-submitJobs        = False   # set to False if you've already submitted jobs and just want to monitor, or if you just want to check for missing files
+submitJobs        = False # set to False if you've already submitted jobs and just want to monitor, or if you just want to check for missing files
 sweeprootExisting = False # set to False to skip sweeprooting on existing files. For if you just want to check for new cms4/resubmit
 removeLogs        = False # remove all condor log files after successful completion
-doMerge           = False  # set to False to stop after all jobs have been finished/sweeprooted
-# doSkim            = True  # set to False to stop after merging
-# doQCDSkim         = False
-# doRSSkim          = False
-# doTriggerSkim     = False
-# doSTSkim          = False
+doMerge           = True  # set to False to stop after all jobs have been finished/sweeprooted
+
 skims = []
 skims.append("base")     # baseline selection
 # skims.append("qcd")      # low-mt2 qcd selection for rphi and related studies
 # skims.append("RS")       # low-ish mt2 selection for R&S CRs
-skims.append("trigger")  # used for measuring hadronic trigger turn-ons
-# skims.append("ST")       # for short track 
+# skims.append("trigger")  # used for measuring hadronic trigger turn-ons
+skims.append("ST")       # for short track 
 
 
 MAXLOCALJOBS = 20
@@ -155,7 +150,8 @@ while NresubmitFiles > 0:
 
 print "* WOO! All files are good!"
 
-mergedir = "/nfs-6/userdata/mt2/"+tag
+basedir = "/nfs-6/userdata/mt2/"
+mergedir = "{0}/{1}".format(basedir,tag)
 if doMerge:
     print "* Merging..."
 
@@ -196,7 +192,6 @@ def isExt(s, samples):
 
 print "* Skimming..."
 
-basedir = "/nfs-6/userdata/mt2/"
 logdir = "/nfs-6/userdata/mt2/skimLogs_bemarsh"
 skim_commands = []
 for skimname in skims:
@@ -228,3 +223,45 @@ while done < len(skim_commands):
 
 print "* Done skimming!"
 
+samp_counts = {}
+maxcount = -1
+for s in samples:
+    base = s.split("_ext")[0]
+    if base not in samp_counts:
+        samp_counts[base] = 1
+    else:
+        samp_counts[base] += 1
+    maxcount = max(maxcount, samp_counts[base])
+
+if maxcount <= 1:
+    sys.exit(0)
+
+print "* Needs an extension merge!"
+logdir = "/nfs-6/userdata/mt2/extmergeLogs_bemarsh"
+subprocess.call("mkdir -p "+logdir, shell=True)
+for skimname in skims:
+    print "** Doing {0} skim".format(skimname)
+    skimdir = "{0}/{1}_skim_{2}".format(basedir, tag, skimname)
+    extmergedir = "{0}/extmerge".format(skimdir)
+    subprocess.call("mkdir -p "+extmergedir, shell=True)
+    subprocess.call("rm -f {0}/*.root".format(extmergedir), shell=True)
+    ps = []
+    for s in samp_counts:
+        if samp_counts[s] == 1:
+            for f in glob.glob("{0}/{1}*.root".format(skimdir, s)):
+                subprocess.call("ln -s -t {0} {1}".format(extmergedir, f), shell=True)
+        else:
+            ps.append(subprocess.Popen("nice -n 19 python skim_bennettworkflow/mergeFixScale1fb.py {0} {1} {2} {3} > {4}/log_{5}_{3}.txt".format(mergedir, skimdir, extmergedir, s, logdir, skimname), shell=True))
+
+    Nleft = 1
+    while Nleft > 0:
+        Nleft = 0
+        for p in ps:
+            if p.poll() is None:
+                Nleft += 1
+        if Nleft > -:
+            print "** Waiting on {0} samples. Checking again in 5 min...".format(Nleft)
+            time.sleep(5 * 60)
+
+print "* Done extension merging!"
+            
