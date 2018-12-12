@@ -7,24 +7,31 @@ import sys
 
 # tag = "V00-10-01_json_314472-317696_2017C_JECs"
 # tag = "V00-10-04_2016_80x_MC"
-# tag = "V00-10-04_2016fullYear_17Jul2018"
-# tag = "V00-10-05_2017fullYear_31Mar2018"
-tag = "V00-10-06_2018fullYear_17Sep2018"
+# tag = "V00-10-07_2016fullYear_17Jul2018"
+# tag = "V00-10-07_2017fullYear_31Mar2018"
+# tag = "V00-10-07_2018fullYear_17Sep2018"
+tag = "V00-10-07_2018B_specialHEM_26Sep2018"
 # tag = "V00-10-03_94x_2017_mc"
 # tag = "V00-10-03_2018_HEmiss_MC"
 # tag = "V00-10-03_2018_HEmiss_data_relval"
-# tag = "V00-10-01_json_294927-306462_31Mar2018_correctJECs"
-# tag = "RebalanceAndSmear_V00-10-01_json_294927-306462_31Mar2018_correctJECs"
 # tag = "RebalanceAndSmear_V00-10-05_sigmasoft25"
 
-submitJobs        = True  # set to False if you've already submitted jobs and just want to monitor, or if you just want to check for missing files
+submitJobs        = False   # set to False if you've already submitted jobs and just want to monitor, or if you just want to check for missing files
 sweeprootExisting = False # set to False to skip sweeprooting on existing files. For if you just want to check for new cms4/resubmit
 removeLogs        = False # remove all condor log files after successful completion
-doMerge           = True  # set to False to stop after all jobs have been finished/sweeprooted
-doSkim            = False # set to False to stop after merging
-doQCDSkim         = False
-doRSSkim          = False
-doTriggerSkim     = True
+doMerge           = False  # set to False to stop after all jobs have been finished/sweeprooted
+# doSkim            = True  # set to False to stop after merging
+# doQCDSkim         = False
+# doRSSkim          = False
+# doTriggerSkim     = False
+# doSTSkim          = False
+skims = []
+skims.append("base")     # baseline selection
+# skims.append("qcd")      # low-mt2 qcd selection for rphi and related studies
+# skims.append("RS")       # low-ish mt2 selection for R&S CRs
+skims.append("trigger")  # used for measuring hadronic trigger turn-ons
+# skims.append("ST")       # for short track 
+
 
 MAXLOCALJOBS = 20
 
@@ -148,74 +155,59 @@ while NresubmitFiles > 0:
 
 print "* WOO! All files are good!"
 
-if not doMerge:
+mergedir = "/nfs-6/userdata/mt2/"+tag
+if doMerge:
+    print "* Merging..."
+
+    hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
+    logdir = "mergeLogs"
+    subprocess.call("mkdir -p "+mergedir, shell=True)
+    for s in samples:
+        subprocess.call("rm -f {0}/{1}*.root".format(mergedir,s), shell=True)
+    subprocess.call("mkdir -p "+logdir, shell=True)
+    subprocess.call("chmod -R a+wrx "+mergedir, shell=True)
+    mergePs = []
+    current = 0
+    done = 0
+    while done < len(samples):
+        done = 0    
+        running = len(mergePs)
+        for i in range(len(mergePs)):
+            if mergePs[i].poll() != None:
+                done += 1
+                running -= 1
+        for s in samples[current:current+MAXLOCALJOBS-running]:
+            mergePs.append(subprocess.Popen("nice -n 19 root -b -q -l mergeHadoopFiles.C'(\"{0}/{1}_{2}\",\"{3}/{2}.root\")' > {4}/log_merge_{1}_{2}.txt".format(hadoopdir,tag,s,mergedir,logdir), shell=True))
+            running += 1
+            current += 1
+        if done < len(samples):
+            print "{0}/{1} samples done merging. {2} currently running. Checking again in 5 min...".format(done, len(samples), running)
+            time.sleep(5 * 60)
+
+    print "* Done Merging!"
+
+if len(skims)==0:
     sys.exit(0)
 
-print "* Merging..."
-
-hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
-outdir = "/nfs-6/userdata/mt2/"+tag
-logdir = "mergeLogs"
-subprocess.call("mkdir -p "+outdir, shell=True)
-for s in samples:
-    subprocess.call("rm -f {0}/{1}*.root".format(outdir,s), shell=True)
-subprocess.call("mkdir -p "+logdir, shell=True)
-subprocess.call("chmod -R a+wrx "+outdir, shell=True)
-mergePs = []
-current = 0
-done = 0
-while done < len(samples):
-    done = 0    
-    running = len(mergePs)
-    for i in range(len(mergePs)):
-        if mergePs[i].poll() != None:
-            done += 1
-            running -= 1
-    for s in samples[current:current+MAXLOCALJOBS-running]:
-        mergePs.append(subprocess.Popen("nice -n 19 root -b -q -l mergeHadoopFiles.C'(\"{0}/{1}_{2}\",\"{3}/{2}.root\")' > {4}/log_merge_{1}_{2}.txt".format(hadoopdir,tag,s,outdir,logdir), shell=True))
-        running += 1
-        current += 1
-    if done < len(samples):
-        print "{0}/{1} samples done merging. {2} currently running. Checking again in 5 min...".format(done, len(samples), running)
-        time.sleep(5 * 60)
-
-print "* Done Merging!"
-
-if not doSkim and not doQCDSkim and not doRSSkim:
-    sys.exit(0)
+def isExt(s, samples):
+    if "_ext" in s and s.split("_ext")[0] in samples:
+        return True
+    return False
 
 print "* Skimming..."
-skimdir = "/nfs-6/userdata/mt2/{0}_skim".format(tag)
-qcdskimdir = "/nfs-6/userdata/mt2/{0}_qcd_skim".format(tag)
-RSskimdir = "/nfs-6/userdata/mt2/{0}_RS_skim".format(tag)
-triggerskimdir = "/nfs-6/userdata/mt2/{0}_trigger_skim".format(tag)
+
+basedir = "/nfs-6/userdata/mt2/"
 logdir = "/nfs-6/userdata/mt2/skimLogs_bemarsh"
-if doSkim:    
+skim_commands = []
+for skimname in skims:
+    skimdir = "{0}/{1}_skim_{2}".format(basedir, tag, skimname)
     subprocess.call("mkdir -p "+skimdir, shell=True)
     for s in samples:
-        subprocess.call("rm -f {0}/{1}*.root".format(skimdir,s), shell=True)
-if doQCDSkim: 
-    subprocess.call("mkdir -p "+qcdskimdir, shell=True)
-    for s in samples:
-        subprocess.call("rm -f {0}/{1}*.root".format(qcdskimdir,s), shell=True)
-if doRSSkim:  
-    subprocess.call("mkdir -p "+RSskimdir, shell=True)
-    for s in samples:
-        subprocess.call("rm -f {0}/{1}*.root".format(RSskimdir,s), shell=True)
-if doTriggerSkim:  
-    subprocess.call("mkdir -p "+Triggerskimdir, shell=True)
-    for s in samples:
-        subprocess.call("rm -f {0}/{1}*.root".format(triggerskimdir,s), shell=True)
-skim_commands = []
-for s in samples:
-    if doSkim:
-        skim_commands.append("nice -n 19 root -b -q -l skim_bennettworkflow/skim_base.C'(\"{0}\",\"{1}\",\"{2}\")' > {3}/log_{2}.txt".format(outdir,skimdir,s,logdir))
-    if doQCDSkim:
-        skim_commands.append("nice -n 19 root -b -q -l skim_bennettworkflow/skim_qcd.C'(\"{0}\",\"{1}\",\"{2}\")' > {3}/log_QCD_{2}.txt".format(outdir,qcdskimdir,s,logdir))
-    if doRSSkim:
-        skim_commands.append("nice -n 19 root -b -q -l skim_bennettworkflow/skim_RS.C'(\"{0}\",\"{1}\",\"{2}\")' > {3}/log_RS_{2}.txt".format(outdir,RSskimdir,s,logdir))
-    if doTriggerSkim:
-        skim_commands.append("nice -n 19 root -b -q -l skim_bennettworkflow/skim_trigger.C'(\"{0}\",\"{1}\",\"{2}\")' > {3}/log_trigger_{2}.txt".format(outdir,triggerskimdir,s,logdir))
+        subprocess.call("rm -f {0}/{1}*.root".format(skimdir, s), shell=True)
+        if isExt(s, samples):
+            continue
+        skim_commands.append("nice -n 19 python skim_bennettworkflow/skim.py skim_bennettworkflow/selection_{0}.txt {1} {2} {3} > {4}/log_{0}_{3}.txt".format(skimname, mergedir, skimdir, s, logdir))
+
 skimPs = []
 current = 0
 done = 0

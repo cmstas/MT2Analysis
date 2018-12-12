@@ -1,0 +1,1 @@
+isGolden && nlep==0 && met_pt>250 && nJet30==2 && jet1_pt>250 && deltaPhiMin<0.3 && diffMetMht/met_pt<0.5

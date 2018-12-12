@@ -1,0 +1,5 @@
+#MET#            (nJet30>=2 && (HLT_PFMET120_PFMHT120!=0 || HLT_PFMETNoMu120_PFMHTNoMu120!=0) && met_pt>250 && nlep==0)
+#JetHT#          (nJet30>=2 && ht > 500 && nlep==0)    
+#SingleElectron# (nJet30>=2 && HLT_SingleEl!=0 && nlep==1 && abs(lep_pdgId[0])==11 && lep_pt[0]>35)
+#EGamma#         (nJet30>=2 && HLT_SingleEl!=0 && nlep==1 && abs(lep_pdgId[0])==11 && lep_pt[0]>35)
+#SingleMuon      (nJet30>=2 && HLT_SingleMu!=0 && nlep==1 && abs(lep_pdgId[0])==13 && lep_pt[0]>28)
