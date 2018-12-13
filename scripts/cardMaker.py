@@ -759,6 +759,8 @@ def makeTemplate(directory,imt2):
             zinvDY_shape = 1.0 + last_bin_relerr_zinvDY / (n_extrap_bins_zinvDY) * (imt2 -  zinvDY_lastbin_hybrid)
         n_syst += 1
 
+    if zinvDY_shape < 0.0: zinvDY_shape = 1.0 # in low stats situations, last bin can be enormous and cause negative error. Take 100% uncertainty in this case.
+
     if (not integratedZinvEstimate and nbjets_LOW >= 2):
         zinv_mcsyst = 2.0
         n_syst += 1
