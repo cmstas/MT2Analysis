@@ -255,6 +255,8 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
 	+ pow( hZinv_Rebin->GetBinError(ibin) / hZinv_Rebin->GetBinContent(ibin),2)  
 	+ pow( hDY_Rebin->GetBinError(ibin)   / hDY_Rebin->GetBinContent(ibin), 2 );
       
+      if(cont < 0.0)
+          cout << "Warning! negative bin content in InclusiveTemplate for " << name << ", bin " << ibin << endl;
       h_RebinnedTemplate->SetBinContent(ibin, cont);
       h_RebinnedTemplate->SetBinError(ibin, sqrt(err2)*cont);
 
@@ -265,6 +267,8 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
       float kMT2 = hZinv_Rebin->GetBinContent(ibin) / integratedYieldZinv;
       h_RebinnedTemplate->SetBinContent(ibin, cont * kMT2);
       h_RebinnedTemplate->SetBinError(ibin, cont*sqrt(err2) * kMT2 );
+      if(cont*kMT2 < 0.0)
+          cout << "Warning! negative bin content in InclusiveTemplate for " << name << ", bin " << ibin << endl;
 
     }
 
@@ -590,10 +594,10 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       else if (srname == "31") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
       // Now the standard regions
       else if (ht_LOW == 250) {
-	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseVL/h_mt2bins3J"; 
+	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseVL/h_mt2bins36J"; 
 	else if (njets_LOW == 2 && njets_HI==4) inclusiveTemplateName = "crdybaseVL/h_mt2bins23J"; 
-	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseVL/h_mt2bins"; 
-	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseVL/h_mt2bins4J"; 
+	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseVL/h_mt2bins46J"; 
+	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseVL/h_mt2bins7J"; 
       }
       else if (ht_LOW == 450) {
 	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseL/h_mt2bins36J"; 
@@ -607,16 +611,18 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	else if (njets_LOW == 2 && njets_HI==7) inclusiveTemplateName = "crdybaseM/h_mt2bins26J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseM/h_mt2bins23J"; 
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseM/h_mt2bins46J"; 
-	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseM/h_mt2bins7J"; 
+	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseM/h_mt2bins79J"; 
+	else if (njets_LOW == 10)  inclusiveTemplateName = "crdybaseM/h_mt2bins10J"; 
       }
       else if (ht_LOW == 1200) {
 	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseH/h_mt2bins36J"; 
 	else if (njets_LOW == 2 && njets_HI==7)  inclusiveTemplateName = "crdybaseH/h_mt2bins26J"; 
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseH/h_mt2bins23J";
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseH/h_mt2bins46J";
-	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseH/h_mt2bins7J";
+	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseH/h_mt2bins79J";
+	else if (njets_LOW == 10)  inclusiveTemplateName = "crdybaseH/h_mt2bins10J";
       }
-      else if (ht_LOW == 1500) inclusiveTemplateName = "crdybaseUH/h_mt2bins";
+      else if (ht_LOW == 1700) inclusiveTemplateName = "crdybaseUH/h_mt2bins";
 
       if (inclusiveTemplateName == "") {
 	cout<< "Can't find template for region: HT "<<ht_LOW<<"-"<<ht_HI<<" and NJ "<<njets_LOW<<"-"<<njets_HI<<endl;
@@ -832,7 +838,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   TFile* f_data = new TFile(Form("%s/data_Run2017.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
-  //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
+  TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
   TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str()));
   //TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
