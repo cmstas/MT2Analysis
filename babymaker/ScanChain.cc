@@ -12,6 +12,7 @@
 #include "TLorentzVector.h"
 #include "TH2.h"
 #include "TMinuit.h"
+#include "TObject.h"
 
 // CORE
 #include "../CORE/CMS3.h"
@@ -85,6 +86,8 @@ const bool useIsotrackCollectionForVeto = true;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
+
+float HEM_region[4] = {-4.7, -1.5, -1.6, -0.8}; // region with bad HEM modules in 2018. etalow, etahigh, philow, phihigh
 
 float rebal_sigma_soft_ = 20.0;
 
@@ -2131,6 +2134,13 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           jet_nemf[njet] = cms3.pfjets_neutralEmE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
           jet_muf[njet] = cms3.pfjets_muonE()[iJet] / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
 
+          if(jet_eta[njet] > HEM_region[0] && jet_eta[njet] < HEM_region[1] &&
+             jet_phi[njet] > HEM_region[2] && jet_phi[njet] < HEM_region[3]){
+              if(jet_pt[njet] > 20.0) nHEMJet20++;
+              if(jet_pt[njet] > 30.0) nHEMJet30++;
+              if(jet_pt[njet] > 40.0) nHEMJet40++;
+          }
+
           if (!isData) {
 	    jet_mcPt[njet] = -1;
             if (cms3.pfjets_mc_p4().size() > 0) jet_mcPt[njet] = cms3.pfjets_mc_p4().at(iJet).pt();
@@ -3474,6 +3484,9 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("nJet100FailId", &nJet100FailId );
   BabyTree_->Branch("nJet20BadFastsim", &nJet20BadFastsim );
   BabyTree_->Branch("nJet200MuFrac50DphiMet", &nJet200MuFrac50DphiMet );
+  BabyTree_->Branch("nHEMJet20", &nHEMJet20 );
+  BabyTree_->Branch("nHEMJet30", &nHEMJet30 );
+  BabyTree_->Branch("nHEMJet40", &nHEMJet40 );
   BabyTree_->Branch("nMuons10", &nMuons10 );
   BabyTree_->Branch("nBadMuons20", &nBadMuons20 );
   BabyTree_->Branch("nElectrons10", &nElectrons10 );
@@ -4132,6 +4145,9 @@ void babyMaker::InitBabyNtuple () {
   nJet100FailId = -999;
   nJet20BadFastsim = -999;
   nJet200MuFrac50DphiMet = -999;
+  nHEMJet20 = -999;
+  nHEMJet30 = -999;
+  nHEMJet40 = -999;
   nMuons10 = -999;
   nBadMuons20 = -999;
   nElectrons10 = -999;
@@ -4784,7 +4800,7 @@ void babyMaker::FillBabyNtuple(){
 
 void babyMaker::CloseBabyNtuple(){
   BabyFile_->cd();
-  BabyTree_->Write();
+  BabyTree_->Write("mt2",TObject::kWriteDelete);
   count_hist_->Write();
   BabyFile_->Close();
   return;
