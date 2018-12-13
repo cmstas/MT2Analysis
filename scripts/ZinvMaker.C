@@ -666,6 +666,9 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	  }
 	  break;
 	}
+	// If no bin requires MC shape inputs, ie all bins have large counts in data (mostly VL and L regions, as almost every other region has O(1) events in the last MT2 bin), 
+	// don't leave lastbin_hybrid at 1!
+	else if (ibin == hDY->GetNbinsX()) lastbin_hybrid = hDY->GetNbinsX(); 
       }
       cout<<"lastbin_hybrid for doHybridSimple: "<<lastbin_hybrid<<endl;
     }
@@ -680,10 +683,24 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     TH1D* purityMC = (TH1D*) hDY->Clone("h_mt2binsPurityMC");
     if (hTop) purityMC->Add(hTop, -1);
+    for ( int ibin = 0; ibin <= purityMC->GetNbinsX(); ++ibin) {
+      if (purityMC->GetBinContent(ibin) < 0) {
+	cout << "Negative purity in MC bin " << ibin << " of " << srname << ht_LOW << "to" << ht_HI << endl;
+	cout << "rSFOF: " << rSFOF << endl;
+	purityMC->SetBinContent(ibin,0);
+      }
+    }
     purityMC->Divide(hDY);
 
     TH1D* purityData = (TH1D*) hData->Clone("h_mt2binsPurityData");
     if (hDataEM) purityData->Add(hDataEM, -1*rSFOF); 
+    for ( int ibin = 0; ibin <= purityData->GetNbinsX(); ++ibin) {
+      if (purityData->GetBinContent(ibin) < 0) {
+	cout << "Negative purity in Data bin " << ibin << " of " << srname << ht_LOW << "to" << ht_HI << endl;
+	cout << "rSFOF: " << rSFOF << endl;
+	purityData->SetBinContent(ibin,0);
+      }
+    }
     purityData->Divide(purityData, hData, 1, 1, "B");
     
     TH1D* Stat = (TH1D*) CRyield->Clone("h_mt2binsStat");
