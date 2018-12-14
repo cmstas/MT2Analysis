@@ -51,6 +51,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8484;
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
@@ -114,6 +115,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8484;
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
@@ -177,6 +179,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V32_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017C", "Fall17_17Nov2017C_V32_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017D", "Fall17_17Nov2017DE_V32_DATA"));
@@ -245,6 +248,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016HV4_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -306,6 +310,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -370,6 +375,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -426,7 +432,7 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "mc_102x_Autumn18"){
 
         c.year               = 2018;
-        c.lumi               = 41.529;
+        c.lumi               = 58.83;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold_DeepCSV = 0.4941;
@@ -434,6 +440,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2018.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -455,6 +462,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -475,6 +483,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -495,6 +504,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2017.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -516,6 +526,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2016.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;

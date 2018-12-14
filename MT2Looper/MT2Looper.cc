@@ -63,7 +63,7 @@ const float njbins[n_njbins+1] = {1, 2, 4, 7, 12};
 const int n_nbjbins = 4;
 const float nbjbins[n_nbjbins+1] = {0, 1, 2, 3, 6};
 const int n_mt2bins_SRBase = 15;
-const float SRBase_mt2bins[n_mt2bins_SRBase+1] = {200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1400, 1600, 1700, 1800, 2400}; 
+const float SRBase_mt2bins[n_mt2bins_SRBase+1] = {200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1400, 1600, 1800, 2400}; 
 const int n_ptVbins = 19;
 float logstep(int i) {
   return TMath::Power(10, 2+4.5e-02*i);

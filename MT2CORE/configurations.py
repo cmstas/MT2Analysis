@@ -25,7 +25,8 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
-    "jet_id": "2017_v1",
+    "jet_id" : "2017_v1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["2017B", "Fall17_17Nov2017B_V32_DATA"],
                ["2017C", "Fall17_17Nov2017C_V32_DATA"],
                ["2017D", "Fall17_17Nov2017DE_V32_DATA"],
@@ -105,7 +106,8 @@ MT2Config_defs["data_2017_Prompt"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
-    "jet_id": "2017_v1",
+    "jet_id" : "2017_v1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["", "Summer16_23Sep2016HV4_DATA"] 
                ],
     "filters" : [ "eeBadScFilter",
@@ -127,7 +129,8 @@ MT2Config_defs["data_2018_Prompt"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
-    "jet_id": "2017_v1",
+    "jet_id" : "2017_v1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
@@ -143,7 +146,8 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
-    "jet_id": "2017_v1",
+    "jet_id" : "2017_v1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
@@ -159,7 +163,8 @@ MT2Config_defs["data_2016_Moriond17"] = {
     "btag_med_threshold_DeepCSV" : 0.6324,
     "btag_med_threshold_CSVv2" : 0.8484,
     "ea_version" : 1,
-    "jet_id": "50nsV1",
+    "jet_id" : "50nsV1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["2016B", "Summer16_23Sep2016BCDV4_DATA"],
                ["2016C", "Summer16_23Sep2016BCDV4_DATA"],
                ["2016D", "Summer16_23Sep2016BCDV4_DATA"],
@@ -245,7 +250,8 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
     "ea_version" : 3,
-    "jet_id": "2017_v1",
+    "jet_id" : "2017_v1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["", "Fall17_17Nov2017_V32_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
@@ -261,8 +267,10 @@ MT2Config_defs["mc_94x_Fall17"] = {
 
 MT2Config_defs["mc_102x_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
 MT2Config_defs["mc_102x_Autumn18"]["year"] = 2018
-MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = 58.83
+MT2Config_defs["mc_102x_Autumn18"]["lumi"] = 58.83
 MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
+MT2Config_defs["mc_102x_Autumn18"]["JRT_file"] = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root"
+
 
 MT2Config_defs["mc_80x_Summer16"] = {
     "year" : 2016,
@@ -273,7 +281,8 @@ MT2Config_defs["mc_80x_Summer16"] = {
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
     "ea_version" : 1,
-    "jet_id": "50nsV1",
+    "jet_id" : "50nsV1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
@@ -295,7 +304,8 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
     "ea_version" : 1,
-    "jet_id": "50nsV1",
+    "jet_id" : "50nsV1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
     "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
                ],
     "filters" : [ "eeBadScFilter",
@@ -414,6 +424,7 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
+        fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))
         for jec in c[tag]["JECs"]:
             fout.write("        c.JECs.push_back(std::pair<std::string, std::string> (\"{0}\", \"{1}\"));\n".format(jec[0], jec[1]))
         for filter in c[tag]["filters"]:

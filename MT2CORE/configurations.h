@@ -18,6 +18,7 @@ struct MT2Configuration {
     float btag_med_threshold_CSVv2;
     std::string pu_weights_file;
     int ea_version;
+    std::string JRT_file;
     std::string jet_id;
     std::vector<std::pair<std::string, std::string> > JECs;
     std::map<std::string, bool> filters;

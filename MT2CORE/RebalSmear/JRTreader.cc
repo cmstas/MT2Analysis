@@ -271,7 +271,7 @@ void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptb
                 if(etabin >=3) etabin = 2;
             
         }
-    }else if(config_tag == "data_2016_94x" || config_tag == "mc_80x_Moriond17"){
+    }else if(config_tag == "data_2016_94x" || config_tag == "mc_94x_Summer16"){
         // for : JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma
         if(isBjet){
             if(ptbin > 19) ptbin = 19;
@@ -313,7 +313,7 @@ void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptb
                 if(etabin >=2) etabin = 1;
             
         }
-    }else if(config_tag == "data_2018_17Sep2018"){
+    }else if(config_tag == "data_2018_17Sep2018" || config_tag == "mc_102x_Autumn18"){
         // for : JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma
         if(isBjet){
             if(ptbin > 19) ptbin = 19;

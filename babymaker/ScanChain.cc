@@ -150,8 +150,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       rebal_reader.SetTailScale(1.0);
       rebal_reader.SetMeanShift(0.0);
       // don't want to widen cores for rebalancing, so treat as MC always
-      string rebal_file = "rebal/JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
-      rebal_reader.Init(rebal_file.c_str(), false);
+      string rebal_file = "rebal/" + config_.JRT_file;
+      rebal_reader.Init(rebal_file.c_str(), false, 0, config_tag);
       cout << "Initialized rebalancing template reader with template file: " << rebal_file << endl;
   }
 
