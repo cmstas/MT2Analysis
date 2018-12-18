@@ -3678,10 +3678,10 @@ namespace mt2 {
       fullSR.SetVarCRQCD("met", 30, -1);
       int njets_lo = fullSR.GetLowerBound("njets");
       int nbjets_lo = fullSR.GetLowerBound("nbjets");
-      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[8] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
+      if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 2400};       fullSR.SetMT2Bins(5, mt2bins);}
-      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[8] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 2400};       fullSR.SetMT2Bins(5, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 2400};       fullSR.SetMT2Bins(5, mt2bins);}
