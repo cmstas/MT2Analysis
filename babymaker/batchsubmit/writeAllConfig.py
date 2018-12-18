@@ -7,7 +7,7 @@ from samples_2016 import samples_2016
 from samples_2017 import samples_2017
 from samples_2018 import samples_2018
 
-tag = "test"
+tag = "V00-10-07_2018fullYear_17Sep2018"
 # samples = samples_2016
 samples = samples_2018
 
@@ -38,6 +38,9 @@ for type in samples:
             print "WARNING: dataset not found!", ds
             continue
         path = info["location"]
+        if "2018D" in ds and "v2" in ds:
+            path = path.replace("V10-01-00","V10-02-02")
+
         samp = samples[type][ds][3]
 
         cmd = "./writeConfig.sh {0} {1}_{2}".format(path, tag, samp)
@@ -47,7 +50,10 @@ for type in samples:
         nfiles += len(glob.glob(path+"/*.root"))
         nevts += info["nevents_out"]
 
-        # os.system(cmd)
+        os.system(cmd)
+
+os.system("mkdir -p configs_"+tag)
+os.system("mv condor_{0}*.cmd configs_{0}".format(tag))
 
 print "Number of samples:", nsamps
 print "Number of files:", nfiles
