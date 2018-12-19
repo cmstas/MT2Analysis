@@ -17,6 +17,10 @@ struct MT2Configuration {
     float btag_med_threshold_DeepCSV;
     float btag_med_threshold_CSVv2;
     std::string pu_weights_file;
+    std::string elSF_file;
+    std::string elSFtrk_file;
+    std::string elSF_histName;
+    std::string elSF_isoHistName;
     int ea_version;
     std::string JRT_file;
     std::string jet_id;

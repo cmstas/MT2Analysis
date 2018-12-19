@@ -24,6 +24,10 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
+    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -105,6 +109,10 @@ MT2Config_defs["data_2017_Prompt"] = {
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
+    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -128,6 +136,10 @@ MT2Config_defs["data_2018_Prompt"] = {
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
+    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -145,6 +157,10 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
+    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -162,6 +178,10 @@ MT2Config_defs["data_2016_Moriond17"] = {
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
     "btag_med_threshold_DeepCSV" : 0.6324,
     "btag_med_threshold_CSVv2" : 0.8484,
+    "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "GsfElectronToCutBasedSpring15V",
+    "elSF_isoHistName" : "MVAVLooseElectronToMini",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -249,6 +269,10 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
+    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -280,6 +304,10 @@ MT2Config_defs["mc_80x_Summer16"] = {
     "btag_med_threshold_DeepCSV" : 0.6324,
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
+    "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "GsfElectronToCutBasedSpring15V",
+    "elSF_isoHistName" : "MVAVLooseElectronToMini",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -303,6 +331,10 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "btag_med_threshold_DeepCSV" : 0.6324,
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
+    "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
+    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_histName" : "GsfElectronToCutBasedSpring15V",
+    "elSF_isoHistName" : "MVAVLooseElectronToMini",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -422,6 +454,10 @@ MT2Configuration GetMT2Config(std::string tag){
         fout.write("        c.btag_med_threshold_CSVv2   = {0};\n".format(c[tag]["btag_med_threshold_CSVv2"]))
         if "pu_weights_file" in c[tag]:
             fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 
+        fout.write("        c.elSF_file          = \"{0}\";\n".format(c[tag]["elSF_file"]))
+        fout.write("        c.elSFtrk_file       = \"{0}\";\n".format(c[tag]["elSFtrk_file"]))
+        fout.write("        c.elSF_histName      = \"{0}\";\n".format(c[tag]["elSF_histName"]))
+        fout.write("        c.elSF_isoHistName   = \"{0}\";\n".format(c[tag]["elSF_isoHistName"]))
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
         fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))

@@ -38,15 +38,14 @@ weightStruct getLepSF(float pt, float, int pdgId) {
 }
 
 //_________________________________________________________
-bool setElSFfile(TString filenameIDISO, TString filenameTRK, bool useTight){
+bool setElSFfile(TString filenameIDISO, TString filenameTRK, std::string histName, std::string isoHistName){
   TFile * f1 = new TFile(filenameIDISO);
   TFile * f2 = new TFile(filenameTRK);
   if (!f1->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
   if (!f2->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find track scale factor file "<<filenameTRK<<std::endl;
   TH2D* h_id = 0;
-  if (useTight) h_id = (TH2D*) f1->Get("GsfElectronToCutBasedSpring15T");
-  else h_id = (TH2D*) f1->Get("GsfElectronToCutBasedSpring15V");
-  TH2D* h_iso = (TH2D*) f1->Get("MVAVLooseElectronToMini");
+  h_id = (TH2D*) f1->Get(histName.c_str());
+  TH2D* h_iso = (TH2D*) f1->Get(isoHistName.c_str());
   TH2D* h_trk = (TH2D*) f2->Get("EGamma_SF2D");
   if (!h_id || !h_iso || !h_trk) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
   h_elSF = (TH2D*) h_id->Clone("h_elSF");
@@ -122,8 +121,17 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
   float eta_cutoff = std::max(-2.39,std::min(2.39,double(eta)));
 
   if (abs(pdgId) == 11) {
-    int binx = h_elSF->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h_elSF->GetYaxis()->FindBin(fabs(eta_cutoff));
+      bool invertedBins = false;
+      if(h_elSF->GetYaxis()->GetXmax() > 20) // the y-axis is pT if the maximum is high enough
+          invertedBins = true;
+      int binx, biny;
+      if(!invertedBins){
+          binx = h_elSF->GetXaxis()->FindBin(pt_cutoff);
+          biny = h_elSF->GetYaxis()->FindBin(fabs(eta_cutoff));
+      }else{
+          binx = h_elSF->GetXaxis()->FindBin(fabs(eta_cutoff));
+          biny = h_elSF->GetYaxis()->FindBin(pt_cutoff);
+      }
     float central = h_elSF->GetBinContent(binx,biny);
     float err  = h_elSF->GetBinError(binx,biny);
     // get also trk sf

@@ -210,19 +210,22 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
   // Lepton Scale Factors
   if (applyLeptonSFs) {
-    setElSFfile("lepsf/moriond17/scaleFactors_el_moriond_2017.root", "lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
-    setMuSFfile("lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-		"lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-		"lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-		"lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
-    setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
-    if (isFastsim) {
-      setElSFfile_fastsim("lepsf/moriond17/sf_el_vetoCB_mini01.root");
-      setMuSFfile_fastsim("lepsf/moriond17/sf_mu_looseID.root",
-			  "lepsf/moriond17/sf_mu_looseID_mini02.root",
-			  "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
-      setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
-    }
+      cout << "Applying lepton scale factors from the following files:\n";
+      cout << "    electrons: " << config_.elSF_file << ":" << config_.elSF_histName << "," << config_.elSF_isoHistName << endl;
+      cout << "    electrons tracking: " << config_.elSFtrk_file << endl;
+      setElSFfile(config_.elSF_file, config_.elSFtrk_file, config_.elSF_histName, config_.elSF_isoHistName);
+      setMuSFfile("lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+                  "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+                  "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+                  "lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+      setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
+      if (isFastsim) {
+          setElSFfile_fastsim("lepsf/moriond17/sf_el_vetoCB_mini01.root");
+          setMuSFfile_fastsim("lepsf/moriond17/sf_mu_looseID.root",
+                              "lepsf/moriond17/sf_mu_looseID_mini02.root",
+                              "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
+          setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
+      }
   }
 
   // get susy xsec file
@@ -1122,8 +1125,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         if(cms3.els_p4().at(iEl).pt() < 10.0) continue;
         if(fabs(cms3.els_p4().at(iEl).eta()) > 2.4) continue;
         // first check ID then iso
-        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v4)) continue;
-        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v4);
+        if(!electronID(iEl,id_level_t::HAD_veto_noiso_v5)) continue;
+        bool pass_iso = electronID(iEl,id_level_t::HAD_veto_v5);
         if(applyLeptonIso && !pass_iso) continue;
         lep_pt_ordering.push_back( std::pair<int,float>(nlep,cms3.els_p4().at(iEl).pt()) );
         vec_lep_pt.push_back ( cms3.els_p4().at(iEl).pt());
@@ -3080,7 +3083,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  // find charginos and see if they have decay lengths in the range of interest, 10 to 100 cm
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
 	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != 1) continue; // looking for final state charginos
-	    chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
+	    // chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
 	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
 	    chargino_phi[nCharginos] = cms3.genps_p4().at(iGen).phi();
 	    chargino_pt[nCharginos] = cms3.genps_p4().at(iGen).pt();  
@@ -3166,7 +3169,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      track_genPdgId[ntracks] = cms3.genps_id().at(genIdx);
 	      // If we matched a chargino ...
 	      if (abs(track_genPdgId[ntracks]) == 1000024) {
-		track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
+		// track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
 		track_isDisappearingChargino[ntracks] = track_decayXY[ntracks] > 10 && track_decayXY[ntracks] < 100;
 	      } 
 	      // if a chargino matched this track, but this track did not match a chargino...
