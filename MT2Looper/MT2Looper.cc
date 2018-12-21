@@ -746,12 +746,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   if (verbose) cout<<__LINE__<<endl;
 
   if (applyLeptonSFfromFiles) {
-    setElSFfile("../babymaker/lepsf/moriond17/scaleFactors_el_moriond_2017.root", "../babymaker/lepsf/moriond17/egammaEffi.txt_EGM2D.root" );
-    setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-        	"../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-        	"../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-        	"../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
-    setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
+      cout << "Applying lepton scale factors from the following files:\n";
+      cout << "    electrons: " << config_.elSF_file << ":" << config_.elSF_histName << "," << config_.elSF_isoHistName << endl;
+      cout << "    electrons tracking: " << config_.elSFtrk_file << endl;
+      setElSFfile("../babymaker/"+config_.elSF_file, "../babymaker/"+config_.elSFtrk_file, config_.elSF_histName, config_.elSF_isoHistName);
+      setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+                  "../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+                  "../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+                  "../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+      setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
   
   if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
