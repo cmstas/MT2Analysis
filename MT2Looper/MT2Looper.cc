@@ -107,7 +107,7 @@ bool doNvtxReweight = false;
 // turn on to apply nTrueInt reweighting to MC
 bool doNTrueIntReweight = true;
 // turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
-bool applyL1PrefireWeights = false;
+bool applyL1PrefireWeights = true;
 // turn on to apply json file to data
 bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -135,10 +135,11 @@ bool print_qcd_event_list = false;
 // set this to true if using a signal region set that includes pseudojet eta binning
 bool include_pj_eta = false;
 
-bool doHEMveto = false;
+bool doHEMveto = true;
 int HEM_startRun = 319077; // affects 38.58 out of 58.83 fb-1 in 2018
+uint HEM_fracNum = 1286, HEM_fracDen = 1961;
 float HEM_ptCut = 30.0;
-float HEM_region[4] = {-4.7, -1.5, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
+float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // load rphi fits to perform r_effective calculation.
 bool doReffCalculation = false;
@@ -909,9 +910,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       }
 
       // handle HEM veto
-      bool hasHEMjet = false;
       if(doHEMveto && config_.year == 2018){
-          if((t.isData && t.run >= HEM_startRun) || (!t.isData && false)){ // HOW TO HANDLE MC??
+          bool hasHEMjet = false;
+          if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
               for(int i=0; i<t.njet; i++){
                   if(t.jet_pt[i] < HEM_ptCut)
                       break;
@@ -920,8 +921,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
                       hasHEMjet = true;
               }
           }
-          if(hasHEMjet)
+          if(hasHEMjet){
+              // cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
               continue;
+          }
       }
 
       // // txt MET filters (data only)
@@ -1192,17 +1195,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       passMonojetId_ = false;
       if ( nJet30_ >= 1 && (isSignal_ || (t.jet_id[0] >= 4)) ) passMonojetId_ = true;
 
-      // can kill this once using babies with nLepHighMT stored
-      int nLepHighMT = 0;
-      for(int i=0; i<t.nlep; i++){
-          float mt = MT(t.lep_pt[i], t.lep_phi[i], t.met_pt, t.met_phi);
-          if(mt >= 100.)
-              nLepHighMT++;
-      }
-      // nLepHighMT = t.nLepHighMT; // switch to this once using babies with this variable stored
 
       // simple counter to check for 1L CR
-      if (t.nLepLowMT == 1 && nLepHighMT == 0){
+      if (t.nLepLowMT == 1 && t.nLepHighMT == 0){
 	doSLplots = true;
 
 	// find unique lepton to plot pt,MT and get flavor
