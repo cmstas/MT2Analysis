@@ -1,0 +1,14 @@
+(ht > 250. && nJet30 >= 2 && mt2 > 200. && met_pt > 30.)                             //baseline SR
+|| (htJECup > 250. && nJet30JECup >= 2 && mt2JECup > 200. && met_ptJECup > 30.)      // base SR w/ JEC variation
+|| (htJECdn > 250. && nJet30JECdn >= 2 && mt2JECdn > 200. && met_ptJECdn > 30.)      // base SR w/ JEC variation
+|| (ht > 250. && nJet30 >= 1 && nJet30 <= 2 && met_pt > 200.)                        // monojet SR
+|| (htJECup > 250. && nJet30JECup >= 1 && nJet30JECup <= 2 && met_ptJECup > 200.)    // monojet SR w/ JEC var
+|| (htJECdn > 250. && nJet30JECdn >= 1 && nJet30JECdn <= 2 && met_ptJECdn > 200.)    // monojet SR w/ JEC var
+|| (gamma_ht > 250. && gamma_nJet30 >= 2 && gamma_mt2 > 200. && gamma_met_pt > 30.)  // gamma+jet CR
+|| (gamma_ht > 250. && gamma_nJet30 == 1 && gamma_met_pt > 200.)                     // gamma_jet monojet CR
+|| (zll_ht > 250. && nJet30 >= 2 && zll_mt2 > 200. && zll_met_pt > 30.)              // DY CR
+|| (zll_ht > 250. && nJet30 == 1 && zll_met_pt > 200.)                               // DY monojet CR
+|| (rl_ht > 250. && nJet30 >= 2 && rl_mt2 > 200. && rl_met_pt > 30.)                 // removed lep CR
+|| (rl_ht > 250. && nJet30 == 1 && rl_met_pt > 200.)                                 // removed lep monojet CR
+// || (ht > 250. && nJet30 >= 2 && mt2_genmet > 200. && met_genPt > 30.)             // some study using genmet
+// || (ht > 250. && nJet30 >= 1 && nJet30 <= 2 && met_genPt > 200.)
