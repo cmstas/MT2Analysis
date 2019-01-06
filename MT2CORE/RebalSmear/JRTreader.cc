@@ -313,7 +313,7 @@ void JRTreader::GetModifiedBins(int ptbin, int etabin, bool isBjet, int *new_ptb
                 if(etabin >=2) etabin = 1;
             
         }
-    }else if(config_tag == "data_2018_17Sep2018" || config_tag == "mc_102x_Autumn18"){
+    }else if(config_tag == "data_2018_17Sep2018" || config_tag == "data_2018_Prompt" || config_tag == "mc_102x_Autumn18"){
         // for : JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma
         if(isBjet){
             if(ptbin > 19) ptbin = 19;

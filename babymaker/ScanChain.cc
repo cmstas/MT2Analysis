@@ -367,7 +367,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       int small_cms3_version = TString(cms3_version(cms3_version.Length()-2,cms3_version.Length())).Atoi();
       bool recent_cms3_version = true;
       if (cms3_version.Contains("V08-00") && small_cms3_version <= 12) recent_cms3_version = false;
-      bool isCMS4 = cms3_version.Contains("CMS4");
+      // bool isCMS4 = cms3_version.Contains("CMS4");
+      bool isCMS4 = true; // FIXME: hardcode to get around buggy CMS3tag in some files. Shouldn't be running over cms3 anyway
       if (cms3_version.Contains("V10-01-00")) doShortTrackInfo = false;
       if (cms3_version.Contains("V00-00-03")) doShortTrackInfo = false;
 
