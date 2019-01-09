@@ -82,7 +82,7 @@ const bool saveLHEweights = false;
 // turn on to save MC scale weights (default false, small size impact)
 const bool saveLHEweightsScaleOnly = true;
 // use isotracks collection in cms4 for veto counting (as opposed to pfcands)
-const bool useIsotrackCollectionForVeto = true;
+const bool useIsotrackCollectionForVeto = false;
 // save high-pT PF cands
 const bool saveHighPtPFcands = true;
 const bool savePFphotons = false;
@@ -126,6 +126,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
   // used to store CORE-specific values, working-points, etc
   gconf.year = config_.year;  
   gconf.ea_version = config_.ea_version;  // effective-area constants are year-specific. 
+  gconf.cmssw_ver = config_.cmssw_ver;
 
   if (baby_name.find("data_Run201") != std::string::npos || baby_name.find("dataRun2") != std::string::npos) {
     isDataFromFileName = true;
@@ -290,7 +291,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L1FastJet_AK4PFchs.txt");
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L2Relative_AK4PFchs.txt");
 	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L3Absolute_AK4PFchs.txt");
-	  jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L2L3Residual_AK4PFchs.txt");
+          if(!isFastsim)
+              jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/" + jecname + "_L2L3Residual_AK4PFchs.txt");
 	  if(!isDataFromFileName){
 	    jetcorr_uncertainty_filename = "jetCorrections/" + jecname + "_Uncertainty_AK4PFchs.txt";
 	  }
@@ -370,6 +372,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       // bool isCMS4 = cms3_version.Contains("CMS4");
       bool isCMS4 = true; // FIXME: hardcode to get around buggy CMS3tag in some files. Shouldn't be running over cms3 anyway
       if (cms3_version.Contains("V10-01-00")) doShortTrackInfo = false;
+      if (cms3_version.Contains("V00-00-02")) doShortTrackInfo = false;
       if (cms3_version.Contains("V00-00-03")) doShortTrackInfo = false;
 
       run  = cms3.evt_run();
@@ -661,9 +664,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
 	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
-	// temporary workaround: flag not in first 80x MC production, so recompute
 	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
         if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
+        if(config_.filters["ecalBadCalibFilterUpdate"])  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
         if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
         if(config_.filters["badChargedCandidateFilter"]) Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
         Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
@@ -672,8 +675,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         // since we don't store all PFCands. Should now just be able to use the filters from miniAOD above
         Flag_badMuonFilterV2                        = badMuonFilterV2();         
         Flag_badChargedHadronFilterV2               = badChargedCandidateFilterV2();          
+        Flag_METFilters                               = cms3.filt_metfilter();
       }
-      Flag_METFilters                               = cms3.filt_metfilter();
       
       // gen block -- for MC only
       ngenPart = 0;
@@ -1411,6 +1414,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               if(!cms3.isotracks_isPFCand().at(iit)) continue;
               if(cms3.isotracks_charge().at(iit) == 0) continue;
               if(fabs(cms3.isotracks_dz().at(iit)) > 0.1) continue;
+              if(fabs(cms3.isotracks_dxy().at(iit)) > 0.2) continue;
               if(cms3.isotracks_fromPV().at(iit) <= 1) continue;
                             
               float absiso = cms3.isotracks_pfIso_ch().at(iit);
@@ -1422,6 +1426,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           for (unsigned int ipf = 0; ipf < cms3.pfcands_p4().size(); ipf++) {              
               if(cms3.pfcands_charge().at(ipf) == 0) continue;
               if(fabs(cms3.pfcands_dz().at(ipf)) > 0.1) continue;
+              if(fabs(cms3.pfcands_dxy().at(ipf)) > 0.2) continue;
               if(cms3.pfcands_fromPV().at(ipf) <= 1) continue;
               
               float absiso  = cms3.pfcands_trackIso().at(ipf);              
@@ -1452,6 +1457,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           int pdgId;
           unsigned int idx;
           std::tie(p4, absiso, pdgId, idx) = isoTrackCandidates.at(iit);
+
+          if(fabs(p4.eta()) > 2.4) continue;
 
           float cand_pt = p4.pt();
           if(cand_pt > 3) ++nPFCHCand3;
@@ -2130,7 +2137,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  const float jet_etaDN =  p4sCorrJetsDN.at(iJet).eta();
           jet_mass[njet] = cms3.pfjets_p4().at(iJet).M();
           jet_btagCSV[njet] = cms3.getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags",iJet);
-          jet_btagDeepCSV[njet] = cms3.pfjets_pfDeepCSVJetTagsprobbPlusprobbb().at(iJet);
+          if(config_.cmssw_ver == 80)
+              jet_btagDeepCSV[njet] = cms3.getbtagvalue("deepFlavourJetTags:probb",iJet) + cms3.getbtagvalue("deepFlavourJetTags:probbb",iJet);
+          else if(config_.cmssw_ver == 94 || config_.cmssw_ver == 102)
+              jet_btagDeepCSV[njet] = cms3.getbtagvalue("pfDeepCSVJetTags:probb",iJet) + cms3.getbtagvalue("pfDeepCSVJetTags:probbb",iJet);
 
           jet_chf[njet] = cms3.pfjets_chargedHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
           jet_nhf[njet] = cms3.pfjets_neutralHadronE().at(iJet) / (cms3.pfjets_undoJEC().at(iJet)*cms3.pfjets_p4()[iJet].energy());
@@ -3649,6 +3659,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("Flag_goodVertices", &Flag_goodVertices );
   BabyTree_->Branch("Flag_eeBadScFilter", &Flag_eeBadScFilter );
   BabyTree_->Branch("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter );
+  BabyTree_->Branch("Flag_ecalBadCalibFilterUpdate", &Flag_ecalBadCalibFilterUpdate );
   BabyTree_->Branch("Flag_badMuonFilter", &Flag_badMuonFilter );
   BabyTree_->Branch("Flag_badMuonFilterV2", &Flag_badMuonFilterV2 ); 
   BabyTree_->Branch("Flag_badMuons", &Flag_badMuons ); 
@@ -4311,6 +4322,7 @@ void babyMaker::InitBabyNtuple () {
   Flag_goodVertices = -999;
   Flag_eeBadScFilter = -999;
   Flag_ecalBadCalibFilter = -999;
+  Flag_ecalBadCalibFilterUpdate = -999;
   Flag_badMuonFilter = -999;
   Flag_badMuonFilterV2 = -999;    
   Flag_badMuons = -999;    

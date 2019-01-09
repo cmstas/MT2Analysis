@@ -287,6 +287,7 @@ class babyMaker {
   Int_t           Flag_goodVertices;
   Int_t           Flag_eeBadScFilter;
   Int_t           Flag_ecalBadCalibFilter;
+  Int_t           Flag_ecalBadCalibFilterUpdate;
   Int_t           Flag_badMuonFilter;
   Int_t           Flag_badMuonFilterV2;  
   Int_t           Flag_badMuons;  

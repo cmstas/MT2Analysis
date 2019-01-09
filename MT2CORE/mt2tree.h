@@ -206,6 +206,7 @@ public :
    Int_t           Flag_goodVertices = -999;
    Int_t           Flag_eeBadScFilter = -999;
    Int_t           Flag_ecalBadCalibFilter = -999;
+   Int_t           Flag_ecalBadCalibFilterUpdate = -999;
    Int_t           Flag_METFilters = -999;
    Int_t           Flag_globalTightHalo2016Filter = -999;
    Int_t           Flag_globalSuperTightHalo2016Filter = -999;
@@ -842,6 +843,7 @@ public :
    TBranch        *b_Flag_goodVertices;   //!
    TBranch        *b_Flag_eeBadScFilter;   //!
    TBranch        *b_Flag_ecalBadCalibFilter;   //!
+   TBranch        *b_Flag_ecalBadCalibFilterUpdate;   //!
    TBranch        *b_Flag_METFilters;   //!
    TBranch        *b_Flag_globalTightHalo2016Filter;   //!
    TBranch        *b_Flag_globalSuperTightHalo2016Filter;   //!
@@ -1510,6 +1512,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("Flag_goodVertices"))                      fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    if(bs->FindObject("Flag_eeBadScFilter"))                     fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
    if(bs->FindObject("Flag_ecalBadCalibFilter"))                fChain->SetBranchAddress("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter, &b_Flag_ecalBadCalibFilter);
+   if(bs->FindObject("Flag_ecalBadCalibFilterUpdate"))          fChain->SetBranchAddress("Flag_ecalBadCalibFilterUpdate", &Flag_ecalBadCalibFilterUpdate, &b_Flag_ecalBadCalibFilterUpdate);
    if(bs->FindObject("Flag_METFilters"))                        fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
    if(bs->FindObject("Flag_globalTightHalo2016Filter"))         fChain->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter, &b_Flag_globalTightHalo2016Filter);
    if(bs->FindObject("Flag_globalSuperTightHalo2016Filter"))    fChain->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter, &b_Flag_globalSuperTightHalo2016Filter);
