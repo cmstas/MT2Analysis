@@ -33,6 +33,7 @@ simplecanvas.SetRightMargin(0.16)
 ROOT.gPad.SetPhi(-135)
 
 fullPropagate = False
+makepngs = False
 
 if len(sys.argv) < 2: 
     print "Which file?"
@@ -43,9 +44,9 @@ shortname = filename[filename.rfind("/")+1:filename.find(".")]
 
 isData = shortname.split("_")[0] == "data"
 year = shortname.split("_")[1]
-tag = shortname[shortname.find(year)+5:] # e.g. 2016_
+tag = shortname.split("_")[2]
 
-filepath = "output_unmerged/{0}_{1}/".format(year,tag)
+filepath = "output_unmerged/{0}_{1}/".format(year,tag) if year != "2017and2018" else "output_unmerged/{0}_{1}/".format("2017",tag)
 if isData: filepath += "data/"
 inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
 filelist = [ROOT.TFile.Open(infile) for infile in inputlist]
@@ -63,11 +64,11 @@ outfile.cd()
 for rawname in names:
     name = rawname[1:] # Get rid of leading /
     # Fshort histograms
-    if name.find("fs") > 0 and name.find("max_weight") < 0:        
+    if name.find("max_weight") >= 0: continue
+    if name.find("fs") > 0:
         h_fs = tfile.Get(name)
-        # Get fshort for inclusive, P, M, L
-        h_alt_rel_err = ROOT.TH1D(name+"_alt_rel_err","Alternative f_{short} Relative Error",4,0,4)
-        for length in range(1,5):
+        h_alt_rel_err = ROOT.TH1D(name+"_alt_rel_err","Alternative f_{short} Relative Error",h_fs.GetNbinsX(),0,h_fs.GetNbinsX())
+        for length in range(1,h_fs.GetNbinsX()+1):
             den = h_fs.GetBinContent(length,3)
             if den == 0:
                 h_fs.SetBinContent(length,1,-1)
@@ -88,7 +89,7 @@ for rawname in names:
                 max_weight = 0
                 max_f = None
                 for f in filelist:
-                    h_max_weight = f.Get(name+"_max_weight")
+                    h_max_weight = f.Get(name+"_max_weight_ST")
                     this_max_weight = h_max_weight.GetBinContent(length)
                     if this_max_weight > max_weight:
                         max_weight = this_max_weight
@@ -109,19 +110,20 @@ for rawname in names:
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
         h_fs.Write()
     # etaphi histograms
+    elif not makepngs: continue
     elif name.find("etaphi") > 0:
         h_etaphi = tfile.Get(name)
         h_etaphi.SetTitle(h_etaphi.GetTitle()+";#eta;#phi")
-        h_etaphi.Draw("colz")
+        h_etaphi.Draw()
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
-    # Look at transfer factor as a function of MT2
-    elif name.find("mt2") > 0:
-        h_mt2 = tfile.Get(name)
-        h_mt2.SetLineWidth(3)
-        h_mt2.SetTitle(h_mt2.GetTitle()+";M_{T2} (GeV);Count")
-        h_mt2.Draw()
-        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
-    # Track mt x pt distribution
+#    # Look at transfer factor as a function of MT2
+#    elif name.find("mt2") > 0:
+#        h_mt2 = tfile.Get(name)
+#        h_mt2.SetLineWidth(3)
+#        h_mt2.SetTitle(h_mt2.GetTitle()+";M_{T2} (GeV);Count")
+#        h_mt2.Draw()
+#        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+#    # Track mt x pt distribution
     elif name.find("mtpt") > 0:
         h_mtpt = tfile.Get(name)
         h_mtpt.GetXaxis().SetTitle("M_{T}(Track,MET) (GeV)")
@@ -140,71 +142,58 @@ for rawname in names:
         h_mtpt.SetBinContent(xmax,ymax,h_mtpt.GetBinContent(xmax,ymax)+upper_right_overflow)            
         h_mtpt.Draw("LEGO2Z")
         simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
-        # L tracks have electroweak contamination and need a more involved procedure using Rmtpt
-        # The histograms we actually use are the removed lepton mtpt hists from electroweak MC.
-        if name.find("rl") > 0:
-            if name.find("4") > 0:
-                njet = "_4"
-            elif name.find("23") > 0:
-                njet = "_23"
-            else: njet = ""
-            if name.find("MR") > 0:
-                reg = "MR"
-            elif name.find("VR") > 0:
-                reg = "VR"
-            else: 
-                reg = "SR"
-            newname="h_Rmtpt" + reg + njet
-            h_Rmtpt = ROOT.TH2F(newname,"L Tracks Outside and Inside the M_{T} x p_{T} Veto Region",1,0,1,3,0,3)
-            h_Rmtpt.GetYaxis().SetBinLabel(1,"R_{MtxPt}")
-            h_Rmtpt.GetYaxis().SetBinLabel(2,"Vetoed")
-            h_Rmtpt.GetYaxis().SetBinLabel(3,"Accepted")
-            total = h_mtpt.Integral(1,-1, 1,-1)
-            denom = h_mtpt.Integral(1,int(h_mtpt.GetXaxis().FindBin(100))-1, 1,int(h_mtpt.GetYaxis().FindBin(150))-1)
-            num = total - denom
-            h_Rmtpt.SetBinContent(1,3,num)
-            h_Rmtpt.SetBinContent(1,2,denom)
-            if denom > 0: h_Rmtpt.SetBinContent(1,1,num / denom)
-            h_Rmtpt.SetMarkerSize(1.8)
-            h_Rmtpt.Draw("text E")
-            simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,newname))
-            h_Rmtpt.Write()
-        # We also separately extrapolate L STCs inside and outside the mtpt veto region. See ShortTrackLooper
+    else: # 1D plot
+        h = tfile.Get(name)
+        h.Draw()
+        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+        
+# Now that we've processed every hist, loop back over and find the systematic associated with every baseline hist
+for rawname in names:
+    name = rawname[1:] # Get rid of leading /
+    # Fshort histograms
+    if name.find("fs") < 0: continue
+    if name.find("max_weight") >= 0: continue
+    if name.find("Baseline") < 0: continue
+    if name.find("MR") < 0 and name.find("VR") < 0: continue
+    if verbose: print name
+    h_fs = tfile.Get(name)
+    h_syst = ROOT.TH1D(name+"_syst","Systematic f_{short} Error",h_fs.GetNbinsX(),0,h_fs.GetNbinsX())
+    for length in range(1,h_fs.GetNbinsX()+1): 
+        if verbose: print length            
+        fs = h_fs.GetBinContent(length,1)
+        if fs == 0:
+            # Assume true fshort is no larger than 1
+            systematic = 1
+        else:
+            fserr = h_fs.GetBinError(length,1)
+            max_variation_in_sigma = 0
+            max_delta = 0
+            max_variation_total_error = 0
+            max_var = ""
+            for variation in ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
+                h_fs_var = tfile.Get(name.replace("Baseline",variation))
+                fs_var = h_fs_var.GetBinContent(length,1)
+                if fs_var == 0: continue
+                fserr_var = h_fs_var.GetBinError(length,1)
+                overall_error = sqrt(fserr**2 + fserr_var**2)
+                delta_in_sigma = abs(fs - fs_var) / overall_error
+                if delta_in_sigma > max_variation_in_sigma:
+                    max_variation_in_sigma = delta_in_sigma
+                    max_delta = abs(fs-fs_var)
+                    max_variation_stat_error = fserr_var
+                    max_var = variation
+            # Now assign systematic large enough to move largest variation within 1 sigma of baseline
+            # max_delta**2 = syst**2 + fserr**2 + fs_var**2 => syst = sqrt(max_delta**2 - fs**2 - fs_var**2)
+            # If max_delta < sqrt(fserr**2*maxerr**2) already, no systematic is needed, but assign 10% anyway
+            expr = max_delta**2-fserr**2-max_variation_stat_error**2
+            if expr < 0: systematic = 0.1*fs
+            else: systematic = max( sqrt(expr), 0.01*fs )
+            print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_stat_error: {} max_var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_stat_error,max_var,systematic)
+#        if verbose: print name,length,fs,fserr,systematic
+        h_syst.SetBinContent(length, 1, systematic)
+    h_syst.Write()
 
-mt2_STC_L=tfile.Get("h_mt2_STC_L")
-mt2_ST_L=tfile.Get("h_mt2_ST_L")
-
-mt2_ST_L.Divide(mt2_STC_L)
-mt2_ST_L.SetTitle("f_{short} by M_{T2}, L Track;M_{T2} (GeV);f_{short}")
-mt2_ST_L.GetXaxis().SetRange(1,14)
-mt2_ST_L.SetMinimum(0)
-mt2_ST_L.Draw()
-simplecanvas.SaveAs("pngs/{0}/fs_by_mt2_L.png".format(shortname))
-
-dphi_L = tfile.Get("h_dphiMet_ST_L")
-dphi_M = tfile.Get("h_dphiMet_ST_M")
-dphi_P = tfile.Get("h_dphiMet_ST_P")
-if dphi_L.Integral() > 0: dphi_L.Scale(1/dphi_L.Integral())
-dphi_L.SetLineWidth(3)
-dphi_L.SetLineColor(ROOT.kGreen)
-if dphi_M.Integral() > 0: dphi_M.Scale(1/dphi_M.Integral())
-dphi_M.SetLineWidth(3)
-dphi_M.SetLineColor(ROOT.kRed)
-if dphi_P.Integral() > 0: dphi_P.Scale(1/dphi_P.Integral())
-dphi_P.SetLineWidth(3)
-dphi_P.SetLineColor(ROOT.kBlue)
-dphi_P.SetMaximum(1.2 * max( [h.GetMaximum() for h in [dphi_P,dphi_M,dphi_L]] ) )
-dphi_P.SetMinimum(0)
-dphi_P.Draw()
-dphi_M.Draw("same")
-dphi_L.Draw("same")
-tl = ROOT.TLegend(0.65,0.85,0.65,0.85)
-tl.AddEntry(dphi_P,"P")
-tl.AddEntry(dphi_M,"M")
-tl.AddEntry(dphi_L,"L")
-tl.Draw()
-simplecanvas.SaveAs("pngs/{0}/dphiMet.png".format(shortname))
-
+  
 outfile.Close()
 
 tfile.Close()

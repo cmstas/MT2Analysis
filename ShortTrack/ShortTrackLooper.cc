@@ -42,24 +42,47 @@ int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi) {
 
 int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, char * runtag) {
   string tag(outtag);
-  const bool isMC = config_tag.find("mc") != std::string::npos;
+  bool isSignal = tag.find("sim") != std::string::npos;
+  const bool isMC = isSignal || config_tag.find("mc") != std::string::npos;
+
+
+  TH1F* h_xsec = 0;
+  if (isSignal) {
+    TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev.root");
+    TH1F* h_xsec_orig = (TH1F*) f_xsec->Get("h_xsec_gluino");
+    h_xsec = (TH1F*) h_xsec_orig->Clone("h_xsec");
+    h_xsec->SetDirectory(0);
+    f_xsec->Close();
+  }
 
   cout << "Using runtag: " << runtag << endl;
 
   const TString FshortName16Data = Form("../FshortLooper/output/Fshort_data_2016_%s.root",runtag);
   const TString FshortName16MC = Form("../FshortLooper/output/Fshort_mc_2016_%s.root",runtag);
-  const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017_%s.root",runtag);
+  //const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017_%s.root",runtag);
+  const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017and2018_%s.root",runtag);
   const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_2017_%s.root",runtag);
+  //const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_2018_%s.root",runtag);
+  const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_2017and2018_%s.root",runtag);
+  //  const TString FshortName18MC = Form("../FshortLooper/output/Fshort_mc_2018_%s.root",runtag);
 
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
 
-  TH2D h_eventwise_counts ("h_eventwise_counts","Events Counts by Length",4,0,4,3,0,3);
+  const int Pidx = 1;
+  const int P3idx = 2;
+  const int P4idx = 3;
+  const int Midx = 4;
+  const int Lidx = 5;
+  //  const int LREJidx = 6;
+
+  TH2D h_eventwise_counts ("h_eventwise_counts","Events Counts by Length",5,0,5,3,0,3);
   h_eventwise_counts.GetYaxis()->SetTitleOffset(3.0);
-  h_eventwise_counts.GetXaxis()->SetBinLabel(1,"P");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(2,"M");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(3,"L (rej)");
-  h_eventwise_counts.GetXaxis()->SetBinLabel(4,"L (acc)");
+  h_eventwise_counts.GetXaxis()->SetBinLabel(Pidx,"P");
+  h_eventwise_counts.GetXaxis()->SetBinLabel(P3idx,"P");
+  h_eventwise_counts.GetXaxis()->SetBinLabel(P4idx,"P");
+  h_eventwise_counts.GetXaxis()->SetBinLabel(Midx,"M");
+  h_eventwise_counts.GetXaxis()->SetBinLabel(Lidx,"L (acc)");
   h_eventwise_counts.GetYaxis()->SetBinLabel(1,"Obs SR Events");
   h_eventwise_counts.GetYaxis()->SetBinLabel(2,"Pred SR Events");
   h_eventwise_counts.GetYaxis()->SetBinLabel(3,"STC CR Events");
@@ -72,25 +95,149 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // NjHt
   TH2D* h_LL_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR");
+  TH2D* h_LM_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR");
   TH2D* h_LH_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR");
   TH2D* h_HL_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HL_VR");
+  TH2D* h_HM_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR");
   TH2D* h_HH_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR");
 
   TH2D* h_LL_SR = (TH2D*)h_eventwise_counts.Clone("h_LL_SR");
+  TH2D* h_LM_SR = (TH2D*)h_eventwise_counts.Clone("h_LM_SR");
   TH2D* h_LH_SR = (TH2D*)h_eventwise_counts.Clone("h_LH_SR");
   TH2D* h_HL_SR = (TH2D*)h_eventwise_counts.Clone("h_HL_SR");
+  TH2D* h_HM_SR = (TH2D*)h_eventwise_counts.Clone("h_HM_SR");
   TH2D* h_HH_SR = (TH2D*)h_eventwise_counts.Clone("h_HH_SR");
 
   // Separate fshorts
   TH2D* h_LL_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23");
+  TH2D* h_LM_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23");
   TH2D* h_LH_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23");
   TH2D* h_HL_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HL_VR_4");
+  TH2D* h_HM_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_4");
   TH2D* h_HH_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_4");
 
   TH2D* h_LL_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_23");
+  TH2D* h_LM_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_23");
   TH2D* h_LH_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23");
   TH2D* h_HL_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_4");
+  TH2D* h_HM_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HM_SR_4");
   TH2D* h_HH_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4");
+
+  // Hi pt
+
+  // NjHt
+  TH2D* h_LL_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_hi");
+  TH2D* h_LM_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_hi");
+  TH2D* h_LH_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_hi");
+  TH2D* h_HL_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HL_VR_hi");
+  TH2D* h_HM_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_hi");
+  TH2D* h_HH_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_hi");
+
+  TH2D* h_LL_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_hi");
+  TH2D* h_LM_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_hi");
+  TH2D* h_LH_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_hi");
+  TH2D* h_HL_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_hi");
+  TH2D* h_HM_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_HM_SR_hi");
+  TH2D* h_HH_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_hi");
+
+  // Separate fshorts
+  TH2D* h_LL_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23_hi");
+  TH2D* h_LM_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23_hi");
+  TH2D* h_LH_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23_hi");
+  TH2D* h_HL_VR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HL_VR_4_hi");
+  TH2D* h_HM_VR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_4_hi");
+  TH2D* h_HH_VR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_4_hi");
+
+  TH2D* h_LL_SR_23_hi = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_23_hi");
+  TH2D* h_LM_SR_23_hi = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_23_hi");
+  TH2D* h_LH_SR_23_hi = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23_hi");
+  TH2D* h_HL_SR_4_hi = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_4_hi");
+  TH2D* h_HM_SR_4_hi = (TH2D*)h_eventwise_counts.Clone("h_HM_SR_4_hi");
+  TH2D* h_HH_SR_4_hi = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4_hi");
+
+  // Lo pt
+  // NjHt
+  TH2D* h_LL_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_lo");
+  TH2D* h_LM_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_lo");
+  TH2D* h_LH_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_lo");
+  TH2D* h_HL_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HL_VR_lo");
+  TH2D* h_HM_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_lo");
+  TH2D* h_HH_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_lo");
+
+  TH2D* h_LL_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_lo");
+  TH2D* h_LM_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_lo");
+  TH2D* h_LH_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_lo");
+  TH2D* h_HL_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_lo");
+  TH2D* h_HM_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_HM_SR_lo");
+  TH2D* h_HH_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_lo");
+
+  // Separate fshorts
+  TH2D* h_LL_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23_lo");
+  TH2D* h_LM_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23_lo");
+  TH2D* h_LH_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23_lo");
+  TH2D* h_HL_VR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HL_VR_4_lo");
+  TH2D* h_HM_VR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_4_lo");
+  TH2D* h_HH_VR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_4_lo");
+
+  TH2D* h_LL_SR_23_lo = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_23_lo");
+  TH2D* h_LM_SR_23_lo = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_23_lo");
+  TH2D* h_LH_SR_23_lo = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23_lo");
+  TH2D* h_HL_SR_4_lo = (TH2D*)h_eventwise_counts.Clone("h_HL_SR_4_lo");
+  TH2D* h_HM_SR_4_lo = (TH2D*)h_eventwise_counts.Clone("h_HM_SR_4_lo");
+  TH2D* h_HH_SR_4_lo = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4_lo");
+
+  unordered_map<TH2D*,TH2D*> low_hists;
+  low_hists[h_LL_VR] = h_LL_VR_lo;
+  low_hists[h_LM_VR] = h_LM_VR_lo;
+  low_hists[h_LH_VR] = h_LH_VR_lo;
+  low_hists[h_HL_VR] = h_HL_VR_lo;
+  low_hists[h_HM_VR] = h_HM_VR_lo;
+  low_hists[h_HH_VR] = h_HH_VR_lo;
+  low_hists[h_LL_SR] = h_LL_SR_lo;
+  low_hists[h_LM_SR] = h_LM_SR_lo;
+  low_hists[h_LH_SR] = h_LH_SR_lo;
+  low_hists[h_HL_SR] = h_HL_SR_lo;
+  low_hists[h_HM_SR] = h_HM_SR_lo;
+  low_hists[h_HH_SR] = h_HH_SR_lo;
+  low_hists[h_LL_VR_23] = h_LL_VR_23_lo;
+  low_hists[h_LM_VR_23] = h_LM_VR_23_lo;
+  low_hists[h_LH_VR_23] = h_LH_VR_23_lo;
+  low_hists[h_HL_VR_4] = h_HL_VR_4_lo;
+  low_hists[h_HM_VR_4] = h_HM_VR_4_lo;
+  low_hists[h_HH_VR_4] = h_HH_VR_4_lo;
+  low_hists[h_LL_SR_23] = h_LL_SR_23_lo;
+  low_hists[h_LM_SR_23] = h_LM_SR_23_lo;
+  low_hists[h_LH_SR_23] = h_LH_SR_23_lo;
+  low_hists[h_HL_SR_4] = h_HL_SR_4_lo;
+  low_hists[h_HM_SR_4] = h_HM_SR_4_lo;
+  low_hists[h_HH_SR_4] = h_HH_SR_4_lo;
+
+  unordered_map<TH2D*,TH2D*> hi_hists;
+  hi_hists[h_LL_VR] = h_LL_VR_hi;
+  hi_hists[h_LM_VR] = h_LM_VR_hi;
+  hi_hists[h_LH_VR] = h_LH_VR_hi;
+  hi_hists[h_HL_VR] = h_HL_VR_hi;
+  hi_hists[h_HM_VR] = h_HM_VR_hi;
+  hi_hists[h_HH_VR] = h_HH_VR_hi;
+  hi_hists[h_LL_SR] = h_LL_SR_hi;
+  hi_hists[h_LM_SR] = h_LM_SR_hi;
+  hi_hists[h_LH_SR] = h_LH_SR_hi;
+  hi_hists[h_HL_SR] = h_HL_SR_hi;
+  hi_hists[h_HM_SR] = h_HM_SR_hi;
+  hi_hists[h_HH_SR] = h_HH_SR_hi;
+  hi_hists[h_LL_VR_23] = h_LL_VR_23_hi;
+  hi_hists[h_LM_VR_23] = h_LM_VR_23_hi;
+  hi_hists[h_LH_VR_23] = h_LH_VR_23_hi;
+  hi_hists[h_HL_VR_4] = h_HL_VR_4_hi;
+  hi_hists[h_HM_VR_4] = h_HM_VR_4_hi;
+  hi_hists[h_HH_VR_4] = h_HH_VR_4_hi;
+  hi_hists[h_LL_SR_23] = h_LL_SR_23_hi;
+  hi_hists[h_LM_SR_23] = h_LM_SR_23_hi;
+  hi_hists[h_LH_SR_23] = h_LH_SR_23_hi;
+  hi_hists[h_HL_SR_4] = h_HL_SR_4_hi;
+  hi_hists[h_HM_SR_4] = h_HM_SR_4_hi;
+  hi_hists[h_HH_SR_4] = h_HH_SR_4_hi;
+
 
   // Nlep = 1 hists
 
@@ -116,11 +263,16 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HLlep_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HLlep_SR_4");
   TH2D* h_HHlep_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HHlep_SR_4");
 
-
   // Save Fshorts used with errors
-  TH1D* h_FS = new TH1D("h_FS","f_{short}",3,0,3);
+  TH1D* h_FS = new TH1D("h_FS","f_{short}",5,0,5);
   TH1D* h_FS_23 = (TH1D*) h_FS->Clone("h_FS_23");
   TH1D* h_FS_4 = (TH1D*) h_FS->Clone("h_FS_4");
+  TH1D* h_FS_hi = (TH1D*) h_FS->Clone("h_FS_hi");
+  TH1D* h_FS_23_hi = (TH1D*) h_FS->Clone("h_FS_23_hi");
+  TH1D* h_FS_4_hi = (TH1D*) h_FS->Clone("h_FS_4_hi");
+  TH1D* h_FS_lo = (TH1D*) h_FS->Clone("h_FS_lo");
+  TH1D* h_FS_23_lo = (TH1D*) h_FS->Clone("h_FS_23_lo");
+  TH1D* h_FS_4_lo = (TH1D*) h_FS->Clone("h_FS_4_lo");
 
   TH1D* h_FS_alt_rel_err = new TH1D("h_FS_alt_rel_err","Alternative Relative Error",3,0,3);
   TH1D* h_FS_23_alt_rel_err = new TH1D("h_FS_23_alt_rel_err","Alternative Relative Error",3,0,3);
@@ -244,6 +396,14 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     }
     FshortNameMC = FshortName17MC;
   }
+  else if (year == 2018) {
+    if (isMC) {
+      FshortName = FshortName17MC; // For now, use 2017 MC in 2018
+    } else {
+      FshortName = FshortName18Data;
+    }
+    FshortNameMC = FshortName17MC; // For now, use 2017 MC in 2018
+  }
   else {
     cout << "Check configuration" << endl;
     return -1;
@@ -257,32 +417,100 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline"))->ProjectionX("h_fs_MC",1,1);
   TH1D* h_fs_Nj23_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23_MC",1,1);
   TH1D* h_fs_Nj4_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4_MC",1,1);
-  const float mc_L_corr = adjL ? h_fs_MC->GetBinContent(4) / h_fs_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err = adjL ? sqrt( pow((h_fs_MC->GetBinError(4) / h_fs_MC->GetBinContent(4)),2) + pow((h_fs_MC->GetBinError(3) / h_fs_MC->GetBinContent(3)),2)) * mc_L_corr : 0;
-  const float mc_L_corr_23 = adjL ? h_fs_Nj23_MC->GetBinContent(4) / h_fs_Nj23_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
+  const float mc_L_corr = adjL ? h_fs_MC->GetBinContent(Lidx) / h_fs_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
+  const float mc_L_corr_err = adjL ? sqrt( pow((h_fs_MC->GetBinError(Lidx) / h_fs_MC->GetBinContent(Lidx)),2) + pow((h_fs_MC->GetBinError(Midx) / h_fs_MC->GetBinContent(Midx)),2)) * mc_L_corr : 0;
+  const float mc_L_corr_23 = adjL ? h_fs_Nj23_MC->GetBinContent(Lidx) / h_fs_Nj23_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
   const float mc_L_corr_err_23 = adjL ? sqrt( pow((h_fs_Nj23_MC->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
-  const float mc_L_corr_4 = adjL ? h_fs_Nj4_MC->GetBinContent(4) / h_fs_Nj4_MC->GetBinContent(3) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err_4 = adjL ? sqrt( pow((h_fs_Nj4_MC->GetBinError(4) / h_fs_Nj4_MC->GetBinContent(4)),2) + pow((h_fs_Nj4_MC->GetBinError(3) / h_fs_Nj4_MC->GetBinContent(3)),2)) * mc_L_corr_4 : 0;
-  // bin 1 is inclusive, then P, M, L
-  const double fs_P = h_fs->GetBinContent(2);
-  const double fs_P_err = h_fs->GetBinError(2);
-  const double fs_M = h_fs->GetBinContent(3);
-  const double fs_M_err = h_fs->GetBinError(3);
-  const double fs_L = adjL ? h_fs->GetBinContent(3) * mc_L_corr : h_fs->GetBinContent(4);
-  const double fs_L_err = adjL ? sqrt( pow((fs_M_err/fs_M),2) + pow((mc_L_corr_err / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(4);
-  const double fs_Nj23_P = h_fs_Nj23->GetBinContent(2);
-  const double fs_Nj23_P_err = h_fs_Nj23->GetBinError(2);
-  const double fs_Nj23_M = h_fs_Nj23->GetBinContent(3);
-  const double fs_Nj23_M_err = h_fs_Nj23->GetBinError(3);
-  const double fs_Nj23_L = adjL ? h_fs_Nj23->GetBinContent(3) * mc_L_corr_23 : h_fs_Nj23->GetBinContent(4);
-  const double fs_Nj23_L_err = adjL ? sqrt( pow((fs_Nj23_M_err/fs_Nj23_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj23_L : h_fs_Nj23->GetBinError(4);
-  const double fs_Nj4_P = h_fs_Nj4->GetBinContent(2);
-  const double fs_Nj4_P_err = h_fs_Nj4->GetBinError(2);
-  const double fs_Nj4_M = h_fs_Nj4->GetBinContent(3);
-  const double fs_Nj4_M_err = h_fs_Nj4->GetBinError(3);
-  const double fs_Nj4_L = adjL ? h_fs_Nj4->GetBinContent(3) * mc_L_corr_4 : h_fs_Nj4->GetBinContent(4);
-  const double fs_Nj4_L_err = adjL ? sqrt( pow((fs_Nj4_M_err/fs_Nj4_M),2) + pow((mc_L_corr_err_4 / mc_L_corr_4),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(4);
+  const float mc_L_corr_4 = adjL ? h_fs_Nj4_MC->GetBinContent(Lidx) / h_fs_Nj4_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
+  const float mc_L_corr_err_4 = adjL ? sqrt( pow((h_fs_Nj4_MC->GetBinError(Lidx) / h_fs_Nj4_MC->GetBinContent(Lidx)),2) + pow((h_fs_Nj4_MC->GetBinError(Midx) / h_fs_Nj4_MC->GetBinContent(Midx)),2)) * mc_L_corr_4 : 0;
+  const double fs_P = h_fs->GetBinContent(Pidx);
+  const double fs_P_err = h_fs->GetBinError(Pidx);
+  const double fs_P3 = h_fs->GetBinContent(P3idx);
+  const double fs_P3_err = h_fs->GetBinError(P3idx);
+  const double fs_P4 = h_fs->GetBinContent(P4idx);
+  const double fs_P4_err = h_fs->GetBinError(P4idx);
+  const double fs_M = h_fs->GetBinContent(Midx);
+  const double fs_M_err = h_fs->GetBinError(Midx);
+  const double fs_L = adjL ? h_fs->GetBinContent(Midx) * mc_L_corr : h_fs->GetBinContent(Lidx);
+  const double fs_L_err = adjL ? sqrt( pow((fs_M_err/fs_M),2) + pow((mc_L_corr_err / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(Lidx);
+  const double fs_Nj23_P = h_fs_Nj23->GetBinContent(Pidx);
+  const double fs_Nj23_P_err = h_fs_Nj23->GetBinError(Pidx);
+  const double fs_Nj23_P3 = h_fs_Nj23->GetBinContent(P3idx);
+  const double fs_Nj23_P3_err = h_fs_Nj23->GetBinError(P3idx);
+  const double fs_Nj23_P4 = h_fs_Nj23->GetBinContent(P4idx);
+  const double fs_Nj23_P4_err = h_fs_Nj23->GetBinError(P4idx);
+  const double fs_Nj23_M = h_fs_Nj23->GetBinContent(Midx);
+  const double fs_Nj23_M_err = h_fs_Nj23->GetBinError(Midx);
+  const double fs_Nj23_L = adjL ? h_fs_Nj23->GetBinContent(Midx) * mc_L_corr_23 : h_fs_Nj23->GetBinContent(Lidx);
+  const double fs_Nj23_L_err = adjL ? sqrt( pow((fs_Nj23_M_err/fs_Nj23_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj23_L : h_fs_Nj23->GetBinError(Lidx);
+  const double fs_Nj4_P = h_fs_Nj4->GetBinContent(Pidx);
+  const double fs_Nj4_P_err = h_fs_Nj4->GetBinError(Pidx);
+  const double fs_Nj4_P3 = h_fs_Nj4->GetBinContent(P3idx);
+  const double fs_Nj4_P3_err = h_fs_Nj4->GetBinError(P3idx);
+  const double fs_Nj4_P4 = h_fs_Nj4->GetBinContent(P4idx);
+  const double fs_Nj4_P4_err = h_fs_Nj4->GetBinError(P4idx);
+  const double fs_Nj4_M = h_fs_Nj4->GetBinContent(Midx);
+  const double fs_Nj4_M_err = h_fs_Nj4->GetBinError(Midx);
+  const double fs_Nj4_L = adjL ? h_fs_Nj4->GetBinContent(Midx) * mc_L_corr_23 : h_fs_Nj4->GetBinContent(Lidx);
+  const double fs_Nj4_L_err = adjL ? sqrt( pow((fs_Nj4_M_err/fs_Nj4_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
 
+  TH1D* h_fs_hi = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt"))->ProjectionX("h_fs_hi",1,1);
+  TH1D* h_fs_Nj23_hi = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt"))->ProjectionX("h_fs_23_hi",1,1);
+  TH1D* h_fs_Nj4_hi = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_hipt"))->ProjectionX("h_fs_4_hi",1,1);
+  const double fs_P_hi = h_fs_hi->GetBinContent(Pidx);
+  const double fs_P_err_hi = h_fs_hi->GetBinError(Pidx);
+  const double fs_P3_hi = h_fs_hi->GetBinContent(P3idx);
+  const double fs_P3_err_hi = h_fs_hi->GetBinError(P3idx);
+  const double fs_P4_hi = h_fs_hi->GetBinContent(P4idx);
+  const double fs_P4_err_hi = h_fs_hi->GetBinError(P4idx);
+  const double fs_M_hi = h_fs_hi->GetBinContent(Midx);
+  const double fs_M_err_hi = h_fs_hi->GetBinError(Midx);
+  const double fs_Nj23_P_hi = h_fs_Nj23_hi->GetBinContent(Pidx);
+  const double fs_Nj23_P_err_hi = h_fs_Nj23_hi->GetBinError(Pidx);
+  const double fs_Nj23_P3_hi = h_fs_Nj23_hi->GetBinContent(P3idx);
+  const double fs_Nj23_P3_err_hi = h_fs_Nj23_hi->GetBinError(P3idx);
+  const double fs_Nj23_P4_hi = h_fs_Nj23_hi->GetBinContent(P4idx);
+  const double fs_Nj23_P4_err_hi = h_fs_Nj23_hi->GetBinError(P4idx);
+  const double fs_Nj23_M_hi = h_fs_Nj23_hi->GetBinContent(Midx);
+  const double fs_Nj23_M_err_hi = h_fs_Nj23_hi->GetBinError(Midx);
+  const double fs_Nj4_P_hi = h_fs_Nj4_hi->GetBinContent(Pidx);
+  const double fs_Nj4_P_err_hi = h_fs_Nj4_hi->GetBinError(Pidx);
+  const double fs_Nj4_P3_hi = h_fs_Nj4_hi->GetBinContent(P3idx);
+  const double fs_Nj4_P3_err_hi = h_fs_Nj4_hi->GetBinError(P3idx);
+  const double fs_Nj4_P4_hi = h_fs_Nj4_hi->GetBinContent(P4idx);
+  const double fs_Nj4_P4_err_hi = h_fs_Nj4_hi->GetBinError(P4idx);
+  const double fs_Nj4_M_hi = h_fs_Nj4_hi->GetBinContent(Midx);
+  const double fs_Nj4_M_err_hi = h_fs_Nj4_hi->GetBinError(Midx);
+
+  TH1D* h_fs_lo = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt"))->ProjectionX("h_fs_lo",1,1);
+  TH1D* h_fs_Nj23_lo = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt"))->ProjectionX("h_fs_23_lo",1,1);
+  TH1D* h_fs_Nj4_lo = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt"))->ProjectionX("h_fs_4_lo",1,1);
+  const double fs_P_lo = h_fs_lo->GetBinContent(Pidx);
+  const double fs_P_err_lo = h_fs_lo->GetBinError(Pidx);
+  const double fs_P3_lo = h_fs_lo->GetBinContent(P3idx);
+  const double fs_P3_err_lo = h_fs_lo->GetBinError(P3idx);
+  const double fs_P4_lo = h_fs_lo->GetBinContent(P4idx);
+  const double fs_P4_err_lo = h_fs_lo->GetBinError(P4idx);
+  const double fs_M_lo = h_fs_lo->GetBinContent(Midx);
+  const double fs_M_err_lo = h_fs_lo->GetBinError(Midx);
+  const double fs_Nj23_P_lo = h_fs_Nj23_lo->GetBinContent(Pidx);
+  const double fs_Nj23_P_err_lo = h_fs_Nj23_lo->GetBinError(Pidx);
+  const double fs_Nj23_P3_lo = h_fs_Nj23_lo->GetBinContent(P3idx);
+  const double fs_Nj23_P3_err_lo = h_fs_Nj23_lo->GetBinError(P3idx);
+  const double fs_Nj23_P4_lo = h_fs_Nj23_lo->GetBinContent(P4idx);
+  const double fs_Nj23_P4_err_lo = h_fs_Nj23_lo->GetBinError(P4idx);
+  const double fs_Nj23_M_lo = h_fs_Nj23_lo->GetBinContent(Midx);
+  const double fs_Nj23_M_err_lo = h_fs_Nj23_lo->GetBinError(Midx);
+  const double fs_Nj4_P_lo = h_fs_Nj4_lo->GetBinContent(Pidx);
+  const double fs_Nj4_P_err_lo = h_fs_Nj4_lo->GetBinError(Pidx);
+  const double fs_Nj4_P3_lo = h_fs_Nj4_lo->GetBinContent(P3idx);
+  const double fs_Nj4_P3_err_lo = h_fs_Nj4_lo->GetBinError(P3idx);
+  const double fs_Nj4_P4_lo = h_fs_Nj4_lo->GetBinContent(P4idx);
+  const double fs_Nj4_P4_err_lo = h_fs_Nj4_lo->GetBinError(P4idx);
+  const double fs_Nj4_M_lo = h_fs_Nj4_lo->GetBinContent(Midx);
+  const double fs_Nj4_M_err_lo = h_fs_Nj4_lo->GetBinError(Midx);
+
+  /*
   TH1D* h_FS_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_Baseline_alt_rel_err"))->Clone("h_FS_alt_rel_err_clone");
   TH1D* h_FS_23_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_23_Baseline_alt_rel_err"))->Clone("h_FS_23_alt_rel_err_clone");
   TH1D* h_FS_4_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_4_Baseline_alt_rel_err"))->Clone("h_FS_4_alt_rel_err_clone");
@@ -305,9 +533,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     h_FS_23_alt_rel_err->SetBinContent(3,h_FS_23_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
     h_FS_4_alt_rel_err->SetBinContent(3,h_FS_4_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
   }
+  */
 
   cout << "Loaded transfer factors" << endl;
 
+  /*
   cout << "alt Perr : " << h_FS_alt_rel_err->GetBinContent(1) << endl;
   cout << "alt Merr : " << h_FS_alt_rel_err->GetBinContent(2) << endl;
   cout << "alt Lerr : " << h_FS_alt_rel_err->GetBinContent(3) << endl;
@@ -317,7 +547,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "alt Perr4: " << h_FS_4_alt_rel_err->GetBinContent(1) << endl;
   cout << "alt Merr4: " << h_FS_4_alt_rel_err->GetBinContent(2) << endl;
   cout << "alt Lerr4: " << h_FS_4_alt_rel_err->GetBinContent(3) << endl;
- 
+  */
+
   cout << "corr     : " << mc_L_corr << endl;
   cout << "corr err : " << mc_L_corr_err << endl;
   cout << "corr23   : " << mc_L_corr_23 << endl;
@@ -325,9 +556,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "corr4    : " << mc_L_corr_4 << endl;
   cout << "corr4 err: " << mc_L_corr_err_4 << endl;
 
-
   cout << "fs_P    : " << fs_P << endl;
   cout << "fs_P err: " << fs_P_err << endl;
+  cout << "fs_P3    : " << fs_P3 << endl;
+  cout << "fs_P3 err: " << fs_P3_err << endl;
+  cout << "fs_P4    : " << fs_P4 << endl;
+  cout << "fs_P4 err: " << fs_P4_err << endl;
   cout << "fs_M    : " << fs_M << endl;
   cout << "fs_M err: " << fs_M_err << endl;
   cout << "fs_L (uncorrected): " << h_fs->GetBinContent(4) << endl;
@@ -336,6 +570,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "fs_L err: " << fs_L_err << endl;
   cout << "fs_Nj23_P    : " << fs_Nj23_P << endl;
   cout << "fs_Nj23_P err: " << fs_Nj23_P_err << endl;
+  cout << "fs_Nj23_P3    : " << fs_Nj23_P3 << endl;
+  cout << "fs_Nj23_P3 err: " << fs_Nj23_P3_err << endl;
+  cout << "fs_Nj23_P4    : " << fs_Nj23_P4 << endl;
+  cout << "fs_Nj23_P4 err: " << fs_Nj23_P4_err << endl;
   cout << "fs_Nj23_M    : " << fs_Nj23_M << endl;
   cout << "fs_Nj23_M err: " << fs_Nj23_M_err << endl;
   cout << "fs_Nj23_L (uncorrected): " << h_fs_Nj23->GetBinContent(4) << endl;
@@ -344,13 +582,136 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "fs_Nj23_L err: " << fs_Nj23_L_err << endl;
   cout << "fs_Nj4_P    : " << fs_Nj4_P << endl;
   cout << "fs_Nj4_P err: " << fs_Nj4_P_err << endl;
+  cout << "fs_Nj4_P3    : " << fs_Nj4_P3 << endl;
+  cout << "fs_Nj4_P3 err: " << fs_Nj4_P3_err << endl;
+  cout << "fs_Nj4_P4    : " << fs_Nj4_P4 << endl;
+  cout << "fs_Nj4_P4 err: " << fs_Nj4_P4_err << endl;
   cout << "fs_Nj4_M    : " << fs_Nj4_M << endl;
   cout << "fs_Nj4_M err: " << fs_Nj4_M_err << endl;
   cout << "fs_Nj4_L (uncorrected): " << h_fs_Nj4->GetBinContent(4) << endl;
   cout << "fs_Nj4_L err (uncorrected): " << h_fs_Nj4->GetBinError(4) << endl;
   cout << "fs_Nj4_L    : " << fs_Nj4_L << endl;
   cout << "fs_Nj4_L err: " << fs_Nj4_L_err << endl;
-  
+
+  cout << "/nHi Pt/n" << endl;
+
+  cout << "fs_P    : " << fs_P_hi << endl;
+  cout << "fs_P err: " << fs_P_err_hi << endl;
+  cout << "fs_P3    : " << fs_P3_hi << endl;
+  cout << "fs_P3 err: " << fs_P3_err_hi << endl;
+  cout << "fs_P4    : " << fs_P4_hi << endl;
+  cout << "fs_P4 err: " << fs_P4_err_hi << endl;
+  cout << "fs_M    : " << fs_M_hi << endl;
+  cout << "fs_M err: " << fs_M_err_hi << endl;
+  cout << "fs_Nj23_P    : " << fs_Nj23_P_hi << endl;
+  cout << "fs_Nj23_P err: " << fs_Nj23_P_err_hi << endl;
+  cout << "fs_Nj23_P3    : " << fs_Nj23_P3_hi << endl;
+  cout << "fs_Nj23_P3 err: " << fs_Nj23_P3_err_hi << endl;
+  cout << "fs_Nj23_P4    : " << fs_Nj23_P4_hi << endl;
+  cout << "fs_Nj23_P4 err: " << fs_Nj23_P4_err_hi << endl;
+  cout << "fs_Nj23_M    : " << fs_Nj23_M_hi << endl;
+  cout << "fs_Nj23_M err: " << fs_Nj23_M_err_hi << endl;
+  cout << "fs_Nj4_P    : " << fs_Nj4_P_hi << endl;
+  cout << "fs_Nj4_P err: " << fs_Nj4_P_err_hi << endl;
+  cout << "fs_Nj4_P3    : " << fs_Nj4_P3_hi << endl;
+  cout << "fs_Nj4_P3 err: " << fs_Nj4_P3_err_hi << endl;
+  cout << "fs_Nj4_P4    : " << fs_Nj4_P4_hi << endl;
+  cout << "fs_Nj4_P4 err: " << fs_Nj4_P4_err_hi << endl;
+  cout << "fs_Nj4_M    : " << fs_Nj4_M_hi << endl;
+  cout << "fs_Nj4_M err: " << fs_Nj4_M_err_hi << endl;
+
+  cout << "/nLow Pt/n" << endl;
+
+  cout << "fs_P    : " << fs_P_lo << endl;
+  cout << "fs_P err: " << fs_P_err_lo << endl;
+  cout << "fs_P3    : " << fs_P3_lo << endl;
+  cout << "fs_P3 err: " << fs_P3_err_lo << endl;
+  cout << "fs_P4    : " << fs_P4_lo << endl;
+  cout << "fs_P4 err: " << fs_P4_err_lo << endl;
+  cout << "fs_M    : " << fs_M_lo << endl;
+  cout << "fs_M err: " << fs_M_err_lo << endl;
+  cout << "fs_Nj23_P    : " << fs_Nj23_P_lo << endl;
+  cout << "fs_Nj23_P err: " << fs_Nj23_P_err_lo << endl;
+  cout << "fs_Nj23_P3    : " << fs_Nj23_P3_lo << endl;
+  cout << "fs_Nj23_P3 err: " << fs_Nj23_P3_err_lo << endl;
+  cout << "fs_Nj23_P4    : " << fs_Nj23_P4_lo << endl;
+  cout << "fs_Nj23_P4 err: " << fs_Nj23_P4_err_lo << endl;
+  cout << "fs_Nj23_M    : " << fs_Nj23_M_lo << endl;
+  cout << "fs_Nj23_M err: " << fs_Nj23_M_err_lo << endl;
+  cout << "fs_Nj4_P    : " << fs_Nj4_P_lo << endl;
+  cout << "fs_Nj4_P err: " << fs_Nj4_P_err_lo << endl;
+  cout << "fs_Nj4_P3    : " << fs_Nj4_P3_lo << endl;
+  cout << "fs_Nj4_P3 err: " << fs_Nj4_P3_err_lo << endl;
+  cout << "fs_Nj4_P4    : " << fs_Nj4_P4_lo << endl;
+  cout << "fs_Nj4_P4 err: " << fs_Nj4_P4_err_lo << endl;
+  cout << "fs_Nj4_M    : " << fs_Nj4_M_lo << endl;
+  cout << "fs_Nj4_M err: " << fs_Nj4_M_err_lo << endl;
+
+  // Now get systematics
+  TH1D* h_fs_syst = (TH1D*) FshortFile->Get("h_fsMR_Baseline_syst");
+  TH1D* h_fs_syst_Nj23 = (TH1D*) FshortFile->Get("h_fsMR_23_Baseline_syst");
+  TH1D* h_fs_syst_Nj4 = (TH1D*) FshortFile->Get("h_fsMR_4_Baseline_syst");
+  TH1D* h_fs_syst_hi = (TH1D*) FshortFile->Get("h_fsMR_Baseline_hipt_syst");
+  TH1D* h_fs_syst_Nj23_hi = (TH1D*) FshortFile->Get("h_fsMR_23_Baseline_hipt_syst");
+  TH1D* h_fs_syst_Nj4_hi = (TH1D*) FshortFile->Get("h_fsMR_4_Baseline_hipt_syst");
+  TH1D* h_fs_syst_low = (TH1D*) FshortFile->Get("h_fsMR_Baseline_lowpt_syst");
+  TH1D* h_fs_syst_Nj23_low = (TH1D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt_syst");
+  TH1D* h_fs_syst_Nj4_low = (TH1D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt_syst");
+
+  const float fs_P_syst  = h_fs_syst->GetBinContent(Pidx);
+  const float fs_P3_syst = h_fs_syst->GetBinContent(P3idx);
+  const float fs_P4_syst = h_fs_syst->GetBinContent(P4idx);
+  const float fs_M_syst  = h_fs_syst->GetBinContent(Midx);
+  const float fs_L_syst  = fs_L;  // Always take 100% error for L tracks
+
+  const float fs_P_syst_Nj23  = h_fs_syst_Nj23->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj23 = h_fs_syst_Nj23->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj23 = h_fs_syst_Nj23->GetBinContent(P4idx);
+  const float fs_M_syst_Nj23  = h_fs_syst_Nj23->GetBinContent(Midx);
+  const float fs_L_syst_Nj23  = fs_Nj23_L;  // Always take 100% error for L tracks
+
+  const float fs_P_syst_Nj4  = h_fs_syst_Nj4->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj4 = h_fs_syst_Nj4->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj4 = h_fs_syst_Nj4->GetBinContent(P4idx);
+  const float fs_M_syst_Nj4  = h_fs_syst_Nj4->GetBinContent(Midx);
+  const float fs_L_syst_Nj4  = fs_Nj4_L;  // Always take 100% error for L tracks
+
+  const float fs_P_syst_lo  = h_fs_syst_low->GetBinContent(Pidx);
+  const float fs_P3_syst_lo = h_fs_syst_low->GetBinContent(P3idx);
+  const float fs_P4_syst_lo = h_fs_syst_low->GetBinContent(P4idx);
+  const float fs_M_syst_lo  = h_fs_syst_low->GetBinContent(Midx);
+  const float fs_L_syst_lo  = 0; // no split L 
+
+  const float fs_P_syst_Nj23_lo  = h_fs_syst_Nj23_low->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj23_lo = h_fs_syst_Nj23_low->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj23_lo = h_fs_syst_Nj23_low->GetBinContent(P4idx);
+  const float fs_M_syst_Nj23_lo  = h_fs_syst_Nj23_low->GetBinContent(Midx);
+  const float fs_L_syst_Nj23_lo  = 0; // no split L
+
+  const float fs_P_syst_Nj4_lo  = h_fs_syst_Nj4_low->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj4_lo = h_fs_syst_Nj4_low->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj4_lo = h_fs_syst_Nj4_low->GetBinContent(P4idx);
+  const float fs_M_syst_Nj4_lo  = h_fs_syst_Nj4_low->GetBinContent(Midx);
+  const float fs_L_syst_Nj4_lo  = 0; // no split L
+
+  const float fs_P_syst_hi  = h_fs_syst_hi->GetBinContent(Pidx);
+  const float fs_P3_syst_hi = h_fs_syst_hi->GetBinContent(P3idx);
+  const float fs_P4_syst_hi = h_fs_syst_hi->GetBinContent(P4idx);
+  const float fs_M_syst_hi  = h_fs_syst_hi->GetBinContent(Midx);
+  const float fs_L_syst_hi  = 0; // no split L
+
+  const float fs_P_syst_Nj23_hi  = h_fs_syst_Nj23_hi->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj23_hi = h_fs_syst_Nj23_hi->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj23_hi = h_fs_syst_Nj23_hi->GetBinContent(P4idx);
+  const float fs_M_syst_Nj23_hi  = h_fs_syst_Nj23_hi->GetBinContent(Midx);
+  const float fs_L_syst_Nj23_hi  = 0;  // No split L
+
+  const float fs_P_syst_Nj4_hi  = h_fs_syst_Nj4_hi->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj4_hi = h_fs_syst_Nj4_hi->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj4_hi = h_fs_syst_Nj4_hi->GetBinContent(P4idx);
+  const float fs_M_syst_Nj4_hi  = h_fs_syst_Nj4_hi->GetBinContent(Midx);
+  const float fs_L_syst_Nj4_hi  = 0;  // No split L
+
   FshortFile->Close();
   FshortFileMC->Close();
 
@@ -416,11 +777,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (t.mt2 < 100) {
       continue;
     }
-    if (t.met_pt < 30) {
-    //    if (t.met_pt < 30 || t.met_pt > 100) {
-    //if (t.met_pt < 100 || t.met_pt > 250) {
-    //    if (t.met_pt < 250) {
+    //if (t.met_pt < 30) {
     //if (t.met_pt < 100) {
+    if (t.met_pt < 30 || (t.ht < 1200 && t.met_pt < 250)) {
 	continue;
     }
 
@@ -468,6 +827,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
     const float lumi = config_.lumi; 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
+
+    if (isSignal) {
+      int bin = h_xsec->GetXaxis()->FindBin(1800);      
+      weight = h_xsec->GetBinContent(bin) * 1000 * lumi / nEventsTree;
+    }
+
 
     if (!t.isData) {
       //      weight *= t.weight_btagsf;
@@ -567,26 +932,38 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
     */
-
-    TH2D* hist;
+    
+    TH2D* hist;    
     TH2D* hist_Nj;
-
+    
     if (!lepveto) {
       // L*
       if (t.nJet30 < 4) {
 	// LH
-	if (t.ht >= 1000) {
+	if (t.ht >= 1200) {
 	  // VR
 	  if (t.mt2 < 200) {
 	    hist = h_LH_VR;
 	    hist_Nj = h_LH_VR_23;
 	  }
 	  // SR 
-	  else if ( !(blind && t.isData) ) {
+	  else { //if ( !(blind && t.isData) ) {
 	    hist = h_LH_SR;
 	    hist_Nj = h_LH_SR_23;
 	  }
-	  else continue;
+	}
+	// LM
+	else if (t.ht >= 450) {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_LM_VR;
+	    hist_Nj = h_LM_VR_23;
+	  }
+	  // SR 
+	  else { //if (! (blind && t.isData) ){
+	    hist = h_LM_SR;
+	    hist_Nj = h_LM_SR_23;
+	  }
 	}
 	// LL
 	else {
@@ -596,28 +973,39 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	    hist_Nj = h_LL_VR_23;
 	  }
 	  // SR 
-	  else if (! (blind && t.isData) ){
+	  else { //if (! (blind && t.isData) ){
 	    hist = h_LL_SR;
 	    hist_Nj = h_LL_SR_23;
 	  }
-	  else continue;
 	}
       } 
       // H*
       else {
 	// HH
-	if (t.ht >= 1000) {
+	if (t.ht >= 1200) {
 	  // VR
 	  if (t.mt2 < 200) {
 	    hist = h_HH_VR;
 	    hist_Nj = h_HH_VR_4;
 	  }
 	  // SR 
-	  else if (! (blind && t.isData) ) {
+	  else { //if (! (blind && t.isData) ) {
 	    hist = h_HH_SR;
 	    hist_Nj = h_HH_SR_4;
 	  }
-	  else continue;
+	}
+	// HM
+	else if (t.ht >= 450) {
+	  // VR
+	  if (t.mt2 < 200) {
+	    hist = h_HM_VR;
+	    hist_Nj = h_HM_VR_4;
+	  }
+	  // SR 
+	  else { //if (! (blind && t.isData) ){
+	    hist = h_HM_SR;
+	    hist_Nj = h_HM_SR_4;
+	  }
 	}
 	// HL
 	else {
@@ -627,19 +1015,19 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	    hist_Nj = h_HL_VR_4;
 	  }
 	  // SR 
-	  else if (! (blind && t.isData) ){
+	  else { //if (! (blind && t.isData) ){
 	    hist = h_HL_SR;
 	    hist_Nj = h_HL_SR_4;
 	  }
-	  else continue;
 	}
       }
     }
     else if (t.nlep == 1) {
+      continue;
       // L*
       if (t.nJet30 < 4) {
 	// LH
-	if (t.ht >= 1000) {
+	if (t.ht >= 1200) {
 	  // VR
 	  if (t.mt2 < 200) {
 	    hist = h_LHlep_VR;
@@ -670,7 +1058,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // H*
       else {
 	// HH
-	if (t.ht >= 1000) {
+	if (t.ht >= 1200) {
 	  // VR
 	  if (t.mt2 < 200) {
 	    hist = h_HHlep_VR;
@@ -704,14 +1092,37 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     // Analysis code
 
     int nSTCp = t.nshorttrackcandidates_P;
+    // TODO: add these guys to babies
+    int nSTCp3 = 0;
+    int nSTCp4 = 0;
     int nSTCm = t.nshorttrackcandidates_M;
-    int nSTp = t.nshorttracks_P;
-    int nSTm = t.nshorttracks_M;
-
     int nSTCl_acc = 0; // L STCs, accepted by mtpt
     int nSTCl_rej = 0; // L STCs, rejected by mtpt
+    int nSTp = t.nshorttracks_P;
+    int nSTp3 = 0;
+    int nSTp4 = 0;
+    int nSTm = t.nshorttracks_M;
     int nSTl_acc = 0; // L STs, accepted by mtpt
     int nSTl_rej = 0; // L STs, rejected by mtpt
+    // hi pt
+    int nSTCp_hi = 0;
+    int nSTCp3_hi = 0;
+    int nSTCp4_hi = 0;
+    int nSTCm_hi = 0;
+    int nSTp_hi = 0;
+    int nSTp3_hi = 0;
+    int nSTp4_hi = 0;
+    int nSTm_hi = 0;
+    // lo pt
+    int nSTCp_lo = 0;
+    int nSTCp3_lo = 0;
+    int nSTCp4_lo = 0;
+    int nSTCm_lo = 0;
+    int nSTp_lo = 0;
+    int nSTp3_lo = 0;
+    int nSTp4_lo = 0;
+    int nSTm_lo = 0;
+
 
     // Need to do a little loop for L ST(C)s even if not recalculating, to see who passed and didn't pass mtpt veto
     if (!recalculate) {
@@ -728,12 +1139,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     else {
       // Manual calculation for testing new ST/STC definitions not coded in babymaker
       nSTCp = 0;
+      nSTCp3 = 0;
+      nSTCp4 = 0;
       nSTCm = 0;
-      nSTp = 0;
-      nSTm = 0;
-      
       nSTCl_rej = 0;
       nSTCl_acc = 0;
+      nSTp = 0;
+      nSTp3 = 0;
+      nSTp4 = 0;
+      nSTm = 0;      
       nSTl_rej = 0;
       nSTl_acc = 0;
       
@@ -747,7 +1161,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  && (year == 2016 || !(t.track_eta[i_trk] < -0.7 && t.track_eta[i_trk] > -0.9 && t.track_phi[i_trk] > 1.5 && t.track_phi[i_trk] < 1.7 ) )
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.30 && t.track_eta[i_trk] > 0.10 && t.track_phi[i_trk] > 2.2 && t.track_phi[i_trk] < 2.5 ) )
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.50 && t.track_eta[i_trk] > 0.40 && t.track_phi[i_trk] > -0.7 && t.track_phi[i_trk] < -0.5  ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) );
+	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) )
+	  && (year != 2018 || !(t.track_eta[i_trk] < 2.45 && t.track_eta[i_trk] > 2.00 && t.track_phi[i_trk] > 1.7 && t.track_phi[i_trk] < 1.9));
 	const float pt = t.track_pt[i_trk];
 	const bool ptSel = pt >= 15.0;
 	const bool etaSel = fabs(t.track_eta[i_trk]) <= 2.4;
@@ -864,6 +1279,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	//	isSTC = !isST && (isP || iso > 30 || reliso > 0.4);
 	if (! (isST || isSTC)) continue;
 	
+	if ( isST && (blind && t.isData && t.mt2 >= 200)) {
+	  continue;
+	}
+
 	const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );	
 	if (lenIndex == 3) {
 	  if (mt < 100 && t.track_pt[i_trk] < 150) {
@@ -884,20 +1303,46 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  }
 	}	
 	else if (isSTC) {
-	  switch(lenIndex) {
-	  case 1: nSTCp++; break;
-	  case 2: nSTCm++; break;
+	  if (lenIndex == 1) {
+	    nSTCp++; 
+	    t.track_pt[i_trk] < 50 ? nSTCp_lo++ : nSTCp_hi++;
+	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
+	      nSTCp3++;
+	      t.track_pt[i_trk] < 50 ? nSTCp3_lo++ : nSTCp3_hi++;
+	    }
+	    else {
+	      nSTCp4++;
+	      t.track_pt[i_trk] < 50 ? nSTCp4_lo++ : nSTCp4_hi++;
+	    }
+	  }
+	  else if (lenIndex == 2) {
+	    nSTCm++;
+	    t.track_pt[i_trk] < 50 ? nSTCm_lo++ : nSTCm_hi++;
 	  }
 	}
 	else if (isST) {
-	  switch(lenIndex) {
-	  case 1: nSTp++; break;
-	  case 2: nSTm++; break;
+	  if (lenIndex == 1) {
+	    nSTp++; 
+	    t.track_pt[i_trk] < 50 ? nSTp_lo++ : nSTp_hi++;
+	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
+	      nSTp3++;
+	      t.track_pt[i_trk] < 50 ? nSTp3_lo++ : nSTp3_hi++;
+	    }
+	    else {
+	      nSTp4++;
+	      t.track_pt[i_trk] < 50 ? nSTp4_lo++ : nSTp4_hi++;
+	    }
+	  }
+	  else if (lenIndex == 2) {
+	    nSTm++;
+	    t.track_pt[i_trk] < 50 ? nSTm_lo++ : nSTm_hi++;
 	  }
 	}
       } // Track loop
     } // recalculate
     
+//if (nSTCp3 > 0 && nSTCp4 > 0) cout << "Double P event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+
     // Eventwise STC Region fills
     // Chance of at least 1 track of given length being tagged is 1 - (1-p)^n
     /*
@@ -912,23 +1357,36 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     */
     if (nSTCl_acc > 0) {
       // For L tracks, we fill separately based on MtPt veto region, and extrapolate from STCs to STs based on M fshort
-      hist->Fill(2.0,2.0,weight); // Fill CR
-      hist_Nj->Fill(2.0,2.0,weight); // Fill CR      
-      hist->Fill(2.0,1.0, weight * ( 1 - pow(1-fs_L,nSTCl_acc) ) ); // Fill expected SR count
-      hist_Nj->Fill(2.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_L : fs_Nj23_L),nSTCl_acc) ) ); // Fill expected SR count with separate Nj fshort
+      hist->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR
+      hist_Nj->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR      
+      hist->Fill(Lidx-0.5,1.0, weight * ( 1 - pow(1-fs_L,nSTCl_acc) ) ); // Fill expected SR count
+      hist_Nj->Fill(Lidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_L : fs_Nj23_L),nSTCl_acc) ) ); // Fill expected SR count with separate Nj fshort
     }
     if (nSTCm > 0) {
-      hist->Fill(1.0,2.0,weight); // Fill CR
-      hist_Nj->Fill(1.0,2.0,weight); // Fill CR
-      hist->Fill(1.0,1.0, weight * ( 1 - pow(1-fs_M,nSTCm) ) ); // Fill expected SR count
-      hist_Nj->Fill(1.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M : fs_Nj23_M),nSTCm) ) ); // Fill expected SR count with separate Nj fs
+      hist->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
+      hist_Nj->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
+      hist->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-fs_M,nSTCm) ) ); // Fill expected SR count
+      hist_Nj->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M : fs_Nj23_M),nSTCm) ) ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp > 0) {
-      hist->Fill(0.0,2.0,weight); // Fill CR
-      hist_Nj->Fill(0.0,2.0,weight); // Fill CR
-      hist->Fill(0.0,1.0, weight * ( 1 - pow(1-fs_P,nSTCp) ) ); // Fill expected SR count
-      hist_Nj->Fill(0.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P : fs_Nj23_P),nSTCp) ) ); // Fill expected SR count with separate Nj fs
+      hist->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
+      hist_Nj->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
+      hist->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-fs_P,nSTCp) ) ); // Fill expected SR count
+      hist_Nj->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P : fs_Nj23_P),nSTCp) ) ); // Fill expected SR count with separate Nj fs
     }
+    if (nSTCp3 > 0) {
+      hist->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
+      hist_Nj->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
+      hist->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-fs_P3,nSTCp3) ) ); // Fill expected SR count
+      hist_Nj->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P3 : fs_Nj23_P3),nSTCp3) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp4 > 0) {
+      hist->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
+      hist_Nj->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
+      hist->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-fs_P4,nSTCp4) ) ); // Fill expected SR count
+      hist_Nj->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P4 : fs_Nj23_P4),nSTCp4) ) ); // Fill expected SR count with separate Nj fs
+    }
+    
     // Eventwise ST fills
     // Only full STs when counting "observed" SR
     /*
@@ -939,63 +1397,476 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     else 
     */
     if (nSTl_acc > 0) {
-      hist->Fill(2.0,0.0,weight);
-      hist_Nj->Fill(2.0,0.0,weight);
+      hist->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
+      hist_Nj->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
     }
     if (nSTm > 0) {
-      hist->Fill(1.0,0.0,weight);
-      hist_Nj->Fill(1.0,0.0,weight);
+      hist->Fill(Midx-0.5,0.0,weight*nSTm);
+      hist_Nj->Fill(Midx-0.5,0.0,weight*nSTm);
     }
     if (nSTp > 0) {
-      hist->Fill(0.0,0.0,weight);
-      hist_Nj->Fill(0.0,0.0,weight);
+      hist->Fill(Pidx-0.5,0.0,weight*nSTp);
+      hist_Nj->Fill(Pidx-0.5,0.0,weight*nSTp);
     }
+    if (nSTp3 > 0) {
+      hist->Fill(P3idx-0.5,0.0,weight*nSTp3);
+      hist_Nj->Fill(P3idx-0.5,0.0,weight*nSTp3);
+    }
+    if (nSTp4 > 0) {
+      hist->Fill(P4idx-0.5,0.0,weight*nSTp4);
+      hist_Nj->Fill(P4idx-0.5,0.0,weight*nSTp4);
+    }
+
+    // Low pt
+    TH2D* hist_lo = low_hists[hist];
+    TH2D* hist_Nj_lo = low_hists[hist_Nj];
+    if (nSTCm_lo > 0) {
+      hist_lo->Fill(Midx-0.5,2.0,weight); // Fill CR
+      hist_Nj_lo->Fill(Midx-0.5,2.0,weight); // Fill CR
+      hist_lo->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-fs_M_lo,nSTCm_lo) ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M_lo : fs_Nj23_M_lo),nSTCm_lo) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp_lo > 0) {
+      hist_lo->Fill(Pidx-0.5,2.0,weight); // Fill CR
+      hist_Nj_lo->Fill(Pidx-0.5,2.0,weight); // Fill CR
+      hist_lo->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-fs_P_lo,nSTCp_lo) ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P_lo : fs_Nj23_P_lo),nSTCp_lo) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp3_lo > 0) {
+      hist_lo->Fill(P3idx-0.5,2.0,weight); // Fill CR
+      hist_Nj_lo->Fill(P3idx-0.5,2.0,weight); // Fill CR
+      hist_lo->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-fs_P3_lo,nSTCp3_lo) ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P3_lo : fs_Nj23_P3_lo),nSTCp3_lo) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp4_lo > 0) {
+      hist_lo->Fill(P4idx-0.5,2.0,weight); // Fill CR
+      hist_Nj_lo->Fill(P4idx-0.5,2.0,weight); // Fill CR
+      hist_lo->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-fs_P4,nSTCp4_lo) ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P4_lo : fs_Nj23_P4_lo),nSTCp4_lo) ) ); // Fill expected SR count with separate Nj fs
+    }
+    
+    // Eventwise ST fills
+    if (nSTm_lo > 0) {
+      hist_lo->Fill(Midx-0.5,0.0,weight);
+      hist_Nj_lo->Fill(Midx-0.5,0.0,weight);
+    }
+    if (nSTp_lo > 0) {
+      hist_lo->Fill(Pidx-0.5,0.0,weight);
+      hist_Nj_lo->Fill(Pidx-0.5,0.0,weight);
+    }
+    if (nSTp3_lo > 0) {
+      hist_lo->Fill(P3idx-0.5,0.0,weight);
+      hist_Nj_lo->Fill(P3idx-0.5,0.0,weight);
+    }
+    if (nSTp4_lo > 0) {
+      hist_lo->Fill(P4idx-0.5,0.0,weight);
+      hist_Nj_lo->Fill(P4idx-0.5,0.0,weight);
+    }
+
+    // High pt
+    TH2D* hist_hi = hi_hists[hist];
+    TH2D* hist_Nj_hi = hi_hists[hist_Nj];
+    if (nSTCm_hi > 0) {
+      hist_hi->Fill(Midx-0.5,2.0,weight); // Fill CR
+      hist_Nj_hi->Fill(Midx-0.5,2.0,weight); // Fill CR
+      hist_hi->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-fs_M_hi,nSTCm_hi) ) ); // Fill expected SR count
+      hist_Nj_hi->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M_hi : fs_Nj23_M_hi),nSTCm_hi) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp_hi > 0) {
+      hist_hi->Fill(Pidx-0.5,2.0,weight); // Fill CR
+      hist_Nj_hi->Fill(Pidx-0.5,2.0,weight); // Fill CR
+      hist_hi->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-fs_P_hi,nSTCp_hi) ) ); // Fill expected SR count
+      hist_Nj_hi->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P_hi : fs_Nj23_P_hi),nSTCp_hi) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp3_hi > 0) {
+      hist_hi->Fill(P3idx-0.5,2.0,weight); // Fill CR
+      hist_Nj_hi->Fill(P3idx-0.5,2.0,weight); // Fill CR
+      hist_hi->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-fs_P3_hi,nSTCp3_hi) ) ); // Fill expected SR count
+      hist_Nj_hi->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P3_hi : fs_Nj23_P3_hi),nSTCp3_hi) ) ); // Fill expected SR count with separate Nj fs
+    }
+    if (nSTCp4_hi > 0) {
+      hist_hi->Fill(P4idx-0.5,2.0,weight); // Fill CR
+      hist_Nj_hi->Fill(P4idx-0.5,2.0,weight); // Fill CR
+      hist_hi->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-fs_P4,nSTCp4_hi) ) ); // Fill expected SR count
+      hist_Nj_hi->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P4_hi : fs_Nj23_P4_hi),nSTCp4_hi) ) ); // Fill expected SR count with separate Nj fs
+    }
+    
+    // Eventwise ST fills
+    if (nSTm_hi > 0) {
+      hist_hi->Fill(Midx-0.5,0.0,weight);
+      hist_Nj_hi->Fill(Midx-0.5,0.0,weight);
+    }
+    if (nSTp_hi > 0) {
+      hist_hi->Fill(Pidx-0.5,0.0,weight);
+      hist_Nj_hi->Fill(Pidx-0.5,0.0,weight);
+    }
+    if (nSTp3_hi > 0) {
+      hist_hi->Fill(P3idx-0.5,0.0,weight);
+      hist_Nj_hi->Fill(P3idx-0.5,0.0,weight);
+    }
+    if (nSTp4_hi > 0) {
+      hist_hi->Fill(P4idx-0.5,0.0,weight);
+      hist_Nj_hi->Fill(P4idx-0.5,0.0,weight);
+    }
+
   }//end loop on events in a file
   
   // Post-processing
   
-  vector<TH2D*> hists   = {h_LL_SR, h_LH_SR, h_HL_SR, h_HH_SR, h_LL_VR, h_LH_VR, h_HL_VR, h_HH_VR,
-			   h_LLlep_SR, h_LHlep_SR, h_HLlep_SR, h_HHlep_SR, h_LLlep_VR, h_LHlep_VR, h_HLlep_VR, h_HHlep_VR};
-  vector<TH2D*> hists23 = {h_LL_SR_23, h_LH_SR_23, h_LL_VR_23, h_LH_VR_23,
-			   h_LLlep_SR_23, h_LHlep_SR_23, h_LLlep_VR_23, h_LHlep_VR_23};
-  vector<TH2D*> hists4  = {h_HL_SR_4, h_HH_SR_4, h_HL_VR_4, h_HH_VR_4,
-			   h_HLlep_SR_4, h_HHlep_SR_4, h_HLlep_VR_4, h_HHlep_VR_4};
+  TH2D* h_LLM_SR = (TH2D*) h_LL_SR->Clone("h_LLM_SR");
+  h_LLM_SR->Add(h_LM_SR);
+  TH2D* h_LLM_VR = (TH2D*) h_LL_VR->Clone("h_LLM_VR");
+  h_LLM_VR->Add(h_LM_VR);
+  TH2D* h_HLM_SR = (TH2D*) h_HL_SR->Clone("h_HLM_SR");
+  h_HLM_SR->Add(h_HM_SR);
+  TH2D* h_HLM_VR = (TH2D*) h_HL_VR->Clone("h_HLM_VR");
+  h_HLM_VR->Add(h_HM_VR);
+
+  TH2D* h_LLM_SR_hi = (TH2D*) h_LL_SR_hi->Clone("h_LLM_SR_hi");
+  h_LLM_SR_hi->Add(h_LM_SR_hi);
+  hi_hists[h_LLM_SR] = h_LLM_SR_hi;
+  TH2D* h_LLM_VR_hi = (TH2D*) h_LL_VR_hi->Clone("h_LLM_VR_hi");
+  h_LLM_VR_hi->Add(h_LM_VR_hi);
+  hi_hists[h_LLM_VR] = h_LLM_VR_hi;
+  TH2D* h_HLM_SR_hi = (TH2D*) h_HL_SR_hi->Clone("h_HLM_SR_hi");
+  h_HLM_SR_hi->Add(h_HM_SR_hi);
+  hi_hists[h_HLM_SR] = h_HLM_SR_hi;
+  TH2D* h_HLM_VR_hi = (TH2D*) h_HL_VR_hi->Clone("h_HLM_VR_hi");
+  h_HLM_VR_hi->Add(h_HM_VR_hi);
+  hi_hists[h_HLM_VR] = h_HLM_VR_hi;
+
+  TH2D* h_LLM_SR_lo = (TH2D*) h_LL_SR_lo->Clone("h_LLM_SR_lo");
+  h_LLM_SR_lo->Add(h_LM_SR_lo);
+  low_hists[h_LLM_SR] = h_LLM_SR_lo;
+  TH2D* h_LLM_VR_lo = (TH2D*) h_LL_VR_lo->Clone("h_LLM_VR_lo");
+  h_LLM_VR_lo->Add(h_LM_VR_lo);
+  low_hists[h_LLM_VR] = h_LLM_VR_lo;
+  TH2D* h_HLM_SR_lo = (TH2D*) h_HL_SR_lo->Clone("h_HLM_SR_lo");
+  h_HLM_SR_lo->Add(h_HM_SR_lo);
+  low_hists[h_HLM_SR] = h_HLM_SR_lo;
+  TH2D* h_HLM_VR_lo = (TH2D*) h_HL_VR_lo->Clone("h_HLM_VR_lo");
+  h_HLM_VR_lo->Add(h_HM_VR_lo);
+  low_hists[h_HLM_VR] = h_HLM_VR_lo;
+
+  vector<TH2D*> hists   = {h_LL_SR, h_LM_SR, h_LLM_SR, h_LH_SR, h_HL_SR, h_HM_SR, h_HLM_SR, h_HH_SR, h_LL_VR, h_LM_VR, h_LLM_VR, h_LH_VR, h_HL_VR, h_HM_VR, h_HLM_VR, h_HH_VR};
+
+
+  TH2D* h_LLM_SR_23 = (TH2D*) h_LL_SR_23->Clone("h_LLM_SR_23");
+  h_LLM_SR_23->Add(h_LM_SR_23);
+  TH2D* h_LLM_VR_23 = (TH2D*) h_LL_VR_23->Clone("h_LLM_VR_23");
+  h_LLM_VR_23->Add(h_LM_VR_23);
+
+  TH2D* h_LLM_SR_23_hi = (TH2D*) h_LL_SR_23_hi->Clone("h_LLM_SR_23_hi");
+  h_LLM_SR_23_hi->Add(h_LM_SR_23_hi);
+  hi_hists[h_LLM_SR_23] = h_LLM_SR_23_hi;
+  TH2D* h_LLM_VR_23_hi = (TH2D*) h_LL_VR_23_hi->Clone("h_LLM_VR_23_hi");
+  h_LLM_VR_23_hi->Add(h_LM_VR_23_hi);
+  hi_hists[h_LLM_VR_23] = h_LLM_VR_23_hi;
+
+  TH2D* h_LLM_SR_23_lo = (TH2D*) h_LL_SR_23_lo->Clone("h_LLM_SR_23_lo");
+  h_LLM_SR_23_lo->Add(h_LM_SR_23_lo);
+  low_hists[h_LLM_SR_23] = h_LLM_SR_23_lo;
+  TH2D* h_LLM_VR_23_lo = (TH2D*) h_LL_VR_23_lo->Clone("h_LLM_VR_23_lo");
+  h_LLM_VR_23_lo->Add(h_LM_VR_23_lo);
+  low_hists[h_LLM_VR_23] = h_LLM_VR_23_lo;
+
+  vector<TH2D*> hists23   = {h_LL_SR_23, h_LM_SR_23, h_LLM_SR_23, h_LH_SR_23, h_LL_VR_23, h_LM_VR_23, h_LLM_VR_23, h_LH_VR_23};
+
+  TH2D* h_HLM_SR_4 = (TH2D*) h_HL_SR_4->Clone("h_HLM_SR_4");
+  h_HLM_SR_4->Add(h_HM_SR_4);
+  TH2D* h_HLM_VR_4 = (TH2D*) h_HL_VR_4->Clone("h_HLM_VR_4");
+  h_HLM_VR_4->Add(h_HM_VR_4);
+
+  TH2D* h_HLM_SR_4_hi = (TH2D*) h_HL_SR_4_hi->Clone("h_HLM_SR_4_hi");
+  h_HLM_SR_4_hi->Add(h_HM_SR_4_hi);
+  hi_hists[h_HLM_SR_4] = h_HLM_SR_4_hi;
+  TH2D* h_HLM_VR_4_hi = (TH2D*) h_HL_VR_4_hi->Clone("h_HLM_VR_4_hi");
+  h_HLM_VR_4_hi->Add(h_HM_VR_4_hi);
+  hi_hists[h_HLM_VR_4] = h_HLM_VR_4_hi;
+
+  TH2D* h_HLM_SR_4_lo = (TH2D*) h_HL_SR_4_lo->Clone("h_HLM_SR_4_lo");
+  h_HLM_SR_4_lo->Add(h_HM_SR_4_lo);
+  low_hists[h_HLM_SR_4] = h_HLM_SR_4_lo;
+  TH2D* h_HLM_VR_4_lo = (TH2D*) h_HL_VR_4_lo->Clone("h_HLM_VR_4_lo");
+  h_HLM_VR_4_lo->Add(h_HM_VR_4_lo);
+  low_hists[h_HLM_VR_4] = h_HLM_VR_4_lo;
+
+  vector<TH2D*> hists4   = {h_HL_SR_4, h_HM_SR_4, h_HLM_SR_4, h_HH_SR_4, h_HL_VR_4, h_HM_VR_4, h_HLM_VR_4, h_HH_VR_4};
   
   // save fshorts so we can easily propagate errors on fshort to errors on the predicted ST counts
-  h_FS->SetBinContent(1,fs_P);
-  h_FS->SetBinContent(2,fs_M);
-  h_FS->SetBinContent(3,fs_L);
-  h_FS->SetBinError(1,fs_P_err);
-  h_FS->SetBinError(2,fs_M_err);
-  h_FS->SetBinError(3,fs_L_err);
+  h_FS->SetBinContent(Pidx,fs_P);
+  h_FS->SetBinContent(P3idx,fs_P3);
+  h_FS->SetBinContent(P4idx,fs_P4);
+  h_FS->SetBinContent(Midx,fs_M);
+  h_FS->SetBinContent(Lidx,fs_L);
+  h_FS->SetBinError(Pidx,fs_P_err);
+  h_FS->SetBinError(P3idx,fs_P3_err);
+  h_FS->SetBinError(P4idx,fs_P4_err);
+  h_FS->SetBinError(Midx,fs_M_err);
+  h_FS->SetBinError(Lidx,fs_L_err);
   
-  h_FS_23->SetBinContent(1,fs_Nj23_P);
-  h_FS_23->SetBinContent(2,fs_Nj23_M);
-  h_FS_23->SetBinContent(3,fs_Nj23_L);
-  h_FS_23->SetBinError(1,fs_Nj23_P_err);
-  h_FS_23->SetBinError(2,fs_Nj23_M_err);
-  h_FS_23->SetBinError(3,fs_Nj23_L_err);
+  h_FS_23->SetBinContent(Pidx,fs_Nj23_P);
+  h_FS_23->SetBinContent(P3idx,fs_Nj23_P3);
+  h_FS_23->SetBinContent(P4idx,fs_Nj23_P4);
+  h_FS_23->SetBinContent(Midx,fs_Nj23_M);
+  h_FS_23->SetBinContent(Lidx,fs_Nj23_L);
+  h_FS_23->SetBinError(Pidx,fs_Nj23_P_err);
+  h_FS_23->SetBinError(P3idx,fs_Nj23_P3_err);
+  h_FS_23->SetBinError(P4idx,fs_Nj23_P4_err);
+  h_FS_23->SetBinError(Midx,fs_Nj23_M_err);
+  h_FS_23->SetBinError(Lidx,fs_Nj23_L_err);
+
+  h_FS_4->SetBinContent(Pidx,fs_Nj4_P);
+  h_FS_4->SetBinContent(P3idx,fs_Nj4_P3);
+  h_FS_4->SetBinContent(P4idx,fs_Nj4_P4);
+  h_FS_4->SetBinContent(Midx,fs_Nj4_M);
+  h_FS_4->SetBinContent(Lidx,fs_Nj4_L);
+  h_FS_4->SetBinError(Pidx,fs_Nj4_P_err);
+  h_FS_4->SetBinError(P3idx,fs_Nj4_P3_err);
+  h_FS_4->SetBinError(P4idx,fs_Nj4_P4_err);
+  h_FS_4->SetBinError(Midx,fs_Nj4_M_err);
+  h_FS_4->SetBinError(Lidx,fs_Nj4_L_err);
+
+  // Hi pt
+  h_FS_hi->SetBinContent(Pidx,fs_P_hi);
+  h_FS_hi->SetBinContent(P3idx,fs_P3_hi);
+  h_FS_hi->SetBinContent(P4idx,fs_P4_hi);
+  h_FS_hi->SetBinContent(Midx,fs_M_hi);
+  h_FS_hi->SetBinError(Pidx,fs_P_err_hi);
+  h_FS_hi->SetBinError(P3idx,fs_P3_err_hi);
+  h_FS_hi->SetBinError(P4idx,fs_P4_err_hi);
+  h_FS_hi->SetBinError(Midx,fs_M_err_hi);
   
-  h_FS_4->SetBinContent(1,fs_Nj4_P);
-  h_FS_4->SetBinContent(2,fs_Nj4_M);
-  h_FS_4->SetBinContent(3,fs_Nj4_L);
-  h_FS_4->SetBinError(1,fs_Nj4_P_err);
-  h_FS_4->SetBinError(2,fs_Nj4_M_err);
-  h_FS_4->SetBinError(3,fs_Nj4_L_err);
+  h_FS_23_hi->SetBinContent(Pidx,fs_Nj23_P_hi);
+  h_FS_23_hi->SetBinContent(P3idx,fs_Nj23_P3_hi);
+  h_FS_23_hi->SetBinContent(P4idx,fs_Nj23_P4_hi);
+  h_FS_23_hi->SetBinContent(Midx,fs_Nj23_M_hi);
+  h_FS_23_hi->SetBinError(Pidx,fs_Nj23_P_err_hi);
+  h_FS_23_hi->SetBinError(P3idx,fs_Nj23_P3_err_hi);
+  h_FS_23_hi->SetBinError(P4idx,fs_Nj23_P4_err_hi);
+  h_FS_23_hi->SetBinError(Midx,fs_Nj23_M_err_hi);
+
+  h_FS_4_hi->SetBinContent(Pidx,fs_Nj4_P_hi);
+  h_FS_4_hi->SetBinContent(P3idx,fs_Nj4_P3_hi);
+  h_FS_4_hi->SetBinContent(P4idx,fs_Nj4_P4_hi);
+  h_FS_4_hi->SetBinContent(Midx,fs_Nj4_M_hi);
+  h_FS_4_hi->SetBinError(Pidx,fs_Nj4_P_err_hi);
+  h_FS_4_hi->SetBinError(P3idx,fs_Nj4_P3_err_hi);
+  h_FS_4_hi->SetBinError(P4idx,fs_Nj4_P4_err_hi);
+  h_FS_4_hi->SetBinError(Midx,fs_Nj4_M_err_hi);
+
+  // Lo pt
+  h_FS_lo->SetBinContent(Pidx,fs_P_lo);
+  h_FS_lo->SetBinContent(P3idx,fs_P3_lo);
+  h_FS_lo->SetBinContent(P4idx,fs_P4_lo);
+  h_FS_lo->SetBinContent(Midx,fs_M_lo);
+  h_FS_lo->SetBinError(Pidx,fs_P_err_lo);
+  h_FS_lo->SetBinError(P3idx,fs_P3_err_lo);
+  h_FS_lo->SetBinError(P4idx,fs_P4_err_lo);
+  h_FS_lo->SetBinError(Midx,fs_M_err_lo);
+  
+  h_FS_23_lo->SetBinContent(Pidx,fs_Nj23_P_lo);
+  h_FS_23_lo->SetBinContent(P3idx,fs_Nj23_P3_lo);
+  h_FS_23_lo->SetBinContent(P4idx,fs_Nj23_P4_lo);
+  h_FS_23_lo->SetBinContent(Midx,fs_Nj23_M_lo);
+  h_FS_23_lo->SetBinError(Pidx,fs_Nj23_P_err_lo);
+  h_FS_23_lo->SetBinError(P3idx,fs_Nj23_P3_err_lo);
+  h_FS_23_lo->SetBinError(P4idx,fs_Nj23_P4_err_lo);
+  h_FS_23_lo->SetBinError(Midx,fs_Nj23_M_err_lo);
+
+  h_FS_4_lo->SetBinContent(Pidx,fs_Nj4_P_lo);
+  h_FS_4_lo->SetBinContent(P3idx,fs_Nj4_P3_lo);
+  h_FS_4_lo->SetBinContent(P4idx,fs_Nj4_P4_lo);
+  h_FS_4_lo->SetBinContent(Midx,fs_Nj4_M_lo);
+  h_FS_4_lo->SetBinError(Pidx,fs_Nj4_P_err_lo);
+  h_FS_4_lo->SetBinError(P3idx,fs_Nj4_P3_err_lo);
+  h_FS_4_lo->SetBinError(P4idx,fs_Nj4_P4_err_lo);
+  h_FS_4_lo->SetBinError(Midx,fs_Nj4_M_err_lo);
+
+  // Now save a copy with systematics
+  TH1D* h_FS_syststat = (TH1D*) h_FS->Clone("h_FS_syststat");
+  TH1D* h_FS_23_syststat = (TH1D*) h_FS_23->Clone("h_FS_23_syststat");
+  TH1D* h_FS_4_syststat = (TH1D*) h_FS_4->Clone("h_FS_4_syststat");
+  TH1D* h_FS_hi_syststat = (TH1D*) h_FS_hi->Clone("h_FS_hi_syststat");
+  TH1D* h_FS_23_hi_syststat = (TH1D*) h_FS_23_hi->Clone("h_FS_23_hi_syststat");
+  TH1D* h_FS_4_hi_syststat = (TH1D*) h_FS_4_hi->Clone("h_FS_4_hi_syststat");
+  TH1D* h_FS_lo_syststat = (TH1D*) h_FS_lo->Clone("h_FS_lo_syststat");
+  TH1D* h_FS_23_lo_syststat = (TH1D*) h_FS_23_lo->Clone("h_FS_23_lo_syststat");
+  TH1D* h_FS_4_lo_syststat = (TH1D*) h_FS_4_lo->Clone("h_FS_4_lo_syststat");
+
+  h_FS_syststat->SetBinError(Pidx,sqrt(pow(h_FS_syststat->GetBinError(Pidx),2)+pow(fs_P_syst,2)));
+  h_FS_syststat->SetBinError(P3idx,sqrt(pow(h_FS_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst,2)));
+  h_FS_syststat->SetBinError(P4idx,sqrt(pow(h_FS_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst,2)));
+  h_FS_syststat->SetBinError(Midx,sqrt(pow(h_FS_syststat->GetBinError(Midx),2)+pow(fs_M_syst,2)));
+  h_FS_syststat->SetBinError(Lidx,sqrt(pow(h_FS_syststat->GetBinError(Lidx),2)+pow(fs_L_syst,2)));
+
+  h_FS_23_syststat->SetBinError(Pidx,sqrt(pow(h_FS_23_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj23,2)));
+  h_FS_23_syststat->SetBinError(P3idx,sqrt(pow(h_FS_23_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj23,2)));
+  h_FS_23_syststat->SetBinError(P4idx,sqrt(pow(h_FS_23_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj23,2)));
+  h_FS_23_syststat->SetBinError(Midx,sqrt(pow(h_FS_23_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj23,2)));
+  h_FS_23_syststat->SetBinError(Lidx,sqrt(pow(h_FS_23_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj23,2)));
+
+  h_FS_4_syststat->SetBinError(Pidx,sqrt(pow(h_FS_4_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj4,2)));
+  h_FS_4_syststat->SetBinError(P3idx,sqrt(pow(h_FS_4_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj4,2)));
+  h_FS_4_syststat->SetBinError(P4idx,sqrt(pow(h_FS_4_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj4,2)));
+  h_FS_4_syststat->SetBinError(Midx,sqrt(pow(h_FS_4_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj4,2)));
+  h_FS_4_syststat->SetBinError(Lidx,sqrt(pow(h_FS_4_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj4,2)));
+
+  h_FS_hi_syststat->SetBinError(Pidx,sqrt(pow(h_FS_hi_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_hi,2)));
+  h_FS_hi_syststat->SetBinError(P3idx,sqrt(pow(h_FS_hi_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_hi,2)));
+  h_FS_hi_syststat->SetBinError(P4idx,sqrt(pow(h_FS_hi_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_hi,2)));
+  h_FS_hi_syststat->SetBinError(Midx,sqrt(pow(h_FS_hi_syststat->GetBinError(Midx),2)+pow(fs_M_syst_hi,2)));
+  h_FS_hi_syststat->SetBinError(Lidx,sqrt(pow(h_FS_hi_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_hi,2)));
+
+  h_FS_23_hi_syststat->SetBinError(Pidx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj23_hi,2)));
+  h_FS_23_hi_syststat->SetBinError(P3idx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj23_hi,2)));
+  h_FS_23_hi_syststat->SetBinError(P4idx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj23_hi,2)));
+  h_FS_23_hi_syststat->SetBinError(Midx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj23_hi,2)));
+  h_FS_23_hi_syststat->SetBinError(Lidx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj23_hi,2)));
+
+  h_FS_4_hi_syststat->SetBinError(Pidx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj4_hi,2)));
+  h_FS_4_hi_syststat->SetBinError(P3idx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj4_hi,2)));
+  h_FS_4_hi_syststat->SetBinError(P4idx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj4_hi,2)));
+  h_FS_4_hi_syststat->SetBinError(Midx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj4_hi,2)));
+  h_FS_4_hi_syststat->SetBinError(Lidx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj4_hi,2)));
+
+  h_FS_lo_syststat->SetBinError(Pidx,sqrt(pow(h_FS_lo_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_lo,2)));
+  h_FS_lo_syststat->SetBinError(P3idx,sqrt(pow(h_FS_lo_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_lo,2)));
+  h_FS_lo_syststat->SetBinError(P4idx,sqrt(pow(h_FS_lo_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_lo,2)));
+  h_FS_lo_syststat->SetBinError(Midx,sqrt(pow(h_FS_lo_syststat->GetBinError(Midx),2)+pow(fs_M_syst_lo,2)));
+  h_FS_lo_syststat->SetBinError(Lidx,sqrt(pow(h_FS_lo_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_lo,2)));
+
+  h_FS_23_lo_syststat->SetBinError(Pidx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj23_lo,2)));
+  h_FS_23_lo_syststat->SetBinError(P3idx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj23_lo,2)));
+  h_FS_23_lo_syststat->SetBinError(P4idx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj23_lo,2)));
+  h_FS_23_lo_syststat->SetBinError(Midx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj23_lo,2)));
+  h_FS_23_lo_syststat->SetBinError(Lidx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj23_lo,2)));
+
+  h_FS_4_lo_syststat->SetBinError(Pidx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj4_lo,2)));
+  h_FS_4_lo_syststat->SetBinError(P3idx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj4_lo,2)));
+  h_FS_4_lo_syststat->SetBinError(P4idx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj4_lo,2)));
+  h_FS_4_lo_syststat->SetBinError(Midx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj4_lo,2)));
+  h_FS_4_lo_syststat->SetBinError(Lidx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj4_lo,2)));
+
+  // Now save just the systematics
+  TH1D* h_FS_syst = (TH1D*) h_FS->Clone("h_FS_syst");
+  TH1D* h_FS_23_syst = (TH1D*) h_FS_23->Clone("h_FS_23_syst");
+  TH1D* h_FS_4_syst = (TH1D*) h_FS_4->Clone("h_FS_4_syst");
+  TH1D* h_FS_hi_syst = (TH1D*) h_FS_hi->Clone("h_FS_hi_syst");
+  TH1D* h_FS_23_hi_syst = (TH1D*) h_FS_23_hi->Clone("h_FS_23_hi_syst");
+  TH1D* h_FS_4_hi_syst = (TH1D*) h_FS_4_hi->Clone("h_FS_4_hi_syst");
+  TH1D* h_FS_lo_syst = (TH1D*) h_FS_lo->Clone("h_FS_lo_syst");
+  TH1D* h_FS_23_lo_syst = (TH1D*) h_FS_23_lo->Clone("h_FS_23_lo_syst");
+  TH1D* h_FS_4_lo_syst = (TH1D*) h_FS_4_lo->Clone("h_FS_4_lo_syst");
+
+  h_FS_syst->SetBinError(Pidx,fs_P_syst);
+  h_FS_syst->SetBinError(P3idx,fs_P3_syst);
+  h_FS_syst->SetBinError(P4idx,fs_P4_syst);
+  h_FS_syst->SetBinError(Midx,fs_M_syst);
+  h_FS_syst->SetBinError(Lidx,fs_L_syst);
+
+  h_FS_23_syst->SetBinError(Pidx,fs_P_syst_Nj23);
+  h_FS_23_syst->SetBinError(P3idx,fs_P3_syst_Nj23);
+  h_FS_23_syst->SetBinError(P4idx,fs_P4_syst_Nj23);
+  h_FS_23_syst->SetBinError(Midx,fs_M_syst_Nj23);
+  h_FS_23_syst->SetBinError(Lidx,fs_L_syst_Nj23);
+
+  h_FS_4_syst->SetBinError(Pidx,fs_P_syst_Nj4);
+  h_FS_4_syst->SetBinError(P3idx,fs_P3_syst_Nj4);
+  h_FS_4_syst->SetBinError(P4idx,fs_P4_syst_Nj4);
+  h_FS_4_syst->SetBinError(Midx,fs_M_syst_Nj4);
+  h_FS_4_syst->SetBinError(Lidx,fs_L_syst_Nj4);
+
+  h_FS_hi_syst->SetBinError(Pidx,fs_P_syst_hi);
+  h_FS_hi_syst->SetBinError(P3idx,fs_P3_syst_hi);
+  h_FS_hi_syst->SetBinError(P4idx,fs_P4_syst_hi);
+  h_FS_hi_syst->SetBinError(Midx,fs_M_syst_hi);
+  h_FS_hi_syst->SetBinError(Lidx,fs_L_syst_hi);
+
+  h_FS_23_hi_syst->SetBinError(Pidx,fs_P_syst_Nj23_hi);
+  h_FS_23_hi_syst->SetBinError(P3idx,fs_P3_syst_Nj23_hi);
+  h_FS_23_hi_syst->SetBinError(P4idx,fs_P4_syst_Nj23_hi);
+  h_FS_23_hi_syst->SetBinError(Midx,fs_M_syst_Nj23_hi);
+  h_FS_23_hi_syst->SetBinError(Lidx,fs_L_syst_Nj23_hi);
+
+  h_FS_4_hi_syst->SetBinError(Pidx,fs_P_syst_Nj4_hi);
+  h_FS_4_hi_syst->SetBinError(P3idx,fs_P3_syst_Nj4_hi);
+  h_FS_4_hi_syst->SetBinError(P4idx,fs_P4_syst_Nj4_hi);
+  h_FS_4_hi_syst->SetBinError(Midx,fs_M_syst_Nj4_hi);
+  h_FS_4_hi_syst->SetBinError(Lidx,fs_L_syst_Nj4_hi);
+
+  h_FS_lo_syst->SetBinError(Pidx,fs_P_syst_lo);
+  h_FS_lo_syst->SetBinError(P3idx,fs_P3_syst_lo);
+  h_FS_lo_syst->SetBinError(P4idx,fs_P4_syst_lo);
+  h_FS_lo_syst->SetBinError(Midx,fs_M_syst_lo);
+  h_FS_lo_syst->SetBinError(Lidx,fs_L_syst_lo);
+
+  h_FS_23_lo_syst->SetBinError(Pidx,fs_P_syst_Nj23_lo);
+  h_FS_23_lo_syst->SetBinError(P3idx,fs_P3_syst_Nj23_lo);
+  h_FS_23_lo_syst->SetBinError(P4idx,fs_P4_syst_Nj23_lo);
+  h_FS_23_lo_syst->SetBinError(Midx,fs_M_syst_Nj23_lo);
+  h_FS_23_lo_syst->SetBinError(Lidx,fs_L_syst_Nj23_lo);
+
+  h_FS_4_lo_syst->SetBinError(Pidx,fs_P_syst_Nj4_lo);
+  h_FS_4_lo_syst->SetBinError(P3idx,fs_P3_syst_Nj4_lo);
+  h_FS_4_lo_syst->SetBinError(P4idx,fs_P4_syst_Nj4_lo);
+  h_FS_4_lo_syst->SetBinError(Midx,fs_M_syst_Nj4_lo);
+  h_FS_4_lo_syst->SetBinError(Lidx,fs_L_syst_Nj4_lo);
 
   cout << "About to write" << endl;
   
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
-  for (vector<TH2D*>::iterator hist = hists.begin(); hist != hists.end(); hist++) (*hist)->Write();
-  for (vector<TH2D*>::iterator hist = hists23.begin(); hist != hists23.end(); hist++) (*hist)->Write();
-  for (vector<TH2D*>::iterator hist = hists4.begin(); hist != hists4.end(); hist++) (*hist)->Write();
+  for (vector<TH2D*>::iterator hist = hists.begin(); hist != hists.end(); hist++) {
+    (*hist)->Write();
+    low_hists[(*hist)]->Write();
+    hi_hists[(*hist)]->Write();
+  }
+  for (vector<TH2D*>::iterator hist = hists23.begin(); hist != hists23.end(); hist++) {
+    (*hist)->Write();
+    low_hists[(*hist)]->Write();
+    hi_hists[(*hist)]->Write();
+  }
+  for (vector<TH2D*>::iterator hist = hists4.begin(); hist != hists4.end(); hist++) {
+    (*hist)->Write();
+    low_hists[(*hist)]->Write();
+    hi_hists[(*hist)]->Write();
+  }
   h_FS->Write();
   h_FS_23->Write();
   h_FS_4->Write();
+  h_FS_hi->Write();
+  h_FS_23_hi->Write();
+  h_FS_4_hi->Write();
+  h_FS_lo->Write();
+  h_FS_23_lo->Write();
+  h_FS_4_lo->Write();
+
+  h_FS_syst->Write();
+  h_FS_23_syst->Write();
+  h_FS_4_syst->Write();
+  h_FS_hi_syst->Write();
+  h_FS_23_hi_syst->Write();
+  h_FS_4_hi_syst->Write();
+  h_FS_lo_syst->Write();
+  h_FS_23_lo_syst->Write();
+  h_FS_4_lo_syst->Write();
+
+  h_FS_syststat->Write();
+  h_FS_23_syststat->Write();
+  h_FS_4_syststat->Write();
+  h_FS_hi_syststat->Write();
+  h_FS_23_hi_syststat->Write();
+  h_FS_4_hi_syststat->Write();
+  h_FS_lo_syststat->Write();
+  h_FS_23_lo_syststat->Write();
+  h_FS_4_lo_syststat->Write();
+
+
   h_FS_alt_rel_err->Write();
   h_FS_23_alt_rel_err->Write();
   h_FS_4_alt_rel_err->Write();
+
   outfile_.Close();
   cout << "Wrote everything" << endl;
 

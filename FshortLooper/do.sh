@@ -2,13 +2,15 @@
 
 make -j 12 || return $?
 
-doD16=0
+doD16=1
 doM16=1
-doD17=0
+doD17=1
 doM17=1
-doS17=0
+doD18=1
+doM18=0
+doS17=1
 
-tag=weight1_noPrescale
+tag=centralMT2
 
 LOGDIR=logs/${tag}
 mkdir -p ${LOGDIR}
@@ -19,7 +21,8 @@ if [ "$doM16" -eq "1" ]; then
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Summer16
     INDIR=/nfs-6/userdata/dpgilber/mt2babies/mc_2016_loose
-    declare -a Samples=(ttsl ttdl singletop qcd ttX dy wjets zinv ww)
+#    INDIR=/nfs-6/userdata/mt2/V00-10-07_2016fullYear_17Jul2018_skim_ST
+    declare -a Samples=(ttsl ttdl singletop qcd ttX dy wjets zinv ww wz)
     
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2016.txt &"
@@ -33,7 +36,8 @@ if [ "$doD16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2016_94x
-    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2016_loose
+#    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2016_loose
+    INDIR=/nfs-6/userdata/mt2/V00-10-07_2016fullYear_17Jul2018_skim_ST/
     declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
     
     for SAMPLE in ${Samples[@]}; do
@@ -53,7 +57,7 @@ if [ "$doM17" -eq "1" ]; then
     declare -a Samples=(ttsl ttdl singletop qcd ttX dy gjets wjets zinv multiboson)
     
     for SAMPLE in ${Samples[@]}; do
-	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2016.txt &"
+	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
 	echo $command
 	eval $command
     done
@@ -64,7 +68,8 @@ if [ "$doD17" -eq "1" ]; then
     OUTDIR=output_unmerged/2017_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2017_31Mar2018
-    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2017_loose
+#    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2017_loose
+    INDIR=/nfs-6/userdata/mt2/V00-10-07_2017fullYear_31Mar2018_ST_skim
     declare -a Samples=(data_Run2017B data_Run2017C data_Run2017D data_Run2017E data_Run2017F)
     
     for SAMPLE in ${Samples[@]}; do
@@ -74,6 +79,35 @@ if [ "$doD17" -eq "1" ]; then
     done
 fi
 
+# 2018 MC
+if [ "$doM18" -eq "1" ]; then
+    OUTDIR=output_unmerged/2018_${tag}/
+    mkdir -p ${OUTDIR}
+    CONFIG=mc_2018
+    INDIR=/nfs-6/userdata/mt2/
+    declare -a Samples=(ttsl ttdl singletop qcd ttX dy gjets wjets zinv multiboson)
+    
+    for SAMPLE in ${Samples[@]}; do
+	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
+	echo $command
+	eval $command
+    done
+fi
+
+# 2018 data
+if [ "$doD18" -eq "1" ]; then
+    OUTDIR=output_unmerged/2018_${tag}/data
+    mkdir -p ${OUTDIR}
+    CONFIG=data_2018_Prompt
+    INDIR=/nfs-6/userdata/mt2/V00-10-07_2018fullYear_17Sep2018_skim_ST
+    declare -a Samples=(data_Run2018A data_Run2018B data_Run2018C data_Run2018D)
+    
+    for SAMPLE in ${Samples[@]}; do
+	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}.txt &"
+	echo $command
+	eval $command
+    done
+fi
 
 #2017 Signal
 if [ "$doS17" -eq "1" ]; then
@@ -84,7 +118,7 @@ if [ "$doS17" -eq "1" ]; then
     declare -a Samples=(fullsim_10cm_mt2 fullsim_90cm_mt2)
     
     for SAMPLE in ${Samples[@]}; do
-	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2016.txt &"
+	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
 	echo $command
 	eval $command
     done
