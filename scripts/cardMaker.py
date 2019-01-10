@@ -73,25 +73,25 @@ if not doZinvFromDY: f_zinv = ROOT.TFile("{0}/zinvFromGJ.root".format(indir))
 f_zinvDY = ROOT.TFile("{0}/zinvFromDY.root".format(indir))
 f_zgratio = ROOT.TFile("{0}/doubleRatio.root".format(indir))
 f_purity = ROOT.TFile("{0}/purity.root".format(indir))
-f_qcd = ROOT.TFile("{0}/qcdFromCRs.root".format(indir))
+f_qcd = ROOT.TFile("{0}/qcdFromRS.root".format(indir))
 f_sig = ROOT.TFile("{0}/{1}.root".format(indir,signal))
 if (doData): f_data = ROOT.TFile("{0}/data_Run2016.root".format(indir))
 
 if f_lostlep.IsZombie():
     print "lostlepFromCRs.root does not exist\n"
     exit(1)
-if not doZinvFromDY and f_zinv.IsZombie():
-    print "zinvFromGJ.root does not exist\n"
-    exit(1)
+# if not doZinvFromDY and f_zinv.IsZombie():
+#     print "zinvFromGJ.root does not exist\n"
+#     exit(1)
 if f_zinvDY.IsZombie():
     print "zinvFromDY.root does not exist\n"
     exit(1)
-if f_zgratio.IsZombie():
-    print "doubleRatio.root does not exist\n"
-    exit(1)
-if f_purity.IsZombie(): 
-    print "purity.root does not exist\n"
-    exit(1)
+# if f_zgratio.IsZombie():
+#     print "doubleRatio.root does not exist\n"
+#     exit(1)
+# if f_purity.IsZombie(): 
+#     print "purity.root does not exist\n"
+#     exit(1)
 if f_qcd.IsZombie():
     print "qcdFromCRs.root does not exist\n"
     exit(1)
@@ -142,6 +142,11 @@ def makeTemplate(directory,imt2):
     fullhistnameFJRB = "{0}FJRBsyst".format(fullhistname)
     fullhistnameFitStat = "{0}FitStat".format(fullhistname)
     fullhistnameFitSyst = "{0}FitSyst".format(fullhistname)
+    fullhistnameJERvar = "{0}/h_mt2bins_JERvar".format(directory)
+    fullhistnameTailVar = "{0}/h_mt2bins_TailVar".format(directory)
+    fullhistnameSigmaSoftVar = "{0}/h_mt2bins_SigmaSoftVar".format(directory)
+    fullhistnameNJetShape = "{0}/h_mt2bins_NJetShape".format(directory)
+    fullhistnameNBJetShape = "{0}/h_mt2bins_NBJetShape".format(directory)
     crsl_directory = directory.replace("sr","crsl")
     fullhistnameCRSL = "{0}/h_mt2bins".format(crsl_directory)
     crqcd_directory = directory.replace("sr","crqcd")
@@ -180,6 +185,11 @@ def makeTemplate(directory,imt2):
     err_qcd_fjrb = 0.0
     err_qcd_fitstat = 0.0
     err_qcd_fitsyst = 0.0
+    err_qcd_JERvar = 0.0
+    err_qcd_TailVar = 0.0
+    err_qcd_SigmaSoftVar = 0.0
+    err_qcd_NJetShape = 0.0
+    err_qcd_NBJetShape = 0.0
     n_bkg = 0.0
     n_data = 0.0
     lostlep_lastbin_hybrid = 1
@@ -239,7 +249,13 @@ def makeTemplate(directory,imt2):
     mt2_HI = mt2_LOW + int(h_sig.GetBinWidth(imt2))
     # The uppermost bin actually extends to infinity, which we represent with -1 for now.
     # TODO: Update these hardcoded values to their new values if they should change
-    if (mt2_HI == 1800 or mt2_HI == 1500): mt2_HI = -1
+    if(njets_LOW==1): mt2_HI = -1
+    elif(ht_LOW==250 and mt2_HI==1200): mt2_HI = -1
+    elif(ht_LOW==450 and mt2_HI==1200): mt2_HI = -1
+    elif(ht_LOW==575 and mt2_HI==2400): mt2_HI = -1
+    elif(ht_LOW==1200 and mt2_HI==2400): mt2_HI = -1
+    elif(ht_LOW==1500 and mt2_HI==2400): mt2_HI = -1
+
 
     # The upper limit (if it's finite) is exclusive, but the descriptive string is inclusive. *_mod will be used to make strings....
     nbjets_HI_mod = nbjets_HI
@@ -589,31 +605,60 @@ def makeTemplate(directory,imt2):
 
     # Either pull QCD parameters from histograms, or if they don't exist, use default values (mostly 0s)
     if (not dir_qcd == None):
+
+        # # RPHI
+        # h_qcd = f_qcd.Get(fullhistname)
+        # if (not h_qcd == None):
+        #     n_qcd = h_qcd.GetBinContent(imt2)
+        #     del h_qcd
+        # h_qcd_cryield = f_qcd.Get(fullhistnameCRyield)
+        # if (not h_qcd_cryield == None):
+        #     n_qcd_cr = round(h_qcd_cryield.GetBinContent(imt2))
+        #     del h_qcd_cryield
+        # h_qcd_alpha = f_qcd.Get(fullhistnameAlpha)
+        # if (not h_qcd_alpha == None):
+        #     qcd_alpha = h_qcd_alpha.GetBinContent(imt2)
+        #     err_qcd_alpha = h_qcd_alpha.GetBinError(imt2)
+        #     del h_qcd_alpha
+        # h_qcd_fjrb = f_qcd.Get(fullhistnameFJRB)
+        # if (not h_qcd_fjrb == None):
+        #     err_qcd_fjrb = h_qcd_fjrb.GetBinContent(imt2)
+        #     del h_qcd_fjrb
+        # h_qcd_fitstat = f_qcd.Get(fullhistnameFitStat)
+        # if (not h_qcd_fitstat == None):
+        #     err_qcd_fitstat = h_qcd_fitstat.GetBinContent(imt2)
+        #     del h_qcd_fitstat
+        # h_qcd_fitsyst = f_qcd.Get(fullhistnameFitSyst)
+        # if (not h_qcd_fitsyst == None):
+        #     err_qcd_fitsyst = h_qcd_fitsyst.GetBinContent(imt2)
+        #     del h_qcd_fitsyst
+
+        # Rebalance and Smear
         h_qcd = f_qcd.Get(fullhistname)
-        if (not h_qcd == None):
+        if h_qcd:
             n_qcd = h_qcd.GetBinContent(imt2)
+            n_qcd_err = h_qcd.GetBinError(imt2)
             del h_qcd
-        h_qcd_cryield = f_qcd.Get(fullhistnameCRyield)
-        if (not h_qcd_cryield == None):
-            n_qcd_cr = round(h_qcd_cryield.GetBinContent(imt2))
-            del h_qcd_cryield
-        h_qcd_alpha = f_qcd.Get(fullhistnameAlpha)
-        if (not h_qcd_alpha == None):
-            qcd_alpha = h_qcd_alpha.GetBinContent(imt2)
-            err_qcd_alpha = h_qcd_alpha.GetBinError(imt2)
-            del h_qcd_alpha
-        h_qcd_fjrb = f_qcd.Get(fullhistnameFJRB)
-        if (not h_qcd_fjrb == None):
-            err_qcd_fjrb = h_qcd_fjrb.GetBinContent(imt2)
-            del h_qcd_fjrb
-        h_qcd_fitstat = f_qcd.Get(fullhistnameFitStat)
-        if (not h_qcd_fitstat == None):
-            err_qcd_fitstat = h_qcd_fitstat.GetBinContent(imt2)
-            del h_qcd_fitstat
-        h_qcd_fitsyst = f_qcd.Get(fullhistnameFitSyst)
-        if (not h_qcd_fitsyst == None):
-            err_qcd_fitsyst = h_qcd_fitsyst.GetBinContent(imt2)
-            del h_qcd_fitsyst
+        h_qcd_JERvar = f_qcd.Get(fullhistnameJERvar)
+        if h_qcd_JERvar:
+            err_qcd_JERvar = h_qcd_JERvar.GetBinContent(imt2)
+            del h_qcd_JERvar
+        h_qcd_TailVar = f_qcd.Get(fullhistnameTailVar)
+        if h_qcd_TailVar:
+            err_qcd_TailVar = h_qcd_TailVar.GetBinContent(imt2)
+            del h_qcd_TailVar
+        h_qcd_SigmaSoftVar = f_qcd.Get(fullhistnameSigmaSoftVar)
+        if h_qcd_SigmaSoftVar:
+            err_qcd_SigmaSoftVar = h_qcd_SigmaSoftVar.GetBinContent(imt2)
+            del h_qcd_SigmaSoftVar
+        h_qcd_NJetShape = f_qcd.Get(fullhistnameNJetShape)
+        if h_qcd_NJetShape:
+            err_qcd_NJetShape = h_qcd_NJetShape.GetBinContent(imt2)
+            del h_qcd_NJetShape
+        h_qcd_NBJetShape = f_qcd.Get(fullhistnameNBJetShape)
+        if h_qcd_NBJetShape:
+            err_qcd_NBJetShape = h_qcd_NBJetShape.GetBinContent(imt2)
+            del h_qcd_NBJetShape
 
     #################        
     # Finalize:
@@ -798,20 +843,43 @@ def makeTemplate(directory,imt2):
     
         n_zinv = n_zinv_cr * zinv_alpha
 
-    qcd_crstat = qcd_alpha
-    if qcd_alpha > 0:
-        qcd_alphaerr = 1.0 + (err_qcd_alpha / qcd_alpha)
-    else:
-        qcd_alphaerr = 1.0 + (err_qcd_alpha / 2.0)
-    qcd_fjrbsyst = 1.0 + err_qcd_fjrb
-    qcd_fitstat = 1.0 + err_qcd_fitstat
-    qcd_fitsyst = 1.0 + err_qcd_fitsyst
+    # qcd_crstat = qcd_alpha
+    # if qcd_alpha > 0:
+    #     qcd_alphaerr = 1.0 + (err_qcd_alpha / qcd_alpha)
+    # else:
+    #     qcd_alphaerr = 1.0 + (err_qcd_alpha / 2.0)
+    # qcd_fjrbsyst = 1.0 + err_qcd_fjrb
+    # qcd_fitstat = 1.0 + err_qcd_fitstat
+    # qcd_fitsyst = 1.0 + err_qcd_fitsyst
 
-    name_qcd_crstat = "qcd_CRstat_{0}".format(perChannel)
-    name_qcd_alphaerr = "qcd_alphaErr_{0}".format(perChannel)
-    name_qcd_fjrbsyst = "qcd_FJRBsyst_{0}".format(perChannel)
-    name_qcd_fitstat = "qcd_RPHIstat_{0}".format(ht_str)
-    name_qcd_fitsyst = "qcd_RPHIsyst_{0}".format(ht_str)
+    # name_qcd_crstat = "qcd_CRstat_{0}".format(perChannel)
+    # name_qcd_alphaerr = "qcd_alphaErr_{0}".format(perChannel)
+    # name_qcd_fjrbsyst = "qcd_FJRBsyst_{0}".format(perChannel)
+    # name_qcd_fitstat = "qcd_RPHIstat_{0}".format(ht_str)
+    # name_qcd_fitsyst = "qcd_RPHIsyst_{0}".format(ht_str)
+
+    qcd_crstat = n_qcd
+    if n_qcd > 0.0:
+        err_qcd_JERvar /= n_qcd
+        err_qcd_TailVar /= n_qcd
+        err_qcd_SigmaSoftVar /= n_qcd
+        err_qcd_NJetShape /= n_qcd
+        err_qcd_NBJetShape /= n_qcd
+        err_qcd_stat = 1.0 + n_qcd_err / n_qcd
+    else:
+        err_qcd_JERvar = 1.0
+        err_qcd_TailVar = 1.0
+        err_qcd_SigmaSoftVar = 1.0
+        err_qcd_NJetShape = 1.0
+        err_qcd_NBJetShape = 1.0
+        err_qcd_stat = 1.0
+
+    name_qcd_JERvar = "qcd_JERvar"
+    name_qcd_TailVar = "qcd_TailVar"
+    name_qcd_SigmaSoftVar = "qcd_SigmaSoftVar"
+    name_qcd_NJetShape = "qcd_NJetShape_{0}".format(ht_str)
+    name_qcd_NBJetShape = "qcd_NBJetShape_{0}".format(ht_str)
+    name_qcd_stat = "qcd_RSstat_{0}".format(perChannel)
 
     if (doDummySignalSyst):
         n_syst += 1
@@ -948,15 +1016,23 @@ def makeTemplate(directory,imt2):
         print "Zinv currently only implemented for DY\n"
         exit(1)
         
-    # QCD systs
-    template_list.append("{0}        gmN {1:.0f}    -    -    -   {2:.5f}\n".format(name_qcd_crstat,n_qcd_cr_towrite,qcd_crstat_towrite))
-    if (njets_LOW == 1): # Monojet
-        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_alphaerr,qcd_alphaerr))
-    else:
-        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fjrbsyst,qcd_fjrbsyst))
-        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat))
-        template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst))
-    
+    # # QCD systs
+    # template_list.append("{0}        gmN {1:.0f}    -    -    -   {2:.5f}\n".format(name_qcd_crstat,n_qcd_cr_towrite,qcd_crstat_towrite))
+    # if (njets_LOW == 1): # Monojet
+    #     template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_alphaerr,qcd_alphaerr))
+    # else:
+    #     template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fjrbsyst,qcd_fjrbsyst))
+    #     template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitstat,qcd_fitstat))
+    #     template_list.append("{0}        lnN    -    -    -   {1:.3f}\n".format(name_qcd_fitsyst,qcd_fitsyst))
+
+    template_list.append("{0}      lnN    -    -    -   {1:.3f}\n".format(name_qcd_stat, err_qcd_stat))
+    template_list.append("{0}      lnN    -    -    -   {1:.3f}\n".format(name_qcd_JERvar, err_qcd_JERvar))
+    template_list.append("{0}      lnN    -    -    -   {1:.3f}\n".format(name_qcd_TailVar, err_qcd_TailVar))
+    if njets_LOW != 1:
+        template_list.append("{0}      lnN    -    -    -   {1:.3f}\n".format(name_qcd_SigmaSoftVar, err_qcd_SigmaSoftVar))
+        template_list.append("{0}      lnN    -    -    -   {1:.3f}\n".format(name_qcd_NJetShape, err_qcd_NJetShape))
+        template_list.append("{0}      lnN    -    -    -   {1:.3f}\n".format(name_qcd_NBJetShape, err_qcd_NBJetShape))
+
     template = "".join(template_list)
 
     # The template contains background information used for all signal mass points.
@@ -1220,7 +1296,7 @@ for key in iterator:
         sr_number = int(re.findall("\d+",directory)[0]) # Search for the first integer of any length in the directory string
         # We're either doing super signal regions or we're not; handle appropriately
         if (sr_number < 20 and doSuperSignalRegions): continue
-        elif (sr_number >= 20 and not doSuperSignalRegions): continue
+        # elif (sr_number >= 20 and not doSuperSignalRegions): continue
         #print "Expected a directory corresponding to a numbered signal region, e.g. sr1VL, but could not find a number in directory {0}, aborting...".format(directory)
         #    exit(1)
         if verbose: print directory
