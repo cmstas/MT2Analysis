@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-void rescaleBoundaryHists(std::string infile, int numSamples){
+void rescaleBoundaryHists(std::string infile, int numSamples=-1){
 
   TFile* f = new TFile(infile.c_str(), "UPDATE");
   TDirectory* dir = 0;
@@ -26,7 +26,10 @@ void rescaleBoundaryHists(std::string infile, int numSamples){
       std::string hist_name = (hist_k->GetTitle());
       if (hist_name.find("_HI") != std::string::npos || hist_name.find("_LOW") != std::string::npos || hist_name.find("h_n_mt2bins") != std::string::npos) {
         TH1* h = (TH1*)hist_k->ReadObj();
-        h->Scale(1.0/numSamples);
+        if(numSamples==-1)
+            h->Scale(1.0/h->GetEntries());
+        else
+            h->Scale(1.0/numSamples);
         dir->cd();
         h->Write("",TObject::kOverwrite);
       }
