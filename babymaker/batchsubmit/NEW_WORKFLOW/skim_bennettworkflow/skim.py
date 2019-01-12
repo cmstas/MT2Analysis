@@ -42,6 +42,13 @@ print "\nInput has {0} entries".format(nevt)
 fout = r.TFile(outname, "RECREATE")
 outtree = ch.CopyTree(sel)
 nevt_out = outtree.GetEntries()
+
+# HACK! if no events pass selection, just copy the first event.
+# We need a valid tree in the output file for accounting purposes
+if nevt_out==0:
+    outtree = ch.CopyTree("", "", 1)
+    nevt_out = 1
+
 print "Output has {0} entries".format(nevt_out)
 print "Reduction factor of", 1.0*nevt/nevt_out
 outtree.Write()

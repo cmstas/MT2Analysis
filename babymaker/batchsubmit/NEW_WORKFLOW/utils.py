@@ -19,6 +19,8 @@ class Sample:
     def __init__(self, name):
         self.name = name
         self.jobs = {}
+        self.nevents = 0
+        self.done = False
 
     def add_job(self, job):
         if not isinstance(job, Job):
@@ -27,23 +29,30 @@ class Sample:
             raise Exception("input file {0} doesn't exist!".format(job.input))
         self.jobs[job.id] = job
 
+    def remove_job(self, job_id):
+        del self.jobs[job_id]
 
 def sweeprootJobs(jobs):
     cmds = {}
     for job in jobs:
         tn = job.tree_name
         if tn not in cmds:
-            cmds[tn] = "sweeproot/sweepRoot -b -o {0}".format(tn)
-        cmds[tn] += " "+job.output
+            cmds[tn] = []
+        cmds[tn].append(job.output)
 
     for tn in cmds:
-        p = subprocess.Popen(cmds[tn].split(), stdout=subprocess.PIPE)
-        out, err = p.communicate()
-        for line in out.split('\n'):
-            if line.startswith("BAD FILE"):
-                print '\n'+line
-                fout = line.split(":")[1].strip()
-                subprocess.call("hadoop fs -rm -r "+fout.replace("/hadoop",""), shell=True)
+        base_cmd = "sweeproot/sweepRoot -b -o {0} ".format(tn)
+        nfiles = len(cmds[tn])
+        FILESPERCMD = 5000
+        for ifile in range(0, nfiles, FILESPERCMD):
+            cmd = base_cmd + " ".join(cmds[tn][ifile:ifile+FILESPERCMD])
+            p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+            out, err = p.communicate()
+            for line in out.split('\n'):
+                if line.startswith("BAD FILE"):
+                    print '\n'+line
+                    fout = line.split(":")[1].strip()
+                    subprocess.call("hadoop fs -rm -r "+fout.replace("/hadoop",""), shell=True)
 
     for job in jobs:
         job.sweeprooted = True
@@ -92,8 +101,13 @@ def isCurrentlySubmitted(job, tag, condor_out):
 def writeSummary(d, tag, summarydir):
     fout = open(os.path.join(summarydir, "{0}.txt".format(tag)), 'w')
     fout.write("Last updated {0}\n".format(str(dt.datetime.now())))
+    done, running, waiting = 0, 0, 0
     for s in sorted(d.keys(), key=lambda x: d[x].done, reverse=True):
-        fout.write("{0:40s} : {1:4d} done, {2:4d} running, {3:4d} waiting\n".format(s, d[s].done, d[s].running, d[s].waiting))
+        fout.write("{0:46s} : {1:5d} done, {2:5d} running, {3:5d} waiting\n".format(s, d[s].done, d[s].running, d[s].waiting))
+        done += d[s].done
+        running += d[s].running
+        waiting += d[s].waiting
+    fout.write("{0:46s} : {1:5d} done, {2:5d} running, {3:5d} waiting\n".format("TOTAL", done, running, waiting))
     fout.close()
 
 

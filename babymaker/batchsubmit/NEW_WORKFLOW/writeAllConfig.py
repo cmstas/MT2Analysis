@@ -2,6 +2,7 @@ import sys, os
 import glob
 sys.path.append("ProjectMetis/scripts")
 import dis_client
+import json
 
 from samples_2016 import samples_2016
 from samples_2017 import samples_2017
@@ -17,21 +18,22 @@ tag = "V00-10-08_2017fullYear_31Mar2018"
 samples = samples_2017
 # samples = samples_2018
 
-# cms4tags = ["CMS4_V10-02-04", "CMS4_V09-04-17"]
+# cms4tags = ["CMS4_V10-02-04", "CMS4_V09-04-17", "CMS4_V00-00-02_2017Sep27"]
 cms4tags = ["CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-19"]
 # cms4tags = ["CMS4_V10-02-04", "CMS4_V10-02-02", "CMS4_V10-02-01"]
 
 do = [
-    "data",
+    # "data",
     "ttbar",
-    "wjets",
-    "zinv",
-    "dyjetsll",
-    "qcd_ht",
-    "singletop",
-    "gjets",
-    "ttv",
-    "diboson",
+    # "wjets",
+    # "zinv",
+    # "dyjetsll",
+    # "qcd_ht",
+    # "singletop",
+    # "gjets",
+    # "ttv",
+    # "diboson",
+    # "signal",
 ]
 
 if checkForScale1fb:
@@ -94,8 +96,17 @@ for type in samples:
 
         samp = samples[type][ds][3]
 
+        try:
+            metadata = json.load(open(path+"/metadata.json"))
+        except:
+            print "WARNING! no metadata! Skipping", ds
+            continue
+        nevts_effective = 0
+        for i in metadata["ijob_to_nevents"]:
+            nevts_effective += metadata["ijob_to_nevents"][i][1]
+
         fout = open("{0}/{1}.txt".format(outdir, samp), 'w')
-        fout.write("# {0} {1} {2} {3} {4}\n".format(ds, info[idx]["nevents_out"], info[idx]["xsec"], info[idx]["kfactor"], info[idx]["filter_eff"]))
+        fout.write("# {0} {1} {2} {3} {4}\n".format(ds, nevts_effective, info[idx]["xsec"], info[idx]["kfactor"], info[idx]["filter_eff"]))
         for f in glob.glob(path+"/*.root"):
             indir, fname = os.path.split(f)
             fout.write("{0} {1}\n".format(fname, indir))

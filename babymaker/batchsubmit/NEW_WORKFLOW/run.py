@@ -8,14 +8,17 @@ import cPickle as pickle
 from utils import *
 
 
-# tag = "V00-10-08_2016fullYear_17Jul2018"
-tag = "V00-10-08_2017fullYear_31Mar2018"
+tag = "V00-10-08_2016fullYear_17Jul2018"
+# tag = "V00-10-08_2017fullYear_31Mar2018"
 # tag = "V00-10-08_2018fullYear_17Sep2018"
 skims = []
 skims.append("base")
 skims.append("ST")
 skims.append("RS")
 skims.append("qcd")
+
+doMerge = False
+forceRecheckExist = True
 
 if os.path.exists("{0}/progress.pkl".format(tag)):
     d = pickle.load(open("{0}/progress.pkl".format(tag), 'rb'))
@@ -26,6 +29,8 @@ sampnames = []
 for f in glob.glob("{0}/file_lists/*.txt".format(tag)):
     sampnames.append(os.path.split(f)[1].split(".")[0])
 
+# sampnames = ["qcd_ht1500to2000", "ttsl_powheg", "ttdl_powheg"]
+
 for s in sampnames:
     if s not in d:
         d[s] = Sample(s)
@@ -34,6 +39,7 @@ for s in sampnames:
     nevents = int(metadata[2])
     d[s].nevents = nevents
     outdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}".format(tag, s)
+    job_ids = []
     for line in fl:
         fid = line.strip().split()[0].split(".")[0]
         indir = line.strip().split()[1]
@@ -43,16 +49,29 @@ for s in sampnames:
         fbaby = os.path.join(outdir, "{0}.root".format(bid))
         exe = "wrapper.sh"
         args = [bid, fin, outdir, "1" if "RebalanceAndSmear" in tag else "0"]
+        job_ids.append(bid)
         if bid not in d[s].jobs:
             d[s].add_job(Job(bid, fin, fbaby, exe, args, True, "mt2"))
+        elif forceRecheckExist and not os.path.exists(d[s].jobs[bid].output):
+            d[s].jobs[bid].done = False
+            d[s].jobs[bid].sweeprooted = False
 
         for skim in skims:
             fskim = os.path.join(outdir, "skim_"+skim, "skim_{0}_{1}.root".format(skim, fidx))
             sid = "skim_{0}_{1}".format(skim, fidx)
             exe = "wrapper_skim.sh"
             args = [sid, fbaby, os.path.join(outdir, "skim_"+skim), skim]
+            job_ids.append(sid)
             if sid not in d[s].jobs:
                 d[s].add_job(Job(sid, fbaby, fskim, exe, args, False, "mt2"))
+            elif forceRecheckExist and not os.path.exists(d[s].jobs[sid].output):
+                d[s].jobs[sid].done = False
+                d[s].jobs[sid].sweeprooted = False
+
+    for bid in d[s].jobs.keys():
+        if bid not in job_ids:
+            print "Job deleted! {0} from sample {1}".format(bid, s)
+            d[s].remove_job(bid)
 
 savepkl = lambda x : pickle.dump(x, open("{0}/progress.pkl".format(tag), 'wb'))
 savepkl(d)
@@ -78,6 +97,7 @@ while not alldone:
     sweeprootJobs(to_sweeproot)
 
     # get the current condor output
+    subprocess.call("condor_release bemarsh > /dev/null", shell=True)
     p = subprocess.Popen("condor_q {0} -nobatch -wide".format(os.environ["USER"]).split(), stdout=subprocess.PIPE)
     out, err = p.communicate()
     condor_out = out.split("\n")
@@ -119,13 +139,14 @@ while not alldone:
             if isCurrentlySubmitted(job, tag, condor_out):
                 d[s].running += 1
             else:
-                if len(condor_out)+N_submitted < 15000:
+                if len(condor_out)+N_submitted < 20000:
                     d[s].running += 1
                     to_submit.append(job)
                 else:
                     d[s].waiting += 1
 
-        print "** {0} babies and {1} skims newly finished!".format(n_babies_newly_done, n_skims_newly_done)
+        if n_babies_newly_done > 0 or n_skims_newly_done > 0:
+            print "** {0} babies and {1} skims newly finished!".format(n_babies_newly_done, n_skims_newly_done)
 
         if len(to_submit) > 0:
             print "** To submit {0} more jobs.".format(len(to_submit))
@@ -138,11 +159,17 @@ while not alldone:
     writeSummary(d, tag, summarydir)
 
     if not alldone:
-        print "Checking again in 30 min..."
-        time.sleep(30 * 60)
+        print "Checking again in 20 min..."
+        time.sleep(20 * 60)
 
 print "WOO! You made it! All {0} jobs are done!".format(sum([len(d[s].jobs) for s in d]))
+
+if not doMerge:
+    exit(0)
+
 print "Merging the skims now."
+
+MAXLOCALJOBS = 25
 
 basedir = "/nfs-7/userdata/mt2/"
 logdir = "mergeLogs/"
@@ -151,7 +178,7 @@ os.system("mkdir -p "+logdir)
 cmds = []
 for s in sampnames:
     for skim in skims:
-        hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}/skim_{2}".format(tag, kim)
+        hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}/skim_{2}".format(tag, s, skim)
         nfsdir = os.path.join(basedir, "{0}_skim_{1}".format(tag, skim))
         os.system("mkdir -p "+nfsdir)
         os.system("chmod -R a+wrx "+nfsdir)
@@ -172,7 +199,7 @@ while done < len(cmds):
         running += 1
         current += 1
     if done < len(cmds):
-        print "{0}/{1} skims done merging. {2} currently running. Checking again in 5 min...".format(done, len(samples), running)
+        print "{0}/{1} skims done merging. {2} currently running. Checking again in 5 min...".format(done, len(cmds), running)
         time.sleep(5 * 60)        
 
 print "Done merging!"

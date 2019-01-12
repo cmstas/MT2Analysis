@@ -57,10 +57,8 @@ samples_2017 = {
         "/MuonEG/Run2017F-31Mar2018-v1/MINIAOD"         : [None, None, None, "data_Run2017F_MuonEG_31Mar2018"],
         },
     "ttbar" : {
-        # "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM"         : [365.34, 1.0, 1.0, "ttsl_powheg", "DELETE"],
-        # "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [365.34, 1.0, 1.0, "ttsl_powheg", "TOADD"],
-        # "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM"                : [88.29,  1.0, 1.0, "ttdl_powheg", "DELETE"],
-        # "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM"        : [88.29,  1.0, 1.0, "ttdl_powheg", "TOADD"], 
+        "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [365.34, 1.0, 1.0, "ttsl_powheg", "TOADD"],
+        "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM"        : [88.29,  1.0, 1.0, "ttdl_powheg", "TOADD"], 
 
         # madgraph samples, consistent with 2016
         "/TTJets_DiLept_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM"             : [54.23, 1.5225, 1.0, "ttdl_mg", "TOADD"],

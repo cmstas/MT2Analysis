@@ -99,6 +99,10 @@ ls -lh
 echo "[wrapper] copying file"
 OUTPUT=`ls | grep ${FILEID}`
 echo "[wrapper] OUTPUT = " ${OUTPUT}
+if [[ $OUTPUT != *".root" ]]; then
+    echo "[wrapper] could not find output! Exiting."
+    exit 1
+fi
 
 # Rigorous sweeproot which checks ALL branches for ALL events.
 # If GetEntry() returns -1, then there was an I/O problem, so we will delete it

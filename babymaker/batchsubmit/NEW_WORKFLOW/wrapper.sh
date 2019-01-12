@@ -99,6 +99,10 @@ ls -lh
 echo "[wrapper] copying file"
 OUTPUT=`ls | grep ${FILEID}`
 echo "[wrapper] OUTPUT = " ${OUTPUT}
+if [[ $OUTPUT != *".root" ]]; then
+    echo "[wrapper] could not find output! Exiting."
+    exit 1
+fi
 echo "[wrapper] moving output to output.root"
 mv ${OUTPUT} output.root
 
