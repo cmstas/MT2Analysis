@@ -244,6 +244,8 @@ void MT2Looper::SetSignalRegions(){
       plot1D("h_"+vars.at(j)+"_"+"HI",   1, SRVecMonojet.at(i).GetUpperBound(vars.at(j)), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
     }
     plot1D("h_n_mt2bins",  1, SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).srHistMap, "", 1, 0, 2);
+    // fill with dummy value of weight 0 just to force it to make the histogram. need the binning info later
+    plot1D("h_mt2bins",  -1, 0, SRVecMonojet.at(i).srHistMap, "; M_{T2} [GeV]", SRVecMonojet.at(i).GetNumberOfMT2Bins(), SRVecMonojet.at(i).GetMT2Bins());
 
     dir = (TDirectory*)outfile_->Get(("crsl"+SRVecMonojet.at(i).GetName()).c_str());
     if (dir == 0) {
@@ -746,7 +748,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   }
   if (verbose) cout<<__LINE__<<endl;
 
-  if (applyLeptonSFfromFiles) {
+  if (config_tag.find("data") == string::npos && applyLeptonSFfromFiles) {
       cout << "Applying lepton scale factors from the following files:\n";
       cout << "    electrons: " << config_.elSF_file << ":" << config_.elSF_histName << "," << config_.elSF_isoHistName << endl;
       cout << "    electrons tracking: " << config_.elSFtrk_file << endl;
@@ -894,6 +896,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
       if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
       if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
+
 
       // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
       if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
@@ -1138,7 +1141,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  evtweight_ *= t.weight_toppt;
 	}
 
-        if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017))
+        if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80)
             evtweight_ *= t.weight_L1prefire;
 
       } // !isData
@@ -1195,9 +1198,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       passMonojetId_ = false;
       if ( nJet30_ >= 1 && (isSignal_ || (t.jet_id[0] >= 4)) ) passMonojetId_ = true;
 
+      // can kill this once using babies with nLepHighMT stored
+      int nLepHighMT = 0;
+      for(int i=0; i<t.nlep; i++){
+          float mt = MT(t.lep_pt[i], t.lep_phi[i], t.met_pt, t.met_phi);
+          if(mt >= 100.)
+              nLepHighMT++;
+      }
+      // nLepHighMT = t.nLepHighMT; // switch to this once using babies with this variable stored
 
       // simple counter to check for 1L CR
-      if (t.nLepLowMT == 1 && t.nLepHighMT == 0){
+      if (t.nLepLowMT == 1 && nLepHighMT == 0){
 	doSLplots = true;
 
 	// find unique lepton to plot pt,MT and get flavor
@@ -1292,6 +1303,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	} //useDRforGammaQCDMixing
       } // ngamma > 0
 
+
       // Variables for Zll (DY) control region
       bool doDYplots = false;
       bool doLowPtSFplots = false;
@@ -1321,7 +1333,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  }
 	}
       } // nlep == 2
-      
+
       // Variables for Removed single lepton (RL) region
       bool doRLplots = false;
       bool doRLMUplots = false;
@@ -1675,7 +1687,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-      //cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+        // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << " " << evtweight_ << endl;
       fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
     }
@@ -1771,7 +1783,7 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
   valuesBase["passesHtMet"] = ( (ht_ > 250. && met_pt_ > 250.) || (ht_ > 1200. && met_pt_ > 30.) );
 
   if (SRBase.PassesSelectionCRSL(valuesBase)) {
-    if(prefix=="crsl") fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
+    if(prefix=="crsl")        fillHistosSingleLepton(SRBase.crslHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslbase", suffix);
     else if(prefix=="crslmu") fillHistosSingleLepton(SRBase.crslmuHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslmubase", suffix);
     else if(prefix=="crslel") fillHistosSingleLepton(SRBase.crslelHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crslelbase", suffix);
 
@@ -2188,8 +2200,8 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   if(passBase && t.zll_ht > 1500.                  ) fillHistosDY(InclusiveRegions.at(4).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseUH", suffix);
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(SRVec.at(srN).PassesSelectionCRDY(values)){
-      // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+    if(SRVec.at(srN).PassesSelectionCRDY(values)){        
+        // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << " " << evtweight_ << endl;
       fillHistosDY(SRVec.at(srN).crdyHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //break; //not orthogonal any more 
     }

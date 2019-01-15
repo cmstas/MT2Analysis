@@ -210,7 +210,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
   }
 
   // Lepton Scale Factors
-  if (applyLeptonSFs) {
+  if (!isDataFromFileName && applyLeptonSFs) {
       cout << "Applying lepton scale factors from the following files:\n";
       cout << "    electrons: " << config_.elSF_file << ":" << config_.elSF_histName << "," << config_.elSF_isoHistName << endl;
       cout << "    electrons tracking: " << config_.elSFtrk_file << endl;
@@ -310,10 +310,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       // ad-hoc solution for latter part of 2016F that requires the 2016G corrections
       if (isDataFromFileName && currentFileName.Contains("2016F")) {
 	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.clear();
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L1FastJet_AK4PFchs.txt"   );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2Relative_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L3Absolute_AK4PFchs.txt"  );
-	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_23Sep2016GV4_DATA_L2L3Residual_AK4PFchs.txt");
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_07Aug2017GH_V11_DATA_L1FastJet_AK4PFchs.txt"   );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_07Aug2017GH_V11_DATA_L2Relative_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_07Aug2017GH_V11_DATA_L3Absolute_AK4PFchs.txt"  );
+	  jetcorr_filenames_pfL1FastJetL2L3_postrun278802.push_back  ("jetCorrections/Summer16_07Aug2017GH_V11_DATA_L2L3Residual_AK4PFchs.txt");
           cout << "additional run-dependent JEC from the following files:" << endl;
           for (unsigned int ifile = 0; ifile < jetcorr_filenames_pfL1FastJetL2L3_postrun278802.size(); ++ifile) {
               cout << "   " << jetcorr_filenames_pfL1FastJetL2L3_postrun278802.at(ifile) << endl;
@@ -500,7 +500,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (!isData && applyTriggerCuts && !(HLT_PFHT1050 || HLT_PFHT350_PFMET120 || HLT_Photon165_HE10 || HLT_SingleMu 
             || HLT_DoubleMu || HLT_DoubleEl || HLT_MuX_Ele12 || HLT_Mu8_EleX)) continue;
 
-      // set jet corrector based on run number for data
+      // set jet corrector based on run number for data (late 2016F has special corrections; everything else determined by era)
       if (isData && run >= 278802 && run <= 278808) {
 	jet_corrector_pfL1FastJetL2L3_current = jet_corrector_pfL1FastJetL2L3_postrun278802;
       } else {

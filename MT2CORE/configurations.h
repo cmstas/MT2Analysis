@@ -11,6 +11,7 @@
 struct MT2Configuration {
     std::string json;
     int year = -1;
+    int cmssw_ver = -1;
     float lumi = -1;
     std::string btagcalib_csv;
     std::string btageff_file;

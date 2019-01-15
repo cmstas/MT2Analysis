@@ -18,16 +18,13 @@ MT2Config_defs = {}
 
 MT2Config_defs["data_2017_31Mar2018"] = {
     "year" : 2017,
+    "cmssw_ver" : 94,
     "json" : "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt",
     "lumi" : 41.37,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
-    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
-    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -43,13 +40,14 @@ MT2Config_defs["data_2017_31Mar2018"] = {
                   "HBHENoiseFilter",
                   "HBHENoiseIsoFilter",
                   "EcalDeadCellTriggerPrimitiveFilter",
-                  "ecalBadCalibFilter",
+                  "ecalBadCalibFilterUpdate",
                   "badMuonFilter",
                   "badChargedCandidateFilter"
                   ],
     "triggers" : {
         "SR" : [ 
             "PFHT1050",
+            "PFJet500",
             "PFHT800_PFMET75_PFMHT75",
             "PFHT500_PFMET100_PFMHT100",
             "PFMET120_PFMHT120",
@@ -103,16 +101,13 @@ MT2Config_defs["data_2017_31Mar2018"] = {
 
 MT2Config_defs["data_2017_Prompt"] = {
     "year" : 2017,
+    "cmssw_ver" : 94,
     "json" : "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt",
     "lumi" : 41.97,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
-    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
-    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -130,16 +125,13 @@ MT2Config_defs["data_2017_Prompt"] = {
 
 MT2Config_defs["data_2018_Prompt"] = {
     "year" : 2018,
+    "cmssw_ver" : 102,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
     "lumi" : 58.83,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_DeepCSV" : 0.4184,
     "btag_med_threshold_CSVv2" : 0.8838,
-    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
-    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -151,16 +143,13 @@ MT2Config_defs["data_2018_Prompt"] = {
 
 MT2Config_defs["data_2018_17Sep2018"] = {
     "year" : 2018,
+    "cmssw_ver" : 102,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
     "lumi" : 58.83,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
-    "btag_med_threshold_DeepCSV" : 0.4941,
+    "btag_med_threshold_DeepCSV" : 0.4184,
     "btag_med_threshold_CSVv2" : 0.8838,
-    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
-    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -172,16 +161,13 @@ MT2Config_defs["data_2018_17Sep2018"] = {
 
 MT2Config_defs["data_2016_Moriond17"] = {
     "year" : 2016,
+    "cmssw_ver" : 80,
     "json" : "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt",
     "lumi" : 35.922,
     "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
     "btag_med_threshold_DeepCSV" : 0.6324,
     "btag_med_threshold_CSVv2" : 0.8484,
-    "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "GsfElectronToCutBasedSpring15V",
-    "elSF_isoHistName" : "MVAVLooseElectronToMini",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -250,6 +236,17 @@ MT2Config_defs["data_2016_Moriond17"] = {
     }
 
 MT2Config_defs["data_2016_94x"] = copy.deepcopy(MT2Config_defs["data_2016_Moriond17"])
+MT2Config_defs["data_2016_94x"]["cmssw_ver"] = 94
+MT2Config_defs["data_2016_94x"]["btag_med_threshold_DeepCSV"] = 0.6321
+MT2Config_defs["data_2016_94x"]["JECs"] = [
+    ["2016B", "Summer16_07Aug2017BCD_V11_DATA"],
+    ["2016C", "Summer16_07Aug2017BCD_V11_DATA"],
+    ["2016D", "Summer16_07Aug2017BCD_V11_DATA"],
+    ["2016E", "Summer16_07Aug2017EF_V11_DATA"],
+    ["2016F", "Summer16_07Aug2017EF_V11_DATA"],
+    ["2016G", "Summer16_07Aug2017GH_V11_DATA"],
+    ["2016H", "Summer16_07Aug2017GH_V11_DATA"]
+    ]
 MT2Config_defs["data_2016_94x"]["filters"] = [
     "eeBadScFilter",
     "globalSuperTightHalo2016Filter",
@@ -263,6 +260,7 @@ MT2Config_defs["data_2016_94x"]["filters"] = [
 
 MT2Config_defs["mc_94x_Fall17"] = {
     "year" : 2017,
+    "cmssw_ver" : 94,
     "lumi" : 41.529,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root",
@@ -270,7 +268,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
     "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSFtrk_file" : "lepsf/FullRunII/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
     "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
     "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
     "ea_version" : 3,
@@ -283,7 +281,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
                   "HBHENoiseFilter",
                   "HBHENoiseIsoFilter",
                   "EcalDeadCellTriggerPrimitiveFilter",
-                  "ecalBadCalibFilter",
+                  "ecalBadCalibFilterUpdate",
                   "badMuonFilter",
                   "badChargedCandidateFilter"
                   ],
@@ -291,13 +289,16 @@ MT2Config_defs["mc_94x_Fall17"] = {
 
 MT2Config_defs["mc_102x_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
 MT2Config_defs["mc_102x_Autumn18"]["year"] = 2018
+MT2Config_defs["mc_102x_Autumn18"]["cmssw_ver"] = 102
 MT2Config_defs["mc_102x_Autumn18"]["lumi"] = 58.83
+MT2Config_defs["mc_102x_Autumn18"]["btag_med_threshold_DeepCSV"] = 0.4184
 MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
 MT2Config_defs["mc_102x_Autumn18"]["JRT_file"] = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root"
 
 
 MT2Config_defs["mc_80x_Summer16"] = {
     "year" : 2016,
+    "cmssw_ver" : 80,
     "lumi" : 35.922,
     "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
@@ -325,10 +326,11 @@ MT2Config_defs["mc_80x_Summer16"] = {
 
 MT2Config_defs["mc_94x_Summer16"] = {
     "year" : 2016,
+    "cmssw_ver" : 94,
     "lumi" : 35.922,
     "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
-    "btag_med_threshold_DeepCSV" : 0.6324,
+    "btag_med_threshold_DeepCSV" : 0.6321,
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
     "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
@@ -338,7 +340,7 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
-    "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
+    "JECs" : [ ["", "Summer16_07Aug2017_V11_MC"]
                ],
     "filters" : [ "eeBadScFilter",
                   "globalSuperTightHalo2016Filter",
@@ -353,6 +355,14 @@ MT2Config_defs["mc_94x_Summer16"] = {
 
 MT2Config_defs["mc_80x_fastsim_Moriond17"] = copy.deepcopy(MT2Config_defs["mc_80x_Summer16"])
 MT2Config_defs["mc_80x_fastsim_Moriond17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
+    "goodVertices",
+    "HBHENoiseFilter",
+    "HBHENoiseIsoFilter",
+    "EcalDeadCellTriggerPrimitiveFilter",
+    "badMuonFilterV2",
+    "badChargedHadronFilterV2"
+    ]
 
 
 
@@ -395,6 +405,7 @@ if __name__=="__main__":
                   "HBHENoiseIsoFilter",
                   "EcalDeadCellTriggerPrimitiveFilter",
                   "ecalBadCalibFilter",
+                  "ecalBadCalibFilterUpdate",
                   "badMuonFilter",
                   "badChargedCandidateFilter",
                   "badMuonFilterV2",
@@ -431,9 +442,14 @@ MT2Configuration GetMT2Config(std::string tag){
     MT2Configuration c;
 
     c.year = -1;
+    c.cmssw_ver = -1;
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
+    c.elSF_file = "";
+    c.elSFtrk_file = "";
+    c.elSF_histName = "";
+    c.elSF_isoHistName = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
 """)
 
@@ -444,6 +460,8 @@ MT2Configuration GetMT2Config(std::string tag){
         fout.write("\n    {0}(tag == \"{1}\"){{\n\n".format("if" if i==0 else "}else if", tag))
         if "year" in c[tag]:
             fout.write("        c.year               = {0};\n".format(c[tag]["year"]))
+        if "cmssw_ver" in c[tag]:
+            fout.write("        c.cmssw_ver          = {0};\n".format(c[tag]["cmssw_ver"]))
         if "json" in c[tag]:
             fout.write("        c.json               = \"{0}\";\n".format(c[tag]["json"]))
         if "lumi" in c[tag]:
@@ -454,16 +472,17 @@ MT2Configuration GetMT2Config(std::string tag){
         fout.write("        c.btag_med_threshold_CSVv2   = {0};\n".format(c[tag]["btag_med_threshold_CSVv2"]))
         if "pu_weights_file" in c[tag]:
             fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 
-        fout.write("        c.elSF_file          = \"{0}\";\n".format(c[tag]["elSF_file"]))
-        fout.write("        c.elSFtrk_file       = \"{0}\";\n".format(c[tag]["elSFtrk_file"]))
-        fout.write("        c.elSF_histName      = \"{0}\";\n".format(c[tag]["elSF_histName"]))
-        fout.write("        c.elSF_isoHistName   = \"{0}\";\n".format(c[tag]["elSF_isoHistName"]))
+        if "elSF_file" in c[tag]:
+            fout.write("        c.elSF_file          = \"{0}\";\n".format(c[tag]["elSF_file"]))
+            fout.write("        c.elSFtrk_file       = \"{0}\";\n".format(c[tag]["elSFtrk_file"]))
+            fout.write("        c.elSF_histName      = \"{0}\";\n".format(c[tag]["elSF_histName"]))
+            fout.write("        c.elSF_isoHistName   = \"{0}\";\n".format(c[tag]["elSF_isoHistName"]))
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
         fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))
         for jec in c[tag]["JECs"]:
             fout.write("        c.JECs.push_back(std::pair<std::string, std::string> (\"{0}\", \"{1}\"));\n".format(jec[0], jec[1]))
-        for filter in c[tag]["filters"]:
+        for filter in c[tag]["filters"]:            
             if filter not in allfilters:
                 raise Exception("ERROR: filter {0} not in list of all filters!".format(filter))
             fout.write("        c.filters[\"{0}\"] = true;\n".format(filter))

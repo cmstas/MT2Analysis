@@ -136,7 +136,8 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     float err  = h_elSF->GetBinError(binx,biny);
     // get also trk sf
     int binx_trk = h_elSF_trk->GetXaxis()->FindBin(eta_cutoff);
-    int biny_trk = 1; // hardcoding for now - only one bin in pt (hist starts at 20)
+    int biny_trk = h_elSF_trk->GetYaxis()->FindBin(pt_cutoff);
+    if(biny_trk < 1) biny_trk = 1;
     central *= h_elSF_trk->GetBinContent(binx_trk,biny_trk);
     float trk_err = h_elSF_trk->GetBinError(binx_trk,biny_trk);
     if (pt_cutoff < 20. || pt_cutoff > 80.) err = sqrt(err*err + trk_err*trk_err + 0.01*0.01); // extra 1% error for pt < 20 OR pt > 80

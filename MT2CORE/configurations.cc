@@ -23,9 +23,14 @@ MT2Configuration GetMT2Config(std::string tag){
     MT2Configuration c;
 
     c.year = -1;
+    c.cmssw_ver = -1;
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
+    c.elSF_file = "";
+    c.elSFtrk_file = "";
+    c.elSF_histName = "";
+    c.elSF_isoHistName = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
     c.filters["eeBadScFilter"] = false;
     c.filters["globalTightHalo2016Filter"] = false;
@@ -35,6 +40,7 @@ MT2Configuration GetMT2Config(std::string tag){
     c.filters["HBHENoiseIsoFilter"] = false;
     c.filters["EcalDeadCellTriggerPrimitiveFilter"] = false;
     c.filters["ecalBadCalibFilter"] = false;
+    c.filters["ecalBadCalibFilterUpdate"] = false;
     c.filters["badMuonFilter"] = false;
     c.filters["badChargedCandidateFilter"] = false;
     c.filters["badMuonFilterV2"] = false;
@@ -43,26 +49,23 @@ MT2Configuration GetMT2Config(std::string tag){
     if(tag == "data_2016_94x"){
 
         c.year               = 2016;
+        c.cmssw_ver          = 94;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
         c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
-        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;
-        c.elSF_file          = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_histName      = "GsfElectronToCutBasedSpring15V";
-        c.elSF_isoHistName   = "MVAVLooseElectronToMini";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016E", "Summer16_23Sep2016EFV4_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016F", "Summer16_23Sep2016EFV4_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016G", "Summer16_23Sep2016GV4_DATA"));
-        c.JECs.push_back(std::pair<std::string, std::string> ("2016H", "Summer16_23Sep2016HV4_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_07Aug2017BCD_V11_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_07Aug2017BCD_V11_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_07Aug2017BCD_V11_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016E", "Summer16_07Aug2017EF_V11_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016F", "Summer16_07Aug2017EF_V11_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016G", "Summer16_07Aug2017GH_V11_DATA"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("2016H", "Summer16_07Aug2017GH_V11_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -111,16 +114,13 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2016_Moriond17"){
 
         c.year               = 2016;
+        c.cmssw_ver          = 80;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
         c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
         c.btag_med_threshold_DeepCSV = 0.6324;
         c.btag_med_threshold_CSVv2   = 0.8484;
-        c.elSF_file          = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_histName      = "GsfElectronToCutBasedSpring15V";
-        c.elSF_isoHistName   = "MVAVLooseElectronToMini";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -179,16 +179,13 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2017_31Mar2018"){
 
         c.year               = 2017;
+        c.cmssw_ver          = 94;
         c.json               = "Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
         c.lumi               = 41.37;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold_DeepCSV = 0.4941;
         c.btag_med_threshold_CSVv2   = 0.8838;
-        c.elSF_file          = "lepsf/FullRunII/ElectronScaleFactors_Run2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_histName      = "Run2017_CutBasedVetoNoIso94XV2";
-        c.elSF_isoHistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -203,11 +200,12 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFJet500");
         c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
         c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
         c.triggers["SR"].push_back("PFMET120_PFMHT120");
@@ -252,16 +250,13 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2017_Prompt"){
 
         c.year               = 2017;
+        c.cmssw_ver          = 94;
         c.json               = "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON_snt.txt";
         c.lumi               = 41.97;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btag_med_threshold_DeepCSV = 0.4941;
         c.btag_med_threshold_CSVv2   = 0.8838;
-        c.elSF_file          = "lepsf/FullRunII/ElectronScaleFactors_Run2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_histName      = "Run2017_CutBasedVetoNoIso94XV2";
-        c.elSF_isoHistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -274,6 +269,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFJet500");
         c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
         c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
         c.triggers["SR"].push_back("PFMET120_PFMHT120");
@@ -318,16 +314,13 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2018_17Sep2018"){
 
         c.year               = 2018;
+        c.cmssw_ver          = 102;
         c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         c.lumi               = 58.83;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_DeepCSV = 0.4184;
         c.btag_med_threshold_CSVv2   = 0.8838;
-        c.elSF_file          = "lepsf/FullRunII/ElectronScaleFactors_Run2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_histName      = "Run2017_CutBasedVetoNoIso94XV2";
-        c.elSF_isoHistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -338,11 +331,12 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFJet500");
         c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
         c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
         c.triggers["SR"].push_back("PFMET120_PFMHT120");
@@ -387,16 +381,13 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "data_2018_Prompt"){
 
         c.year               = 2018;
+        c.cmssw_ver          = 102;
         c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         c.lumi               = 58.83;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_DeepCSV = 0.4184;
         c.btag_med_threshold_CSVv2   = 0.8838;
-        c.elSF_file          = "lepsf/FullRunII/ElectronScaleFactors_Run2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_histName      = "Run2017_CutBasedVetoNoIso94XV2";
-        c.elSF_isoHistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -407,11 +398,12 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
+        c.triggers["SR"].push_back("PFJet500");
         c.triggers["SR"].push_back("PFHT800_PFMET75_PFMHT75");
         c.triggers["SR"].push_back("PFHT500_PFMET100_PFMHT100");
         c.triggers["SR"].push_back("PFMET120_PFMHT120");
@@ -456,14 +448,15 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "mc_102x_Autumn18"){
 
         c.year               = 2018;
+        c.cmssw_ver          = 102;
         c.lumi               = 58.83;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
-        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_DeepCSV = 0.4184;
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.pu_weights_file    = "puWeight2018.root";
         c.elSF_file          = "lepsf/FullRunII/ElectronScaleFactors_Run2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSFtrk_file       = "lepsf/FullRunII/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
         c.elSF_histName      = "Run2017_CutBasedVetoNoIso94XV2";
         c.elSF_isoHistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.ea_version         = 3;
@@ -475,13 +468,14 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
 
     }else if(tag == "mc_80x_Summer16"){
 
         c.year               = 2016;
+        c.cmssw_ver          = 80;
         c.lumi               = 35.922;
         c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
@@ -507,6 +501,7 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "mc_80x_fastsim_Moriond17"){
 
         c.year               = 2016;
+        c.cmssw_ver          = 80;
         c.lumi               = 35.922;
         c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
@@ -521,7 +516,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
-        c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
@@ -532,6 +526,7 @@ MT2Configuration GetMT2Config(std::string tag){
     }else if(tag == "mc_94x_Fall17"){
 
         c.year               = 2017;
+        c.cmssw_ver          = 94;
         c.lumi               = 41.529;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
@@ -539,7 +534,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.pu_weights_file    = "puWeight2017.root";
         c.elSF_file          = "lepsf/FullRunII/ElectronScaleFactors_Run2017.root";
-        c.elSFtrk_file       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSFtrk_file       = "lepsf/FullRunII/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
         c.elSF_histName      = "Run2017_CutBasedVetoNoIso94XV2";
         c.elSF_isoHistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.ea_version         = 3;
@@ -551,17 +546,18 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
-        c.filters["ecalBadCalibFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
 
     }else if(tag == "mc_94x_Summer16"){
 
         c.year               = 2016;
+        c.cmssw_ver          = 94;
         c.lumi               = 35.922;
         c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
-        c.btag_med_threshold_DeepCSV = 0.6324;
+        c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
         c.elSF_file          = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
@@ -571,7 +567,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_07Aug2017_V11_MC"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -628,6 +624,7 @@ void fillTriggerVector(const mt2tree& t, std::vector<const Int_t*>& trigs, std::
         else if(s=="PFHT890_Prescale")                 trigs.push_back(&t.HLT_PFHT890_Prescale);
         else if(s=="PFHT900")                          trigs.push_back(&t.HLT_PFHT900);
         else if(s=="PFJet450")                         trigs.push_back(&t.HLT_PFJet450);
+        else if(s=="PFJet500")                         trigs.push_back(&t.HLT_PFJet500);
         else if(s=="PFMET120_PFMHT120")                trigs.push_back(&t.HLT_PFMET120_PFMHT120);
         else if(s=="PFMET120_PFMHT120_PFHT60")         trigs.push_back(&t.HLT_PFMET120_PFMHT120_PFHT60);
         else if(s=="PFMETNoMu120_PFMHTNoMu120")        trigs.push_back(&t.HLT_PFMETNoMu120_PFMHTNoMu120);
