@@ -267,10 +267,19 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
-    "elSF_file" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSFtrk_file" : "lepsf/FullRunII/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
-    "elSF_histName" : "Run2017_CutBasedVetoNoIso94XV2",
-    "elSF_isoHistName" : "Run2017_MVAVLooseTightIP2DMini",
+    "elSF_IDISOfile" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
+    "elSF_TRKfile" : "lepsf/FullRunII/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
+    "elSF_IDhistName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_ISOhistName" : "Run2017_MVAVLooseTightIP2DMini",
+    "muSF_IDfile" : "lepsf/FullRunII/MuonPOG_SF_ID_2017BCDEF.root",
+    "muSF_ISOfile" : "lepsf/FullRunII/SUS_MuSF_MiniIso2_LooseID.root",
+    "muSF_IPfile" : "",
+    "muSF_TRKfile" : "",
+    "muSF_IDhistName": "NUM_LooseID_DEN_genTracks_pt_abseta",
+    "muSF_ISOhistName" : "TnP_MC_NUM_MiniIso02Cut_DEN_LooseID_PAR_pt_eta",
+    "muSF_IPhistName" : "",
+    "muSF_TRKLT10histName" : "",
+    "muSF_TRKGT10histName" : "",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -305,10 +314,19 @@ MT2Config_defs["mc_80x_Summer16"] = {
     "btag_med_threshold_DeepCSV" : 0.6324,
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
-    "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "GsfElectronToCutBasedSpring15V",
-    "elSF_isoHistName" : "MVAVLooseElectronToMini",
+    "elSF_IDISOfile" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
+    "elSF_TRKfile" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_IDhistName" : "GsfElectronToCutBasedSpring15V",
+    "elSF_ISOhistName" : "MVAVLooseElectronToMini",
+    "muSF_IDfile" : "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+    "muSF_ISOfile" : "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+    "muSF_IPfile" : "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+    "muSF_TRKfile" : "lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root",
+    "muSF_IDhistName": "SF",
+    "muSF_ISOhistName" : "SF",
+    "muSF_IPhistName" : "SF",
+    "muSF_TRKLT10histName" : "ratio_eff_eta3_tk0_dr030e030_corr",
+    "muSF_TRKGT10histName" : "ratio_eff_eta3_dr030e030_corr",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -333,10 +351,19 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "btag_med_threshold_DeepCSV" : 0.6321,
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
-    "elSF_file" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
-    "elSFtrk_file" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_histName" : "GsfElectronToCutBasedSpring15V",
-    "elSF_isoHistName" : "MVAVLooseElectronToMini",
+    "elSF_IDISOfile" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
+    "elSF_TRKfile" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
+    "elSF_IDhistName" : "GsfElectronToCutBasedSpring15V",
+    "elSF_ISOhistName" : "MVAVLooseElectronToMini",
+    "muSF_IDfile" : "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
+    "muSF_ISOfile" : "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
+    "muSF_IPfile" : "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+    "muSF_TRKfile" : "lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root",
+    "muSF_IDhistName": "SF",
+    "muSF_ISOhistName" : "SF",
+    "muSF_IPhistName" : "SF",
+    "muSF_TRKLT10histName" : "ratio_eff_eta3_tk0_dr030e030_corr",
+    "muSF_TRKGT10histName" : "ratio_eff_eta3_dr030e030_corr",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -446,10 +473,19 @@ MT2Configuration GetMT2Config(std::string tag){
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
-    c.elSF_file = "";
-    c.elSFtrk_file = "";
-    c.elSF_histName = "";
-    c.elSF_isoHistName = "";
+    c.elSF_IDISOfile = "";
+    c.elSF_TRKfile = "";
+    c.elSF_IDhistName = "";
+    c.elSF_ISOhistName = "";
+    c.muSF_IDfile = "";
+    c.muSF_ISOfile = "";
+    c.muSF_IPfile = "";
+    c.muSF_TRKfile = "";
+    c.muSF_IDhistName = "";
+    c.muSF_ISOhistName = "";
+    c.muSF_IPhistName = "";
+    c.muSF_TRKLT10histName = "";
+    c.muSF_TRKGT10histName = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
 """)
 
@@ -472,11 +508,21 @@ MT2Configuration GetMT2Config(std::string tag){
         fout.write("        c.btag_med_threshold_CSVv2   = {0};\n".format(c[tag]["btag_med_threshold_CSVv2"]))
         if "pu_weights_file" in c[tag]:
             fout.write("        c.pu_weights_file    = \"{0}\";\n".format(c[tag]["pu_weights_file"])) 
-        if "elSF_file" in c[tag]:
-            fout.write("        c.elSF_file          = \"{0}\";\n".format(c[tag]["elSF_file"]))
-            fout.write("        c.elSFtrk_file       = \"{0}\";\n".format(c[tag]["elSFtrk_file"]))
-            fout.write("        c.elSF_histName      = \"{0}\";\n".format(c[tag]["elSF_histName"]))
-            fout.write("        c.elSF_isoHistName   = \"{0}\";\n".format(c[tag]["elSF_isoHistName"]))
+        if "elSF_IDISOfile" in c[tag]:
+            fout.write("        c.elSF_IDISOfile     = \"{0}\";\n".format(c[tag]["elSF_IDISOfile"]))
+            fout.write("        c.elSF_TRKfile       = \"{0}\";\n".format(c[tag]["elSF_TRKfile"]))
+            fout.write("        c.elSF_IDhistName    = \"{0}\";\n".format(c[tag]["elSF_IDhistName"]))
+            fout.write("        c.elSF_ISOhistName   = \"{0}\";\n".format(c[tag]["elSF_ISOhistName"]))
+        if "muSF_IDfile" in c[tag]:
+            fout.write("        c.muSF_IDfile        = \"{0}\";\n".format(c[tag]["muSF_IDfile"]))
+            fout.write("        c.muSF_ISOfile       = \"{0}\";\n".format(c[tag]["muSF_ISOfile"]))
+            fout.write("        c.muSF_IPfile        = \"{0}\";\n".format(c[tag]["muSF_IPfile"]))
+            fout.write("        c.muSF_TRKfile       = \"{0}\";\n".format(c[tag]["muSF_TRKfile"]))
+            fout.write("        c.muSF_IDhistName    = \"{0}\";\n".format(c[tag]["muSF_IDhistName"]))
+            fout.write("        c.muSF_ISOhistName   = \"{0}\";\n".format(c[tag]["muSF_ISOhistName"]))
+            fout.write("        c.muSF_IPhistName    = \"{0}\";\n".format(c[tag]["muSF_IPhistName"]))
+            fout.write("        c.muSF_TRKLT10histName    = \"{0}\";\n".format(c[tag]["muSF_TRKLT10histName"]))
+            fout.write("        c.muSF_TRKGT10histName    = \"{0}\";\n".format(c[tag]["muSF_TRKGT10histName"]))
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
         fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))

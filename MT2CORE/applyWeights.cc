@@ -38,14 +38,14 @@ weightStruct getLepSF(float pt, float, int pdgId) {
 }
 
 //_________________________________________________________
-bool setElSFfile(TString filenameIDISO, TString filenameTRK, std::string histName, std::string isoHistName){
+bool setElSFfile(TString filenameIDISO, TString filenameTRK, TString histName, TString isoHistName){
   TFile * f1 = new TFile(filenameIDISO);
   TFile * f2 = new TFile(filenameTRK);
   if (!f1->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
   if (!f2->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find track scale factor file "<<filenameTRK<<std::endl;
   TH2D* h_id = 0;
-  h_id = (TH2D*) f1->Get(histName.c_str());
-  TH2D* h_iso = (TH2D*) f1->Get(isoHistName.c_str());
+  h_id = (TH2D*) f1->Get(histName);
+  TH2D* h_iso = (TH2D*) f1->Get(isoHistName);
   TH2D* h_trk = (TH2D*) f2->Get("EGamma_SF2D");
   if (!h_id || !h_iso || !h_trk) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
   h_elSF = (TH2D*) h_id->Clone("h_elSF");
@@ -57,31 +57,66 @@ bool setElSFfile(TString filenameIDISO, TString filenameTRK, std::string histNam
   return true;
 }
 
+void customMultiply(TH2D *h1, TH2D *h2){
+    // multiply h2 into h1. h2 should have bin edges wherever h1 does, or else this doesn't make sense
+    for(int ix=1; ix <= h1->GetNbinsX(); ix++){
+        for(int iy=1; iy <= h1->GetNbinsY(); iy++){
+            int binx = h2->GetXaxis()->FindBin(h1->GetXaxis()->GetBinCenter(ix));
+            int biny = h2->GetYaxis()->FindBin(h1->GetYaxis()->GetBinCenter(iy));
+            double cont1 = h1->GetBinContent(ix, iy);
+            double cont2 = h2->GetBinContent(binx, biny);
+            double relerr1 = cont1==0.0 ? 0.0 : h1->GetBinError(ix, iy) / h1->GetBinContent(ix, iy);
+            double relerr2 = cont2==0.0 ? 0.0 : h2->GetBinError(binx, biny) / h2->GetBinContent(binx, biny);
+            h1->SetBinContent(ix, iy, cont1 * cont2);
+            h1->SetBinError(ix, iy, cont1*cont2*sqrt(relerr1*relerr1 + relerr2*relerr2));
+        }
+    }
+}
+    
 //_________________________________________________________
-bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK){
+bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK, TString idHistName, TString isoHistName, TString ipHistName, TString trklt10HistName, TString trkgt10HistName){
+
+  // 2017 ID file has an extra bin... do custom multiplication here. if/when we get new files, should double check that this binning works
+  double binsX[8] = {10., 20., 25., 30., 40., 50., 60., 120};
+  double binsY[5] = {0.0, 0.9, 1.2, 2.1, 2.4};
+  h_muSF = new TH2D("h_muSF", ";pt;abs(eta)", 7, binsX, 4, binsY);
+  for(int ix=1; ix <= h_muSF->GetNbinsX(); ix++){
+      for(int iy=1; iy <= h_muSF->GetNbinsY(); iy++){
+          h_muSF->SetBinContent(ix, iy, 1.0);
+          h_muSF->SetBinError(ix, iy, 0.0);
+      }
+  }
+
   TFile * f1 = new TFile(filenameID);
   TFile * f2 = new TFile(filenameISO);
-  TFile * f3 = new TFile(filenameIP);
-  TFile * f4 = new TFile(filenameTRK);
   if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
   if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
-  if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
-  if (!f4->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find TRK scale factor file "<<filenameTRK<<std::endl; return 0;}
-  TH2D* h_id = (TH2D*) f1->Get("SF");
-  TH2D* h_iso = (TH2D*) f2->Get("SF");
-  TH2D* h_ip = (TH2D*) f3->Get("SF");
-  TH1D* h_trk_ptlt10 = (TH1D*) f4->Get("ratio_eff_eta3_tk0_dr030e030_corr");
-  TH1D* h_trk_ptgt10 = (TH1D*) f4->Get("ratio_eff_eta3_dr030e030_corr");
-  if (!h_id || !h_iso || !h_ip || !h_trk_ptlt10 || !h_trk_ptgt10) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
-  h_muSF = (TH2D*) h_id->Clone("h_muSF");
-  h_muSF->SetDirectory(0);
-  h_muSF->Multiply(h_iso);
-  h_muSF->Multiply(h_ip);
-  //h_muSF->Print("all");
-  h_muSF_trk_ptlt10 = (TH1D*) h_trk_ptlt10->Clone("h_muSF_trk_ptlt10");
-  h_muSF_trk_ptlt10->SetDirectory(0);
-  h_muSF_trk_ptgt10 = (TH1D*) h_trk_ptgt10->Clone("h_muSF_trk_ptgt10");
-  h_muSF_trk_ptgt10->SetDirectory(0);
+  TH2D* h_id = (TH2D*) f1->Get(idHistName);
+  TH2D* h_iso = (TH2D*) f2->Get(isoHistName);
+  if (!h_id || !h_iso) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID/ISO scale factor histogram(s)"<<std::endl; return 0;}
+  customMultiply(h_muSF, h_id);
+  customMultiply(h_muSF, h_iso);
+  if (filenameIP != "") { 
+      TFile * f3 = new TFile(filenameIP);
+      if(!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
+      TH2D* h_ip = (TH2D*) f3->Get(ipHistName);
+      if (!h_ip) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor histogram"<<std::endl; return 0;}
+      customMultiply(h_muSF, h_ip);
+  }
+  if (filenameTRK != "") { 
+      TFile * f4 = new TFile(filenameTRK);
+      if(!f4->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find TRK scale factor file "<<filenameTRK<<std::endl; return 0;}
+      TH1D* h_trk_ptlt10 = (TH1D*) f4->Get(trklt10HistName);
+      TH1D* h_trk_ptgt10 = (TH1D*) f4->Get(trkgt10HistName);
+      if (!h_trk_ptlt10 || !h_trk_ptgt10) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find TRK scale factor histogram"<<std::endl; return 0;}
+      h_muSF_trk_ptlt10 = (TH1D*) h_trk_ptlt10->Clone("h_muSF_trk_ptlt10");
+      h_muSF_trk_ptlt10->SetDirectory(0);
+      h_muSF_trk_ptgt10 = (TH1D*) h_trk_ptgt10->Clone("h_muSF_trk_ptgt10");
+      h_muSF_trk_ptgt10->SetDirectory(0);
+  }
+
+  h_muSF->Print("all");
+
   return true;
 }
 
@@ -152,6 +187,8 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     int binx = h_muSF->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_muSF->GetYaxis()->FindBin(fabs(eta_cutoff));
     float central = h_muSF->GetBinContent(binx,biny);
+    if(pt_cutoff < 20.0 && central < 0.1) // 2017 SFs cut off at 20, so protect here against SF of 0.0
+        central = 1.0;
     // get also trk sf, if present
     if (h_muSF_trk_ptgt10 && h_muSF_trk_ptlt10) {
       if (pt > 10) central *= h_muSF_trk_ptgt10->GetBinContent(h_muSF_trk_ptgt10->FindBin(eta_cutoff));

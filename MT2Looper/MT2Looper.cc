@@ -750,13 +750,21 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
   if (config_tag.find("data") == string::npos && applyLeptonSFfromFiles) {
       cout << "Applying lepton scale factors from the following files:\n";
-      cout << "    electrons: " << config_.elSF_file << ":" << config_.elSF_histName << "," << config_.elSF_isoHistName << endl;
-      cout << "    electrons tracking: " << config_.elSFtrk_file << endl;
-      setElSFfile("../babymaker/"+config_.elSF_file, "../babymaker/"+config_.elSFtrk_file, config_.elSF_histName, config_.elSF_isoHistName);
-      setMuSFfile("../babymaker/lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
-                  "../babymaker/lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
-                  "../babymaker/lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-                  "../babymaker/lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root");
+      cout << "    els IDISO: " << config_.elSF_IDISOfile << ": " << config_.elSF_IDhistName << " (id), " << config_.elSF_ISOhistName << " (iso)" << endl;
+      cout << "    els TRK  : " << config_.elSF_TRKfile << endl;
+      cout << "    muons ID : " << config_.muSF_IDfile << ": " << config_.muSF_IDhistName << endl;
+      cout << "    muons ISO: " << config_.muSF_ISOfile << ": " << config_.muSF_ISOhistName << endl;
+      if(config_.muSF_IPfile!="")
+          cout << "    muons IP : " << config_.muSF_IPfile << ": " << config_.muSF_IPhistName << endl;
+      else
+          cout << "    muons IP : not applying" << endl;
+      if(config_.muSF_TRKfile!="")
+          cout << "    muons TRK: " << config_.muSF_TRKfile << ": " << config_.muSF_TRKLT10histName << " (pT<10), " << config_.muSF_TRKGT10histName << " (pt>10)" << endl;
+      else
+          cout << "    muons TRK: not applying" << endl;
+      setElSFfile(config_.elSF_IDISOfile, config_.elSF_TRKfile, config_.elSF_IDhistName, config_.elSF_ISOhistName);
+      setMuSFfile(config_.muSF_IDfile, config_.muSF_ISOfile, config_.muSF_IPfile, config_.muSF_TRKfile,
+                  config_.muSF_IDhistName, config_.muSF_ISOhistName, config_.muSF_IPhistName, config_.muSF_TRKLT10histName, config_.muSF_TRKGT10histName);
       setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
   

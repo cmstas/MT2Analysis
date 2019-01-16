@@ -22,8 +22,8 @@ TH2D* h_elSF_trk = 0;
 TH2D* h_muSF = 0;
 TH1D* h_muSF_trk_ptlt10 = 0;
 TH1D* h_muSF_trk_ptgt10 = 0;
-bool setElSFfile(TString filenameIDISO, TString filenameTRK, std::string histName, std::string isoHistName);
-bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK);
+bool setElSFfile(TString filenameIDISO, TString filenameTRK, TString histName, TString isoHistName);
+bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TString filenameTRK, TString idHistName, TString isoHistName, TString ipHistName, TString trklt10HistName, TString trkgt10HistName);
 bool setMuSFfileNoTrk(TString filenameID, TString filenameISO, TString filenameIP);
 weightStruct getLepSFFromFile(float pt, float eta, int pdgId);
 
