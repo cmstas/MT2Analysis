@@ -1,6 +1,6 @@
 # Calculating Fshort
 
-The babymaker counts STs and STCs for a standard STC isolation and quality factor (as of Aug 6, 2018, isolation is loosened by 6x and quality by 3x). If you wish to use a different STC definition, edit FshortLooper.cc, and set recalculate to true. Make sure to run on a loose skim if you do this.
+The babymaker counts STs and STCs for a standard STC isolation and quality factor (as of Jan 15, 2018, isolation is loosened by 6x and quality by 3x). If you wish to use a different STC definition, edit FshortLooper.cc, and set recalculate to true. Make sure to run on a loose skim if you do this.
 
 Do 
 ``` bash
@@ -9,7 +9,7 @@ make b
 
 Then edit do.sh to point to the 2016/17/18 data and MC babies you wish to run on.
 
-In either case, output root files containing various Fshort histograms will be placed in output_unmerged/<TAG>.
+Root files containing various Fshort histograms will be placed in output_unmerged/<TAG>.
 
 Then do
 ``` bash
