@@ -267,12 +267,12 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "btag_med_threshold_DeepCSV" : 0.4941,
     "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2017.root",
-    "elSF_IDISOfile" : "lepsf/FullRunII/ElectronScaleFactors_Run2017.root",
-    "elSF_TRKfile" : "lepsf/FullRunII/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
+    "elSF_IDISOfile" : "lepsf/Fall17/ElectronScaleFactors_Run2017.root",
+    "elSF_TRKfile" : "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
     "elSF_IDhistName" : "Run2017_CutBasedVetoNoIso94XV2",
     "elSF_ISOhistName" : "Run2017_MVAVLooseTightIP2DMini",
-    "muSF_IDfile" : "lepsf/FullRunII/MuonPOG_SF_ID_2017BCDEF.root",
-    "muSF_ISOfile" : "lepsf/FullRunII/SUS_MuSF_MiniIso2_LooseID.root",
+    "muSF_IDfile" : "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root",
+    "muSF_ISOfile" : "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root",
     "muSF_IPfile" : "",
     "muSF_TRKfile" : "",
     "muSF_IDhistName": "NUM_LooseID_DEN_genTracks_pt_abseta",
@@ -521,8 +521,8 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.muSF_IDhistName    = \"{0}\";\n".format(c[tag]["muSF_IDhistName"]))
             fout.write("        c.muSF_ISOhistName   = \"{0}\";\n".format(c[tag]["muSF_ISOhistName"]))
             fout.write("        c.muSF_IPhistName    = \"{0}\";\n".format(c[tag]["muSF_IPhistName"]))
-            fout.write("        c.muSF_TRKLT10histName    = \"{0}\";\n".format(c[tag]["muSF_TRKLT10histName"]))
-            fout.write("        c.muSF_TRKGT10histName    = \"{0}\";\n".format(c[tag]["muSF_TRKGT10histName"]))
+            fout.write("        c.muSF_TRKLT10histName = \"{0}\";\n".format(c[tag]["muSF_TRKLT10histName"]))
+            fout.write("        c.muSF_TRKGT10histName = \"{0}\";\n".format(c[tag]["muSF_TRKGT10histName"]))
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
         fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))
