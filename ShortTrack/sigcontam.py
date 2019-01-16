@@ -1,4 +1,4 @@
-# STCImplementation background estimates and plots
+# Calculate impact of signal contamination (requires that sigcontam.py in FshortLooper be run first).
 
 import ROOT
 from math import sqrt
@@ -7,10 +7,6 @@ import sys
 import os
 from os.path import isfile,join
 import subprocess
-
-sys.path.append("../Nifty")
-
-import NiftyUtils
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError

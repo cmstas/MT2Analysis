@@ -1,4 +1,4 @@
-# STCImplementation background estimates and plots
+# Make nice tables and plots of results
 
 import ROOT
 from math import sqrt

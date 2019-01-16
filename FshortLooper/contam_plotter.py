@@ -8,10 +8,6 @@ import os
 from os.path import isfile,join
 import subprocess
 
-sys.path.append("../Nifty")
-
-import NiftyUtils
-
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
 

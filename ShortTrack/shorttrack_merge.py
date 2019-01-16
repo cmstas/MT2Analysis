@@ -1,4 +1,4 @@
-# STCImplementation background estimates and plots
+# Combine and process histograms produced by ShortTrackLooper
 
 import ROOT
 from math import sqrt
@@ -7,10 +7,6 @@ import sys
 import os
 from os.path import isfile,join
 import subprocess
-
-sys.path.append("../Nifty")
-
-import NiftyUtils
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError

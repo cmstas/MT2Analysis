@@ -1,4 +1,4 @@
-# STCImplementation background estimates and plots
+# Make tables containing limits on benchmark points.
 
 import ROOT
 from math import sqrt
