@@ -94,6 +94,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Nlep = 0 hists
 
   // NjHt
+  TH2D* h_LL_MR = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR");
+  TH2D* h_LM_MR = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR");
+  TH2D* h_LH_MR = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR");
+  TH2D* h_HL_MR = (TH2D*)h_eventwise_countsVR.Clone("h_HL_MR");
+  TH2D* h_HM_MR = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR");
+  TH2D* h_HH_MR = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR");
+
   TH2D* h_LL_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR");
   TH2D* h_LM_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR");
   TH2D* h_LH_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR");
@@ -109,6 +116,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR = (TH2D*)h_eventwise_counts.Clone("h_HH_SR");
 
   // Separate fshorts
+  TH2D* h_LL_MR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_23");
+  TH2D* h_LM_MR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_23");
+  TH2D* h_LH_MR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_23");
+  TH2D* h_HL_MR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HL_MR_4");
+  TH2D* h_HM_MR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_4");
+  TH2D* h_HH_MR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_4");
+
   TH2D* h_LL_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23");
   TH2D* h_LM_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23");
   TH2D* h_LH_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23");
@@ -126,6 +140,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Hi pt
 
   // NjHt
+  TH2D* h_LL_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_hi");
+  TH2D* h_LM_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_hi");
+  TH2D* h_LH_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_hi");
+  TH2D* h_HL_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HL_MR_hi");
+  TH2D* h_HM_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_hi");
+  TH2D* h_HH_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_hi");
+
   TH2D* h_LL_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_hi");
   TH2D* h_LM_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_hi");
   TH2D* h_LH_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_hi");
@@ -141,6 +162,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_hi");
 
   // Separate fshorts
+  TH2D* h_LL_MR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_23_hi");
+  TH2D* h_LM_MR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_23_hi");
+  TH2D* h_LH_MR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_23_hi");
+  TH2D* h_HL_MR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HL_MR_4_hi");
+  TH2D* h_HM_MR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_4_hi");
+  TH2D* h_HH_MR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_4_hi");
+
   TH2D* h_LL_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23_hi");
   TH2D* h_LM_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23_hi");
   TH2D* h_LH_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23_hi");
@@ -157,6 +185,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Lo pt
   // NjHt
+  TH2D* h_LL_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_lo");
+  TH2D* h_LM_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_lo");
+  TH2D* h_LH_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_lo");
+  TH2D* h_HL_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HL_MR_lo");
+  TH2D* h_HM_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_lo");
+  TH2D* h_HH_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_lo");
+
   TH2D* h_LL_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_lo");
   TH2D* h_LM_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_lo");
   TH2D* h_LH_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_lo");
@@ -172,6 +207,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_lo");
 
   // Separate fshorts
+  TH2D* h_LL_MR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_23_lo");
+  TH2D* h_LM_MR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_23_lo");
+  TH2D* h_LH_MR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_23_lo");
+  TH2D* h_HL_MR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HL_MR_4_lo");
+  TH2D* h_HM_MR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_4_lo");
+  TH2D* h_HH_MR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_4_lo");
+
   TH2D* h_LL_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23_lo");
   TH2D* h_LM_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23_lo");
   TH2D* h_LH_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23_lo");
@@ -187,6 +229,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR_4_lo = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4_lo");
 
   unordered_map<TH2D*,TH2D*> low_hists;
+  low_hists[h_LL_MR] = h_LL_MR_lo;
+  low_hists[h_LM_MR] = h_LM_MR_lo;
+  low_hists[h_LH_MR] = h_LH_MR_lo;
+  low_hists[h_HL_MR] = h_HL_MR_lo;
+  low_hists[h_HM_MR] = h_HM_MR_lo;
+  low_hists[h_HH_MR] = h_HH_MR_lo;
   low_hists[h_LL_VR] = h_LL_VR_lo;
   low_hists[h_LM_VR] = h_LM_VR_lo;
   low_hists[h_LH_VR] = h_LH_VR_lo;
@@ -199,9 +247,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HL_SR] = h_HL_SR_lo;
   low_hists[h_HM_SR] = h_HM_SR_lo;
   low_hists[h_HH_SR] = h_HH_SR_lo;
+  low_hists[h_LL_MR_23] = h_LL_MR_23_lo;
+  low_hists[h_LM_MR_23] = h_LM_MR_23_lo;
+  low_hists[h_LH_MR_23] = h_LH_MR_23_lo;
   low_hists[h_LL_VR_23] = h_LL_VR_23_lo;
   low_hists[h_LM_VR_23] = h_LM_VR_23_lo;
   low_hists[h_LH_VR_23] = h_LH_VR_23_lo;
+  low_hists[h_HL_MR_4] = h_HL_MR_4_lo;
+  low_hists[h_HM_MR_4] = h_HM_MR_4_lo;
+  low_hists[h_HH_MR_4] = h_HH_MR_4_lo;
   low_hists[h_HL_VR_4] = h_HL_VR_4_lo;
   low_hists[h_HM_VR_4] = h_HM_VR_4_lo;
   low_hists[h_HH_VR_4] = h_HH_VR_4_lo;
@@ -213,9 +267,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HH_SR_4] = h_HH_SR_4_lo;
 
   unordered_map<TH2D*,TH2D*> hi_hists;
+  hi_hists[h_LL_MR] = h_LL_MR_hi;
+  hi_hists[h_LM_MR] = h_LM_MR_hi;
+  hi_hists[h_LH_MR] = h_LH_MR_hi;
   hi_hists[h_LL_VR] = h_LL_VR_hi;
   hi_hists[h_LM_VR] = h_LM_VR_hi;
   hi_hists[h_LH_VR] = h_LH_VR_hi;
+  hi_hists[h_HL_MR] = h_HL_MR_hi;
+  hi_hists[h_HM_MR] = h_HM_MR_hi;
+  hi_hists[h_HH_MR] = h_HH_MR_hi;
   hi_hists[h_HL_VR] = h_HL_VR_hi;
   hi_hists[h_HM_VR] = h_HM_VR_hi;
   hi_hists[h_HH_VR] = h_HH_VR_hi;
@@ -225,6 +285,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   hi_hists[h_HL_SR] = h_HL_SR_hi;
   hi_hists[h_HM_SR] = h_HM_SR_hi;
   hi_hists[h_HH_SR] = h_HH_SR_hi;
+  hi_hists[h_LL_MR_23] = h_LL_MR_23_hi;
+  hi_hists[h_LM_MR_23] = h_LM_MR_23_hi;
+  hi_hists[h_LH_MR_23] = h_LH_MR_23_hi;
+  hi_hists[h_HL_MR_4] = h_HL_MR_4_hi;
+  hi_hists[h_HM_MR_4] = h_HM_MR_4_hi;
+  hi_hists[h_HH_MR_4] = h_HH_MR_4_hi;
   hi_hists[h_LL_VR_23] = h_LL_VR_23_hi;
   hi_hists[h_LM_VR_23] = h_LM_VR_23_hi;
   hi_hists[h_LH_VR_23] = h_LH_VR_23_hi;
@@ -774,7 +840,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (unlikely(t.nJet30FailId != 0)) {
       continue;
     }
-    if (t.mt2 < 100) {
+    if (t.mt2 < 60) {
       continue;
     }
     //if (t.met_pt < 30) {
@@ -941,8 +1007,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       if (t.nJet30 < 4) {
 	// LH
 	if (t.ht >= 1200) {
+	  // MR
+	  if (t.mt2 < 100) {
+	    hist = h_LH_MR;
+	    hist_Nj = h_LH_VR_23;
+	  }
 	  // VR
-	  if (t.mt2 < 200) {
+	  else if (t.mt2 < 200) {
 	    hist = h_LH_VR;
 	    hist_Nj = h_LH_VR_23;
 	  }
@@ -954,8 +1025,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
 	// LM
 	else if (t.ht >= 450) {
+	  // MR
+	  if (t.mt2 < 100) {
+	    hist = h_LM_MR;
+	    hist_Nj = h_LM_MR_23;
+	  }
 	  // VR
-	  if (t.mt2 < 200) {
+	  else if (t.mt2 < 200) {
 	    hist = h_LM_VR;
 	    hist_Nj = h_LM_VR_23;
 	  }
@@ -967,8 +1043,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
 	// LL
 	else {
+	  // MR
+	  if (t.mt2 < 100) {
+	    hist = h_LL_MR;
+	    hist_Nj = h_LL_MR_23;
+	  }
 	  // VR
-	  if (t.mt2 < 200) {
+	  else if (t.mt2 < 200) {
 	    hist = h_LL_VR;
 	    hist_Nj = h_LL_VR_23;
 	  }
@@ -983,8 +1064,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       else {
 	// HH
 	if (t.ht >= 1200) {
+	  // MR
+	  if (t.mt2 < 100) {
+	    hist = h_HH_MR;
+	    hist_Nj = h_HH_MR_4;
+	  }
 	  // VR
-	  if (t.mt2 < 200) {
+	  else if (t.mt2 < 200) {
 	    hist = h_HH_VR;
 	    hist_Nj = h_HH_VR_4;
 	  }
@@ -996,8 +1082,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
 	// HM
 	else if (t.ht >= 450) {
+	  // MR
+	  if (t.mt2 < 100) {
+	    hist = h_HM_MR;
+	    hist_Nj = h_HM_MR_4;
+	  }
 	  // VR
-	  if (t.mt2 < 200) {
+	  else if (t.mt2 < 200) {
 	    hist = h_HM_VR;
 	    hist_Nj = h_HM_VR_4;
 	  }
@@ -1009,8 +1100,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
 	// HL
 	else {
+	  // MR
+	  if (t.mt2 < 100) {
+	    hist = h_HL_MR;
+	    hist_Nj = h_HL_MR_4;
+	  }
 	  // VR
-	  if (t.mt2 < 200) {
+	  else if (t.mt2 < 200) {
 	    hist = h_HL_VR;
 	    hist_Nj = h_HL_VR_4;
 	  }
@@ -1517,10 +1613,14 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_LLM_SR->Add(h_LM_SR);
   TH2D* h_LLM_VR = (TH2D*) h_LL_VR->Clone("h_LLM_VR");
   h_LLM_VR->Add(h_LM_VR);
+  TH2D* h_LLM_MR = (TH2D*) h_LL_MR->Clone("h_LLM_MR");
+  h_LLM_MR->Add(h_LM_MR);
   TH2D* h_HLM_SR = (TH2D*) h_HL_SR->Clone("h_HLM_SR");
   h_HLM_SR->Add(h_HM_SR);
   TH2D* h_HLM_VR = (TH2D*) h_HL_VR->Clone("h_HLM_VR");
   h_HLM_VR->Add(h_HM_VR);
+  TH2D* h_HLM_MR = (TH2D*) h_HL_MR->Clone("h_HLM_MR");
+  h_HLM_MR->Add(h_HM_MR);
 
   TH2D* h_LLM_SR_hi = (TH2D*) h_LL_SR_hi->Clone("h_LLM_SR_hi");
   h_LLM_SR_hi->Add(h_LM_SR_hi);
@@ -1528,12 +1628,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_LLM_VR_hi = (TH2D*) h_LL_VR_hi->Clone("h_LLM_VR_hi");
   h_LLM_VR_hi->Add(h_LM_VR_hi);
   hi_hists[h_LLM_VR] = h_LLM_VR_hi;
+  TH2D* h_LLM_MR_hi = (TH2D*) h_LL_MR_hi->Clone("h_LLM_MR_hi");
+  h_LLM_MR_hi->Add(h_LM_MR_hi);
+  hi_hists[h_LLM_MR] = h_LLM_MR_hi;
   TH2D* h_HLM_SR_hi = (TH2D*) h_HL_SR_hi->Clone("h_HLM_SR_hi");
   h_HLM_SR_hi->Add(h_HM_SR_hi);
   hi_hists[h_HLM_SR] = h_HLM_SR_hi;
   TH2D* h_HLM_VR_hi = (TH2D*) h_HL_VR_hi->Clone("h_HLM_VR_hi");
   h_HLM_VR_hi->Add(h_HM_VR_hi);
   hi_hists[h_HLM_VR] = h_HLM_VR_hi;
+  TH2D* h_HLM_MR_hi = (TH2D*) h_HL_MR_hi->Clone("h_HLM_MR_hi");
+  h_HLM_MR_hi->Add(h_HM_MR_hi);
+  hi_hists[h_HLM_MR] = h_HLM_MR_hi;
 
   TH2D* h_LLM_SR_lo = (TH2D*) h_LL_SR_lo->Clone("h_LLM_SR_lo");
   h_LLM_SR_lo->Add(h_LM_SR_lo);
@@ -1541,20 +1647,29 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_LLM_VR_lo = (TH2D*) h_LL_VR_lo->Clone("h_LLM_VR_lo");
   h_LLM_VR_lo->Add(h_LM_VR_lo);
   low_hists[h_LLM_VR] = h_LLM_VR_lo;
+  TH2D* h_LLM_MR_lo = (TH2D*) h_LL_MR_lo->Clone("h_LLM_MR_lo");
+  h_LLM_MR_lo->Add(h_LM_MR_lo);
+  low_hists[h_LLM_MR] = h_LLM_MR_lo;
   TH2D* h_HLM_SR_lo = (TH2D*) h_HL_SR_lo->Clone("h_HLM_SR_lo");
   h_HLM_SR_lo->Add(h_HM_SR_lo);
   low_hists[h_HLM_SR] = h_HLM_SR_lo;
   TH2D* h_HLM_VR_lo = (TH2D*) h_HL_VR_lo->Clone("h_HLM_VR_lo");
   h_HLM_VR_lo->Add(h_HM_VR_lo);
   low_hists[h_HLM_VR] = h_HLM_VR_lo;
+  TH2D* h_HLM_MR_lo = (TH2D*) h_HL_MR_lo->Clone("h_HLM_MR_lo");
+  h_HLM_MR_lo->Add(h_HM_MR_lo);
+  low_hists[h_HLM_MR] = h_HLM_MR_lo;
 
-  vector<TH2D*> hists   = {h_LL_SR, h_LM_SR, h_LLM_SR, h_LH_SR, h_HL_SR, h_HM_SR, h_HLM_SR, h_HH_SR, h_LL_VR, h_LM_VR, h_LLM_VR, h_LH_VR, h_HL_VR, h_HM_VR, h_HLM_VR, h_HH_VR};
+  vector<TH2D*> hists   = {h_LL_SR, h_LM_SR, h_LLM_SR, h_LH_SR, h_HL_SR, h_HM_SR, h_HLM_SR, h_HH_SR, h_LL_VR, h_LM_VR, h_LLM_VR, h_LH_VR, h_HL_VR, h_HM_VR, h_HLM_VR, h_HH_VR,
+			   h_LL_MR, h_LM_MR, h_LLM_MR, h_LH_MR, h_HL_MR, h_HM_MR, h_HLM_MR, h_HH_MR};
 
 
   TH2D* h_LLM_SR_23 = (TH2D*) h_LL_SR_23->Clone("h_LLM_SR_23");
   h_LLM_SR_23->Add(h_LM_SR_23);
   TH2D* h_LLM_VR_23 = (TH2D*) h_LL_VR_23->Clone("h_LLM_VR_23");
   h_LLM_VR_23->Add(h_LM_VR_23);
+  TH2D* h_LLM_MR_23 = (TH2D*) h_LL_MR_23->Clone("h_LLM_MR_23");
+  h_LLM_MR_23->Add(h_LM_MR_23);
 
   TH2D* h_LLM_SR_23_hi = (TH2D*) h_LL_SR_23_hi->Clone("h_LLM_SR_23_hi");
   h_LLM_SR_23_hi->Add(h_LM_SR_23_hi);
@@ -1562,6 +1677,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_LLM_VR_23_hi = (TH2D*) h_LL_VR_23_hi->Clone("h_LLM_VR_23_hi");
   h_LLM_VR_23_hi->Add(h_LM_VR_23_hi);
   hi_hists[h_LLM_VR_23] = h_LLM_VR_23_hi;
+  TH2D* h_LLM_MR_23_hi = (TH2D*) h_LL_MR_23_hi->Clone("h_LLM_MR_23_hi");
+  h_LLM_MR_23_hi->Add(h_LM_MR_23_hi);
+  hi_hists[h_LLM_MR_23] = h_LLM_MR_23_hi;
 
   TH2D* h_LLM_SR_23_lo = (TH2D*) h_LL_SR_23_lo->Clone("h_LLM_SR_23_lo");
   h_LLM_SR_23_lo->Add(h_LM_SR_23_lo);
@@ -1569,13 +1687,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_LLM_VR_23_lo = (TH2D*) h_LL_VR_23_lo->Clone("h_LLM_VR_23_lo");
   h_LLM_VR_23_lo->Add(h_LM_VR_23_lo);
   low_hists[h_LLM_VR_23] = h_LLM_VR_23_lo;
+  TH2D* h_LLM_MR_23_lo = (TH2D*) h_LL_MR_23_lo->Clone("h_LLM_MR_23_lo");
+  h_LLM_MR_23_lo->Add(h_LM_MR_23_lo);
+  low_hists[h_LLM_MR_23] = h_LLM_MR_23_lo;
 
-  vector<TH2D*> hists23   = {h_LL_SR_23, h_LM_SR_23, h_LLM_SR_23, h_LH_SR_23, h_LL_VR_23, h_LM_VR_23, h_LLM_VR_23, h_LH_VR_23};
+  vector<TH2D*> hists23   = {h_LL_SR_23, h_LM_SR_23, h_LLM_SR_23, h_LH_SR_23, h_LL_VR_23, h_LM_VR_23, h_LLM_VR_23, h_LH_VR_23, h_LL_MR_23, h_LM_MR_23, h_LLM_MR_23, h_LH_MR_23};
 
   TH2D* h_HLM_SR_4 = (TH2D*) h_HL_SR_4->Clone("h_HLM_SR_4");
   h_HLM_SR_4->Add(h_HM_SR_4);
   TH2D* h_HLM_VR_4 = (TH2D*) h_HL_VR_4->Clone("h_HLM_VR_4");
   h_HLM_VR_4->Add(h_HM_VR_4);
+  TH2D* h_HLM_MR_4 = (TH2D*) h_HL_MR_4->Clone("h_HLM_MR_4");
+  h_HLM_MR_4->Add(h_HM_MR_4);
 
   TH2D* h_HLM_SR_4_hi = (TH2D*) h_HL_SR_4_hi->Clone("h_HLM_SR_4_hi");
   h_HLM_SR_4_hi->Add(h_HM_SR_4_hi);
@@ -1583,6 +1706,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HLM_VR_4_hi = (TH2D*) h_HL_VR_4_hi->Clone("h_HLM_VR_4_hi");
   h_HLM_VR_4_hi->Add(h_HM_VR_4_hi);
   hi_hists[h_HLM_VR_4] = h_HLM_VR_4_hi;
+  TH2D* h_HLM_MR_4_hi = (TH2D*) h_HL_MR_4_hi->Clone("h_HLM_MR_4_hi");
+  h_HLM_MR_4_hi->Add(h_HM_MR_4_hi);
+  hi_hists[h_HLM_MR_4] = h_HLM_MR_4_hi;
 
   TH2D* h_HLM_SR_4_lo = (TH2D*) h_HL_SR_4_lo->Clone("h_HLM_SR_4_lo");
   h_HLM_SR_4_lo->Add(h_HM_SR_4_lo);
@@ -1590,8 +1716,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HLM_VR_4_lo = (TH2D*) h_HL_VR_4_lo->Clone("h_HLM_VR_4_lo");
   h_HLM_VR_4_lo->Add(h_HM_VR_4_lo);
   low_hists[h_HLM_VR_4] = h_HLM_VR_4_lo;
+  TH2D* h_HLM_MR_4_lo = (TH2D*) h_HL_MR_4_lo->Clone("h_HLM_MR_4_lo");
+  h_HLM_MR_4_lo->Add(h_HM_MR_4_lo);
+  low_hists[h_HLM_MR_4] = h_HLM_MR_4_lo;
 
-  vector<TH2D*> hists4   = {h_HL_SR_4, h_HM_SR_4, h_HLM_SR_4, h_HH_SR_4, h_HL_VR_4, h_HM_VR_4, h_HLM_VR_4, h_HH_VR_4};
+  vector<TH2D*> hists4   = {h_HL_SR_4, h_HM_SR_4, h_HLM_SR_4, h_HH_SR_4, h_HL_VR_4, h_HM_VR_4, h_HLM_VR_4, h_HH_VR_4, h_HL_MR_4, h_HM_MR_4, h_HLM_MR_4, h_HH_MR_4};
   
   // save fshorts so we can easily propagate errors on fshort to errors on the predicted ST counts
   h_FS->SetBinContent(Pidx,fs_P);

@@ -22,7 +22,12 @@ const bool blind = true;
 
 const bool skipHighWeights = true; // turn on to skip MC events with weight > 1, to keep errors reasonable
 
-const bool fillDiagnosticHists = false; // turn on to fill extra histograms
+const bool fillCutHists = true; // turn on to fill extra histograms
+const bool fillUnimportantCutHists = false; // turn on to fill Nvertex, Eta, Ntag, DphiMet, and HitSignature histograms
+
+const bool fillNM1Hists = true; // turn on to fill NM1 histograms (need to set recalculate and fillCutHists to true)
+
+const bool onlyMatchedTracks = false; // for fshort, use only matched chargino tracks
 
 TFile VetoFile("VetoHists.root");
 TH2F* veto_bar = (TH2F*) VetoFile.Get("h_VetoEtaPhi_bar");
@@ -90,12 +95,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   string variations[] = {"Baseline","gt1200HT","lt1200HT","MET30","MET100","MET250","HT250","HT450","HT450MET100"};
   string njets[] = {"","_23","_4"};
   string pts[] = {"","_hipt","_lowpt"};
-  string regions[] = {"Incl","MR","VR","SR"};
+  string regions[] = {"MR","VR","SR"};
   for (int var = 0; var < 9; var++) {
     string variation = variations[var];
     for (int nj = 0; nj < 4; nj++) {
       string njet = njets[nj];
-      for (int reg = 0; reg < 4; reg++) {
+      for (int reg = 0; reg < 3; reg++) {
 	string region = regions[reg];
 	for (int ptbin = 0; ptbin < 3; ptbin++) {
 	  string hname = "h_fs"+region+njet+"_"+variation+pts[ptbin];
@@ -130,8 +135,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
   //  string lengths[] = {"P","P3","P4","M","L","Lrej","1L","1Lrej"};
   string lengths[] = {"P","P3","P4","M","L","Lrej"};
   string njethts[] = {"","_23","_4","_L","_H","_23L","_23H","_4L","_4H"};
-  string matches[] = {"_","_ewke_","_ewkm_","_tewke_","_tewkm_","_newk_","_1newk_","_3newk_"};
-  if (fillDiagnosticHists) {
+  string matches[] = {"_","_ewke_","_ewkm_","_tewke_","_tewkm_","_newk_","_1newk_","_3newk_","_chargino_"};
+  if (fillCutHists) {
     TH2D* h_mtpt_base = new TH2D("h_mtpt_base","p_{T} x M_{T}(Track,MET)",10,0,200,10,0,500);
     TH2D* h_etaphi_base = new TH2D("h_etaphi_base","#eta and #phi",100,-2.4,2.4,100,-TMath::Pi(),TMath::Pi());
     // Full hp takes too long
@@ -159,7 +164,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       for (int len = 0; len < 6; len++) {
 	string length = lengths[len];
 	cout << "Booked cut hists for " << category + " " + length << endl;
-	for (int matchidx = 0; matchidx < 8; matchidx++) {
+	for (int matchidx = 0; matchidx < 9; matchidx++) {
 	  string match = matches[matchidx];
 	  for (int njht = 0; njht < 9; njht++) {
 	    string njetht = njethts[njht];
@@ -173,20 +178,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      // EtaPhi
 	      hname = "h_etaphi_"+suffix;
 	      etaphiHists[hname] = (TH2D*) h_etaphi_base->Clone(hname.c_str());
-	      // Hit Pattern
-	      hname = "h_hp_"+suffix;
-	      cutHists[hname] = (TH1D*) h_hp_base->Clone(hname.c_str());
-	      if (len < 3) cutHists[hname]->GetXaxis()->SetRange(0,(1<<5)-1); // At most 4 layers for P tracks
-	      else if (len == 4) cutHists[hname]->GetXaxis()->SetRange(0,(1<<7)-1); // At most 6 layers for P tracks
 	      // Dz
 	      hname = "h_dz_"+suffix;
 	      cutHists[hname] = (TH1D*) h_dz_base->Clone(hname.c_str());
 	      // Dxy
 	      hname = "h_dxy_"+suffix;
 	      cutHists[hname] = (TH1D*) h_dxy_base->Clone(hname.c_str());
-	      // N vertex
-	      hname = "h_nv_"+suffix;
-	      cutHists[hname] = (TH1D*) h_nv_base->Clone(hname.c_str());
 	      // pterr / pt^2
 	      hname = "h_pterr_"+suffix;
 	      cutHists[hname] = (TH1D*) h_pterr_base->Clone(hname.c_str());
@@ -202,27 +199,48 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	      // N RelIso 0.05
 	      hname = "h_nreliso_"+suffix;
 	      cutHists[hname] = (TH1D*) h_nreliso_base->Clone(hname.c_str());
-	      // Eta
-	      hname = "h_eta_"+suffix;
-	      cutHists[hname] = (TH1D*) h_eta_base->Clone(hname.c_str());	    
 	      // Pt
 	      hname = "h_pt_"+suffix;
 	      cutHists[hname] = (TH1D*) h_pt_base->Clone(hname.c_str());	    
 	      // MT2
 	      hname = "h_mt2_"+suffix;
 	      cutHists[hname] = (TH1D*) h_mt2_base->Clone(hname.c_str());	    
-	      // dphi Met
-	      hname = "h_dphiMet_"+suffix;
-	      cutHists[hname] = (TH1D*) h_dphiMet_base->Clone(hname.c_str());	    
-	      // Ntag
-	      hname = "h_nb_"+suffix;
-	      cutHists[hname] = (TH1D*) h_nb_base->Clone(hname.c_str());	    
+	      if (fillUnimportantCutHists) {
+		// Ntag
+		hname = "h_nb_"+suffix;
+		cutHists[hname] = (TH1D*) h_nb_base->Clone(hname.c_str());	    
+		// Hit Pattern
+		hname = "h_hp_"+suffix;
+		cutHists[hname] = (TH1D*) h_hp_base->Clone(hname.c_str());
+		if (len < 3) cutHists[hname]->GetXaxis()->SetRange(0,(1<<5)-1); // At most 4 layers for P tracks
+		else if (len == 4) cutHists[hname]->GetXaxis()->SetRange(0,(1<<7)-1); // At most 6 layers for M tracks
+		// N vertex
+		hname = "h_nv_"+suffix;
+		cutHists[hname] = (TH1D*) h_nv_base->Clone(hname.c_str());
+		// dphi Met
+		hname = "h_dphiMet_"+suffix;
+		cutHists[hname] = (TH1D*) h_dphiMet_base->Clone(hname.c_str());	    
+		// Eta
+		hname = "h_eta_"+suffix;
+		cutHists[hname] = (TH1D*) h_eta_base->Clone(hname.c_str());	    
+	      }
 	    }
 	  }
 	}
       }
     }
   }
+  unordered_map<string,TH1D*> cutHistsNM1;
+  if (fillNM1Hists) {
+    cout << "Booking NM1 hists" << endl;
+    for (unordered_map<string,TH1D*>::iterator hist = cutHists.begin(); hist != cutHists.end(); hist++) {
+      string hname = (hist->first)+"_NM1"; 
+      if (hname.find("iso") == string::npos && hname.find("pterr") == string::npos && hname.find("dz") == string::npos && hname.find("dxy") == string::npos) continue;
+      TH1D* cutHistNM1 = (TH1D*) (hist->second)->Clone(hname.c_str());
+      cutHistsNM1[hname] = cutHistNM1;
+    }
+  }
+
 
   mt2tree t;
   t.Init(ch);
@@ -684,6 +702,8 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
     const int ntracks = t.ntracks;
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
+      bool PassesFullIsoSel = false; bool PassesFullIsoSelSTC = false;
+      bool isQualityTrack = false; bool isQualityTrackSTC = false;
 
       // Apply basic selections
       const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) == 0 
@@ -697,6 +717,7 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 
       int lenIndex = -1;
       const bool isChargino = isSignal && t.track_matchedCharginoIdx[i_trk] >= 0;
+      if (isSignal && !isChargino) continue;
       if (isChargino) {
 	h_CharLength->Fill( t.track_decayXY[i_trk], weight );
       }
@@ -777,10 +798,10 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const float reliso = t.track_reliso[i_trk];
 	const bool relisoSel = reliso < 0.2;
 	const bool relisoSelSTC = reliso < 0.2 * isoSTC;
-	const bool PassesFullIsoSel = NeuIso0p05Sel && NeuRelIso0p05Sel && isoSel && relisoSel;
-	const bool PassesFullIsoSelSTC = NeuIso0p05SelSTC && NeuRelIso0p05SelSTC && isoSelSTC && relisoSelSTC;
+	PassesFullIsoSel = NeuIso0p05Sel && NeuRelIso0p05Sel && isoSel && relisoSel;
+	PassesFullIsoSelSTC = NeuIso0p05SelSTC && NeuRelIso0p05SelSTC && isoSelSTC && relisoSelSTC;
 
-	if (!PassesFullIsoSelSTC) {
+	if (!fillNM1Hists && !PassesFullIsoSelSTC) {
 	  if (isChargino) cout << "Chargino failed isolation" << endl;
 	  continue;
 	}
@@ -817,23 +838,19 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	const bool isHighPurity = t.track_isHighPurity[i_trk] == 1;
 	const bool QualityTrackBase = lostInnerHitsSel && pterrSel && isHighPurity && dxySel && dzSel;
 	const bool QualityTrackSTCBase =  lostInnerHitsSel && pterrSelSTC && isHighPurity && dxySelSTC && dzSelSTC;
-	const bool isQualityTrack = pixLayersSel4 && QualityTrackBase;
-	const bool isQualityTrackSTC = pixLayersSel4 && QualityTrackSTCBase;
+	isQualityTrack = pixLayersSel4 && QualityTrackBase;
+	isQualityTrackSTC = pixLayersSel4 && QualityTrackSTCBase;
 
-	if (!isQualityTrackSTC) {
+	if (!fillNM1Hists && !isQualityTrackSTC) {
 	  if (isChargino) cout << "Chargino failed quality" << endl;
 	  continue;
 	}
 
 	// Full Short Track
-	//	isST = PassesFullIsoSel && isQualityTrack && !is1L;
-	//	isST1 = PassesFullIsoSel && isQualityTrack && is1L;
 	isST = PassesFullIsoSel && isQualityTrack;
 
 	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
-	//	isSTC = !isST && !is1L;
-	//	isSTC1 = !isST && is1L;
-	isSTC = !isST;
+	isSTC = !isST && PassesFullIsoSelSTC && isQualityTrackSTC;
 
 	/*
 	if (isSTC || isST) {	  
@@ -865,14 +882,6 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 	// more else ifs for 1-MOH tracks
       }
 
-      //      if (!isST && !isSTC && !isST1 && !isSTC1) {
-      if (!isST && !isSTC) {
-	if (isChargino) {
-	  cout << "Chargino failed selection" << endl;
-	}
-	continue;
-      }
-
       if (isChargino) {
 	if (isST) {
 	  h_sigeffST->Fill( t.track_decayXY[i_trk], weight);
@@ -885,36 +894,41 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       vector<string> matches = {"_"};
       // Check gen match
       if (!t.isData) {
-	bool genPromptE = false, genPromptM = false, genTauE = false, genTauM = false, genTau1 = false, genTau3 = false;
-	for (int i_gl = 0; i_gl < t.ngenLep; i_gl++) {
-	  if (DeltaR(t.genLep_eta[i_gl], t.track_eta[i_trk], t.genLep_phi[i_gl], t.track_phi[i_trk]) < 0.05) {
-	    if (fabs(t.genLep_pdgId[i_gl]) == 11) genPromptE = true;
-	    else genPromptM = true;
-	  }
+	if (isChargino) {
+	  matches.push_back("_chargino_");
 	}
-	for (int i_gl = 0; i_gl < t.ngenLepFromTau; i_gl++) {
-	  if (DeltaR(t.genLepFromTau_eta[i_gl], t.track_eta[i_trk], t.genLepFromTau_phi[i_gl], t.track_phi[i_trk]) < 0.05) {
-	    if (fabs(t.genLepFromTau_pdgId[i_gl]) == 11) genTauE = true;
-	    else genTauM = true;
-	  }
-	}
-	for (int i_gl = 0; i_gl < t.ngenTau; i_gl++) {
-	  if (DeltaR(t.genTau_eta[i_gl], t.track_eta[i_trk], t.genTau_phi[i_gl], t.track_phi[i_trk]) < 0.2) { // Only require 0.2 for rough matching to hadronic taus
-	    if (t.genTau_decayMode[i_gl] == 1) {
-	      genTau1 = true;
-	    }
-	    else if (t.genTau_decayMode[i_gl] == 3) {
-	      genTau3 = true;
+	else {
+	  bool genPromptE = false, genPromptM = false, genTauE = false, genTauM = false, genTau1 = false, genTau3 = false;
+	  for (int i_gl = 0; i_gl < t.ngenLep; i_gl++) {
+	    if (DeltaR(t.genLep_eta[i_gl], t.track_eta[i_trk], t.genLep_phi[i_gl], t.track_phi[i_trk]) < 0.05) {
+	      if (fabs(t.genLep_pdgId[i_gl]) == 11) genPromptE = true;
+	      else genPromptM = true;
 	    }
 	  }
+	  for (int i_gl = 0; i_gl < t.ngenLepFromTau; i_gl++) {
+	    if (DeltaR(t.genLepFromTau_eta[i_gl], t.track_eta[i_trk], t.genLepFromTau_phi[i_gl], t.track_phi[i_trk]) < 0.05) {
+	      if (fabs(t.genLepFromTau_pdgId[i_gl]) == 11) genTauE = true;
+	      else genTauM = true;
+	    }
+	  }
+	  for (int i_gl = 0; i_gl < t.ngenTau; i_gl++) {
+	    if (DeltaR(t.genTau_eta[i_gl], t.track_eta[i_trk], t.genTau_phi[i_gl], t.track_phi[i_trk]) < 0.2) { // Only require 0.2 for rough matching to hadronic taus
+	      if (t.genTau_decayMode[i_gl] == 1) {
+		genTau1 = true;
+	      }
+	      else if (t.genTau_decayMode[i_gl] == 3) {
+		genTau3 = true;
+	      }
+	    }
+	  }
+	  if (genPromptE)      matches.push_back("_ewke_");
+	  else if (genPromptM) matches.push_back("_ewkm_");
+	  else if (genTauE)    matches.push_back("_tewke_");
+	  else if (genTauM)    matches.push_back("_tewkm_");
+	  else if (genTau1)    matches.push_back("_1newk_");
+	  else if (genTau3)    matches.push_back("_3newk_");
+	  else                 matches.push_back("_newk_");
 	}
-	if (genPromptE)      matches.push_back("_ewke_");
-	else if (genPromptM) matches.push_back("_ewkm_");
-	else if (genTauE)    matches.push_back("_tewke_");
-	else if (genTauM)    matches.push_back("_tewkm_");
-	else if (genTau1)    matches.push_back("_1newk_");
-	else if (genTau3)    matches.push_back("_3newk_");
-	else                 matches.push_back("_newk_");
       }
 
       // One final cut for L tracks to catch lost leptons
@@ -959,23 +973,75 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
       const float dphiMet = DeltaPhi(t.track_phi[i_trk],t.met_phi);
       
       // Fills
-      vector<TH2D*> ptHistsToFill; 
-      for (vector<TH2D*>::iterator hist = histsToFill.begin(); hist != histsToFill.end(); hist++) {
-	string hname = string((*hist)->GetName())+ptstring;
-	ptHistsToFill.push_back(fsHists[hname]);
-      }
-      int fillRow = isST ? 1 : 2; unordered_map<TH2D*,TH1D*> max_weights = isST ? max_st_weights : max_stc_weights;
-      for (std::vector<int>::iterator fillIndex = fillIndices.begin(); fillIndex != fillIndices.end(); fillIndex++) {
-	FillHists(histsToFill,weight,fillRow,*fillIndex);
-	FillHists(ptHistsToFill,weight,fillRow,*fillIndex);
-	// keep track of max weight we've filled for STC
-	for (std::vector<TH2D*>::iterator fshist = histsToFill.begin(); fshist != histsToFill.end(); fshist++) {
-	  TH2D* fsh = *fshist;	
-	  float max_weight = max_weights[fsh]->GetBinContent(*fillIndex);
-	  if (weight > max_weight) max_weights[fsh]->SetBinContent(*fillIndex,weight);
+      if (fillNM1Hists) {
+	for (vector<string>::iterator length = lengths.begin(); length != lengths.end(); length++) {
+	  for (vector<string>::iterator match = matches.begin(); match != matches.end(); match++) {
+	    for (vector<string>::iterator njht = njhtToFill.begin(); njht != njhtToFill.end(); njht++) {
+	      for (vector<string>::iterator reg = regsToFill.begin(); reg != regsToFill.end(); reg++) {
+		string suffixST = (*reg)+(*match)+"ST_"+(*length)+(*njht)+"_NM1";
+		string suffixSTC = (*reg)+(*match)+"STC_"+(*length)+(*njht)+"_NM1";
+		if (PassesFullIsoSelSTC) { // Fill NM1 quality hists
+		  string suffix = PassesFullIsoSel ? suffixST : suffixSTC;
+		  // Dz
+		  string hname = "h_dz_"+suffix;
+		  cutHistsNM1[hname]->Fill(fabs(t.track_dz[i_trk]),weight);
+		  // Dxy
+		  hname = "h_dxy_"+suffix;
+		  cutHistsNM1[hname]->Fill(fabs(t.track_dxy[i_trk]),weight);
+		  // pterr / pt^2
+		  hname = "h_pterr_"+suffix;
+		  cutHistsNM1[hname]->Fill(t.track_ptErr[i_trk]/(t.track_pt[i_trk]*t.track_pt[i_trk]),weight);
+		}
+		if (isQualityTrackSTC) { // Fill NM1 iso hists
+		  string suffix = isQualityTrack ? suffixST : suffixSTC;
+		  // Abs Iso 0.3
+		  string hname = "h_iso_"+suffix;
+		  cutHistsNM1[hname]->Fill(t.track_iso[i_trk],weight);
+		  // Rel Iso 0.3
+		  hname = "h_reliso_"+suffix;
+		  cutHistsNM1[hname]->Fill(t.track_reliso[i_trk],weight);
+		  // N Iso 0.05
+		  hname = "h_niso_"+suffix;
+		  cutHistsNM1[hname]->Fill(t.track_neuIso0p05[i_trk],weight);
+		  // N RelIso 0.05
+		  hname = "h_nreliso_"+suffix;
+		  cutHistsNM1[hname]->Fill(t.track_neuRelIso0p05[i_trk],weight);
+		}
+	      }
+	    }
+	  }
 	}
       }
-      if (fillDiagnosticHists) {
+
+      //      if (!isST && !isSTC && !isST1 && !isSTC1) {
+      if (!isST && !isSTC) {
+	if (isChargino) {
+	  cout << "Chargino failed selection" << endl;
+	}
+	continue;
+      }
+
+      // If we want to find fshort for matched chargino tracks and this is not one, then skip this fill
+      if (!(onlyMatchedTracks && !isChargino)) {
+	vector<TH2D*> ptHistsToFill; 
+	for (vector<TH2D*>::iterator hist = histsToFill.begin(); hist != histsToFill.end(); hist++) {
+	  string hname = string((*hist)->GetName())+ptstring;
+	  ptHistsToFill.push_back(fsHists[hname]);
+	}
+	int fillRow = isST ? 1 : 2; unordered_map<TH2D*,TH1D*> max_weights = isST ? max_st_weights : max_stc_weights;      
+	for (std::vector<int>::iterator fillIndex = fillIndices.begin(); fillIndex != fillIndices.end(); fillIndex++) {
+	  FillHists(histsToFill,weight,fillRow,*fillIndex);
+	  FillHists(ptHistsToFill,weight,fillRow,*fillIndex);
+	  // keep track of max weight we've filled for STC
+	  for (std::vector<TH2D*>::iterator fshist = histsToFill.begin(); fshist != histsToFill.end(); fshist++) {
+	    TH2D* fsh = *fshist;	
+	    float max_weight = max_weights[fsh]->GetBinContent(*fillIndex);
+	    if (weight > max_weight) max_weights[fsh]->SetBinContent(*fillIndex,weight);
+	  }
+	}
+      }
+
+      if (fillCutHists) {
 	string category = isST ? "ST" : "STC";
 	for (vector<string>::iterator length = lengths.begin(); length != lengths.end(); length++) {
 	  for (vector<string>::iterator match = matches.begin(); match != matches.end(); match++) {
@@ -988,18 +1054,12 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		// EtaPhi
 		hname = "h_etaphi_"+suffix;
 		etaphiHists[hname]->Fill(t.track_eta[i_trk],t.track_phi[i_trk],weight);
-		// Hit Pattern
-		hname = "h_hp_"+suffix;
-		cutHists[hname]->Fill(t.track_HitSignature[i_trk] & ((1<<7)-1),weight); // Mask so we save only first 6 hits
 		// Dz
 		hname = "h_dz_"+suffix;
 		cutHists[hname]->Fill(fabs(t.track_dz[i_trk]),weight);
 		// Dxy
 		hname = "h_dxy_"+suffix;
 		cutHists[hname]->Fill(fabs(t.track_dxy[i_trk]),weight);
-		// N vertex
-		hname = "h_nv_"+suffix;
-		cutHists[hname]->Fill(t.nVert,weight);
 		// pterr / pt^2
 		hname = "h_pterr_"+suffix;
 		cutHists[hname]->Fill(t.track_ptErr[i_trk]/(t.track_pt[i_trk]*t.track_pt[i_trk]),weight);
@@ -1015,21 +1075,29 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
 		// N RelIso 0.05
 		hname = "h_nreliso_"+suffix;
 		cutHists[hname]->Fill(t.track_neuRelIso0p05[i_trk],weight);
-		// Eta
-		hname = "h_eta_"+suffix;
-		cutHists[hname]->Fill(fabs(t.track_eta[i_trk]),weight);
 		// Pt
 		hname = "h_pt_"+suffix;
 		cutHists[hname]->Fill(t.track_pt[i_trk],weight);
 		// MT2
 		hname = "h_mt2_"+suffix;
 		cutHists[hname]->Fill(t.mt2,weight);
-		// dphi Met
-		hname = "h_dphiMet_"+suffix;
-		cutHists[hname]->Fill(dphiMet,weight);
-		// Ntag
-		hname = "h_nb_"+suffix;
-		cutHists[hname]->Fill(t.nBJet20,weight);
+		if (fillUnimportantCutHists) {
+		  // Eta
+		  hname = "h_eta_"+suffix;
+		  cutHists[hname]->Fill(fabs(t.track_eta[i_trk]),weight);
+		  // dphi Met
+		  hname = "h_dphiMet_"+suffix;
+		  cutHists[hname]->Fill(dphiMet,weight);
+		  // Ntag
+		  hname = "h_nb_"+suffix;
+		  cutHists[hname]->Fill(t.nBJet20,weight);
+		  // Hit Pattern
+		  hname = "h_hp_"+suffix;
+		  cutHists[hname]->Fill(t.track_HitSignature[i_trk] & ((1<<7)-1),weight); // Mask so we save only first 6 hits
+		  // N vertex
+		  hname = "h_nv_"+suffix;
+		  cutHists[hname]->Fill(t.nVert,weight);
+		}
 	      }
 	    }
 	  }
@@ -1081,9 +1149,13 @@ int FshortLooper::loop (TChain* ch, char * outtag, std::string config_tag) {
     max_st_weights[h]->Write();
     max_stc_weights[h]->Write();   
   }
-  if (fillDiagnosticHists) {
+  if (fillCutHists) {
+    for (unordered_map<string,TH2D*>::iterator hist = mtptHists.begin(); hist != mtptHists.end(); hist++) (hist->second)->Write();
     for (unordered_map<string,TH2D*>::iterator hist = etaphiHists.begin(); hist != etaphiHists.end(); hist++) (hist->second)->Write();
     for (unordered_map<string,TH1D*>::iterator hist = cutHists.begin(); hist != cutHists.end(); hist++) (hist->second)->Write();
+  }
+  if (fillNM1Hists) {
+    for (unordered_map<string,TH1D*>::iterator hist = cutHistsNM1.begin(); hist != cutHistsNM1.end(); hist++) (hist->second)->Write();
   }
 
   h_sigeffST->Write();

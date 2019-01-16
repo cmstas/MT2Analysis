@@ -389,10 +389,115 @@ for filename in filenames:
               "h_HH_SR_4_lo" : ContentTuple(h_fsMR_Nj4_lo)
               }
 
+    fserr_stat = { "h_LL_VR" : ErrorTuple(h_fsMR_stat),
+              "h_LLM_VR" : ErrorTuple(h_fsMR_stat),
+              "h_LM_VR" : ErrorTuple(h_fsMR_stat),
+              "h_LH_VR" : ErrorTuple(h_fsMR_stat),
+              "h_HL_VR" : ErrorTuple(h_fsMR_stat),
+              "h_HLM_VR" : ErrorTuple(h_fsMR_stat),
+              "h_HM_VR" : ErrorTuple(h_fsMR_stat),
+              "h_HH_VR" : ErrorTuple(h_fsMR_stat),
+              "h_LL_VR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_LLM_VR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_LM_VR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_LH_VR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_HL_VR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              "h_HLM_VR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              "h_HM_VR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              "h_HH_VR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              
+              "h_LL_SR" : ErrorTuple(h_fsMR_stat),
+              "h_LLM_SR" : ErrorTuple(h_fsMR_stat),
+              "h_LM_SR" : ErrorTuple(h_fsMR_stat),
+              "h_LH_SR" : ErrorTuple(h_fsMR_stat),
+              "h_HL_SR" : ErrorTuple(h_fsMR_stat),
+              "h_HLM_SR" : ErrorTuple(h_fsMR_stat),
+              "h_HM_SR" : ErrorTuple(h_fsMR_stat),
+              "h_HH_SR" : ErrorTuple(h_fsMR_stat),
+              "h_LL_SR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_LLM_SR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_LM_SR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_LH_SR_23" : ErrorTuple(h_fsMR_Nj23_stat),
+              "h_HL_SR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              "h_HLM_SR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              "h_HM_SR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              "h_HH_SR_4" : ErrorTuple(h_fsMR_Nj4_stat),
+              
+              # hi pt
+              "h_LL_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LLM_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LM_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LH_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HL_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HLM_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HM_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HH_VR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LL_VR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_LLM_VR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_LM_VR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_LH_VR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_HL_VR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+              "h_HLM_VR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+              "h_HM_VR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+              "h_HH_VR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+
+              "h_LL_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LLM_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LM_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LH_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HL_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HLM_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HM_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_HH_SR_hi" : ErrorTuple(h_fsMR_hi_stat),
+              "h_LL_SR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_LLM_SR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_LM_SR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_LH_SR_23_hi" : ErrorTuple(h_fsMR_Nj23_hi_stat),
+              "h_HL_SR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+              "h_HLM_SR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+              "h_HM_SR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+              "h_HH_SR_4_hi" : ErrorTuple(h_fsMR_Nj4_hi_stat),
+
+              # lo pt
+              "h_LL_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LLM_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LM_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LH_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HL_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HLM_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HM_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HH_VR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LL_VR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_LLM_VR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_LM_VR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_LH_VR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_HL_VR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+              "h_HLM_VR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+              "h_HM_VR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+              "h_HH_VR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+
+              "h_LL_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LLM_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LM_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LH_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HL_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HLM_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HM_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_HH_SR_lo" : ErrorTuple(h_fsMR_lo_stat),
+              "h_LL_SR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_LLM_SR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_LM_SR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_LH_SR_23_lo" : ErrorTuple(h_fsMR_Nj23_lo_stat),
+              "h_HL_SR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+              "h_HLM_SR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+              "h_HM_SR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat),
+              "h_HH_SR_4_lo" : ErrorTuple(h_fsMR_Nj4_lo_stat)
+              }
+
 
 #    histnames = [hname + ptstring for hname in ["h_LL_VR","h_LH_VR","h_HL_VR","h_HH_VR","h_LL_SR","h_LH_SR","h_HL_SR","h_HH_SR","h_LL_VR_23","h_LH_VR_23","h_HL_VR_4","h_HH_VR_4","h_LL_SR_23","h_LH_SR_23","h_HL_SR_4","h_HH_SR_4"] for ptstring in ["","_lo","_hi"]]
-    histnames = ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["H"] for ht in ["L","LM","M","H"] for reg in ["VR","SR"] for njsplit in ["","_4"] for ptstring in ["","_lo","_hi"]]
-    histnames += ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["L"] for ht in ["L","LM","M","H"] for reg in ["VR","SR"] for njsplit in ["","_23"] for ptstring in ["","_lo","_hi"]]
+    histnames = ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["H"] for ht in ["L","LM","M","H"] for reg in ["MR","VR","SR"] for njsplit in ["","_4"] for ptstring in ["","_lo","_hi"]]
+    histnames += ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["L"] for ht in ["L","LM","M","H"] for reg in ["MR","VR","SR"] for njsplit in ["","_23"] for ptstring in ["","_lo","_hi"]]
 
     for histname in histnames:
 #    for histname in ["h_LH_VR_23"]:
@@ -401,9 +506,14 @@ for filename in filenames:
         # First, sum all region histograms
         for f in filelist[1:]:
             h.Add(f.Get(histname))
+        # Don't do background prediction for MR
+        if histname.find("MR") >= 0: 
+            outfile.cd()
+            h.Write()
+            continue
         # Now, propagate fshort errors to the predicted counts of these histograms (y bin 2)
         # ROOT takes care of observed STC and ST counts for us, and tracks the error in bin 2 coming from STC statistics, but not that coming from fshort
-        # if CR count is 0, then take upper STC count as 1.83, and upper end of predicted error as 1.83 * (fshort+fshorterr)
+        # if CR count is 0, then take upper STC count as 1.83, and upper end of predicted error as 1.83 * (fshort+fshorterr)            
         fs_P = fs[histname][0]
         fs_P_err = fserr[histname][0]
         fs_P3 = fs[histname][1]
@@ -469,68 +579,34 @@ for filename in filenames:
 
     # Now find non-closure systematic
 
-#    regions = [("L",nj,ht,"") for nj in ["L","H"] for ht in ["LM","H"]] # L regions are common to 2016 and 2017-2018
-    regions = [("M",nj,ht) for nj in ["L","H"] for ht in ["LM","H"]]
-    if filename == d18 or filename == d17 or filename == d1718 or filename == m17 or filename == m18:
-        regions += [("P3",nj,ht) for nj in ["L","H"] for ht in ["L","M","H"]] # P3 tracks have an extra Ht split
-        regions += [("P4",nj,ht) for nj in ["L","H"] for ht in ["LM","H"]] # tracks are like M
-    elif filename == d16 or filename == m16:
-        regions += [("P",nj,ht) for nj in ["L","H"] for ht in ["L","M","H"]] # P tracks have an extra Ht split
-    
-
-    for ptstring in ["_lo","_hi"]:
-        max_nonclosure_sigma = 0
-        max_nonclosure_error = 0
-        max_nonclosure_delta = 0
-        max_nonclosure_pred = 0
-        max_nonclosure_obs = 0
-        max_nonclosure_region = ""
-        for region in regions:
-            cat = region[0]
-            if cat == "P":
-                index = 1
-            elif cat == "P3":
-                index = 2
-            elif cat == "P4":
-                index = 3
-            elif cat == "M":
-                index = 4
-            nj = region[1]
-            njsplit = "23" if nj == "L" else "4"
-            ht = region[2]
-            histname = "h_" + nj + ht + "_VR_" + njsplit + ptstring
-            h = outfile.Get(histname)
-            pred = h.GetBinContent(index,2)
-            obs = h.GetBinContent(index,1)
-            if pred == 0 or obs == 0: continue
-            pred_err = h.GetBinError(index,2)
-            obs_err = h.GetBinError(index,1)
-            total_err = sqrt(pred_err**2 + obs_err**2)
-            delta_in_sigma = abs(pred-obs) / total_err
-            if delta_in_sigma > max_nonclosure_sigma:
-                max_nonclosure_sigma = delta_in_sigma
-                max_nonclosure_error = total_err
-                max_nonclosure_delta = abs(pred-obs)
-                max_nonclosure_region = region
-                max_nonclosure_pred = pred
-                max_nonclosure_obs = obs
-        print "Maximum nonclosure region is:","{} {}{} for {}".format(max_nonclosure_region[0],max_nonclosure_region[1],max_nonclosure_region[2],ptstring)
-        print "With Delta (in sigma):",max_nonclosure_sigma
-        print "Delta:",max_nonclosure_delta
-        print "Pred:",max_nonclosure_pred
-        print "Total Error:",max_nonclosure_error
-        # require that even max nonclosure region be within 1 sigma, total
-        # (delta)**2 = syst**2 + total_err**2 => syst = sqrt((delta)**2 - total_err**2)
-        expr = max_nonclosure_delta**2 - max_nonclosure_error**2
-        if expr < 0:
-            systematic = 0
-        else:
-            systematic = sqrt(expr)/sqrt(max_nonclosure_pred)
-
-        print "Systematic:",systematic
-
-        h_syst = ROOT.TH1F("h_nonclosure_systematic"+ptstring,"Systematic from Non-closure in Validation Region",1,0,1)
-        h_syst.SetBinContent(1,systematic)
+    for histname in histnames:
+        if histname.find("MR") >= 0: continue
+        h = outfile.Get(histname)
+        h_syst = ROOT.TH1F(histname+"_nonclosure_systematic","Systematic from Non-closure in Validation Region",h.GetNbinsX(),0,h.GetNbinsX())
+        for length in range(1,h.GetNbinsX()+1):
+            if h.GetBinContent(length,3) == 0:
+                # in this case, just set rel-error to 50%
+                h_syst.SetBinContent(length,0.5)
+            else:
+                pred = h.GetBinContent(length,2)
+                obs = h.GetBinContent(length,1)
+                pred_err = h.GetBinError(length,2)
+                obs_err = h.GetBinError(length,1)
+                total_err = sqrt(pred_err**2 + obs_err**2)
+                expr = abs(pred-obs)**2 - total_err**2
+                stc_stat = h.GetBinError(length,3)/h.GetBinContent(length,3)
+                this_fs = fs[histname][length-1]
+                # we don't care about cases with immeasurable fshort
+                if this_fs <= 0: continue
+                fs_stat_err = fserr_stat[histname][length-1]
+                fshort_stat = fs_stat_err/this_fs
+                minimal_rel_error = sqrt(stc_stat**2 + fshort_stat**2)
+                if expr < 0:
+                    systematic_percent = 0
+                else:
+                    systematic_percent = sqrt(expr)/pred # pred is nonzero if Nstc is nonzero
+                # Set systematic to either the calculated systematic, or the total statistical error if it is larger
+                h_syst.SetBinContent(length,max(systematic_percent,minimal_rel_error))
         outfile.cd()
         h_syst.Write()
 

@@ -18,7 +18,7 @@ using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 50.;
-float rSFOF = 1.07;
+float rSFOF = 0.86;
 float rSFOFerr = 0.15;
 bool verbose = true;
 
@@ -97,63 +97,6 @@ int findLastMT2Hardcoded(TString srname){
 
 }
 
-std::tuple<int,int,int,int,int,int> getKinematicRange(string srname){
-
-    int ht_LO, ht_HI, nj_LO, nj_HI, nb_LO, nb_HI;
-    string topo_reg;
-
-    // handle monojet
-    if(srname.find("J") != string::npos)
-        return std::make_tuple(-1, -1, 1, 2, -1, -1);
-
-    if(srname.find("VL") != string::npos){
-        ht_LO = 250;
-        ht_HI = 450;
-        topo_reg = srname.substr(0, srname.size()-2);
-    }else if(srname.find("UH") != string::npos){
-        ht_LO = 1500;
-        ht_HI = -1;
-        topo_reg = srname.substr(0, srname.size()-2);
-    }else if(srname.find("L") != string::npos){
-        ht_LO = 450;
-        ht_HI = 575;
-        topo_reg = srname.substr(0, srname.size()-1);
-    }else if(srname.find("M") != string::npos){
-        ht_LO = 575;
-        ht_HI = 1200;
-        topo_reg = srname.substr(0, srname.size()-1);
-    }else if(srname.find("H") != string::npos){
-        ht_LO = 1200;
-        ht_HI = 1500;
-        topo_reg = srname.substr(0, srname.size()-1);
-    }
-
-
-    if(topo_reg=="1") { nj_LO=2;  nj_HI=4;  nb_LO=0; nb_HI=1;  }
-    if(topo_reg=="2") { nj_LO=2;  nj_HI=4;  nb_LO=1; nb_HI=2;  }
-    if(topo_reg=="3") { nj_LO=2;  nj_HI=4;  nb_LO=2; nb_HI=3;  }
-    if(topo_reg=="4") { nj_LO=4;  nj_HI=7;  nb_LO=0; nb_HI=1;  }
-    if(topo_reg=="5") { nj_LO=4;  nj_HI=7;  nb_LO=1; nb_HI=2;  }
-    if(topo_reg=="6") { nj_LO=4;  nj_HI=7;  nb_LO=2; nb_HI=3;  }
-    if(topo_reg=="7") { nj_LO=7;  nj_HI=-1; nb_LO=0; nb_HI=1;  }
-    if(topo_reg=="8") { nj_LO=7;  nj_HI=-1; nb_LO=1; nb_HI=2;  }
-    if(topo_reg=="9") { nj_LO=7;  nj_HI=-1; nb_LO=2; nb_HI=3;  }
-    if(topo_reg=="10"){ nj_LO=2;  nj_HI=7;  nb_LO=3; nb_HI=-1; }
-    if(topo_reg=="11"){ nj_LO=7;  nj_HI=-1; nb_LO=3; nb_HI=-1; }
-    if(topo_reg=="20"){ nj_LO=7;  nj_HI=10; nb_LO=0; nb_HI=1;  }
-    if(topo_reg=="21"){ nj_LO=7;  nj_HI=10; nb_LO=1; nb_HI=2;  }
-    if(topo_reg=="22"){ nj_LO=7;  nj_HI=10; nb_LO=2; nb_HI=3;  }
-    if(topo_reg=="23"){ nj_LO=7;  nj_HI=10; nb_LO=3; nb_HI=4;  }
-    if(topo_reg=="24"){ nj_LO=7;  nj_HI=10; nb_LO=4; nb_HI=-1; }
-    if(topo_reg=="25"){ nj_LO=10; nj_HI=-1; nb_LO=0; nb_HI=1;  }
-    if(topo_reg=="26"){ nj_LO=10; nj_HI=-1; nb_LO=1; nb_HI=2;  }
-    if(topo_reg=="27"){ nj_LO=10; nj_HI=-1; nb_LO=2; nb_HI=3;  }
-    if(topo_reg=="28"){ nj_LO=10; nj_HI=-1; nb_LO=3; nb_HI=4;  }
-    if(topo_reg=="29"){ nj_LO=10; nj_HI=-1; nb_LO=4; nb_HI=-1; }
-
-    return std::make_tuple(ht_LO, ht_HI, nj_LO, nj_HI, nb_LO, nb_HI);
-    
-}
 
 int purityRandNorm(TH1D* h_template, TString name , TFile * fData, TFile * fZinv, TFile * fDY, int & lastmt2val_hybrid) {
 
@@ -234,8 +177,8 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
 
   //cout<<"purityRandNorm for template "<<name<<endl;
   //h_template->Print("all");
-  int lastbin_hybrid = -1;
-  lastmt2val_hybrid = -1;
+  int lastbin_hybrid = 1;
+  lastmt2val_hybrid = 200;
   TString name_emu = name + "emu";
   TString name_zinv = name;
   name_zinv.ReplaceAll("crdy", "sr");
@@ -269,7 +212,7 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
 
   // find the last bin (hardcoded)
   // for every topological region, just hardcode lastbin_hybrid and lastmt2val_hybrid
-  // lastmt2val_hybrid = findLastMT2Hardcoded(srname);
+  lastmt2val_hybrid = findLastMT2Hardcoded(srname);
   if (lastmt2val_hybrid>0) lastbin_hybrid = hDY_Rebin->GetXaxis()->FindBin(lastmt2val_hybrid+1);
 
   // find the last bin (flexible)
@@ -277,7 +220,7 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
     cout<<"Could not find hardcoded last bin for this region. Counting "<<hybrid_nevent_threshold<<" MC events"<<endl;
     for ( int ibin = hDY_Rebin->GetNbinsX()+1; ibin >= 1; --ibin ) {
       //cout<<hDY_Rebin->Integral(ibin,-1)<<endl;
-      if (hDY_Rebin->Integral(ibin,-1) < hybrid_nevent_threshold && ibin!=1) continue;
+      if (hDY_Rebin->Integral(ibin,-1) < hybrid_nevent_threshold) continue;
       lastbin_hybrid = ibin;
       lastmt2val_hybrid = hDY_Rebin->GetBinLowEdge(ibin);
     break;
@@ -312,8 +255,6 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
 	+ pow( hZinv_Rebin->GetBinError(ibin) / hZinv_Rebin->GetBinContent(ibin),2)  
 	+ pow( hDY_Rebin->GetBinError(ibin)   / hDY_Rebin->GetBinContent(ibin), 2 );
       
-      if(cont < 0.0)
-          cout << "Warning! negative bin content in InclusiveTemplate for " << name << ", bin " << ibin << endl;
       h_RebinnedTemplate->SetBinContent(ibin, cont);
       h_RebinnedTemplate->SetBinError(ibin, sqrt(err2)*cont);
 
@@ -324,8 +265,6 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
       float kMT2 = hZinv_Rebin->GetBinContent(ibin) / integratedYieldZinv;
       h_RebinnedTemplate->SetBinContent(ibin, cont * kMT2);
       h_RebinnedTemplate->SetBinError(ibin, cont*sqrt(err2) * kMT2 );
-      if(cont*kMT2 < 0.0)
-          cout << "Warning! negative bin content in InclusiveTemplate for " << name << ", bin " << ibin << endl;
 
     }
 
@@ -620,22 +559,20 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     if (doHybridInclusiveTemplate) {
       //  Inclusive template: use inclusive template corresponding to this region
       
-      // //Get variable boundaries for signal region.
-      // TH1D* h_ht_LOW = (TH1D*) fZinv->Get(directory+"/h_ht_LOW");
-      // TH1D* h_ht_HI  = (TH1D*) fZinv->Get(directory+"/h_ht_HI");
-      // if (h_ht_LOW) ht_LOW = h_ht_LOW->GetBinContent(1);
-      // if (h_ht_HI)  ht_HI = h_ht_HI->GetBinContent(1);
-      // TH1D* h_njets_LOW = (TH1D*) fZinv->Get(directory+"/h_njets_LOW");
-      // TH1D* h_njets_HI  = (TH1D*) fZinv->Get(directory+"/h_njets_HI");
-      // if (h_njets_LOW) njets_LOW = h_njets_LOW->GetBinContent(1);
-      // if (h_njets_HI)  njets_HI = h_njets_HI->GetBinContent(1);
-      // TH1D* h_nbjets_LOW = (TH1D*) fZinv->Get(directory+"/h_nbjets_LOW");
-      // TH1D* h_nbjets_HI  = (TH1D*) fZinv->Get(directory+"/h_nbjets_HI");
-      // if (h_nbjets_LOW) nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
-      // if (h_nbjets_HI)  nbjets_HI = h_nbjets_HI->GetBinContent(1);
-
-        std::tie(ht_LOW, ht_HI, njets_LOW, njets_HI, nbjets_LOW, nbjets_HI) = getKinematicRange(srname.Data());
-
+      //Get variable boundaries for signal region.
+      TH1D* h_ht_LOW = (TH1D*) fZinv->Get(directory+"/h_ht_LOW");
+      TH1D* h_ht_HI  = (TH1D*) fZinv->Get(directory+"/h_ht_HI");
+      if (h_ht_LOW) ht_LOW = h_ht_LOW->GetBinContent(1);
+      if (h_ht_HI)  ht_HI = h_ht_HI->GetBinContent(1);
+      TH1D* h_njets_LOW = (TH1D*) fZinv->Get(directory+"/h_njets_LOW");
+      TH1D* h_njets_HI  = (TH1D*) fZinv->Get(directory+"/h_njets_HI");
+      if (h_njets_LOW) njets_LOW = h_njets_LOW->GetBinContent(1);
+      if (h_njets_HI)  njets_HI = h_njets_HI->GetBinContent(1);
+      TH1D* h_nbjets_LOW = (TH1D*) fZinv->Get(directory+"/h_nbjets_LOW");
+      TH1D* h_nbjets_HI  = (TH1D*) fZinv->Get(directory+"/h_nbjets_HI");
+      if (h_nbjets_LOW) nbjets_LOW = h_nbjets_LOW->GetBinContent(1);
+      if (h_nbjets_HI)  nbjets_HI = h_nbjets_HI->GetBinContent(1);
+      
       //Determine which inclusive template to use. If none works, this reverts to HybridSimple, taking template from its own TopoRegion 
       // Start from the Aggregate Regions (hardcoded, since they can partially overlap with the standard regions)
       if (srname == "20") inclusiveTemplateName = "crdy20/h_mt2bins";  // self (2j, HT1200)
@@ -653,10 +590,10 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       else if (srname == "31") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21
       // Now the standard regions
       else if (ht_LOW == 250) {
-	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseVL/h_mt2bins36J"; 
+	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseVL/h_mt2bins3J"; 
 	else if (njets_LOW == 2 && njets_HI==4) inclusiveTemplateName = "crdybaseVL/h_mt2bins23J"; 
-	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseVL/h_mt2bins46J"; 
-	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseVL/h_mt2bins7J"; 
+	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseVL/h_mt2bins"; 
+	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseVL/h_mt2bins4J"; 
       }
       else if (ht_LOW == 450) {
 	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseL/h_mt2bins36J"; 
@@ -671,7 +608,6 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseM/h_mt2bins23J"; 
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseM/h_mt2bins46J"; 
 	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseM/h_mt2bins7J"; 
-	else if (njets_LOW == 10)  inclusiveTemplateName = "crdybaseM/h_mt2bins7J"; 
       }
       else if (ht_LOW == 1200) {
 	if (njets_LOW == 2 && nbjets_LOW==3) inclusiveTemplateName = "crdybaseH/h_mt2bins36J"; 
@@ -679,7 +615,6 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	else if (njets_LOW == 2)  inclusiveTemplateName = "crdybaseH/h_mt2bins23J";
 	else if (njets_LOW == 4)  inclusiveTemplateName = "crdybaseH/h_mt2bins46J";
 	else if (njets_LOW == 7)  inclusiveTemplateName = "crdybaseH/h_mt2bins7J";
-	else if (njets_LOW == 10)  inclusiveTemplateName = "crdybaseH/h_mt2bins7J";
       }
       else if (ht_LOW == 1500) inclusiveTemplateName = "crdybaseUH/h_mt2bins";
 
@@ -694,7 +629,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	// Get the template
 	lastbin_hybrid = makeHybridTemplate(srname, h_MT2Template, inclusiveTemplateName , fData, fZinv, fDY, lastmt2val_hybrid);
 	cout<<"lastbin_hybrid "<<lastbin_hybrid<<" and lastmt2val_hybrid "<<lastmt2val_hybrid<<endl;
-	if (h_MT2Template!=0) h_MT2Template->Print();
+	if (h_MT2Template!=0) h_MT2Template->Print("all");
 	else cout<<"h_MT2Template is 0, using hybrid within this region (no external templates)"<<endl;
       }
 
@@ -725,9 +660,6 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	  }
 	  break;
 	}
-	// If no bin requires MC shape inputs, ie all bins have large counts in data (mostly VL and L regions, as almost every other region has O(1) events in the last MT2 bin), 
-	// don't leave lastbin_hybrid at 1!
-	else if (ibin == hDY->GetNbinsX()) lastbin_hybrid = hDY->GetNbinsX(); 
       }
       cout<<"lastbin_hybrid for doHybridSimple: "<<lastbin_hybrid<<endl;
     }
@@ -742,24 +674,10 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     TH1D* purityMC = (TH1D*) hDY->Clone("h_mt2binsPurityMC");
     if (hTop) purityMC->Add(hTop, -1);
-    for ( int ibin = 0; ibin <= purityMC->GetNbinsX(); ++ibin) {
-      if (purityMC->GetBinContent(ibin) < 0) {
-	cout << "Negative purity in MC bin " << ibin << " of " << srname << ht_LOW << "to" << ht_HI << endl;
-	cout << "rSFOF: " << rSFOF << endl;
-	purityMC->SetBinContent(ibin,0);
-      }
-    }
     purityMC->Divide(hDY);
 
     TH1D* purityData = (TH1D*) hData->Clone("h_mt2binsPurityData");
     if (hDataEM) purityData->Add(hDataEM, -1*rSFOF); 
-    for ( int ibin = 0; ibin <= purityData->GetNbinsX(); ++ibin) {
-      if (purityData->GetBinContent(ibin) < 0) {
-	cout << "Negative purity in Data bin " << ibin << " of " << srname << ht_LOW << "to" << ht_HI << endl;
-	cout << "rSFOF: " << rSFOF << endl;
-	purityData->SetBinContent(ibin,0);
-      }
-    }
     purityData->Divide(purityData, hData, 1, 1, "B");
     
     TH1D* Stat = (TH1D*) CRyield->Clone("h_mt2binsStat");
@@ -769,7 +687,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     TH1D* Syst = (TH1D*) Stat->Clone("h_mt2binsSyst");
     TH1D* pred = (TH1D*) Stat->Clone("h_mt2bins");
     for ( int ibin = 0; ibin <= Stat->GetNbinsX(); ++ibin) { 
-      Syst->SetBinError(ibin, (1-purityData->GetBinContent(ibin))*rSFOFerr*Stat->GetBinContent(ibin));
+      Syst->SetBinError(ibin, (1-purityData->GetBinContent(ibin))*0.2*Stat->GetBinContent(ibin));
       double quadrature = Stat->GetBinError(ibin)*Stat->GetBinError(ibin) + Syst->GetBinError(ibin)*Syst->GetBinError(ibin);
       pred->SetBinError(ibin, sqrt(quadrature));
     }
@@ -898,14 +816,12 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
 
 //_______________________________________________________________________________
-void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto"){
+void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-09-02_21p15fb"){
 
-    // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto";
-  // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_2016fullYear";
-  // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_pred2016withFullCR";
-  input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_unblinded1718";
-
-  string output_name = input_dir+"/zinvFromDY.root";
+  //  string input_dir = "/home/users/olivito/MT2Analysis/MT2looper/output/V00-00-08_fullstats/";
+  //  string input_dir = "../MT2looper/output/2015ExtendedNJets/";
+  //string input_dir = "../MT2looper/output/2015LowLumi/";
+  string output_name = input_dir+"/zinvFromGJ.root";
   // ----------------------------------------
   //  samples definition
   // ----------------------------------------
@@ -913,17 +829,16 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
-  TFile* f_data = new TFile(Form("%s/data_unblinded.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_Run2017.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
-  // TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
-  // TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
+  TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
+  //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
   TFile* f_top = new TFile(Form("%s/top.root",input_dir.c_str()));
   //TFile* f_dy = new TFile(Form("%s/dyjetsll_incl.root",input_dir.c_str()));
 
 
-  // if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
-  if(f_zinv->IsZombie()) {
+  if(f_zinv->IsZombie() || f_gjet->IsZombie()) {
     std::cerr << "Input file does not exist" << std::endl;
     return;
   }
@@ -937,14 +852,15 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   std::string keep = "sr";
   std::string skip = "srbase";
   while ((k = (TKey *)it())) {
-      if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
-      if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0) { //it is a signal region
-          std::string sr_string = k->GetTitle();
-          sr_string.erase(0, 2);//remove "sr" from front of string
-          dirs.push_back(sr_string);
-      }
+//    if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+    if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0 
+) {//it is a signal region
+      std::string sr_string = k->GetTitle();
+      sr_string.erase(0, 2);//remove "sr" from front of string
+      dirs.push_back(sr_string);
+    }
   }
-  
+
   //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
   // makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
