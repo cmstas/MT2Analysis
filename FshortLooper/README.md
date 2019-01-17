@@ -1,41 +1,33 @@
 # Calculating Fshort
 
-The babymaker counts STs and STCs for a standard STC isolation and quality factor (as of Aug 6, 2018, isolation is loosened by 6x and quality by 3x). If you wish to use a different STC definition, edit FshortLooper.cc, and set recalculate to true.
+The babymaker counts STs and STCs for a standard STC isolation and quality factor (as of Jan 15, 2018, isolation is loosened by 6x and quality by 3x). If you wish to use a different STC definition, edit FshortLooper.cc, and set recalculate to true. Make sure to run on a loose skim if you do this.
 
 Do 
 ``` bash
 make b
 ```
 
-Then, edit do.sh to point to the babies you wish to run on, and execute the script.
+Then edit do.sh to point to the 2016/17/18 data and MC babies you wish to run on.
 
-Output root files will be placed in 
+Root files containing various Fshort histograms will be placed in output_unmerged/<TAG>.
 
+Then do
 ``` bash
-output_unmerged/<year>_<TAG>
+haddall.sh <TAG>
 ```
 
-Execute haddall.sh (possibly edited, if you only ran on a subset of datasets). This will combine files into 
+This will produce output_merged/<TAG>.root
 
+Finally, run
 ``` bash
-output_merged/<mc or data>_<year>_<tag>.root
+postprocess.sh
 ```
 
-Execute postprocess.sh to produce output Fshort histograms in the output/ directory, plus plots in pngs/, etc.
+This will produce a merged output/Fshort_<TAG>.root containing transfer factors for use in ShortTrackLooper, as well as some pngs.
+
+Run
 ``` bash
-. postprocess.sh <TAG>
+python sigcontam.py <TAG>
 ```
 
-This will produce a merged 
-
-``` bash
-output/Fshort_<mc or data>_<year>_<TAG>.root 
-```
-
-file to serve as input to ShortTrackLooper.
-
-You can produce Fshort kinematic invariance plots and tables with
-
-``` bash
-python print_variations.py
-```
+to calculate the effect of signal contamination on fshort.

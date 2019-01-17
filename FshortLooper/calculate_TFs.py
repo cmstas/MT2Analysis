@@ -173,7 +173,7 @@ for rawname in names:
             for variation in ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
                 h_fs_var = tfile.Get(name.replace("Baseline",variation))
                 fs_var = h_fs_var.GetBinContent(length,1)
-                if fs_var == 0: continue
+                if fs_var <= 0: continue
                 fserr_var = h_fs_var.GetBinError(length,1)
                 overall_error = sqrt(fserr**2 + fserr_var**2)
                 delta_in_sigma = abs(fs - fs_var) / overall_error
@@ -187,7 +187,7 @@ for rawname in names:
             # If max_delta < sqrt(fserr**2*maxerr**2) already, no systematic is needed, but assign 10% anyway
             expr = max_delta**2-fserr**2-max_variation_stat_error**2
             if expr < 0: systematic = 0.1*fs
-            else: systematic = max( sqrt(expr), 0.01*fs )
+            else: systematic = max( sqrt(expr), 0.1*fs )
             print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_stat_error: {} max_var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_stat_error,max_var,systematic)
 #        if verbose: print name,length,fs,fserr,systematic
         h_syst.SetBinContent(length, 1, systematic)

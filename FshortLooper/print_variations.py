@@ -1,4 +1,4 @@
-# STCImplementation background estimates and plots
+# Make plots of fshort variations.
 
 import ROOT
 from math import sqrt

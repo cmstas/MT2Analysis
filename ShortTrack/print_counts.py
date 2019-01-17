@@ -1,4 +1,4 @@
-# STCImplementation background estimates and plots
+# Make nice tables and plots of results
 
 import ROOT
 from math import sqrt
@@ -17,7 +17,7 @@ ROOT.gStyle.SetOptStat(False)
 ROOT.gStyle.SetLegendTextSize(0.03)
 ROOT.gStyle.SetPaintTextFormat("#3.3g")
 ROOT.gStyle.SetLegendBorderSize(0)
-simplecanvas = ROOT.TCanvas("plotter")
+simplecanvas = ROOT.TCanvas("plotter_simple")
 simplecanvas.SetCanvasSize(1000,600)
 simplecanvas.SetTicks(1,1)
 simplecanvas.SetLeftMargin(0.16)
@@ -25,7 +25,25 @@ simplecanvas.SetTopMargin(0.12)
 simplecanvas.SetRightMargin(0.16)
 simplecanvas.SetBottomMargin(0.16)
 
-tl=ROOT.TLegend(0.2,0.7,0.4,0.8)
+ratiocanvas = ROOT.TCanvas("plotter_ratio")
+ratiocanvas.SetCanvasSize(1000,1000)
+ratiocanvas.SetTicks(1,0)
+ratiocanvas.SetLeftMargin(0.16)
+ratiocanvas.SetTopMargin(0.12)
+ratiocanvas.SetRightMargin(0.16)
+ratiocanvas.SetBottomMargin(0.16)
+pads = []
+pads.append(ROOT.TPad("1","1",0.0,0.26,1.0,1.0))
+pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.27))
+pads[0].SetTopMargin(0.08)
+pads[0].SetLeftMargin(0.12)
+pads[0].SetBottomMargin(0.17)
+pads[1].SetLeftMargin(0.12)
+pads[0].Draw()
+pads[1].Draw()
+
+
+tl=ROOT.TLegend(0.2,0.65,0.4,0.85)
 
 if len(sys.argv) < 3: 
     print "Which syststring?"
@@ -45,7 +63,7 @@ def printHeader(outfile):
     outfile.write("\documentclass[10pt]{article}\n\n")
 
     outfile.write("\usepackage{amsmath,graphicx,setspace,multirow,booktabs}\n")
-    outfile.write("\usepackage[paperheight=14in,paperwidth=14in]{geometry}\n")
+    outfile.write("\usepackage[paperheight=18in,paperwidth=14in]{geometry}\n")
     outfile.write("\usepackage[table]{xcolor}\n\n")
 
     outfile.write("\\addtolength{\\topmargin}{-.875in}\n")
@@ -176,6 +194,16 @@ def startMergedCountsTable(outfile):
     outfile.write("\\toprule\n")
     outfile.write("\multirow{2}{*}{Region} & 2017-18 Data & 2016 Data & \multicolumn{3}{c}{10 cm Signal} & \multicolumn{3}{c}{90 cm Signal} \\\\ \n")
     outfile.write(" & Pred Background & Pred Background & 1800, 1400 GeV & 1800, 1600 GeV & 1800, 1700 GeV & 1800, 1400 GeV & 1800, 1600 GeV & 1800, 1700 GeV\\\\ \n ")
+    outfile.write("\hline\n")
+
+def startMRvsSRTable(outfile):
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | *3c| *3c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("\multirow{3}{*}{Track Length N$_{J}$,H$_{T}$,p$_{T}$ Region} & \multicolumn{6}{c}{MR / SR ST Counts} \\\\ \n")
+    outfile.write(" & \multicolumn{3}{c}{90 cm Signal} & \multicolumn{3}{c}{10 cm Signal} \\\\ \n")
+    outfile.write(" & 1800, 1400 GeV & 1800, 1600 GeV & 1800, 1700 GeV & 1800, 1400 GeV & 1800, 1600 GeV & 1800, 1700 GeV\\\\ \n ")
     outfile.write("\hline\n")
 
 def printFooter(outfile):
@@ -375,6 +403,31 @@ def getFshorts(f):
     return vals,errs,systs
 
 def getCounts(f):
+    h_LL_MR_23 = f.Get("h_LL_MR_23")
+    h_LM_MR_23 = f.Get("h_LM_MR_23")
+    h_LLM_MR_23 = f.Get("h_LLM_MR_23")
+    h_LH_MR_23 = f.Get("h_LH_MR_23")
+    h_HL_MR_4 = f.Get("h_HL_MR_4")
+    h_HLM_MR_4 = f.Get("h_HLM_MR_4")
+    h_HM_MR_4 = f.Get("h_HM_MR_4")
+    h_HH_MR_4 = f.Get("h_HH_MR_4")
+    h_LL_MR_23_hi = f.Get("h_LL_MR_23_hi")
+    h_LLM_MR_23_hi = f.Get("h_LLM_MR_23_hi")
+    h_LM_MR_23_hi = f.Get("h_LM_MR_23_hi")
+    h_LH_MR_23_hi = f.Get("h_LH_MR_23_hi")
+    h_HL_MR_4_hi = f.Get("h_HL_MR_4_hi")
+    h_HLM_MR_4_hi = f.Get("h_HLM_MR_4_hi")
+    h_HM_MR_4_hi = f.Get("h_HM_MR_4_hi")
+    h_HH_MR_4_hi = f.Get("h_HH_MR_4_hi")
+    h_LL_MR_23_lo = f.Get("h_LL_MR_23_lo")
+    h_LLM_MR_23_lo = f.Get("h_LLM_MR_23_lo")
+    h_LM_MR_23_lo = f.Get("h_LM_MR_23_lo")
+    h_LH_MR_23_lo = f.Get("h_LH_MR_23_lo")
+    h_HL_MR_4_lo = f.Get("h_HL_MR_4_lo")
+    h_HLM_MR_4_lo = f.Get("h_HLM_MR_4_lo")
+    h_HM_MR_4_lo = f.Get("h_HM_MR_4_lo")
+    h_HH_MR_4_lo = f.Get("h_HH_MR_4_lo")
+
     h_LL_VR_23 = f.Get("h_LL_VR_23")
     h_LM_VR_23 = f.Get("h_LM_VR_23")
     h_LLM_VR_23 = f.Get("h_LLM_VR_23")
@@ -399,6 +452,7 @@ def getCounts(f):
     h_HLM_VR_4_lo = f.Get("h_HLM_VR_4_lo")
     h_HM_VR_4_lo = f.Get("h_HM_VR_4_lo")
     h_HH_VR_4_lo = f.Get("h_HH_VR_4_lo")
+
     h_LL_SR_23 = f.Get("h_LL_SR_23")
     h_LLM_SR_23 = f.Get("h_LLM_SR_23")
     h_LM_SR_23 = f.Get("h_LM_SR_23")
@@ -423,8 +477,813 @@ def getCounts(f):
     h_HLM_SR_4_lo = f.Get("h_HLM_SR_4_lo")
     h_HM_SR_4_lo = f.Get("h_HM_SR_4_lo")
     h_HH_SR_4_lo = f.Get("h_HH_SR_4_lo")
+
+    # Systs
+    h_LL_VR_23_ns = f.Get("h_LL_VR_23_nonclosure_systematic")
+    h_LM_VR_23_ns = f.Get("h_LM_VR_23_nonclosure_systematic")
+    h_LLM_VR_23_ns = f.Get("h_LLM_VR_23_nonclosure_systematic")
+    h_LH_VR_23_ns = f.Get("h_LH_VR_23_nonclosure_systematic")
+    h_HL_VR_4_ns = f.Get("h_HL_VR_4_nonclosure_systematic")
+    h_HLM_VR_4_ns = f.Get("h_HLM_VR_4_nonclosure_systematic")
+    h_HM_VR_4_ns = f.Get("h_HM_VR_4_nonclosure_systematic")
+    h_HH_VR_4_ns = f.Get("h_HH_VR_4_nonclosure_systematic")
+    h_LL_VR_23_hi_ns = f.Get("h_LL_VR_23_hi_nonclosure_systematic")
+    h_LLM_VR_23_hi_ns = f.Get("h_LLM_VR_23_hi_nonclosure_systematic")
+    h_LM_VR_23_hi_ns = f.Get("h_LM_VR_23_hi_nonclosure_systematic")
+    h_LH_VR_23_hi_ns = f.Get("h_LH_VR_23_hi_nonclosure_systematic")
+    h_HL_VR_4_hi_ns = f.Get("h_HL_VR_4_hi_nonclosure_systematic")
+    h_HLM_VR_4_hi_ns = f.Get("h_HLM_VR_4_hi_nonclosure_systematic")
+    h_HM_VR_4_hi_ns = f.Get("h_HM_VR_4_hi_nonclosure_systematic")
+    h_HH_VR_4_hi_ns = f.Get("h_HH_VR_4_hi_nonclosure_systematic")
+    h_LL_VR_23_lo_ns = f.Get("h_LL_VR_23_lo_nonclosure_systematic")
+    h_LLM_VR_23_lo_ns = f.Get("h_LLM_VR_23_lo_nonclosure_systematic")
+    h_LM_VR_23_lo_ns = f.Get("h_LM_VR_23_lo_nonclosure_systematic")
+    h_LH_VR_23_lo_ns = f.Get("h_LH_VR_23_lo_nonclosure_systematic")
+    h_HL_VR_4_lo_ns = f.Get("h_HL_VR_4_lo_nonclosure_systematic")
+    h_HLM_VR_4_lo_ns = f.Get("h_HLM_VR_4_lo_nonclosure_systematic")
+    h_HM_VR_4_lo_ns = f.Get("h_HM_VR_4_lo_nonclosure_systematic")
+    h_HH_VR_4_lo_ns = f.Get("h_HH_VR_4_lo_nonclosure_systematic")
+    # VR hists are used for SR as well
+
+
     vals = {}
     errs = {}
+    systs = {}
+
+    # MR vals
+    vals["P LL MR STC"] = h_LL_MR_23.GetBinContent(1,3)
+    vals["P LL MR pre"] = h_LL_MR_23.GetBinContent(1,2)
+    vals["P LL MR obs"] = h_LL_MR_23.GetBinContent(1,1)
+    vals["P3 LL MR STC"] = h_LL_MR_23.GetBinContent(2,3)
+    vals["P3 LL MR pre"] = h_LL_MR_23.GetBinContent(2,2)
+    vals["P3 LL MR obs"] = h_LL_MR_23.GetBinContent(2,1)
+    vals["P4 LL MR STC"] = h_LL_MR_23.GetBinContent(3,3)
+    vals["P4 LL MR pre"] = h_LL_MR_23.GetBinContent(3,2)
+    vals["P4 LL MR obs"] = h_LL_MR_23.GetBinContent(3,1)
+    vals["M LL MR STC"] = h_LL_MR_23.GetBinContent(4,3)
+    vals["M LL MR pre"] = h_LL_MR_23.GetBinContent(4,2)
+    vals["M LL MR obs"] = h_LL_MR_23.GetBinContent(4,1)
+    vals["L LL MR STC"] = h_LL_MR_23.GetBinContent(5,3)
+    vals["L LL MR pre"] = h_LL_MR_23.GetBinContent(5,2)
+    vals["L LL MR obs"] = h_LL_MR_23.GetBinContent(5,1)
+
+    vals["P LLM MR STC"] = h_LLM_MR_23.GetBinContent(1,3)
+    vals["P LLM MR pre"] = h_LLM_MR_23.GetBinContent(1,2)
+    vals["P LLM MR obs"] = h_LLM_MR_23.GetBinContent(1,1)
+    vals["P3 LLM MR STC"] = h_LLM_MR_23.GetBinContent(2,3)
+    vals["P3 LLM MR pre"] = h_LLM_MR_23.GetBinContent(2,2)
+    vals["P3 LLM MR obs"] = h_LLM_MR_23.GetBinContent(2,1)
+    vals["P4 LLM MR STC"] = h_LLM_MR_23.GetBinContent(3,3)
+    vals["P4 LLM MR pre"] = h_LLM_MR_23.GetBinContent(3,2)
+    vals["P4 LLM MR obs"] = h_LLM_MR_23.GetBinContent(3,1)
+    vals["M LLM MR STC"] = h_LLM_MR_23.GetBinContent(4,3)
+    vals["M LLM MR pre"] = h_LLM_MR_23.GetBinContent(4,2)
+    vals["M LLM MR obs"] = h_LLM_MR_23.GetBinContent(4,1)
+    vals["L LLM MR STC"] = h_LLM_MR_23.GetBinContent(5,3)
+    vals["L LLM MR pre"] = h_LLM_MR_23.GetBinContent(5,2)
+    vals["L LLM MR obs"] = h_LLM_MR_23.GetBinContent(5,1)
+
+    vals["P LM MR STC"] = h_LM_MR_23.GetBinContent(1,3)
+    vals["P LM MR pre"] = h_LM_MR_23.GetBinContent(1,2)
+    vals["P LM MR obs"] = h_LM_MR_23.GetBinContent(1,1)
+    vals["P3 LM MR STC"] = h_LM_MR_23.GetBinContent(2,3)
+    vals["P3 LM MR pre"] = h_LM_MR_23.GetBinContent(2,2)
+    vals["P3 LM MR obs"] = h_LM_MR_23.GetBinContent(2,1)
+    vals["P4 LM MR STC"] = h_LM_MR_23.GetBinContent(3,3)
+    vals["P4 LM MR pre"] = h_LM_MR_23.GetBinContent(3,2)
+    vals["P4 LM MR obs"] = h_LM_MR_23.GetBinContent(3,1)
+    vals["M LM MR STC"] = h_LM_MR_23.GetBinContent(4,3)
+    vals["M LM MR pre"] = h_LM_MR_23.GetBinContent(4,2)
+    vals["M LM MR obs"] = h_LM_MR_23.GetBinContent(4,1)
+    vals["L LM MR STC"] = h_LM_MR_23.GetBinContent(5,3)
+    vals["L LM MR pre"] = h_LM_MR_23.GetBinContent(5,2)
+    vals["L LM MR obs"] = h_LM_MR_23.GetBinContent(5,1)
+
+    vals["P LH MR STC"] = h_LH_MR_23.GetBinContent(1,3)
+    vals["P LH MR pre"] = h_LH_MR_23.GetBinContent(1,2)
+    vals["P LH MR obs"] = h_LH_MR_23.GetBinContent(1,1)
+    vals["P3 LH MR STC"] = h_LH_MR_23.GetBinContent(2,3)
+    vals["P3 LH MR pre"] = h_LH_MR_23.GetBinContent(2,2)
+    vals["P3 LH MR obs"] = h_LH_MR_23.GetBinContent(2,1)
+    vals["P4 LH MR STC"] = h_LH_MR_23.GetBinContent(3,3)
+    vals["P4 LH MR pre"] = h_LH_MR_23.GetBinContent(3,2)
+    vals["P4 LH MR obs"] = h_LH_MR_23.GetBinContent(3,1)
+    vals["M LH MR STC"] = h_LH_MR_23.GetBinContent(4,3)
+    vals["M LH MR pre"] = h_LH_MR_23.GetBinContent(4,2)
+    vals["M LH MR obs"] = h_LH_MR_23.GetBinContent(4,1)
+    vals["L LH MR STC"] = h_LH_MR_23.GetBinContent(5,3)
+    vals["L LH MR pre"] = h_LH_MR_23.GetBinContent(5,2)
+    vals["L LH MR obs"] = h_LH_MR_23.GetBinContent(5,1)
+
+    vals["P HL MR STC"] = h_HL_MR_4.GetBinContent(1,3)
+    vals["P HL MR pre"] = h_HL_MR_4.GetBinContent(1,2)
+    vals["P HL MR obs"] = h_HL_MR_4.GetBinContent(1,1)
+    vals["P3 HL MR STC"] = h_HL_MR_4.GetBinContent(2,3)
+    vals["P3 HL MR pre"] = h_HL_MR_4.GetBinContent(2,2)
+    vals["P3 HL MR obs"] = h_HL_MR_4.GetBinContent(2,1)
+    vals["P4 HL MR STC"] = h_HL_MR_4.GetBinContent(3,3)
+    vals["P4 HL MR pre"] = h_HL_MR_4.GetBinContent(3,2)
+    vals["P4 HL MR obs"] = h_HL_MR_4.GetBinContent(3,1)
+    vals["M HL MR STC"] = h_HL_MR_4.GetBinContent(4,3)
+    vals["M HL MR pre"] = h_HL_MR_4.GetBinContent(4,2)
+    vals["M HL MR obs"] = h_HL_MR_4.GetBinContent(4,1)
+    vals["L HL MR STC"] = h_HL_MR_4.GetBinContent(5,3)
+    vals["L HL MR pre"] = h_HL_MR_4.GetBinContent(5,2)
+    vals["L HL MR obs"] = h_HL_MR_4.GetBinContent(5,1)
+
+    vals["P HLM MR STC"] = h_HLM_MR_4.GetBinContent(1,3)
+    vals["P HLM MR pre"] = h_HLM_MR_4.GetBinContent(1,2)
+    vals["P HLM MR obs"] = h_HLM_MR_4.GetBinContent(1,1)
+    vals["P3 HLM MR STC"] = h_HLM_MR_4.GetBinContent(2,3)
+    vals["P3 HLM MR pre"] = h_HLM_MR_4.GetBinContent(2,2)
+    vals["P3 HLM MR obs"] = h_HLM_MR_4.GetBinContent(2,1)
+    vals["P4 HLM MR STC"] = h_HLM_MR_4.GetBinContent(3,3)
+    vals["P4 HLM MR pre"] = h_HLM_MR_4.GetBinContent(3,2)
+    vals["P4 HLM MR obs"] = h_HLM_MR_4.GetBinContent(3,1)
+    vals["M HLM MR STC"] = h_HLM_MR_4.GetBinContent(4,3)
+    vals["M HLM MR pre"] = h_HLM_MR_4.GetBinContent(4,2)
+    vals["M HLM MR obs"] = h_HLM_MR_4.GetBinContent(4,1)
+    vals["L HLM MR STC"] = h_HLM_MR_4.GetBinContent(5,3)
+    vals["L HLM MR pre"] = h_HLM_MR_4.GetBinContent(5,2)
+    vals["L HLM MR obs"] = h_HLM_MR_4.GetBinContent(5,1)
+
+    vals["P HM MR STC"] = h_HM_MR_4.GetBinContent(1,3)
+    vals["P HM MR pre"] = h_HM_MR_4.GetBinContent(1,2)
+    vals["P HM MR obs"] = h_HM_MR_4.GetBinContent(1,1)
+    vals["P3 HM MR STC"] = h_HM_MR_4.GetBinContent(2,3)
+    vals["P3 HM MR pre"] = h_HM_MR_4.GetBinContent(2,2)
+    vals["P3 HM MR obs"] = h_HM_MR_4.GetBinContent(2,1)
+    vals["P4 HM MR STC"] = h_HM_MR_4.GetBinContent(3,3)
+    vals["P4 HM MR pre"] = h_HM_MR_4.GetBinContent(3,2)
+    vals["P4 HM MR obs"] = h_HM_MR_4.GetBinContent(3,1)
+    vals["M HM MR STC"] = h_HM_MR_4.GetBinContent(4,3)
+    vals["M HM MR pre"] = h_HM_MR_4.GetBinContent(4,2)
+    vals["M HM MR obs"] = h_HM_MR_4.GetBinContent(4,1)
+    vals["L HM MR STC"] = h_HM_MR_4.GetBinContent(5,3)
+    vals["L HM MR pre"] = h_HM_MR_4.GetBinContent(5,2)
+    vals["L HM MR obs"] = h_HM_MR_4.GetBinContent(5,1)
+
+    vals["P HH MR STC"] = h_HH_MR_4.GetBinContent(1,3)
+    vals["P HH MR pre"] = h_HH_MR_4.GetBinContent(1,2)
+    vals["P HH MR obs"] = h_HH_MR_4.GetBinContent(1,1)
+    vals["P3 HH MR STC"] = h_HH_MR_4.GetBinContent(2,3)
+    vals["P3 HH MR pre"] = h_HH_MR_4.GetBinContent(2,2)
+    vals["P3 HH MR obs"] = h_HH_MR_4.GetBinContent(2,1)
+    vals["P4 HH MR STC"] = h_HH_MR_4.GetBinContent(3,3)
+    vals["P4 HH MR pre"] = h_HH_MR_4.GetBinContent(3,2)
+    vals["P4 HH MR obs"] = h_HH_MR_4.GetBinContent(3,1)
+    vals["M HH MR STC"] = h_HH_MR_4.GetBinContent(4,3)
+    vals["M HH MR pre"] = h_HH_MR_4.GetBinContent(4,2)
+    vals["M HH MR obs"] = h_HH_MR_4.GetBinContent(4,1)
+    vals["L HH MR STC"] = h_HH_MR_4.GetBinContent(5,3)
+    vals["L HH MR pre"] = h_HH_MR_4.GetBinContent(5,2)
+    vals["L HH MR obs"] = h_HH_MR_4.GetBinContent(5,1)
+
+    # hi pt
+    vals["P LL MR hi STC"] = h_LL_MR_23_hi.GetBinContent(1,3)
+    vals["P LL MR hi pre"] = h_LL_MR_23_hi.GetBinContent(1,2)
+    vals["P LL MR hi obs"] = h_LL_MR_23_hi.GetBinContent(1,1)
+    vals["P3 LL MR hi STC"] = h_LL_MR_23_hi.GetBinContent(2,3)
+    vals["P3 LL MR hi pre"] = h_LL_MR_23_hi.GetBinContent(2,2)
+    vals["P3 LL MR hi obs"] = h_LL_MR_23_hi.GetBinContent(2,1)
+    vals["P4 LL MR hi STC"] = h_LL_MR_23_hi.GetBinContent(3,3)
+    vals["P4 LL MR hi pre"] = h_LL_MR_23_hi.GetBinContent(3,2)
+    vals["P4 LL MR hi obs"] = h_LL_MR_23_hi.GetBinContent(3,1)
+    vals["M LL MR hi STC"] = h_LL_MR_23_hi.GetBinContent(4,3)
+    vals["M LL MR hi pre"] = h_LL_MR_23_hi.GetBinContent(4,2)
+    vals["M LL MR hi obs"] = h_LL_MR_23_hi.GetBinContent(4,1)
+    vals["L LL MR hi STC"] = h_LL_MR_23_hi.GetBinContent(5,3)
+    vals["L LL MR hi pre"] = h_LL_MR_23_hi.GetBinContent(5,2)
+    vals["L LL MR hi obs"] = h_LL_MR_23_hi.GetBinContent(5,1)
+
+    vals["P LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinContent(1,3)
+    vals["P LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinContent(1,2)
+    vals["P LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinContent(1,1)
+    vals["P3 LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinContent(2,3)
+    vals["P3 LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinContent(2,2)
+    vals["P3 LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinContent(2,1)
+    vals["P4 LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinContent(3,3)
+    vals["P4 LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinContent(3,2)
+    vals["P4 LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinContent(3,1)
+    vals["M LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinContent(4,3)
+    vals["M LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinContent(4,2)
+    vals["M LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinContent(4,1)
+    vals["L LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinContent(5,3)
+    vals["L LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinContent(5,2)
+    vals["L LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinContent(5,1)
+
+    vals["P LM MR hi STC"] = h_LM_MR_23_hi.GetBinContent(1,3)
+    vals["P LM MR hi pre"] = h_LM_MR_23_hi.GetBinContent(1,2)
+    vals["P LM MR hi obs"] = h_LM_MR_23_hi.GetBinContent(1,1)
+    vals["P3 LM MR hi STC"] = h_LM_MR_23_hi.GetBinContent(2,3)
+    vals["P3 LM MR hi pre"] = h_LM_MR_23_hi.GetBinContent(2,2)
+    vals["P3 LM MR hi obs"] = h_LM_MR_23_hi.GetBinContent(2,1)
+    vals["P4 LM MR hi STC"] = h_LM_MR_23_hi.GetBinContent(3,3)
+    vals["P4 LM MR hi pre"] = h_LM_MR_23_hi.GetBinContent(3,2)
+    vals["P4 LM MR hi obs"] = h_LM_MR_23_hi.GetBinContent(3,1)
+    vals["M LM MR hi STC"] = h_LM_MR_23_hi.GetBinContent(4,3)
+    vals["M LM MR hi pre"] = h_LM_MR_23_hi.GetBinContent(4,2)
+    vals["M LM MR hi obs"] = h_LM_MR_23_hi.GetBinContent(4,1)
+    vals["L LM MR hi STC"] = h_LM_MR_23_hi.GetBinContent(5,3)
+    vals["L LM MR hi pre"] = h_LM_MR_23_hi.GetBinContent(5,2)
+    vals["L LM MR hi obs"] = h_LM_MR_23_hi.GetBinContent(5,1)
+
+    vals["P LH MR hi STC"] = h_LH_MR_23_hi.GetBinContent(1,3)
+    vals["P LH MR hi pre"] = h_LH_MR_23_hi.GetBinContent(1,2)
+    vals["P LH MR hi obs"] = h_LH_MR_23_hi.GetBinContent(1,1)
+    vals["P3 LH MR hi STC"] = h_LH_MR_23_hi.GetBinContent(2,3)
+    vals["P3 LH MR hi pre"] = h_LH_MR_23_hi.GetBinContent(2,2)
+    vals["P3 LH MR hi obs"] = h_LH_MR_23_hi.GetBinContent(2,1)
+    vals["P4 LH MR hi STC"] = h_LH_MR_23_hi.GetBinContent(3,3)
+    vals["P4 LH MR hi pre"] = h_LH_MR_23_hi.GetBinContent(3,2)
+    vals["P4 LH MR hi obs"] = h_LH_MR_23_hi.GetBinContent(3,1)
+    vals["M LH MR hi STC"] = h_LH_MR_23_hi.GetBinContent(4,3)
+    vals["M LH MR hi pre"] = h_LH_MR_23_hi.GetBinContent(4,2)
+    vals["M LH MR hi obs"] = h_LH_MR_23_hi.GetBinContent(4,1)
+    vals["L LH MR hi STC"] = h_LH_MR_23_hi.GetBinContent(5,3)
+    vals["L LH MR hi pre"] = h_LH_MR_23_hi.GetBinContent(5,2)
+    vals["L LH MR hi obs"] = h_LH_MR_23_hi.GetBinContent(5,1)
+
+    vals["P HL MR hi STC"] = h_HL_MR_4_hi.GetBinContent(1,3)
+    vals["P HL MR hi pre"] = h_HL_MR_4_hi.GetBinContent(1,2)
+    vals["P HL MR hi obs"] = h_HL_MR_4_hi.GetBinContent(1,1)
+    vals["P3 HL MR hi STC"] = h_HL_MR_4_hi.GetBinContent(2,3)
+    vals["P3 HL MR hi pre"] = h_HL_MR_4_hi.GetBinContent(2,2)
+    vals["P3 HL MR hi obs"] = h_HL_MR_4_hi.GetBinContent(2,1)
+    vals["P4 HL MR hi STC"] = h_HL_MR_4_hi.GetBinContent(3,3)
+    vals["P4 HL MR hi pre"] = h_HL_MR_4_hi.GetBinContent(3,2)
+    vals["P4 HL MR hi obs"] = h_HL_MR_4_hi.GetBinContent(3,1)
+    vals["M HL MR hi STC"] = h_HL_MR_4_hi.GetBinContent(4,3)
+    vals["M HL MR hi pre"] = h_HL_MR_4_hi.GetBinContent(4,2)
+    vals["M HL MR hi obs"] = h_HL_MR_4_hi.GetBinContent(4,1)
+    vals["L HL MR hi STC"] = h_HL_MR_4_hi.GetBinContent(5,3)
+    vals["L HL MR hi pre"] = h_HL_MR_4_hi.GetBinContent(5,2)
+    vals["L HL MR hi obs"] = h_HL_MR_4_hi.GetBinContent(5,1)
+
+    vals["P HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinContent(1,3)
+    vals["P HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinContent(1,2)
+    vals["P HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinContent(1,1)
+    vals["P3 HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinContent(2,3)
+    vals["P3 HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinContent(2,2)
+    vals["P3 HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinContent(2,1)
+    vals["P4 HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinContent(3,3)
+    vals["P4 HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinContent(3,2)
+    vals["P4 HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinContent(3,1)
+    vals["M HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinContent(4,3)
+    vals["M HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinContent(4,2)
+    vals["M HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinContent(4,1)
+    vals["L HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinContent(5,3)
+    vals["L HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinContent(5,2)
+    vals["L HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinContent(5,1)
+
+    vals["P HM MR hi STC"] = h_HM_MR_4_hi.GetBinContent(1,3)
+    vals["P HM MR hi pre"] = h_HM_MR_4_hi.GetBinContent(1,2)
+    vals["P HM MR hi obs"] = h_HM_MR_4_hi.GetBinContent(1,1)
+    vals["P3 HM MR hi STC"] = h_HM_MR_4_hi.GetBinContent(2,3)
+    vals["P3 HM MR hi pre"] = h_HM_MR_4_hi.GetBinContent(2,2)
+    vals["P3 HM MR hi obs"] = h_HM_MR_4_hi.GetBinContent(2,1)
+    vals["P4 HM MR hi STC"] = h_HM_MR_4_hi.GetBinContent(3,3)
+    vals["P4 HM MR hi pre"] = h_HM_MR_4_hi.GetBinContent(3,2)
+    vals["P4 HM MR hi obs"] = h_HM_MR_4_hi.GetBinContent(3,1)
+    vals["M HM MR hi STC"] = h_HM_MR_4_hi.GetBinContent(4,3)
+    vals["M HM MR hi pre"] = h_HM_MR_4_hi.GetBinContent(4,2)
+    vals["M HM MR hi obs"] = h_HM_MR_4_hi.GetBinContent(4,1)
+    vals["L HM MR hi STC"] = h_HM_MR_4_hi.GetBinContent(5,3)
+    vals["L HM MR hi pre"] = h_HM_MR_4_hi.GetBinContent(5,2)
+    vals["L HM MR hi obs"] = h_HM_MR_4_hi.GetBinContent(5,1)
+
+    vals["P HH MR hi STC"] = h_HH_MR_4_hi.GetBinContent(1,3)
+    vals["P HH MR hi pre"] = h_HH_MR_4_hi.GetBinContent(1,2)
+    vals["P HH MR hi obs"] = h_HH_MR_4_hi.GetBinContent(1,1)
+    vals["P3 HH MR hi STC"] = h_HH_MR_4_hi.GetBinContent(2,3)
+    vals["P3 HH MR hi pre"] = h_HH_MR_4_hi.GetBinContent(2,2)
+    vals["P3 HH MR hi obs"] = h_HH_MR_4_hi.GetBinContent(2,1)
+    vals["P4 HH MR hi STC"] = h_HH_MR_4_hi.GetBinContent(3,3)
+    vals["P4 HH MR hi pre"] = h_HH_MR_4_hi.GetBinContent(3,2)
+    vals["P4 HH MR hi obs"] = h_HH_MR_4_hi.GetBinContent(3,1)
+    vals["M HH MR hi STC"] = h_HH_MR_4_hi.GetBinContent(4,3)
+    vals["M HH MR hi pre"] = h_HH_MR_4_hi.GetBinContent(4,2)
+    vals["M HH MR hi obs"] = h_HH_MR_4_hi.GetBinContent(4,1)
+    vals["L HH MR hi STC"] = h_HH_MR_4_hi.GetBinContent(5,3)
+    vals["L HH MR hi pre"] = h_HH_MR_4_hi.GetBinContent(5,2)
+    vals["L HH MR hi obs"] = h_HH_MR_4_hi.GetBinContent(5,1)
+
+    # lo pt
+    vals["P LL MR lo STC"] = h_LL_MR_23_lo.GetBinContent(1,3)
+    vals["P LL MR lo pre"] = h_LL_MR_23_lo.GetBinContent(1,2)
+    vals["P LL MR lo obs"] = h_LL_MR_23_lo.GetBinContent(1,1)
+    vals["P3 LL MR lo STC"] = h_LL_MR_23_lo.GetBinContent(2,3)
+    vals["P3 LL MR lo pre"] = h_LL_MR_23_lo.GetBinContent(2,2)
+    vals["P3 LL MR lo obs"] = h_LL_MR_23_lo.GetBinContent(2,1)
+    vals["P4 LL MR lo STC"] = h_LL_MR_23_lo.GetBinContent(3,3)
+    vals["P4 LL MR lo pre"] = h_LL_MR_23_lo.GetBinContent(3,2)
+    vals["P4 LL MR lo obs"] = h_LL_MR_23_lo.GetBinContent(3,1)
+    vals["M LL MR lo STC"] = h_LL_MR_23_lo.GetBinContent(4,3)
+    vals["M LL MR lo pre"] = h_LL_MR_23_lo.GetBinContent(4,2)
+    vals["M LL MR lo obs"] = h_LL_MR_23_lo.GetBinContent(4,1)
+    vals["L LL MR lo STC"] = h_LL_MR_23_lo.GetBinContent(5,3)
+    vals["L LL MR lo pre"] = h_LL_MR_23_lo.GetBinContent(5,2)
+    vals["L LL MR lo obs"] = h_LL_MR_23_lo.GetBinContent(5,1)
+
+    vals["P LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinContent(1,3)
+    vals["P LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinContent(1,2)
+    vals["P LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinContent(1,1)
+    vals["P3 LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinContent(2,3)
+    vals["P3 LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinContent(2,2)
+    vals["P3 LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinContent(2,1)
+    vals["P4 LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinContent(3,3)
+    vals["P4 LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinContent(3,2)
+    vals["P4 LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinContent(3,1)
+    vals["M LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinContent(4,3)
+    vals["M LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinContent(4,2)
+    vals["M LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinContent(4,1)
+    vals["L LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinContent(5,3)
+    vals["L LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinContent(5,2)
+    vals["L LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinContent(5,1)
+
+    vals["P LM MR lo STC"] = h_LM_MR_23_lo.GetBinContent(1,3)
+    vals["P LM MR lo pre"] = h_LM_MR_23_lo.GetBinContent(1,2)
+    vals["P LM MR lo obs"] = h_LM_MR_23_lo.GetBinContent(1,1)
+    vals["P3 LM MR lo STC"] = h_LM_MR_23_lo.GetBinContent(2,3)
+    vals["P3 LM MR lo pre"] = h_LM_MR_23_lo.GetBinContent(2,2)
+    vals["P3 LM MR lo obs"] = h_LM_MR_23_lo.GetBinContent(2,1)
+    vals["P4 LM MR lo STC"] = h_LM_MR_23_lo.GetBinContent(3,3)
+    vals["P4 LM MR lo pre"] = h_LM_MR_23_lo.GetBinContent(3,2)
+    vals["P4 LM MR lo obs"] = h_LM_MR_23_lo.GetBinContent(3,1)
+    vals["M LM MR lo STC"] = h_LM_MR_23_lo.GetBinContent(4,3)
+    vals["M LM MR lo pre"] = h_LM_MR_23_lo.GetBinContent(4,2)
+    vals["M LM MR lo obs"] = h_LM_MR_23_lo.GetBinContent(4,1)
+    vals["L LM MR lo STC"] = h_LM_MR_23_lo.GetBinContent(5,3)
+    vals["L LM MR lo pre"] = h_LM_MR_23_lo.GetBinContent(5,2)
+    vals["L LM MR lo obs"] = h_LM_MR_23_lo.GetBinContent(5,1)
+
+    vals["P LH MR lo STC"] = h_LH_MR_23_lo.GetBinContent(1,3)
+    vals["P LH MR lo pre"] = h_LH_MR_23_lo.GetBinContent(1,2)
+    vals["P LH MR lo obs"] = h_LH_MR_23_lo.GetBinContent(1,1)
+    vals["P3 LH MR lo STC"] = h_LH_MR_23_lo.GetBinContent(2,3)
+    vals["P3 LH MR lo pre"] = h_LH_MR_23_lo.GetBinContent(2,2)
+    vals["P3 LH MR lo obs"] = h_LH_MR_23_lo.GetBinContent(2,1)
+    vals["P4 LH MR lo STC"] = h_LH_MR_23_lo.GetBinContent(3,3)
+    vals["P4 LH MR lo pre"] = h_LH_MR_23_lo.GetBinContent(3,2)
+    vals["P4 LH MR lo obs"] = h_LH_MR_23_lo.GetBinContent(3,1)
+    vals["M LH MR lo STC"] = h_LH_MR_23_lo.GetBinContent(4,3)
+    vals["M LH MR lo pre"] = h_LH_MR_23_lo.GetBinContent(4,2)
+    vals["M LH MR lo obs"] = h_LH_MR_23_lo.GetBinContent(4,1)
+    vals["L LH MR lo STC"] = h_LH_MR_23_lo.GetBinContent(5,3)
+    vals["L LH MR lo pre"] = h_LH_MR_23_lo.GetBinContent(5,2)
+    vals["L LH MR lo obs"] = h_LH_MR_23_lo.GetBinContent(5,1)
+
+    vals["P HL MR lo STC"] = h_HL_MR_4_lo.GetBinContent(1,3)
+    vals["P HL MR lo pre"] = h_HL_MR_4_lo.GetBinContent(1,2)
+    vals["P HL MR lo obs"] = h_HL_MR_4_lo.GetBinContent(1,1)
+    vals["P3 HL MR lo STC"] = h_HL_MR_4_lo.GetBinContent(2,3)
+    vals["P3 HL MR lo pre"] = h_HL_MR_4_lo.GetBinContent(2,2)
+    vals["P3 HL MR lo obs"] = h_HL_MR_4_lo.GetBinContent(2,1)
+    vals["P4 HL MR lo STC"] = h_HL_MR_4_lo.GetBinContent(3,3)
+    vals["P4 HL MR lo pre"] = h_HL_MR_4_lo.GetBinContent(3,2)
+    vals["P4 HL MR lo obs"] = h_HL_MR_4_lo.GetBinContent(3,1)
+    vals["M HL MR lo STC"] = h_HL_MR_4_lo.GetBinContent(4,3)
+    vals["M HL MR lo pre"] = h_HL_MR_4_lo.GetBinContent(4,2)
+    vals["M HL MR lo obs"] = h_HL_MR_4_lo.GetBinContent(4,1)
+    vals["L HL MR lo STC"] = h_HL_MR_4_lo.GetBinContent(5,3)
+    vals["L HL MR lo pre"] = h_HL_MR_4_lo.GetBinContent(5,2)
+    vals["L HL MR lo obs"] = h_HL_MR_4_lo.GetBinContent(5,1)
+
+    vals["P HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinContent(1,3)
+    vals["P HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinContent(1,2)
+    vals["P HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinContent(1,1)
+    vals["P3 HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinContent(2,3)
+    vals["P3 HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinContent(2,2)
+    vals["P3 HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinContent(2,1)
+    vals["P4 HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinContent(3,3)
+    vals["P4 HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinContent(3,2)
+    vals["P4 HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinContent(3,1)
+    vals["M HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinContent(4,3)
+    vals["M HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinContent(4,2)
+    vals["M HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinContent(4,1)
+    vals["L HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinContent(5,3)
+    vals["L HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinContent(5,2)
+    vals["L HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinContent(5,1)
+
+    vals["P HM MR lo STC"] = h_HM_MR_4_lo.GetBinContent(1,3)
+    vals["P HM MR lo pre"] = h_HM_MR_4_lo.GetBinContent(1,2)
+    vals["P HM MR lo obs"] = h_HM_MR_4_lo.GetBinContent(1,1)
+    vals["P3 HM MR lo STC"] = h_HM_MR_4_lo.GetBinContent(2,3)
+    vals["P3 HM MR lo pre"] = h_HM_MR_4_lo.GetBinContent(2,2)
+    vals["P3 HM MR lo obs"] = h_HM_MR_4_lo.GetBinContent(2,1)
+    vals["P4 HM MR lo STC"] = h_HM_MR_4_lo.GetBinContent(3,3)
+    vals["P4 HM MR lo pre"] = h_HM_MR_4_lo.GetBinContent(3,2)
+    vals["P4 HM MR lo obs"] = h_HM_MR_4_lo.GetBinContent(3,1)
+    vals["M HM MR lo STC"] = h_HM_MR_4_lo.GetBinContent(4,3)
+    vals["M HM MR lo pre"] = h_HM_MR_4_lo.GetBinContent(4,2)
+    vals["M HM MR lo obs"] = h_HM_MR_4_lo.GetBinContent(4,1)
+    vals["L HM MR lo STC"] = h_HM_MR_4_lo.GetBinContent(5,3)
+    vals["L HM MR lo pre"] = h_HM_MR_4_lo.GetBinContent(5,2)
+    vals["L HM MR lo obs"] = h_HM_MR_4_lo.GetBinContent(5,1)
+
+    vals["P HH MR lo STC"] = h_HH_MR_4_lo.GetBinContent(1,3)
+    vals["P HH MR lo pre"] = h_HH_MR_4_lo.GetBinContent(1,2)
+    vals["P HH MR lo obs"] = h_HH_MR_4_lo.GetBinContent(1,1)
+    vals["P3 HH MR lo STC"] = h_HH_MR_4_lo.GetBinContent(2,3)
+    vals["P3 HH MR lo pre"] = h_HH_MR_4_lo.GetBinContent(2,2)
+    vals["P3 HH MR lo obs"] = h_HH_MR_4_lo.GetBinContent(2,1)
+    vals["P4 HH MR lo STC"] = h_HH_MR_4_lo.GetBinContent(3,3)
+    vals["P4 HH MR lo pre"] = h_HH_MR_4_lo.GetBinContent(3,2)
+    vals["P4 HH MR lo obs"] = h_HH_MR_4_lo.GetBinContent(3,1)
+    vals["M HH MR lo STC"] = h_HH_MR_4_lo.GetBinContent(4,3)
+    vals["M HH MR lo pre"] = h_HH_MR_4_lo.GetBinContent(4,2)
+    vals["M HH MR lo obs"] = h_HH_MR_4_lo.GetBinContent(4,1)
+    vals["L HH MR lo STC"] = h_HH_MR_4_lo.GetBinContent(5,3)
+    vals["L HH MR lo pre"] = h_HH_MR_4_lo.GetBinContent(5,2)
+    vals["L HH MR lo obs"] = h_HH_MR_4_lo.GetBinContent(5,1)
+
+    # MR Errors
+    errs["P LL MR STC"] = h_LL_MR_23.GetBinError(1,3)
+    errs["P LL MR pre"] = h_LL_MR_23.GetBinError(1,2)
+    errs["P LL MR obs"] = h_LL_MR_23.GetBinError(1,1)
+    errs["P3 LL MR STC"] = h_LL_MR_23.GetBinError(2,3)
+    errs["P3 LL MR pre"] = h_LL_MR_23.GetBinError(2,2)
+    errs["P3 LL MR obs"] = h_LL_MR_23.GetBinError(2,1)
+    errs["P4 LL MR STC"] = h_LL_MR_23.GetBinError(3,3)
+    errs["P4 LL MR pre"] = h_LL_MR_23.GetBinError(3,2)
+    errs["P4 LL MR obs"] = h_LL_MR_23.GetBinError(3,1)
+    errs["M LL MR STC"] = h_LL_MR_23.GetBinError(4,3)
+    errs["M LL MR pre"] = h_LL_MR_23.GetBinError(4,2)
+    errs["M LL MR obs"] = h_LL_MR_23.GetBinError(4,1)
+    errs["L LL MR STC"] = h_LL_MR_23.GetBinError(5,3)
+    errs["L LL MR pre"] = h_LL_MR_23.GetBinError(5,2)
+    errs["L LL MR obs"] = h_LL_MR_23.GetBinError(5,1)
+
+    errs["P LLM MR STC"] = h_LLM_MR_23.GetBinError(1,3)
+    errs["P LLM MR pre"] = h_LLM_MR_23.GetBinError(1,2)
+    errs["P LLM MR obs"] = h_LLM_MR_23.GetBinError(1,1)
+    errs["P3 LLM MR STC"] = h_LLM_MR_23.GetBinError(2,3)
+    errs["P3 LLM MR pre"] = h_LLM_MR_23.GetBinError(2,2)
+    errs["P3 LLM MR obs"] = h_LLM_MR_23.GetBinError(2,1)
+    errs["P4 LLM MR STC"] = h_LLM_MR_23.GetBinError(3,3)
+    errs["P4 LLM MR pre"] = h_LLM_MR_23.GetBinError(3,2)
+    errs["P4 LLM MR obs"] = h_LLM_MR_23.GetBinError(3,1)
+    errs["M LLM MR STC"] = h_LLM_MR_23.GetBinError(4,3)
+    errs["M LLM MR pre"] = h_LLM_MR_23.GetBinError(4,2)
+    errs["M LLM MR obs"] = h_LLM_MR_23.GetBinError(4,1)
+    errs["L LLM MR STC"] = h_LLM_MR_23.GetBinError(5,3)
+    errs["L LLM MR pre"] = h_LLM_MR_23.GetBinError(5,2)
+    errs["L LLM MR obs"] = h_LLM_MR_23.GetBinError(5,1)
+
+    errs["P LM MR STC"] = h_LM_MR_23.GetBinError(1,3)
+    errs["P LM MR pre"] = h_LM_MR_23.GetBinError(1,2)
+    errs["P LM MR obs"] = h_LM_MR_23.GetBinError(1,1)
+    errs["P3 LM MR STC"] = h_LM_MR_23.GetBinError(2,3)
+    errs["P3 LM MR pre"] = h_LM_MR_23.GetBinError(2,2)
+    errs["P3 LM MR obs"] = h_LM_MR_23.GetBinError(2,1)
+    errs["P4 LM MR STC"] = h_LM_MR_23.GetBinError(3,3)
+    errs["P4 LM MR pre"] = h_LM_MR_23.GetBinError(3,2)
+    errs["P4 LM MR obs"] = h_LM_MR_23.GetBinError(3,1)
+    errs["M LM MR STC"] = h_LM_MR_23.GetBinError(4,3)
+    errs["M LM MR pre"] = h_LM_MR_23.GetBinError(4,2)
+    errs["M LM MR obs"] = h_LM_MR_23.GetBinError(4,1)
+    errs["L LM MR STC"] = h_LM_MR_23.GetBinError(5,3)
+    errs["L LM MR pre"] = h_LM_MR_23.GetBinError(5,2)
+    errs["L LM MR obs"] = h_LM_MR_23.GetBinError(5,1)
+
+    errs["P LH MR STC"] = h_LH_MR_23.GetBinError(1,3)
+    errs["P LH MR pre"] = h_LH_MR_23.GetBinError(1,2)
+    errs["P LH MR obs"] = h_LH_MR_23.GetBinError(1,1)
+    errs["P3 LH MR STC"] = h_LH_MR_23.GetBinError(2,3)
+    errs["P3 LH MR pre"] = h_LH_MR_23.GetBinError(2,2)
+    errs["P3 LH MR obs"] = h_LH_MR_23.GetBinError(2,1)
+    errs["P4 LH MR STC"] = h_LH_MR_23.GetBinError(3,3)
+    errs["P4 LH MR pre"] = h_LH_MR_23.GetBinError(3,2)
+    errs["P4 LH MR obs"] = h_LH_MR_23.GetBinError(3,1)
+    errs["M LH MR STC"] = h_LH_MR_23.GetBinError(4,3)
+    errs["M LH MR pre"] = h_LH_MR_23.GetBinError(4,2)
+    errs["M LH MR obs"] = h_LH_MR_23.GetBinError(4,1)
+    errs["L LH MR STC"] = h_LH_MR_23.GetBinError(5,3)
+    errs["L LH MR pre"] = h_LH_MR_23.GetBinError(5,2)
+    errs["L LH MR obs"] = h_LH_MR_23.GetBinError(5,1)
+
+    errs["P HL MR STC"] = h_HL_MR_4.GetBinError(1,3)
+    errs["P HL MR pre"] = h_HL_MR_4.GetBinError(1,2)
+    errs["P HL MR obs"] = h_HL_MR_4.GetBinError(1,1)
+    errs["P3 HL MR STC"] = h_HL_MR_4.GetBinError(2,3)
+    errs["P3 HL MR pre"] = h_HL_MR_4.GetBinError(2,2)
+    errs["P3 HL MR obs"] = h_HL_MR_4.GetBinError(2,1)
+    errs["P4 HL MR STC"] = h_HL_MR_4.GetBinError(3,3)
+    errs["P4 HL MR pre"] = h_HL_MR_4.GetBinError(3,2)
+    errs["P4 HL MR obs"] = h_HL_MR_4.GetBinError(3,1)
+    errs["M HL MR STC"] = h_HL_MR_4.GetBinError(4,3)
+    errs["M HL MR pre"] = h_HL_MR_4.GetBinError(4,2)
+    errs["M HL MR obs"] = h_HL_MR_4.GetBinError(4,1)
+    errs["L HL MR STC"] = h_HL_MR_4.GetBinError(5,3)
+    errs["L HL MR pre"] = h_HL_MR_4.GetBinError(5,2)
+    errs["L HL MR obs"] = h_HL_MR_4.GetBinError(5,1)
+
+    errs["P HLM MR STC"] = h_HLM_MR_4.GetBinError(1,3)
+    errs["P HLM MR pre"] = h_HLM_MR_4.GetBinError(1,2)
+    errs["P HLM MR obs"] = h_HLM_MR_4.GetBinError(1,1)
+    errs["P3 HLM MR STC"] = h_HLM_MR_4.GetBinError(2,3)
+    errs["P3 HLM MR pre"] = h_HLM_MR_4.GetBinError(2,2)
+    errs["P3 HLM MR obs"] = h_HLM_MR_4.GetBinError(2,1)
+    errs["P4 HLM MR STC"] = h_HLM_MR_4.GetBinError(3,3)
+    errs["P4 HLM MR pre"] = h_HLM_MR_4.GetBinError(3,2)
+    errs["P4 HLM MR obs"] = h_HLM_MR_4.GetBinError(3,1)
+    errs["M HLM MR STC"] = h_HLM_MR_4.GetBinError(4,3)
+    errs["M HLM MR pre"] = h_HLM_MR_4.GetBinError(4,2)
+    errs["M HLM MR obs"] = h_HLM_MR_4.GetBinError(4,1)
+    errs["L HLM MR STC"] = h_HLM_MR_4.GetBinError(5,3)
+    errs["L HLM MR pre"] = h_HLM_MR_4.GetBinError(5,2)
+    errs["L HLM MR obs"] = h_HLM_MR_4.GetBinError(5,1)
+
+    errs["P HM MR STC"] = h_HM_MR_4.GetBinError(1,3)
+    errs["P HM MR pre"] = h_HM_MR_4.GetBinError(1,2)
+    errs["P HM MR obs"] = h_HM_MR_4.GetBinError(1,1)
+    errs["P3 HM MR STC"] = h_HM_MR_4.GetBinError(2,3)
+    errs["P3 HM MR pre"] = h_HM_MR_4.GetBinError(2,2)
+    errs["P3 HM MR obs"] = h_HM_MR_4.GetBinError(2,1)
+    errs["P4 HM MR STC"] = h_HM_MR_4.GetBinError(3,3)
+    errs["P4 HM MR pre"] = h_HM_MR_4.GetBinError(3,2)
+    errs["P4 HM MR obs"] = h_HM_MR_4.GetBinError(3,1)
+    errs["M HM MR STC"] = h_HM_MR_4.GetBinError(4,3)
+    errs["M HM MR pre"] = h_HM_MR_4.GetBinError(4,2)
+    errs["M HM MR obs"] = h_HM_MR_4.GetBinError(4,1)
+    errs["L HM MR STC"] = h_HM_MR_4.GetBinError(5,3)
+    errs["L HM MR pre"] = h_HM_MR_4.GetBinError(5,2)
+    errs["L HM MR obs"] = h_HM_MR_4.GetBinError(5,1)
+
+    errs["P HH MR STC"] = h_HH_MR_4.GetBinError(1,3)
+    errs["P HH MR pre"] = h_HH_MR_4.GetBinError(1,2)
+    errs["P HH MR obs"] = h_HH_MR_4.GetBinError(1,1)
+    errs["P3 HH MR STC"] = h_HH_MR_4.GetBinError(2,3)
+    errs["P3 HH MR pre"] = h_HH_MR_4.GetBinError(2,2)
+    errs["P3 HH MR obs"] = h_HH_MR_4.GetBinError(2,1)
+    errs["P4 HH MR STC"] = h_HH_MR_4.GetBinError(3,3)
+    errs["P4 HH MR pre"] = h_HH_MR_4.GetBinError(3,2)
+    errs["P4 HH MR obs"] = h_HH_MR_4.GetBinError(3,1)
+    errs["M HH MR STC"] = h_HH_MR_4.GetBinError(4,3)
+    errs["M HH MR pre"] = h_HH_MR_4.GetBinError(4,2)
+    errs["M HH MR obs"] = h_HH_MR_4.GetBinError(4,1)
+    errs["L HH MR STC"] = h_HH_MR_4.GetBinError(5,3)
+    errs["L HH MR pre"] = h_HH_MR_4.GetBinError(5,2)
+    errs["L HH MR obs"] = h_HH_MR_4.GetBinError(5,1)
+
+    # hi pt
+    errs["P LL MR hi STC"] = h_LL_MR_23_hi.GetBinError(1,3)
+    errs["P LL MR hi pre"] = h_LL_MR_23_hi.GetBinError(1,2)
+    errs["P LL MR hi obs"] = h_LL_MR_23_hi.GetBinError(1,1)
+    errs["P3 LL MR hi STC"] = h_LL_MR_23_hi.GetBinError(2,3)
+    errs["P3 LL MR hi pre"] = h_LL_MR_23_hi.GetBinError(2,2)
+    errs["P3 LL MR hi obs"] = h_LL_MR_23_hi.GetBinError(2,1)
+    errs["P4 LL MR hi STC"] = h_LL_MR_23_hi.GetBinError(3,3)
+    errs["P4 LL MR hi pre"] = h_LL_MR_23_hi.GetBinError(3,2)
+    errs["P4 LL MR hi obs"] = h_LL_MR_23_hi.GetBinError(3,1)
+    errs["M LL MR hi STC"] = h_LL_MR_23_hi.GetBinError(4,3)
+    errs["M LL MR hi pre"] = h_LL_MR_23_hi.GetBinError(4,2)
+    errs["M LL MR hi obs"] = h_LL_MR_23_hi.GetBinError(4,1)
+    errs["L LL MR hi STC"] = h_LL_MR_23_hi.GetBinError(5,3)
+    errs["L LL MR hi pre"] = h_LL_MR_23_hi.GetBinError(5,2)
+    errs["L LL MR hi obs"] = h_LL_MR_23_hi.GetBinError(5,1)
+
+    errs["P LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinError(1,3)
+    errs["P LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinError(1,2)
+    errs["P LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinError(1,1)
+    errs["P3 LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinError(2,3)
+    errs["P3 LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinError(2,2)
+    errs["P3 LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinError(2,1)
+    errs["P4 LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinError(3,3)
+    errs["P4 LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinError(3,2)
+    errs["P4 LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinError(3,1)
+    errs["M LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinError(4,3)
+    errs["M LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinError(4,2)
+    errs["M LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinError(4,1)
+    errs["L LLM MR hi STC"] = h_LLM_MR_23_hi.GetBinError(5,3)
+    errs["L LLM MR hi pre"] = h_LLM_MR_23_hi.GetBinError(5,2)
+    errs["L LLM MR hi obs"] = h_LLM_MR_23_hi.GetBinError(5,1)
+
+    errs["P LM MR hi STC"] = h_LM_MR_23_hi.GetBinError(1,3)
+    errs["P LM MR hi pre"] = h_LM_MR_23_hi.GetBinError(1,2)
+    errs["P LM MR hi obs"] = h_LM_MR_23_hi.GetBinError(1,1)
+    errs["P3 LM MR hi STC"] = h_LM_MR_23_hi.GetBinError(2,3)
+    errs["P3 LM MR hi pre"] = h_LM_MR_23_hi.GetBinError(2,2)
+    errs["P3 LM MR hi obs"] = h_LM_MR_23_hi.GetBinError(2,1)
+    errs["P4 LM MR hi STC"] = h_LM_MR_23_hi.GetBinError(3,3)
+    errs["P4 LM MR hi pre"] = h_LM_MR_23_hi.GetBinError(3,2)
+    errs["P4 LM MR hi obs"] = h_LM_MR_23_hi.GetBinError(3,1)
+    errs["M LM MR hi STC"] = h_LM_MR_23_hi.GetBinError(4,3)
+    errs["M LM MR hi pre"] = h_LM_MR_23_hi.GetBinError(4,2)
+    errs["M LM MR hi obs"] = h_LM_MR_23_hi.GetBinError(4,1)
+    errs["L LM MR hi STC"] = h_LM_MR_23_hi.GetBinError(5,3)
+    errs["L LM MR hi pre"] = h_LM_MR_23_hi.GetBinError(5,2)
+    errs["L LM MR hi obs"] = h_LM_MR_23_hi.GetBinError(5,1)
+
+    errs["P LH MR hi STC"] = h_LH_MR_23_hi.GetBinError(1,3)
+    errs["P LH MR hi pre"] = h_LH_MR_23_hi.GetBinError(1,2)
+    errs["P LH MR hi obs"] = h_LH_MR_23_hi.GetBinError(1,1)
+    errs["P3 LH MR hi STC"] = h_LH_MR_23_hi.GetBinError(2,3)
+    errs["P3 LH MR hi pre"] = h_LH_MR_23_hi.GetBinError(2,2)
+    errs["P3 LH MR hi obs"] = h_LH_MR_23_hi.GetBinError(2,1)
+    errs["P4 LH MR hi STC"] = h_LH_MR_23_hi.GetBinError(3,3)
+    errs["P4 LH MR hi pre"] = h_LH_MR_23_hi.GetBinError(3,2)
+    errs["P4 LH MR hi obs"] = h_LH_MR_23_hi.GetBinError(3,1)
+    errs["M LH MR hi STC"] = h_LH_MR_23_hi.GetBinError(4,3)
+    errs["M LH MR hi pre"] = h_LH_MR_23_hi.GetBinError(4,2)
+    errs["M LH MR hi obs"] = h_LH_MR_23_hi.GetBinError(4,1)
+    errs["L LH MR hi STC"] = h_LH_MR_23_hi.GetBinError(5,3)
+    errs["L LH MR hi pre"] = h_LH_MR_23_hi.GetBinError(5,2)
+    errs["L LH MR hi obs"] = h_LH_MR_23_hi.GetBinError(5,1)
+
+    errs["P HL MR hi STC"] = h_HL_MR_4_hi.GetBinError(1,3)
+    errs["P HL MR hi pre"] = h_HL_MR_4_hi.GetBinError(1,2)
+    errs["P HL MR hi obs"] = h_HL_MR_4_hi.GetBinError(1,1)
+    errs["P3 HL MR hi STC"] = h_HL_MR_4_hi.GetBinError(2,3)
+    errs["P3 HL MR hi pre"] = h_HL_MR_4_hi.GetBinError(2,2)
+    errs["P3 HL MR hi obs"] = h_HL_MR_4_hi.GetBinError(2,1)
+    errs["P4 HL MR hi STC"] = h_HL_MR_4_hi.GetBinError(3,3)
+    errs["P4 HL MR hi pre"] = h_HL_MR_4_hi.GetBinError(3,2)
+    errs["P4 HL MR hi obs"] = h_HL_MR_4_hi.GetBinError(3,1)
+    errs["M HL MR hi STC"] = h_HL_MR_4_hi.GetBinError(4,3)
+    errs["M HL MR hi pre"] = h_HL_MR_4_hi.GetBinError(4,2)
+    errs["M HL MR hi obs"] = h_HL_MR_4_hi.GetBinError(4,1)
+    errs["L HL MR hi STC"] = h_HL_MR_4_hi.GetBinError(5,3)
+    errs["L HL MR hi pre"] = h_HL_MR_4_hi.GetBinError(5,2)
+    errs["L HL MR hi obs"] = h_HL_MR_4_hi.GetBinError(5,1)
+
+    errs["P HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinError(1,3)
+    errs["P HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinError(1,2)
+    errs["P HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinError(1,1)
+    errs["P3 HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinError(2,3)
+    errs["P3 HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinError(2,2)
+    errs["P3 HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinError(2,1)
+    errs["P4 HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinError(3,3)
+    errs["P4 HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinError(3,2)
+    errs["P4 HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinError(3,1)
+    errs["M HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinError(4,3)
+    errs["M HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinError(4,2)
+    errs["M HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinError(4,1)
+    errs["L HLM MR hi STC"] = h_HLM_MR_4_hi.GetBinError(5,3)
+    errs["L HLM MR hi pre"] = h_HLM_MR_4_hi.GetBinError(5,2)
+    errs["L HLM MR hi obs"] = h_HLM_MR_4_hi.GetBinError(5,1)
+
+    errs["P HM MR hi STC"] = h_HM_MR_4_hi.GetBinError(1,3)
+    errs["P HM MR hi pre"] = h_HM_MR_4_hi.GetBinError(1,2)
+    errs["P HM MR hi obs"] = h_HM_MR_4_hi.GetBinError(1,1)
+    errs["P3 HM MR hi STC"] = h_HM_MR_4_hi.GetBinError(2,3)
+    errs["P3 HM MR hi pre"] = h_HM_MR_4_hi.GetBinError(2,2)
+    errs["P3 HM MR hi obs"] = h_HM_MR_4_hi.GetBinError(2,1)
+    errs["P4 HM MR hi STC"] = h_HM_MR_4_hi.GetBinError(3,3)
+    errs["P4 HM MR hi pre"] = h_HM_MR_4_hi.GetBinError(3,2)
+    errs["P4 HM MR hi obs"] = h_HM_MR_4_hi.GetBinError(3,1)
+    errs["M HM MR hi STC"] = h_HM_MR_4_hi.GetBinError(4,3)
+    errs["M HM MR hi pre"] = h_HM_MR_4_hi.GetBinError(4,2)
+    errs["M HM MR hi obs"] = h_HM_MR_4_hi.GetBinError(4,1)
+    errs["L HM MR hi STC"] = h_HM_MR_4_hi.GetBinError(5,3)
+    errs["L HM MR hi pre"] = h_HM_MR_4_hi.GetBinError(5,2)
+    errs["L HM MR hi obs"] = h_HM_MR_4_hi.GetBinError(5,1)
+
+    errs["P HH MR hi STC"] = h_HH_MR_4_hi.GetBinError(1,3)
+    errs["P HH MR hi pre"] = h_HH_MR_4_hi.GetBinError(1,2)
+    errs["P HH MR hi obs"] = h_HH_MR_4_hi.GetBinError(1,1)
+    errs["P3 HH MR hi STC"] = h_HH_MR_4_hi.GetBinError(2,3)
+    errs["P3 HH MR hi pre"] = h_HH_MR_4_hi.GetBinError(2,2)
+    errs["P3 HH MR hi obs"] = h_HH_MR_4_hi.GetBinError(2,1)
+    errs["P4 HH MR hi STC"] = h_HH_MR_4_hi.GetBinError(3,3)
+    errs["P4 HH MR hi pre"] = h_HH_MR_4_hi.GetBinError(3,2)
+    errs["P4 HH MR hi obs"] = h_HH_MR_4_hi.GetBinError(3,1)
+    errs["M HH MR hi STC"] = h_HH_MR_4_hi.GetBinError(4,3)
+    errs["M HH MR hi pre"] = h_HH_MR_4_hi.GetBinError(4,2)
+    errs["M HH MR hi obs"] = h_HH_MR_4_hi.GetBinError(4,1)
+    errs["L HH MR hi STC"] = h_HH_MR_4_hi.GetBinError(5,3)
+    errs["L HH MR hi pre"] = h_HH_MR_4_hi.GetBinError(5,2)
+    errs["L HH MR hi obs"] = h_HH_MR_4_hi.GetBinError(5,1)
+
+    # lo pt
+    errs["P LL MR lo STC"] = h_LL_MR_23_lo.GetBinError(1,3)
+    errs["P LL MR lo pre"] = h_LL_MR_23_lo.GetBinError(1,2)
+    errs["P LL MR lo obs"] = h_LL_MR_23_lo.GetBinError(1,1)
+    errs["P3 LL MR lo STC"] = h_LL_MR_23_lo.GetBinError(2,3)
+    errs["P3 LL MR lo pre"] = h_LL_MR_23_lo.GetBinError(2,2)
+    errs["P3 LL MR lo obs"] = h_LL_MR_23_lo.GetBinError(2,1)
+    errs["P4 LL MR lo STC"] = h_LL_MR_23_lo.GetBinError(3,3)
+    errs["P4 LL MR lo pre"] = h_LL_MR_23_lo.GetBinError(3,2)
+    errs["P4 LL MR lo obs"] = h_LL_MR_23_lo.GetBinError(3,1)
+    errs["M LL MR lo STC"] = h_LL_MR_23_lo.GetBinError(4,3)
+    errs["M LL MR lo pre"] = h_LL_MR_23_lo.GetBinError(4,2)
+    errs["M LL MR lo obs"] = h_LL_MR_23_lo.GetBinError(4,1)
+    errs["L LL MR lo STC"] = h_LL_MR_23_lo.GetBinError(5,3)
+    errs["L LL MR lo pre"] = h_LL_MR_23_lo.GetBinError(5,2)
+    errs["L LL MR lo obs"] = h_LL_MR_23_lo.GetBinError(5,1)
+
+    errs["P LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinError(1,3)
+    errs["P LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinError(1,2)
+    errs["P LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinError(1,1)
+    errs["P3 LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinError(2,3)
+    errs["P3 LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinError(2,2)
+    errs["P3 LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinError(2,1)
+    errs["P4 LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinError(3,3)
+    errs["P4 LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinError(3,2)
+    errs["P4 LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinError(3,1)
+    errs["M LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinError(4,3)
+    errs["M LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinError(4,2)
+    errs["M LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinError(4,1)
+    errs["L LLM MR lo STC"] = h_LLM_MR_23_lo.GetBinError(5,3)
+    errs["L LLM MR lo pre"] = h_LLM_MR_23_lo.GetBinError(5,2)
+    errs["L LLM MR lo obs"] = h_LLM_MR_23_lo.GetBinError(5,1)
+
+    errs["P LM MR lo STC"] = h_LM_MR_23_lo.GetBinError(1,3)
+    errs["P LM MR lo pre"] = h_LM_MR_23_lo.GetBinError(1,2)
+    errs["P LM MR lo obs"] = h_LM_MR_23_lo.GetBinError(1,1)
+    errs["P3 LM MR lo STC"] = h_LM_MR_23_lo.GetBinError(2,3)
+    errs["P3 LM MR lo pre"] = h_LM_MR_23_lo.GetBinError(2,2)
+    errs["P3 LM MR lo obs"] = h_LM_MR_23_lo.GetBinError(2,1)
+    errs["P4 LM MR lo STC"] = h_LM_MR_23_lo.GetBinError(3,3)
+    errs["P4 LM MR lo pre"] = h_LM_MR_23_lo.GetBinError(3,2)
+    errs["P4 LM MR lo obs"] = h_LM_MR_23_lo.GetBinError(3,1)
+    errs["M LM MR lo STC"] = h_LM_MR_23_lo.GetBinError(4,3)
+    errs["M LM MR lo pre"] = h_LM_MR_23_lo.GetBinError(4,2)
+    errs["M LM MR lo obs"] = h_LM_MR_23_lo.GetBinError(4,1)
+    errs["L LM MR lo STC"] = h_LM_MR_23_lo.GetBinError(5,3)
+    errs["L LM MR lo pre"] = h_LM_MR_23_lo.GetBinError(5,2)
+    errs["L LM MR lo obs"] = h_LM_MR_23_lo.GetBinError(5,1)
+
+    errs["P LH MR lo STC"] = h_LH_MR_23_lo.GetBinError(1,3)
+    errs["P LH MR lo pre"] = h_LH_MR_23_lo.GetBinError(1,2)
+    errs["P LH MR lo obs"] = h_LH_MR_23_lo.GetBinError(1,1)
+    errs["P3 LH MR lo STC"] = h_LH_MR_23_lo.GetBinError(2,3)
+    errs["P3 LH MR lo pre"] = h_LH_MR_23_lo.GetBinError(2,2)
+    errs["P3 LH MR lo obs"] = h_LH_MR_23_lo.GetBinError(2,1)
+    errs["P4 LH MR lo STC"] = h_LH_MR_23_lo.GetBinError(3,3)
+    errs["P4 LH MR lo pre"] = h_LH_MR_23_lo.GetBinError(3,2)
+    errs["P4 LH MR lo obs"] = h_LH_MR_23_lo.GetBinError(3,1)
+    errs["M LH MR lo STC"] = h_LH_MR_23_lo.GetBinError(4,3)
+    errs["M LH MR lo pre"] = h_LH_MR_23_lo.GetBinError(4,2)
+    errs["M LH MR lo obs"] = h_LH_MR_23_lo.GetBinError(4,1)
+    errs["L LH MR lo STC"] = h_LH_MR_23_lo.GetBinError(5,3)
+    errs["L LH MR lo pre"] = h_LH_MR_23_lo.GetBinError(5,2)
+    errs["L LH MR lo obs"] = h_LH_MR_23_lo.GetBinError(5,1)
+
+    errs["P HL MR lo STC"] = h_HL_MR_4_lo.GetBinError(1,3)
+    errs["P HL MR lo pre"] = h_HL_MR_4_lo.GetBinError(1,2)
+    errs["P HL MR lo obs"] = h_HL_MR_4_lo.GetBinError(1,1)
+    errs["P3 HL MR lo STC"] = h_HL_MR_4_lo.GetBinError(2,3)
+    errs["P3 HL MR lo pre"] = h_HL_MR_4_lo.GetBinError(2,2)
+    errs["P3 HL MR lo obs"] = h_HL_MR_4_lo.GetBinError(2,1)
+    errs["P4 HL MR lo STC"] = h_HL_MR_4_lo.GetBinError(3,3)
+    errs["P4 HL MR lo pre"] = h_HL_MR_4_lo.GetBinError(3,2)
+    errs["P4 HL MR lo obs"] = h_HL_MR_4_lo.GetBinError(3,1)
+    errs["M HL MR lo STC"] = h_HL_MR_4_lo.GetBinError(4,3)
+    errs["M HL MR lo pre"] = h_HL_MR_4_lo.GetBinError(4,2)
+    errs["M HL MR lo obs"] = h_HL_MR_4_lo.GetBinError(4,1)
+    errs["L HL MR lo STC"] = h_HL_MR_4_lo.GetBinError(5,3)
+    errs["L HL MR lo pre"] = h_HL_MR_4_lo.GetBinError(5,2)
+    errs["L HL MR lo obs"] = h_HL_MR_4_lo.GetBinError(5,1)
+
+    errs["P HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinError(1,3)
+    errs["P HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinError(1,2)
+    errs["P HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinError(1,1)
+    errs["P3 HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinError(2,3)
+    errs["P3 HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinError(2,2)
+    errs["P3 HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinError(2,1)
+    errs["P4 HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinError(3,3)
+    errs["P4 HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinError(3,2)
+    errs["P4 HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinError(3,1)
+    errs["M HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinError(4,3)
+    errs["M HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinError(4,2)
+    errs["M HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinError(4,1)
+    errs["L HLM MR lo STC"] = h_HLM_MR_4_lo.GetBinError(5,3)
+    errs["L HLM MR lo pre"] = h_HLM_MR_4_lo.GetBinError(5,2)
+    errs["L HLM MR lo obs"] = h_HLM_MR_4_lo.GetBinError(5,1)
+
+    errs["P HM MR lo STC"] = h_HM_MR_4_lo.GetBinError(1,3)
+    errs["P HM MR lo pre"] = h_HM_MR_4_lo.GetBinError(1,2)
+    errs["P HM MR lo obs"] = h_HM_MR_4_lo.GetBinError(1,1)
+    errs["P3 HM MR lo STC"] = h_HM_MR_4_lo.GetBinError(2,3)
+    errs["P3 HM MR lo pre"] = h_HM_MR_4_lo.GetBinError(2,2)
+    errs["P3 HM MR lo obs"] = h_HM_MR_4_lo.GetBinError(2,1)
+    errs["P4 HM MR lo STC"] = h_HM_MR_4_lo.GetBinError(3,3)
+    errs["P4 HM MR lo pre"] = h_HM_MR_4_lo.GetBinError(3,2)
+    errs["P4 HM MR lo obs"] = h_HM_MR_4_lo.GetBinError(3,1)
+    errs["M HM MR lo STC"] = h_HM_MR_4_lo.GetBinError(4,3)
+    errs["M HM MR lo pre"] = h_HM_MR_4_lo.GetBinError(4,2)
+    errs["M HM MR lo obs"] = h_HM_MR_4_lo.GetBinError(4,1)
+    errs["L HM MR lo STC"] = h_HM_MR_4_lo.GetBinError(5,3)
+    errs["L HM MR lo pre"] = h_HM_MR_4_lo.GetBinError(5,2)
+    errs["L HM MR lo obs"] = h_HM_MR_4_lo.GetBinError(5,1)
+
+    errs["P HH MR lo STC"] = h_HH_MR_4_lo.GetBinError(1,3)
+    errs["P HH MR lo pre"] = h_HH_MR_4_lo.GetBinError(1,2)
+    errs["P HH MR lo obs"] = h_HH_MR_4_lo.GetBinError(1,1)
+    errs["P3 HH MR lo STC"] = h_HH_MR_4_lo.GetBinError(2,3)
+    errs["P3 HH MR lo pre"] = h_HH_MR_4_lo.GetBinError(2,2)
+    errs["P3 HH MR lo obs"] = h_HH_MR_4_lo.GetBinError(2,1)
+    errs["P4 HH MR lo STC"] = h_HH_MR_4_lo.GetBinError(3,3)
+    errs["P4 HH MR lo pre"] = h_HH_MR_4_lo.GetBinError(3,2)
+    errs["P4 HH MR lo obs"] = h_HH_MR_4_lo.GetBinError(3,1)
+    errs["M HH MR lo STC"] = h_HH_MR_4_lo.GetBinError(4,3)
+    errs["M HH MR lo pre"] = h_HH_MR_4_lo.GetBinError(4,2)
+    errs["M HH MR lo obs"] = h_HH_MR_4_lo.GetBinError(4,1)
+    errs["L HH MR lo STC"] = h_HH_MR_4_lo.GetBinError(5,3)
+    errs["L HH MR lo pre"] = h_HH_MR_4_lo.GetBinError(5,2)
+    errs["L HH MR lo obs"] = h_HH_MR_4_lo.GetBinError(5,1)
+
     # VR vals
     vals["P LL VR STC"] = h_LL_VR_23.GetBinContent(1,3)
     vals["P LL VR pre"] = h_LL_VR_23.GetBinContent(1,2)
@@ -1198,6 +2057,129 @@ def getCounts(f):
     errs["L HH VR lo STC"] = h_HH_VR_4_lo.GetBinError(5,3)
     errs["L HH VR lo pre"] = h_HH_VR_4_lo.GetBinError(5,2)
     errs["L HH VR lo obs"] = h_HH_VR_4_lo.GetBinError(5,1)
+
+    # VR systs
+    if h_LL_VR_23_ns != None:
+        systs["P LL VR"] = h_LL_VR_23_ns.GetBinContent(1)
+        systs["P3 LL VR"] = h_LL_VR_23_ns.GetBinContent(2)
+        systs["P4 LL VR"] = h_LL_VR_23_ns.GetBinContent(3)
+        systs["M LL VR"] = h_LL_VR_23_ns.GetBinContent(4)
+        systs["L LL VR"] = h_LL_VR_23_ns.GetBinContent(5)
+        systs["P LLM VR"] = h_LLM_VR_23_ns.GetBinContent(1)
+        systs["P3 LLM VR"] = h_LLM_VR_23_ns.GetBinContent(2)
+        systs["P4 LLM VR"] = h_LLM_VR_23_ns.GetBinContent(3)
+        systs["M LLM VR"] = h_LLM_VR_23_ns.GetBinContent(4)
+        systs["L LLM VR"] = h_LLM_VR_23_ns.GetBinContent(5)
+        systs["P LM VR"] = h_LM_VR_23_ns.GetBinContent(1)
+        systs["P3 LM VR"] = h_LM_VR_23_ns.GetBinContent(2)
+        systs["P4 LM VR"] = h_LM_VR_23_ns.GetBinContent(3)
+        systs["M LM VR"] = h_LM_VR_23_ns.GetBinContent(4)
+        systs["L LM VR"] = h_LM_VR_23_ns.GetBinContent(5)
+        systs["P LH VR"] = h_LH_VR_23_ns.GetBinContent(1)
+        systs["P3 LH VR"] = h_LH_VR_23_ns.GetBinContent(2)
+        systs["P4 LH VR"] = h_LH_VR_23_ns.GetBinContent(3)
+        systs["M LH VR"] = h_LH_VR_23_ns.GetBinContent(4)
+        systs["L LH VR"] = h_LH_VR_23_ns.GetBinContent(5)
+        systs["P HL VR"] = h_HL_VR_4_ns.GetBinContent(1)
+        systs["P3 HL VR"] = h_HL_VR_4_ns.GetBinContent(2)
+        systs["P4 HL VR"] = h_HL_VR_4_ns.GetBinContent(3)
+        systs["M HL VR"] = h_HL_VR_4_ns.GetBinContent(4)
+        systs["L HL VR"] = h_HL_VR_4_ns.GetBinContent(5)
+        systs["P HLM VR"] = h_HLM_VR_4_ns.GetBinContent(1)
+        systs["P3 HLM VR"] = h_HLM_VR_4_ns.GetBinContent(2)
+        systs["P4 HLM VR"] = h_HLM_VR_4_ns.GetBinContent(3)
+        systs["M HLM VR"] = h_HLM_VR_4_ns.GetBinContent(4)
+        systs["L HLM VR"] = h_HLM_VR_4_ns.GetBinContent(5)
+        systs["P HM VR"] = h_HM_VR_4_ns.GetBinContent(1)
+        systs["P3 HM VR"] = h_HM_VR_4_ns.GetBinContent(2)
+        systs["P4 HM VR"] = h_HM_VR_4_ns.GetBinContent(3)
+        systs["M HM VR"] = h_HM_VR_4_ns.GetBinContent(4)
+        systs["L HM VR"] = h_HM_VR_4_ns.GetBinContent(5)
+        systs["P HH VR"] = h_HH_VR_4_ns.GetBinContent(1)
+        systs["P3 HH VR"] = h_HH_VR_4_ns.GetBinContent(2)
+        systs["P4 HH VR"] = h_HH_VR_4_ns.GetBinContent(3)
+        systs["M HH VR"] = h_HH_VR_4_ns.GetBinContent(4)
+        systs["L HH VR"] = h_HH_VR_4_ns.GetBinContent(5)
+        systs["P LL VR hi"] = h_LL_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LL VR hi"] = h_LL_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LL VR hi"] = h_LL_VR_23_hi_ns.GetBinContent(3)
+        systs["M LL VR hi"] = h_LL_VR_23_hi_ns.GetBinContent(4)
+        systs["L LL VR hi"] = h_LL_VR_23_hi_ns.GetBinContent(5)
+        systs["P LLM VR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LLM VR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LLM VR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(3)
+        systs["M LLM VR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(4)
+        systs["L LLM VR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(5)
+        systs["P LM VR hi"] = h_LM_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LM VR hi"] = h_LM_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LM VR hi"] = h_LM_VR_23_hi_ns.GetBinContent(3)
+        systs["M LM VR hi"] = h_LM_VR_23_hi_ns.GetBinContent(4)
+        systs["L LM VR hi"] = h_LM_VR_23_hi_ns.GetBinContent(5)
+        systs["P LH VR hi"] = h_LH_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LH VR hi"] = h_LH_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LH VR hi"] = h_LH_VR_23_hi_ns.GetBinContent(3)
+        systs["M LH VR hi"] = h_LH_VR_23_hi_ns.GetBinContent(4)
+        systs["L LH VR hi"] = h_LH_VR_23_hi_ns.GetBinContent(5)
+        systs["P HL VR hi"] = h_HL_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HL VR hi"] = h_HL_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HL VR hi"] = h_HL_VR_4_hi_ns.GetBinContent(3)
+        systs["M HL VR hi"] = h_HL_VR_4_hi_ns.GetBinContent(4)
+        systs["L HL VR hi"] = h_HL_VR_4_hi_ns.GetBinContent(5)
+        systs["P HLM VR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HLM VR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HLM VR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(3)
+        systs["M HLM VR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(4)
+        systs["L HLM VR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(5)
+        systs["P HM VR hi"] = h_HM_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HM VR hi"] = h_HM_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HM VR hi"] = h_HM_VR_4_hi_ns.GetBinContent(3)
+        systs["M HM VR hi"] = h_HM_VR_4_hi_ns.GetBinContent(4)
+        systs["L HM VR hi"] = h_HM_VR_4_hi_ns.GetBinContent(5)
+        systs["P HH VR hi"] = h_HH_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HH VR hi"] = h_HH_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HH VR hi"] = h_HH_VR_4_hi_ns.GetBinContent(3)
+        systs["M HH VR hi"] = h_HH_VR_4_hi_ns.GetBinContent(4)
+        systs["L HH VR hi"] = h_HH_VR_4_hi_ns.GetBinContent(5)
+        systs["P LL VR lo"] = h_LL_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LL VR lo"] = h_LL_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LL VR lo"] = h_LL_VR_23_lo_ns.GetBinContent(3)
+        systs["M LL VR lo"] = h_LL_VR_23_lo_ns.GetBinContent(4)
+        systs["L LL VR lo"] = h_LL_VR_23_lo_ns.GetBinContent(5)
+        systs["P LLM VR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LLM VR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LLM VR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(3)
+        systs["M LLM VR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(4)
+        systs["L LLM VR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(5)
+        systs["P LM VR lo"] = h_LM_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LM VR lo"] = h_LM_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LM VR lo"] = h_LM_VR_23_lo_ns.GetBinContent(3)
+        systs["M LM VR lo"] = h_LM_VR_23_lo_ns.GetBinContent(4)
+        systs["L LM VR lo"] = h_LM_VR_23_lo_ns.GetBinContent(5)
+        systs["P LH VR lo"] = h_LH_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LH VR lo"] = h_LH_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LH VR lo"] = h_LH_VR_23_lo_ns.GetBinContent(3)
+        systs["M LH VR lo"] = h_LH_VR_23_lo_ns.GetBinContent(4)
+        systs["L LH VR lo"] = h_LH_VR_23_lo_ns.GetBinContent(5)
+        systs["P HL VR lo"] = h_HL_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HL VR lo"] = h_HL_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HL VR lo"] = h_HL_VR_4_lo_ns.GetBinContent(3)
+        systs["M HL VR lo"] = h_HL_VR_4_lo_ns.GetBinContent(4)
+        systs["L HL VR lo"] = h_HL_VR_4_lo_ns.GetBinContent(5)
+        systs["P HLM VR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HLM VR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HLM VR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(3)
+        systs["M HLM VR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(4)
+        systs["L HLM VR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(5)
+        systs["P HM VR lo"] = h_HM_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HM VR lo"] = h_HM_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HM VR lo"] = h_HM_VR_4_lo_ns.GetBinContent(3)
+        systs["M HM VR lo"] = h_HM_VR_4_lo_ns.GetBinContent(4)
+        systs["L HM VR lo"] = h_HM_VR_4_lo_ns.GetBinContent(5)
+        systs["P HH VR lo"] = h_HH_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HH VR lo"] = h_HH_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HH VR lo"] = h_HH_VR_4_lo_ns.GetBinContent(3)
+        systs["M HH VR lo"] = h_HH_VR_4_lo_ns.GetBinContent(4)
+        systs["L HH VR lo"] = h_HH_VR_4_lo_ns.GetBinContent(5)
 
     # SR vals
     vals["P LL SR STC"] = h_LL_SR_23.GetBinContent(1,3)
@@ -1973,9 +2955,133 @@ def getCounts(f):
     errs["L HH SR lo pre"] = h_HH_SR_4_lo.GetBinError(5,2)
     errs["L HH SR lo obs"] = h_HH_SR_4_lo.GetBinError(5,1)
 
-    return vals,errs
+    # SR systs; The systs here are based on VR, so the VR in the hist names is intentional, not a bug. 
+    # (These percentage values are all the same as for the VR equivalents, above.)
+    if h_LL_VR_23_ns != None:
+        systs["P LL SR"] = h_LL_VR_23_ns.GetBinContent(1)
+        systs["P3 LL SR"] = h_LL_VR_23_ns.GetBinContent(2)
+        systs["P4 LL SR"] = h_LL_VR_23_ns.GetBinContent(3)
+        systs["M LL SR"] = h_LL_VR_23_ns.GetBinContent(4)
+        systs["L LL SR"] = h_LL_VR_23_ns.GetBinContent(5)
+        systs["P LLM SR"] = h_LLM_VR_23_ns.GetBinContent(1)
+        systs["P3 LLM SR"] = h_LLM_VR_23_ns.GetBinContent(2)
+        systs["P4 LLM SR"] = h_LLM_VR_23_ns.GetBinContent(3)
+        systs["M LLM SR"] = h_LLM_VR_23_ns.GetBinContent(4)
+        systs["L LLM SR"] = h_LLM_VR_23_ns.GetBinContent(5)
+        systs["P LM SR"] = h_LM_VR_23_ns.GetBinContent(1)
+        systs["P3 LM SR"] = h_LM_VR_23_ns.GetBinContent(2)
+        systs["P4 LM SR"] = h_LM_VR_23_ns.GetBinContent(3)
+        systs["M LM SR"] = h_LM_VR_23_ns.GetBinContent(4)
+        systs["L LM SR"] = h_LM_VR_23_ns.GetBinContent(5)
+        systs["P LH SR"] = h_LH_VR_23_ns.GetBinContent(1)
+        systs["P3 LH SR"] = h_LH_VR_23_ns.GetBinContent(2)
+        systs["P4 LH SR"] = h_LH_VR_23_ns.GetBinContent(3)
+        systs["M LH SR"] = h_LH_VR_23_ns.GetBinContent(4)
+        systs["L LH SR"] = h_LH_VR_23_ns.GetBinContent(5)
+        systs["P HL SR"] = h_HL_VR_4_ns.GetBinContent(1)
+        systs["P3 HL SR"] = h_HL_VR_4_ns.GetBinContent(2)
+        systs["P4 HL SR"] = h_HL_VR_4_ns.GetBinContent(3)
+        systs["M HL SR"] = h_HL_VR_4_ns.GetBinContent(4)
+        systs["L HL SR"] = h_HL_VR_4_ns.GetBinContent(5)
+        systs["P HLM SR"] = h_HLM_VR_4_ns.GetBinContent(1)
+        systs["P3 HLM SR"] = h_HLM_VR_4_ns.GetBinContent(2)
+        systs["P4 HLM SR"] = h_HLM_VR_4_ns.GetBinContent(3)
+        systs["M HLM SR"] = h_HLM_VR_4_ns.GetBinContent(4)
+        systs["L HLM SR"] = h_HLM_VR_4_ns.GetBinContent(5)
+        systs["P HM SR"] = h_HM_VR_4_ns.GetBinContent(1)
+        systs["P3 HM SR"] = h_HM_VR_4_ns.GetBinContent(2)
+        systs["P4 HM SR"] = h_HM_VR_4_ns.GetBinContent(3)
+        systs["M HM SR"] = h_HM_VR_4_ns.GetBinContent(4)
+        systs["L HM SR"] = h_HM_VR_4_ns.GetBinContent(5)
+        systs["P HH SR"] = h_HH_VR_4_ns.GetBinContent(1)
+        systs["P3 HH SR"] = h_HH_VR_4_ns.GetBinContent(2)
+        systs["P4 HH SR"] = h_HH_VR_4_ns.GetBinContent(3)
+        systs["M HH SR"] = h_HH_VR_4_ns.GetBinContent(4)
+        systs["L HH SR"] = h_HH_VR_4_ns.GetBinContent(5)
+        systs["P LL SR hi"] = h_LL_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LL SR hi"] = h_LL_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LL SR hi"] = h_LL_VR_23_hi_ns.GetBinContent(3)
+        systs["M LL SR hi"] = h_LL_VR_23_hi_ns.GetBinContent(4)
+        systs["L LL SR hi"] = h_LL_VR_23_hi_ns.GetBinContent(5)
+        systs["P LLM SR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LLM SR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LLM SR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(3)
+        systs["M LLM SR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(4)
+        systs["L LLM SR hi"] = h_LLM_VR_23_hi_ns.GetBinContent(5)
+        systs["P LM SR hi"] = h_LM_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LM SR hi"] = h_LM_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LM SR hi"] = h_LM_VR_23_hi_ns.GetBinContent(3)
+        systs["M LM SR hi"] = h_LM_VR_23_hi_ns.GetBinContent(4)
+        systs["L LM SR hi"] = h_LM_VR_23_hi_ns.GetBinContent(5)
+        systs["P LH SR hi"] = h_LH_VR_23_hi_ns.GetBinContent(1)
+        systs["P3 LH SR hi"] = h_LH_VR_23_hi_ns.GetBinContent(2)
+        systs["P4 LH SR hi"] = h_LH_VR_23_hi_ns.GetBinContent(3)
+        systs["M LH SR hi"] = h_LH_VR_23_hi_ns.GetBinContent(4)
+        systs["L LH SR hi"] = h_LH_VR_23_hi_ns.GetBinContent(5)
+        systs["P HL SR hi"] = h_HL_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HL SR hi"] = h_HL_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HL SR hi"] = h_HL_VR_4_hi_ns.GetBinContent(3)
+        systs["M HL SR hi"] = h_HL_VR_4_hi_ns.GetBinContent(4)
+        systs["L HL SR hi"] = h_HL_VR_4_hi_ns.GetBinContent(5)
+        systs["P HLM SR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HLM SR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HLM SR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(3)
+        systs["M HLM SR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(4)
+        systs["L HLM SR hi"] = h_HLM_VR_4_hi_ns.GetBinContent(5)
+        systs["P HM SR hi"] = h_HM_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HM SR hi"] = h_HM_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HM SR hi"] = h_HM_VR_4_hi_ns.GetBinContent(3)
+        systs["M HM SR hi"] = h_HM_VR_4_hi_ns.GetBinContent(4)
+        systs["L HM SR hi"] = h_HM_VR_4_hi_ns.GetBinContent(5)
+        systs["P HH SR hi"] = h_HH_VR_4_hi_ns.GetBinContent(1)
+        systs["P3 HH SR hi"] = h_HH_VR_4_hi_ns.GetBinContent(2)
+        systs["P4 HH SR hi"] = h_HH_VR_4_hi_ns.GetBinContent(3)
+        systs["M HH SR hi"] = h_HH_VR_4_hi_ns.GetBinContent(4)
+        systs["L HH SR hi"] = h_HH_VR_4_hi_ns.GetBinContent(5)
+        systs["P LL SR lo"] = h_LL_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LL SR lo"] = h_LL_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LL SR lo"] = h_LL_VR_23_lo_ns.GetBinContent(3)
+        systs["M LL SR lo"] = h_LL_VR_23_lo_ns.GetBinContent(4)
+        systs["L LL SR lo"] = h_LL_VR_23_lo_ns.GetBinContent(5)
+        systs["P LLM SR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LLM SR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LLM SR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(3)
+        systs["M LLM SR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(4)
+        systs["L LLM SR lo"] = h_LLM_VR_23_lo_ns.GetBinContent(5)
+        systs["P LM SR lo"] = h_LM_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LM SR lo"] = h_LM_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LM SR lo"] = h_LM_VR_23_lo_ns.GetBinContent(3)
+        systs["M LM SR lo"] = h_LM_VR_23_lo_ns.GetBinContent(4)
+        systs["L LM SR lo"] = h_LM_VR_23_lo_ns.GetBinContent(5)
+        systs["P LH SR lo"] = h_LH_VR_23_lo_ns.GetBinContent(1)
+        systs["P3 LH SR lo"] = h_LH_VR_23_lo_ns.GetBinContent(2)
+        systs["P4 LH SR lo"] = h_LH_VR_23_lo_ns.GetBinContent(3)
+        systs["M LH SR lo"] = h_LH_VR_23_lo_ns.GetBinContent(4)
+        systs["L LH SR lo"] = h_LH_VR_23_lo_ns.GetBinContent(5)
+        systs["P HL SR lo"] = h_HL_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HL SR lo"] = h_HL_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HL SR lo"] = h_HL_VR_4_lo_ns.GetBinContent(3)
+        systs["M HL SR lo"] = h_HL_VR_4_lo_ns.GetBinContent(4)
+        systs["L HL SR lo"] = h_HL_VR_4_lo_ns.GetBinContent(5)
+        systs["P HLM SR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HLM SR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HLM SR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(3)
+        systs["M HLM SR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(4)
+        systs["L HLM SR lo"] = h_HLM_VR_4_lo_ns.GetBinContent(5)
+        systs["P HM SR lo"] = h_HM_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HM SR lo"] = h_HM_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HM SR lo"] = h_HM_VR_4_lo_ns.GetBinContent(3)
+        systs["M HM SR lo"] = h_HM_VR_4_lo_ns.GetBinContent(4)
+        systs["L HM SR lo"] = h_HM_VR_4_lo_ns.GetBinContent(5)
+        systs["P HH SR lo"] = h_HH_VR_4_lo_ns.GetBinContent(1)
+        systs["P3 HH SR lo"] = h_HH_VR_4_lo_ns.GetBinContent(2)
+        systs["P4 HH SR lo"] = h_HH_VR_4_lo_ns.GetBinContent(3)
+        systs["M HH SR lo"] = h_HH_VR_4_lo_ns.GetBinContent(4)
+        systs["L HH SR lo"] = h_HH_VR_4_lo_ns.GetBinContent(5)
 
-def makePlot(regions,vals,errs,nonclosure_syst,desc): 
+    return vals,errs,systs
+
+def makePlot(regions,vals,errs,systs,desc): 
     simplecanvas.cd()
     tl.Clear()
     nregions=len(regions)
@@ -2026,91 +3132,128 @@ def makePlot(regions,vals,errs,nonclosure_syst,desc):
     tl.Draw()
     simplecanvas.SaveAs("{0}/{1}.png".format(plotdir,desc.replace(" ","_")))
 
-def makePlotRaw(regions,vals,errs,nonclosure_error,desc): # Don't rescale counts
-    simplecanvas.cd()
+def makePlotRaw(regions,vals,errs,systs,desc): # Don't rescale counts
+    ratiocanvas.cd()
     tl.Clear()
     nregions=len(regions)
     hobs=ROOT.TH1D(desc,desc+";;Short Track Counts",nregions,0,nregions)
     hobs.SetLineWidth(3)
     hpred=hobs.Clone(hobs.GetName()+"_prediction")
-    ptindices = ["dummy0"]
-    tag_index = 1
-    for region in regions:
-        ptindices.append(0 if region.find("lo") >= 0 else 1)
-        hpred.GetXaxis().SetBinLabel(tag_index,region)
+    for index,region in enumerate(regions):
+        bin_index = index+1
+        hpred.GetXaxis().SetBinLabel(bin_index,region)
         pred = vals[region+" pre"]
         perr = errs[region+" pre"]
         obs = vals[region+" obs"]
         oerr = 1.83 if obs == 0 else errs[region+" obs"]
         if obs == 0:
             print "In region",region,"of",desc,", observation was 0, so setting oerr to 1.83"
-        hpred.SetBinContent(tag_index,pred)
-        hpred.SetBinError(tag_index,perr)
-        hobs.SetBinContent(tag_index,obs)
-        hobs.SetBinError(tag_index,oerr)
-        tag_index += 1    
+        hpred.SetBinContent(bin_index,pred)
+        hpred.SetBinError(bin_index,perr)
+        hobs.SetBinContent(bin_index,obs)
+        hobs.SetBinError(bin_index,oerr)
     hpred.GetXaxis().LabelsOption("v")
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
-    hpred.SetMaximum(2.5*max(hpred.GetMaximum(),hobs.GetMaximum()))
+    hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
     hobs.SetLineColor(ROOT.kRed)
     hpred.SetLineColor(ROOT.kBlack)
     hpred_nofill = hpred.Clone(hpred.GetName()+"nofill")
     hpred_syst = hpred.Clone(hpred.GetName()+"_syst")
-    for bin in range(1,hpred_syst.GetNbinsX()+1):
-        hpred_syst.SetBinError(bin,sqrt(hpred.GetBinError(bin)**2+hpred.GetBinContent(bin)*(nonclosure_error[ptindices[bin]])**2))
+    for index,region in enumerate(regions):
+        bin_index = index+1
+        hpred_syst.SetBinError(bin_index,sqrt(hpred_syst.GetBinError(bin_index)**2+(systs[region]*hpred_syst.GetBinContent(bin_index))**2))
     hpred.SetFillColor(ROOT.kGray)
     hpred_syst.SetFillColor(ROOT.kGray+2)
     tl.AddEntry(hobs,"Observation")
     tl.AddEntry(hpred,"Prediction, with f_{short} Stat & Syst")
     tl.AddEntry(hpred_syst,"Prediction, with Non-Closure Systematic")
+    pads[0].cd()
     hpred_syst.Draw("E2")
     hpred.Draw("E2 same")
     hpred_nofill.Draw("hist same")
     hobs.Draw("same E0")
     tl.Draw()
-    simplecanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
+    hratio = hobs.Clone("ratio"+desc)
+    hratio.SetTitle("")
+    hratio.SetLineColor(ROOT.kRed)
+    hratio.SetFillColor(0)
+    hratio.GetYaxis().SetLabelSize(hpred_syst.GetYaxis().GetLabelSize()*.83/.16/2)
+    hratio.GetYaxis().SetTitleSize(hpred_syst.GetYaxis().GetTitleSize()*.83/.16/2)
+    hratio.GetYaxis().SetTitleOffset(0.35)
+    hratio.GetYaxis().SetTitle("Obs/Pred")
+    hratio.Divide(hpred)
+    for bin in range(1,hratio.GetNbinsX()+1):
+        hratio.SetBinError(bin,hobs.GetBinError(bin)/hpred.GetBinContent(bin) if hpred.GetBinContent(bin) > 0 else 0)
+    pads[1].cd()
+    h1 = hratio.Clone(region+"1")
+    maxval = 0
+    for bin in range(1,hratio.GetNbinsX()+1):
+        h1.SetBinContent(bin,1)
+        h1.GetXaxis().SetBinLabel(bin,"")
+        h1.SetBinError(bin,0.0)
+        maxval = max(hratio.GetBinContent(bin),maxval)
+    h1_err = h1.Clone(region+"1err")
+    h1_systerr = h1.Clone(region+"1systerr")
+    for bin in range(1,hratio.GetNbinsX()+1):
+        h1_err.SetBinError(bin,hpred.GetBinError(bin)/hpred.GetBinContent(bin) if hpred.GetBinContent(bin) > 0 else 0)
+        h1_systerr.SetBinError(bin,hpred_syst.GetBinError(bin)/hpred.GetBinContent(bin) if hpred.GetBinContent(bin) > 0 else 0)
+    h1_err.SetFillColor(ROOT.kGray)
+    h1_systerr.SetFillColor(ROOT.kGray+2)
+    h1_systerr.SetMinimum(-0.01)
+    h1_systerr.SetMaximum(min(round(maxval+1),5))
+    h1_systerr.SetLineColor(ROOT.kBlack)
+    h1_systerr.Draw("E2")
+    h1_err.Draw("E2 same")
+    h1.SetLineColor(ROOT.kBlack)
+    h1.Draw("hist same")
+    hratio.Draw("same")
+    ratiocanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
 
-def makeSignalPlot(regions,vals_bg,errs_bg,vals_sig,errs_sig, nonclosure_syst, rescale_lumi, desc): # Don't rescale counts
+def makeSignalPlot(regions,vals_bg,errs_bg,list_of_vals_sig,list_of_errs_sig, systs, rescale_lumi, desc, sig_tags, sig_colors): # Don't rescale counts
     simplecanvas.cd()
     tl.Clear()
     nregions=len(regions)
     hbg=ROOT.TH1D(desc+"_counts",desc+";;Short Track Counts",nregions,0,nregions)
     hbg.SetLineWidth(3)
-    hsig=hbg.Clone(hbg.GetName()+"_withSig")
-    ptindices = ["dummy0"]
-    tag_index = 1
-    for region in regions:
-        ptindices.append(0 if region.find("lo") >= 0 else 1)
-        hbg.GetXaxis().SetBinLabel(tag_index,region)
-        val_sig = vals_sig[region+" obs"] * rescale_lumi
-        err_sig = errs_sig[region+" obs"]
+    hsigs = [hbg.Clone(hbg.GetName()+"_withSig_"+sig_tag) for sig_tag in sig_tags]
+    for index,region in enumerate(regions):
+        bin_index = index+1
+        hbg.GetXaxis().SetBinLabel(bin_index,region)
         val_bg = vals_bg[region+" pre"]
         err_bg = errs_bg[region+" pre"]
-        hbg.SetBinContent(tag_index,val_bg)
-        hbg.SetBinError(tag_index,err_bg)
-        hsig.SetBinContent(tag_index,val_sig+val_bg) # Add val_bg so sig is sitting atop background, for easy error comparison
-        hsig.SetBinError(tag_index,err_sig)
-        tag_index += 1    
+        hbg.SetBinContent(bin_index,val_bg)
+        hbg.SetBinError(bin_index,err_bg)
+        for sig_index,sig_tag in enumerate(sig_tags):
+            vals_sig = list_of_vals_sig[sig_index]
+            errs_sig = list_of_errs_sig[sig_index]
+            hsig = hsigs[sig_index]
+            val_sig = vals_sig[region+" obs"] * rescale_lumi
+            err_sig = errs_sig[region+" obs"]
+            hsig.SetBinContent(bin_index,val_sig+val_bg) # Add val_bg so sig is sitting atop background, for easy error comparison
+            hsig.SetBinError(bin_index,err_sig)
     hbg.GetXaxis().LabelsOption("v")
     hbg.GetXaxis().SetTitleOffset(4.8)
     hbg.SetMinimum(-0.001)
     hbg.SetMaximum(2.5*hsig.GetMaximum())
-    hsig.SetLineColor(ROOT.kRed)
+    for sig_index,hsig in enumerate(hsigs):
+        hsig.SetLineColor(sig_colors[sig_index])
     hbg.SetLineColor(ROOT.kBlack)
     hbg_nofill = hbg.Clone(hbg.GetName()+"nofill")
     hbg_syst = hbg.Clone(hbg.GetName()+"_syst")
-    for bin in range(1,hbg.GetNbinsX()+1):
-        hbg_syst.SetBinError(bin,sqrt(hbg.GetBinError(bin)**2+hbg.GetBinContent(bin)*(nonclosure_syst[ptindices[bin]])**2))
+    for index,region in enumerate(regions):
+        bin_index = index+1
+        hbg_syst.SetBinError(bin_index,sqrt(hbg.GetBinError(bin_index)**2+(systs[region]*hbg.GetBinContent(bin_index))**2))
     hbg.SetFillColor(ROOT.kGray)
     hbg_syst.SetFillColor(ROOT.kGray+2)
     tl.AddEntry(hbg,"Predicted BG")
     tl.AddEntry(hbg_syst,"Predicted BG, with Non-closure Syst")
-    tl.AddEntry(hsig,"Signal + Pred BG (Signal MC Errors)")
     hbg_syst.Draw("E2")
     hbg.Draw("E2 same")
-    hbg_nofill.Draw("hist same")
-    hsig.Draw("same E0")
+    hbg_nofill.Draw("hist same")    
+    for sig_index,hsig in enumerate(hsigs):
+        hsig.Draw("same E0")
+        tl.AddEntry(hsig,sig_tags[sig_index]+" + Pred BG (Signal MC Errors)")
     tl.Draw()
     simplecanvas.SaveAs("{0}/{1}_counts.png".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",","")))
 
@@ -2130,18 +3273,20 @@ sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm
 sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(tag))
 
 signal_points=[(1800,1400,10),(1800,1600,10),(1800,1700,10),(1800,1400,90),(1800,1600,90),(1800,1700,90)]
+signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
+signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
 
 #D18,eD18=getCounts(d18)
 #D17,eD17=getCounts(d17)
-D1718,eD1718=getCounts(d1718)
-D16,eD16=getCounts(d16)
-M17,eM17=getCounts(m17)
-M16,eM16=getCounts(m16)
+D1718,eD1718,sD1718=getCounts(d1718)
+D16,eD16,sD16=getCounts(d16)
+M17,eM17,sM17=getCounts(m17)
+M16,eM16,sM16=getCounts(m16)
 
 S1718 = {}
 eS1718 = {}
 for sp in signal_points:
-    S1718[sp],eS1718[sp] = getCounts(sig1718[sp])
+    S1718[sp],eS1718[sp],dummy_systs = getCounts(sig1718[sp])
     sig1718[sp].Close()
 
 #D18f,eD18f=getFshorts(d18)
@@ -2151,19 +3296,6 @@ D16f,eD16f,sD16f=getFshorts(d16)
 M17f,eM17f,sM17f=getFshorts(m17)
 M16f,eM16f,sM16f=getFshorts(m16)
 
-h_nonclosure_syst_D1718_lo = d1718.Get("h_nonclosure_systematic_lo")
-h_nonclosure_syst_D1718_hi = d1718.Get("h_nonclosure_systematic_hi")
-nonclosure_syst_D1718 = (h_nonclosure_syst_D1718_lo.GetBinContent(1),h_nonclosure_syst_D1718_hi.GetBinContent(1))
-h_nonclosure_syst_D16_lo = d16.Get("h_nonclosure_systematic_lo")
-h_nonclosure_syst_D16_hi = d16.Get("h_nonclosure_systematic_hi")
-nonclosure_syst_D16 = (h_nonclosure_syst_D16_lo.GetBinContent(1),h_nonclosure_syst_D16_hi.GetBinContent(1))
-h_nonclosure_syst_M17_lo = m17.Get("h_nonclosure_systematic_lo")
-h_nonclosure_syst_M17_hi = m17.Get("h_nonclosure_systematic_hi")
-nonclosure_syst_M17 =  (h_nonclosure_syst_M17_lo.GetBinContent(1), h_nonclosure_syst_M17_hi.GetBinContent(1))
-h_nonclosure_syst_M16_lo = m16.Get("h_nonclosure_systematic_lo")
-h_nonclosure_syst_M16_hi = m16.Get("h_nonclosure_systematic_hi")
-nonclosure_syst_M16 = (h_nonclosure_syst_M16_lo.GetBinContent(1),h_nonclosure_syst_M16_hi.GetBinContent(1))
-
 #d18.Close()
 #d17.Close()
 d1718.Close()
@@ -2171,102 +3303,252 @@ d16.Close()
 m17.Close()
 m16.Close()
 
-def getMergedCountsLine(region):
-    cat = region[0:2]
-    if cat == "P ": # don't return 2017-2018
-        lumi = 35.9/41.97
-        return "{} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D16[region+" pre"], eD16[region+" pre"], S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
-    elif cat == "P3" or cat == "P4": # don't return 2016
-        lumi = 1+(58.83/41.97)
-        return "{} & {:.3f} $\pm$ {:.3f} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" pre"], eD1718[region+" pre"], S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
+def getMergedCountsLine(region,year=None):
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
     else:
-        lumi = 1+(58.83/41.97)+(35.9/41.97)
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" pre"], eD1718[region+" pre"], D16[region+" pre"], eD16[region+" pre"], S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
+        colorline = "\\rowcolor{red!25}"
+    cat = region[0:2]
+    if cat == "P " or year == 2016: # don't return 2017-2018
+        lumi = 35.9/41.97
+        return colorline+"{} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
+                                                                                                                                                                                                                                    D16[region+" pre"], sqrt(eD16[region+" pre"]**2+(sD16[region]*D16[region+" pre"])**2), S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
+    elif (cat == "P3" or cat == "P4") or year == 2017 or year == 2018: # don't return 2016
+        lumi = 1+(58.83/41.97)
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",
+                                                                                                                                                                                                                                    D1718[region+" pre"], sqrt(eD1718[region+" pre"]**2+(sD1718[region]*D1718[region+" pre"])**2), S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
+    else:
+        lumi = (35.9/41.97)
+        line_for_2016 = colorline+"{} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
+                                                                                                                                                                                                                                    D16[region+" pre"], sqrt(eD16[region+" pre"]**2+(sD16[region]*D16[region+" pre"])**2), S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
+        lumi = 1+(58.83/41.97)
+        line_for_2017and2018 = colorline+"{} & {:.3f} $\pm$ {:.3f} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",
+                                                                                                                                                                                                                                    D1718[region+" pre"], sqrt(eD1718[region+" pre"]**2+(sD1718[region]*D1718[region+" pre"])**2), S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"]*lumi)
+
+        return line_for_2016 + line_for_2017and2018
+
+def getMRvsSRLine(region_SR,year=None):
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
+    region_MR = region_SR.replace("SR","MR")    
+    num1 = S1718[(1800,1400,90)][region_MR+" obs"]
+    num1err = eS1718[(1800,1400,90)][region_MR+" obs"]
+    num2 = S1718[(1800,1600,90)][region_MR+" obs"]
+    num2err = eS1718[(1800,1600,90)][region_MR+" obs"]
+    num3 = S1718[(1800,1700,90)][region_MR+" obs"]
+    num3err = eS1718[(1800,1700,90)][region_MR+" obs"]
+    num4 = S1718[(1800,1400,10)][region_MR+" obs"]
+    num4err = eS1718[(1800,1400,10)][region_MR+" obs"]
+    num5 = S1718[(1800,1600,10)][region_MR+" obs"]
+    num5err = eS1718[(1800,1600,10)][region_MR+" obs"]
+    num6 = S1718[(1800,1700,10)][region_MR+" obs"]
+    num6err = eS1718[(1800,1700,10)][region_MR+" obs"]
+
+    den1 = S1718[(1800,1400,90)][region_SR+" obs"]
+    den1err = eS1718[(1800,1400,90)][region_SR+" obs"]
+    den2 = S1718[(1800,1600,90)][region_SR+" obs"]
+    den2err = eS1718[(1800,1600,90)][region_SR+" obs"]
+    den3 = S1718[(1800,1700,90)][region_SR+" obs"]
+    den3err = eS1718[(1800,1700,90)][region_SR+" obs"]
+    den4 = S1718[(1800,1400,10)][region_SR+" obs"]
+    den4err = eS1718[(1800,1400,10)][region_SR+" obs"]
+    den5 = S1718[(1800,1600,10)][region_SR+" obs"]
+    den5err = eS1718[(1800,1600,10)][region_SR+" obs"]
+    den6 = S1718[(1800,1700,10)][region_SR+" obs"]
+    den6err = eS1718[(1800,1700,10)][region_SR+" obs"]
+
+    if den1 > 0 and num1 > 0:
+        rat1 = num1/den1
+        rat1err = sqrt((num1err/num1)**2+(den1err/den1)**2)*rat1
+        rat1str = "{:.2f} $\pm$ {:.2f}".format(rat1,rat1err)
+    elif num1 > 0:
+        rat1str = "{:.2f} $\pm$ {:.2f} / 0".format(num1,num1err)
+    elif den1 > 0:
+        rat1str = "0 / {:.2f} $\pm$ {:.2f}".format(den1,den1err)
+    else: rat1str = " -- "
+    if den2 > 0 and num2 > 0:
+        rat2 = num2/den2
+        rat2err = sqrt((num2err/num2)**2+(den2err/den2)**2)*rat2
+        rat2str = "{:.2f} $\pm$ {:.2f}".format(rat2,rat2err)
+    elif num2 > 0:
+        rat2str = "{:.2f} $\pm$ {:.2f} / 0".format(num2,num2err)
+    elif den2 > 0:
+        rat2str = "0 / {:.2f} $\pm$ {:.2f}".format(den2,den2err)
+    else: rat2str = " -- "
+    if den3 > 0 and num3 > 0:
+        rat3 = num3/den3
+        rat3err = sqrt((num3err/num3)**2+(den3err/den3)**2)*rat3
+        rat3str = "{:.2f} $\pm$ {:.2f}".format(rat3,rat3err)
+    elif num3 > 0:
+        rat3str = "{:.2f} $\pm$ {:.2f} / 0".format(num3,num3err)
+    elif den3 > 0:
+        rat3str = "0 / {:.2f} $\pm$ {:.2f}".format(den3,den3err)
+    else: rat3str = " -- "
+    if den4 > 0 and num4 > 0:
+        rat4 = num4/den4
+        rat4err = sqrt((num4err/num4)**2+(den4err/den4)**2)*rat4
+        rat4str = "{:.2f} $\pm$ {:.2f}".format(rat4,rat4err)
+    elif num4 > 0:
+        rat4str = "{:.2f} $\pm$ {:.2f} / 0".format(num4,num4err)
+    elif den4 > 0:
+        rat4str = "0 / {:.2f} $\pm$ {:.2f}".format(den4,den4err)
+    else: rat4str = " -- "
+    if den5 > 0 and num5 > 0:
+        rat5 = num5/den5
+        rat5err = sqrt((num5err/num5)**2+(den5err/den5)**2)*rat5
+        rat5str = "{:.2f} $\pm$ {:.2f}".format(rat5,rat5err)
+    elif num5 > 0:
+        rat5str = "{:.2f} $\pm$ {:.2f} / 0".format(num5,num5err)
+    elif den5 > 0:
+        rat5str = "0 / {:.2f} $\pm$ {:.2f}".format(den5,den5err)
+    else: rat5str = " -- "
+    if den6 > 0 and num6 > 0:
+        rat6 = num6/den6
+        rat6err = sqrt((num6err/num6)**2+(den6err/den6)**2)*rat6
+        rat6str = "{:.2f} $\pm$ {:.2f}".format(rat6,rat6err)
+    elif num6 > 0:
+        rat6str = "{:.2f} $\pm$ {:.2f} / 0".format(num6,num6err)
+    elif den6 > 0:
+        rat6str = "0 / {:.2f} $\pm$ {:.2f}".format(den6,den6err)
+    else: rat6str = " -- "
+
+    return colorline+"{} & {} & {} & {} & {} & {} & {} \\\\\n".format(region_SR.replace(" SR",""), rat1str, rat2str, rat3str, rat4str, rat5str, rat6str)
 
 
 def getLineData(region):
-    return "{} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
+    return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     D18[region+" pre"], eD18[region+" pre"], D18[region+" obs"],
                                                                                                                                                                                                                                     D17[region+" pre"], eD17[region+" pre"], D17[region+" obs"],
                                                                                                                                                                                                                                     D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
 
 def getLineMC(region):
-    return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
+    return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
                                   M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
 def getLineDataSTC(region):
-    return "{} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
+    return colorline+"{} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     D18[region+" STC"], D18[region+" pre"], eD18[region+" pre"], D18[region+" obs"],
                                                                                                                                                                                                                                     D17[region+" STC"], D17[region+" pre"], eD17[region+" pre"], D17[region+" obs"],
                                                                                                                                                                                                                                     D16[region+" STC"], D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
 
 def getLineMCSTC(region):
-    return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
+    return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     M17[region+" STC"], eM17[region+" STC"], M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
                                   M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
 def getMergedLineData(region):
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
     cat = region[0:2]
     if cat == "P ": # don't return 2017-2018
-        return "{} & - & - & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & - & - & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
     elif cat == "P3" or cat == "P4": # don't return 2016
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     D1718[region+" pre"], eD1718[region+" pre"], D1718[region+" obs"])
     else:
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     D1718[region+" pre"], eD1718[region+" pre"], D1718[region+" obs"],
                                                                                                                                                                                                                                     D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
 
 def getMergedLineMC(region):
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
     cat = region[0:2]
     if cat == "P ": # Don't return 2017-18
-        return "{} & - & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & - & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
 
                                   M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & - & - \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & - & - \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"])
     else:
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
                                   M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
 def getMergedLineDataSTC(region):
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
     cat = region[0:2]
     if cat == "P ": # Don't return 2017-18
-        return "{} & - & - & - & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D16[region+" STC"], D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
+        return colorline+"{} & - & - & - & {:.0f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D16[region+" STC"], D16[region+" pre"], eD16[region+" pre"], sD16[region]*D16[region+" pre"], D16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return "{} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" STC"], D1718[region+" pre"], eD1718[region+" pre"], D1718[region+" obs"])
+        return colorline+"{} & {:.0f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst) & {:.0f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D1718[region+" STC"], D1718[region+" pre"], eD1718[region+" pre"], sD1718[region]*D1718[region+" pre"], D1718[region+" obs"])
 
     else:
-        return "{} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" STC"], D1718[region+" pre"], eD1718[region+" pre"], D1718[region+" obs"],
-                                                                                                                                                                                                                                    D16[region+" STC"], D16[region+" pre"], eD16[region+" pre"], D16[region+" obs"])
+        return colorline+"{} & {:.0f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst) & {:.0f} & {:.0f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D1718[region+" STC"], D1718[region+" pre"], eD1718[region+" pre"], sD1718[region]*D1718[region+" pre"], D1718[region+" obs"],
+                                                                                                                                                                                                                                    D16[region+" STC"], D16[region+" pre"], eD16[region+" pre"], sD16[region]*D16[region+" pre"], D16[region+" obs"])
 
 def getMergedLineMCSTC(region):
+    if region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
     cat = region[0:2]
     if cat == "P ": # Don't return 2017-18
-        return "{} & - & - & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & - & - & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst)& {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
 
-                                  M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
+                                  M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], sM16[region]*M16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & - & - & - \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M17[region+" STC"], eM17[region+" STC"], M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"])
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst) & {:.3f} $\pm$ {:.3f} & - & - & - \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    M17[region+" STC"], eM17[region+" STC"], M17[region+" pre"], eM17[region+" pre"], sM17[region]*M17[region+" pre"], M17[region+" obs"], eM17[region+" obs"])
 
     else:
-        return "{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M17[region+" STC"], eM17[region+" STC"], M17[region+" pre"], eM17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
-                                  M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
+        return colorline+"{} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst)& {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} $\pm$ {:.3f} (non-closure syst) & {:.3f} $\pm$ {:.3f} \\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    M17[region+" STC"], eM17[region+" STC"], M17[region+" pre"], eM17[region+" pre"], sM17[region]*M17[region+" pre"], M17[region+" obs"], eM17[region+" obs"],
+                                  M16[region+" STC"], eM16[region+" STC"], M16[region+" pre"], eM16[region+" pre"], sM16[region]*M16[region+" pre"], M16[region+" obs"], eM16[region+" obs"])
 
 
 def getFSLineData(cat):
@@ -2301,175 +3583,168 @@ def getMergedFSLineMC(cat):
 #regionsDataNoL1718 = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3","P4","M"] for kin in ["LL","HL","LH","HH"] for pt in ["lo","hi"]]
 #regionsDataL = ["L " + kin + " VR" for kin in ["LL","LH","HL","HH"]]
 
-regionsP16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ]
-regionsP16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ]
-regionsM16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"] ]
-regionsM16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"] ]
-regionsNoL1718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
-regionsNoL1718VR += [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P4","M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"]]
-regionsNoL1718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
-regionsNoL1718SR += [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P4","M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"]]
+#regionsP16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ]
+#regionsP16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ]
+#regionsM16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"] ]
+#regionsM16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"] ]
+regionsNoL16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ]
+regionsNoL16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ]
+#regionsNoL1718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+#regionsNoL1718VR += [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P4","M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"]]
+regionsNoL1718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3","P4","M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+#regionsNoL1718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsNoL1718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3","P4","M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+#regionsNoL1718SR += [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P4","M"] for kin in ["LLM","LH","HLM","HH"] for pt in ["lo","hi"]]
 regionsLVR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["VR"]]
 regionsLSR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["SR"]]
 
-allVRnoL = regionsP16VR + regionsNoL1718VR
-allSRnoL = regionsP16VR + regionsNoL1718SR
+regionsNicelyOrderedSR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","P3","P4","M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ] + regionsLSR
+regionsNicelyOrderedVR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","P3","P4","M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"] ] + regionsLVR
+
+#allVRnoL = regionsP16VR + regionsNoL1718VR
+allVRnoL = regionsNoL16VR + regionsNoL1718VR
+#allSRnoL = regionsP16SR + regionsNoL1718SR
+allSRnoL = regionsNoL16SR + regionsNoL1718SR
 
 allVR1718 = regionsNoL1718VR+regionsLVR
-allVR16 = regionsP16VR+regionsM16VR+regionsLVR
+#allVR16 = regionsP16VR+regionsM16VR+regionsLVR
+allVR16 = regionsNoL16VR+regionsLVR
 
 allSR1718 = regionsNoL1718SR+regionsLSR
-allSR16 = regionsP16SR+regionsM16SR+regionsLSR
+#allSR16 = regionsP16SR+regionsM16SR+regionsLSR
+allSR16 = regionsNoL16SR+regionsLSR
 
-allVR = regionsP16VR + regionsNoL1718VR + regionsLVR
-allSR = regionsP16SR + regionsNoL1718SR + regionsLSR
+#allVR = regionsP16VR + regionsNoL1718VR + regionsLVR
+allVR = allVR16 + allVR1718
+#allSR = regionsP16SR + regionsNoL1718SR + regionsLSR
+allSR = allSR16 + allSR1718
 
 allregions = allVR + allSR
 
-makePlotRaw(allVR1718,D1718,eD1718,nonclosure_syst_D1718,"2017-18 DATA VR")
-makePlotRaw(allVR16,D16,eD16,nonclosure_syst_D16,"2016 DATA VR")
+makePlotRaw(allVR1718,D1718,eD1718,sD1718,"2017-18 DATA VR")
+makePlotRaw(allVR16,D16,eD16,sD16,"2016 DATA VR")
 
 for sp in signal_points:
     m1=sp[0]
     m2=sp[1]
     ct=sp[2]
-    makeSignalPlot(allSR1718,D1718,eD1718,S1718[sp],eS1718[sp],nonclosure_syst_D1718,1+(58.83/41.97),"2017-18 ({}, {}) GeV, {} cm".format(m1,m2,ct))
-    makeSignalPlot(allSR16,D16,eD16,S1718[sp],eS1718[sp],nonclosure_syst_D16,35.9/41.97,"2016 ({}, {}) GeV, {} cm".format(m1,m2,ct))
+    makeSignalPlot(allSR1718,D1718,eD1718,[S1718[sp]],[eS1718[sp]],sD1718,1+(58.83/41.97),"2017-18 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed])
+    makeSignalPlot(allSR16,D16,eD16,[S1718[sp]],[eS1718[sp]],sD16,35.9/41.97,"2016 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed])
 
-output = open("{0}/counts_data_{1}_SR.tex".format(tabledir,tag),"w")
+output = open("{0}/MRvsSR_{1}.tex".format(tabledir,tag),"w")
 printHeader(output)
-startMergedCountsTable(output)
-for region in allSR:
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedCountsLine(region))
+startMRvsSRTable(output)
+for region in regionsNicelyOrderedSR:
+    output.write(getMRvsSRLine(region))
 printFooter(output)
 output.close()
 
-output = open("{0}/regions_data_{1}_VR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableData(output)
-for region in allVR:
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineData(region))
-printFooter(output)
-output.close()
+list_of_vals_10 = [S1718[sp] for sp in signal_points_10]
+list_of_errs_10 = [eS1718[sp] for sp in signal_points_10]
+list_of_vals_90 = [S1718[sp] for sp in signal_points_90]
+list_of_errs_90 = [eS1718[sp] for sp in signal_points_90]
+list_of_tags = ["(1800, {}) GeV".format(m2) for m2 in [1400,1600,1700]]
+colors = [ROOT.kRed,ROOT.kBlue,ROOT.kGreen]
+makeSignalPlot(allSR1718,D1718,eD1718,list_of_vals_10,list_of_errs_10,sD1718,1+(58.83/41.97),"2017-18 10 cm",list_of_tags,colors)
+makeSignalPlot(allSR1718,D1718,eD1718,list_of_vals_90,list_of_errs_90,sD1718,1+(58.83/41.97),"2017-18 90 cm",list_of_tags,colors)
+makeSignalPlot(allSR16,D16,eD16,list_of_vals_10,list_of_errs_10,sD16,35.9/41.97,"2016 10 cm",list_of_tags,colors)
+makeSignalPlot(allSR16,D16,eD16,list_of_vals_90,list_of_errs_90,sD16,35.9/41.97,"2016 90 cm",list_of_tags,colors)
 
-output = open("{0}/regions_stc_data_{1}_VR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableDataSTC(output)
-for region in allVR:
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineDataSTC(region))
-printFooter(output)
-output.close()
+if True:
+    output = open("{0}/counts_data_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedCountsTable(output)
+    for region in regionsNicelyOrderedSR:
+        output.write(getMergedCountsLine(region))
+    printFooter(output)
+    output.close()
 
-output = open("{0}/regions_data_{1}_SR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableData(output)
-for region in allSR:
-    if region.find("VR") >= 0: continue
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineData(region))
-printFooter(output)
-output.close()
+    output = open("{0}/counts_data_2016_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedCountsTable(output)
+    for region in allSR16:
+        output.write(getMergedCountsLine(region,2016))
+    printFooter(output)
+    output.close()
 
-output = open("{0}/regions_stc_data_{1}_SR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableDataSTC(output)
-for region in allSR:
-    if region.find("VR") >= 0: continue
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineDataSTC(region))
-printFooter(output)
-output.close()
+    output = open("{0}/counts_data_2017and2018_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedCountsTable(output)
+    for region in allSR1718:
+        output.write(getMergedCountsLine(region,2017))
+    printFooter(output)
+    output.close()
 
-makePlotRaw(allVR1718,M17,eM17,nonclosure_syst_M17,"2017 MC VR")
-makePlotRaw(allVR16,M16,eM16,nonclosure_syst_M16,"2016 MC VR")
+    output = open("{0}/regions_data_{1}_VR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableData(output)
+    for region in regionsNicelyOrderedVR:
+        output.write(getMergedLineData(region))
+    printFooter(output)
+    output.close()
 
-makePlotRaw(allSR1718,M17,eM17,nonclosure_syst_M17,"2017 MC SR")
-makePlotRaw(allSR16,M16,eM16,nonclosure_syst_M16,"2016 MC SR")
+    output = open("{0}/regions_stc_data_{1}_VR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableDataSTC(output)
+    for region in regionsNicelyOrderedVR:
+        output.write(getMergedLineDataSTC(region))
+    printFooter(output)
+    output.close()
 
-output = open("{0}/regions_mc_{1}_VR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableMC(output)
-for region in allVR:
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineMC(region))
-printFooter(output)
-output.close()
+    output = open("{0}/regions_data_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableData(output)
+    for region in regionsNicelyOrderedSR:
+        output.write(getMergedLineData(region))
+    printFooter(output)
+    output.close()
 
-output = open("{0}/regions_stc_mc_{1}_VR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableMCSTC(output)
-for region in allVR:
-    if region.find("SR") >= 0: continue
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineMCSTC(region))
-printFooter(output)
-output.close()
+    output = open("{0}/regions_stc_data_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableDataSTC(output)
+    for region in regionsNicelyOrderedSR:
+        output.write(getMergedLineDataSTC(region))
+    printFooter(output)
+    output.close()
 
-output = open("{0}/regions_mc_{1}_SR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableMC(output)
-for region in allSR:
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineMC(region))
-printFooter(output)
-output.close()
+makePlotRaw(allVR1718,M17,eM17,sM17,"2017 MC VR")
+makePlotRaw(allVR16,M16,eM16,sM16,"2016 MC VR")
 
-output = open("{0}/regions_stc_mc_{1}_SR.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedRegionTableMCSTC(output)
-for region in allSR:
-    if region[0] == "P":
-        output.write("\\rowcolor{green!25}")
-    elif region[0] == "M":
-        output.write("\\rowcolor{blue!25}")
-    else:
-        output.write("\\rowcolor{red!25}")
-    output.write(getMergedLineMCSTC(region))
-printFooter(output)
-output.close()
+makePlotRaw(allSR1718,M17,eM17,sM17,"2017 MC SR")
+makePlotRaw(allSR16,M16,eM16,sM16,"2016 MC SR")
+
+if True:
+    output = open("{0}/regions_mc_{1}_VR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableMC(output)
+    for region in regionsNicelyOrderedVR:
+        output.write(getMergedLineMC(region))
+    printFooter(output)
+    output.close()
+
+    output = open("{0}/regions_stc_mc_{1}_VR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableMCSTC(output)
+    for region in regionsNicelyOrderedVR:
+        output.write(getMergedLineMCSTC(region))
+    printFooter(output)
+    output.close()
+
+    output = open("{0}/regions_mc_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableMC(output)
+    for region in regionsNicelyOrderedSR:
+        output.write(getMergedLineMC(region))
+    printFooter(output)
+    output.close()
+
+    output = open("{0}/regions_stc_mc_{1}_SR.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedRegionTableMCSTC(output)
+    for region in regionsNicelyOrderedSR:
+        output.write(getMergedLineMCSTC(region))
+    printFooter(output)
+    output.close()
 
 
 output = open("{0}/fshorts_data_{1}.tex".format(tabledir,tag),"w")
