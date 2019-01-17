@@ -839,12 +839,19 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       float integratedYield = CRyield->IntegralAndError(0,-1,integratedYieldErr);
       
       float integratedDen = integratedYield;
-      float EM = 0;
-      if (hDataEM) EM =  hDataEM->Integral(0, -1)*rSFOF;
+      float EM = 0, errEM=0;
+      if (hDataEM) EM =  hDataEM->IntegralAndError(0, -1, errEM)*rSFOF;
       float integratedNum = integratedDen - EM;
       if (integratedNum < 0) integratedNum = 0;
-      float integratedPurity = integratedNum/integratedDen;
-      float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
+      float integratedPurity = integratedNum/integratedDen;      
+      // float integratedPurityErr = sqrt(integratedPurity*(1-integratedPurity)/integratedDen);// sqrt(e(1-e)/N)
+      // this isn't a proportion (OF/SF are statistically independent regions). Makes no sense to do this
+      // what we want is the error on (SF - R*OF). Three sources: dSF, OF*dR, and R*dOF
+      // first comes from gmN error in the cards on the main CR yield
+      // second comes from special RSFOF handling in cardmaker
+      // third should be: R*dOF/(SF-R*dOF). Use gaussian dOF=sqrt(OF) approx
+      integratedPurityErr = rSFOF*errEM / integratedNum * integratedPurity;
+      
       if (verbose) cout<<"Found SF="<<integratedYield<<" and OF="<<EM<<", so purity is "<<integratedPurity<<endl;
 
       for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
@@ -900,10 +907,10 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 //_______________________________________________________________________________
 void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto"){
 
-    // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto";
+    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_2016fullYear";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_pred2016withFullCR";
-  input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_unblinded1718";
+  // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_unblinded1718";
 
   string output_name = input_dir+"/zinvFromDY.root";
   // ----------------------------------------
@@ -913,7 +920,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   std::cout << "Writing to file: " << output_name << std::endl;
 
   // get input files
-  TFile* f_data = new TFile(Form("%s/data_unblinded.root",input_dir.c_str()));
+  TFile* f_data = new TFile(Form("%s/data_RunAll.root",input_dir.c_str()));
   TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   // TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   // TFile* f_qcd = new TFile(Form("%s/qcd_ht.root",input_dir.c_str()));
