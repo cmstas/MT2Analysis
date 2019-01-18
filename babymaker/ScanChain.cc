@@ -528,7 +528,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	    } catch (const exception& e) {
 	      if (event == 0) {
 		cout << "WARNING: " << e.what() << endl;
-		cout << "WARNING: Setting evt_nEvts to 0, evt_scale1fb to 1.0, evt_xsec to 0" << endl;
+		// cout << "WARNING: Setting evt_nEvts to 0, evt_scale1fb to 1.0, evt_xsec to 0" << endl;
+		cout << "ABORTING. This is for safety so we don't get silent scale1fb errors when babymaking. Comment out if you want to proceed." << endl;
+                return;
 	      }
 	      evt_nEvts = 0;
 	      evt_scale1fb = 1.0;
