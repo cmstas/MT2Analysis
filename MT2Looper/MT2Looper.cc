@@ -87,9 +87,9 @@ bool applyWeights = false;
 // turn on to apply btag sf to central value
 bool applyBtagSF = true; // default true
 // turn on to apply lepton sf to central value - take from babies
-bool applyLeptonSFfromBabies = false;
+bool applyLeptonSFfromBabies = true;
 // turn on to apply lepton sf to central value - reread from files
-bool applyLeptonSFfromFiles = true; // default true
+bool applyLeptonSFfromFiles = false; // default true
 // turn on to apply lepton sf to central value also for 0L SR. values chosen by options above
 bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
@@ -137,8 +137,8 @@ bool include_pj_eta = false;
 
 bool doHEMveto = true;
 int HEM_startRun = 319077; // affects 38.58 out of 58.83 fb-1 in 2018
-uint HEM_fracNum = 1286, HEM_fracDen = 1961;
-float HEM_ptCut = 30.0;
+uint HEM_fracNum = 1286, HEM_fracDen = 1961; // 38.58/58.82 ~= 1286/1961. Used for figuring out if we should veto MC events
+float HEM_ptCut = 30.0;  // veto on jets above this threshold
 float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // load rphi fits to perform r_effective calculation.
@@ -642,6 +642,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       }
   }
 
+  if(config_.year !=- 2016)
+      applyISRWeights = false;
+
   if (applyJSON && config_.json != "") {
     cout << "[MT2Looper::loop] Loading json file: " << config_.json << endl;
     set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
@@ -762,8 +765,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
           cout << "    muons TRK: " << config_.muSF_TRKfile << ": " << config_.muSF_TRKLT10histName << " (pT<10), " << config_.muSF_TRKGT10histName << " (pt>10)" << endl;
       else
           cout << "    muons TRK: not applying" << endl;
-      setElSFfile(config_.elSF_IDISOfile, config_.elSF_TRKfile, config_.elSF_IDhistName, config_.elSF_ISOhistName);
-      setMuSFfile(config_.muSF_IDfile, config_.muSF_ISOfile, config_.muSF_IPfile, config_.muSF_TRKfile,
+      setElSFfile("../babymaker/"+config_.elSF_IDISOfile, "../babymaker/"+config_.elSF_TRKfile, config_.elSF_IDhistName, config_.elSF_ISOhistName);
+      setMuSFfile("../babymaker/"+config_.muSF_IDfile, "../babymaker/"+config_.muSF_ISOfile, "../babymaker/"+config_.muSF_IPfile, "../babymaker/"+config_.muSF_TRKfile,
                   config_.muSF_IDhistName, config_.muSF_ISOhistName, config_.muSF_IPhistName, config_.muSF_TRKLT10histName, config_.muSF_TRKGT10histName);
       setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
@@ -776,6 +779,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
     setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
   }
   if (verbose) cout<<__LINE__<<endl;
+
+  // dilepton trigger weight setup
+  if(config_tag.find("data") == string::npos && applyDileptonTriggerWeights){
+      cout << "Applying dilepton trigger weights from file: " << "../babymaker/"+config_.dilep_trigeff_file << endl;
+      setDilepTrigEffFile("../babymaker/"+config_.dilep_trigeff_file);
+  }
 
   // set up signal binning
   if (sample.find("T2cc") != std::string::npos) {
@@ -921,9 +930,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       }
 
       // handle HEM veto
+      // if(t.run < HEM_startRun) continue;
+      bool isHEMaffected = false; // use later to determine whether to veto electrons in HEM region from CRSL
       if(doHEMveto && config_.year == 2018){
           bool hasHEMjet = false;
           if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
+              isHEMaffected = true;
               for(int i=0; i<t.njet; i++){
                   if(t.jet_pt[i] < HEM_ptCut)
                       break;
@@ -1187,7 +1199,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       bool doSLplots = false;
       bool doSLMUplots = false;
       bool doSLELplots = false;
-      leppt_ = -1.;
+      leppt_ = -1., lepeta_=-1., lepphi_=-1.;
       mt_ = -1.;
       if (verbose) cout<<__LINE__<<endl;
       // count number of forward jets
@@ -1231,6 +1243,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
 	    // good candidate: save
 	    leppt_ = t.lep_pt[ilep];
+	    lepeta_ = t.lep_eta[ilep];
+	    lepphi_ = t.lep_phi[ilep];
 	    mt_ = mt;
 	    cand_pdgId = t.lep_pdgId[ilep];
 	    foundlep = true;
@@ -1242,6 +1256,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	if (!foundlep && t.nPFLep5LowMT > 0) {
       	  for (int itrk = 0; itrk < t.nisoTrack; ++itrk) {
 	    float pt = t.isoTrack_pt[itrk];
+	    float eta = t.isoTrack_eta[itrk];
+	    float phi = t.isoTrack_phi[itrk];
 	    if (pt < 5.) continue;
       	    int pdgId = t.isoTrack_pdgId[itrk];
 	    if ((abs(pdgId) != 11) && (abs(pdgId) != 13)) continue;
@@ -1262,6 +1278,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
 	    // good candidate: save
 	    leppt_ = pt;
+	    lepeta_ = eta;
+	    lepphi_ = phi;
 	    mt_ = mt;
 	    cand_pdgId = pdgId;
 	    foundlep = true;
@@ -1275,8 +1293,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 		    << ", nPFLep5LowMT: " << t.nPFLep5LowMT << ", nLepLowMT: " << t.nLepLowMT << std::endl;
 	}
 
-	if (abs(cand_pdgId) == 11) doSLELplots = true;
-	else if (abs(cand_pdgId) == 13) doSLMUplots = true;
+	if (abs(cand_pdgId) == 11){
+            // veto on HEM-region electrons if we are in a HEM-affected part of data
+            if(isHEMaffected && 
+               lepeta_ > HEM_region[0] && lepeta_ < HEM_region[1] &&
+               lepphi_ > HEM_region[2] && lepphi_ < HEM_region[3]){
+                doSLplots = false;
+            }else{
+                doSLplots = true;
+                doSLELplots = true;
+            }
+        }else if (abs(cand_pdgId) == 13) 
+            doSLMUplots = true;
 
       } // for 1L control region
 
@@ -2669,6 +2697,7 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_
 
   if (!doMinimalPlots) {
     plot1D("h_leppt"+s,      leppt_,   evtweight_, h_1d, ";p_{T}(lep) [GeV]", 200, 0, 1000);
+    plot2D("h_lep_eta_phi"+s, lepeta_, lepphi_, evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
     plot1D("h_mt"+s,            mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
   }
   

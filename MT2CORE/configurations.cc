@@ -40,6 +40,7 @@ MT2Configuration GetMT2Config(std::string tag){
     c.muSF_IPhistName = "";
     c.muSF_TRKLT10histName = "";
     c.muSF_TRKGT10histName = "";
+    c.dilep_trigeff_file = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
     c.filters["eeBadScFilter"] = false;
     c.filters["globalTightHalo2016Filter"] = false;
@@ -477,6 +478,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_IPhistName    = "";
         c.muSF_TRKLT10histName = "";
         c.muSF_TRKGT10histName = "";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2018fullYear.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -513,6 +515,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_IPhistName    = "SF";
         c.muSF_TRKLT10histName = "ratio_eff_eta3_tk0_dr030e030_corr";
         c.muSF_TRKGT10histName = "ratio_eff_eta3_dr030e030_corr";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2016fullYear.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -548,6 +551,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_IPhistName    = "SF";
         c.muSF_TRKLT10histName = "ratio_eff_eta3_tk0_dr030e030_corr";
         c.muSF_TRKGT10histName = "ratio_eff_eta3_dr030e030_corr";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2016fullYear.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -582,6 +586,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_IPhistName    = "";
         c.muSF_TRKLT10histName = "";
         c.muSF_TRKGT10histName = "";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2017fullYear.root";
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
@@ -618,6 +623,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_IPhistName    = "SF";
         c.muSF_TRKLT10histName = "ratio_eff_eta3_tk0_dr030e030_corr";
         c.muSF_TRKGT10histName = "ratio_eff_eta3_dr030e030_corr";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2016fullYear.root";
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";

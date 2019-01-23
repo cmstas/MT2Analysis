@@ -280,6 +280,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "muSF_IPhistName" : "",
     "muSF_TRKLT10histName" : "",
     "muSF_TRKGT10histName" : "",
+    "dilep_trigeff_file" : "lepsf/trigeff/trigeff_dilep_2017fullYear.root",
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -303,6 +304,7 @@ MT2Config_defs["mc_102x_Autumn18"]["lumi"] = 58.83
 MT2Config_defs["mc_102x_Autumn18"]["btag_med_threshold_DeepCSV"] = 0.4184
 MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
 MT2Config_defs["mc_102x_Autumn18"]["JRT_file"] = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root"
+MT2Config_defs["mc_102x_Autumn18"]["dilep_trigeff_file"] = "lepsf/trigeff/trigeff_dilep_2018fullYear.root"
 
 
 MT2Config_defs["mc_80x_Summer16"] = {
@@ -327,6 +329,7 @@ MT2Config_defs["mc_80x_Summer16"] = {
     "muSF_IPhistName" : "SF",
     "muSF_TRKLT10histName" : "ratio_eff_eta3_tk0_dr030e030_corr",
     "muSF_TRKGT10histName" : "ratio_eff_eta3_dr030e030_corr",
+    "dilep_trigeff_file" : "lepsf/trigeff/trigeff_dilep_2016fullYear.root",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -364,6 +367,7 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "muSF_IPhistName" : "SF",
     "muSF_TRKLT10histName" : "ratio_eff_eta3_tk0_dr030e030_corr",
     "muSF_TRKGT10histName" : "ratio_eff_eta3_dr030e030_corr",
+    "dilep_trigeff_file" : "lepsf/trigeff/trigeff_dilep_2016fullYear.root",
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
@@ -390,8 +394,6 @@ MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     "badMuonFilterV2",
     "badChargedHadronFilterV2"
     ]
-
-
 
 
 def GetFilterString(config_tag):
@@ -486,6 +488,7 @@ MT2Configuration GetMT2Config(std::string tag){
     c.muSF_IPhistName = "";
     c.muSF_TRKLT10histName = "";
     c.muSF_TRKGT10histName = "";
+    c.dilep_trigeff_file = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
 """)
 
@@ -523,6 +526,8 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.muSF_IPhistName    = \"{0}\";\n".format(c[tag]["muSF_IPhistName"]))
             fout.write("        c.muSF_TRKLT10histName = \"{0}\";\n".format(c[tag]["muSF_TRKLT10histName"]))
             fout.write("        c.muSF_TRKGT10histName = \"{0}\";\n".format(c[tag]["muSF_TRKGT10histName"]))
+        if "dilep_trigeff_file" in c[tag]:
+            fout.write("        c.dilep_trigeff_file = \"{0}\";\n".format(c[tag]["dilep_trigeff_file"]))
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
         fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))

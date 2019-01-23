@@ -45,6 +45,10 @@ float getLepVetoEffFromFile_fastsim(float pt, float eta, int pdgId);
 
 float getPhotonTriggerWeight(float eta, float pt);
 
+TH2D* h_dilep_trigeff_ee = 0;
+TH2D* h_dilep_trigeff_mm = 0;
+TH2D* h_dilep_trigeff_em = 0;
+bool setDilepTrigEffFile(TString filename);
 float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int unc = 0);
 
 #endif

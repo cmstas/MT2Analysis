@@ -1,4 +1,5 @@
 #include "applyWeights.h"
+#include "TEfficiency.h"
 
 #include <cstdlib>
 
@@ -114,8 +115,6 @@ bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TS
       h_muSF_trk_ptgt10 = (TH1D*) h_trk_ptgt10->Clone("h_muSF_trk_ptgt10");
       h_muSF_trk_ptgt10->SetDirectory(0);
   }
-
-  h_muSF->Print("all");
 
   return true;
 }
@@ -470,22 +469,120 @@ float getPhotonTriggerWeight(float eta, float pt){
   return SF;
 }
 
+bool setDilepTrigEffFile(TString filename){
+    TFile *f = new TFile(filename);
+    if(!f->IsOpen()){
+        std::cout << "ERROR: couldn't open trigeff file " << filename << std::endl;
+        return 0;
+    }
+    
+    TH2D* h_ee_num = (TH2D*)f->Get("h_ee_pt_2d_num_ht");
+    TH2D* h_ee_den = (TH2D*)f->Get("h_ee_pt_2d_denom_ht");
+    TH2D* h_mm_num = (TH2D*)f->Get("h_mm_pt_2d_num_ht");
+    TH2D* h_mm_den = (TH2D*)f->Get("h_mm_pt_2d_denom_ht");
+    TH2D* h_em_num = (TH2D*)f->Get("h_em_pt_2d_num_ht");
+    TH2D* h_em_den = (TH2D*)f->Get("h_em_pt_2d_denom_ht");
+
+    for(int i=1; i<=h_ee_den->GetNbinsX(); i++){
+        int j;
+        for(j=1; h_ee_den->GetBinContent(i,j)>20; j++);
+        for(int k=j; k <= h_ee_den->GetNbinsY(); k++){
+            h_ee_num->SetBinContent(i,k, h_ee_num->Integral(i, i, j-1, -1));
+            h_ee_den->SetBinContent(i,k, h_ee_den->Integral(i, i, j-1, -1));
+        }
+        for(j=1; h_mm_den->GetBinContent(i,j)>20; j++);
+        for(int k=j; k <= h_mm_den->GetNbinsY(); k++){
+            h_mm_num->SetBinContent(i,k, h_mm_num->Integral(i, i, j-1, -1));
+            h_mm_den->SetBinContent(i,k, h_mm_den->Integral(i, i, j-1, -1));
+        }
+        for(j=1; h_em_den->GetBinContent(i,j)>20; j++);
+        for(int k=j; k <= h_em_den->GetNbinsY(); k++){
+            h_em_num->SetBinContent(i,k, h_em_num->Integral(i, i, j-1, -1));
+            h_em_den->SetBinContent(i,k, h_em_den->Integral(i, i, j-1, -1));
+        }
+    }
+
+    h_dilep_trigeff_ee = (TH2D*)h_ee_num->Clone("h_dilep_trigeff_ee");
+    h_dilep_trigeff_ee->SetDirectory(0);
+    h_dilep_trigeff_mm = (TH2D*)h_mm_num->Clone("h_dilep_trigeff_mm");
+    h_dilep_trigeff_mm->SetDirectory(0);
+    h_dilep_trigeff_em = (TH2D*)h_em_num->Clone("h_dilep_trigeff_em");
+    h_dilep_trigeff_em->SetDirectory(0);
+
+    for(int i=1; i<=h_dilep_trigeff_ee->GetNbinsX(); i++){
+        for(int j=1; j<=h_dilep_trigeff_ee->GetNbinsY(); j++){
+            float level = 0.6826;
+            float num, den, err;
+            
+            num = h_ee_num->GetBinContent(i,j);
+            den = h_ee_den->GetBinContent(i,j);
+            err = TEfficiency::ClopperPearson(den, num, level, false);
+            h_dilep_trigeff_ee->SetBinContent(i, j, num/den);
+            h_dilep_trigeff_ee->SetBinError(i, j, num/den-err);
+            
+            num = h_mm_num->GetBinContent(i,j);
+            den = h_mm_den->GetBinContent(i,j);
+            err = TEfficiency::ClopperPearson(den, num, level, false);
+            h_dilep_trigeff_mm->SetBinContent(i, j, num/den);
+            h_dilep_trigeff_mm->SetBinError(i, j, num/den-err);
+            
+            num = h_em_num->GetBinContent(i,j);
+            den = h_em_den->GetBinContent(i,j);
+            err = TEfficiency::ClopperPearson(den, num, level, false);
+            h_dilep_trigeff_em->SetBinContent(i, j, num/den);
+            h_dilep_trigeff_em->SetBinError(i, j, num/den-err);
+        
+        }
+    }
+
+    // h_dilep_trigeff_ee->Print("all");
+
+    return true;
+}
+
 float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int unc) {
 
-  float SF;
-  // based on https://indico.cern.ch/event/592150/attachments/1380789/2099040/dileptrigeff_olivito_301116.pdf
-  if      (abs(pdgId1) == 13 && abs(pdgId2) == 13 ) {
-    SF = (unc == 0) ? 0.97 : (unc == -1 ? 0.94 : 1.00);
-  }
-  else if (abs(pdgId1) == 11 && abs(pdgId2) == 11 ) {
-    if ( pt1 < 180 && pt2 < 35) SF = (unc == 0) ? 0.91 : (unc == -1 ? 0.84 : 1.00);
-    else SF = (unc == 0) ? 1.00 : (unc == -1 ? 0.97 : 1.00);
-  }
-  else {
-    if ( pt1 < 180) SF = (unc == 0) ? 0.92 : (unc == -1 ? 0.89 : 0.95);
-    else SF = (unc == 0) ? 0.97 : (unc == -1 ? 0.92 : 1.00);
-  }
+  //   //  OLD: USED FOR MORIOND17
+  // float SF;
+  // // based on https://indico.cern.ch/event/592150/attachments/1380789/2099040/dileptrigeff_olivito_301116.pdf
+  // if      (abs(pdgId1) == 13 && abs(pdgId2) == 13 ) {
+  //   SF = (unc == 0) ? 0.97 : (unc == -1 ? 0.94 : 1.00);
+  // }
+  // else if (abs(pdgId1) == 11 && abs(pdgId2) == 11 ) {
+  //   if ( pt1 < 180 && pt2 < 35) SF = (unc == 0) ? 0.91 : (unc == -1 ? 0.84 : 1.00);
+  //   else SF = (unc == 0) ? 1.00 : (unc == -1 ? 0.97 : 1.00);
+  // }
+  // else {
+  //   if ( pt1 < 180) SF = (unc == 0) ? 0.92 : (unc == -1 ? 0.89 : 0.95);
+  //   else SF = (unc == 0) ? 0.97 : (unc == -1 ? 0.92 : 1.00);
+  // }
 
-  return SF;
+  // return SF;
+    
+    pt1 = std::max(30.f, std::min(299.f, pt1));
+    pt2 = std::max(30.f, std::min(299.f, pt2));
+    float val, err;
+    if(abs(pdgId1)==11 && abs(pdgId2)==11){
+        int binx = h_dilep_trigeff_ee->GetXaxis()->FindBin(pt1);
+        int biny = h_dilep_trigeff_ee->GetYaxis()->FindBin(pt2);
+        val = h_dilep_trigeff_ee->GetBinContent(binx, biny);
+        err = h_dilep_trigeff_ee->GetBinError(binx, biny);
+    }
+    else if(abs(pdgId1)==13 && abs(pdgId2)==13){
+        int binx = h_dilep_trigeff_mm->GetXaxis()->FindBin(pt1);
+        int biny = h_dilep_trigeff_mm->GetYaxis()->FindBin(pt2);
+        val = h_dilep_trigeff_mm->GetBinContent(binx, biny);
+        err = h_dilep_trigeff_mm->GetBinError(binx, biny);
+    }
+    else{
+        int binx = h_dilep_trigeff_em->GetXaxis()->FindBin(pt1);
+        int biny = h_dilep_trigeff_em->GetYaxis()->FindBin(pt2);
+        val = h_dilep_trigeff_em->GetBinContent(binx, biny);
+        err = h_dilep_trigeff_em->GetBinError(binx, biny);
+    }
+
+    // std::cout << "DILEP WEIGHT: " << pdgId1 << " " << pdgId2 << " " << pt1 << " " << pt2 << " " << std::min(1.0f, val + unc*err) << std::endl;
+
+    return std::min(1.0f, val + unc*err);
 
 }

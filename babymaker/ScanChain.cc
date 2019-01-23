@@ -676,7 +676,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
         if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
-        if(config_.filters["ecalBadCalibFilterUpdate"])  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
+        if(config_.filters["ecalBadCalibFilterUpdate"] && !cms3_version.Contains("V09"))  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
         if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
         if(config_.filters["badChargedCandidateFilter"]) Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
         Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
@@ -1151,7 +1151,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         vec_lep_pdgId.push_back ( (-11)*cms3.els_charge().at(iEl));
         vec_lep_dxy.push_back ( cms3.els_dxyPV().at(iEl));
         vec_lep_dz.push_back ( cms3.els_dzPV().at(iEl));
-        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,4) );
+        vec_lep_tightId.push_back ( eleTightID(iEl,analysis_t::HAD,5) );
         vec_lep_heepId.push_back ( isHEEPV60(iEl) );
         vec_lep_highPtFit_pt.push_back ( -1. );
         vec_lep_highPtFit_eta.push_back ( -1. );

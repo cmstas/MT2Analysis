@@ -31,6 +31,7 @@ struct MT2Configuration {
     std::string muSF_IPhistName;
     std::string muSF_TRKLT10histName;
     std::string muSF_TRKGT10histName;
+    std::string dilep_trigeff_file;
     int ea_version;
     std::string JRT_file;
     std::string jet_id;
