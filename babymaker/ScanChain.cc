@@ -3101,11 +3101,12 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (doShortTrackInfo) {	
 
 	unsigned int Ch1_idx = 1000000; unsigned int Ch2_idx = 1000000;
+	const int charginoStatus = isFastsim ? 22 : 1;
 	if (!isData) {
 	  if (verbose) cout << "Before chargino matching" << endl;
 	  // find charginos and see if they have decay lengths in the range of interest, 10 to 100 cm
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
-	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != 1) continue; // looking for final state charginos
+	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != charginoStatus) continue; // looking for final state charginos
 	    // chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
 	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
 	    chargino_phi[nCharginos] = cms3.genps_p4().at(iGen).phi();
