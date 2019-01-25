@@ -50,9 +50,9 @@ samples_2018 = {
     "zinv" : {
         "/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"   : [280.35,  1.23, 1.073, "zinv_ht100to200"],
         "/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"   : [77.67,   1.23, 1.169, "zinv_ht200to400"],
-        "/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"   : [2.619, 1.23, 1.212, "zinv_ht600to800"],
+        "/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"   : [2.619,   1.23, 1.212, "zinv_ht600to800"],
         "/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"  : [1.198,   1.23, 1.139, "zinv_ht800to1200"],
-        "/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM" : [.2915,   1.23  1.032, "zinv_ht1200to2500"],
+        "/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM" : [.2915,   1.23, 1.032, "zinv_ht1200to2500"],
         "/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"  : [.006669, 1.23, 0.985, "zinv_ht2500toInf"],
         },
     "dyjetsll" : {

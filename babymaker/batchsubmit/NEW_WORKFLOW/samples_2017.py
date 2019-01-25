@@ -85,7 +85,7 @@ samples_2017 = {
 
         "/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM"   : [10.73, 1.23, 1.200, "zinv_ht400to600", "TOADD"],
         "/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM"   : [2.619, 1.23, 1.212, "zinv_ht600to800", "TOADD"],
-        "/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [.2915, 1.23  1.032, "zinv_ht1200to2500", "TOADD"],
+        "/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [.2915, 1.23, 1.032, "zinv_ht1200to2500", "TOADD"],
         },
     "dyjetsll" : {
         "/DYJetsToLL_M-50_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM"   : [42.91,   1.16, 1.133, "dyjetsll_ht200to400", "TOADD"],
