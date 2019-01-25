@@ -6,7 +6,7 @@ import dis_client
 
 samples_2016 = {
     "data" : { 
-        "/JetHT/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_JetHT_17Jul2018_ver1-v1"],
+        # "/JetHT/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_JetHT_17Jul2018_ver1-v1"],
         "/JetHT/Run2016B-17Jul2018_ver2-v2/MINIAOD" : [None, None, None, "data_Run2016B_JetHT_17Jul2018_ver2-v2"],
         "/JetHT/Run2016C-17Jul2018-v1/MINIAOD" :     [None, None, None, "data_Run2016C_JetHT_17Jul2018-v1"],
         "/JetHT/Run2016D-17Jul2018-v1/MINIAOD" :     [None, None, None, "data_Run2016D_JetHT_17Jul2018-v1"],
@@ -15,7 +15,7 @@ samples_2016 = {
         "/JetHT/Run2016G-17Jul2018-v1/MINIAOD" :     [None, None, None, "data_Run2016G_JetHT_17Jul2018-v1"],
         "/JetHT/Run2016H-17Jul2018-v1/MINIAOD" :     [None, None, None, "data_Run2016H_JetHT_17Jul2018-v1"],
         
-        "/MET/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_MET_17Jul2018_ver1-v1"],
+        # "/MET/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_MET_17Jul2018_ver1-v1"],
         "/MET/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_MET_17Jul2018_ver2-v1"],
         "/MET/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_MET_17Jul2018-v1"],
         "/MET/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_MET_17Jul2018-v1"],
@@ -24,7 +24,7 @@ samples_2016 = {
         "/MET/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_MET_17Jul2018-v1"],
         "/MET/Run2016H-17Jul2018-v2/MINIAOD" :      [None, None, None, "data_Run2016H_MET_17Jul2018-v2"],
 
-        "/HTMHT/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_HTMHT_17Jul2018_ver1-v1"],
+        # "/HTMHT/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_HTMHT_17Jul2018_ver1-v1"],
         "/HTMHT/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_HTMHT_17Jul2018_ver2-v1"],
         "/HTMHT/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_HTMHT_17Jul2018-v1"],
         "/HTMHT/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_HTMHT_17Jul2018-v1"],
@@ -33,7 +33,7 @@ samples_2016 = {
         "/HTMHT/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_HTMHT_17Jul2018-v1"],
         "/HTMHT/Run2016H-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016H_HTMHT_17Jul2018-v1"],
 
-        "/SingleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_SingleMuon_17Jul2018_ver1-v1"],
+        # "/SingleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_SingleMuon_17Jul2018_ver1-v1"],
         "/SingleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_SingleMuon_17Jul2018_ver2-v1"],
         "/SingleMuon/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_SingleMuon_17Jul2018-v1"],
         "/SingleMuon/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_SingleMuon_17Jul2018-v1"],
@@ -42,7 +42,7 @@ samples_2016 = {
         "/SingleMuon/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_SingleMuon_17Jul2018-v1"],
         "/SingleMuon/Run2016H-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016H_SingleMuon_17Jul2018-v1"],
         
-        "/SingleElectron/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_SingleElectron_17Jul2018_ver1-v1"],
+        # "/SingleElectron/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_SingleElectron_17Jul2018_ver1-v1"],
         "/SingleElectron/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_SingleElectron_17Jul2018_ver2-v1"],
         "/SingleElectron/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_SingleElectron_17Jul2018-v1"],
         "/SingleElectron/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_SingleElectron_17Jul2018-v1"],
@@ -51,7 +51,7 @@ samples_2016 = {
         "/SingleElectron/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_SingleElectron_17Jul2018-v1"],
         "/SingleElectron/Run2016H-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016H_SingleElectron_17Jul2018-v1"],
         
-        "/SinglePhoton/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_SinglePhoton_17Jul2018_ver1-v1"],
+        # "/SinglePhoton/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_SinglePhoton_17Jul2018_ver1-v1"],
         "/SinglePhoton/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_SinglePhoton_17Jul2018_ver2-v1"],
         "/SinglePhoton/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_SinglePhoton_17Jul2018-v1"],
         "/SinglePhoton/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_SinglePhoton_17Jul2018-v1"],
@@ -60,7 +60,7 @@ samples_2016 = {
         "/SinglePhoton/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_SinglePhoton_17Jul2018-v1"],
         "/SinglePhoton/Run2016H-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016H_SinglePhoton_17Jul2018-v1"],
         
-        "/DoubleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_DoubleMuon_17Jul2018_ver1-v1"],
+        # "/DoubleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_DoubleMuon_17Jul2018_ver1-v1"],
         "/DoubleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_DoubleMuon_17Jul2018_ver2-v1"],
         "/DoubleMuon/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_DoubleMuon_17Jul2018-v1"],
         "/DoubleMuon/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_DoubleMuon_17Jul2018-v1"],
@@ -69,7 +69,7 @@ samples_2016 = {
         "/DoubleMuon/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_DoubleMuon_17Jul2018-v1"],
         "/DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016H_DoubleMuon_17Jul2018-v1"],
         
-        "/DoubleEG/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_DoubleEG_17Jul2018_ver1-v1"],
+        # "/DoubleEG/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_DoubleEG_17Jul2018_ver1-v1"],
         "/DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_DoubleEG_17Jul2018_ver2-v1"],
         "/DoubleEG/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_DoubleEG_17Jul2018-v1"],
         "/DoubleEG/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_DoubleEG_17Jul2018-v1"],
@@ -78,7 +78,7 @@ samples_2016 = {
         "/DoubleEG/Run2016G-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016G_DoubleEG_17Jul2018-v1"],
         "/DoubleEG/Run2016H-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016H_DoubleEG_17Jul2018-v1"],
         
-        "/MuonEG/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_MuonEG_17Jul2018_ver1-v1"],
+        # "/MuonEG/Run2016B-17Jul2018_ver1-v1/MINIAOD" : [None, None, None, "data_Run2016B_MuonEG_17Jul2018_ver1-v1"],
         "/MuonEG/Run2016B-17Jul2018_ver2-v1/MINIAOD" : [None, None, None, "data_Run2016B_MuonEG_17Jul2018_ver2-v1"],
         "/MuonEG/Run2016C-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016C_MuonEG_17Jul2018-v1"],
         "/MuonEG/Run2016D-17Jul2018-v1/MINIAOD" :      [None, None, None, "data_Run2016D_MuonEG_17Jul2018-v1"],
@@ -115,12 +115,13 @@ samples_2016 = {
         "/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM"  : [0.03216, 1.21, 1.0, "wjets_ht2500toInf_ext1"],
         },
     "zinv" : {
-        "/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"   : [280.35, 1.23, 1.0, "zinv_ht100to200"],
-        "/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"   : [77.67,  1.23, 1.0, "zinv_ht200to400"],
-        "/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"   : [10.73,  1.23, 1.0, "zinv_ht400to600"],
+        "/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"   : [280.35, 1.23,  1.0, "zinv_ht100to200"],
+        "/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"   : [77.67,  1.23,  1.0, "zinv_ht200to400"],
+        "/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"   : [10.73,  1.23,  1.0, "zinv_ht400to600"],
         "/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM"   : [3.221,   1.0,  1.0, "zinv_ht600to800"],
-        "/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM"  : [1.474,  1.0,  1.0, "zinv_ht800to1200"],
-        "/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [.3586,  1.0,  1.0, "zinv_ht1200to2500"],
+        "/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM"  : [1.474,   1.0,  1.0, "zinv_ht800to1200"],
+        "/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [.3586,   1.0,  1.0, "zinv_ht1200to2500"],
+        "/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM"  : [.008203, 1.0,  1.0, "zinv_ht2500toInf"],
 
         "/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM" : [280.35, 1.23, 1.0, "zinv_ht100to200_ext1"],
         "/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM" : [77.67,  1.23, 1.0, "zinv_ht200to400_ext1"],
@@ -138,6 +139,8 @@ samples_2016 = {
         "/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM" : [147.4, 1.23, 1.0, "dyjetsll_ht100to200_ext1"],
         "/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM" : [40.99, 1.23, 1.0, "dyjetsll_ht200to400_ext1"],
         "/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM" : [5.678, 1.23, 1.0, "dyjetsll_ht400to600_ext1"],
+
+        "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext2-v2/MINIAODSIM" : [4895.0, 1.23, 1.0, "dyjetsll_m50_incl"],
         },
     "singletop" : {
         "/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM"     : [136.02, 1.0,    1.0, "singletop_tchan_top"],

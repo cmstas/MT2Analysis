@@ -56,6 +56,10 @@ samples_2018 = {
         "/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"  : [.008203, 1.0,  1.0, "zinv_ht2500toInf"],
         },
     "dyjetsll" : {
+        "/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM"  : [164.4,   1.0, 1.105, "dyjetsll_ht100to200"],
+        "/DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM"  : [49.77,   1.0, 1.100, "dyjetsll_ht200to400"],
+        "/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM"  : [6.805,   1.0, 1.142, "dyjetsll_ht400to600"],
+        "/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [.8526,   1.0, 0.966, "dyjetsll_ht800to1200"],
         },
     "singletop" : {
         "/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v3/MINIAODSIM" : [34.91,  1.0, 0.53, "singletop_tW_tbar"],
