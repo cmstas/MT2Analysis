@@ -29,6 +29,10 @@ int main(int argc, char **argv) {
   if (argc >= 6) doShortTrack = (bool)atoi(argv[5]);
   std::cout << "Doing short track info? " << (doShortTrack ? "yes" : "no") << std::endl;
 
+  float xsec_corr = 1.0;
+  if (argc >= 7) xsec_corr = atof(argv[6]);
+  std::cout << "Scaling SNT xsec by: " << xsec_corr << std::endl;
+
   TChain *chain = new TChain("Events");
   chain->Add(infile.Data());
   if (chain->GetEntries() == 0) std::cout << "WARNING: no entries in chain. filename was: " << infile << std::endl;
@@ -237,8 +241,10 @@ int main(int argc, char **argv) {
   else if(infile.Contains("dataRun2") && infile.Contains("2018"))      config_tag = "data_2018_Prompt";
   else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Summer16";
   else if(infile.Contains("RunIISummer16") && infile.Contains("94X"))  config_tag = "mc_94x_Summer16";
+  else if(infile.Contains("Private_94x"))                              config_tag = "mc_94x_Summer16";
   else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";
-  else if(infile.Contains("RunIIAutumn18") && infile.Contains("102X"))  config_tag = "mc_102x_Autumn18";
+  else if(infile.Contains("RunIIAutumn18") && infile.Contains("102X")) config_tag = "mc_102x_Autumn18";
+  else if(infile.Contains("RunIISpring16") && infile.Contains("Fast") && infile.Contains("80X"))  config_tag = "mc_80x_fastsim_Moriond17";
   else{
       std::cout << "[processBaby] ERROR! could not determine correct configuration to use" << std::endl;
       return 1;
@@ -251,6 +257,7 @@ int main(int argc, char **argv) {
   babyMaker *looper = new babyMaker();
   looper->SetDoRebal(doRebal);
   looper->SetDoShortTrack(doShortTrack);
+  looper->SetXsecCorrection(xsec_corr);
   looper->ScanChain(chain, sample, config_tag, isFastsim, max_events); 
   delete chain;
   return 0;

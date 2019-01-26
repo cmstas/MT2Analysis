@@ -43,6 +43,7 @@ class babyMaker {
   void SetRecomputeRawPFMET(bool flag) {doRecomputeRawPFMET_ = flag;};
   void SetDoRebal(bool flag) {doRebal = flag;}
   void SetDoShortTrack(bool flag) {doShortTrackInfo = flag;}
+  void SetXsecCorrection(float xsec_corr) {xsec_corr_ = xsec_corr;}
     
   //functiuon to minimize for rebalancing
   static void minuitFunction(int& nDim, double* gout, double& result, double par[], int flg);
@@ -62,6 +63,8 @@ class babyMaker {
   bool doRecomputeRawPFMET_;
   bool doRebal;
   bool doShortTrackInfo;
+
+  float xsec_corr_ = 1.0;
 
   // for btag SFs
   BTagCalibration* calib;
