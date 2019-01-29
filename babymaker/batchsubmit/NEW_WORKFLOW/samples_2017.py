@@ -135,40 +135,52 @@ samples_2017 = {
         "/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM"           : [30000, 1.0, 1.0, "qcd_ht500to700"],
         "/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [1098,   1.0, 1.0, "qcd_ht1000to1500"],
         },
-    
+
+    "signal" : {
+        "/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T1tttt"],
+        }
 
     }
 
 if __name__ == "__main__":
 
-    todelete = []
-    toadd = []
-    badpu = []
+    # todelete = []
+    # toadd = []
+    # badpu = []
+    # for type in samples_2017:
+    #     for ds in samples_2017[type]:
+    #         vals = samples_2017[type][ds]
+    #         if len(vals) > 4 and vals[4]=="DELETE":
+    #             todelete.append(ds)
+    #         if len(vals) > 4 and vals[4]=="TOADD":
+    #             toadd.append('"{0}|{1}|{2}|{3}",'.format(ds, *samples_2017[type][ds]))
+                
+    #         if "Run2017" not in ds and (len(vals) <= 4 or vals[4] != "DELETE"):
+    #             out = dis_client.query(ds, "parents")["response"]["payload"]["parents"]
+    #             if len(out) < 1 or "PU2017" not in out[0]:
+    #                 badpu.append(ds)
+
+    # print "Datasets to replace:"
+    # for ds in todelete:
+    #     print ds
+
+    # print "\nDatasets to add:"
+    # for ds in toadd:
+    #     print ds
+
+    # print "\nDatasets with old PU and no replacement:"
+    # for ds in badpu:
+    #     print ds
+
+
     for type in samples_2017:
+        if type == "data":
+            continue
         for ds in samples_2017[type]:
             vals = samples_2017[type][ds]
-            if len(vals) > 4 and vals[4]=="DELETE":
-                todelete.append(ds)
-            if len(vals) > 4 and vals[4]=="TOADD":
-                toadd.append('"{0}|{1}|{2}|{3}",'.format(ds, *samples_2017[type][ds]))
-                
-            if "Run2017" not in ds and (len(vals) <= 4 or vals[4] != "DELETE"):
-                out = dis_client.query(ds, "parents")["response"]["payload"]["parents"]
-                if len(out) < 1 or "PU2017" not in out[0]:
-                    badpu.append(ds)
 
-    print "Datasets to replace:"
-    for ds in todelete:
-        print ds
-
-    print "\nDatasets to add:"
-    for ds in toadd:
-        print ds
-
-    print "\nDatasets with old PU and no replacement:"
-    for ds in badpu:
-        print ds
+            print '"{0}|{1}|{2}|{3}",'.format(ds, *samples_2017[type][ds])
 
 
 
-
+    

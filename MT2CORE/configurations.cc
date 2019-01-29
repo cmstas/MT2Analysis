@@ -637,6 +637,42 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
 
+    }else if(tag == "mc_94x_fastsim_Fall17"){
+
+        c.year               = 2017;
+        c.cmssw_ver          = 94;
+        c.lumi               = 41.529;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
+        c.pu_weights_file    = "puWeight2017.root";
+        c.elSF_IDISOfile     = "lepsf/Fall17/ElectronScaleFactors_Run2017.root";
+        c.elSF_TRKfile       = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
+        c.elSF_IDhistName    = "Run2017_CutBasedVetoNoIso94XV2";
+        c.elSF_ISOhistName   = "Run2017_MVAVLooseTightIP2DMini";
+        c.muSF_IDfile        = "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root";
+        c.muSF_ISOfile       = "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root";
+        c.muSF_IPfile        = "";
+        c.muSF_TRKfile       = "";
+        c.muSF_IDhistName    = "NUM_LooseID_DEN_genTracks_pt_abseta";
+        c.muSF_ISOhistName   = "TnP_MC_NUM_MiniIso02Cut_DEN_LooseID_PAR_pt_eta";
+        c.muSF_IPhistName    = "";
+        c.muSF_TRKLT10histName = "";
+        c.muSF_TRKGT10histName = "";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2017fullYear.root";
+        c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
+
     }else{
         std::cout << "[MT2Configuration] ERROR! invalid tag \""+tag+"\"" << std::endl;
         throw std::exception();

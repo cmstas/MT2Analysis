@@ -395,6 +395,18 @@ MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     "badChargedHadronFilterV2"
     ]
 
+MT2Config_defs["mc_94x_fastsim_Fall17"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_94x_fastsim_Fall17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
+MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
+    "goodVertices",
+    "HBHENoiseFilter",
+    "HBHENoiseIsoFilter",
+    "EcalDeadCellTriggerPrimitiveFilter",
+    "badMuonFilter",
+    "badChargedCandidateFilter",
+    "ecalBadCalibFilterUpdate"
+    ]
+
 
 def GetFilterString(config_tag):
     if config_tag not in MT2Config_defs:
