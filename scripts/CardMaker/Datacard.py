@@ -1,4 +1,4 @@
-from math import log10
+from math import log10, isinf, isnan
 
 class Datacard:
     def __init__(self, name, nbkg, bkg_names, nchan=1, chan_names=None, years=None, split_bkg_by_year=False):
@@ -46,7 +46,18 @@ class Datacard:
             self.bkg_rates[bkg] = 0.0
 
         self.nuisances = {}
-        
+
+    def GetName(self):
+        return self.name
+
+    def GetObservation(self):
+        return self.obs
+
+    def GetNuisanceNames(self):
+        return self.nuisances.keys()
+
+    def GetNuisanceDict(self):
+        return self.nuisances
 
     def SetObservation(self, obs):
         self.obs = obs
@@ -114,19 +125,32 @@ class Datacard:
         fullbkg = bkg_name + (str(year) if year is not None else "")
         fullidx = self.split_bkg_names.index(fullbkg)
 
-        if self.nuisances[fullname].type=="lnN" and abs(1.0-value) > 0.5:
-            print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
+        if type(value)==tuple:
+            if self.nuisances[fullname].type != "lnN":
+                raise Exception("ERROR: only lnN nuisances support 2-sided values!")
+            if abs(1.0-value[0])>0.9 or abs(1.0-value[1])>0.9:
+                print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
+            if isnan(value[0]) or isinf(value[0]) or isnan(value[1]) or isinf(value[1]):
+                raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
+        elif type(value)==float:
+            if self.nuisances[fullname].type=="lnN" and abs(1.0-value) > 0.9:
+                print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
+            if isnan(value) or isinf(value):
+                raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
+        else:
+            raise Exception("ERROR: value must be a float or tuple of 2 float (upper,lower) (lnN only)")
 
         self.nuisances[fullname].bkg_values[fullidx] = value
 
-    def Write(self, outname):
+
+    def Write(self, outname, sortkey=str):
         fid = open(outname, 'w')
 
         maxNuisLength = 20
         for name in self.nuisances:
             maxNuisLength = max(maxNuisLength, len(name))
 
-        colsizes = [maxNuisLength+2, 12] + [12]*(self.n_split_bkg + 1)
+        colsizes = [maxNuisLength+2, 12] + [13]*(self.n_split_bkg + 1)
         ml = lambda s,l: s+" "*max(1,(l-len(s)))
 
         fid.write("imax {0}  number of channels\n".format(self.nchan))
@@ -160,7 +184,7 @@ class Datacard:
         fid.write('\n')
         fid.write("-"*sum(colsizes)+'\n')
 
-        for nuis in sorted(self.nuisances.keys()):
+        for nuis in sorted(self.nuisances.keys(), key=sortkey):
             fid.write(ml(nuis, colsizes[0]))
             tp = self.nuisances[nuis].type
             sigval = self.nuisances[nuis].sig_value
@@ -175,6 +199,8 @@ class Datacard:
                 for i in range(self.n_split_bkg):
                     if bkgvals[i] is None:
                         fid.write(ml("-", colsizes[i+3]))
+                    elif type(bkgvals[i])==tuple:
+                        fid.write(ml("{0:.3f}/{1:.3f}".format(*bkgvals[i]), colsizes[i+3]))
                     else:
                         fid.write(ml("{0:.3f}".format(bkgvals[i]), colsizes[i+3]))
             elif tp=="gmN":
@@ -191,7 +217,10 @@ class Datacard:
                     else:
                         nround = max(0, int(-log10(bkgvals[i]))+4)
                         fid.write(ml("{{0:.{0}f}}".format(nround).format(bkgvals[i]), colsizes[i+3]))
-                        if abs(bkgvals[i]*N / self.bkg_rates[self.split_bkg_names[i]] - 1) > 1e-5:
+                        if self.bkg_rates[self.split_bkg_names[i]] > 0 and \
+                                abs(bkgvals[i]*N / self.bkg_rates[self.split_bkg_names[i]] - 1) > 1e-5:
+                            raise Exception("ERROR: gmN values and rate don't line up! Nuis: {0}, Bkg: {1}".format(nuis, self.split_bkg_names[i]))
+                        if self.bkg_rates[self.split_bkg_names[i]] == 0.0 and bkgvals[i]*N != 0.0:
                             raise Exception("ERROR: gmN values and rate don't line up! Nuis: {0}, Bkg: {1}".format(nuis, self.split_bkg_names[i]))
 
             fid.write("\n")
