@@ -69,8 +69,8 @@ for fileindex,f in enumerate(files):
             h_output = ROOT.TH1D("output{}_".format(correction)+filetag+"_"+signame,"Signal Efficiency Adjustments, "+filetag+", "+signame.replace("_"," ").replace("fastsim ","")+";;Sig Eff Adj",len(regions),0,len(regions))
             h_output.SetLineWidth(3)
             h_output.SetLineColor(ROOT.kBlack)
-            h_output.SetMaximum(1.00001)
-            h_output.SetMinimum(0)
+            h_output.SetMaximum(1.00001 if correction != "STC" else 10*h_output.GetMaximum())
+            h_output.SetMinimum(0 if correction != "STC" else 0.1*h_output.GetMinimum())
             for regionindex,region in enumerate(regions):
                 bin = regionindex+1
                 tokens = region.split("_")
@@ -86,7 +86,10 @@ for fileindex,f in enumerate(files):
                 bin = regionindex+1
                 h_output.GetXaxis().SetBinLabel(bin,region.replace("_"," "))
             h_output.GetXaxis().LabelsOption("v")
+            if correction == "STC": 
+                simplecanvas.SetLogy()
+                h_output.GetYaxis().SetTitle("Events, in 2017 (41.97/fb)")
             h_output.Draw("E")
             simplecanvas.SaveAs("pngs_contam/{}.png".format(h_output.GetName()))
-
+            simplecanvas.SetLogy(False)
 print "Done"

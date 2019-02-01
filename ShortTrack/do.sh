@@ -2,9 +2,6 @@
 
 make -j 12 || return $?
 
-LOGDIR=logs/splitpt
-mkdir -p ${LOGDIR}
-
 doD16=1
 doM16=1
 doD17=1
@@ -13,11 +10,14 @@ doD18=1
 doM18=0
 doS17=1
 
-tag=centralMT2
+tag=FullNewHEM
+outtag=FullUnblind
+LOGDIR=logs/${outtag}
+mkdir -p ${LOGDIR}
 
 # 2016 MC
 if [ "$doM16" -eq "1" ]; then
-    OUTDIR=output_unmerged/2016_${tag}
+    OUTDIR=output_unmerged/2016_${outtag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Summer16
     INDIR=/nfs-6/userdata/dpgilber/mt2babies/mc_2016_loose
@@ -32,7 +32,7 @@ fi
 
 # 2016 data
 if [ "$doD16" -eq "1" ]; then
-    OUTDIR=output_unmerged/2016_${tag}/data
+    OUTDIR=output_unmerged/2016_${outtag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2016_94x
 #    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2016_loose
@@ -50,7 +50,7 @@ fi
 
 #2017 MC
 if [ "$doM17" -eq "1" ]; then
-    OUTDIR=output_unmerged/2017_${tag}
+    OUTDIR=output_unmerged/2017_${outtag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Fall17
     INDIR=/nfs-6/userdata/dpgilber/mt2babies/mc_2017_loose
@@ -65,7 +65,7 @@ fi
 
 # 2017 data
 if [ "$doD17" -eq "1" ]; then
-    OUTDIR=output_unmerged/2017_${tag}/data
+    OUTDIR=output_unmerged/2017_${outtag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2017_31Mar2018
     INDIR=/nfs-6/userdata/mt2/V00-10-07_2017fullYear_31Mar2018_ST_skim
@@ -82,7 +82,7 @@ fi
 
 #2018 MC
 if [ "$doM18" -eq "1" ]; then
-    OUTDIR=output_unmerged/2018_${tag}
+    OUTDIR=output_unmerged/2018_${outtag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_18
     INDIR=/nfs-6/userdata/dpgilber/mt2babies/mc_2017_loose
@@ -97,7 +97,7 @@ fi
 
 # 2018 data
 if [ "$doD18" -eq "1" ]; then
-    OUTDIR=output_unmerged/2018_${tag}/data
+    OUTDIR=output_unmerged/2018_${outtag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2018_Prompt
     INDIR=/nfs-6/userdata/mt2/V00-10-07_2018fullYear_17Sep2018_skim_ST/
@@ -113,12 +113,13 @@ fi
 
 #2017 Signal
 if [ "$doS17" -eq "1" ]; then
-    OUTDIR=output_unmerged/2017_${tag}/signal
+    OUTDIR=output_unmerged/2017_${outtag}/signal
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Fall17
     INDIR=/nfs-6/userdata/dpgilber/ShortTrackSignals
 #    declare -a Samples=(fullsim_10cm_mt2 fullsim_90cm_mt2)
-    declare -a Samples=(10cm_1800-1700 10cm_1800-1600 10cm_1800-1400 10cm_1700-1600 90cm_1800-1700 90cm_1800-1600 90cm_1800-1400 90cm_1700-1600)
+#    declare -a Samples=(10cm_1800-1700 10cm_1800-1600 10cm_1800-1400 10cm_1700-1600 90cm_1800-1700 90cm_1800-1600 90cm_1800-1400 90cm_1700-1600)
+    declare -a Samples=(10cm_1800-1700 10cm_1800-1600 10cm_1800-1400 90cm_1800-1700 90cm_1800-1600 90cm_1800-1400)
     
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/fastsim_${SAMPLE} ${INDIR}/fastsim_${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"

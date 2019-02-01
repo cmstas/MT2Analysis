@@ -10,22 +10,33 @@ const int applyRecoVeto = 2; // 0: None, 1: use MT2 ID leptons for the reco veto
 const bool increment17 = false;
 const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
+const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
 
 // turn on to apply json file to data
 const bool applyJSON = true;
-const bool blind = true;
+const bool blind = false;
 
-const bool applyISRWeights = false; // evt_id is messed up in current babies, and we don't have isr weights implemented for 2017 MC anyway
+const bool applyISRWeights = true; // evt_id is messed up in current babies, and we don't have isr weights implemented for 2017 MC anyway
 
 const bool doNTrueIntReweight = true; // evt_id is messed up in current babies
 
-TFile VetoFile("VetoHists.root");
-TH2F* veto_bar = (TH2F*) VetoFile.Get("h_VetoEtaPhi_bar");
-TH2F* veto_ecp = (TH2F*) VetoFile.Get("h_VetoEtaPhi_ecp");
-TH2F* veto_ecn = (TH2F*) VetoFile.Get("h_VetoEtaPhi_ecn");
+bool doHEMveto = true;
+int HEM_startRun = 319077; // affects 38.58 out of 58.83 fb-1 in 2018
+uint HEM_fracNum = 1286, HEM_fracDen = 1961; // 38.58/58.82 ~= 1286/1961. Used for figuring out if we should veto MC events
+float HEM_ptCut = 30.0;  // veto on jets above this threshold
+float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
-int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi) {
+// turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
+bool applyL1PrefireWeights = false;
+
+TFile VetoFile("../FshortLooper/veto_etaphi.root");
+TH2F* veto_etaphi_16 = (TH2F*) VetoFile.Get("etaphi_veto_16");
+TH2F* veto_etaphi_17 = (TH2F*) VetoFile.Get("etaphi_veto_17");
+TH2F* veto_etaphi_18 = (TH2F*) VetoFile.Get("etaphi_veto_18");
+
+int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi, int year) {
   if (fabs(eta) > 2.4) return -1;
+  /*
   else if (eta > 1.4) {
     float bc = veto_ecp->GetBinContent(veto_ecp->FindBin(eta,phi));
     if (bc > 0) return 3;
@@ -37,7 +48,11 @@ int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi) {
     if (bc > 0) return 1;
   }
   if (eta < -1.05 && eta > -1.15 && phi < -1.8 && phi > -2.1) return 4;  
-  return 0;
+  */
+  TH2F* veto_hist = veto_etaphi_16;
+  if (year == 2017) veto_hist = veto_etaphi_17;
+  if (year == 2018) veto_hist = veto_etaphi_18;
+  return (int) veto_hist->GetBinContent(veto_hist->FindBin(eta,phi));
 }
 
 int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, char * runtag) {
@@ -304,6 +319,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   hi_hists[h_HM_SR_4] = h_HM_SR_4_hi;
   hi_hists[h_HH_SR_4] = h_HH_SR_4_hi;
 
+  // 2 ST 
+  TH2D* h_2STC_MR = new TH2D("h_2STC_MR","2 Track Event Counts",1,0,1,3,0,3);
+  h_2STC_MR->GetYaxis()->SetTitleOffset(3.0);
+  h_2STC_MR->GetXaxis()->SetBinLabel(1,"2 STC Events");
+  h_2STC_MR->GetYaxis()->SetBinLabel(1,"Obs SR 2ST Events");
+  h_2STC_MR->GetYaxis()->SetBinLabel(2,"Pred SR 2ST Events");
+  h_2STC_MR->GetYaxis()->SetBinLabel(3,"2 STC CR Events");
+  TH2D* h_2STC_VR = (TH2D*)h_2STC_MR->Clone("h_2STC_VR");
+  TH2D* h_2STC_SR = (TH2D*)h_2STC_MR->Clone("h_2STC_SR");
 
   // Nlep = 1 hists
 
@@ -340,9 +364,25 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_FS_23_lo = (TH1D*) h_FS->Clone("h_FS_23_lo");
   TH1D* h_FS_4_lo = (TH1D*) h_FS->Clone("h_FS_4_lo");
 
-  TH1D* h_FS_alt_rel_err = new TH1D("h_FS_alt_rel_err","Alternative Relative Error",3,0,3);
-  TH1D* h_FS_23_alt_rel_err = new TH1D("h_FS_23_alt_rel_err","Alternative Relative Error",3,0,3);
-  TH1D* h_FS_4_alt_rel_err = new TH1D("h_FS_4_alt_rel_err","Alternative Relative Error",3,0,3);
+  TH1D* h_FS_up = (TH1D*) h_FS->Clone("h_FS_up");
+  TH1D* h_FS_23_up = (TH1D*) h_FS->Clone("h_FS_23_up");
+  TH1D* h_FS_4_up = (TH1D*) h_FS->Clone("h_FS_4_up");
+  TH1D* h_FS_hi_up = (TH1D*) h_FS->Clone("h_FS_hi_up");
+  TH1D* h_FS_23_hi_up = (TH1D*) h_FS->Clone("h_FS_23_hi_up");
+  TH1D* h_FS_4_hi_up = (TH1D*) h_FS->Clone("h_FS_4_hi_up");
+  TH1D* h_FS_lo_up = (TH1D*) h_FS->Clone("h_FS_lo_up");
+  TH1D* h_FS_23_lo_up = (TH1D*) h_FS->Clone("h_FS_23_lo_up");
+  TH1D* h_FS_4_lo_up = (TH1D*) h_FS->Clone("h_FS_4_lo_up");
+
+  TH1D* h_FS_dn = (TH1D*) h_FS->Clone("h_FS_dn");
+  TH1D* h_FS_23_dn = (TH1D*) h_FS->Clone("h_FS_23_dn");
+  TH1D* h_FS_4_dn = (TH1D*) h_FS->Clone("h_FS_4_dn");
+  TH1D* h_FS_hi_dn = (TH1D*) h_FS->Clone("h_FS_hi_dn");
+  TH1D* h_FS_23_hi_dn = (TH1D*) h_FS->Clone("h_FS_23_hi_dn");
+  TH1D* h_FS_4_hi_dn = (TH1D*) h_FS->Clone("h_FS_4_hi_dn");
+  TH1D* h_FS_lo_dn = (TH1D*) h_FS->Clone("h_FS_lo_dn");
+  TH1D* h_FS_23_lo_dn = (TH1D*) h_FS->Clone("h_FS_23_lo_dn");
+  TH1D* h_FS_4_lo_dn = (TH1D*) h_FS->Clone("h_FS_4_lo_dn");
 
   mt2tree t;
 
@@ -480,238 +520,310 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs = ((TH2D*) FshortFile->Get("h_fsMR_Baseline"))->ProjectionX("h_fs",1,1);
   TH1D* h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23",1,1);
   TH1D* h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4",1,1);
+  TH1D* h_fs_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_up"))->ProjectionX("h_fs_up",1,1);
+  TH1D* h_fs_Nj23_up = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_up"))->ProjectionX("h_fs_23_up",1,1);
+  TH1D* h_fs_Nj4_up = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_up"))->ProjectionX("h_fs_4_up",1,1);
+  TH1D* h_fs_dn = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_dn"))->ProjectionX("h_fs_dn",1,1);
+  TH1D* h_fs_Nj23_dn = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_dn"))->ProjectionX("h_fs_23_dn",1,1);
+  TH1D* h_fs_Nj4_dn = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_dn"))->ProjectionX("h_fs_4_dn",1,1);
   TH1D* h_fs_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline"))->ProjectionX("h_fs_MC",1,1);
+  TH1D* h_fs_MC_up = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline_up"))->ProjectionX("h_fs_MC_up",1,1);
+  TH1D* h_fs_MC_dn = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline_dn"))->ProjectionX("h_fs_MC_dn",1,1);
   TH1D* h_fs_Nj23_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23_MC",1,1);
+  TH1D* h_fs_Nj23_MC_up = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline_up"))->ProjectionX("h_fs_23_MC_up",1,1);
+  TH1D* h_fs_Nj23_MC_dn = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline_dn"))->ProjectionX("h_fs_23_MC_dn",1,1);
   TH1D* h_fs_Nj4_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4_MC",1,1);
+  TH1D* h_fs_Nj4_MC_up = ((TH2D*) FshortFileMC->Get("h_fsMR_4_Baseline_up"))->ProjectionX("h_fs_4_MC_up",1,1);
+  TH1D* h_fs_Nj4_MC_dn = ((TH2D*) FshortFileMC->Get("h_fsMR_4_Baseline_dn"))->ProjectionX("h_fs_4_MC_dn",1,1);
+
   const float mc_L_corr = adjL ? h_fs_MC->GetBinContent(Lidx) / h_fs_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err = adjL ? sqrt( pow((h_fs_MC->GetBinError(Lidx) / h_fs_MC->GetBinContent(Lidx)),2) + pow((h_fs_MC->GetBinError(Midx) / h_fs_MC->GetBinContent(Midx)),2)) * mc_L_corr : 0;
+  const float mc_L_corr_err_up = adjL ? sqrt( pow((h_fs_MC_up->GetBinError(Lidx) / h_fs_MC->GetBinContent(Lidx)),2) + pow((h_fs_MC_up->GetBinError(Midx) / h_fs_MC->GetBinContent(Midx)),2)) * mc_L_corr : 0;
+  const float mc_L_corr_err_dn = adjL ? sqrt( pow((h_fs_MC_dn->GetBinError(Lidx) / h_fs_MC->GetBinContent(Lidx)),2) + pow((h_fs_MC_dn->GetBinError(Midx) / h_fs_MC->GetBinContent(Midx)),2)) * mc_L_corr : 0;
   const float mc_L_corr_23 = adjL ? h_fs_Nj23_MC->GetBinContent(Lidx) / h_fs_Nj23_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err_23 = adjL ? sqrt( pow((h_fs_Nj23_MC->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
+  const float mc_L_corr_err_23_up = adjL ? sqrt( pow((h_fs_Nj23_MC_up->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC_up->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
+  const float mc_L_corr_err_23_dn = adjL ? sqrt( pow((h_fs_Nj23_MC_dn->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC_dn->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
   const float mc_L_corr_4 = adjL ? h_fs_Nj4_MC->GetBinContent(Lidx) / h_fs_Nj4_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
-  const float mc_L_corr_err_4 = adjL ? sqrt( pow((h_fs_Nj4_MC->GetBinError(Lidx) / h_fs_Nj4_MC->GetBinContent(Lidx)),2) + pow((h_fs_Nj4_MC->GetBinError(Midx) / h_fs_Nj4_MC->GetBinContent(Midx)),2)) * mc_L_corr_4 : 0;
+  const float mc_L_corr_err_4_up = adjL ? sqrt( pow((h_fs_Nj4_MC_up->GetBinError(Lidx) / h_fs_Nj4_MC->GetBinContent(Lidx)),2) + pow((h_fs_Nj4_MC_up->GetBinError(Midx) / h_fs_Nj4_MC->GetBinContent(Midx)),2)) * mc_L_corr_4 : 0;
+  const float mc_L_corr_err_4_dn = adjL ? sqrt( pow((h_fs_Nj4_MC_dn->GetBinError(Lidx) / h_fs_Nj4_MC->GetBinContent(Lidx)),2) + pow((h_fs_Nj4_MC_dn->GetBinError(Midx) / h_fs_Nj4_MC->GetBinContent(Midx)),2)) * mc_L_corr_4 : 0;
   const double fs_P = h_fs->GetBinContent(Pidx);
-  const double fs_P_err = h_fs->GetBinError(Pidx);
+  const double fs_P_err_up = h_fs_up->GetBinError(Pidx);
+  const double fs_P_err_dn = h_fs_dn->GetBinError(Pidx);
   const double fs_P3 = h_fs->GetBinContent(P3idx);
-  const double fs_P3_err = h_fs->GetBinError(P3idx);
+  const double fs_P3_err_up = h_fs_up->GetBinError(P3idx);
+  const double fs_P3_err_dn = h_fs_dn->GetBinError(P3idx);
   const double fs_P4 = h_fs->GetBinContent(P4idx);
-  const double fs_P4_err = h_fs->GetBinError(P4idx);
+  const double fs_P4_err_up = h_fs_up->GetBinError(P4idx);
+  const double fs_P4_err_dn = h_fs_dn->GetBinError(P4idx);
   const double fs_M = h_fs->GetBinContent(Midx);
-  const double fs_M_err = h_fs->GetBinError(Midx);
+  const double fs_M_err_up = h_fs_up->GetBinError(Midx);
+  const double fs_M_err_dn = h_fs_dn->GetBinError(Midx);
   const double fs_L = adjL ? h_fs->GetBinContent(Midx) * mc_L_corr : h_fs->GetBinContent(Lidx);
-  const double fs_L_err = adjL ? sqrt( pow((fs_M_err/fs_M),2) + pow((mc_L_corr_err / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(Lidx);
+  const double fs_L_err_up = adjL ? sqrt( pow((fs_M_err_up/fs_M),2) + pow((mc_L_corr_err_up / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(Lidx);
+  const double fs_L_err_dn = adjL ? sqrt( pow((fs_M_err_dn/fs_M),2) + pow((mc_L_corr_err_dn / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(Lidx);
   const double fs_Nj23_P = h_fs_Nj23->GetBinContent(Pidx);
-  const double fs_Nj23_P_err = h_fs_Nj23->GetBinError(Pidx);
+  const double fs_Nj23_P_err_up = h_fs_Nj23_up->GetBinError(Pidx);
+  const double fs_Nj23_P_err_dn = h_fs_Nj23_dn->GetBinError(Pidx);
   const double fs_Nj23_P3 = h_fs_Nj23->GetBinContent(P3idx);
-  const double fs_Nj23_P3_err = h_fs_Nj23->GetBinError(P3idx);
+  const double fs_Nj23_P3_err_up = h_fs_Nj23_up->GetBinError(P3idx);
+  const double fs_Nj23_P3_err_dn = h_fs_Nj23_dn->GetBinError(P3idx);
   const double fs_Nj23_P4 = h_fs_Nj23->GetBinContent(P4idx);
-  const double fs_Nj23_P4_err = h_fs_Nj23->GetBinError(P4idx);
+  const double fs_Nj23_P4_err_up = h_fs_Nj23_up->GetBinError(P4idx);
+  const double fs_Nj23_P4_err_dn = h_fs_Nj23_dn->GetBinError(P4idx);
   const double fs_Nj23_M = h_fs_Nj23->GetBinContent(Midx);
-  const double fs_Nj23_M_err = h_fs_Nj23->GetBinError(Midx);
+  const double fs_Nj23_M_err_up = h_fs_Nj23_up->GetBinError(Midx);
+  const double fs_Nj23_M_err_dn = h_fs_Nj23_dn->GetBinError(Midx);
   const double fs_Nj23_L = adjL ? h_fs_Nj23->GetBinContent(Midx) * mc_L_corr_23 : h_fs_Nj23->GetBinContent(Lidx);
-  const double fs_Nj23_L_err = adjL ? sqrt( pow((fs_Nj23_M_err/fs_Nj23_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj23_L : h_fs_Nj23->GetBinError(Lidx);
+  const double fs_Nj23_L_err_up = adjL ? sqrt( pow((fs_Nj23_M_err_up/fs_Nj23_M),2) + pow((mc_L_corr_err_23_up / mc_L_corr_23),2) ) * fs_Nj23_L : h_fs_Nj23->GetBinError(Lidx);
+  const double fs_Nj23_L_err_dn = adjL ? sqrt( pow((fs_Nj23_M_err_dn/fs_Nj23_M),2) + pow((mc_L_corr_err_23_dn / mc_L_corr_23),2) ) * fs_Nj23_L : h_fs_Nj23->GetBinError(Lidx);
   const double fs_Nj4_P = h_fs_Nj4->GetBinContent(Pidx);
-  const double fs_Nj4_P_err = h_fs_Nj4->GetBinError(Pidx);
+  const double fs_Nj4_P_err_up = h_fs_Nj4_up->GetBinError(Pidx);
+  const double fs_Nj4_P_err_dn = h_fs_Nj4_dn->GetBinError(Pidx);
   const double fs_Nj4_P3 = h_fs_Nj4->GetBinContent(P3idx);
-  const double fs_Nj4_P3_err = h_fs_Nj4->GetBinError(P3idx);
+  const double fs_Nj4_P3_err_up = h_fs_Nj4_up->GetBinError(P3idx);
+  const double fs_Nj4_P3_err_dn = h_fs_Nj4_dn->GetBinError(P3idx);
   const double fs_Nj4_P4 = h_fs_Nj4->GetBinContent(P4idx);
-  const double fs_Nj4_P4_err = h_fs_Nj4->GetBinError(P4idx);
+  const double fs_Nj4_P4_err_up = h_fs_Nj4_up->GetBinError(P4idx);
+  const double fs_Nj4_P4_err_dn = h_fs_Nj4_dn->GetBinError(P4idx);
   const double fs_Nj4_M = h_fs_Nj4->GetBinContent(Midx);
-  const double fs_Nj4_M_err = h_fs_Nj4->GetBinError(Midx);
+  const double fs_Nj4_M_err_up = h_fs_Nj4_up->GetBinError(Midx);
+  const double fs_Nj4_M_err_dn = h_fs_Nj4_dn->GetBinError(Midx);
   const double fs_Nj4_L = adjL ? h_fs_Nj4->GetBinContent(Midx) * mc_L_corr_23 : h_fs_Nj4->GetBinContent(Lidx);
-  const double fs_Nj4_L_err = adjL ? sqrt( pow((fs_Nj4_M_err/fs_Nj4_M),2) + pow((mc_L_corr_err_23 / mc_L_corr_23),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
+  const double fs_Nj4_L_err_up = adjL ? sqrt( pow((fs_Nj4_M_err_up/fs_Nj4_M),2) + pow((mc_L_corr_err_23_up / mc_L_corr_23),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
+  const double fs_Nj4_L_err_dn = adjL ? sqrt( pow((fs_Nj4_M_err_dn/fs_Nj4_M),2) + pow((mc_L_corr_err_23_dn / mc_L_corr_23),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
 
   TH1D* h_fs_hi = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt"))->ProjectionX("h_fs_hi",1,1);
+  TH1D* h_fs_hi_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt_up"))->ProjectionX("h_fs_hi_up",1,1);
+  TH1D* h_fs_hi_dn = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt_dn"))->ProjectionX("h_fs_hi_dn",1,1);
   TH1D* h_fs_Nj23_hi = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt"))->ProjectionX("h_fs_23_hi",1,1);
+  TH1D* h_fs_Nj23_hi_up = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt_up"))->ProjectionX("h_fs_23_hi_up",1,1);
+  TH1D* h_fs_Nj23_hi_dn = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt_dn"))->ProjectionX("h_fs_23_hi_dn",1,1);
   TH1D* h_fs_Nj4_hi = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_hipt"))->ProjectionX("h_fs_4_hi",1,1);
+  TH1D* h_fs_Nj4_hi_up = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_hipt_up"))->ProjectionX("h_fs_4_hi_up",1,1);
+  TH1D* h_fs_Nj4_hi_dn = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_hipt_dn"))->ProjectionX("h_fs_4_hi_dn",1,1);
+
   const double fs_P_hi = h_fs_hi->GetBinContent(Pidx);
-  const double fs_P_err_hi = h_fs_hi->GetBinError(Pidx);
+  const double fs_P_err_hi_up = h_fs_hi_up->GetBinError(Pidx);
+  const double fs_P_err_hi_dn = h_fs_hi_dn->GetBinError(Pidx);
   const double fs_P3_hi = h_fs_hi->GetBinContent(P3idx);
-  const double fs_P3_err_hi = h_fs_hi->GetBinError(P3idx);
+  const double fs_P3_err_hi_up = h_fs_hi_up->GetBinError(P3idx);
+  const double fs_P3_err_hi_dn = h_fs_hi_dn->GetBinError(P3idx);
   const double fs_P4_hi = h_fs_hi->GetBinContent(P4idx);
-  const double fs_P4_err_hi = h_fs_hi->GetBinError(P4idx);
+  const double fs_P4_err_hi_up = h_fs_hi_up->GetBinError(P4idx);
+  const double fs_P4_err_hi_dn = h_fs_hi_dn->GetBinError(P4idx);
   const double fs_M_hi = h_fs_hi->GetBinContent(Midx);
-  const double fs_M_err_hi = h_fs_hi->GetBinError(Midx);
+  const double fs_M_err_hi_up = h_fs_hi_up->GetBinError(Midx);
+  const double fs_M_err_hi_dn = h_fs_hi_dn->GetBinError(Midx);
   const double fs_Nj23_P_hi = h_fs_Nj23_hi->GetBinContent(Pidx);
-  const double fs_Nj23_P_err_hi = h_fs_Nj23_hi->GetBinError(Pidx);
+  const double fs_Nj23_P_err_hi_up = h_fs_Nj23_hi_up->GetBinError(Pidx);
+  const double fs_Nj23_P_err_hi_dn = h_fs_Nj23_hi_dn->GetBinError(Pidx);
   const double fs_Nj23_P3_hi = h_fs_Nj23_hi->GetBinContent(P3idx);
-  const double fs_Nj23_P3_err_hi = h_fs_Nj23_hi->GetBinError(P3idx);
+  const double fs_Nj23_P3_err_hi_up = h_fs_Nj23_hi_up->GetBinError(P3idx);
+  const double fs_Nj23_P3_err_hi_dn = h_fs_Nj23_hi_dn->GetBinError(P3idx);
   const double fs_Nj23_P4_hi = h_fs_Nj23_hi->GetBinContent(P4idx);
-  const double fs_Nj23_P4_err_hi = h_fs_Nj23_hi->GetBinError(P4idx);
+  const double fs_Nj23_P4_err_hi_up = h_fs_Nj23_hi_up->GetBinError(P4idx);
+  const double fs_Nj23_P4_err_hi_dn = h_fs_Nj23_hi_dn->GetBinError(P4idx);
   const double fs_Nj23_M_hi = h_fs_Nj23_hi->GetBinContent(Midx);
-  const double fs_Nj23_M_err_hi = h_fs_Nj23_hi->GetBinError(Midx);
+  const double fs_Nj23_M_err_hi_up = h_fs_Nj23_hi_up->GetBinError(Midx);
+  const double fs_Nj23_M_err_hi_dn = h_fs_Nj23_hi_dn->GetBinError(Midx);
   const double fs_Nj4_P_hi = h_fs_Nj4_hi->GetBinContent(Pidx);
-  const double fs_Nj4_P_err_hi = h_fs_Nj4_hi->GetBinError(Pidx);
+  const double fs_Nj4_P_err_hi_up = h_fs_Nj4_hi_up->GetBinError(Pidx);
+  const double fs_Nj4_P_err_hi_dn = h_fs_Nj4_hi_dn->GetBinError(Pidx);
   const double fs_Nj4_P3_hi = h_fs_Nj4_hi->GetBinContent(P3idx);
-  const double fs_Nj4_P3_err_hi = h_fs_Nj4_hi->GetBinError(P3idx);
+  const double fs_Nj4_P3_err_hi_up = h_fs_Nj4_hi_up->GetBinError(P3idx);
+  const double fs_Nj4_P3_err_hi_dn = h_fs_Nj4_hi_dn->GetBinError(P3idx);
   const double fs_Nj4_P4_hi = h_fs_Nj4_hi->GetBinContent(P4idx);
-  const double fs_Nj4_P4_err_hi = h_fs_Nj4_hi->GetBinError(P4idx);
+  const double fs_Nj4_P4_err_hi_up = h_fs_Nj4_hi_up->GetBinError(P4idx);
+  const double fs_Nj4_P4_err_hi_dn = h_fs_Nj4_hi_dn->GetBinError(P4idx);
   const double fs_Nj4_M_hi = h_fs_Nj4_hi->GetBinContent(Midx);
-  const double fs_Nj4_M_err_hi = h_fs_Nj4_hi->GetBinError(Midx);
+  const double fs_Nj4_M_err_hi_up = h_fs_Nj4_hi_up->GetBinError(Midx);
+  const double fs_Nj4_M_err_hi_dn = h_fs_Nj4_hi_dn->GetBinError(Midx);
 
   TH1D* h_fs_lo = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt"))->ProjectionX("h_fs_lo",1,1);
+  TH1D* h_fs_lo_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt_up"))->ProjectionX("h_fs_lo_up",1,1);
+  TH1D* h_fs_lo_dn = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt_dn"))->ProjectionX("h_fs_lo_dn",1,1);
   TH1D* h_fs_Nj23_lo = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt"))->ProjectionX("h_fs_23_lo",1,1);
+  TH1D* h_fs_Nj23_lo_up = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt_up"))->ProjectionX("h_fs_23_lo_up",1,1);
+  TH1D* h_fs_Nj23_lo_dn = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt_dn"))->ProjectionX("h_fs_23_lo_dn",1,1);
   TH1D* h_fs_Nj4_lo = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt"))->ProjectionX("h_fs_4_lo",1,1);
+  TH1D* h_fs_Nj4_lo_up = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt_up"))->ProjectionX("h_fs_4_lo_up",1,1);
+  TH1D* h_fs_Nj4_lo_dn = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt_dn"))->ProjectionX("h_fs_4_lo_dn",1,1);
+
   const double fs_P_lo = h_fs_lo->GetBinContent(Pidx);
-  const double fs_P_err_lo = h_fs_lo->GetBinError(Pidx);
+  const double fs_P_err_lo_up = h_fs_lo_up->GetBinError(Pidx);
+  const double fs_P_err_lo_dn = h_fs_lo_dn->GetBinError(Pidx);
   const double fs_P3_lo = h_fs_lo->GetBinContent(P3idx);
-  const double fs_P3_err_lo = h_fs_lo->GetBinError(P3idx);
+  const double fs_P3_err_lo_up = h_fs_lo_up->GetBinError(P3idx);
+  const double fs_P3_err_lo_dn = h_fs_lo_dn->GetBinError(P3idx);
   const double fs_P4_lo = h_fs_lo->GetBinContent(P4idx);
-  const double fs_P4_err_lo = h_fs_lo->GetBinError(P4idx);
+  const double fs_P4_err_lo_up = h_fs_lo_up->GetBinError(P4idx);
+  const double fs_P4_err_lo_dn = h_fs_lo_dn->GetBinError(P4idx);
   const double fs_M_lo = h_fs_lo->GetBinContent(Midx);
-  const double fs_M_err_lo = h_fs_lo->GetBinError(Midx);
+  const double fs_M_err_lo_up = h_fs_lo_up->GetBinError(Midx);
+  const double fs_M_err_lo_dn = h_fs_lo_dn->GetBinError(Midx);
   const double fs_Nj23_P_lo = h_fs_Nj23_lo->GetBinContent(Pidx);
-  const double fs_Nj23_P_err_lo = h_fs_Nj23_lo->GetBinError(Pidx);
+  const double fs_Nj23_P_err_lo_up = h_fs_Nj23_lo_up->GetBinError(Pidx);
+  const double fs_Nj23_P_err_lo_dn = h_fs_Nj23_lo_dn->GetBinError(Pidx);
   const double fs_Nj23_P3_lo = h_fs_Nj23_lo->GetBinContent(P3idx);
-  const double fs_Nj23_P3_err_lo = h_fs_Nj23_lo->GetBinError(P3idx);
+  const double fs_Nj23_P3_err_lo_up = h_fs_Nj23_lo_up->GetBinError(P3idx);
+  const double fs_Nj23_P3_err_lo_dn = h_fs_Nj23_lo_dn->GetBinError(P3idx);
   const double fs_Nj23_P4_lo = h_fs_Nj23_lo->GetBinContent(P4idx);
-  const double fs_Nj23_P4_err_lo = h_fs_Nj23_lo->GetBinError(P4idx);
+  const double fs_Nj23_P4_err_lo_up = h_fs_Nj23_lo_up->GetBinError(P4idx);
+  const double fs_Nj23_P4_err_lo_dn = h_fs_Nj23_lo_dn->GetBinError(P4idx);
   const double fs_Nj23_M_lo = h_fs_Nj23_lo->GetBinContent(Midx);
-  const double fs_Nj23_M_err_lo = h_fs_Nj23_lo->GetBinError(Midx);
+  const double fs_Nj23_M_err_lo_up = h_fs_Nj23_lo_up->GetBinError(Midx);
+  const double fs_Nj23_M_err_lo_dn = h_fs_Nj23_lo_dn->GetBinError(Midx);
   const double fs_Nj4_P_lo = h_fs_Nj4_lo->GetBinContent(Pidx);
-  const double fs_Nj4_P_err_lo = h_fs_Nj4_lo->GetBinError(Pidx);
+  const double fs_Nj4_P_err_lo_up = h_fs_Nj4_lo_up->GetBinError(Pidx);
+  const double fs_Nj4_P_err_lo_dn = h_fs_Nj4_lo_dn->GetBinError(Pidx);
   const double fs_Nj4_P3_lo = h_fs_Nj4_lo->GetBinContent(P3idx);
-  const double fs_Nj4_P3_err_lo = h_fs_Nj4_lo->GetBinError(P3idx);
+  const double fs_Nj4_P3_err_lo_up = h_fs_Nj4_lo_up->GetBinError(P3idx);
+  const double fs_Nj4_P3_err_lo_dn = h_fs_Nj4_lo_dn->GetBinError(P3idx);
   const double fs_Nj4_P4_lo = h_fs_Nj4_lo->GetBinContent(P4idx);
-  const double fs_Nj4_P4_err_lo = h_fs_Nj4_lo->GetBinError(P4idx);
+  const double fs_Nj4_P4_err_lo_up = h_fs_Nj4_lo_up->GetBinError(P4idx);
+  const double fs_Nj4_P4_err_lo_dn = h_fs_Nj4_lo_dn->GetBinError(P4idx);
   const double fs_Nj4_M_lo = h_fs_Nj4_lo->GetBinContent(Midx);
-  const double fs_Nj4_M_err_lo = h_fs_Nj4_lo->GetBinError(Midx);
+  const double fs_Nj4_M_err_lo_up = h_fs_Nj4_lo_up->GetBinError(Midx);
+  const double fs_Nj4_M_err_lo_dn = h_fs_Nj4_lo_dn->GetBinError(Midx);
 
-  /*
-  TH1D* h_FS_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_Baseline_alt_rel_err"))->Clone("h_FS_alt_rel_err_clone");
-  TH1D* h_FS_23_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_23_Baseline_alt_rel_err"))->Clone("h_FS_23_alt_rel_err_clone");
-  TH1D* h_FS_4_alt_rel_err_clone = (TH1D*) (FshortFile->Get("h_fsMR_4_Baseline_alt_rel_err"))->Clone("h_FS_4_alt_rel_err_clone");
- 
-  h_FS_alt_rel_err->SetBinContent(1,h_FS_alt_rel_err_clone->GetBinContent(2));
-  h_FS_alt_rel_err->SetBinContent(2,h_FS_alt_rel_err_clone->GetBinContent(3));
-  h_FS_alt_rel_err->SetBinContent(3,h_FS_alt_rel_err_clone->GetBinContent(4));
-  h_FS_23_alt_rel_err->SetBinContent(1,h_FS_23_alt_rel_err_clone->GetBinContent(2));
-  h_FS_23_alt_rel_err->SetBinContent(2,h_FS_23_alt_rel_err_clone->GetBinContent(3));
-  h_FS_23_alt_rel_err->SetBinContent(3,h_FS_23_alt_rel_err_clone->GetBinContent(4));
-  h_FS_4_alt_rel_err->SetBinContent(1,h_FS_4_alt_rel_err_clone->GetBinContent(2));
-  h_FS_4_alt_rel_err->SetBinContent(2,h_FS_4_alt_rel_err_clone->GetBinContent(3));
-  h_FS_4_alt_rel_err->SetBinContent(3,h_FS_4_alt_rel_err_clone->GetBinContent(4));
-
-  if (!isMC) {
-    TH1D* h_FS_alt_rel_err_MC = (TH1D*) (FshortFileMC->Get("h_fsMR_Baseline_alt_rel_err"))->Clone("h_FS_alt_rel_err_MC");
-    TH1D* h_FS_23_alt_rel_err_MC = (TH1D*) (FshortFileMC->Get("h_fsMR_23_Baseline_alt_rel_err"))->Clone("h_FS_23_alt_rel_err_MC");
-    TH1D* h_FS_4_alt_rel_err_MC = (TH1D*) (FshortFileMC->Get("h_fsMR_4_Baseline_alt_rel_err"))->Clone("h_FS_4_alt_rel_err_MC");
-    h_FS_alt_rel_err->SetBinContent(3,h_FS_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
-    h_FS_23_alt_rel_err->SetBinContent(3,h_FS_23_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
-    h_FS_4_alt_rel_err->SetBinContent(3,h_FS_4_alt_rel_err_MC->GetBinContent(4)); // data L tracks have MC L track errors associated with them
-  }
-  */
 
   cout << "Loaded transfer factors" << endl;
 
-  /*
-  cout << "alt Perr : " << h_FS_alt_rel_err->GetBinContent(1) << endl;
-  cout << "alt Merr : " << h_FS_alt_rel_err->GetBinContent(2) << endl;
-  cout << "alt Lerr : " << h_FS_alt_rel_err->GetBinContent(3) << endl;
-  cout << "altPerr23: " << h_FS_23_alt_rel_err->GetBinContent(1) << endl;
-  cout << "altMerr23: " << h_FS_23_alt_rel_err->GetBinContent(2) << endl;
-  cout << "altLerr23: " << h_FS_23_alt_rel_err->GetBinContent(3) << endl;
-  cout << "alt Perr4: " << h_FS_4_alt_rel_err->GetBinContent(1) << endl;
-  cout << "alt Merr4: " << h_FS_4_alt_rel_err->GetBinContent(2) << endl;
-  cout << "alt Lerr4: " << h_FS_4_alt_rel_err->GetBinContent(3) << endl;
-  */
+  cout << "corr             : " << mc_L_corr << endl;
+  cout << "corr err up      : " << mc_L_corr_err_up << endl;
+  cout << "corr err dn      : " << mc_L_corr_err_dn << endl;
+  cout << "corr 23          : " << mc_L_corr_23 << endl;
+  cout << "corr 23 err up   : " << mc_L_corr_err_23_up << endl;
+  cout << "corr 23 err dn   : " << mc_L_corr_err_23_dn << endl;
+  cout << "corr4            : " << mc_L_corr_4 << endl;
+  cout << "corr 4 err up    : " << mc_L_corr_err_4_up << endl;
+  cout << "corr 4 err dn    : " << mc_L_corr_err_4_dn << endl;
 
-  cout << "corr     : " << mc_L_corr << endl;
-  cout << "corr err : " << mc_L_corr_err << endl;
-  cout << "corr23   : " << mc_L_corr_23 << endl;
-  cout << "corr23err: " << mc_L_corr_err_23 << endl;
-  cout << "corr4    : " << mc_L_corr_4 << endl;
-  cout << "corr4 err: " << mc_L_corr_err_4 << endl;
-
-  cout << "fs_P    : " << fs_P << endl;
-  cout << "fs_P err: " << fs_P_err << endl;
-  cout << "fs_P3    : " << fs_P3 << endl;
-  cout << "fs_P3 err: " << fs_P3_err << endl;
-  cout << "fs_P4    : " << fs_P4 << endl;
-  cout << "fs_P4 err: " << fs_P4_err << endl;
-  cout << "fs_M    : " << fs_M << endl;
-  cout << "fs_M err: " << fs_M_err << endl;
-  cout << "fs_L (uncorrected): " << h_fs->GetBinContent(4) << endl;
-  cout << "fs_L err (uncorrected): " << h_fs->GetBinError(4) << endl;
-  cout << "fs_L    : " << fs_L << endl;
-  cout << "fs_L err: " << fs_L_err << endl;
-  cout << "fs_Nj23_P    : " << fs_Nj23_P << endl;
-  cout << "fs_Nj23_P err: " << fs_Nj23_P_err << endl;
-  cout << "fs_Nj23_P3    : " << fs_Nj23_P3 << endl;
-  cout << "fs_Nj23_P3 err: " << fs_Nj23_P3_err << endl;
-  cout << "fs_Nj23_P4    : " << fs_Nj23_P4 << endl;
-  cout << "fs_Nj23_P4 err: " << fs_Nj23_P4_err << endl;
-  cout << "fs_Nj23_M    : " << fs_Nj23_M << endl;
-  cout << "fs_Nj23_M err: " << fs_Nj23_M_err << endl;
-  cout << "fs_Nj23_L (uncorrected): " << h_fs_Nj23->GetBinContent(4) << endl;
-  cout << "fs_Nj23_L err (uncorrected): " << h_fs_Nj23->GetBinError(4) << endl;
-  cout << "fs_Nj23_L    : " << fs_Nj23_L << endl;
-  cout << "fs_Nj23_L err: " << fs_Nj23_L_err << endl;
-  cout << "fs_Nj4_P    : " << fs_Nj4_P << endl;
-  cout << "fs_Nj4_P err: " << fs_Nj4_P_err << endl;
-  cout << "fs_Nj4_P3    : " << fs_Nj4_P3 << endl;
-  cout << "fs_Nj4_P3 err: " << fs_Nj4_P3_err << endl;
-  cout << "fs_Nj4_P4    : " << fs_Nj4_P4 << endl;
-  cout << "fs_Nj4_P4 err: " << fs_Nj4_P4_err << endl;
-  cout << "fs_Nj4_M    : " << fs_Nj4_M << endl;
-  cout << "fs_Nj4_M err: " << fs_Nj4_M_err << endl;
-  cout << "fs_Nj4_L (uncorrected): " << h_fs_Nj4->GetBinContent(4) << endl;
-  cout << "fs_Nj4_L err (uncorrected): " << h_fs_Nj4->GetBinError(4) << endl;
-  cout << "fs_Nj4_L    : " << fs_Nj4_L << endl;
-  cout << "fs_Nj4_L err: " << fs_Nj4_L_err << endl;
+  cout << "fs_P             : " << fs_P << endl;
+  cout << "fs_P err up      : " << fs_P_err_up << endl;
+  cout << "fs_P err dn      : " << fs_P_err_dn << endl;
+  cout << "fs_P3            : " << fs_P3 << endl;
+  cout << "fs_P3 err up     : " << fs_P3_err_up << endl;
+  cout << "fs_P3 err dn     : " << fs_P3_err_dn << endl;
+  cout << "fs_P4            : " << fs_P4 << endl;
+  cout << "fs_P4 err up     : " << fs_P4_err_up << endl;
+  cout << "fs_P4 err dn     : " << fs_P4_err_dn << endl;
+  cout << "fs_M             : " << fs_M << endl;
+  cout << "fs_M err up      : " << fs_M_err_up << endl;
+  cout << "fs_M err dn      : " << fs_M_err_dn << endl;
+  cout << "fs_L (raw)       : " << h_fs->GetBinContent(4) << endl;
+  cout << "fs_L             : " << fs_L << endl;
+  cout << "fs_L err up      : " << fs_L_err_up << endl;
+  cout << "fs_L err dn      : " << fs_L_err_dn << endl;
+  cout << "fs_Nj23_P        : " << fs_Nj23_P << endl;
+  cout << "fs_Nj23_P err up : " << fs_Nj23_P_err_up << endl;
+  cout << "fs_Nj23_P err dn : " << fs_Nj23_P_err_dn << endl;
+  cout << "fs_Nj23_P3       : " << fs_Nj23_P3 << endl;
+  cout << "fs_Nj23_P3 err up: " << fs_Nj23_P3_err_up << endl;
+  cout << "fs_Nj23_P3 err dn: " << fs_Nj23_P3_err_up << endl;
+  cout << "fs_Nj23_P4       : " << fs_Nj23_P4 << endl;
+  cout << "fs_Nj23_P4 err up: " << fs_Nj23_P4_err_up << endl;
+  cout << "fs_Nj23_P4 err dn: " << fs_Nj23_P4_err_dn << endl;
+  cout << "fs_Nj23_M        : " << fs_Nj23_M << endl;
+  cout << "fs_Nj23_M err up : " << fs_Nj23_M_err_up << endl;
+  cout << "fs_Nj23_M err dn : " << fs_Nj23_M_err_dn << endl;
+  cout << "fs_Nj23_L (raw)  : " << h_fs_Nj23->GetBinContent(4) << endl;
+  cout << "fs_Nj23_L        : " << fs_Nj23_L << endl;
+  cout << "fs_Nj23_L err up : " << fs_Nj23_L_err_up << endl;
+  cout << "fs_Nj23_L err dn : " << fs_Nj23_L_err_dn << endl;
+  cout << "fs_Nj4_P         : " << fs_Nj4_P << endl;
+  cout << "fs_Nj4_P err up  : " << fs_Nj4_P_err_up << endl;
+  cout << "fs_Nj4_P err dn  : " << fs_Nj4_P_err_dn << endl;
+  cout << "fs_Nj4_P3        : " << fs_Nj4_P3 << endl;
+  cout << "fs_Nj4_P3 err up : " << fs_Nj4_P3_err_up << endl;
+  cout << "fs_Nj4_P3 err dn : " << fs_Nj4_P3_err_dn << endl;
+  cout << "fs_Nj4_P4        : " << fs_Nj4_P4 << endl;
+  cout << "fs_Nj4_P4 err up : " << fs_Nj4_P4_err_up << endl;
+  cout << "fs_Nj4_P4 err dn : " << fs_Nj4_P4_err_dn << endl;
+  cout << "fs_Nj4_M         : " << fs_Nj4_M << endl;
+  cout << "fs_Nj4_M err up  : " << fs_Nj4_M_err_up << endl;
+  cout << "fs_Nj4_M err dn  : " << fs_Nj4_M_err_dn << endl;
+  cout << "fs_Nj4_L (raw)   : " << h_fs_Nj4->GetBinContent(4) << endl;
+  cout << "fs_Nj4_L         : " << fs_Nj4_L << endl;
+  cout << "fs_Nj4_L err up  : " << fs_Nj4_L_err_up << endl;
+  cout << "fs_Nj4_L err dn  : " << fs_Nj4_L_err_dn << endl;
 
   cout << "/nHi Pt/n" << endl;
 
-  cout << "fs_P    : " << fs_P_hi << endl;
-  cout << "fs_P err: " << fs_P_err_hi << endl;
-  cout << "fs_P3    : " << fs_P3_hi << endl;
-  cout << "fs_P3 err: " << fs_P3_err_hi << endl;
-  cout << "fs_P4    : " << fs_P4_hi << endl;
-  cout << "fs_P4 err: " << fs_P4_err_hi << endl;
-  cout << "fs_M    : " << fs_M_hi << endl;
-  cout << "fs_M err: " << fs_M_err_hi << endl;
-  cout << "fs_Nj23_P    : " << fs_Nj23_P_hi << endl;
-  cout << "fs_Nj23_P err: " << fs_Nj23_P_err_hi << endl;
-  cout << "fs_Nj23_P3    : " << fs_Nj23_P3_hi << endl;
-  cout << "fs_Nj23_P3 err: " << fs_Nj23_P3_err_hi << endl;
-  cout << "fs_Nj23_P4    : " << fs_Nj23_P4_hi << endl;
-  cout << "fs_Nj23_P4 err: " << fs_Nj23_P4_err_hi << endl;
-  cout << "fs_Nj23_M    : " << fs_Nj23_M_hi << endl;
-  cout << "fs_Nj23_M err: " << fs_Nj23_M_err_hi << endl;
-  cout << "fs_Nj4_P    : " << fs_Nj4_P_hi << endl;
-  cout << "fs_Nj4_P err: " << fs_Nj4_P_err_hi << endl;
-  cout << "fs_Nj4_P3    : " << fs_Nj4_P3_hi << endl;
-  cout << "fs_Nj4_P3 err: " << fs_Nj4_P3_err_hi << endl;
-  cout << "fs_Nj4_P4    : " << fs_Nj4_P4_hi << endl;
-  cout << "fs_Nj4_P4 err: " << fs_Nj4_P4_err_hi << endl;
-  cout << "fs_Nj4_M    : " << fs_Nj4_M_hi << endl;
-  cout << "fs_Nj4_M err: " << fs_Nj4_M_err_hi << endl;
+  cout << "fs_P             : " << fs_P_hi << endl;
+  cout << "fs_P err up      : " << fs_P_err_hi_up << endl;
+  cout << "fs_P err dn      : " << fs_P_err_hi_dn << endl;
+  cout << "fs_P3            : " << fs_P3_hi << endl;
+  cout << "fs_P3 err up     : " << fs_P3_err_hi_up << endl;
+  cout << "fs_P3 err dn     : " << fs_P3_err_hi_dn << endl;
+  cout << "fs_P4            : " << fs_P4_hi << endl;
+  cout << "fs_P4 err up     : " << fs_P4_err_hi_up << endl;
+  cout << "fs_P4 err dn     : " << fs_P4_err_hi_dn << endl;
+  cout << "fs_M             : " << fs_M_hi << endl;
+  cout << "fs_M err up      : " << fs_M_err_hi_up << endl;
+  cout << "fs_M err dn      : " << fs_M_err_hi_dn << endl;
+  cout << "fs_Nj23_P        : " << fs_Nj23_P_hi << endl;
+  cout << "fs_Nj23_P err up : " << fs_Nj23_P_err_hi_up << endl;
+  cout << "fs_Nj23_P err dn : " << fs_Nj23_P_err_hi_dn << endl;
+  cout << "fs_Nj23_P3       : " << fs_Nj23_P3_hi << endl;
+  cout << "fs_Nj23_P3 err up: " << fs_Nj23_P3_err_hi_up << endl;
+  cout << "fs_Nj23_P3 err dn: " << fs_Nj23_P3_err_hi_dn << endl;
+  cout << "fs_Nj23_P4       : " << fs_Nj23_P4_hi << endl;
+  cout << "fs_Nj23_P4 err up: " << fs_Nj23_P4_err_hi_up << endl;
+  cout << "fs_Nj23_P4 err dn: " << fs_Nj23_P4_err_hi_dn << endl;
+  cout << "fs_Nj23_M        : " << fs_Nj23_M_hi << endl;
+  cout << "fs_Nj23_M err up : " << fs_Nj23_M_err_hi_up << endl;
+  cout << "fs_Nj23_M err dn : " << fs_Nj23_M_err_hi_dn << endl;
+  cout << "fs_Nj4_P         : " << fs_Nj4_P_hi << endl;
+  cout << "fs_Nj4_P err up  : " << fs_Nj4_P_err_hi_up << endl;
+  cout << "fs_Nj4_P err dn  : " << fs_Nj4_P_err_hi_dn << endl;
+  cout << "fs_Nj4_P3        : " << fs_Nj4_P3_hi << endl;
+  cout << "fs_Nj4_P3 err up : " << fs_Nj4_P3_err_hi_up << endl;
+  cout << "fs_Nj4_P3 err dn : " << fs_Nj4_P3_err_hi_dn << endl;
+  cout << "fs_Nj4_P4        : " << fs_Nj4_P4_hi << endl;
+  cout << "fs_Nj4_P4 err up : " << fs_Nj4_P4_err_hi_up << endl;
+  cout << "fs_Nj4_P4 err dn : " << fs_Nj4_P4_err_hi_dn << endl;
+  cout << "fs_Nj4_M         : " << fs_Nj4_M_hi << endl;
+  cout << "fs_Nj4_M err dn: " << fs_Nj4_M_err_hi_up << endl;
+  cout << "fs_Nj4_M err up: " << fs_Nj4_M_err_hi_dn << endl;
 
   cout << "/nLow Pt/n" << endl;
 
-  cout << "fs_P    : " << fs_P_lo << endl;
-  cout << "fs_P err: " << fs_P_err_lo << endl;
-  cout << "fs_P3    : " << fs_P3_lo << endl;
-  cout << "fs_P3 err: " << fs_P3_err_lo << endl;
-  cout << "fs_P4    : " << fs_P4_lo << endl;
-  cout << "fs_P4 err: " << fs_P4_err_lo << endl;
-  cout << "fs_M    : " << fs_M_lo << endl;
-  cout << "fs_M err: " << fs_M_err_lo << endl;
-  cout << "fs_Nj23_P    : " << fs_Nj23_P_lo << endl;
-  cout << "fs_Nj23_P err: " << fs_Nj23_P_err_lo << endl;
-  cout << "fs_Nj23_P3    : " << fs_Nj23_P3_lo << endl;
-  cout << "fs_Nj23_P3 err: " << fs_Nj23_P3_err_lo << endl;
-  cout << "fs_Nj23_P4    : " << fs_Nj23_P4_lo << endl;
-  cout << "fs_Nj23_P4 err: " << fs_Nj23_P4_err_lo << endl;
-  cout << "fs_Nj23_M    : " << fs_Nj23_M_lo << endl;
-  cout << "fs_Nj23_M err: " << fs_Nj23_M_err_lo << endl;
-  cout << "fs_Nj4_P    : " << fs_Nj4_P_lo << endl;
-  cout << "fs_Nj4_P err: " << fs_Nj4_P_err_lo << endl;
-  cout << "fs_Nj4_P3    : " << fs_Nj4_P3_lo << endl;
-  cout << "fs_Nj4_P3 err: " << fs_Nj4_P3_err_lo << endl;
-  cout << "fs_Nj4_P4    : " << fs_Nj4_P4_lo << endl;
-  cout << "fs_Nj4_P4 err: " << fs_Nj4_P4_err_lo << endl;
-  cout << "fs_Nj4_M    : " << fs_Nj4_M_lo << endl;
-  cout << "fs_Nj4_M err: " << fs_Nj4_M_err_lo << endl;
+  cout << "fs_P             : " << fs_P_lo << endl;
+  cout << "fs_P err up      : " << fs_P_err_lo_up << endl;
+  cout << "fs_P err dn      : " << fs_P_err_lo_dn << endl;
+  cout << "fs_P3            : " << fs_P3_lo << endl;
+  cout << "fs_P3 err up     : " << fs_P3_err_lo_up << endl;
+  cout << "fs_P3 err dn     : " << fs_P3_err_lo_dn << endl;
+  cout << "fs_P4            : " << fs_P4_lo << endl;
+  cout << "fs_P4 err up     : " << fs_P4_err_lo_up << endl;
+  cout << "fs_P4 err dn     : " << fs_P4_err_lo_dn << endl;
+  cout << "fs_M             : " << fs_M_lo << endl;
+  cout << "fs_M err up      : " << fs_M_err_lo_up << endl;
+  cout << "fs_M err dn      : " << fs_M_err_lo_dn << endl;
+  cout << "fs_Nj23_P        : " << fs_Nj23_P_lo << endl;
+  cout << "fs_Nj23_P err up : " << fs_Nj23_P_err_lo_up << endl;
+  cout << "fs_Nj23_P err dn : " << fs_Nj23_P_err_lo_dn << endl;
+  cout << "fs_Nj23_P3       : " << fs_Nj23_P3_lo << endl;
+  cout << "fs_Nj23_P3 err up: " << fs_Nj23_P3_err_lo_up << endl;
+  cout << "fs_Nj23_P3 err dn: " << fs_Nj23_P3_err_lo_dn << endl;
+  cout << "fs_Nj23_P4       : " << fs_Nj23_P4_lo << endl;
+  cout << "fs_Nj23_P4 err up: " << fs_Nj23_P4_err_lo_up << endl;
+  cout << "fs_Nj23_P4 err dn: " << fs_Nj23_P4_err_lo_dn << endl;
+  cout << "fs_Nj23_M        : " << fs_Nj23_M_lo << endl;
+  cout << "fs_Nj23_M err up : " << fs_Nj23_M_err_lo_up << endl;
+  cout << "fs_Nj23_M err dn : " << fs_Nj23_M_err_lo_dn << endl;
+  cout << "fs_Nj4_P         : " << fs_Nj4_P_lo << endl;
+  cout << "fs_Nj4_P err up  : " << fs_Nj4_P_err_lo_up << endl;
+  cout << "fs_Nj4_P err dn  : " << fs_Nj4_P_err_lo_dn << endl;
+  cout << "fs_Nj4_P3        : " << fs_Nj4_P3_lo << endl;
+  cout << "fs_Nj4_P3 err up : " << fs_Nj4_P3_err_lo_up << endl;
+  cout << "fs_Nj4_P3 err dn : " << fs_Nj4_P3_err_lo_dn << endl;
+  cout << "fs_Nj4_P4        : " << fs_Nj4_P4_lo << endl;
+  cout << "fs_Nj4_P4 err up : " << fs_Nj4_P4_err_lo_up << endl;
+  cout << "fs_Nj4_P4 err dn : " << fs_Nj4_P4_err_lo_dn << endl;
+  cout << "fs_Nj4_M         : " << fs_Nj4_M_lo << endl;
+  cout << "fs_Nj4_M err dn: " << fs_Nj4_M_err_lo_up << endl;
+  cout << "fs_Nj4_M err up: " << fs_Nj4_M_err_lo_dn << endl;
 
   // Now get systematics
   TH1D* h_fs_syst = (TH1D*) FshortFile->Get("h_fsMR_Baseline_syst");
@@ -782,7 +894,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   FshortFileMC->Close();
 
   const unsigned int nEventsTree = ch->GetEntries();
-  int nDuplicates = 0;
+  int nDuplicates = 0; int numberOfAllSTs = 0; int numberOfAllSTCs = 0;
+  int GoodEventCounter = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
     //    if (event % 1000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
 
@@ -804,6 +917,20 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     //---------------------
     
     if( applyJSON && t.isData && !goodrun(t.run, t.lumi) ) continue;
+
+    // Not a duplicate, and a good event. Counts towards our unblinded luminosity
+    GoodEventCounter++;
+    // 10/fb in 2016 = 10/35.9 = about 1 event in 3.6, call it 1 event in 4
+    // 10/fb in 2017 = 10/42 = about 1 event in 4 
+    // 10/fb in 2018 = 10/58.83 = about 1 event in 6
+    bool partial_unblind = false;
+    if (year == 2016 && GoodEventCounter % 4 == 0) partial_unblind = true; // about 9/fb
+    else if (year == 2017 && GoodEventCounter % 4 == 0) partial_unblind = true; // about 10.5/fb
+    else if (year == 2018 && GoodEventCounter % 6 == 0) partial_unblind = true; // about 9.8/fb
+    /*
+    if (year == 2016 && GoodEventCounter % 7 == 0) partial_unblind = true;
+    else if (year == 2017 && GoodEventCounter % 8 == 0) partial_unblind = true;
+    */
 
     if (unlikely(t.nVert == 0)) {
       continue;
@@ -827,6 +954,31 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
 	   << ", met=" << t.met_pt << ", ht=" << t.ht << endl;
       continue;
+    }
+
+    // catch events with unphysical jet pt
+    if(t.jet_pt[0] > 13000.){
+      cout << endl << "WARNING: bad event with unphysical jet pt! " << t.run << ":" << t.lumi << ":" << t.evt
+	   << ", met=" << t.met_pt << ", ht=" << t.ht << ", jet_pt=" << t.jet_pt[0] << endl;
+      continue;
+    }
+
+    // apply HEM veto, and simulate effects in MC
+    if(doHEMveto && config_.year == 2018){
+      bool hasHEMjet = false;
+      if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
+	for(int i=0; i<t.njet; i++){
+	  if(t.jet_pt[i] < HEM_ptCut)
+	    break;
+	  if(t.jet_eta[i] > HEM_region[0] && t.jet_eta[i] < HEM_region[1] && 
+	     t.jet_phi[i] > HEM_region[2] && t.jet_phi[i] < HEM_region[3])
+	    hasHEMjet = true;
+	}
+      }
+      if(hasHEMjet){
+	// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	continue;
+      }
     }
 
     if (t.nJet30 < 2) {
@@ -908,6 +1060,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	weight *= t.weight_isr / getAverageISRWeight(outtag,config_tag);
       }
 
+      if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80) {
+	weight *= t.weight_L1prefire;
+      }
 
       if (doNTrueIntReweight) {
 	if(h_nTrueInt_weights_==0){
@@ -1010,7 +1165,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  // MR
 	  if (t.mt2 < 100) {
 	    hist = h_LH_MR;
-	    hist_Nj = h_LH_VR_23;
+	    hist_Nj = h_LH_MR_23;
 	  }
 	  // VR
 	  else if (t.mt2 < 200) {
@@ -1249,20 +1404,34 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       
       for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {   
 
+	bool isChargino = isSignal && t.track_matchedCharginoIdx[i_trk] >= 0;
+	if (isSignal && !isChargino) {
+	  for (int i_chargino = 0; i_chargino < t.nCharginos; i_chargino++) {
+	    if (DeltaR(t.track_eta[i_trk],t.chargino_eta[i_chargino],t.track_phi[i_trk],t.chargino_phi[i_chargino]) < 0.1) {
+	      isChargino = true;
+	      break;
+	    }
+	  }
+	}
+
 	int lenIndex = -1;
 	bool isST = false, isSTC = false;
 	
 	// Apply basic selections
+	/*
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) == 0 
 	  && (year == 2016 || !(t.track_eta[i_trk] < -0.7 && t.track_eta[i_trk] > -0.9 && t.track_phi[i_trk] > 1.5 && t.track_phi[i_trk] < 1.7 ) )
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.30 && t.track_eta[i_trk] > 0.10 && t.track_phi[i_trk] > 2.2 && t.track_phi[i_trk] < 2.5 ) )
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.50 && t.track_eta[i_trk] > 0.40 && t.track_phi[i_trk] > -0.7 && t.track_phi[i_trk] < -0.5  ) )
 	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) )
 	  && (year != 2018 || !(t.track_eta[i_trk] < 2.45 && t.track_eta[i_trk] > 2.00 && t.track_phi[i_trk] > 1.7 && t.track_phi[i_trk] < 1.9));
+	*/
+	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk],year) == 0;
 	const float pt = t.track_pt[i_trk];
 	const bool ptSel = pt >= 15.0;
 	const bool etaSel = fabs(t.track_eta[i_trk]) <= 2.4;
 	const bool BaseSel = CaloSel && ptSel && etaSel;
+	//const bool BaseSel = ptSel && etaSel;
 	
 	if (!BaseSel) {
 	  continue;
@@ -1373,15 +1542,27 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
 	isSTC = !isST;
 	//	isSTC = !isST && (isP || iso > 30 || reliso > 0.4);
-	if (! (isST || isSTC)) continue;
-	
-	if ( isST && (blind && t.isData && t.mt2 >= 200)) {
+	if (! (isST || isSTC)) continue;       
+
+	if ( isST && (blind && t.isData && t.mt2 >= 200 && !partial_unblind)) {
 	  continue;
 	}
 
 	const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );	
+	const bool vetoMtPt = mt < 100 && t.track_pt[i_trk] < 150;
+
+	if (isSignal && !isChargino && !(lenIndex == 3 && vetoMtPt)) {
+	  bool TwoMatches = t.chargino_matchedTrackIdx[0] >= 0 && t.chargino_matchedTrackIdx[1] >= 0;
+	  cout << "Unmatched " << (isST ? "ST" : "STC") << ", " << (TwoMatches  ? "2 matched charginos" : "<2 matched charginos");
+	  cout << "Track: " << t.track_eta[i_trk] << ", " << t.track_phi[i_trk] << " // "
+	       << t.chargino_eta[0] << ", " << t.chargino_phi[0] << ": " << DeltaR(t.track_eta[i_trk], t.chargino_eta[0], t.track_phi[i_trk], t.chargino_phi[0]) << " // "
+	       << t.chargino_eta[1] << ", " << t.chargino_phi[1] << ": " << DeltaR(t.track_eta[i_trk], t.chargino_eta[1], t.track_phi[i_trk], t.chargino_phi[1]) << endl;
+	  cout << hist_Nj->GetName() << (t.track_pt[i_trk] < 50 ? " low" : " high") << endl;
+	  continue;
+	}
+
 	if (lenIndex == 3) {
-	  if (mt < 100 && t.track_pt[i_trk] < 150) {
+	  if (vetoMtPt) {
 	    if (isST) {
 	      nSTl_rej++;
 	    }
@@ -1392,19 +1573,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  else {
 	    if (isST) {
 	      nSTl_acc++;
+	      numberOfAllSTs++;
 	    }
 	    else {
 	      nSTCl_acc++;
+	      numberOfAllSTCs++;
 	    }
 	  }
 	}	
 	else if (isSTC) {
+	  numberOfAllSTCs++;
 	  if (lenIndex == 1) {
 	    nSTCp++; 
 	    t.track_pt[i_trk] < 50 ? nSTCp_lo++ : nSTCp_hi++;
 	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
 	      nSTCp3++;
 	      t.track_pt[i_trk] < 50 ? nSTCp3_lo++ : nSTCp3_hi++;
+	      if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "P3 LH VR hi STC: pt = " << t.track_pt[i_trk] << " pterr = " << t.track_ptErr[i_trk] << endl;
 	    }
 	    else {
 	      nSTCp4++;
@@ -1417,12 +1602,14 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  }
 	}
 	else if (isST) {
+	  numberOfAllSTs++;
 	  if (lenIndex == 1) {
 	    nSTp++; 
 	    t.track_pt[i_trk] < 50 ? nSTp_lo++ : nSTp_hi++;
 	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
 	      nSTp3++;
 	      t.track_pt[i_trk] < 50 ? nSTp3_lo++ : nSTp3_hi++;
+	      if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "P3 LH VR hi ST: pt = " << t.track_pt[i_trk] << " pterr = " << t.track_ptErr[i_trk] << endl;
 	    }
 	    else {
 	      nSTp4++;
@@ -1451,36 +1638,69 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     }
     else 
     */
-    if (nSTCl_acc > 0) {
-      // For L tracks, we fill separately based on MtPt veto region, and extrapolate from STCs to STs based on M fshort
-      hist->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR
-      hist_Nj->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR      
-      hist->Fill(Lidx-0.5,1.0, weight * ( 1 - pow(1-fs_L,nSTCl_acc) ) ); // Fill expected SR count
-      hist_Nj->Fill(Lidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_L : fs_Nj23_L),nSTCl_acc) ) ); // Fill expected SR count with separate Nj fshort
+    if (nSTCl_acc + nSTCm + nSTCp == 2 && EventWise) {
+      cout << "2 STC, P3: " << nSTCp3 << " P4: " << nSTCp4 << " M: " << nSTCm << " L: " << nSTCl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
+      float pred_weight = weight;
+      pred_weight *= pow(fs_L,nSTCl_acc);
+      pred_weight *= pow(fs_M,nSTCm);
+      if (year == 2016) {
+	pred_weight *= pow(fs_P,nSTCp);
+      }
+      else {
+	pred_weight *= pow(fs_P3,nSTCp3);
+	pred_weight *= pow(fs_P4,nSTCp4);
+      }
+      if (t.mt2 < 100) {
+	cout << ", MR" << endl;
+	h_2STC_MR->Fill(0.0,2.0,weight);
+	h_2STC_MR->Fill(0.0,1.0,pred_weight);
+      }
+      else if (t.mt2 < 200) {
+	cout << ", VR" << endl;
+	h_2STC_VR->Fill(0.0,2.0,weight);
+	h_2STC_VR->Fill(0.0,1.0,pred_weight);
+      }
+      else {
+	cout << ", SR" << endl;
+	h_2STC_SR->Fill(0.0,2.0,weight);
+	h_2STC_SR->Fill(0.0,1.0,pred_weight);
+      }
     }
-    if (nSTCm > 0) {
-      hist->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
-      hist_Nj->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
-      hist->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-fs_M,nSTCm) ) ); // Fill expected SR count
-      hist_Nj->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M : fs_Nj23_M),nSTCm) ) ); // Fill expected SR count with separate Nj fs
+    else if (nSTCl_acc + nSTCm + nSTCp >= 1) { // we fill here if track count == 1 if filling EventWise, and for any track count if filling TrackWise. Can safely multiply by Nstc.
+      if (nSTCl_acc > 0) {
+	// For L tracks, we fill separately based on MtPt veto region, and extrapolate from STCs to STs based on M fshort
+	hist->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR
+	hist_Nj->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR      
+	hist->Fill(Lidx-0.5,1.0, weight * ( fs_L*nSTCl_acc ) ); // Fill expected SR count
+	hist_Nj->Fill(Lidx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_L : fs_Nj23_L) * nSTCl_acc ) ); // Fill expected SR count with separate Nj fshort
+      }
+      if (nSTCm > 0) {
+	hist->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
+	hist_Nj->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
+	hist->Fill(Midx-0.5,1.0, weight * ( fs_M * nSTCm ) ); // Fill expected SR count
+	hist_Nj->Fill(Midx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_M : fs_Nj23_M) * nSTCm) ); // Fill expected SR count with separate Nj fs
+      }
+      if (nSTCp > 0) {
+	hist->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
+	hist_Nj->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
+	hist->Fill(Pidx-0.5,1.0, weight * ( fs_P * nSTCp ) ); // Fill expected SR count
+	hist_Nj->Fill(Pidx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P : fs_Nj23_P) * nSTCp) ); // Fill expected SR count with separate Nj fs
+      }
+      if (nSTCp3 > 0) {
+	hist->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
+	hist_Nj->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
+	hist->Fill(P3idx-0.5,1.0, weight * ( fs_P3 * nSTCp3 ) ); // Fill expected SR count
+	hist_Nj->Fill(P3idx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P3 : fs_Nj23_P3) * nSTCp3 ) ); // Fill expected SR count with separate Nj fs
+      }
+      if (nSTCp4 > 0) {
+	hist->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
+	hist_Nj->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
+	hist->Fill(P4idx-0.5,1.0, weight * ( fs_P4 * nSTCp4 ) ); // Fill expected SR count
+	hist_Nj->Fill(P4idx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P4 : fs_Nj23_P4) * nSTCp4 ) ); // Fill expected SR count with separate Nj fs
+      }
     }
-    if (nSTCp > 0) {
-      hist->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
-      hist_Nj->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
-      hist->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-fs_P,nSTCp) ) ); // Fill expected SR count
-      hist_Nj->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P : fs_Nj23_P),nSTCp) ) ); // Fill expected SR count with separate Nj fs
-    }
-    if (nSTCp3 > 0) {
-      hist->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
-      hist_Nj->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
-      hist->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-fs_P3,nSTCp3) ) ); // Fill expected SR count
-      hist_Nj->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P3 : fs_Nj23_P3),nSTCp3) ) ); // Fill expected SR count with separate Nj fs
-    }
-    if (nSTCp4 > 0) {
-      hist->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
-      hist_Nj->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
-      hist->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-fs_P4,nSTCp4) ) ); // Fill expected SR count
-      hist_Nj->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P4 : fs_Nj23_P4),nSTCp4) ) ); // Fill expected SR count with separate Nj fs
+    else if (nSTCl_acc + nSTCm + nSTCp > 2) {
+      cout << "More than 2 STCs!" << endl;
     }
     
     // Eventwise ST fills
@@ -1492,117 +1712,144 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     }
     else 
     */
-    if (nSTl_acc > 0) {
-      hist->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
-      hist_Nj->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
+
+    /*
+    if (nSTl_acc > 0 && t.mt2 > 200) {
+      cout << "Found a L ST in unblinded data: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
     }
-    if (nSTm > 0) {
-      hist->Fill(Midx-0.5,0.0,weight*nSTm);
-      hist_Nj->Fill(Midx-0.5,0.0,weight*nSTm);
+    */
+
+    if (nSTl_acc + nSTm + nSTp > 1 && EventWise) {
+      cout << "2 ST, P3: " << nSTp3 << " P4: " << nSTp4 << " M: " << nSTm << " L: " << nSTl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
+      if (t.mt2 < 100) {
+	cout << ", MR" << endl;
+	h_2STC_MR->Fill(0.0,0.0,weight);
+      }
+      else if (t.mt2 < 200) {
+	cout << ", VR" << endl;
+	h_2STC_VR->Fill(0.0,0.0,weight);
+      }
+      else {
+	cout << ", SR" << endl;
+	h_2STC_SR->Fill(0.0,0.0,weight);
+      }
     }
-    if (nSTp > 0) {
-      hist->Fill(Pidx-0.5,0.0,weight*nSTp);
-      hist_Nj->Fill(Pidx-0.5,0.0,weight*nSTp);
-    }
-    if (nSTp3 > 0) {
-      hist->Fill(P3idx-0.5,0.0,weight*nSTp3);
-      hist_Nj->Fill(P3idx-0.5,0.0,weight*nSTp3);
-    }
-    if (nSTp4 > 0) {
-      hist->Fill(P4idx-0.5,0.0,weight*nSTp4);
-      hist_Nj->Fill(P4idx-0.5,0.0,weight*nSTp4);
+    else { // If nST > 1, we only fill here if filling trackwise; can safely multiply by Nst.
+      if (nSTl_acc > 0) {
+	hist->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
+	hist_Nj->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
+      }
+      if (nSTm > 0) {
+	if (t.mt2 > 200) cout << "M ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	hist->Fill(Midx-0.5,0.0,weight*nSTm);
+	hist_Nj->Fill(Midx-0.5,0.0,weight*nSTm);
+      }
+      if (nSTp > 0) {
+	hist->Fill(Pidx-0.5,0.0,weight*nSTp);
+	hist_Nj->Fill(Pidx-0.5,0.0,weight*nSTp);
+      }
+      if (nSTp3 > 0) {
+	hist->Fill(P3idx-0.5,0.0,weight*nSTp3);
+	hist_Nj->Fill(P3idx-0.5,0.0,weight*nSTp3);
+      }
+      if (nSTp4 > 0) {
+	hist->Fill(P4idx-0.5,0.0,weight*nSTp4);
+	hist_Nj->Fill(P4idx-0.5,0.0,weight*nSTp4);
+      }
     }
 
     // Low pt
     TH2D* hist_lo = low_hists[hist];
     TH2D* hist_Nj_lo = low_hists[hist_Nj];
     if (nSTCm_lo > 0) {
-      hist_lo->Fill(Midx-0.5,2.0,weight); // Fill CR
-      hist_Nj_lo->Fill(Midx-0.5,2.0,weight); // Fill CR
-      hist_lo->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-fs_M_lo,nSTCm_lo) ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M_lo : fs_Nj23_M_lo),nSTCm_lo) ) ); // Fill expected SR count with separate Nj fs
+      hist_lo->Fill(Midx-0.5,2.0,weight*nSTCm_lo); // Fill CR
+      hist_Nj_lo->Fill(Midx-0.5,2.0,weight*nSTCm_lo); // Fill CR
+      hist_lo->Fill(Midx-0.5,1.0, weight * ( fs_M_lo * nSTCm_lo ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(Midx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_M_lo : fs_Nj23_M_lo) * nSTCm_lo ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp_lo > 0) {
-      hist_lo->Fill(Pidx-0.5,2.0,weight); // Fill CR
-      hist_Nj_lo->Fill(Pidx-0.5,2.0,weight); // Fill CR
-      hist_lo->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-fs_P_lo,nSTCp_lo) ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P_lo : fs_Nj23_P_lo),nSTCp_lo) ) ); // Fill expected SR count with separate Nj fs
+      hist_lo->Fill(Pidx-0.5,2.0,weight*nSTCp_lo); // Fill CR
+      hist_Nj_lo->Fill(Pidx-0.5,2.0,weight*nSTCp_lo); // Fill CR
+      hist_lo->Fill(Pidx-0.5,1.0, weight * ( fs_P_lo * nSTCp_lo ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(Pidx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P_lo : fs_Nj23_P_lo) * nSTCp_lo ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp3_lo > 0) {
-      hist_lo->Fill(P3idx-0.5,2.0,weight); // Fill CR
-      hist_Nj_lo->Fill(P3idx-0.5,2.0,weight); // Fill CR
-      hist_lo->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-fs_P3_lo,nSTCp3_lo) ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P3_lo : fs_Nj23_P3_lo),nSTCp3_lo) ) ); // Fill expected SR count with separate Nj fs
+      hist_lo->Fill(P3idx-0.5,2.0,weight*nSTCp3_lo); // Fill CR
+      hist_Nj_lo->Fill(P3idx-0.5,2.0,weight*nSTCp3_lo); // Fill CR
+      hist_lo->Fill(P3idx-0.5,1.0, weight * ( fs_P3_lo * nSTCp3_lo ) ); // Fill expected SR count
+      hist_Nj_lo->Fill(P3idx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_P3_lo : fs_Nj23_P3_lo) * nSTCp3_lo ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp4_lo > 0) {
-      hist_lo->Fill(P4idx-0.5,2.0,weight); // Fill CR
-      hist_Nj_lo->Fill(P4idx-0.5,2.0,weight); // Fill CR
-      hist_lo->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-fs_P4,nSTCp4_lo) ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P4_lo : fs_Nj23_P4_lo),nSTCp4_lo) ) ); // Fill expected SR count with separate Nj fs
+      hist_lo->Fill(P4idx-0.5,2.0,weight*nSTCp4_lo); // Fill CR
+      hist_Nj_lo->Fill(P4idx-0.5,2.0,weight*nSTCp4_lo); // Fill CR
+      hist_lo->Fill(P4idx-0.5,1.0, weight * ( fs_P4 * nSTCp4_lo) ); // Fill expected SR count
+      hist_Nj_lo->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_lo : fs_Nj23_P4_lo) * nSTCp4_lo ); // Fill expected SR count with separate Nj fs
     }
     
     // Eventwise ST fills
     if (nSTm_lo > 0) {
-      hist_lo->Fill(Midx-0.5,0.0,weight);
-      hist_Nj_lo->Fill(Midx-0.5,0.0,weight);
+      hist_lo->Fill(Midx-0.5,0.0,weight*nSTm_lo);
+      hist_Nj_lo->Fill(Midx-0.5,0.0,weight*nSTm_lo);
     }
     if (nSTp_lo > 0) {
-      hist_lo->Fill(Pidx-0.5,0.0,weight);
-      hist_Nj_lo->Fill(Pidx-0.5,0.0,weight);
+      hist_lo->Fill(Pidx-0.5,0.0,weight*nSTp_lo);
+      hist_Nj_lo->Fill(Pidx-0.5,0.0,weight*nSTp_lo);
     }
     if (nSTp3_lo > 0) {
-      hist_lo->Fill(P3idx-0.5,0.0,weight);
-      hist_Nj_lo->Fill(P3idx-0.5,0.0,weight);
+      hist_lo->Fill(P3idx-0.5,0.0,weight*nSTp3_lo);
+      hist_Nj_lo->Fill(P3idx-0.5,0.0,weight*nSTp3_lo);
     }
     if (nSTp4_lo > 0) {
-      hist_lo->Fill(P4idx-0.5,0.0,weight);
-      hist_Nj_lo->Fill(P4idx-0.5,0.0,weight);
+      hist_lo->Fill(P4idx-0.5,0.0,weight*nSTp4_lo);
+      hist_Nj_lo->Fill(P4idx-0.5,0.0,weight*nSTp4_lo);
     }
 
     // High pt
     TH2D* hist_hi = hi_hists[hist];
     TH2D* hist_Nj_hi = hi_hists[hist_Nj];
     if (nSTCm_hi > 0) {
-      hist_hi->Fill(Midx-0.5,2.0,weight); // Fill CR
-      hist_Nj_hi->Fill(Midx-0.5,2.0,weight); // Fill CR
-      hist_hi->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-fs_M_hi,nSTCm_hi) ) ); // Fill expected SR count
-      hist_Nj_hi->Fill(Midx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_M_hi : fs_Nj23_M_hi),nSTCm_hi) ) ); // Fill expected SR count with separate Nj fs
+      hist_hi->Fill(Midx-0.5,2.0,weight*nSTCm_hi); // Fill CR
+      hist_Nj_hi->Fill(Midx-0.5,2.0,weight*nSTCm_hi); // Fill CR
+      hist_hi->Fill(Midx-0.5,1.0, weight * ( fs_M_hi * nSTCm_hi) ); // Fill expected SR count
+      hist_Nj_hi->Fill(Midx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_M_hi : fs_Nj23_M_hi) * nSTCm_hi ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp_hi > 0) {
-      hist_hi->Fill(Pidx-0.5,2.0,weight); // Fill CR
-      hist_Nj_hi->Fill(Pidx-0.5,2.0,weight); // Fill CR
-      hist_hi->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-fs_P_hi,nSTCp_hi) ) ); // Fill expected SR count
-      hist_Nj_hi->Fill(Pidx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P_hi : fs_Nj23_P_hi),nSTCp_hi) ) ); // Fill expected SR count with separate Nj fs
+      hist_hi->Fill(Pidx-0.5,2.0,weight*nSTCp_hi); // Fill CR
+      hist_Nj_hi->Fill(Pidx-0.5,2.0,weight*nSTCp_hi); // Fill CR
+      hist_hi->Fill(Pidx-0.5,1.0, weight * ( fs_P_hi * nSTCp_hi ) ); // Fill expected SR count
+      hist_Nj_hi->Fill(Pidx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P_hi : fs_Nj23_P_hi) * nSTCp_hi ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp3_hi > 0) {
-      hist_hi->Fill(P3idx-0.5,2.0,weight); // Fill CR
-      hist_Nj_hi->Fill(P3idx-0.5,2.0,weight); // Fill CR
-      hist_hi->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-fs_P3_hi,nSTCp3_hi) ) ); // Fill expected SR count
-      hist_Nj_hi->Fill(P3idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P3_hi : fs_Nj23_P3_hi),nSTCp3_hi) ) ); // Fill expected SR count with separate Nj fs
+      hist_hi->Fill(P3idx-0.5,2.0,weight*nSTCp3_hi); // Fill CR
+      hist_Nj_hi->Fill(P3idx-0.5,2.0,weight*nSTCp3_hi); // Fill CR
+      if (hist_Nj_hi == h_LM_VR_23_hi) cout << "P3 LH VR hi STC event, with nSTCp3_hi = " << nSTCp3_hi << endl;
+      hist_hi->Fill(P3idx-0.5,1.0, weight * ( fs_P3_hi * nSTCp3_hi) ); // Fill expected SR count
+      hist_Nj_hi->Fill(P3idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P3_hi : fs_Nj23_P3_hi) * nSTCp3_hi ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp4_hi > 0) {
-      hist_hi->Fill(P4idx-0.5,2.0,weight); // Fill CR
-      hist_Nj_hi->Fill(P4idx-0.5,2.0,weight); // Fill CR
-      hist_hi->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-fs_P4,nSTCp4_hi) ) ); // Fill expected SR count
-      hist_Nj_hi->Fill(P4idx-0.5,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_Nj4_P4_hi : fs_Nj23_P4_hi),nSTCp4_hi) ) ); // Fill expected SR count with separate Nj fs
+      hist_hi->Fill(P4idx-0.5,2.0,weight*nSTCp4_hi); // Fill CR
+      hist_Nj_hi->Fill(P4idx-0.5,2.0,weight*nSTCp4_hi); // Fill CR
+      hist_hi->Fill(P4idx-0.5,1.0, weight * ( fs_P4 * nSTCp4_hi) ); // Fill expected SR count
+      hist_Nj_hi->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_hi : fs_Nj23_P4_hi) * nSTCp4_hi ); // Fill expected SR count with separate Nj fs
     }
     
     // Eventwise ST fills
     if (nSTm_hi > 0) {
-      hist_hi->Fill(Midx-0.5,0.0,weight);
-      hist_Nj_hi->Fill(Midx-0.5,0.0,weight);
+      hist_hi->Fill(Midx-0.5,0.0,weight*nSTm_hi);
+      hist_Nj_hi->Fill(Midx-0.5,0.0,weight*nSTm_hi);
     }
     if (nSTp_hi > 0) {
-      hist_hi->Fill(Pidx-0.5,0.0,weight);
-      hist_Nj_hi->Fill(Pidx-0.5,0.0,weight);
+      hist_hi->Fill(Pidx-0.5,0.0,weight*nSTp_hi);
+      hist_Nj_hi->Fill(Pidx-0.5,0.0,weight*nSTp_hi);
     }
     if (nSTp3_hi > 0) {
-      hist_hi->Fill(P3idx-0.5,0.0,weight);
-      hist_Nj_hi->Fill(P3idx-0.5,0.0,weight);
+      if (t.mt2 > 100 && t.mt2 < 200 && hist_Nj_hi == h_LM_VR_23_hi) cout << "P3 LM VR hi ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+      hist_hi->Fill(P3idx-0.5,0.0,weight*nSTp3_hi);
+      hist_Nj_hi->Fill(P3idx-0.5,0.0,weight*nSTp3_hi);
     }
     if (nSTp4_hi > 0) {
-      hist_hi->Fill(P4idx-0.5,0.0,weight);
-      hist_Nj_hi->Fill(P4idx-0.5,0.0,weight);
+      hist_hi->Fill(P4idx-0.5,0.0,weight*nSTp4_hi);
+      hist_Nj_hi->Fill(P4idx-0.5,0.0,weight*nSTp4_hi);
     }
 
   }//end loop on events in a file
@@ -1728,156 +1975,150 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS->SetBinContent(P4idx,fs_P4);
   h_FS->SetBinContent(Midx,fs_M);
   h_FS->SetBinContent(Lidx,fs_L);
-  h_FS->SetBinError(Pidx,fs_P_err);
-  h_FS->SetBinError(P3idx,fs_P3_err);
-  h_FS->SetBinError(P4idx,fs_P4_err);
-  h_FS->SetBinError(Midx,fs_M_err);
-  h_FS->SetBinError(Lidx,fs_L_err);
-  
+  h_FS_up->SetBinError(Pidx,fs_P_err_up);
+  h_FS_dn->SetBinError(Pidx,fs_P_err_dn);
+  h_FS_up->SetBinError(P3idx,fs_P3_err_up);
+  h_FS_dn->SetBinError(P3idx,fs_P3_err_dn);
+  h_FS_up->SetBinError(P4idx,fs_P4_err_up);
+  h_FS_dn->SetBinError(P4idx,fs_P4_err_dn);
+  h_FS_up->SetBinError(Midx,fs_M_err_up);
+  h_FS_dn->SetBinError(Midx,fs_M_err_dn);
+  h_FS_up->SetBinError(Lidx,fs_L_err_up);
+  h_FS_dn->SetBinError(Lidx,fs_L_err_dn);
+
   h_FS_23->SetBinContent(Pidx,fs_Nj23_P);
   h_FS_23->SetBinContent(P3idx,fs_Nj23_P3);
   h_FS_23->SetBinContent(P4idx,fs_Nj23_P4);
   h_FS_23->SetBinContent(Midx,fs_Nj23_M);
   h_FS_23->SetBinContent(Lidx,fs_Nj23_L);
-  h_FS_23->SetBinError(Pidx,fs_Nj23_P_err);
-  h_FS_23->SetBinError(P3idx,fs_Nj23_P3_err);
-  h_FS_23->SetBinError(P4idx,fs_Nj23_P4_err);
-  h_FS_23->SetBinError(Midx,fs_Nj23_M_err);
-  h_FS_23->SetBinError(Lidx,fs_Nj23_L_err);
+  h_FS_23_up->SetBinError(Pidx,fs_Nj23_P_err_up);
+  h_FS_23_dn->SetBinError(Pidx,fs_Nj23_P_err_dn);
+  h_FS_23_up->SetBinError(P3idx,fs_Nj23_P3_err_up);
+  h_FS_23_dn->SetBinError(P3idx,fs_Nj23_P3_err_dn);
+  h_FS_23_up->SetBinError(P4idx,fs_Nj23_P4_err_up);
+  h_FS_23_dn->SetBinError(P4idx,fs_Nj23_P4_err_dn);
+  h_FS_23_up->SetBinError(Midx,fs_Nj23_M_err_up);
+  h_FS_23_dn->SetBinError(Midx,fs_Nj23_M_err_dn);
+  h_FS_23_up->SetBinError(Lidx,fs_Nj23_L_err_up);
+  h_FS_23_dn->SetBinError(Lidx,fs_Nj23_L_err_dn);
 
   h_FS_4->SetBinContent(Pidx,fs_Nj4_P);
   h_FS_4->SetBinContent(P3idx,fs_Nj4_P3);
   h_FS_4->SetBinContent(P4idx,fs_Nj4_P4);
   h_FS_4->SetBinContent(Midx,fs_Nj4_M);
   h_FS_4->SetBinContent(Lidx,fs_Nj4_L);
-  h_FS_4->SetBinError(Pidx,fs_Nj4_P_err);
-  h_FS_4->SetBinError(P3idx,fs_Nj4_P3_err);
-  h_FS_4->SetBinError(P4idx,fs_Nj4_P4_err);
-  h_FS_4->SetBinError(Midx,fs_Nj4_M_err);
-  h_FS_4->SetBinError(Lidx,fs_Nj4_L_err);
+  h_FS_4_up->SetBinError(Pidx,fs_Nj4_P_err_up);
+  h_FS_4_dn->SetBinError(Pidx,fs_Nj4_P_err_dn);
+  h_FS_4_up->SetBinError(P3idx,fs_Nj4_P3_err_up);
+  h_FS_4_dn->SetBinError(P3idx,fs_Nj4_P3_err_dn);
+  h_FS_4_up->SetBinError(P4idx,fs_Nj4_P4_err_up);
+  h_FS_4_dn->SetBinError(P4idx,fs_Nj4_P4_err_dn);
+  h_FS_4_up->SetBinError(Midx,fs_Nj4_M_err_up);
+  h_FS_4_dn->SetBinError(Midx,fs_Nj4_M_err_dn);
+  h_FS_4_up->SetBinError(Lidx,fs_Nj4_L_err_up);
+  h_FS_4_dn->SetBinError(Lidx,fs_Nj4_L_err_dn);
+
 
   // Hi pt
   h_FS_hi->SetBinContent(Pidx,fs_P_hi);
   h_FS_hi->SetBinContent(P3idx,fs_P3_hi);
   h_FS_hi->SetBinContent(P4idx,fs_P4_hi);
   h_FS_hi->SetBinContent(Midx,fs_M_hi);
-  h_FS_hi->SetBinError(Pidx,fs_P_err_hi);
-  h_FS_hi->SetBinError(P3idx,fs_P3_err_hi);
-  h_FS_hi->SetBinError(P4idx,fs_P4_err_hi);
-  h_FS_hi->SetBinError(Midx,fs_M_err_hi);
-  
+  h_FS_hi->SetBinContent(Lidx,fs_L);
+  h_FS_hi_up->SetBinError(Pidx,fs_P_err_hi_up);
+  h_FS_hi_dn->SetBinError(Pidx,fs_P_err_hi_dn);
+  h_FS_hi_up->SetBinError(P3idx,fs_P3_err_hi_up);
+  h_FS_hi_dn->SetBinError(P3idx,fs_P3_err_hi_dn);
+  h_FS_hi_up->SetBinError(P4idx,fs_P4_err_hi_up);
+  h_FS_hi_dn->SetBinError(P4idx,fs_P4_err_hi_dn);
+  h_FS_hi_up->SetBinError(Midx,fs_M_err_hi_up);
+  h_FS_hi_dn->SetBinError(Midx,fs_M_err_hi_dn);
+  h_FS_hi_up->SetBinError(Lidx,fs_L_err_up);
+  h_FS_hi_dn->SetBinError(Lidx,fs_L_err_dn);
+
   h_FS_23_hi->SetBinContent(Pidx,fs_Nj23_P_hi);
   h_FS_23_hi->SetBinContent(P3idx,fs_Nj23_P3_hi);
   h_FS_23_hi->SetBinContent(P4idx,fs_Nj23_P4_hi);
   h_FS_23_hi->SetBinContent(Midx,fs_Nj23_M_hi);
-  h_FS_23_hi->SetBinError(Pidx,fs_Nj23_P_err_hi);
-  h_FS_23_hi->SetBinError(P3idx,fs_Nj23_P3_err_hi);
-  h_FS_23_hi->SetBinError(P4idx,fs_Nj23_P4_err_hi);
-  h_FS_23_hi->SetBinError(Midx,fs_Nj23_M_err_hi);
+  h_FS_23_hi->SetBinContent(Lidx,fs_Nj23_L);
+  h_FS_23_hi_up->SetBinError(Pidx,fs_Nj23_P_err_hi_up);
+  h_FS_23_hi_dn->SetBinError(Pidx,fs_Nj23_P_err_hi_dn);
+  h_FS_23_hi_up->SetBinError(P3idx,fs_Nj23_P3_err_hi_up);
+  h_FS_23_hi_dn->SetBinError(P3idx,fs_Nj23_P3_err_hi_dn);
+  h_FS_23_hi_up->SetBinError(P4idx,fs_Nj23_P4_err_hi_up);
+  h_FS_23_hi_dn->SetBinError(P4idx,fs_Nj23_P4_err_hi_dn);
+  h_FS_23_hi_up->SetBinError(Midx,fs_Nj23_M_err_hi_up);
+  h_FS_23_hi_dn->SetBinError(Midx,fs_Nj23_M_err_hi_dn);
+  h_FS_23_hi_up->SetBinError(Lidx,fs_Nj23_L_err_up);
+  h_FS_23_hi_dn->SetBinError(Lidx,fs_Nj23_L_err_dn);
 
   h_FS_4_hi->SetBinContent(Pidx,fs_Nj4_P_hi);
   h_FS_4_hi->SetBinContent(P3idx,fs_Nj4_P3_hi);
   h_FS_4_hi->SetBinContent(P4idx,fs_Nj4_P4_hi);
   h_FS_4_hi->SetBinContent(Midx,fs_Nj4_M_hi);
-  h_FS_4_hi->SetBinError(Pidx,fs_Nj4_P_err_hi);
-  h_FS_4_hi->SetBinError(P3idx,fs_Nj4_P3_err_hi);
-  h_FS_4_hi->SetBinError(P4idx,fs_Nj4_P4_err_hi);
-  h_FS_4_hi->SetBinError(Midx,fs_Nj4_M_err_hi);
+  h_FS_4_hi->SetBinContent(Lidx,fs_Nj4_L);
+  h_FS_4_hi_up->SetBinError(Pidx,fs_Nj4_P_err_hi_up);
+  h_FS_4_hi_dn->SetBinError(Pidx,fs_Nj4_P_err_hi_dn);
+  h_FS_4_hi_up->SetBinError(P3idx,fs_Nj4_P3_err_hi_up);
+  h_FS_4_hi_dn->SetBinError(P3idx,fs_Nj4_P3_err_hi_dn);
+  h_FS_4_hi_up->SetBinError(P4idx,fs_Nj4_P4_err_hi_up);
+  h_FS_4_hi_dn->SetBinError(P4idx,fs_Nj4_P4_err_hi_dn);
+  h_FS_4_hi_up->SetBinError(Midx,fs_Nj4_M_err_hi_up);
+  h_FS_4_hi_dn->SetBinError(Midx,fs_Nj4_M_err_hi_dn);
+  h_FS_4_hi_up->SetBinError(Lidx,fs_Nj4_L_err_up);
+  h_FS_4_hi_dn->SetBinError(Lidx,fs_Nj4_L_err_dn);
+
 
   // Lo pt
   h_FS_lo->SetBinContent(Pidx,fs_P_lo);
   h_FS_lo->SetBinContent(P3idx,fs_P3_lo);
   h_FS_lo->SetBinContent(P4idx,fs_P4_lo);
   h_FS_lo->SetBinContent(Midx,fs_M_lo);
-  h_FS_lo->SetBinError(Pidx,fs_P_err_lo);
-  h_FS_lo->SetBinError(P3idx,fs_P3_err_lo);
-  h_FS_lo->SetBinError(P4idx,fs_P4_err_lo);
-  h_FS_lo->SetBinError(Midx,fs_M_err_lo);
-  
+  h_FS_lo->SetBinContent(Lidx,fs_L);
+  h_FS_lo_up->SetBinError(Pidx,fs_P_err_lo_up);
+  h_FS_lo_dn->SetBinError(Pidx,fs_P_err_lo_dn);
+  h_FS_lo_up->SetBinError(P3idx,fs_P3_err_lo_up);
+  h_FS_lo_dn->SetBinError(P3idx,fs_P3_err_lo_dn);
+  h_FS_lo_up->SetBinError(P4idx,fs_P4_err_lo_up);
+  h_FS_lo_dn->SetBinError(P4idx,fs_P4_err_lo_dn);
+  h_FS_lo_up->SetBinError(Midx,fs_M_err_lo_up);
+  h_FS_lo_dn->SetBinError(Midx,fs_M_err_lo_dn);
+  h_FS_lo_up->SetBinError(Lidx,fs_L_err_up);
+  h_FS_lo_dn->SetBinError(Lidx,fs_L_err_dn);
+
   h_FS_23_lo->SetBinContent(Pidx,fs_Nj23_P_lo);
   h_FS_23_lo->SetBinContent(P3idx,fs_Nj23_P3_lo);
   h_FS_23_lo->SetBinContent(P4idx,fs_Nj23_P4_lo);
   h_FS_23_lo->SetBinContent(Midx,fs_Nj23_M_lo);
-  h_FS_23_lo->SetBinError(Pidx,fs_Nj23_P_err_lo);
-  h_FS_23_lo->SetBinError(P3idx,fs_Nj23_P3_err_lo);
-  h_FS_23_lo->SetBinError(P4idx,fs_Nj23_P4_err_lo);
-  h_FS_23_lo->SetBinError(Midx,fs_Nj23_M_err_lo);
+  h_FS_23_lo->SetBinContent(Lidx,fs_Nj23_L);
+  h_FS_23_lo_up->SetBinError(Pidx,fs_Nj23_P_err_lo_up);
+  h_FS_23_lo_dn->SetBinError(Pidx,fs_Nj23_P_err_lo_dn);
+  h_FS_23_lo_up->SetBinError(P3idx,fs_Nj23_P3_err_lo_up);
+  h_FS_23_lo_dn->SetBinError(P3idx,fs_Nj23_P3_err_lo_dn);
+  h_FS_23_lo_up->SetBinError(P4idx,fs_Nj23_P4_err_lo_up);
+  h_FS_23_lo_dn->SetBinError(P4idx,fs_Nj23_P4_err_lo_dn);
+  h_FS_23_lo_up->SetBinError(Midx,fs_Nj23_M_err_lo_up);
+  h_FS_23_lo_dn->SetBinError(Midx,fs_Nj23_M_err_lo_dn);
+  h_FS_23_lo_up->SetBinError(Lidx,fs_Nj23_L_err_up);
+  h_FS_23_lo_dn->SetBinError(Lidx,fs_Nj23_L_err_dn);
 
   h_FS_4_lo->SetBinContent(Pidx,fs_Nj4_P_lo);
   h_FS_4_lo->SetBinContent(P3idx,fs_Nj4_P3_lo);
   h_FS_4_lo->SetBinContent(P4idx,fs_Nj4_P4_lo);
   h_FS_4_lo->SetBinContent(Midx,fs_Nj4_M_lo);
-  h_FS_4_lo->SetBinError(Pidx,fs_Nj4_P_err_lo);
-  h_FS_4_lo->SetBinError(P3idx,fs_Nj4_P3_err_lo);
-  h_FS_4_lo->SetBinError(P4idx,fs_Nj4_P4_err_lo);
-  h_FS_4_lo->SetBinError(Midx,fs_Nj4_M_err_lo);
+  h_FS_4_lo->SetBinContent(Lidx,fs_Nj4_L);
+  h_FS_4_lo_up->SetBinError(Pidx,fs_Nj4_P_err_lo_up);
+  h_FS_4_lo_dn->SetBinError(Pidx,fs_Nj4_P_err_lo_dn);
+  h_FS_4_lo_up->SetBinError(P3idx,fs_Nj4_P3_err_lo_up);
+  h_FS_4_lo_dn->SetBinError(P3idx,fs_Nj4_P3_err_lo_dn);
+  h_FS_4_lo_up->SetBinError(P4idx,fs_Nj4_P4_err_lo_up);
+  h_FS_4_lo_dn->SetBinError(P4idx,fs_Nj4_P4_err_lo_dn);
+  h_FS_4_lo_up->SetBinError(Midx,fs_Nj4_M_err_lo_up);
+  h_FS_4_lo_dn->SetBinError(Midx,fs_Nj4_M_err_lo_dn);
+  h_FS_4_lo_up->SetBinError(Lidx,fs_Nj4_L_err_up);
+  h_FS_4_lo_dn->SetBinError(Lidx,fs_Nj4_L_err_dn);
 
-  // Now save a copy with systematics
-  TH1D* h_FS_syststat = (TH1D*) h_FS->Clone("h_FS_syststat");
-  TH1D* h_FS_23_syststat = (TH1D*) h_FS_23->Clone("h_FS_23_syststat");
-  TH1D* h_FS_4_syststat = (TH1D*) h_FS_4->Clone("h_FS_4_syststat");
-  TH1D* h_FS_hi_syststat = (TH1D*) h_FS_hi->Clone("h_FS_hi_syststat");
-  TH1D* h_FS_23_hi_syststat = (TH1D*) h_FS_23_hi->Clone("h_FS_23_hi_syststat");
-  TH1D* h_FS_4_hi_syststat = (TH1D*) h_FS_4_hi->Clone("h_FS_4_hi_syststat");
-  TH1D* h_FS_lo_syststat = (TH1D*) h_FS_lo->Clone("h_FS_lo_syststat");
-  TH1D* h_FS_23_lo_syststat = (TH1D*) h_FS_23_lo->Clone("h_FS_23_lo_syststat");
-  TH1D* h_FS_4_lo_syststat = (TH1D*) h_FS_4_lo->Clone("h_FS_4_lo_syststat");
-
-  h_FS_syststat->SetBinError(Pidx,sqrt(pow(h_FS_syststat->GetBinError(Pidx),2)+pow(fs_P_syst,2)));
-  h_FS_syststat->SetBinError(P3idx,sqrt(pow(h_FS_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst,2)));
-  h_FS_syststat->SetBinError(P4idx,sqrt(pow(h_FS_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst,2)));
-  h_FS_syststat->SetBinError(Midx,sqrt(pow(h_FS_syststat->GetBinError(Midx),2)+pow(fs_M_syst,2)));
-  h_FS_syststat->SetBinError(Lidx,sqrt(pow(h_FS_syststat->GetBinError(Lidx),2)+pow(fs_L_syst,2)));
-
-  h_FS_23_syststat->SetBinError(Pidx,sqrt(pow(h_FS_23_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj23,2)));
-  h_FS_23_syststat->SetBinError(P3idx,sqrt(pow(h_FS_23_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj23,2)));
-  h_FS_23_syststat->SetBinError(P4idx,sqrt(pow(h_FS_23_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj23,2)));
-  h_FS_23_syststat->SetBinError(Midx,sqrt(pow(h_FS_23_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj23,2)));
-  h_FS_23_syststat->SetBinError(Lidx,sqrt(pow(h_FS_23_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj23,2)));
-
-  h_FS_4_syststat->SetBinError(Pidx,sqrt(pow(h_FS_4_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj4,2)));
-  h_FS_4_syststat->SetBinError(P3idx,sqrt(pow(h_FS_4_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj4,2)));
-  h_FS_4_syststat->SetBinError(P4idx,sqrt(pow(h_FS_4_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj4,2)));
-  h_FS_4_syststat->SetBinError(Midx,sqrt(pow(h_FS_4_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj4,2)));
-  h_FS_4_syststat->SetBinError(Lidx,sqrt(pow(h_FS_4_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj4,2)));
-
-  h_FS_hi_syststat->SetBinError(Pidx,sqrt(pow(h_FS_hi_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_hi,2)));
-  h_FS_hi_syststat->SetBinError(P3idx,sqrt(pow(h_FS_hi_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_hi,2)));
-  h_FS_hi_syststat->SetBinError(P4idx,sqrt(pow(h_FS_hi_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_hi,2)));
-  h_FS_hi_syststat->SetBinError(Midx,sqrt(pow(h_FS_hi_syststat->GetBinError(Midx),2)+pow(fs_M_syst_hi,2)));
-  h_FS_hi_syststat->SetBinError(Lidx,sqrt(pow(h_FS_hi_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_hi,2)));
-
-  h_FS_23_hi_syststat->SetBinError(Pidx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj23_hi,2)));
-  h_FS_23_hi_syststat->SetBinError(P3idx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj23_hi,2)));
-  h_FS_23_hi_syststat->SetBinError(P4idx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj23_hi,2)));
-  h_FS_23_hi_syststat->SetBinError(Midx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj23_hi,2)));
-  h_FS_23_hi_syststat->SetBinError(Lidx,sqrt(pow(h_FS_23_hi_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj23_hi,2)));
-
-  h_FS_4_hi_syststat->SetBinError(Pidx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj4_hi,2)));
-  h_FS_4_hi_syststat->SetBinError(P3idx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj4_hi,2)));
-  h_FS_4_hi_syststat->SetBinError(P4idx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj4_hi,2)));
-  h_FS_4_hi_syststat->SetBinError(Midx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj4_hi,2)));
-  h_FS_4_hi_syststat->SetBinError(Lidx,sqrt(pow(h_FS_4_hi_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj4_hi,2)));
-
-  h_FS_lo_syststat->SetBinError(Pidx,sqrt(pow(h_FS_lo_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_lo,2)));
-  h_FS_lo_syststat->SetBinError(P3idx,sqrt(pow(h_FS_lo_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_lo,2)));
-  h_FS_lo_syststat->SetBinError(P4idx,sqrt(pow(h_FS_lo_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_lo,2)));
-  h_FS_lo_syststat->SetBinError(Midx,sqrt(pow(h_FS_lo_syststat->GetBinError(Midx),2)+pow(fs_M_syst_lo,2)));
-  h_FS_lo_syststat->SetBinError(Lidx,sqrt(pow(h_FS_lo_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_lo,2)));
-
-  h_FS_23_lo_syststat->SetBinError(Pidx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj23_lo,2)));
-  h_FS_23_lo_syststat->SetBinError(P3idx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj23_lo,2)));
-  h_FS_23_lo_syststat->SetBinError(P4idx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj23_lo,2)));
-  h_FS_23_lo_syststat->SetBinError(Midx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj23_lo,2)));
-  h_FS_23_lo_syststat->SetBinError(Lidx,sqrt(pow(h_FS_23_lo_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj23_lo,2)));
-
-  h_FS_4_lo_syststat->SetBinError(Pidx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(Pidx),2)+pow(fs_P_syst_Nj4_lo,2)));
-  h_FS_4_lo_syststat->SetBinError(P3idx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(P3idx),2)+pow(fs_P3_syst_Nj4_lo,2)));
-  h_FS_4_lo_syststat->SetBinError(P4idx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(P4idx),2)+pow(fs_P4_syst_Nj4_lo,2)));
-  h_FS_4_lo_syststat->SetBinError(Midx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(Midx),2)+pow(fs_M_syst_Nj4_lo,2)));
-  h_FS_4_lo_syststat->SetBinError(Lidx,sqrt(pow(h_FS_4_lo_syststat->GetBinError(Lidx),2)+pow(fs_L_syst_Nj4_lo,2)));
-
-  // Now save just the systematics
+  // Now save the systematics
   TH1D* h_FS_syst = (TH1D*) h_FS->Clone("h_FS_syst");
   TH1D* h_FS_23_syst = (TH1D*) h_FS_23->Clone("h_FS_23_syst");
   TH1D* h_FS_4_syst = (TH1D*) h_FS_4->Clone("h_FS_4_syst");
@@ -1961,6 +2202,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     low_hists[(*hist)]->Write();
     hi_hists[(*hist)]->Write();
   }
+
+  h_2STC_MR->Write();
+  h_2STC_VR->Write();
+  h_2STC_SR->Write();
+
   h_FS->Write();
   h_FS_23->Write();
   h_FS_4->Write();
@@ -1970,6 +2216,26 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_lo->Write();
   h_FS_23_lo->Write();
   h_FS_4_lo->Write();
+
+  h_FS_up->Write();
+  h_FS_23_up->Write();
+  h_FS_4_up->Write();
+  h_FS_hi_up->Write();
+  h_FS_23_hi_up->Write();
+  h_FS_4_hi_up->Write();
+  h_FS_lo_up->Write();
+  h_FS_23_lo_up->Write();
+  h_FS_4_lo_up->Write();
+
+  h_FS_dn->Write();
+  h_FS_23_dn->Write();
+  h_FS_4_dn->Write();
+  h_FS_hi_dn->Write();
+  h_FS_23_hi_dn->Write();
+  h_FS_4_hi_dn->Write();
+  h_FS_lo_dn->Write();
+  h_FS_23_lo_dn->Write();
+  h_FS_4_lo_dn->Write();
 
   h_FS_syst->Write();
   h_FS_23_syst->Write();
@@ -1981,23 +2247,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_23_lo_syst->Write();
   h_FS_4_lo_syst->Write();
 
-  h_FS_syststat->Write();
-  h_FS_23_syststat->Write();
-  h_FS_4_syststat->Write();
-  h_FS_hi_syststat->Write();
-  h_FS_23_hi_syststat->Write();
-  h_FS_4_hi_syststat->Write();
-  h_FS_lo_syststat->Write();
-  h_FS_23_lo_syststat->Write();
-  h_FS_4_lo_syststat->Write();
-
-
-  h_FS_alt_rel_err->Write();
-  h_FS_23_alt_rel_err->Write();
-  h_FS_4_alt_rel_err->Write();
-
   outfile_.Close();
   cout << "Wrote everything" << endl;
+
+  cout << "Total short track count: " << numberOfAllSTs << endl;
+  cout << "Total short track candidate count: " << numberOfAllSTCs << endl;
+
 
   return 0;
 }
