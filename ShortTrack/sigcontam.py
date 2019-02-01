@@ -54,12 +54,12 @@ for filename in filenames:
 
     if filename == d1718:
         print "2017-2018 Data"
-        datafile = ROOT.TFile.Open("output_merged/data_2017and2018_{}_syststat.root".format(tag))
+        datafile = ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(tag))
         rescale = 1+(58.83/41.97)
         fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2017and2018_NM1.root")
     elif filename == d16:
         print "2016 Data"
-        datafile = ROOT.TFile.Open("output_merged/data_2016_{}_syststat.root".format(tag))
+        datafile = ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
         rescale = 35.9/41.97
         fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2016_NM1.root")
 
@@ -67,6 +67,9 @@ for filename in filenames:
         signalname = inputnamelist[index]
         for histname in histnames:
             hdata = datafile.Get(histname)
+            if hdata == None:
+                print histname
+                exit(1)
             hsig = signalfile.Get(histname)
             hsig.Scale(rescale)
             h_correction = ROOT.TH1D(histname+"_contam_"+signalname,"Total Relative Correction",hdata.GetNbinsX(),0,hdata.GetNbinsX())
@@ -99,20 +102,19 @@ for filename in filenames:
                     print "Capping at 100% efficiency loss"
                     delta_count_stc = stc_data                    
                 relative_delta_stc = delta_count_stc / st_sig if st_sig > 0 else 0
-                h_STC.SetBinContent(length,relative_delta_stc)
-                h_STC.SetBinError(length,0 if stc_sig == 0 else hsig.GetBinError(length)/stc_sig * relative_delta_stc)
+                h_STC.SetBinContent(length,delta_count_stc)
 
                 new_st_count = st_sig - delta_count_stc
 
                 # No do impact of MR contamination, through fshort
-                adj_stc = stc_data - stc_sig
+                #adj_stc = stc_data - stc_sig
                 delta_fs = max(h_deltafs.GetBinContent(length),0)                    
-                delta_count_fs = adj_stc * delta_fs
+                delta_count_fs = stc_data * delta_fs # instead of using adj_stc, use stc_data. This is conservative, and makes contam proportional to signal strength.
                 if deltafs_name == "h_fsMR_4_Baseline_lowpt_deltafs_fastsim_90cm_1800_1400" and filename == d1718 and length == 2 and histname.find("_HL_") > 0 and histname.find("_SR_") > 0:
                     h_deltafs.Print("all")
                     hsig.Print("all")
                     print "delta fs",delta_fs
-                    print "new Nstc",adj_stc
+                    #print "new Nstc",adj_stc
                     print "change in count due to fs",delta_count_fs
                     print "Nst sig",st_sig
                     print "Nst'/Nst",(new_st_count-delta_count_fs)/st_sig if st_sig > 0 else "0 denom"

@@ -34,6 +34,54 @@ if len(sys.argv) < 2:
 tag=sys.argv[1]
 merge2017and2018 = len(sys.argv) == 2
 
+def getAsymmetricErrors(y):
+    yp=0.0
+    ym=0.0
+    yerr=[]
+    alpha=1 - 0.6827
+    if(y==0):
+        ym = 0.0
+    else:
+        ym = ROOT.Math.gamma_quantile(alpha/2,y,1);
+    yp =  ROOT.Math.gamma_quantile_c(alpha/2,y+1,1)
+    ym=y-ym
+    yp=yp-y
+    yerr.append(yp)
+    yerr.append(ym)
+    return yerr
+
+def getPoissonGraph( histo, errors = None, drawXline = True):
+
+  nBins = histo.GetNbinsX()
+  graph = ROOT.TGraphAsymmErrors()
+
+  graph.SetMaximum(histo.GetMaximum())
+  graph.SetMinimum(histo.GetMinimum())
+  graph.SetLineWidth(histo.GetLineWidth())
+  graph.SetLineColor(histo.GetLineColor())
+  graph.SetFillColor(histo.GetFillColor())
+  graph.GetYaxis().SetTitle(histo.GetYaxis().GetTitle())
+  graph.GetXaxis().SetTitle(histo.GetXaxis().GetTitle())
+  graph.SetTitle(histo.GetTitle())
+
+  for iBin in xrange(1,nBins+1):
+      x = histo.GetXaxis().GetBinCenter(iBin)
+      xerr = histo.GetBinWidth(iBin)/2.0 if drawXline else 0
+      y = histo.GetBinContent(iBin)
+      
+      yerrplus=0.0
+      yerrminus=0.0
+
+      yerr = getAsymmetricErrors(y) if errors is None else errors[iBin-1]
+      yerrplus = yerr[0]
+      yerrminus = yerr[1]
+
+      thisPoint = graph.GetN();
+      graph.SetPoint( thisPoint, x, y );
+      graph.SetPointError( thisPoint, xerr, xerr, yerrminus, yerrplus );
+      if verbose: print x, y, xerr, xerr, yerrminus, yerrplus
+
+  return graph
 
 def printHeader(outfile):
     outfile.write("\documentclass[10pt]{article}\n\n")
@@ -197,20 +245,24 @@ def getFshortMerged(region,data):
             hname = "h_fs"+fileregion+"_"+variation+ptstring
 
             h = d1718.Get(hname)
+            h_up = d1718.Get(hname+"_up")
+            h_dn = d1718.Get(hname+"_dn")
             vals1718[variation+ptstring + " STC"] = h.GetBinContent(cat,3)
             vals1718[variation+ptstring + " ST"] = h.GetBinContent(cat,2)
             vals1718[variation+ptstring + " FS"] = h.GetBinContent(cat,1)
             errs1718[variation+ptstring + " STC"] = h.GetBinError(cat,3)
             errs1718[variation+ptstring + " ST"] = h.GetBinError(cat,2)
-            errs1718[variation+ptstring + " FS"] = h.GetBinError(cat,1)
+            errs1718[variation+ptstring + " FS"] = (h_up.GetBinError(cat,1),h_dn.GetBinError(cat,1))
 
             h = d16.Get(hname)
+            h_up = d16.Get(hname+"_up")
+            h_dn = d16.Get(hname+"_dn")
             vals16[variation+ptstring + " STC"] = h.GetBinContent(cat,3)
             vals16[variation+ptstring + " ST"] = h.GetBinContent(cat,2)
             vals16[variation+ptstring + " FS"] = h.GetBinContent(cat,1)
             errs16[variation+ptstring + " STC"] = h.GetBinError(cat,3)
             errs16[variation+ptstring + " ST"] = h.GetBinError(cat,2)
-            errs16[variation+ptstring + " FS"] = h.GetBinError(cat,1)
+            errs16[variation+ptstring + " FS"] = (h_up.GetBinError(cat,1), h_dn.GetBinError(cat,1))
             
 
         hnamesyst = "h_fs"+fileregion+"_Baseline"+ptstring+"_syst"
@@ -303,12 +355,16 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     hist.SetLineWidth(3)
     hdef=hist.Clone(region+ptstring+"_Baseline")
     variation_index = 1
+    var_errs = []
+    def_errs = []
     for variation in variations:
         hdef.GetXaxis().SetBinLabel(variation_index,roottag[variation])
-        hist.SetBinContent(variation_index,vals[variation+" FS"])
-        hist.SetBinError(variation_index,errs[variation+" FS"])
+        hist.SetBinContent(variation_index,vals[variation+" FS"] if vals[variation+" FS"] > 0 else -1)
+        hist.SetBinError(variation_index,1e-9)
+        var_errs.append(errs[variation+" FS"])
         hdef.SetBinContent(variation_index,vals["Baseline"+ptstring+" FS"])
-        hdef.SetBinError(variation_index,errs["Baseline"+ptstring+" FS"])
+        hdef.SetBinError(variation_index,1e-9)
+        def_errs.append(errs["Baseline"+ptstring+" FS"])
         variation_index += 1    
     hdef.GetXaxis().LabelsOption("v")
     hdef.SetMaximum(hist.GetMaximum() * 2)
@@ -318,18 +374,23 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     hdef.SetLineColor(ROOT.kBlack)
     hdef_nofill = hdef.Clone(hdef.GetName()+"nofill")
     hsyst= hdef.Clone(hdef.GetName()+"_syst")
-    for bin in range(1,hdef.GetNbinsX()+1):
-        hsyst.SetBinError(bin,sqrt(systs["Baseline"+ptstring]**2+hdef.GetBinError(bin)**2))
-#    print desc,hdef.GetBinContent(1),hdef.GetBinError(1), hdef_nofill.GetBinError(1)
     hsyst.SetFillColor(ROOT.kGray+2)
     hdef.SetFillColor(ROOT.kGray)
+    gdef = getPoissonGraph(hdef, def_errs)
+    gvar = getPoissonGraph(hist, var_errs)
+    syst_errs = [sqrt(systs["Baseline"+ptstring]**2+errs["Baseline"+ptstring+" FS"][i]**2) for i in [0,1]]
+    print syst_errs
+    gsyst = getPoissonGraph( hsyst, [syst_errs for i in range(len(def_errs))] )
     tl.AddEntry(hist,"Variations")
     tl.AddEntry(hdef,"Baseline, Stat Error Only")
-    tl.AddEntry(hsyst,"Baseline, Quadrature(Stat, Syst)")
-    hsyst.Draw("E2")
-    hdef.Draw("E2 same")
-    hdef_nofill.Draw("hist same")
+    tl.AddEntry(hsyst,"Baseline, Quadrature(Stat, Syst)")    
+    hsyst.Draw("AXIS")
+    gsyst.Draw("2 same")
+    gdef.Draw("2 same")
+    hdef_nofill.Draw("same")
+    gvar.Draw("p same")
     hist.Draw("same")
+    hsyst.Draw("AXIS same")
     tl.Draw()
     simplecanvas.SaveAs("fshort_plots/{}.png".format(hist.GetName()+"_"+desc))
 
@@ -348,13 +409,9 @@ for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_
     else:
         D1718,eD1718,D16,eD16,sD1718,sD16=getFshortMerged(region,True)
 
-    output = open("variation_tables/fshort_data_{}.tex".format(region),"w")
-    printHeader(output)
-    startFshortTableData(output)    
-    for variation in tablevariations:
-        output.write(getLineData(variation,D18,eD18,D17,eD17,D16,eD16)) if not merge2017and2018 else output.write(getLineDataMerged(variation,D1718,eD1718,D16,eD16))
-    printFooter(output)
-    output.close()
+    M17,eM17,M16,eM16,sM17,sM16=getFshortMerged(region,False)
+
+    print sD16
 
     if not merge2017and2018:
         makePlot(region,plotvariations,D18,eD18,"2018_DATA")
@@ -371,15 +428,6 @@ for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_
     makePlot(region,plotvariations_lowpt,D16,eD16,sD16,"2016_DATA_lowpt","_lowpt")
     makePlot(region,plotvariations_hipt,D16,eD16,sD16,"2016_DATA_hipt","_hipt")
 
-    M17,eM17,M16,eM16,sM17,sM16=getFshortMerged(region,False)
-
-    output = open("variation_tables/fshort_mc_{}.tex".format(region),"w")
-    printHeader(output)
-    startFshortTableMC(output)
-    for variation in tablevariations:
-        output.write(getLineMC(variation,M17,eM17,M16,eM16))
-    printFooter(output)
-    output.close()
 
     makePlot(region,plotvariations,M17,eM17,sM17,"2017_MC")
     makePlot(region,plotvariations,M16,eM16,sM16,"2016_MC")
@@ -389,5 +437,24 @@ for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_
     makePlot(region,plotvariations_lowpt,M17,eM17,sM17,"2017_MC_lowpt","_lowpt")
     makePlot(region,plotvariations_hipt,M16,eM16,sM16,"2016_MC_hipt","_hipt")
     makePlot(region,plotvariations_hipt,M17,eM17,sM17,"2017_MC_hipt","_hipt")
+
+    continue
+
+    output = open("variation_tables/fshort_data_{}.tex".format(region),"w")
+    printHeader(output)
+    startFshortTableData(output)    
+    for variation in tablevariations:
+        output.write(getLineData(variation,D18,eD18,D17,eD17,D16,eD16)) if not merge2017and2018 else output.write(getLineDataMerged(variation,D1718,eD1718,D16,eD16))
+    printFooter(output)
+    output.close()
+
+    output = open("variation_tables/fshort_mc_{}.tex".format(region),"w")
+    printHeader(output)
+    startFshortTableMC(output)
+    for variation in tablevariations:
+        output.write(getLineMC(variation,M17,eM17,M16,eM16))
+    printFooter(output)
+    output.close()
+
 
 print "Done"

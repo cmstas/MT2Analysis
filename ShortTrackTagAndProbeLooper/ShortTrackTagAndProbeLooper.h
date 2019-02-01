@@ -1,5 +1,5 @@
-#ifndef SHORTTRACKLOOPER_H
-#define SHORTTRACKLOOPER_H
+#ifndef STP_H
+#define STP_H
 
 // C++
 #include <iostream>
@@ -9,8 +9,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <map>
-#include <unordered_map>
-#include <vector>
 
 // ROOT
 #include "TMath.h"
@@ -20,28 +18,25 @@
 #include "TProfile.h"
 #include "TChain.h"
 
+// Tools
 #include "../CORE/Tools/utils.h"
 #include "../CORE/Tools/goodrun.h"
 #include "../CORE/Tools/dorky/dorky.h"
 #include "../CORE/Tools/badEventFilter.h"
 
-#include "../MT2CORE/mt2tree.h"
+#include "../MT2CORE/MHtree.h"
 #include "../MT2CORE/configurations.h"
-#include "../MT2CORE/applyWeights.h"
 
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
-class ShortTrackLooper {
+class ShortTrackTagAndProbeLooper {
  public:
-  ShortTrackLooper();
-  ~ShortTrackLooper();
-  int InEtaPhiVetoRegion(float eta, float phi, int year);
-  int loop(TChain* ch_st, char* infile, std::string config, char* runtag);
-  float getAverageISRWeight(const std::string sample, const std::string config_tag);
+  ShortTrackTagAndProbeLooper();
+  ~ShortTrackTagAndProbeLooper();
+  int loop(TChain* ch_st, char* infile, char* config_tag);
  private:
   MT2Configuration config_;
-  MT2Configuration data_config_;
 };
 
 #endif
