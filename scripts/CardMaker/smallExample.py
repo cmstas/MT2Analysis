@@ -3,9 +3,11 @@ import ROOT as r
 from Datacard import *
 
 ## working example
-dc = Datacard("test", 3, ["zinv", "llep", "qcd"], years=[16,17,18], split_bkg_by_year=True)
+dc = Datacard("test", 3, ["zinv", "llep", "qcd"], years=[16,17,18], split_bkg_by_year=True, split_sig_by_year=True)
 dc.SetObservation(24)
-dc.SetSignalRate(0.516)
+dc.SetSignalRate(0.516, 16)
+dc.SetSignalRate(0.221, 17)
+dc.SetSignalRate(0.468, 18)
 dc.SetBkgRate(6.0, "zinv", 16)
 dc.SetBkgRate(4.0, "zinv", 17)
 dc.SetBkgRate(2.0, "zinv", 18)

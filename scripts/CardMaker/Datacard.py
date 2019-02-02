@@ -1,7 +1,8 @@
 from math import log10, isinf, isnan
 
 class Datacard:
-    def __init__(self, name, nbkg, bkg_names, nchan=1, chan_names=None, years=None, split_bkg_by_year=False):
+    def __init__(self, name, nbkg, bkg_names, nchan=1, chan_names=None, years=None, 
+                 split_bkg_by_year=False, split_sig_by_year=False):
         self.name = name
         self.nbkg = nbkg
         self.bkg_names = bkg_names
@@ -39,8 +40,17 @@ class Datacard:
             self.n_split_bkg = self.nbkg
             self.split_bkg_names = self.bkg_names
 
+        self.split_sig_by_year = split_sig_by_year
+        if split_sig_by_year:
+            self.sig_rate = {}
+            self.nsig = len(years)
+            for y in years:
+                self.sig_rate[y] = 0.0
+        else:
+            self.nsig = 1
+            self.sig_rate = 0.0
+
         self.obs = 0
-        self.sig_rate = 0.0
         self.bkg_rates = {}
         for bkg in self.split_bkg_names:
             self.bkg_rates[bkg] = 0.0
@@ -62,8 +72,13 @@ class Datacard:
     def SetObservation(self, obs):
         self.obs = obs
 
-    def SetSignalRate(self, rate):
-        self.sig_rate = rate
+    def SetSignalRate(self, rate, year=None):
+        if year is None and self.split_sig_by_year:
+            raise Exception("ERROR: you're splitting signal by year, must specify year!")
+        if self.split_sig_by_year:
+            self.sig_rate[year] = rate
+        else:
+            self.sig_rate = rate
 
     def SetBkgRate(self, rate, bkg_name, year=None):
         if year is None and self.years is not None:
@@ -84,10 +99,10 @@ class Datacard:
         if split_by_year:
             for year in self.years:
                 fullname = name+"_"+str(year)
-                nuis = Nuisance(fullname, nuisType, self.n_split_bkg)
+                nuis = Nuisance(fullname, nuisType, self.nsig, self.n_split_bkg)
                 self.nuisances[fullname] = nuis
         else:
-            nuis = Nuisance(name, nuisType, self.n_split_bkg)
+            nuis = Nuisance(name, nuisType, self.nsig, self.n_split_bkg)
             self.nuisances[name] = nuis
 
     def GetFullNuisName(self, nuisname, year=None):
@@ -110,8 +125,18 @@ class Datacard:
         self.nuisances[fullname].N = N
 
     def SetNuisanceSignalValue(self, nuisname, value, year=None):
+        if self.split_sig_by_year and year is None:
+            raise Exception("ERROR: you're splitting signal by year, must specify year!")
+        if isnan(value) or isinf(value):
+            raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, signal, year {2}".format(nuisname, bkg_name, year))
+
         fullname = self.GetFullNuisName(nuisname, year)
-        self.nuisances[fullname].sig_value = value
+
+        if self.split_sig_by_year:
+            idx = self.years.index(year)
+            self.nuisances[fullname].sig_value[idx] = value
+        else:
+            self.nuisances[fullname].sig_value[0] = value
 
     def SetNuisanceBkgValue(self, nuisname, value, bkg_name, year=None):
         if self.split_bkg_by_year and year is None:
@@ -150,7 +175,7 @@ class Datacard:
         for name in self.nuisances:
             maxNuisLength = max(maxNuisLength, len(name))
 
-        colsizes = [maxNuisLength+2, 12] + [13]*(self.n_split_bkg + 1)
+        colsizes = [maxNuisLength+2, 12] + [13]*(self.nsig + self.n_split_bkg)
         ml = lambda s,l: s+" "*max(1,(l-len(s)))
 
         fid.write("imax {0}  number of channels\n".format(self.nchan))
@@ -167,20 +192,26 @@ class Datacard:
         fid.write('\n')
         fid.write(ml("process", colsizes[0]))
         fid.write(ml("", colsizes[1]))
-        fid.write(ml("sig", colsizes[2]))
+        for i in range(self.nsig):
+            signame = "sig"+str(self.years[i]) if self.split_sig_by_year else "sig"
+            fid.write(ml(signame, colsizes[i+2]))
         for i in range(self.n_split_bkg):
-            fid.write(ml(self.split_bkg_names[i], colsizes[i+3]))
+            fid.write(ml(self.split_bkg_names[i], colsizes[i+2+self.nsig]))
         fid.write('\n')
         fid.write(ml("process", colsizes[0]))
         fid.write(ml("", colsizes[1]))
-        for i in range(self.n_split_bkg+1):
-            fid.write(ml(str(i), colsizes[i+2]))
+        for i in range(self.nsig + self.n_split_bkg):
+            idx = 0 if i<self.nsig else i+1-self.nsig
+            fid.write(ml(str(idx), colsizes[i+2]))
         fid.write('\n')
         fid.write(ml("rate", colsizes[0]))
         fid.write(ml("", colsizes[1]))
-        fid.write(ml("{0:.3f}".format(self.sig_rate), colsizes[2]))
+        for i in range(self.nsig):
+            sig_rate = self.sig_rate[self.years[i]] if self.split_sig_by_year else self.sig_rate
+            fid.write(ml("{0:.3f}".format(sig_rate), colsizes[i+2]))
         for i in range(self.n_split_bkg):
-            fid.write(ml("{0:.3f}".format(self.bkg_rates[self.split_bkg_names[i]]), colsizes[i+3]))
+            rate = self.bkg_rates[self.split_bkg_names[i]]
+            fid.write(ml("{0:.3f}".format(rate), colsizes[i+2+self.nsig]))
         fid.write('\n')
         fid.write("-"*sum(colsizes)+'\n')
 
@@ -192,31 +223,33 @@ class Datacard:
 
             if tp=="lnN":
                 fid.write(ml(tp, colsizes[1]))                
-                if sigval is None:
-                    fid.write(ml("-", colsizes[2]))
-                else:
-                    fid.write(ml("{0:.3f}".format(sigval), colsizes[2]))
+                for i in range(self.nsig):
+                    if sigval[i] is None:
+                        fid.write(ml("-", colsizes[i+2]))
+                    else:
+                        fid.write(ml("{0:.3f}".format(sigval[i]), colsizes[i+2]))
                 for i in range(self.n_split_bkg):
                     if bkgvals[i] is None:
-                        fid.write(ml("-", colsizes[i+3]))
+                        fid.write(ml("-", colsizes[i+2+self.nsig]))
                     elif type(bkgvals[i])==tuple:
-                        fid.write(ml("{0:.3f}/{1:.3f}".format(*bkgvals[i]), colsizes[i+3]))
+                        fid.write(ml("{0:.3f}/{1:.3f}".format(*bkgvals[i]), colsizes[i+2+self.nsig]))
                     else:
-                        fid.write(ml("{0:.3f}".format(bkgvals[i]), colsizes[i+3]))
+                        fid.write(ml("{0:.3f}".format(bkgvals[i]), colsizes[i+2+self.nsig]))
             elif tp=="gmN":
                 N = self.nuisances[nuis].N
                 fid.write(ml(tp+" "+str(N), colsizes[1]))
-                if sigval is None:
-                    fid.write(ml("-", colsizes[2]))
-                else:
-                    nround = max(0, int(-log10(sigval))+4)
-                    fid.write(ml("{{0:.{0}f}}".format(nround).format(sigval), colsizes[2]))
+                for i in range(self.nsig):
+                    if sigval[i] is None:
+                        fid.write(ml("-", colsizes[i+2]))
+                    else:
+                        nround = max(0, int(-log10(sigval))+4)
+                        fid.write(ml("{{0:.{0}f}}".format(nround).format(sigval[i]), colsizes[i+2]))
                 for i in range(self.n_split_bkg):
                     if bkgvals[i] is None:
-                        fid.write(ml("-", colsizes[i+3]))
+                        fid.write(ml("-", colsizes[i+2+self.nsig]))
                     else:
                         nround = max(0, int(-log10(bkgvals[i]))+4)
-                        fid.write(ml("{{0:.{0}f}}".format(nround).format(bkgvals[i]), colsizes[i+3]))
+                        fid.write(ml("{{0:.{0}f}}".format(nround).format(bkgvals[i]), colsizes[i+2+self.nsig]))
                         if self.bkg_rates[self.split_bkg_names[i]] > 0 and \
                                 abs(bkgvals[i]*N / self.bkg_rates[self.split_bkg_names[i]] - 1) > 1e-5:
                             raise Exception("ERROR: gmN values and rate don't line up! Nuis: {0}, Bkg: {1}".format(nuis, self.split_bkg_names[i]))
@@ -229,20 +262,21 @@ class Datacard:
 
 
 class Nuisance:
-    def __init__(self, name, nuisType, nbkg, correlation=0):
+    def __init__(self, name, nuisType, nsig, nbkg):
         self.name = name
         if nuisType not in ["gmN", "lnN"]:
             raise Exception("ERROR: nuisance type {0} not supported. Only gmN and lnN".format(nuisType))
         self.type = nuisType
         self.nbkg = nbkg
-        
+        self.nsig = nsig
+
         if self.type=="gmN":
             self.N = 0
             self.bkg_values = [None]*nbkg
-            self.sig_value = None
+            self.sig_value = [None]*nsig
         elif self.type=="lnN":
             self.N = None
             self.bkg_values = [None]*nbkg
-            self.sig_value = None
+            self.sig_value = [None]*nsig
 
 
