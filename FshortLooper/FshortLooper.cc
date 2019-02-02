@@ -20,7 +20,7 @@ const bool doNTrueIntReweight = true; // evt_id is messed up in current babies
 
 const bool applyDileptonTriggerWeights = true;
 
-const bool blind = true;
+const bool blind = false;
 
 const bool skipHighWeights = true; // turn on to skip MC events with weight > 1, to keep errors reasonable
 
@@ -29,7 +29,7 @@ const bool fillUnimportantCutHists = false; // turn on to fill Nvertex, Eta, Nta
 
 const bool fillNM1Hists = false; // turn on to fill NM1 histograms (need to set recalculate and fillCutHists to true)
 
-const bool onlyMatchedTracks = false; // for fshort, use only matched chargino tracks
+bool onlyMatchedTracks = true; // for fshort, use only matched chargino tracks if signal
 
 bool doHEMveto = true;
 int HEM_startRun = 319077; // affects 38.58 out of 58.83 fb-1 in 2018
@@ -38,14 +38,8 @@ float HEM_ptCut = 30.0;  // veto on jets above this threshold
 float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
-bool applyL1PrefireWeights = false;
+bool applyL1PrefireWeights = true;
 
-/*
-TFile VetoFile("VetoHists.root");
-TH2F* veto_bar = (TH2F*) VetoFile.Get("h_VetoEtaPhi_bar");
-TH2F* veto_ecp = (TH2F*) VetoFile.Get("h_VetoEtaPhi_ecp");
-TH2F* veto_ecn = (TH2F*) VetoFile.Get("h_VetoEtaPhi_ecn");
-*/
 TFile VetoFile("veto_etaphi.root");
 TH2F* veto_etaphi_16 = (TH2F*) VetoFile.Get("etaphi_veto_16");
 TH2F* veto_etaphi_17 = (TH2F*) VetoFile.Get("etaphi_veto_17");
@@ -53,19 +47,6 @@ TH2F* veto_etaphi_18 = (TH2F*) VetoFile.Get("etaphi_veto_18");
 
 int FshortLooper::InEtaPhiVetoRegion(float eta, float phi, int year) {
   if (fabs(eta) > 2.4) return -1;
-  /*
-  else if (eta > 1.4) {
-    float bc = veto_ecp->GetBinContent(veto_ecp->FindBin(eta,phi));
-    if (bc > 0) return 3;
-  } else if (eta < -1.4) {
-    float bc = veto_ecn->GetBinContent(veto_ecn->FindBin(eta,phi));
-    if (bc > 0) return 2;
-  } else {
-    float bc = veto_bar->GetBinContent(veto_bar->FindBin(eta,phi));
-    if (bc > 0) return 1;
-  }
-  if (eta < -1.05 && eta > -1.15 && phi < -1.8 && phi > -2.1) return 4;  
-  */
   TH2F* veto_hist = veto_etaphi_16;
   if (year == 2017) veto_hist = veto_etaphi_17;
   if (year == 2018) veto_hist = veto_etaphi_18;
@@ -84,6 +65,7 @@ bool FshortLooper::FillHists(const vector<TH2D*>& hists, const double weight, co
 int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::string mode) {
   string tag(outtag);
 
+  //    bool isSignal_ = t.evt_id >= 1000;
   bool isSignal = tag.find("sim") != std::string::npos;
 
   cout << "mode: " << mode << endl;
@@ -96,6 +78,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   cout << (doNoLeps ? "All-hadronic" : "Zll") << endl;
 
   cout << (isSignal ? "isSignal True" : "isSignal False") << endl;
+
+  if (!isSignal) onlyMatchedTracks = false;
 
   TH1F* h_xsec = 0;
   if (isSignal) {
@@ -369,41 +353,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     fillTriggerVector(t, trigs_singleLep_, config_.triggers["SingleEl"]);
     fillTriggerVector(t, trigs_doubleLep_, config_.triggers["DilepSF"]);
     fillTriggerVector(t, trigs_doubleLep_, config_.triggers["DilepOF"]);
-  } else if (config_tag.find("mc") != std::string::npos) {
-    std::string data_config_tag = "";
-    if (config_tag == "mc_94x_Fall17") data_config_tag = "data_2017_31Mar2018";
-    else if (config_tag == "mc_94x_Summer16") data_config_tag = "data_2016_94x";
-
-    cout << "Detected we are running on MC corresponding to data config: " << data_config_tag << endl;
-					 
-    data_config_ = GetMT2Config(data_config_tag);
-    if( data_config_.triggers.find("SR")       == data_config_.triggers.end() ||
-        data_config_.triggers.find("prescaledHT")       == data_config_.triggers.end() ||
-        data_config_.triggers.find("SingleMu") == data_config_.triggers.end() ||
-        data_config_.triggers.find("SingleEl") == data_config_.triggers.end() ){
-      cout << "[FshortLooper::loop] ERROR: invalid trigger map in configuration '" << data_config_tag << "'!" << endl;
-      cout << "                         Make sure you have trigger vectors for 'SR', 'SingleMu', 'SingleEl', 'prescaledHT" << endl;
-      return -1;
-    }
-    cout << "                  Triggers:" << endl;
-    for(map<string,vector<string> >::iterator it=data_config_.triggers.begin(); it!=data_config_.triggers.end(); it++){
-      cout << "                    " << it->first << ":" << endl;
-      for(uint i=0; i<it->second.size(); i++){
-        if(i==0)
-          cout << "                      " << it->second.at(i);
-        else
-          cout << " || " << it->second.at(i);
-      }
-      cout << endl;
-    }
-    fillTriggerVector(t, trigs_SR_,        data_config_.triggers["SR"]);
-    fillTriggerVector(t, trigs_prescaled_, data_config_.triggers["prescaledHT"]);
-    fillTriggerVector(t, trigs_singleLep_, data_config_.triggers["SingleMu"]);
-    fillTriggerVector(t, trigs_singleLep_, data_config_.triggers["SingleEl"]);
-    fillTriggerVector(t, trigs_doubleLep_, data_config_.triggers["DilepSF"]);
-    fillTriggerVector(t, trigs_doubleLep_, data_config_.triggers["DilepOF"]);
-
-  }    else {
+  }
+  else if (config_tag.find("mc") == std::string::npos) {
     cout << "                  No triggers provided and no \"mc\" in config name. Weight calculation may be inaccurate." << endl;
     if(config_tag.find("data") != string::npos){
       cout << "[FshortLooper::loop] WARNING! it looks like you are using data and didn't supply any triggers in the configuration." <<
@@ -547,16 +498,16 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       }
     }
 
-    //const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
-    const bool passSRTrigger = passTrigger(t, trigs_SR_);
-    //    const bool passDilepTrigger = passTrigger(t, trigs_doubleLep_);
-    const bool passMonolepTrigger = passTrigger(t, trigs_singleLep_);
-    //    const bool passTrigger = passPrescaleTrigger || passSRTrigger;
-    const bool passTrigger = doNoLeps ? passSRTrigger : passSRTrigger || passMonolepTrigger;//passDilepTrigger;
-
-    if (!passTrigger && !isSignal) continue;
-
-    //    bool isSignal_ = t.evt_id >= 1000;
+    if (t.isData) {
+      //const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
+      const bool passSRTrigger = passTrigger(t, trigs_SR_);
+      //    const bool passDilepTrigger = passTrigger(t, trigs_doubleLep_);
+      const bool passMonolepTrigger = passTrigger(t, trigs_singleLep_);
+      //    const bool passTrigger = passPrescaleTrigger || passSRTrigger;
+      const bool passTrigger = doNoLeps ? passSRTrigger : passSRTrigger || passMonolepTrigger;//passDilepTrigger;
+      
+      if (!passTrigger) continue;
+    }
 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
 
@@ -584,8 +535,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	weight *= t.weight_isr / getAverageISRWeight(outtag,config_tag);
       }
 
-      //      if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80) {
-      if(applyL1PrefireWeights && (config_.year==2017) && config_.cmssw_ver!=80) { // 2016 babies not ready yet
+      if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80) {
 	weight *= t.weight_L1prefire;
       }
       //      weight *= t.weight_btagsf;
@@ -607,91 +557,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       if (skipHighWeights && weight > 1.0) continue; // skip high weighted events
 
     }
-    /*
-    // simulate turn-on curves and prescales in MC
-    if (!t.isData) {
-      if ( !passSRTrigger ) {
-	if (year == 2016) {
-	  if (t.HLT_PFHT475_Prescale) {
-	    weight /= 115.2;
-	  }
-	  else if (t.HLT_PFHT350_Prescale) {
-	    weight /= 460.6;
-	  }
-	  else { //125
-	    weight /= 9200.0; 
-	  }
-	}
-	else { // 2017 and 2018
-	  if (t.HLT_PFHT890_Prescale) {
-	    weight /= 17.1;
-	  }
-	  else if (t.HLT_PFHT780_Prescale) {
-	    weight /= 29.5;
-	  }	
-	  else if (t.HLT_PFHT680_Prescale) {
-	    weight /= 47.4;
-	  }	
-	  else if (t.HLT_PFHT590_Prescale) {
-	    weight /= 67.4;
-	  }
-	  else if (t.HLT_PFHT510_Prescale) {
-	    weight /= 145.0;
-	  }
-	  else if (t.HLT_PFHT430_Prescale) {
-	    weight /= 307.0;
-	  }
-	  else if (t.HLT_PFHT370_Prescale) {
-	    weight /= 707.0;
-	  }
-	  else if (t.HLT_PFHT250_Prescale) {
-	    weight /= 824.0;
-	  }
-	  else if (t.HLT_PFHT180_Prescale) {
-	    weight /= 1316.0;
-	  }
-	}
-      }
-      else { // not prescaled, but may not be in the 100% efficiency region
-	if (year == 2016 && (met < 250 && ht < 1000)) {
-	  if (met < 100) {
-	    // assume 0.1 for everything below 100 GeV
-	    weight *= 0.1;
-	  }
-	  else if (met < 200) {
-	    weight *= (((0.8/100) * (met - 100)) + 0.1);
-	  } else {
-	    weight *= (((0.1/50) * (met - 200)) + 0.9);
-	  }
-	}
-	// BUG
-	else if (year == 2017 && (met < 250 && ht < 1200)) {
-	  // use same values for 2017 for now
-	  if (met < 75) {
-	    // assume 0.1 for everything below 100 GeV
-	    weight *= 0.1;
-	    //weight *= ( (0.1/25) * (met - 100) ); 
-	    //weight = ( (0.1/25) * (met - 100) ); 
-	  }
-	  else if (met < 100) {
-	    // assume 0.1 for everything below 100 GeV
-	    weight *= 0.1;
-	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
-	    //weight *= ( (0.1/25) * (met - 75) ); 
-	    //weight *= ( (0.1/25) * (met - 75) ); 
-	    //weight = ( (0.1/25) * (met - 100) ); 
-	  }
-	  else if (met < 200) {
-	    weight *= (((0.8/100) * (met - 100)) + 0.1);
-	    //weight = (((0.8/100) * (met - 100)) + 0.1);
-	  } else {
-	    weight *= (((0.1/50) * (met - 200)) + 0.9);
-	    //weight = (((0.1/50) * (met - 200)) + 0.9);
-	  }	  
-	}
-      }
-    }
-    */
 
     if (weight < 0.0) {
       cout << "Negative weight: " << weight << ", " << t.run << ":" << t.lumi << ":" << t.evt << endl;
@@ -700,31 +565,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     vector<TH2D*> histsToFill; 
     vector<string> regsToFill = {"Incl"};
     vector<string> njhtToFill = {""};
-    /*
-    bool lowJ = t.nJet30 < 4;
-    bool lowHT = ht < 1200;
-    if (lowJ) {
-      njhtToFill.push_back("_23");
-      if (lowHT) {
-	njhtToFill.push_back("_23L");	
-      }
-      else {
-	njhtToFill.push_back("_23H");	
-      }
-    }
-    else {
-      njhtToFill.push_back("_4");
-      if (lowHT) {
-	njhtToFill.push_back("_4L");	
-      }
-      else {
-	njhtToFill.push_back("_4H");	
-      }      
-    }
-    if (lowHT) njhtToFill.push_back("_L");
-    else njhtToFill.push_back("_H");
-    */
-    // Fshort region
+
+    // Measurement Region
     if (mt2 < 100) {
       regsToFill.push_back("MR");
       histsToFill.push_back(fsHists["h_fsMR_Baseline"]);
@@ -823,15 +665,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
       // Apply basic selections
       if (applyCaloSel) {
-	/*
-	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) == 0 
-	  && (year == 2016 || !(t.track_eta[i_trk] < -0.7 && t.track_eta[i_trk] > -0.9 && t.track_phi[i_trk] > 1.5 && t.track_phi[i_trk] < 1.7 ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.30 && t.track_eta[i_trk] > 0.10 && t.track_phi[i_trk] > 2.2 && t.track_phi[i_trk] < 2.5 ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.50 && t.track_eta[i_trk] > 0.40 && t.track_phi[i_trk] > -0.7 && t.track_phi[i_trk] < -0.5  ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) )
-	  && (year != 2018 || !(t.track_eta[i_trk] < 2.45 && t.track_eta[i_trk] > 2.00 && t.track_phi[i_trk] > 1.7 && t.track_phi[i_trk] < 1.9));
-	//	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]);
-	*/
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk],year) == 0;
 	if (!CaloSel) continue;
       }
@@ -854,11 +687,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       if (recalculate) {
 
 	const float pt = t.track_pt[i_trk];
-	// changed from pt > 15
 	const bool ptSel = pt >= 15.0;
-	//if (pt == 15.0) cout << "CHANGE: pt == 15.0" << endl;
 	const bool etaSel = fabs(t.track_eta[i_trk]) <= 2.4;
-	//if (fabs(t.track_eta[i_trk]) == 2.4) cout << "CHANGE: eta == 2.4" << endl;
 	const bool BaseSel = ptSel && etaSel;
 	
 	if (!BaseSel || (isSignal && t.track_isBadCharginoTrack[i_trk])) {
@@ -867,8 +697,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  }
 	  continue;
 	}
-	
-	// Length and category
+
 	// Length and categorization
 	const bool lostOuterHitsSel = t.track_nLostOuterHits[i_trk] >= 2;
 	const int nLayers = t.track_nLayersWithMeasurement[i_trk];
@@ -876,16 +705,14 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	const bool isLong = nLayers >= 7;
 	const bool isM = nLayers != t.track_nPixelLayersWithMeasurement[i_trk] && !isLong && lostOuterHitsSel;
 	const bool isL = isLong && lostOuterHitsSel;
-	//	const bool is1L = isLong && t.track_nLostOuterHits[i_trk] == 1;
 	const bool isShort = isP || isM || isL;
 
-	//	if (!isShort && !is1L) {
 	if (!isShort) {
 	  if (isChargino && !isShort) cout << "Chargino failed shortness selection. Layers: " << nLayers << ", MOH: " << t.track_nLostOuterHits[i_trk] << endl;
 	  continue;
 	}
 
-	lenIndex = isP ? 1 : (isM ? 2 : 3); // use L requirements for 1-MOH tracks for now, then switch 3 to 4 for these tracks later
+	lenIndex = isP ? 1 : (isM ? 2 : 3);
 	
 	if (applyRecoVeto == 1) {	
 	  const float nearestPF_DR = t.track_nearestPF_DR[i_trk];
@@ -1007,7 +834,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  isST = true;
 	  lenIndex = t.track_ispixelonly[i_trk] ? 1 : (t.track_ismedium[i_trk] ? 2 : 3);
 	}
-	// more else ifs for 1-MOH tracks
       }
 
       if (isChargino) {
@@ -1142,7 +968,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	}
       }
 
-      //      if (!isST && !isSTC && !isST1 && !isSTC1) {
       if (!isST && !isSTC) {
 	if (isChargino) {
 	  cout << "Chargino failed selection" << endl;

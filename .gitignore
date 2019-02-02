@@ -26,4 +26,6 @@ CORE
 MT2Looper/runLooper
 MT2Looper/output/*
 Nifty
-
+ShortTrack/output*/*
+FshortLooper/output*/*
+ShortTrack/region*/*

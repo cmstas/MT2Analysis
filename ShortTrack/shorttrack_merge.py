@@ -44,14 +44,9 @@ m17 = "output_merged/mc_2017_{}.root".format(outtag)
 m16 = "output_merged/mc_2016_{}.root".format(outtag)
 
 d1718 = "output_merged/data_2017and2018_{}.root".format(outtag)
+m1718 = "output_merged/mc_2017and2018_{}.root".format(outtag)
 
-#filenames = [d18, m18, d17, m17, d16, m16]
-#filenames = [d18, d17, m17, d16, m16]
-filenames = [d1718, m17, d16, m16]
-#filenames = [d17, m17, d16]
-#filenames = [m17]
-#filenames = [d17]
-#filenames = [d1718]
+filenames = [d1718, m1718, d16, m16]
 
 def ErrorTuple(h):
     return (h.GetBinError(1,1),h.GetBinError(2,1),h.GetBinError(3,1),h.GetBinError(4,1),h.GetBinError(5,1))

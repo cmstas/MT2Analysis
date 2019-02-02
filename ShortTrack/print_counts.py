@@ -93,10 +93,10 @@ def startRegionTableData(outfile):
 def startRegionTableMC(outfile):
     outfile.write("\\begin{document}\n\n")
 
-    outfile.write("\\begin{tabular}{l | *2c | *2c}\n")
+    outfile.write("\\begin{tabular}{l | *2c | *2c | *2c}\n")
     outfile.write("\\toprule\n")
-    outfile.write("\multirow{2}{*}{Region} & \multicolumn{2}{c}{2017 MC} & \multicolumn{2}{c}{2016 MC}\\\\ \n")
-    outfile.write(" & Pred ST & Obs ST & Pred ST & Obs ST \\\\ \n ")
+    outfile.write("\multirow{2}{*}{Region} & \multicolumn{2}{c}{2018 MC} & \multicolumn{2}{c}{2017 MC} & \multicolumn{2}{c}{2016 MC}\\\\ \n")
+    outfile.write(" & Pred ST & Obs ST & Pred ST & Obs ST & Pred ST & Obs ST \\\\ \n ")
     outfile.write("\hline\n")
 
 def startRegionTableDataSTC(outfile):
@@ -111,10 +111,10 @@ def startRegionTableDataSTC(outfile):
 def startRegionTableMCSTC(outfile):
     outfile.write("\\begin{document}\n\n")
 
-    outfile.write("\\begin{tabular}{l | *3c | *3c}\n")
+    outfile.write("\\begin{tabular}{l | *3c | *3c | *3c}\n")
     outfile.write("\\toprule\n")
-    outfile.write("\multirow{2}{*}{Region} & \multicolumn{3}{c}{2017 MC} & \multicolumn{3}{c}{2016 MC}\\\\ \n")
-    outfile.write(" & STC & Pred ST & Obs ST & STC & Pred ST & Obs ST \\\\ \n ")
+    outfile.write("\multirow{2}{*}{Region} & \multicolumn{3}{c}{2018 MC} &  \multicolumn{3}{c}{2017 MC} & \multicolumn{3}{c}{2016 MC}\\\\ \n")
+    outfile.write(" & STC & Pred ST & Obs ST & STC & Pred ST & Obs ST & STC & Pred ST & Obs ST \\\\ \n ")
     outfile.write("\hline\n")
 
 def startFshortTableData(outfile):
@@ -128,9 +128,9 @@ def startFshortTableData(outfile):
 def startFshortTableMC(outfile):
     outfile.write("\\begin{document}\n\n")
 
-    outfile.write("\\begin{tabular}{l | c | c}\n")
+    outfile.write("\\begin{tabular}{l | c | c | c}\n")
     outfile.write("\\toprule\n")
-    outfile.write("Category & 2017 MC & 2016 MC\\\\ \n")
+    outfile.write("Category & 2018 MC & 2017 MC & 2016 MC\\\\ \n")
     outfile.write("\hline\n")
 
 def startMergedRegionTableData(outfile):
@@ -978,7 +978,7 @@ def makePlotSigErr(regions,vals,nonncerrs,ncsysts,list_of_sigvals,sigtags,sigcol
 #d17=ROOT.TFile.Open("output_merged/data_2017_{}.root".format(tag))
 d1718=ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(tag))
 d16=ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
-m17=ROOT.TFile.Open("output_merged/mc_2017_{}.root".format(tag))
+m1718=ROOT.TFile.Open("output_merged/mc_2017and2018_{}.root".format(tag))
 m16=ROOT.TFile.Open("output_merged/mc_2016_{}.root".format(tag))
 
 sig1718 = {}
@@ -1001,7 +1001,7 @@ siglimits[(1800,1700,90)] = 0.28
 #D17f,eD17f=getFshorts(d17)
 D1718f,eD1718f,sD1718f=getFshorts(d1718)
 D16f,eD16f,sD16f=getFshorts(d16)
-M17f,eM17f,sM17f=getFshorts(m17)
+M1718f,eM1718f,sM1718f=getFshorts(m1718)
 M16f,eM16f,sM16f=getFshorts(m16)
 
 print D1718f["P 23 hi"], sD1718f["P 23 hi"]
@@ -1014,7 +1014,7 @@ signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
 #D17,eD17=getCounts(d17)
 D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f)
 D16,eD16,sD16=getCounts(d16,D16f,sD16f)
-M17,eM17,sM17=getCounts(m17,M17f,sM17f,True)
+M1718,eM1718,sM1718=getCounts(m1718,M1718f,sM1718f,True)
 M16,eM16,sM16=getCounts(m16,M16f,sM16f,True)
 
 S1718 = {}
@@ -1027,7 +1027,7 @@ for sp in signal_points:
 #d17.Close()
 d1718.Close()
 d16.Close()
-m17.Close()
+m1718.Close()
 m16.Close()
 
 def getMergedCountsLine(region,year=None):
@@ -1291,7 +1291,7 @@ def getMergedLineMCSTC(region,rescale16=1.0,rescale17=1.0): # rescale multiplies
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
     pred16 = M16[region+" pre"]*rescale16
-    pred17 = M17[region+" pre"]*rescale17
+    pred17 = M1718[region+" pre"]*rescale17
     if pred16 > 0:
         systFS16 = "{:.3f}".format(sM16[region+" fs"])
         systNC16 = "{:.3f}".format(sM16[region+" nc"])
@@ -1299,22 +1299,22 @@ def getMergedLineMCSTC(region,rescale16=1.0,rescale17=1.0): # rescale multiplies
         systFS16 = "$<${:.1f}\%$>$".format(100*sM16[region+" fsrel"])
         systNC16 = "$<${:.1f}\%$>$".format(100*sM16[region+" ncrel"])
     if pred17 > 0:
-        systFS17 = "{:.3f}".format(sM17[region+" fs"])
-        systNC17 = "{:.3f}".format(sM17[region+" nc"])
+        systFS17 = "{:.3f}".format(sM1718[region+" fs"])
+        systNC17 = "{:.3f}".format(sM1718[region+" nc"])
     else: 
-        systFS17 = "$<${:.1f}\%$>$".format(100*sM17[region+" fsrel"])
-        systNC17 = "$<${:.1f}\%$>$".format(100*sM17[region+" ncrel"])
-    if cat == "P ": # Don't return 2017
+        systFS17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" fsrel"])
+        systNC17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" ncrel"])
+    if cat == "P ": # Don't return 2017-18
         return colorline+"{} & - & - & - & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
         return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M17[region+" STC"], pred17, eM17[region+" pre"][0]*rescale17, systFS17, systNC17, M17[region+" obs"])
+                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"])
 
     else:
         return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$) $\pm$ {} (VR syst) & {:.3f} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M17[region+" STC"], pred17, eM17[region+" pre"][0]*rescale17, systFS17, systNC17, M17[region+" obs"],
+                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"],
                            M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
 
 def getMergedLineMCSTC_Combined(region,rescale16=1.0,rescale17=1.0): # rescale multiplies prediction to enable partial unblinding
@@ -1326,27 +1326,27 @@ def getMergedLineMCSTC_Combined(region,rescale16=1.0,rescale17=1.0): # rescale m
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
     pred16 = M16[region+" pre"]*rescale16
-    pred17 = M17[region+" pre"]*rescale17
+    pred17 = M1718[region+" pre"]*rescale17
     if pred16 > 0:
         syst16 = "{:.3f}".format(sqrt(sM16[region+" fs"]**2 + sM16[region+" nc"]**2))
     else: 
         systFS16 = "$<${:.1f}\%$>$".format(100*sqrt(sM16[region+" fsrel"]**2 + sM16[region+" ncrel"]**2))
     if pred17 > 0:
-        systFS17 = "{:.3f}".format(sqrt(sM17[region+" fs"]**2 + sM17[region+" nc"]**2))
+        systFS17 = "{:.3f}".format(sqrt(sM1718[region+" fs"]**2 + sM1718[region+" nc"]**2))
     else: 
-        systFS17 = "$<${:.1f}\%$>$".format(100*sqrt(sM17[region+" fsrel"]**2 + sM17[region+" ncrel"]**2))
+        systFS17 = "$<${:.1f}\%$>$".format(100*sqrt(sM1718[region+" fsrel"]**2 + sM1718[region+" ncrel"]**2))
 
-    if cat == "P ": # Don't return 2017
+    if cat == "P ": # Don't return 2017-18
         return colorline+"{} & - & - & - & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
         return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M17[region+" STC"], pred17, eM17[region+" pre"][0]*rescale17, syst17, M17[region+" obs"])
+                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"])
 
     else:
         return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (VR syst) & {:.3f} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M17[region+" STC"], pred17, eM17[region+" pre"][0]*rescale17, syst17, M17[region+" obs"],
+                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"],
                            M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
 
 
@@ -1359,7 +1359,7 @@ def getMergedLineMC(region,rescale16=1.0,rescale17=1.0): # rescale multiplies pr
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
     pred16 = M16[region+" pre"]*rescale16
-    pred17 = M17[region+" pre"]*rescale17
+    pred17 = M1718[region+" pre"]*rescale17
     if pred16 > 0:
         systFS16 = "{:.3f}".format(sM16[region+" fs"])
         systNC16 = "{:.3f}".format(sM16[region+" nc"])
@@ -1367,22 +1367,22 @@ def getMergedLineMC(region,rescale16=1.0,rescale17=1.0): # rescale multiplies pr
         systFS16 = "$<${:.1f}\%$>$".format(100*sM16[region+" fsrel"])
         systNC16 = "$<${:.1f}\%$>$".format(100*sM16[region+" ncrel"])
     if pred17 > 0:
-        systFS17 = "{:.3f}".format(sM17[region+" fs"])
-        systNC17 = "{:.3f}".format(sM17[region+" nc"])
+        systFS17 = "{:.3f}".format(sM1718[region+" fs"])
+        systNC17 = "{:.3f}".format(sM1718[region+" nc"])
     else: 
-        systFS17 = "$<${:.1f}\%$>$".format(100*sM17[region+" fsrel"])
-        systNC17 = "$<${:.1f}\%$>$".format(100*sM17[region+" ncrel"])
-    if cat == "P ": # Don't return 2017
+        systFS17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" fsrel"])
+        systNC17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" ncrel"])
+    if cat == "P ": # Don't return 2017-18
         return colorline+"{} & - & - & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
         return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM17[region+" pre"][0]*rescale17, systFS17, systNC17, M17[region+" obs"])
+                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"])
 
     else:
         return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$) $\pm$ {} (VR syst) & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM17[region+" pre"][0]*rescale17, systFS17, systNC17, M17[region+" obs"],
+                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"],
                            pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
 
 
@@ -1395,27 +1395,27 @@ def getMergedLineMC_Combined(region,rescale16=1.0,rescale17=1.0): # rescale mult
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
     pred16 = M16[region+" pre"]*rescale16
-    pred17 = M17[region+" pre"]*rescale17
+    pred17 = M1718[region+" pre"]*rescale17
     if pred16 > 0:
         syst16 = "{:.3f}".format(sqrt(sM16[region+" fs"]**2 + sM16[region+" nc"]**2))
     else: 
         systFS16 = "$<${:.1f}\%$>$".format(100*sqrt(sM16[region+" fsrel"]**2 + sM16[region+" ncrel"]**2))
     if pred17 > 0:
-        systFS17 = "{:.3f}".format(sqrt(sM17[region+" fs"]**2 + sM17[region+" nc"]**2))
+        systFS17 = "{:.3f}".format(sqrt(sM1718[region+" fs"]**2 + sM1718[region+" nc"]**2))
     else: 
-        systFS17 = "$<${:.1f}\%$>$".format(100*sqrt(sM17[region+" fsrel"]**2 + sM17[region+" ncrel"]**2))
+        systFS17 = "$<${:.1f}\%$>$".format(100*sqrt(sM1718[region+" fsrel"]**2 + sM1718[region+" ncrel"]**2))
 
-    if cat == "P ": # Don't return 2017
+    if cat == "P ": # Don't return 2017-18
         return colorline+"{} & - & - & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
         return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM17[region+" pre"][0]*rescale17, syst17, M17[region+" obs"])
+                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"])
 
     else:
         return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (VR syst) & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM17[region+" pre"][0]*rescale17, syst17, M17[region+" obs"],
+                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"],
                            pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
 
 
@@ -1443,12 +1443,12 @@ def getMergedFSLineMC(cat):
     else:
         colorline = "\\rowcolor{red!25}"                                   
     subcat = cat[0:2]
-    if subcat == "P ": # Don't return 2017
+    if subcat == "P ": # Don't return 2017-18
         return colorline+"{} & - & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M16f[cat],eM16f[cat][0],sM16f[cat])
     elif subcat == "P3" or subcat == "P4": # don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & -\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],sM17f[cat])
+        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & -\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat])
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],sM17f[cat],M16f[cat],eM16f[cat][0],eM16f[cat][1],sM16f[cat])
+        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat],M16f[cat],eM16f[cat][0],eM16f[cat][1],sM16f[cat])
 
 #############
 # Make output
@@ -1495,16 +1495,16 @@ makePlotRaw(allVR16,D16,eD16,sD16,"2016 DATA VR")
 makePlotRaw(allSR1718,D1718,eD1718,sD1718,"2017-18 DATA SR",rescale1718)
 makePlotRaw(allSR16,D16,eD16,sD16,"2016 DATA SR",rescale16)
 
-makePlotRaw(allVR1718,M17,eM17,sM17,"2017 MC VR")
+makePlotRaw(allVR1718,M1718,eM1718,sM1718,"2017-18 MC VR")
 makePlotRaw(allVR16,M16,eM16,sM16,"2016 MC VR")
-makePlotRaw(allSR1718,M17,eM17,sM17,"2017 MC SR")
+makePlotRaw(allSR1718,M1718,eM1718,sM1718,"2017-18 MC SR")
 makePlotRaw(allSR16,M16,eM16,sM16,"2016 MC SR")
 
 makePlotDiscrepancies([allVR16,allVR1718],[D16,D1718],[eD16,eD1718],[sD16,sD1718],"All DATA VR")
-makePlotDiscrepancies([allVR16,allVR1718],[M16,M17],[eM16,eM17],[sM16,sM17],"All MC VR")
+makePlotDiscrepancies([allVR16,allVR1718],[M16,M1718],[eM16,eM1718],[sM16,sM1718],"All MC VR")
 
 makePlotDiscrepancies([allSR16,allSR1718],[D16,D1718],[eD16,eD1718],[sD16,sD1718],"All DATA SR",rescale=[rescale16,rescale1718])
-makePlotDiscrepancies([allSR16,allSR1718],[M16,M17],[eM16,eM17],[sM16,sM17],"All MC SR")
+makePlotDiscrepancies([allSR16,allSR1718],[M16,M1718],[eM16,eM1718],[sM16,sM1718],"All MC SR")
 
 for sp in signal_points:
     m1=sp[0]
@@ -1531,7 +1531,7 @@ fshort_regions_1718 = [cat + " " + nj + " " + pt for cat in ["P3","P4","M"] for 
 fshort_regions_1718 += [ "L 23", "L 4" ]
 
 makePlotFshort(fshort_regions_16,D16f,eD16f,sD16f,M16f,eM16f,sM16f,"2016")
-makePlotFshort(fshort_regions_1718,D1718f,eD1718f,sD1718f,M17f,eM17f,sM17f,"2017-18")
+makePlotFshort(fshort_regions_1718,D1718f,eD1718f,sD1718f,M1718f,eM1718f,sM1718f,"2017-18")
 
 if printTables:
     output = open("{0}/regions_stc_data_{1}_VR.tex".format(tabledir,tag),"w")

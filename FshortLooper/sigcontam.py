@@ -66,6 +66,8 @@ for comparefile in comparefiles:
             if name.find("Baseline") < 0: continue
             if name.find("alt") >= 0: continue
             if name.find("syst") >= 0: continue
+            if name.find("up") >= 0: continue
+            if name.find("dn") >= 0: continue
             if verbose: print name
             h_fs = datafile.Get(name)
             if verbose: 
@@ -76,7 +78,11 @@ for comparefile in comparefiles:
             if verbose: 
                 print "signal h_fs"
                 h_sig.Print("all")
-            h_sig.Scale(rescale)
+            try:
+                h_sig.Scale(rescale)
+            except:
+                print name
+                exit(1)
             if verbose:
                 print "rescaled signal"
                 h_sig.Print("all")

@@ -45,10 +45,12 @@ isData = shortname.split("_")[0] == "data"
 year = shortname.split("_")[1]
 tag = shortname.split("_")[2]
 
-filepath = "output_unmerged/{0}_{1}/".format(year,tag) if year != "2017and2018" else "output_unmerged/{0}_{1}/".format("2017",tag)
-if isData: filepath += "data/"
-inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
-filelist = [ROOT.TFile.Open(infile) for infile in inputlist]
+filepaths = ["output_unmerged/{0}_{1}/".format(year,tag)] if year != "2017and2018" else ["output_unmerged/{0}_{1}/".format(yr,tag) for yr in ["2017","2018"]]
+filelist = []
+for filepath in filepaths:
+    if isData: filepath += "data/"
+    inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+    filelist += [ROOT.TFile.Open(infile) for infile in inputlist]
 
 os.system("mkdir -p output")
 os.system("mkdir -p pngs/{0}".format(shortname))
