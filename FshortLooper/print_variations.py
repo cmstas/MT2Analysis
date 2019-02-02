@@ -11,6 +11,7 @@ import subprocess
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more status messages
+printTables = False
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
@@ -33,6 +34,8 @@ if len(sys.argv) < 2:
 
 tag=sys.argv[1]
 merge2017and2018 = len(sys.argv) == 2
+
+os.system("mkdir -p fshort_plots")
 
 def getAsymmetricErrors(y):
     yp=0.0
@@ -238,7 +241,7 @@ def getFshortMerged(region,data):
         fileregion = region[2:]
     else: 
         print "Did not recognize region",region
-    d1718=ROOT.TFile.Open("output/Fshort_data_2017and2018_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2017_{}.root".format(tag))
+    d1718=ROOT.TFile.Open("output/Fshort_data_2017and2018_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2017and2018_{}.root".format(tag))
     d16=ROOT.TFile.Open("output/Fshort_data_2016_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2016_{}.root".format(tag))
     for ptstring in ["","_lowpt","_hipt"]:
         for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
@@ -335,15 +338,19 @@ def getLineDataMerged(variation,D1718,eD1718,D16,eD16):
                                                                                                                                                                                                                                     D1718[variation+" STC"], D1718[variation+" ST"], D1718[variation+" FS"], eD1718[variation+" FS"],                               
                                                                                                                                                                                                                                     D16[variation+" STC"], D16[variation+" ST"], D16[variation+" FS"], eD16[variation+" FS"])
 
-#def getLineMC(variation,M18,eM18,M17,eM17,M16,eM16):
-def getLineMC(variation,M17,eM17,M16,eM16):
+def getLineMC(variation,M1718,eM1718,M16,eM16):
     
     return "{} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} & {:.3f} $\pm$ {:.3f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} & {:.3f} $\pm$ {:.3f}  \\\\ \n".format(writeabletag[variation],
-                                                                                                                                                                                                                                    M17[variation+" STC"], eM17[variation+" STC"], M17[variation+" ST"], eM17[variation+" ST"], M17[variation+" FS"], eM17[variation+" FS"],
+                                                                                                                                                                                                                                    M1718[variation+" STC"], eM1718[variation+" STC"], M1718[variation+" ST"], eM1718[variation+" ST"], M1718[variation+" FS"], eM1718[variation+" FS"],
                                                  M16[variation+" STC"], eM16[variation+" STC"], M16[variation+" ST"], eM16[variation+" ST"], M16[variation+" FS"], eM16[variation+" FS"])
 
 def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     simplecanvas.cd()
+    track_category = region[0:2]
+    if desc.find("2016") >= 0 and (track_category == "P3" or track_category == "P4"):
+        return
+    if (desc.find("2017") >= 0 or desc.find("2018") >= 0) and (track_category == "P_"):
+        return
     tl.Clear()
     nvariations=len(variations)             
     title = desc + " " + region
@@ -379,7 +386,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     gdef = getPoissonGraph(hdef, def_errs)
     gvar = getPoissonGraph(hist, var_errs)
     syst_errs = [sqrt(systs["Baseline"+ptstring]**2+errs["Baseline"+ptstring+" FS"][i]**2) for i in [0,1]]
-    print syst_errs
+    if verbose: print syst_errs
     gsyst = getPoissonGraph( hsyst, [syst_errs for i in range(len(def_errs))] )
     tl.AddEntry(hist,"Variations")
     tl.AddEntry(hdef,"Baseline, Stat Error Only")
@@ -401,7 +408,9 @@ plotvariations_nopt = ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]
 plotvariations_lowpt = ["HT250_lowpt","HT450_lowpt","HT450MET100_lowpt","MET30_lowpt","MET100_lowpt","MET250_lowpt"]
 plotvariations_hipt = ["HT250_hipt","HT450_hipt","HT450MET100_hipt","MET30_hipt","MET100_hipt","MET250_hipt"]
 
-for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","L_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","L_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4","L_VR_4"]:
+#for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","L_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","L_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4","L_VR_4"]:
+# L regions lack stats
+for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4"]:
     print region
 
     if not merge2017and2018:
@@ -409,36 +418,34 @@ for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_
     else:
         D1718,eD1718,D16,eD16,sD1718,sD16=getFshortMerged(region,True)
 
-    M17,eM17,M16,eM16,sM17,sM16=getFshortMerged(region,False)
-
-    print sD16
+    M1718,eM1718,M16,eM16,sM1718,sM16=getFshortMerged(region,False)
 
     if not merge2017and2018:
-        makePlot(region,plotvariations,D18,eD18,"2018_DATA")
-        makePlot(region,plotvariations,D17,eD17,"2017_DATA")
-        makePlot(region,plotvariations_nopt,D18,eD18,"2018_DATA_NoPtSplit")
-        makePlot(region,plotvariations_nopt,D17,eD17,"2017_DATA_NoPtSplit")
+#        makePlot(region,plotvariations,D18,eD18,"2018_DATA")
+#        makePlot(region,plotvariations,D17,eD17,"2017_DATA")
+#        makePlot(region,plotvariations_nopt,D18,eD18,"2018_DATA_NoPtSplit")
+#        makePlot(region,plotvariations_nopt,D17,eD17,"2017_DATA_NoPtSplit")
         makePlot(region,plotvariations_lowpt,D18,eD18,sD18,"2018_DATA_lowpt","_lowpt")
         makePlot(region,plotvariations_hipt,D17,eD17,sD17,"2017_DATA_hipt","_hipt")
     else:
-        makePlot(region,plotvariations,D1718,eD1718,sD1718,"2017-18_DATA")
+#        makePlot(region,plotvariations,D1718,eD1718,sD1718,"2017-18_DATA")
         makePlot(region,plotvariations_lowpt,D1718,eD1718,sD1718,"2017-2018_DATA_lowpt","_lowpt")
         makePlot(region,plotvariations_hipt,D1718,eD1718,sD1718,"2017-2018_DATA_hipt","_hipt")
-    makePlot(region,plotvariations,D16,eD16,sD16,"2016_DATA")
+#    makePlot(region,plotvariations,D16,eD16,sD16,"2016_DATA")
     makePlot(region,plotvariations_lowpt,D16,eD16,sD16,"2016_DATA_lowpt","_lowpt")
     makePlot(region,plotvariations_hipt,D16,eD16,sD16,"2016_DATA_hipt","_hipt")
 
 
-    makePlot(region,plotvariations,M17,eM17,sM17,"2017_MC")
-    makePlot(region,plotvariations,M16,eM16,sM16,"2016_MC")
-    makePlot(region,plotvariations_nopt,M17,eM17,sM17,"2017_MC_NoPtSplit")
-    makePlot(region,plotvariations_nopt,M16,eM16,sM16,"2016_MC_NoPtSplit")
+#    makePlot(region,plotvariations,M1718,eM1718,sM1718,"2017_MC")
+#    makePlot(region,plotvariations,M16,eM16,sM16,"2016_MC")
+#    makePlot(region,plotvariations_nopt,M1718,eM1718,sM1718,"2017_MC_NoPtSplit")
+#    makePlot(region,plotvariations_nopt,M16,eM16,sM16,"2016_MC_NoPtSplit")
     makePlot(region,plotvariations_lowpt,M16,eM16,sM16,"2016_MC_lowpt","_lowpt")
-    makePlot(region,plotvariations_lowpt,M17,eM17,sM17,"2017_MC_lowpt","_lowpt")
+    makePlot(region,plotvariations_lowpt,M1718,eM1718,sM1718,"2017_MC_lowpt","_lowpt")
     makePlot(region,plotvariations_hipt,M16,eM16,sM16,"2016_MC_hipt","_hipt")
-    makePlot(region,plotvariations_hipt,M17,eM17,sM17,"2017_MC_hipt","_hipt")
+    makePlot(region,plotvariations_hipt,M1718,eM1718,sM1718,"2017_MC_hipt","_hipt")
 
-    continue
+    if not printTables: continue
 
     output = open("variation_tables/fshort_data_{}.tex".format(region),"w")
     printHeader(output)
@@ -452,7 +459,7 @@ for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_
     printHeader(output)
     startFshortTableMC(output)
     for variation in tablevariations:
-        output.write(getLineMC(variation,M17,eM17,M16,eM16))
+        output.write(getLineMC(variation,M1718,eM1718,M16,eM16))
     printFooter(output)
     output.close()
 

@@ -56,12 +56,12 @@ for filename in filenames:
         print "2017-2018 Data"
         datafile = ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(tag))
         rescale = 1+(58.83/41.97)
-        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2017and2018_NM1.root")
+        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2017and2018_{}.root".format(tag))
     elif filename == d16:
         print "2016 Data"
         datafile = ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
         rescale = 35.9/41.97
-        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2016_NM1.root")
+        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2016_{}.root".format(tag))
 
     for index,signalfile in enumerate(filelist):
         signalname = inputnamelist[index]

@@ -7,10 +7,10 @@ doM16=1
 doD17=1
 doM17=1
 doD18=1
-doM18=0
+doM18=1
 doS17=1
 
-tag=MR60to75
+tag=FullMC
 mode=default
 #mode=useZll
 skim_string=_skim_ST
@@ -26,9 +26,8 @@ if [ "$doM16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Summer16
-#    INDIR=/nfs-6/userdata/dpgilber/mt2babies/mc_2016_loose
-    INDIR=/nfs-6/userdata/mt2/V00-10-07_2016fullYear_17Jul2018${skim_string}
-    declare -a Samples=(ttsl ttdl singletop qcd ttX dy wjets zinv ww wz)
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2016fullYear${skim_string}/extmerge
+    declare -a Samples=(ttsl ttdl singletop qcd ttw ttz ttg tttt dy wjets_ht zinv ww wz)
     
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2016.txt &"
@@ -42,11 +41,8 @@ if [ "$doD16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2016_94x
-#    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2016_loose
-    INDIR=/nfs-6/userdata/mt2/V00-10-07_2016fullYear_17Jul2018${skim_string}/
-#    INDIR=/nfs-6/userdata/dpgilber/etaphiSkim
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2016fullYear${skim_string}/data/extmerge
     declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
-    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}.txt &"
 	echo $command
@@ -60,9 +56,8 @@ if [ "$doM17" -eq "1" ]; then
     OUTDIR=output_unmerged/2017_${tag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Fall17
-    INDIR=/nfs-6/userdata/dpgilber/mt2babies/mc_2017_loose
-    declare -a Samples=(ttsl ttdl singletop qcd ttX dy gjets wjets zinv multiboson)
-    
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2017fullYear${skim_string}
+    declare -a Samples=(ttsl ttdl singletop qcd ttw ttz tttt ttg dy gjets wjets_ht zinv ww wz)    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
 	echo $command
@@ -75,11 +70,8 @@ if [ "$doD17" -eq "1" ]; then
     OUTDIR=output_unmerged/2017_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2017_31Mar2018
-#    INDIR=/nfs-6/userdata/dpgilber/mt2babies/data_2017_loose
-    INDIR=/nfs-6/userdata/mt2/V00-10-07_2017fullYear_31Mar2018_ST_skim
-#    INDIR=/nfs-6/userdata/dpgilber/etaphiSkim
-    declare -a Samples=(data_Run2017B data_Run2017C data_Run2017D data_Run2017E data_Run2017F)
-    
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2017fullYear${skim_string}
+    declare -a Samples=(data_Run2017B data_Run2017C data_Run2017D data_Run2017E data_Run2017F)    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}.txt &"
 	echo $command
@@ -91,12 +83,11 @@ fi
 if [ "$doM18" -eq "1" ]; then
     OUTDIR=output_unmerged/2018_${tag}/
     mkdir -p ${OUTDIR}
-    CONFIG=mc_2018
-    INDIR=/nfs-6/userdata/mt2/
-    declare -a Samples=(ttsl ttdl singletop qcd ttX dy gjets wjets zinv multiboson)
-    
+    CONFIG=mc_102x_Autumn18
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2018fullYear${skim_string}
+    declare -a Samples=(ttsl ttdl qcd ttw ttz tttt dy wjets_ht zinv ww wz) # excluding singletop due to missing/2017 duplicated samples and gjets because no events pass skim
     for SAMPLE in ${Samples[@]}; do
-	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
+	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2018.txt &"
 	echo $command
 	eval $command
     done
@@ -107,8 +98,7 @@ if [ "$doD18" -eq "1" ]; then
     OUTDIR=output_unmerged/2018_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2018_Prompt
-    INDIR=/nfs-6/userdata/mt2/V00-10-07_2018fullYear_17Sep2018${skim_string}
-#    INDIR=/nfs-6/userdata/dpgilber/etaphiSkim
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2018fullYear${skim_string}
     declare -a Samples=(data_Run2018A data_Run2018B data_Run2018C data_Run2018D)
     
     for SAMPLE in ${Samples[@]}; do

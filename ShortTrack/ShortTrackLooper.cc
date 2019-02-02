@@ -27,7 +27,7 @@ float HEM_ptCut = 30.0;  // veto on jets above this threshold
 float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
-bool applyL1PrefireWeights = false;
+bool applyL1PrefireWeights = true;
 
 TFile VetoFile("../FshortLooper/veto_etaphi.root");
 TH2F* veto_etaphi_16 = (TH2F*) VetoFile.Get("etaphi_veto_16");
@@ -36,19 +36,6 @@ TH2F* veto_etaphi_18 = (TH2F*) VetoFile.Get("etaphi_veto_18");
 
 int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi, int year) {
   if (fabs(eta) > 2.4) return -1;
-  /*
-  else if (eta > 1.4) {
-    float bc = veto_ecp->GetBinContent(veto_ecp->FindBin(eta,phi));
-    if (bc > 0) return 3;
-  } else if (eta < -1.4) {
-    float bc = veto_ecn->GetBinContent(veto_ecn->FindBin(eta,phi));
-    if (bc > 0) return 2;
-  } else {
-    float bc = veto_bar->GetBinContent(veto_bar->FindBin(eta,phi));
-    if (bc > 0) return 1;
-  }
-  if (eta < -1.05 && eta > -1.15 && phi < -1.8 && phi > -2.1) return 4;  
-  */
   TH2F* veto_hist = veto_etaphi_16;
   if (year == 2017) veto_hist = veto_etaphi_17;
   if (year == 2018) veto_hist = veto_etaphi_18;
@@ -74,12 +61,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   const TString FshortName16Data = Form("../FshortLooper/output/Fshort_data_2016_%s.root",runtag);
   const TString FshortName16MC = Form("../FshortLooper/output/Fshort_mc_2016_%s.root",runtag);
-  //const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017_%s.root",runtag);
   const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017and2018_%s.root",runtag);
-  const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_2017_%s.root",runtag);
-  //const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_2018_%s.root",runtag);
+  const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_2017and2018_%s.root",runtag);
   const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_2017and2018_%s.root",runtag);
-  //  const TString FshortName18MC = Form("../FshortLooper/output/Fshort_mc_2018_%s.root",runtag);
+  const TString FshortName18MC = Form("../FshortLooper/output/Fshort_mc_2017and2018_%s.root",runtag);
 
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
@@ -329,30 +314,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_2STC_VR = (TH2D*)h_2STC_MR->Clone("h_2STC_VR");
   TH2D* h_2STC_SR = (TH2D*)h_2STC_MR->Clone("h_2STC_SR");
 
-  // Nlep = 1 hists
-
-  // NjHt
-  TH2D* h_LLlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LLlep_VR");
-  TH2D* h_LHlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LHlep_VR");
-  TH2D* h_HLlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HLlep_VR");
-  TH2D* h_HHlep_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HHlep_VR");
-
-  TH2D* h_LLlep_SR = (TH2D*)h_eventwise_counts.Clone("h_LLlep_SR");
-  TH2D* h_LHlep_SR = (TH2D*)h_eventwise_counts.Clone("h_LHlep_SR");
-  TH2D* h_HLlep_SR = (TH2D*)h_eventwise_counts.Clone("h_HLlep_SR");
-  TH2D* h_HHlep_SR = (TH2D*)h_eventwise_counts.Clone("h_HHlep_SR");
-
-  // Separate fshorts
-  TH2D* h_LLlep_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LLlep_VR_23");
-  TH2D* h_LHlep_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LHlep_VR_23");
-  TH2D* h_HLlep_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HLlep_VR_4");
-  TH2D* h_HHlep_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HHlep_VR_4");
-
-  TH2D* h_LLlep_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LLlep_SR_23");
-  TH2D* h_LHlep_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LHlep_SR_23");
-  TH2D* h_HLlep_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HLlep_SR_4");
-  TH2D* h_HHlep_SR_4 = (TH2D*)h_eventwise_counts.Clone("h_HHlep_SR_4");
-
   // Save Fshorts used with errors
   TH1D* h_FS = new TH1D("h_FS","f_{short}",5,0,5);
   TH1D* h_FS_23 = (TH1D*) h_FS->Clone("h_FS_23");
@@ -423,39 +384,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     fillTriggerVector(t, trigs_prescaled_, config_.triggers["prescaledHT"]);
     fillTriggerVector(t, trigs_singleLep_, config_.triggers["SingleMu"]);
     fillTriggerVector(t, trigs_singleLep_, config_.triggers["SingleEl"]);
-  }else if (config_tag.find("mc") != std::string::npos) {
-    std::string data_config_tag = "";
-    if (config_tag == "mc_94x_Fall17") data_config_tag = "data_2017_31Mar2018";
-    else if (config_tag == "mc_94x_Summer16") data_config_tag = "data_2016_94x";
-
-    cout << "Detected we are running on MC corresponding to data config: " << data_config_tag << endl;
-					 
-    data_config_ = GetMT2Config(data_config_tag);
-    if( data_config_.triggers.find("SR")       == data_config_.triggers.end() ||
-        data_config_.triggers.find("prescaledHT")       == data_config_.triggers.end() ||
-        data_config_.triggers.find("SingleMu") == data_config_.triggers.end() ||
-        data_config_.triggers.find("SingleEl") == data_config_.triggers.end() ){
-      cout << "[ShortTrackLooper::loop] ERROR: invalid trigger map in configuration '" << data_config_tag << "'!" << endl;
-      cout << "                         Make sure you have trigger vectors for 'SR', 'SingleMu', 'SingleEl', 'prescaledHT" << endl;
-      return -1;
-    }
-    cout << "                  Triggers:" << endl;
-    for(map<string,vector<string> >::iterator it=data_config_.triggers.begin(); it!=data_config_.triggers.end(); it++){
-      cout << "                    " << it->first << ":" << endl;
-      for(uint i=0; i<it->second.size(); i++){
-        if(i==0)
-          cout << "                      " << it->second.at(i);
-        else
-          cout << " || " << it->second.at(i);
-      }
-      cout << endl;
-    }
-    fillTriggerVector(t, trigs_SR_,        data_config_.triggers["SR"]);
-    fillTriggerVector(t, trigs_prescaled_, data_config_.triggers["prescaledHT"]);
-    fillTriggerVector(t, trigs_singleLep_, data_config_.triggers["SingleEl"]);
-    fillTriggerVector(t, trigs_singleLep_, data_config_.triggers["SingleMu"]);
-
-  }    else {
+  }else if (config_tag.find("mc") == std::string::npos) {
     cout << "                  No triggers provided and no \"mc\" in config name. Weight calculation may be inaccurate." << endl;
     if(config_tag.find("data") != string::npos){
       cout << "[ShortTrackLooper::loop] WARNING! it looks like you are using data and didn't supply any triggers in the configuration." <<
@@ -504,11 +433,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   }
   else if (year == 2018) {
     if (isMC) {
-      FshortName = FshortName17MC; // For now, use 2017 MC in 2018
+      FshortName = FshortName18MC;
     } else {
       FshortName = FshortName18Data;
     }
-    FshortNameMC = FshortName17MC; // For now, use 2017 MC in 2018
+    FshortNameMC = FshortName18MC;
   }
   else {
     cout << "Check configuration" << endl;
@@ -985,8 +914,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       continue;
     }
     if (t.ht < 250) {
-    //if (t.ht < 250 || t.ht > 450) {
-    //if (t.ht < 450) {
+
       continue;
     }
     if (unlikely(t.nJet30FailId != 0)) {
@@ -995,8 +923,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (t.mt2 < 60) {
       continue;
     }
-    //if (t.met_pt < 30) {
-    //if (t.met_pt < 100) {
+
     if (t.met_pt < 30 || (t.ht < 1200 && t.met_pt < 250)) {
 	continue;
     }
@@ -1014,7 +941,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
     const bool lepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0;
 
-    /*
     if (lepveto) {
       continue;
     }
@@ -1022,21 +948,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (t.deltaPhiMin < 0.3) {
       continue;
     }
-    */
 
-    // Triggers
-    /*    const bool passPrescaleTrigger = (year == 2016) ? 
-      t.HLT_PFHT125_Prescale || t.HLT_PFHT350_Prescale || t.HLT_PFHT475_Prescale : 
-      t.HLT_PFHT180_Prescale || t.HLT_PFHT370_Prescale || t.HLT_PFHT430_Prescale || t.HLT_PFHT510_Prescale || t.HLT_PFHT590_Prescale || t.HLT_PFHT680_Prescale || t.HLT_PFHT780_Prescale || t.HLT_PFHT890_Prescale;
-    const bool passUnPrescaleTrigger = (year == 2016) ? 
-      t.HLT_PFHT900 || t.HLT_PFJet450 :
-      t.HLT_PFHT1050 || t.HLT_PFJet500;
-    const bool passMetTrigger = t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
-    
-    if (! (passPrescaleTrigger || passUnPrescaleTrigger || passMetTrigger) ) {
-      continue;
-    }
-    */
     //    const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
     const bool passSRTrigger = passTrigger(t, trigs_SR_);
 
@@ -1077,268 +989,124 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
     if (weight > 1.0) continue;
 
-    /*
-    // simulate turn-on curves and prescales in MC
-    if (!t.isData) {
-      if ( !passSRTrigger ) {
-	if (year == 2016) {
-	  if (t.HLT_PFHT475_Prescale) {
-	    weight /= 115.2;
-	  }
-	  else if (t.HLT_PFHT350_Prescale) {
-	    weight /= 460.6;
-	  }
-	  else { //125
-	    weight /= 9200.0; 
-	  }
-	}
-	else { // 2017 and 2018
-	  if (t.HLT_PFHT890_Prescale) {
-	    weight /= 17.1;
-	  }
-	  else if (t.HLT_PFHT780_Prescale) {
-	    weight /= 29.5;
-	  }	
-	  else if (t.HLT_PFHT680_Prescale) {
-	    weight /= 47.4;
-	  }	
-	  else if (t.HLT_PFHT590_Prescale) {
-	    weight /= 67.4;
-	  }
-	  else if (t.HLT_PFHT510_Prescale) {
-	    weight /= 145.0;
-	  }
-	  else if (t.HLT_PFHT430_Prescale) {
-	    weight /= 307.0;
-	  }
-	  else if (t.HLT_PFHT370_Prescale) {
-	    weight /= 707.0;
-	  }
-	  else if (t.HLT_PFHT250_Prescale) {
-	    weight /= 824.0;
-	  }
-	  else if (t.HLT_PFHT180_Prescale) {
-	    weight /= 1316.0;
-	  }
-	}
-      }
-      else { // not prescaled, but may not be in the 100% efficiency region
-	if (year == 2016 && (t.met_pt < 250 && t.ht < 1000)) {
-	  if (t.met_pt < 100) {
-	    // assume 0.1 for everything below 100 GeV
-	    weight *= 0.1;
-	  }
-	  else if (t.met_pt < 200) {
-	    weight *= (((0.8/100) * (t.met_pt - 100)) + 0.1);
-	  } else {
-	    weight *= (((0.1/50) * (t.met_pt - 200)) + 0.9);
-	  }
-	}
-	else if (year == 2017 && (t.met_pt < 250 && t.ht < 1200)) {
-	  // use same values for 2017 for now
-	  if (t.met_pt < 75) {
-	    // assume 0.1 for everything below 100 GeV
-	    weight *= 0.1;
-	  }
-	  else if (t.met_pt < 100) {
-	    // assume PFHT800_PFMET75_PFMHT75 goes down to 75; let's just take that as the cutoff
-	    weight *= ( (0.1/25) * (t.met_pt - 75) ); 
-	  }
-	  else if (t.met_pt < 200) {
-	    weight *= (((0.8/100) * (t.met_pt - 100)) + 0.1);
-	  } else {
-	    weight *= (((0.1/50) * (t.met_pt - 200)) + 0.9);
-	  }	  
-	}
-      }
-    }
-    */
     
     TH2D* hist;    
     TH2D* hist_Nj;
     
-    if (!lepveto) {
-      // L*
-      if (t.nJet30 < 4) {
-	// LH
-	if (t.ht >= 1200) {
-	  // MR
-	  if (t.mt2 < 100) {
-	    hist = h_LH_MR;
-	    hist_Nj = h_LH_MR_23;
-	  }
-	  // VR
-	  else if (t.mt2 < 200) {
-	    hist = h_LH_VR;
-	    hist_Nj = h_LH_VR_23;
-	  }
-	  // SR 
-	  else { //if ( !(blind && t.isData) ) {
-	    hist = h_LH_SR;
-	    hist_Nj = h_LH_SR_23;
-	  }
+    // L*
+    if (t.nJet30 < 4) {
+      // LH
+      if (t.ht >= 1200) {
+	// MR
+	if (t.mt2 < 100) {
+	  hist = h_LH_MR;
+	  hist_Nj = h_LH_MR_23;
 	}
-	// LM
-	else if (t.ht >= 450) {
-	  // MR
-	  if (t.mt2 < 100) {
-	    hist = h_LM_MR;
-	    hist_Nj = h_LM_MR_23;
-	  }
-	  // VR
-	  else if (t.mt2 < 200) {
-	    hist = h_LM_VR;
-	    hist_Nj = h_LM_VR_23;
-	  }
-	  // SR 
-	  else { //if (! (blind && t.isData) ){
-	    hist = h_LM_SR;
-	    hist_Nj = h_LM_SR_23;
-	  }
+	// VR
+	else if (t.mt2 < 200) {
+	  hist = h_LH_VR;
+	  hist_Nj = h_LH_VR_23;
 	}
-	// LL
-	else {
-	  // MR
-	  if (t.mt2 < 100) {
-	    hist = h_LL_MR;
-	    hist_Nj = h_LL_MR_23;
-	  }
-	  // VR
-	  else if (t.mt2 < 200) {
-	    hist = h_LL_VR;
-	    hist_Nj = h_LL_VR_23;
-	  }
-	  // SR 
-	  else { //if (! (blind && t.isData) ){
-	    hist = h_LL_SR;
-	    hist_Nj = h_LL_SR_23;
-	  }
+	// SR 
+	else { //if ( !(blind && t.isData) ) {
+	  hist = h_LH_SR;
+	  hist_Nj = h_LH_SR_23;
 	}
-      } 
-      // H*
+      }
+      // LM
+      else if (t.ht >= 450) {
+	// MR
+	if (t.mt2 < 100) {
+	  hist = h_LM_MR;
+	  hist_Nj = h_LM_MR_23;
+	}
+	// VR
+	else if (t.mt2 < 200) {
+	  hist = h_LM_VR;
+	  hist_Nj = h_LM_VR_23;
+	}
+	// SR 
+	else { //if (! (blind && t.isData) ){
+	  hist = h_LM_SR;
+	  hist_Nj = h_LM_SR_23;
+	}
+      }
+      // LL
       else {
-	// HH
-	if (t.ht >= 1200) {
-	  // MR
-	  if (t.mt2 < 100) {
-	    hist = h_HH_MR;
-	    hist_Nj = h_HH_MR_4;
-	  }
-	  // VR
-	  else if (t.mt2 < 200) {
-	    hist = h_HH_VR;
-	    hist_Nj = h_HH_VR_4;
-	  }
-	  // SR 
-	  else { //if (! (blind && t.isData) ) {
-	    hist = h_HH_SR;
-	    hist_Nj = h_HH_SR_4;
-	  }
+	// MR
+	if (t.mt2 < 100) {
+	  hist = h_LL_MR;
+	  hist_Nj = h_LL_MR_23;
 	}
-	// HM
-	else if (t.ht >= 450) {
-	  // MR
-	  if (t.mt2 < 100) {
-	    hist = h_HM_MR;
-	    hist_Nj = h_HM_MR_4;
-	  }
-	  // VR
-	  else if (t.mt2 < 200) {
-	    hist = h_HM_VR;
-	    hist_Nj = h_HM_VR_4;
-	  }
-	  // SR 
-	  else { //if (! (blind && t.isData) ){
-	    hist = h_HM_SR;
-	    hist_Nj = h_HM_SR_4;
-	  }
+	// VR
+	else if (t.mt2 < 200) {
+	  hist = h_LL_VR;
+	  hist_Nj = h_LL_VR_23;
 	}
-	// HL
-	else {
-	  // MR
-	  if (t.mt2 < 100) {
-	    hist = h_HL_MR;
-	    hist_Nj = h_HL_MR_4;
-	  }
-	  // VR
-	  else if (t.mt2 < 200) {
-	    hist = h_HL_VR;
-	    hist_Nj = h_HL_VR_4;
-	  }
-	  // SR 
-	  else { //if (! (blind && t.isData) ){
-	    hist = h_HL_SR;
-	    hist_Nj = h_HL_SR_4;
-	  }
+	// SR 
+	else { //if (! (blind && t.isData) ){
+	  hist = h_LL_SR;
+	  hist_Nj = h_LL_SR_23;
+	}
+      }
+    } 
+    // H*
+    else {
+      // HH
+      if (t.ht >= 1200) {
+	// MR
+	if (t.mt2 < 100) {
+	  hist = h_HH_MR;
+	  hist_Nj = h_HH_MR_4;
+	}
+	// VR
+	else if (t.mt2 < 200) {
+	  hist = h_HH_VR;
+	  hist_Nj = h_HH_VR_4;
+	}
+	// SR 
+	else { //if (! (blind && t.isData) ) {
+	  hist = h_HH_SR;
+	  hist_Nj = h_HH_SR_4;
+	}
+      }
+      // HM
+      else if (t.ht >= 450) {
+	// MR
+	if (t.mt2 < 100) {
+	  hist = h_HM_MR;
+	  hist_Nj = h_HM_MR_4;
+	}
+	// VR
+	else if (t.mt2 < 200) {
+	  hist = h_HM_VR;
+	  hist_Nj = h_HM_VR_4;
+	}
+	// SR 
+	else { //if (! (blind && t.isData) ){
+	  hist = h_HM_SR;
+	  hist_Nj = h_HM_SR_4;
+	}
+      }
+      // HL
+      else {
+	// MR
+	if (t.mt2 < 100) {
+	  hist = h_HL_MR;
+	  hist_Nj = h_HL_MR_4;
+	}
+	// VR
+	else if (t.mt2 < 200) {
+	  hist = h_HL_VR;
+	  hist_Nj = h_HL_VR_4;
+	}
+	// SR 
+	else { //if (! (blind && t.isData) ){
+	  hist = h_HL_SR;
+	  hist_Nj = h_HL_SR_4;
 	}
       }
     }
-    else if (t.nlep == 1) {
-      continue;
-      // L*
-      if (t.nJet30 < 4) {
-	// LH
-	if (t.ht >= 1200) {
-	  // VR
-	  if (t.mt2 < 200) {
-	    hist = h_LHlep_VR;
-	    hist_Nj = h_LHlep_VR_23;
-	  }
-	  // SR 
-	  // don't need to blind in data at nlep = 1
-	  else {
-	    hist = h_LHlep_SR;
-	    hist_Nj = h_LHlep_SR_23;
-	  }
-	}
-	// LL
-	else {
-	  // VR
-	  if (t.mt2 < 200) {
-	    hist = h_LLlep_VR;
-	    hist_Nj = h_LLlep_VR_23;
-	  }
-	  // SR 
-	  // don't need to blind in data at nlep = 1
-	  else {
-	    hist = h_LLlep_SR;
-	    hist_Nj = h_LLlep_SR_23;
-	  }
-	}
-      } 
-      // H*
-      else {
-	// HH
-	if (t.ht >= 1200) {
-	  // VR
-	  if (t.mt2 < 200) {
-	    hist = h_HHlep_VR;
-	    hist_Nj = h_HHlep_VR_4;
-	  }
-	  // SR 
-	  // don't need to blind in data at nlep = 1
-	  else {
-	    hist = h_HHlep_SR;
-	    hist_Nj = h_HHlep_SR_4;
-	  }
-	}
-	// HL
-	else {
-	  // VR
-	  if (t.mt2 < 200) {
-	    hist = h_HLlep_VR;
-	    hist_Nj = h_HLlep_VR_4;
-	  }
-	  // SR
-	  // don't need to blind in data at nlep = 1
-	  else {
-	    hist = h_HLlep_SR;
-	    hist_Nj = h_HLlep_SR_4;
-	  }
-	}
-      }
-    }        
-    else continue;
 
     // Analysis code
 
@@ -1418,20 +1186,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	bool isST = false, isSTC = false;
 	
 	// Apply basic selections
-	/*
-	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk]) == 0 
-	  && (year == 2016 || !(t.track_eta[i_trk] < -0.7 && t.track_eta[i_trk] > -0.9 && t.track_phi[i_trk] > 1.5 && t.track_phi[i_trk] < 1.7 ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.30 && t.track_eta[i_trk] > 0.10 && t.track_phi[i_trk] > 2.2 && t.track_phi[i_trk] < 2.5 ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.50 && t.track_eta[i_trk] > 0.40 && t.track_phi[i_trk] > -0.7 && t.track_phi[i_trk] < -0.5  ) )
-	  && (year == 2016 || !(t.track_eta[i_trk] < 0.70 && t.track_eta[i_trk] > 0.60 && t.track_phi[i_trk] > -1.1 && t.track_phi[i_trk] < -0.9  ) )
-	  && (year != 2018 || !(t.track_eta[i_trk] < 2.45 && t.track_eta[i_trk] > 2.00 && t.track_phi[i_trk] > 1.7 && t.track_phi[i_trk] < 1.9));
-	*/
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk],year) == 0;
 	const float pt = t.track_pt[i_trk];
 	const bool ptSel = pt >= 15.0;
 	const bool etaSel = fabs(t.track_eta[i_trk]) <= 2.4;
 	const bool BaseSel = CaloSel && ptSel && etaSel;
-	//const bool BaseSel = ptSel && etaSel;
 	
 	if (!BaseSel) {
 	  continue;
@@ -1624,20 +1383,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       } // Track loop
     } // recalculate
     
-//if (nSTCp3 > 0 && nSTCp4 > 0) cout << "Double P event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
-
-    // Eventwise STC Region fills
-    // Chance of at least 1 track of given length being tagged is 1 - (1-p)^n
-    /*
-    if (nSTCl_rej > 0) {
-      // For L tracks, we fill separately based on MtPt veto region, and extrapolate from STCs to STs with the Lfshort
-      hist->Fill(2.0,2.0,weight); // Fill CR
-      hist_Nj->Fill(2.0,2.0,weight); // Fill CR      
-      hist->Fill(2.0,1.0, weight * ( 1 - pow(1-fs_L,nSTCl_rej) ) ); // Fill expected SR count
-      hist_Nj->Fill(2.0,1.0, weight * ( 1 - pow(1-(t.nJet30 > 3 ? fs_L_4 : fs_L_23),nSTCl_rej) ) ); // Fill expected SR count with separate Nj fshort
-    }
-    else 
-    */
     if (nSTCl_acc + nSTCm + nSTCp == 2 && EventWise) {
       cout << "2 STC, P3: " << nSTCp3 << " P4: " << nSTCp4 << " M: " << nSTCm << " L: " << nSTCl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
       float pred_weight = weight;
@@ -1703,22 +1448,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       cout << "More than 2 STCs!" << endl;
     }
     
-    // Eventwise ST fills
-    // Only full STs when counting "observed" SR
-    /*
-    if (nSTl_rej > 0) {
-      hist->Fill(2.0,0.0,weight);
-      hist_Nj->Fill(2.0,0.0,weight);
-    }
-    else 
-    */
-
-    /*
-    if (nSTl_acc > 0 && t.mt2 > 200) {
-      cout << "Found a L ST in unblinded data: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
-    }
-    */
-
     if (nSTl_acc + nSTm + nSTp > 1 && EventWise) {
       cout << "2 ST, P3: " << nSTp3 << " P4: " << nSTp4 << " M: " << nSTm << " L: " << nSTl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
       if (t.mt2 < 100) {
