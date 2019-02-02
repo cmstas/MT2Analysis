@@ -13,6 +13,7 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 verbose = False # Print more status messages
 printTables = True
 full_unblind = True
+doMC = True
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
@@ -183,6 +184,22 @@ def startMergedFshortTableMC(outfile):
     outfile.write("\\begin{tabular}{l | c | c}\n")
     outfile.write("\\toprule\n")
     outfile.write("Category & 2017-18 MC & 2016 MC\\\\ \n")
+    outfile.write("\hline\n")
+
+def start17vs18FshortTableData(outfile):
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | c | c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("Category & 2017 Data & 2018 Data\\\\ \n")
+    outfile.write("\hline\n")
+
+def start17vs18FshortTableMC(outfile):
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | c | c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("Category & 2017 MC & 2018 MC\\\\ \n")
     outfile.write("\hline\n")
 
 def startMergedCountsTable(outfile):
@@ -974,62 +991,6 @@ def makePlotSigErr(regions,vals,nonncerrs,ncsysts,list_of_sigvals,sigtags,sigcol
     simplecanvas.SaveAs("{0}/{1}_systcontam.png".format(plotdir,desc.replace(" ","_")))
     simplecanvas.SetLogy(False)
 
-#d18=ROOT.TFile.Open("output_merged/data_2018_{}.root".format(tag))
-#d17=ROOT.TFile.Open("output_merged/data_2017_{}.root".format(tag))
-d1718=ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(tag))
-d16=ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
-m1718=ROOT.TFile.Open("output_merged/mc_2017and2018_{}.root".format(tag))
-m16=ROOT.TFile.Open("output_merged/mc_2016_{}.root".format(tag))
-
-sig1718 = {}
-sig1718[(1800,1400,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1400.root".format(tag))
-sig1718[(1800,1600,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1600.root".format(tag))
-sig1718[(1800,1700,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1700.root".format(tag))
-sig1718[(1800,1400,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1400.root".format(tag))
-sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1600.root".format(tag))
-sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(tag))
-
-siglimits = {}
-siglimits[(1800,1400,10)] = 0.56
-siglimits[(1800,1600,10)] = 1.3
-siglimits[(1800,1700,10)] = 3.3
-siglimits[(1800,1400,90)] = 0.058
-siglimits[(1800,1600,90)] = 0.14
-siglimits[(1800,1700,90)] = 0.28
-
-#D18f,eD18f=getFshorts(d18)
-#D17f,eD17f=getFshorts(d17)
-D1718f,eD1718f,sD1718f=getFshorts(d1718)
-D16f,eD16f,sD16f=getFshorts(d16)
-M1718f,eM1718f,sM1718f=getFshorts(m1718)
-M16f,eM16f,sM16f=getFshorts(m16)
-
-print D1718f["P 23 hi"], sD1718f["P 23 hi"]
-
-# Mglu, Mlsp, ctau, limit mu
-signal_points=[(1800,1400,10),(1800,1600,10),(1800,1700,10),(1800,1400,90),(1800,1600,90),(1800,1700,90)]
-signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
-signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
-#D18,eD18=getCounts(d18)
-#D17,eD17=getCounts(d17)
-D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f)
-D16,eD16,sD16=getCounts(d16,D16f,sD16f)
-M1718,eM1718,sM1718=getCounts(m1718,M1718f,sM1718f,True)
-M16,eM16,sM16=getCounts(m16,M16f,sM16f,True)
-
-S1718 = {}
-eS1718 = {}
-for sp in signal_points:
-    S1718[sp],eS1718[sp],dummy_systs = getCounts(sig1718[sp],{},{},True,True) # sig doesn't care about fshort, just feed dummies
-    sig1718[sp].Close()
-
-#d18.Close()
-#d17.Close()
-d1718.Close()
-d16.Close()
-m1718.Close()
-m16.Close()
-
 def getMergedCountsLine(region,year=None):
     if region[0] == "P":
         colorline = "\\rowcolor{green!25}"
@@ -1450,6 +1411,111 @@ def getMergedFSLineMC(cat):
     else:
         return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat],M16f[cat],eM16f[cat][0],eM16f[cat][1],sM16f[cat])
 
+def get17vs18FSLineData(cat):
+    if cat[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif cat[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"                                   
+    return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,D17f[cat],eD17f[cat][0],eD17f[cat][1],sD17f[cat],D18f[cat],eD18f[cat][0],eD18f[cat][1],sD18f[cat])
+
+def get17vs18FSLineMC(cat):
+    if cat[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif cat[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"                                   
+    return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],eM17f[cat][1],sM17f[cat],M18f[cat],eM18f[cat][0],eM18f[cat][1],sM18f[cat])
+
+#d18=ROOT.TFile.Open("output_merged/data_2018_{}.root".format(tag))
+#d17=ROOT.TFile.Open("output_merged/data_2017_{}.root".format(tag))
+#m18=ROOT.TFile.Open("output_merged/mc_2018_{}.root".format(tag))
+#m17=ROOT.TFile.Open("output_merged/mc_2017_{}.root".format(tag))
+
+#D17f,eD17f,sD17f=getFshorts(d17)
+#D18f,eD18f,sD18f=getFshorts(d18)
+#fs_regions = [cat + " " + nj + " " + pt for cat in ["P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
+#fs_regions += ["L 23","L 4"]
+#output = open("{0}/fshorts_data_{1}.tex".format(tabledir,tag),"w")
+#printHeader(output)
+#start17vs18FshortTableData(output)
+#for fs_region in fs_regions:
+#    output.write(get17vs18FSLineData(fs_region))
+#printFooter(output)
+#output.close()
+
+#M17f,eM17f,sM17f=getFshorts(m17)
+#M18f,eM18f,sM18f=getFshorts(m18)
+#output = open("{0}/fshorts_mc_{1}.tex".format(tabledir,tag),"w")
+#printHeader(output)
+#start17vs18FshortTableMC(output)
+#for fs_region in fs_regions:
+#    output.write(get17vs18FSLineMC(fs_region))
+#printFooter(output)
+#output.close()
+
+#print ("Done 17 vs 18 fshort")
+#exit(1)
+
+d1718=ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(tag))
+d16=ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
+if doMC:
+    m1718=ROOT.TFile.Open("output_merged/mc_2017and2018_{}.root".format(tag))
+    m16=ROOT.TFile.Open("output_merged/mc_2016_{}.root".format(tag))
+
+    sig1718 = {}
+    sig1718[(1800,1400,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1400.root".format(tag))
+    sig1718[(1800,1600,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1600.root".format(tag))
+    sig1718[(1800,1700,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1700.root".format(tag))
+    sig1718[(1800,1400,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1400.root".format(tag))
+    sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1600.root".format(tag))
+    sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(tag))
+
+    siglimits = {}
+    siglimits[(1800,1400,10)] = 0.56
+    siglimits[(1800,1600,10)] = 1.3
+    siglimits[(1800,1700,10)] = 3.3
+    siglimits[(1800,1400,90)] = 0.058
+    siglimits[(1800,1600,90)] = 0.14
+    siglimits[(1800,1700,90)] = 0.28
+
+#D18f,eD18f=getFshorts(d18)
+#D17f,eD17f=getFshorts(d17)
+D1718f,eD1718f,sD1718f=getFshorts(d1718)
+D16f,eD16f,sD16f=getFshorts(d16)
+if doMC:
+    M1718f,eM1718f,sM1718f=getFshorts(m1718)
+    M16f,eM16f,sM16f=getFshorts(m16)
+
+# Mglu, Mlsp, ctau, limit mu
+signal_points=[(1800,1400,10),(1800,1600,10),(1800,1700,10),(1800,1400,90),(1800,1600,90),(1800,1700,90)]
+signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
+signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
+#D18,eD18=getCounts(d18)
+#D17,eD17=getCounts(d17)
+D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f)
+D16,eD16,sD16=getCounts(d16,D16f,sD16f)
+if doMC:
+    M1718,eM1718,sM1718=getCounts(m1718,M1718f,sM1718f,True)
+    M16,eM16,sM16=getCounts(m16,M16f,sM16f,True)
+
+    S1718 = {}
+    eS1718 = {}
+    for sp in signal_points:
+        S1718[sp],eS1718[sp],dummy_systs = getCounts(sig1718[sp],{},{},True,True) # sig doesn't care about fshort, just feed dummies
+        sig1718[sp].Close()
+
+#d18.Close()
+#d17.Close()
+d1718.Close()
+d16.Close()
+if doMC:
+    m1718.Close()
+    m16.Close()
+
+
 #############
 # Make output
 #############
@@ -1495,34 +1561,36 @@ makePlotRaw(allVR16,D16,eD16,sD16,"2016 DATA VR")
 makePlotRaw(allSR1718,D1718,eD1718,sD1718,"2017-18 DATA SR",rescale1718)
 makePlotRaw(allSR16,D16,eD16,sD16,"2016 DATA SR",rescale16)
 
-makePlotRaw(allVR1718,M1718,eM1718,sM1718,"2017-18 MC VR")
-makePlotRaw(allVR16,M16,eM16,sM16,"2016 MC VR")
-makePlotRaw(allSR1718,M1718,eM1718,sM1718,"2017-18 MC SR")
-makePlotRaw(allSR16,M16,eM16,sM16,"2016 MC SR")
+if doMC:
+    makePlotRaw(allVR1718,M1718,eM1718,sM1718,"2017-18 MC VR")
+    makePlotRaw(allVR16,M16,eM16,sM16,"2016 MC VR")
+    makePlotRaw(allSR1718,M1718,eM1718,sM1718,"2017-18 MC SR")
+    makePlotRaw(allSR16,M16,eM16,sM16,"2016 MC SR")
 
 makePlotDiscrepancies([allVR16,allVR1718],[D16,D1718],[eD16,eD1718],[sD16,sD1718],"All DATA VR")
-makePlotDiscrepancies([allVR16,allVR1718],[M16,M1718],[eM16,eM1718],[sM16,sM1718],"All MC VR")
-
 makePlotDiscrepancies([allSR16,allSR1718],[D16,D1718],[eD16,eD1718],[sD16,sD1718],"All DATA SR",rescale=[rescale16,rescale1718])
-makePlotDiscrepancies([allSR16,allSR1718],[M16,M1718],[eM16,eM1718],[sM16,sM1718],"All MC SR")
 
-for sp in signal_points:
-    m1=sp[0]
-    m2=sp[1]
-    ct=sp[2]
-    makeSignalPlot(allSR1718,D1718,eD1718,sD1718,[S1718[sp]],[eS1718[sp]],1+(58.83/41.97),"2017-18 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed],rescale1718)
-    makeSignalPlot(allSR16,D16,eD16,sD16,[S1718[sp]],[eS1718[sp]],35.9/41.97,"2016 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed],rescale16)
+if doMC:
+    makePlotDiscrepancies([allVR16,allVR1718],[M16,M1718],[eM16,eM1718],[sM16,sM1718],"All MC VR")
+    makePlotDiscrepancies([allSR16,allSR1718],[M16,M1718],[eM16,eM1718],[sM16,sM1718],"All MC SR")
 
-list_of_vals_10 = [S1718[sp] for sp in signal_points_10]
-list_of_errs_10 = [eS1718[sp] for sp in signal_points_10]
-list_of_vals_90 = [S1718[sp] for sp in signal_points_90]
-list_of_errs_90 = [eS1718[sp] for sp in signal_points_90]
-list_of_tags = ["(1800, {}) GeV".format(m2) for m2 in [1400,1600,1700]]
-colors = [ROOT.kMagenta,ROOT.kYellow+1,ROOT.kGreen+2]
-makeSignalPlot(allSR1718,D1718,eD1718,sD1718,list_of_vals_10,list_of_errs_10,1+(58.83/41.97),"2017-18 10 cm",list_of_tags,colors,rescale1718)
-makeSignalPlot(allSR1718,D1718,eD1718,sD1718,list_of_vals_90,list_of_errs_90,1+(58.83/41.97),"2017-18 90 cm",list_of_tags,colors,rescale1718)
-makeSignalPlot(allSR16,D16,eD16,sD16,list_of_vals_10,list_of_errs_10,35.9/41.97,"2016 10 cm",list_of_tags,colors,rescale16)
-makeSignalPlot(allSR16,D16,eD16,sD16,list_of_vals_90,list_of_errs_90,35.9/41.97,"2016 90 cm",list_of_tags,colors,rescale16)
+    for sp in signal_points:
+        m1=sp[0]
+        m2=sp[1]
+        ct=sp[2]
+        makeSignalPlot(allSR1718,D1718,eD1718,sD1718,[S1718[sp]],[eS1718[sp]],1+(58.83/41.97),"2017-18 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed],rescale1718)
+        makeSignalPlot(allSR16,D16,eD16,sD16,[S1718[sp]],[eS1718[sp]],35.9/41.97,"2016 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed],rescale16)
+
+        list_of_vals_10 = [S1718[sp] for sp in signal_points_10]
+        list_of_errs_10 = [eS1718[sp] for sp in signal_points_10]
+        list_of_vals_90 = [S1718[sp] for sp in signal_points_90]
+        list_of_errs_90 = [eS1718[sp] for sp in signal_points_90]
+        list_of_tags = ["(1800, {}) GeV".format(m2) for m2 in [1400,1600,1700]]
+        colors = [ROOT.kMagenta,ROOT.kYellow+1,ROOT.kGreen+2]
+        makeSignalPlot(allSR1718,D1718,eD1718,sD1718,list_of_vals_10,list_of_errs_10,1+(58.83/41.97),"2017-18 10 cm",list_of_tags,colors,rescale1718)
+        makeSignalPlot(allSR1718,D1718,eD1718,sD1718,list_of_vals_90,list_of_errs_90,1+(58.83/41.97),"2017-18 90 cm",list_of_tags,colors,rescale1718)
+        makeSignalPlot(allSR16,D16,eD16,sD16,list_of_vals_10,list_of_errs_10,35.9/41.97,"2016 10 cm",list_of_tags,colors,rescale16)
+        makeSignalPlot(allSR16,D16,eD16,sD16,list_of_vals_90,list_of_errs_90,35.9/41.97,"2016 90 cm",list_of_tags,colors,rescale16)
 
 fshort_regions_16 = [cat + " " + nj + " " + pt for cat in ["P","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fshort_regions_16 += [ "L 23", "L 4" ]
@@ -1530,8 +1598,9 @@ fshort_regions_16 += [ "L 23", "L 4" ]
 fshort_regions_1718 = [cat + " " + nj + " " + pt for cat in ["P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fshort_regions_1718 += [ "L 23", "L 4" ]
 
-makePlotFshort(fshort_regions_16,D16f,eD16f,sD16f,M16f,eM16f,sM16f,"2016")
-makePlotFshort(fshort_regions_1718,D1718f,eD1718f,sD1718f,M1718f,eM1718f,sM1718f,"2017-18")
+if doMC:
+    makePlotFshort(fshort_regions_16,D16f,eD16f,sD16f,M16f,eM16f,sM16f,"2016")
+    makePlotFshort(fshort_regions_1718,D1718f,eD1718f,sD1718f,M1718f,eM1718f,sM1718f,"2017-18")
 
 if printTables:
     output = open("{0}/regions_stc_data_{1}_VR.tex".format(tabledir,tag),"w")
@@ -1550,53 +1619,54 @@ if printTables:
     printFooter(output)
     output.close()
 
-    output = open("{0}/counts_data_{1}_SR.tex".format(tabledir,tag),"w")
-    printHeader(output)
-    startMergedCountsTable(output)
-    for region in regionsNicelyOrderedSR:
-        output.write(getMergedCountsLine(region))
-    printFooter(output)
-    output.close()
+    if doMC:
+        output = open("{0}/counts_data_{1}_SR.tex".format(tabledir,tag),"w")
+        printHeader(output)
+        startMergedCountsTable(output)
+        for region in regionsNicelyOrderedSR:
+            output.write(getMergedCountsLine(region))
+        printFooter(output)
+        output.close()
 
-    output = open("{0}/counts_data_2016_{1}_SR.tex".format(tabledir,tag),"w")
-    printHeader(output)
-    startMergedCountsTable(output)
-    for region in allSR16:
-        output.write(getMergedCountsLine(region,2016))
-    printFooter(output)
-    output.close()
+        output = open("{0}/counts_data_2016_{1}_SR.tex".format(tabledir,tag),"w")
+        printHeader(output)
+        startMergedCountsTable(output)
+        for region in allSR16:
+            output.write(getMergedCountsLine(region,2016))
+        printFooter(output)
+        output.close()
 
-    output = open("{0}/counts_data_2017and2018_{1}_SR.tex".format(tabledir,tag),"w")
-    printHeader(output)
-    startMergedCountsTable(output)
-    for region in allSR1718:
-        output.write(getMergedCountsLine(region,2017))
-    printFooter(output)
-    output.close()
+        output = open("{0}/counts_data_2017and2018_{1}_SR.tex".format(tabledir,tag),"w")
+        printHeader(output)
+        startMergedCountsTable(output)
+        for region in allSR1718:
+            output.write(getMergedCountsLine(region,2017))
+        printFooter(output)
+        output.close()
 
-    output = open("{0}/counts_data_{1}_VR.tex".format(tabledir,tag),"w")
-    printHeader(output)
-    startMergedCountsTable(output)
-    for region in regionsNicelyOrderedVR:
-        output.write(getMergedCountsLine(region))
-    printFooter(output)
-    output.close()
+        output = open("{0}/counts_data_{1}_VR.tex".format(tabledir,tag),"w")
+        printHeader(output)
+        startMergedCountsTable(output)
+        for region in regionsNicelyOrderedVR:
+            output.write(getMergedCountsLine(region))
+        printFooter(output)
+        output.close()
 
-    output = open("{0}/counts_data_2016_{1}_VR.tex".format(tabledir,tag),"w")
-    printHeader(output)
-    startMergedCountsTable(output)
-    for region in allVR16:
-        output.write(getMergedCountsLine(region,2016))
-    printFooter(output)
-    output.close()
+        output = open("{0}/counts_data_2016_{1}_VR.tex".format(tabledir,tag),"w")
+        printHeader(output)
+        startMergedCountsTable(output)
+        for region in allVR16:
+            output.write(getMergedCountsLine(region,2016))
+        printFooter(output)
+        output.close()
 
-    output = open("{0}/counts_data_2017and2018_{1}_VR.tex".format(tabledir,tag),"w")
-    printHeader(output)
-    startMergedCountsTable(output)
-    for region in allVR1718:
-        output.write(getMergedCountsLine(region,2017))
-    printFooter(output)
-    output.close()
+        output = open("{0}/counts_data_2017and2018_{1}_VR.tex".format(tabledir,tag),"w")
+        printHeader(output)
+        startMergedCountsTable(output)
+        for region in allVR1718:
+            output.write(getMergedCountsLine(region,2017))
+        printFooter(output)
+        output.close()
 
     output = open("{0}/regions_data_{1}_VR.tex".format(tabledir,tag),"w")
     printHeader(output)
@@ -1616,7 +1686,7 @@ if printTables:
     output.close()
 
 
-if True:
+if doMC and printTables:
     output = open("{0}/regions_mc_{1}_VR.tex".format(tabledir,tag),"w")
     printHeader(output)
     startMergedRegionTableMC(output)
@@ -1660,13 +1730,14 @@ for fs_region in fs_regions:
 printFooter(output)
 output.close()
 
-output = open("{0}/fshorts_mc_{1}.tex".format(tabledir,tag),"w")
-printHeader(output)
-startMergedFshortTableMC(output)
-for fs_region in fs_regions:
-    output.write(getMergedFSLineMC(fs_region))
-printFooter(output)
-output.close()
+if doMC:
+    output = open("{0}/fshorts_mc_{1}.tex".format(tabledir,tag),"w")
+    printHeader(output)
+    startMergedFshortTableMC(output)
+    for fs_region in fs_regions:
+        output.write(getMergedFSLineMC(fs_region))
+    printFooter(output)
+    output.close()
 
 
 print "Done test; still need to fix makePlotSigErr and MRvsSR table"

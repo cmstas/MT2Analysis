@@ -11,9 +11,11 @@ doM18=1
 doS17=1
 
 tag=FullMC
-outtag=FullMC
+outtag=FullMCv2
 LOGDIR=logs/${outtag}
 mkdir -p ${LOGDIR}
+
+skim_string=_skim_ST
 
 # 2016 MC
 if [ "$doM16" -eq "1" ]; then

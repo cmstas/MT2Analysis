@@ -7,7 +7,7 @@ fi
 
 tag=$1
 
-declare -a inputs=(data_2017and2018_${tag}.root mc_2017and2018_${tag}.root data_2016_${tag}.root mc_2016_${tag}.root)
+declare -a inputs=(data_2017and2018_${tag}.root mc_2017and2018_${tag}.root data_2016_${tag}.root mc_2016_${tag}.root data_2018_${tag}.root data_2017_${tag}.root mc_2018_${tag}.root mc_2017_${tag}.root)
 
 for input in ${inputs[@]}; do
     command="nohup python calculate_TFs.py output_merged/${input} &> /dev/null &"
