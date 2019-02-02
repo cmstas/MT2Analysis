@@ -12,6 +12,8 @@ const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
 
+const bool merge17and18 = true;
+
 // turn on to apply json file to data
 const bool applyJSON = true;
 const bool blind = false;
@@ -59,12 +61,22 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << "Using runtag: " << runtag << endl;
 
+  cout << (merge17and18 ? "" : "not ") << "merging 2017 and 2018" << endl;
+
   const TString FshortName16Data = Form("../FshortLooper/output/Fshort_data_2016_%s.root",runtag);
   const TString FshortName16MC = Form("../FshortLooper/output/Fshort_mc_2016_%s.root",runtag);
-  const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_2017and2018_%s.root",runtag);
-  const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_2017and2018_%s.root",runtag);
-  const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_2017and2018_%s.root",runtag);
-  const TString FshortName18MC = Form("../FshortLooper/output/Fshort_mc_2017and2018_%s.root",runtag);
+  const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_%s_%s.root",(merge17and18 ? "2017and2018" : "2017"), runtag);
+  const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_%s_%s.root",(merge17and18 ? "2017and2018" : "2017"),runtag);
+  const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_%s_%s.root",(merge17and18 ? "2017and2018" : "2018"),runtag);
+  const TString FshortName18MC = Form("../FshortLooper/output/Fshort_mc_%s_%s.root",(merge17and18 ? "2017and2018" : "2018"), runtag);
+
+  cout << "Will load fshort from: " 
+       << FshortName16Data.Data()
+       << FshortName16MC.Data()
+       << FshortName17Data.Data()
+       << FshortName17MC.Data()
+       << FshortName18Data.Data()
+       << FshortName18MC.Data() << endl;
 
   // Book histograms
   TH1::SetDefaultSumw2(true); // Makes histograms do proper error calculation automatically
@@ -516,9 +528,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const double fs_Nj4_M = h_fs_Nj4->GetBinContent(Midx);
   const double fs_Nj4_M_err_up = h_fs_Nj4_up->GetBinError(Midx);
   const double fs_Nj4_M_err_dn = h_fs_Nj4_dn->GetBinError(Midx);
-  const double fs_Nj4_L = adjL ? h_fs_Nj4->GetBinContent(Midx) * mc_L_corr_23 : h_fs_Nj4->GetBinContent(Lidx);
-  const double fs_Nj4_L_err_up = adjL ? sqrt( pow((fs_Nj4_M_err_up/fs_Nj4_M),2) + pow((mc_L_corr_err_23_up / mc_L_corr_23),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
-  const double fs_Nj4_L_err_dn = adjL ? sqrt( pow((fs_Nj4_M_err_dn/fs_Nj4_M),2) + pow((mc_L_corr_err_23_dn / mc_L_corr_23),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
+  const double fs_Nj4_L = adjL ? h_fs_Nj4->GetBinContent(Midx) * mc_L_corr_4 : h_fs_Nj4->GetBinContent(Lidx);
+  const double fs_Nj4_L_err_up = adjL ? sqrt( pow((fs_Nj4_M_err_up/fs_Nj4_M),2) + pow((mc_L_corr_err_4_up / mc_L_corr_4),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
+  const double fs_Nj4_L_err_dn = adjL ? sqrt( pow((fs_Nj4_M_err_dn/fs_Nj4_M),2) + pow((mc_L_corr_err_4_dn / mc_L_corr_4),2) ) * fs_Nj4_L : h_fs_Nj4->GetBinError(Lidx);
 
   TH1D* h_fs_hi = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt"))->ProjectionX("h_fs_hi",1,1);
   TH1D* h_fs_hi_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt_up"))->ProjectionX("h_fs_hi_up",1,1);

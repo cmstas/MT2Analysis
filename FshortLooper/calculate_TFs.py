@@ -220,7 +220,8 @@ for rawname in names:
                     fserr = h_fs.GetBinError(length,1)
                     fserr_var = h_fs_var.GetBinError(length,1)
                 overall_error = sqrt(fserr**2 + fserr_var**2)
-                delta_in_sigma = abs(fs - fs_var) / overall_error
+                delta_in_sigma = abs(fs - fs_var) / overall_error if overall_error > 0 else -1
+                if delta_in_sigma < 0: print "total error 0 for",name,variation
                 if delta_in_sigma > max_variation_in_sigma:
                     max_variation_in_sigma = delta_in_sigma
                     max_delta = fs-fs_var
