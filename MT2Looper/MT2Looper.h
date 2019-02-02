@@ -98,6 +98,8 @@ class MT2Looper {
   int nJet30_;
   int nBJet20_;
   float leppt_;
+  float lepeta_;
+  float lepphi_;
   float mt_;
   int nJet30Eta3_;
   bool isSignal_;
@@ -135,6 +137,8 @@ class MT2Looper {
   float weight_lepsf_cr_DN_;
   float evtweight_renormUp_;
   float evtweight_renormDn_;
+  float weight_TTHF_UP_;
+  float weight_TTHF_DN_;
 
   std::vector<const Int_t*> trigs_SR_;
   std::vector<const Int_t*> trigs_Photon_;

@@ -611,6 +611,8 @@ class babyMaker {
   Float_t         genLepFromTau_charge[max_ngenLepFromTau];   //[ngenLepFromTau]
   Int_t           genLepFromTau_sourceId[max_ngenLepFromTau];   //[ngenLepFromTau]
 
+  Int_t           extraGenB;  // number of gen b-jets not from top
+
 //----- JETS
   static const int max_njet = 100;
   Int_t           njet;

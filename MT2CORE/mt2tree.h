@@ -462,6 +462,7 @@ public :
    Int_t           ngenTau;
    Int_t           ngenTau1Prong;
    Int_t           ngenTau3Prong;
+   Int_t           extraGenB;
    Float_t         genTau_pt[10];   //[ngenTau]
    Float_t         genTau_eta[10];   //[ngenTau]
    Float_t         genTau_phi[10];   //[ngenTau]
@@ -1098,6 +1099,7 @@ public :
    TBranch        *b_ngenTau;   //!
    TBranch        *b_ngenTau1Prong;   //!
    TBranch        *b_ngenTau3Prong;   //!
+   TBranch        *b_extraGenB;   //!
    TBranch        *b_genTau_pt;   //!
    TBranch        *b_genTau_eta;   //!
    TBranch        *b_genTau_phi;   //!
@@ -1767,6 +1769,7 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("ngenTau"))                                fChain->SetBranchAddress("ngenTau", &ngenTau, &b_ngenTau);
    if(bs->FindObject("ngenTau1Prong"))                          fChain->SetBranchAddress("ngenTau1Prong", &ngenTau1Prong, &b_ngenTau1Prong);
    if(bs->FindObject("ngenTau3Prong"))                          fChain->SetBranchAddress("ngenTau3Prong", &ngenTau3Prong, &b_ngenTau3Prong);
+   if(bs->FindObject("extraGenB"))                              fChain->SetBranchAddress("extraGenB", &extraGenB, &b_extraGenB);
    if(bs->FindObject("genTau_pt"))                              fChain->SetBranchAddress("genTau_pt", genTau_pt, &b_genTau_pt);
    if(bs->FindObject("genTau_eta"))                             fChain->SetBranchAddress("genTau_eta", genTau_eta, &b_genTau_eta);
    if(bs->FindObject("genTau_phi"))                             fChain->SetBranchAddress("genTau_phi", genTau_phi, &b_genTau_phi);

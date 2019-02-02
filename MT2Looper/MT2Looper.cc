@@ -108,6 +108,8 @@ bool doNvtxReweight = false;
 bool doNTrueIntReweight = true;
 // turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
 bool applyL1PrefireWeights = true;
+// apply ttbar heavy-flavor correctio weight
+bool applyTTHFWeights = true;
 // turn on to apply json file to data
 bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -642,7 +644,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       }
   }
 
-  if(config_.year !=- 2016)
+  if(config_.year != 2016)
       applyISRWeights = false;
 
   if (applyJSON && config_.json != "") {
@@ -715,10 +717,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   h_sig_avgweight_isr_DN_ = 0;
   if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
     std::string scan_name = sample;
+    std::string weights_dir = "";
+    if(config_tag.find("Fall17") != string::npos)
+        weights_dir = "../babymaker/data/sigweights_Fall17/";
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
-    TFile* f_nsig_weights = new TFile(Form("../babymaker/data/nsig_weights_%s.root",scan_name.c_str()));
+    TFile* f_nsig_weights = new TFile(Form("%s/nsig_weights_%s.root", weights_dir.c_str(), scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
     TH2D* h_sig_avgweight_btagsf_heavy_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf_heavy_UP");
@@ -913,7 +918,6 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
       if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
       if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
-
 
       // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
       if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
@@ -1164,13 +1168,37 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
         if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80)
             evtweight_ *= t.weight_L1prefire;
 
+        if(applyTTHFWeights){
+            // only apply to tt(V) events with >=2 gen b-jets not from top
+            if(((t.evt_id>=300 && t.evt_id<400)||(t.evt_id>=410 && t.evt_id<460)) && t.extraGenB >= 2){
+                evtweight_ *= 1.71;
+                weight_TTHF_UP_ = (1.71 + 0.54) / 1.71;
+                weight_TTHF_DN_ = (1.71 - 0.54) / 1.71;
+            }else{
+                evtweight_ *= 1.0;
+                weight_TTHF_UP_ = 1.0;
+                weight_TTHF_DN_ = 1.0;
+            }
+        }
       } // !isData
 
       //weights for renorm/factorization scale variations
       if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
 	if (!isSignal_) { 
-	  evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
-	  evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+            if(t.nLHEweight >= 9){
+                evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+                evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+            }else{
+                evtweight_renormUp_ = evtweight_;
+                evtweight_renormDn_ = evtweight_;
+            }
+
+          if(evtweight_renormUp_ > 10)
+              cout << "WARNING: very large renorm UP weight! Event: " << t.run << ":" << t.lumi << ":" << 
+                  t.evt << " weight: " << evtweight_renormUp_ << endl;
+          if(evtweight_renormDn_ > 10)
+              cout << "WARNING: very large renorm DN weight! Event: " << t.run << ":" << t.lumi << ":" << 
+                  t.evt << " weight: " << evtweight_renormDn_ << endl;
 	}
 	else {
 	  
@@ -1723,7 +1751,9 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-        // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << " " << evtweight_ << endl;
+        if(SRVec.at(srN).GetName()=="25UH" && mt2_>400){
+            cout << endl << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+        }
       fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
     }
@@ -2514,6 +2544,7 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_J1pt"+s,       jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
   }
 
+
   TString directoryname(dirname);
   if (directoryname.Contains("nocut") && !t.isData && !doMinimalPlots) {
     
@@ -2683,6 +2714,11 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_renorm_UP"+s,        mt2_temp,   evtweight_renormUp_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_renorm_DN"+s,        mt2_temp,   evtweight_renormDn_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
+
+  if ( !t.isData && applyTTHFWeights ){
+    plot1D("h_mt2bins_TTHF_UP"+s,        mt2_temp,   evtweight_ * weight_TTHF_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_TTHF_DN"+s,        mt2_temp,   evtweight_ * weight_TTHF_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
     
   outfile_->cd();
   return;
@@ -2701,6 +2737,19 @@ void MT2Looper::fillHistosSingleLepton(std::map<std::string, TH1*>& h_1d, int n_
     plot1D("h_mt"+s,            mt_,   evtweight_, h_1d, ";M_{T} [GeV]", 200, 0, 1000);
   }
   
+  if(!doMinimalPlots && dirname.find("crslbase") != string::npos){
+      if(t.nJet30 >= 7){
+          plot1D("h_nBJet20_ge7j"+s, t.nBJet20, evtweight_, h_1d, ";N(b jets)", 6, 0, 6);
+          if(t.nJet30 >= 10)
+              plot1D("h_nBJet20_ge10j"+s, t.nBJet20, evtweight_, h_1d, ";N(b jets)", 6, 0, 6);
+          plot1D("h_nJet30_ge7j"+s, t.nJet30, evtweight_, h_1d, ";N(jets)", 7, 7, 14);
+          if(t.nBJet20==0)
+              plot1D("h_nJet30_ge7j_0b"+s, t.nJet30, evtweight_, h_1d, ";N(jets)", 7, 7, 14);
+          else
+              plot1D("h_nJet30_ge7j_ge1b"+s, t.nJet30, evtweight_, h_1d, ";N(jets)", 7, 7, 14);
+      }
+  }
+
   outfile_->cd();
 
   fillHistos(h_1d, n_mt2bins, mt2bins, dirname, s);
@@ -2980,6 +3029,20 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
 
 
   }
+
+  if(!doMinimalPlots && dirname.find("crdybase") != string::npos){
+      if(t.nJet30 >= 7){
+          plot1D("h_nBJet20_ge7j"+s, t.nBJet20, evtweight_, h_1d, ";N(b jets)", 6, 0, 6);
+          if(t.nJet30 >= 10)
+              plot1D("h_nBJet20_ge10j"+s, t.nBJet20, evtweight_, h_1d, ";N(b jets)", 6, 0, 6);
+          plot1D("h_nJet30_ge7j"+s, t.nJet30, evtweight_, h_1d, ";N(jets)", 7, 7, 14);
+          if(t.nBJet20==0)
+              plot1D("h_nJet30_ge7j_0b"+s, t.nJet30, evtweight_, h_1d, ";N(jets)", 7, 7, 14);
+          else
+              plot1D("h_nJet30_ge7j_ge1b"+s, t.nJet30, evtweight_, h_1d, ";N(jets)", 7, 7, 14);
+      }
+  }
+
 
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
   if (!t.isData && doLepEffVars && (applyLeptonSFfromFiles || applyLeptonSFfromBabies)) {

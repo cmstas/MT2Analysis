@@ -199,7 +199,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       TH2D* h_btag_eff_udsg_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_udsg");
       h_btag_eff_b_fastsim = (TH2D*) h_btag_eff_b_fastsim_temp->Clone("h_btag_eff_b_fastsim");
       h_btag_eff_b_fastsim->SetDirectory(rootdir);
-     h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
+      h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
       h_btag_eff_c_fastsim->SetDirectory(rootdir);
       h_btag_eff_udsg_fastsim = (TH2D*) h_btag_eff_udsg_fastsim_temp->Clone("h_btag_eff_udsg_fastsim");
       h_btag_eff_udsg_fastsim->SetDirectory(rootdir);
@@ -402,7 +402,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (verbose) cout << "before trigger" << endl;
 
       // for now 2017 fastsim has not trigger info.
-      if(config_tag != "mc_94x_fastsim_Fall17"){
+      if(config_tag != "mc_94x_fastsim_Fall17" && config_tag != "mc_94x_fastsim_Summer16"){
           //TRIGGER - check first to enable cuts
           HLT_PFHT1050        = passHLTTriggerPattern("HLT_PFHT1050_v");
           HLT_PFHT900         = passHLTTriggerPattern("HLT_PFHT900_v");
@@ -734,6 +734,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         int nHardScatter = 0;
 	genTop_pt = -1.;
 	genTbar_pt = -1.;
+        extraGenB = 0;
+        std::vector<uint> foundBGenJetIdxs;
 	if (cms3.genps_p4().size() != cms3.genps_isLastCopy().size()) {
             std::cout << "WARNING: The gen particle isLastCopy branch does not have the same number of entries as the other gen particle branches. This can happen when you run on cms4 including the packed gen particles, which are appended to a subset of gen particle branches. Add a protection to the isLastCopy access line or modify the NtupleMaker and reproduce cms4 if you wish to avoid the exception that's about to happen.";
 	}
@@ -756,6 +758,29 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           int pdgId = abs(cms3.genps_id().at(iGen));
           int status = cms3.genps_status().at(iGen);	  
           int isLastCopy = cms3.genps_isLastCopy().at(iGen);
+          int motherId = abs(genps_id_mother()[iGen]);
+          
+          // only do this for tt and ttV samples
+          if((evt_id>=300 && evt_id<400)||(evt_id>=410 && evt_id<460)){
+              // count the extra b-jets (not from top) so we can reweight tt(V)bb events later
+              if(pdgId==5 && status!=1111 && motherId!=6 && motherId!=22 && motherId!=23 && motherId!=24 && motherId!=25) {
+                  bool foundB = false;
+                  for(uint igj=0; igj < genjets_p4NoMuNoNu().size(); igj++){
+                      if(std::find(foundBGenJetIdxs.begin(), foundBGenJetIdxs.end(), igj) != foundBGenJetIdxs.end())
+                          continue;
+                      float dR = DeltaR(genps_p4()[iGen].eta(), genjets_p4NoMuNoNu()[igj].eta(),
+                                        genps_p4()[iGen].phi(), genjets_p4NoMuNoNu()[igj].phi());
+                      if(dR < 0.25){
+                          foundB = true;
+                          foundBGenJetIdxs.push_back(igj);
+                          break;
+                      }
+                  }
+                  if(foundB)
+                      extraGenB++;
+              }
+          }
+          
 
           // find hard scatter products to get recoil pt
           if (evt_id >= 300 && evt_id < 400) {
@@ -822,7 +847,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
             if (nHardScatter > 2) std::cout << "WARNING: found too many stops in T2cc MC!" << std::endl;
           }
 
-          int motherId = abs(cms3.genps_id_simplemother().at(iGen));
+          motherId = abs(cms3.genps_id_simplemother().at(iGen));
           int grandmotherId = abs(cms3.genps_id_simplegrandma().at(iGen));
 
           // save all status 22 or 23 gen particles
@@ -1003,6 +1028,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
             ++ngenLepFromTau;
           }
   
+
         } // loop over genPart
 
 
@@ -3966,6 +3992,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
     BabyTree_->Branch("genLepFromTau_sourceId", genLepFromTau_sourceId, "genLepFromTau_sourceId[ngenLepFromTau]/I" );
     BabyTree_->Branch("ngenLepFromZ", &ngenLepFromZ, "ngenLepFromZ/I" );
     BabyTree_->Branch("ngenNuFromZ", &ngenNuFromZ, "ngenNuFromZ/I" );
+    BabyTree_->Branch("extraGenB", &extraGenB, "extraGenB/I" );
     BabyTree_->Branch("GenSusyMScan1", &GenSusyMScan1 );
     BabyTree_->Branch("GenSusyMScan2", &GenSusyMScan2 );
     BabyTree_->Branch("GenSusyMScan3", &GenSusyMScan3 );
@@ -4432,6 +4459,7 @@ void babyMaker::InitBabyNtuple () {
   ngenLepFromTau = -999;
   ngenLepFromZ = -999;
   ngenNuFromZ = -999;
+  extraGenB = -999;
   njet = -999;
   gamma_mt2 = -999.0;
   gamma_nJet30 = -999;
