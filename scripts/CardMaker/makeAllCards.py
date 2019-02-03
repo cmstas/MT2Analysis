@@ -4,39 +4,58 @@ from Datacard import *
 from nuisances import *
 from math import isnan, isinf
 import cPickle as pickle
+from copy import deepcopy
 
 ## TODO
-#   - should we have some kind of extrapolation error for going from j7toInf CR to j10toInf SR ?
-#     (njet modeling is not good at high njet, and right now we're blindly trusting MC)
 #   - why are jec (llep and zinv) and lep_eff (zinv) hard-coded??
 
-
+onlyTemplates = True
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
+subtractSignalContam = True
 RsfofErr = 0.15
 lumi_syst_16 = 0.025
 lumi_syst_17 = 0.024
 lumi_syst_18 = 0.050
+sig_PUsyst = 1.046
+
+verbose = False
+
+isScan = True
+signame = "T1tttt"
+# set these to None to do a full scan; set to mass values to do a single point
+M1 = 2000
+M2 = 0
 
 f_zinvDY = {}
 f_lostlep = {}
 f_qcd = {}
+f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined/qcdFromRS_2018.root")
-f_data = r.TFile("../../MT2Looper/output/V00-10-10_combined/data_unblinded.root")
+f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/zinvFromDY_2016.root")
+f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/zinvFromDY_2017.root")
+f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/zinvFromDY_2018.root")
+f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/lostlepFromCRs_2016.root")
+f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/lostlepFromCRs_2017.root")
+f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/lostlepFromCRs_2018.root")
+f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/qcdFromRS_2016.root")
+f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/qcdFromRS_2017.root")
+f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/qcdFromRS_2018.root")
+f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+f_data = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/data_RunAll.root")
 
 years = [16, 17, 18]
 
+# ad-hoc scaling if signals aren't normalized to right lumi
+# (e.g. if using 2017 signal for 2018)
+sig_scale = {}
+sig_scale[16] = 35.9 / 41.5
+sig_scale[17] = 1.0
+sig_scale[18] = 58.8 / 41.5
 
-outdir = "cards_test"
+outdir = "cards_FullRunII_v3_ttbbWeights"
 os.system("mkdir -p "+outdir)
 
 # used to set the approximate error when we have no MC SR events
@@ -178,13 +197,19 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
 
 
-    dc = Datacard(name, 3, ["zinv", "llep", "qcd"], years=[16,17,18], split_bkg_by_year=True)
+    dc = Datacard(name, 3, ["zinv", "llep", "qcd"], years=[16,17,18], split_bkg_by_year=True, split_sig_by_year=True)
+    # use this later in signal part
+    dc.info["lostlep_lastbin_hybrid"] = crsl_lastbin_hybrid
+    dc.info["orig_name"] = name
+    dc.info["name_per_ht_reg"] = name_per_ht_reg
+    dc.info["name_per_topo_reg"] = name_per_topo_reg
     
     # get some common histograms/values
     h_zinv_mt2bins, h_llep_mt2bins, h_qcd_mt2bins = {}, {}, {}
     h_llep_alpha = {}
     h_zinv_purity, h_zinv_ratio = {}, {}
     n_qcd, n_zinv, n_llep = {}, {}, {}
+    no_qcd_hist = {}
     total_estimate = 0.0
     for y in years:
         h_llep_mt2bins[y] = f_lostlep[y].Get(dirname+"/h_mt2bins")
@@ -197,8 +222,10 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         n_zinv[y] = h_zinv_mt2bins[y].GetBinContent(imt2)
         n_llep[y] = h_llep_mt2bins[y].GetBinContent(imt2)
         n_qcd[y] = 0.0        
+        no_qcd_hist[y] = True
         if h_qcd_mt2bins[y]: 
             n_qcd[y] = h_qcd_mt2bins[y].GetBinContent(imt2)
+            no_qcd_hist[y] = False
 
         total_estimate += n_zinv[y]
         total_estimate += n_llep[y]
@@ -215,6 +242,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         total_estimate  = 0.01
         dc.SetBkgRate(n_qcd[years[0]], "qcd", years[0])
 
+
     if use_pred_for_obs:
         dc.SetObservation(total_estimate)
     else:
@@ -226,8 +254,10 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
     if imt2 >= crsl_lastbin_hybrid:
         n_llep_MCCR = float(f_lostlep[16].Get(dirname+"/h_lostlepMC_cr").Integral(crsl_lastbin_hybrid, -1))
     llep_zero_alpha = {}
+    dc.info["lostlep_alpha"] = {}
     for y in years:
         alpha = h_llep_alpha[y].GetBinContent(imt2)
+        dc.info["lostlep_alpha"][y] = alpha
 
         nuis_name = "llep_CRstat_"+crsl_name                
         llep_zero_alpha[y] = False
@@ -325,6 +355,8 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         if alpha > 10.0:
             print "WARNING: zinv alpha is very large ({0}) for directory {1}, imt2 {2}".format(alpha, dirname, imt2)
 
+    lowmt2bin = 2 if (suppressFirstUHmt2bin and "UH" in dirname) else 1
+
     # now do the lnN nuisances
     for nuis in nuisances:
         corr = nuisances[nuis]["correlation"]
@@ -343,9 +375,9 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         dc.AddNuisance(nuis_name, "lnN", split_by_year=split_by_year)
 
         if nuis == "lumi_syst":
-            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_16 * 35.9/136.3, 16)
-            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_17 * 41.5/136.3, 17)
-            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_18 * 58.8/136.3, 18)
+            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_16, 16)
+            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_17, 17)
+            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_18, 18)
 
         if nuis == "jec":
             llep_val = 1.02
@@ -359,11 +391,11 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 # lostlep
                 h_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_lepeff_UP")
                 h_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_lepeff_DN")
-                baseline_int = h_llep_alpha[y].Integral(0,-1)
-                err_UP = abs(1.0 - h_UP.Integral(0,-1) / baseline_int)
-                err_DN = abs(1.0 - h_DN.Integral(0,-1) / baseline_int)
+                baseline_int = h_llep_alpha[y].Integral(lowmt2bin,-1)
+                err_UP = abs(1.0 - h_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_DN = abs(1.0 - h_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(err_UP, err_DN)
-                direc = 1 if h_UP.Integral(0,-1) < baseline_int else -1
+                direc = 1 if h_UP.Integral(lowmt2bin,-1) < baseline_int else -1
                 err = 1.0 + direc*err                
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
@@ -426,7 +458,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
             for y in years:
                 h_mtcut = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_mtcut")
                 # measure over entire topo region
-                err = h_mtcut.Integral(0, -1) / h_llep_alpha[y].Integral(0,-1)
+                err = h_mtcut.Integral(lowmt2bin, -1) / h_llep_alpha[y].Integral(lowmt2bin,-1)
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
         if nuis == "llep_btageff":
@@ -435,13 +467,13 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 h_heavy_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_btagsf_heavy_DN")
                 h_light_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_btagsf_light_UP")
                 h_light_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_btagsf_light_DN")
-                baseline_int = h_llep_alpha[y].Integral(0,-1)
-                err_heavy_UP = abs(1.0 - h_heavy_UP.Integral(0,-1) / baseline_int)
-                err_heavy_DN = abs(1.0 - h_heavy_DN.Integral(0,-1) / baseline_int)
-                err_light_UP = abs(1.0 - h_light_UP.Integral(0,-1) / baseline_int)
-                err_light_DN = abs(1.0 - h_light_DN.Integral(0,-1) / baseline_int)
+                baseline_int = h_llep_alpha[y].Integral(lowmt2bin,-1)
+                err_heavy_UP = abs(1.0 - h_heavy_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_heavy_DN = abs(1.0 - h_heavy_DN.Integral(lowmt2bin,-1) / baseline_int)
+                err_light_UP = abs(1.0 - h_light_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_light_DN = abs(1.0 - h_light_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(max(max(err_heavy_UP, err_heavy_DN), err_light_UP), err_light_DN)
-                direc = 1 if h_heavy_UP.Integral(0,-1) >= baseline_int else -1
+                direc = 1 if h_heavy_UP.Integral(lowmt2bin,-1) >= baseline_int else -1
                 err = 1.0 + direc*err
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
@@ -451,13 +483,13 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 h_1p_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_tau1p_DN")
                 h_3p_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_tau3p_UP")
                 h_3p_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_tau3p_DN")
-                baseline_int = h_llep_alpha[y].Integral(0,-1)
-                err_1p_UP = abs(1.0 - h_1p_UP.Integral(0,-1) / baseline_int)
-                err_1p_DN = abs(1.0 - h_1p_DN.Integral(0,-1) / baseline_int)
-                err_3p_UP = abs(1.0 - h_3p_UP.Integral(0,-1) / baseline_int)
-                err_3p_DN = abs(1.0 - h_3p_DN.Integral(0,-1) / baseline_int)
+                baseline_int = h_llep_alpha[y].Integral(lowmt2bin,-1)
+                err_1p_UP = abs(1.0 - h_1p_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_1p_DN = abs(1.0 - h_1p_DN.Integral(lowmt2bin,-1) / baseline_int)
+                err_3p_UP = abs(1.0 - h_3p_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_3p_DN = abs(1.0 - h_3p_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(max(max(err_1p_UP, err_1p_DN), err_3p_UP), err_3p_DN)
-                direc = 1 if h_1p_UP.Integral(0,-1) >= baseline_int else -1
+                direc = 1 if h_1p_UP.Integral(lowmt2bin,-1) >= baseline_int else -1
                 err = 1.0 + direc*err
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
@@ -465,11 +497,23 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
             for y in years:
                 h_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_renorm_UP")
                 h_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_renorm_DN")
-                baseline_int = h_llep_alpha[y].Integral(0,-1)
-                err_UP = abs(1.0 - h_UP.Integral(0,-1) / baseline_int)
-                err_DN = abs(1.0 - h_DN.Integral(0,-1) / baseline_int)
+                baseline_int = h_llep_alpha[y].Integral(lowmt2bin,-1)
+                err_UP = abs(1.0 - h_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_DN = abs(1.0 - h_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(err_UP, err_DN)
-                direc = 1 if h_UP.Integral(0,-1) >= baseline_int else -1
+                direc = 1 if h_UP.Integral(lowmt2bin,-1) >= baseline_int else -1
+                err = 1.0 + direc*err
+                dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
+
+        if nuis == "llep_ttHeavyFlavor":
+            for y in years:
+                h_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_TTHF_UP")
+                h_DN = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_TTHF_DN")
+                baseline_int = h_llep_alpha[y].Integral(lowmt2bin,-1)
+                err_UP = abs(1.0 - h_UP.Integral(lowmt2bin,-1) / baseline_int)
+                err_DN = abs(1.0 - h_DN.Integral(lowmt2bin,-1) / baseline_int)
+                err = max(err_UP, err_DN)
+                direc = 1 if h_UP.Integral(lowmt2bin,-1) >= baseline_int else -1
                 err = 1.0 + direc*err
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
@@ -497,42 +541,42 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         if nuis == "qcd_JERvar":
             for y in years:
                 err_qcd = 1.0
-                if n_qcd[y] > 0.01:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_JERvar").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_RSstat":
             for y in years:
                 err_qcd = 1.0
-                if n_qcd[y] > 0.01:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
                     err_qcd = 1.0 + h_qcd_mt2bins[y].GetBinError(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_TailVar":
             for y in years:
                 err_qcd = 1.0
-                if n_qcd[y] > 0.01:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_TailVar").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_SigmaSoftVar":
             for y in years:
                 err_qcd = 1.0
-                if n_qcd[y] > 0.01:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_SigmaSoftVar").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_NJetShape":
             for y in years:
                 err_qcd = 1.0
-                if n_qcd[y] > 0.01:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_NJetShape").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_NBJetShape":
             for y in years:
                 err_qcd = 1.0
-                if n_qcd[y] > 0.01:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_NBJetShape").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
@@ -546,10 +590,256 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
 
 
+def printFullCard(signal_dc, dirname, imt2, im1, im2, output_dir):
+    os.system("mkdir -p "+output_dir)
+    dc = signal_dc
+
+    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame
+
+    name = "{0}_{1}_{2}_{3}".format(dc.GetName(), signame, im1, im2)
+    dc.SetName(name)
+
+    aux_names = ["genmet", "btagsf_heavy_UP", "btagsf_heavy_DN",
+                 "btagsf_light_UP", "btagsf_light_DN",
+                 "lepeff_UP", "lepeff_DN", "isr_UP", "isr_DN"]
+
+    h_sig = {}
+    h_aux = {}
+    h_crsl_sig = {}
+    h_crsl_aux = {}
+    for an in aux_names:
+        h_aux[an] = {}
+        h_crsl_aux[an] = {}
+        for y in years:
+            h_aux[an][y] = None
+            h_crsl_aux[an][y] = None
+    if im1 >= 0 and im2 >= 0:
+        # doing a full scan (or one point of one)
+        for y in years:
+            h_sigscan = f_sig[y].Get(dirname+"/h_mt2bins_sigscan")
+            h_sig[y] = None
+            if not h_sigscan:
+                if verbose: print "Could not get h_mt2bins_sigscan for dir {0}, year {1}, skipping".format(dirname, y)
+                continue
+            bin1 = h_sigscan.GetYaxis().FindBin(im1)
+            bin2 = h_sigscan.GetZaxis().FindBin(im2)
+            h_sig[y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}".format(y, dirname, im1, im2, imt2), bin1, bin1, bin2, bin2)
+            for an in aux_names:
+                h_sigscan = f_sig[y].Get(dirname+"/h_mt2bins_sigscan_"+an)
+                h_aux[an][y] = 0
+                if h_sigscan:
+                    h_aux[an][y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}_{5}".format(an, y, dirname, im1, im2, imt2),
+                                                         bin1, bin1, bin2, bin2)
+            if subtractSignalContam:
+                h_sigscan = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_sigscan")
+                h_crsl_sig[y] = None
+                if h_sigscan:
+                    h_crsl_sig[y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}".format(y, dirname+"sl", im1, im2, imt2),
+                                                          bin1, bin1, bin2, bin2)
+                for an in aux_names:
+                    h_sigscan = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_sigscan_"+an)
+                    h_crsl_aux[an][y] = None
+                    if h_sigscan and an=="genmet":
+                        h_crsl_aux[an][y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}_{5}".format(an, y, dirname+"sl", 
+                                                                                                         im1, im2, imt2),
+                                                                  bin1, bin1, bin2, bin2)
+    else:
+        # doint a single-point sample
+        # not implemented yet
+        raise Exception("non-scan samples not implemented yet!")
+
+
+    allnone = True
+    for y in years:
+        if h_sig[y] is not None:
+            allnone = False
+    if allnone:
+        if verbose: print "Couldn't find signal for any year, skipping"
+        return False
+
+    # loop over years and get histogram contents. Skip if no histo for any year
+    n_sig = {}
+    n_sig_topo = {}
+    err_sig_mcstat = {}
+    err_sig_mcstat_rel = {}
+    n_aux = {}
+    for an in aux_names:
+        n_aux[an] = {}
+    sigexists = False
+    for y in years:
+        n_sig[y] = 0.0
+        n_sig_topo[y] = 0.0
+        err_sig_mcstat[y] = 0.0
+        err_sig_mcstat_rel[y] = 0.0
+
+        if h_sig[y]:
+            sigexists = True
+            if not h_aux["genmet"][y]:
+                print "genmet histogram doesn't exist for {0}. This is strange and may indicate something went wrong in the looper. We'll assume that the gen counts are 0 for a good reason, but you may want to check this.".format(name)
+                h_aux["genmet"][y] = h_sig[y].Clone("h_mt2bins_genmet_{0}_{1}_{2}".format(im1, im2, dirname))
+                h_aux["genmet"][y].Scale(0.0)
+            n_sig[y] = h_sig[y].GetBinContent(imt2)
+            n_sig_topo[y] = h_sig[y].Integral(0,-1)
+            err_sig_mcstat[y] = h_sig[y].GetBinContent(imt2)
+            if n_sig[y] > 0:
+                err_sig_mcstat_rel[y] = err_sig_mcstat[y] / n_sig[y] - 1.0
+
+        for an in aux_names:
+            n_aux[an][y] = n_sig[y]
+            if h_aux[an][y]:
+                n_aux[an][y] = h_aux[an][y].GetBinContent(imt2)
+
+    if not sigexists:
+        if verbose: print "No signal found for {0} point {1},{2}, dir {3}. Skipping".format(signame, im1, im2, dirname)
+        return False
+
+
+    # do reco/gen averaging
+    n_sig_recogenaverage = {}
+    err_sig_recogenaverage = {}
+    for y in years:
+        n_sig_recogenaverage[y] = (n_sig[y] + n_aux["genmet"][y]) / 2.0
+        err_sig_recogenaverage[y] = 0.0
+        if n_sig_recogenaverage[y] > 0.0:
+            err_sig_recogenaverage[y] = (n_sig[y] - n_aux["genmet"][y]) / 2.0 / n_sig_recogenaverage[y]
+
+    # subtract signal contamination
+    n_sig_cor = {}
+    n_sig_cor_recogenaverage = {}
+    n_aux_cor = {}
+    n_sig_crsl = {}
+    n_aux_crsl = {}
+    for an in aux_names:
+        n_aux_cor[an] = {}
+        n_aux_crsl[an] = {}
+    for y in years:
+        n_sig_cor[y] = n_sig[y]
+        n_sig_crsl[y] = 0.0
+        n_sig_cor_recogenaverage[y] = n_sig_recogenaverage[y]
+        for an in aux_names:
+            n_aux_cor[an][y] = n_aux[an][y]
+            n_aux_crsl[an][y] = 0.0
+
+        if subtractSignalContam:
+            if h_crsl_sig[y]:
+                if imt2 >= dc.info["lostlep_lastbin_hybrid"]:
+                    n_sig_crsl[y] = h_crsl_sig[y].Integral(dc.info["lostlep_lastbin_hybrid"], -1)
+                else:
+                    n_sig_crsl[y] = h_crsl_sig[y].GetBinContent(imt2)
+                for an in aux_names:
+                    if not h_crsl_aux[an][y]:
+                        continue
+                    if imt2 >= dc.info["lostlep_lastbin_hybrid"]:
+                        n_aux_crsl[an][y] = h_crsl_aux[an][y].Integral(dc.info["lostlep_lastbin_hybrid"], -1)
+                    else:
+                        n_aux_crsl[an][y] = h_crsl_aux[an][y].GetBinContent(imt2)
+
+                nextra = n_sig_crsl[y] * dc.info["lostlep_alpha"][y]
+                nextra_genmet = n_aux_crsl["genmet"][y] * dc.info["lostlep_alpha"][y]
+                nextra_recogenaverage = (nextra + nextra_genmet) / 2.0
+                n_sig_cor[y] = max(0.0, n_sig[y] - nextra)
+                n_sig_cor_recogenaverage[y] = max(0.0, n_sig_recogenaverage[y] - nextra_recogenaverage)
+                err_sig_recogenaverage[y] = 0.0
+                if n_sig_cor_recogenaverage[y] > 0:
+                    err_sig_recogenaverage[y] = abs(n_sig_cor[y] - n_sig_cor_recogenaverage[y]) / 2.0 / n_sig_cor_recogenaverage[y]
+
+            elif isSignalWithLeptons:
+                pass
+
+    totsig = 0.0
+    for y in years:
+        n_sig_cor_recogenaverage[y] *= 1.0 * sig_scale[y]
+        totsig += n_sig_cor_recogenaverage[y]
+
+    if totsig < 0.001:
+        if verbose: print "Skipping {0}, imt2 {1} for point {2},{3} due to 0 bin content ".format(dirname, imt2, im1, im2)
+        return False
+
+    for y in years:
+        dc.SetSignalRate(n_sig_cor_recogenaverage[y], y)
+
+    for nuis in nuisances:
+        corr = nuisances[nuis]["correlation"]
+        split_by_year = nuisances[nuis]["splitByYear"]
+
+        nuis_name = nuis
+        if corr == PER_HT_REG:
+            nuis_name += "_" + dc.info["name_per_ht_reg"]
+        if corr == PER_TOPO_REG:
+            nuis_name += "_" + dc.info["name_per_topo_reg"]
+        if corr == PER_MT2_BIN:
+            nuis_name += "_" + dc.info["orig_name"]
+
+        if nuis == "sig_PUsyst":
+            for y in years:
+                dc.SetNuisanceSignalValue(nuis_name, sig_PUsyst, y)
+
+        if nuis == "sig_gensyst":
+            for y in years:
+                dc.SetNuisanceSignalValue(nuis_name, 1.0 + err_sig_recogenaverage[y], y)
+
+        if nuis == "sig_IsrSyst":
+            for y in years:
+                err = 1.0
+                if n_sig[y] > 0.0:
+                    errup = (n_aux["isr_UP"][y] / n_sig[y] - 1.0)
+                    errdn = (n_aux["isr_DN"][y] / n_sig[y] - 1.0)
+                    err = max(abs(errup), abs(errdn))
+                    err = 1.0+err if errup>0 else 1.0-err
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis == "sig_bTagHeavySyst":
+            for y in years:
+                err = 1.0
+                if n_sig[y] > 0.0:
+                    errup = (n_aux["btagsf_heavy_UP"][y] / n_sig[y] - 1.0)
+                    errdn = (n_aux["btagsf_heavy_DN"][y] / n_sig[y] - 1.0)
+                    err = max(abs(errup), abs(errdn))
+                    err = 1.0+err if errup>0 else 1.0-err
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis == "sig_bTagLightSyst":
+            for y in years:
+                err = 1.0
+                if n_sig[y] > 0.0:
+                    errup = (n_aux["btagsf_light_UP"][y] / n_sig[y] - 1.0)
+                    errdn = (n_aux["btagsf_light_DN"][y] / n_sig[y] - 1.0)
+                    err = max(abs(errup), abs(errdn))
+                    err = 1.0+err if errup>0 else 1.0-err
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis == "sig_MCstat":
+            for y in years:
+                err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.005)**0.5
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis== "lep_eff":
+            for y in years:
+                err = 1.0
+                if n_sig[y] > 0.0:
+                    errup = (n_aux["lepeff_UP"][y] / n_sig[y] - 1.0)
+                    errdn = (n_aux["lepeff_DN"][y] / n_sig[y] - 1.0)
+                    err = max(abs(errup), abs(errdn))
+                    err = 1.0+err if errup>0 else 1.0-err
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+
+
+    if output_dir is not None:
+        outname = os.path.join(output_dir, "datacard_"+name+".txt")
+        dc.Write(outname, sortkey=customNuisanceSort)
+
+    return True
+
+
+
+
+
 template_dir = os.path.join(outdir, "templates")
 os.system("mkdir -p "+template_dir)
 
 template_datacards = {}
+signal_points = set()
 iterator = f_lostlep[16].GetListOfKeys()
 keep = "sr"
 skip = "srbase"
@@ -568,13 +858,38 @@ for key in iterator:
         continue
 
     # print dirname
+    # if dirname != "sr22UH":
+    #     continue
 
     h_mt2bins = f_lostlep[16].Get(dirname+"/h_mt2bins")
     for imt2 in range(1, h_mt2bins.GetNbinsX()+1):
         if suppressFirstUHmt2bin and "UH" in dirname and imt2==1:
             continue
-        dc = makeTemplate(dirname, imt2, template_output_dir=template_dir)
+        dc = makeTemplate(dirname, imt2, template_output_dir=template_dir, use_pred_for_obs=False)
         template_datacards[dc.GetName()] = dc
+
+        if isScan and not onlyTemplates:
+            y_binwidth = 25
+            y_max = 2100
+            x_binwidth = 25
+            x_max = 3000
+            if "T2cc" in signame:
+                y_binwidth = 5
+                y_max = 800
+            for im1 in range(0, x_max+1, x_binwidth):
+                for im2 in range(0, y_max+1, y_binwidth):
+                    if M1 is not None and (im1 != M1 or im2 != M2):
+                        continue
+                    sig_dc = deepcopy(dc)
+                    sigdir = os.path.join(outdir, "{0}_{1}_{2}".format(signame, im1, im2))
+                    result = printFullCard(sig_dc, dirname, imt2, im1, im2, sigdir)
+                    if result:
+                        signal_points.add((im1, im2))
+                    
+                    del sig_dc
+        else:
+            # not implemented yet
+            pass
 
 pickle.dump(template_datacards, open(os.path.join(template_dir, "template_datacards.pkl"), 'wb'))
 

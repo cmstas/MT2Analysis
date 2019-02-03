@@ -1,4 +1,5 @@
-from math import log10, isinf, isnan
+import ROOT
+from math import log10, isinf, isnan, sqrt
 
 class Datacard:
     def __init__(self, name, nbkg, bkg_names, nchan=1, chan_names=None, years=None, 
@@ -56,6 +57,12 @@ class Datacard:
             self.bkg_rates[bkg] = 0.0
 
         self.nuisances = {}
+
+        # put anything you want here, if it will be useful later. e.g. lostlep alpha and lostlep lastbin hybrid
+        self.info = {}
+
+    def SetName(self, name):
+        self.name = name
 
     def GetName(self):
         return self.name
@@ -153,12 +160,12 @@ class Datacard:
         if type(value)==tuple:
             if self.nuisances[fullname].type != "lnN":
                 raise Exception("ERROR: only lnN nuisances support 2-sided values!")
-            if abs(1.0-value[0])>0.9 or abs(1.0-value[1])>0.9:
+            if value[0]>2.0 or value[1]>2.0 or value[0]<0.3 or value[1]<0.3:
                 print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
             if isnan(value[0]) or isinf(value[0]) or isnan(value[1]) or isinf(value[1]):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
         elif type(value)==float:
-            if self.nuisances[fullname].type=="lnN" and abs(1.0-value) > 0.9:
+            if self.nuisances[fullname].type=="lnN" and (value > 2.0 or value < 0.3):
                 print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
             if isnan(value) or isinf(value):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
@@ -167,6 +174,37 @@ class Datacard:
 
         self.nuisances[fullname].bkg_values[fullidx] = value
 
+
+    def GetTotalUncertainty(self):
+        alpha = 1-0.6827
+        tot_err_up = 0.0
+        tot_err_dn = 0.0
+        for nuis in self.nuisances.values():
+            err_up = 0.0
+            err_dn = 0.0
+            if nuis.type == "lnN":
+                for i,val in enumerate(nuis.bkg_values):
+                    bkg = self.split_bkg_names[i]
+                    if val is None:
+                        continue
+                    if type(val)==tuple:
+                        err_up += (val[0]-1.0) * self.bkg_rates[bkg]
+                        err_dn += (val[1]-1.0) * self.bkg_rates[bkg]
+                    else:
+                        err_up += (val-1.0) * self.bkg_rates[bkg]
+                        err_dn += (val-1.0) * self.bkg_rates[bkg]
+            if nuis.type == "gmN":                
+                for i,val in enumerate(nuis.bkg_values):
+                    bkg = self.split_bkg_names[i]
+                    if val is None:
+                        continue
+                    err_up += val * (ROOT.Math.gamma_quantile_c(alpha/2, nuis.N+1, 1) - nuis.N)
+                    err_dn += val * (0 if nuis.N==0 else nuis.N-ROOT.Math.gamma_quantile(alpha/2, nuis.N, 1))
+
+            tot_err_up += err_up**2
+            tot_err_dn += err_dn**2
+
+        return (sqrt(tot_err_up), sqrt(tot_err_dn))
 
     def Write(self, outname, sortkey=str):
         fid = open(outname, 'w')
@@ -179,15 +217,18 @@ class Datacard:
         ml = lambda s,l: s+" "*max(1,(l-len(s)))
 
         fid.write("imax {0}  number of channels\n".format(self.nchan))
-        fid.write("jmax {0}  number of channels\n".format(self.n_split_bkg))
+        fid.write("jmax *  number of channels\n".format(self.n_split_bkg + self.nsig))
         fid.write("kmax *\n")
         fid.write("------------\n")
         fid.write("bin         {0}\n".format(self.chan_names[0]))
         fid.write("observation {0}\n".format(self.obs))
+        unc_up, unc_dn = self.GetTotalUncertainty()
+        fid.write("# total prediction: {0:.3f} + {1:.3f} - {2:.3f}\n".format(sum(self.bkg_rates.values()), unc_up, unc_dn))
+        fid.write("# total signal: {0:.3f}\n".format(self.sig_rate if self.nsig==1 else sum(self.sig_rate.values())))
         fid.write("------------\n")
         fid.write(ml("bin", colsizes[0]))
         fid.write(ml("", colsizes[1]))
-        for i in range(self.n_split_bkg + 1):
+        for i in range(self.n_split_bkg + self.nsig):
             fid.write(ml(self.chan_names[0], colsizes[i+2]))
         fid.write('\n')
         fid.write(ml("process", colsizes[0]))

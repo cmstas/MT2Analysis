@@ -6,7 +6,7 @@ PER_TOPO_REG = 2
 PER_TOPO_REG_CRSL = 3
 PER_MT2_BIN = 4
 
-DEFAULT_splitByYear = True
+DEFAULT_splitByYear = False
 
 nuisances = {
     "lumi_syst" : {
@@ -35,7 +35,7 @@ nuisances = {
         },
     "sig_MCstat" : {
         "correlation" : PER_MT2_BIN,
-        "splitByYear" : DEFAULT_splitByYear,
+        "splitByYear" : True,
         },
     "jec" : {
         "correlation" : CORR_ACROSS_ALLBINS,
@@ -73,10 +73,14 @@ nuisances = {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
         },
-    # "llep_renorm" : {
-    #     "correlation" : CORR_ACROSS_ALLBINS,
-    #     "splitByYear" : DEFAULT_splitByYear,
-    #     },
+    "llep_renorm" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : DEFAULT_splitByYear,
+        },
+    "llep_ttHeavyFlavor" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : DEFAULT_splitByYear,
+        },
     "llep_MCstat" : {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : DEFAULT_splitByYear,
