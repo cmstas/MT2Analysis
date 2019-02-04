@@ -201,6 +201,7 @@ class Datacard:
                     err_up += val * (ROOT.Math.gamma_quantile_c(alpha/2, nuis.N+1, 1) - nuis.N)
                     err_dn += val * (0 if nuis.N==0 else nuis.N-ROOT.Math.gamma_quantile(alpha/2, nuis.N, 1))
 
+            # print nuis.name, err_up, err_dn
             tot_err_up += err_up**2
             tot_err_dn += err_dn**2
 

@@ -6,56 +6,37 @@ from math import isnan, isinf
 import cPickle as pickle
 from copy import deepcopy
 
-## TODO
-#   - why are jec (llep and zinv) and lep_eff (zinv) hard-coded??
 
-onlyTemplates = True
+TAG = "FullRunII_17MCfor18_ttbbWeights"
+
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
-subtractSignalContam = True
 RsfofErr = 0.15
 lumi_syst_16 = 0.025
 lumi_syst_17 = 0.024
 lumi_syst_18 = 0.050
-sig_PUsyst = 1.046
 
 verbose = False
-
-isScan = True
-signame = "T1tttt"
-# set these to None to do a full scan; set to mass values to do a single point
-M1 = 2000
-M2 = 0
 
 f_zinvDY = {}
 f_lostlep = {}
 f_qcd = {}
 f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/qcdFromRS_2018.root")
-f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
-f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
-f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
-f_data = r.TFile("../../MT2Looper/output/V00-10-10_withExtraB_combined/data_RunAll.root")
+f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/zinvFromDY_2016.root")
+f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/zinvFromDY_2017.root")
+f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/zinvFromDY_2018.root")
+f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/lostlepFromCRs_2016.root")
+f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/lostlepFromCRs_2017.root")
+f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/lostlepFromCRs_2018.root")
+f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/qcdFromRS_2016.root")
+f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/qcdFromRS_2017.root")
+f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/qcdFromRS_2018.root")
+f_data = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/data_RunAll.root")
 
 years = [16, 17, 18]
 
-# ad-hoc scaling if signals aren't normalized to right lumi
-# (e.g. if using 2017 signal for 2018)
-sig_scale = {}
-sig_scale[16] = 35.9 / 41.5
-sig_scale[17] = 1.0
-sig_scale[18] = 58.8 / 41.5
-
-outdir = "cards_FullRunII_v3_ttbbWeights"
+outdir = "cards_"+TAG
 os.system("mkdir -p "+outdir)
 
 # used to set the approximate error when we have no MC SR events
@@ -199,6 +180,8 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
     dc = Datacard(name, 3, ["zinv", "llep", "qcd"], years=[16,17,18], split_bkg_by_year=True, split_sig_by_year=True)
     # use this later in signal part
+    dc.info["dirname"] = dirname
+    dc.info["imt2"] = imt2
     dc.info["lostlep_lastbin_hybrid"] = crsl_lastbin_hybrid
     dc.info["orig_name"] = name
     dc.info["name_per_ht_reg"] = name_per_ht_reg
@@ -523,7 +506,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 if llep_zero_alpha[y]: # if we're doing the ad-hoc procedure, just give it a 100% error
                     err = 2.0
                 else:
-                    h_mcstat = f_lostlep[y].Get(dirname+"/h_mt2binsMCStat")
+                    h_mcstat = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha")
                     val = h_mcstat.GetBinContent(imt2)
                     if val > 0.0:
                         err = 1.0 + h_mcstat.GetBinError(imt2) / val
@@ -618,6 +601,7 @@ def printFullCard(signal_dc, dirname, imt2, im1, im2, output_dir):
         for y in years:
             h_sigscan = f_sig[y].Get(dirname+"/h_mt2bins_sigscan")
             h_sig[y] = None
+            h_crsl_sig[y] = None
             if not h_sigscan:
                 if verbose: print "Could not get h_mt2bins_sigscan for dir {0}, year {1}, skipping".format(dirname, y)
                 continue
@@ -632,7 +616,6 @@ def printFullCard(signal_dc, dirname, imt2, im1, im2, output_dir):
                                                          bin1, bin1, bin2, bin2)
             if subtractSignalContam:
                 h_sigscan = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_sigscan")
-                h_crsl_sig[y] = None
                 if h_sigscan:
                     h_crsl_sig[y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}".format(y, dirname+"sl", im1, im2, imt2),
                                                           bin1, bin1, bin2, bin2)
@@ -858,7 +841,7 @@ for key in iterator:
         continue
 
     # print dirname
-    # if dirname != "sr22UH":
+    # if dirname != "sr25UH":
     #     continue
 
     h_mt2bins = f_lostlep[16].Get(dirname+"/h_mt2bins")
@@ -867,29 +850,6 @@ for key in iterator:
             continue
         dc = makeTemplate(dirname, imt2, template_output_dir=template_dir, use_pred_for_obs=False)
         template_datacards[dc.GetName()] = dc
-
-        if isScan and not onlyTemplates:
-            y_binwidth = 25
-            y_max = 2100
-            x_binwidth = 25
-            x_max = 3000
-            if "T2cc" in signame:
-                y_binwidth = 5
-                y_max = 800
-            for im1 in range(0, x_max+1, x_binwidth):
-                for im2 in range(0, y_max+1, y_binwidth):
-                    if M1 is not None and (im1 != M1 or im2 != M2):
-                        continue
-                    sig_dc = deepcopy(dc)
-                    sigdir = os.path.join(outdir, "{0}_{1}_{2}".format(signame, im1, im2))
-                    result = printFullCard(sig_dc, dirname, imt2, im1, im2, sigdir)
-                    if result:
-                        signal_points.add((im1, im2))
-                    
-                    del sig_dc
-        else:
-            # not implemented yet
-            pass
 
 pickle.dump(template_datacards, open(os.path.join(template_dir, "template_datacards.pkl"), 'wb'))
 
