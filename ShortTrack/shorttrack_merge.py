@@ -46,8 +46,8 @@ m16 = "output_merged/mc_2016_{}.root".format(outtag)
 d1718 = "output_merged/data_2017and2018_{}.root".format(outtag)
 m1718 = "output_merged/mc_2017and2018_{}.root".format(outtag)
 
-#filenames = [d18, d17, m18, m17]
-filenames = [d1718, m1718, d16, m16]
+filenames = [d18, d17, m18, m17]
+#filenames = [d1718, m1718, d16, m16]
 #filenames = [d1718, d16]
 
 def ErrorTuple(h):

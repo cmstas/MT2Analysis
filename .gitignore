@@ -29,3 +29,6 @@ Nifty
 ShortTrack/output*/*
 FshortLooper/output*/*
 ShortTrack/region*/*
+scripts/limit*/**
+scripts/cards*/**
+**/CMSSW*/**

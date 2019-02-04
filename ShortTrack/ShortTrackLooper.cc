@@ -12,7 +12,7 @@ const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
 
-const bool merge17and18 = true;
+const bool merge17and18 = false;
 
 // turn on to apply json file to data
 const bool applyJSON = true;
@@ -936,7 +936,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       continue;
     }
 
-    if (t.met_pt < 30 || (t.ht < 1200 && t.met_pt < 250)) {
+    // Let low met events through regardless of Ht if they're in MR
+    if (t.met_pt < 30 || (t.ht < 1200 && t.met_pt < 250 && t.mt2 > 100)) {
 	continue;
     }
 

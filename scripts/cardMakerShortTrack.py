@@ -17,7 +17,7 @@ doDummySignalSyst = True
 subtractSignalContam = True
 doDummyBackgroundSyst = False
 saveTemplates = True # Save templates separately from cards
-setBGtoObs = True
+setBGtoObs = False
 
 # We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
 n_zero = 1e-3
@@ -50,10 +50,10 @@ bmark.Start("benchmark")
 
 # These are typically in MT2looper/output/some_directory
 # See makeDataDrivenEstimates.sh
-f_16 = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}_syststat.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}_syststat.root".format(tag))
-f_1718 = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}_syststat.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017_{0}_syststat.root".format(tag))
+f_16 = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}.root".format(tag))
+f_1718 = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017and2018_{0}.root".format(tag))
 f_16_contam = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}_contam.root".format(tag))
-f_1718_contam = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017_{0}_contam.root".format(tag))
+f_1718_contam = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017and2018_{0}_contam.root".format(tag))
 #f_sig_16 = ROOT.TFile("../ShortTrack/output_unmerged/2016_{0}/signal/{1}.root".format(tag,signal))
 f_sig_1718 = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}.root".format(tag,signal))
 f_sig_16 = f_sig_1718 # for now, just use 2017 signal for 2016
@@ -92,8 +92,15 @@ def makeTemplate(year,region,length):
     ptstring = ""
     if region.find("lo") > 0: ptstring = "_lo"
     elif region.find("hi") > 0: ptstring = "_hi"
-    h_fs_stat = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring).Clone("h_fs_{}".format(channel))
-    fserr_stat = 1+(h_fs_stat.GetBinError(length)/h_fs_stat.GetBinContent(length))
+    h_fs = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring).Clone("h_fs_{}".format(channel))
+    fs = h_fs.GetBinContent(length)
+    if fs <= 0:
+        print "fs = {:.3f} in {}, aborting".format(fs,channel)
+        exit(1)
+    h_fs_stat_up = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring+"_up").Clone("h_fs_{}_up".format(channel))
+    h_fs_stat_dn = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring+"_dn").Clone("h_fs_{}_dn".format(channel))
+    fserr_stat_up = 1+(h_fs_stat_up.GetBinError(length)/fs)
+    fserr_stat_dn = 1-(h_fs_stat_dn.GetBinError(length)/fs)
     fshort_id_string = "{}_{}{}".format(category,"23" if region.find("23") > 0 else "4",ptstring)
 
     if verbose: 
@@ -140,13 +147,11 @@ def makeTemplate(year,region,length):
         template_list.append("name_sig_mcstat     lnN    sig_mcstat   -\n")
         template_list.append("name_sig_genmet                  lnU    sig_genmet   -\n")
         template_list.append("name_sig_isr                  lnN    sig_isr   -\n")
-        template_list.append("name_sig_btagsf_heavy            lnN    sig_btagsf_heavy   -\n")
-        template_list.append("name_sig_btagsf_light            lnN    sig_btagsf_light   -\n")
 
     # background errors
     
     # statistics
-    template_list.append("alphaerr_{0}        lnN    -    {1:.3f}\n".format(fshort_id_string,fserr_stat))
+    template_list.append("alphaerr_{0}        lnN    -    {1:.3f}/{2:.3f}\n".format(fshort_id_string,fserr_stat_dn,fserr_stat_up))
     template_list.append("crstat_{0}        gmN {1:.0f}    -    {2:.5f}\n".format(channel,n_stc,alpha))
 
     # systematics
@@ -246,6 +251,7 @@ for region in regions:
     if verbose: print region
     # Loop over track length bins in this signal region
     for length in range(1,6): # length 1 is inclusive P track, then P3, P4, M, L
+        track_category = ["P","P3","P4","M","L"][length-1]
         if region[0:3] == "LLM" or region[0:3] == "HLM":
             if length < 5: continue # LLM only used for L tracks
         elif region[1] == "L" or region[1] == "M":
@@ -267,7 +273,7 @@ for region in regions:
                         print "Template could not be formed due to missing histograms in region {0}, but we're suppressing zero bins anyway. Continuing.".format(fullregion)
                         continue
                 if saveTemplates:
-                    templatefile = open(outdir+"/templates/"+fullregion+"_"+year+"_template.txt","w")
+                    templatefile = open(outdir+"/templates/"+track_category+"_"+fullregion+"_"+year+"_template.txt","w")
                     templatefile.write(template)
                     templatefile.close()            
                 # If we're doing a full scan, loop over mass points and replace placeholders in the template with appropriate signal values for each point.

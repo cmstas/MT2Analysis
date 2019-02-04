@@ -11,7 +11,7 @@ doM18=1
 doS17=1
 
 tag=FullMC
-outtag=FullMCv2
+outtag=FullMC_Separate18
 LOGDIR=logs/${outtag}
 mkdir -p ${LOGDIR}
 

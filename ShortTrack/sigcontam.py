@@ -28,14 +28,15 @@ if len(sys.argv) < 2:
 
 ROOT.TH1.SetDefaultSumw2()
 
-tag = sys.argv[1]
+shorttrack_tag = sys.argv[1]
+fshort_tag = shorttrack_tag if len(sys.argv) == 2 else sys.argv[2]
 
-d16 = "output_merged/data_2016_{}_contam.root".format(tag)
-d1718 = "output_merged/data_2017and2018_{}_contam.root".format(tag)
+d16 = "output_merged/data_2016_{}_contam.root".format(shorttrack_tag)
+d1718 = "output_merged/data_2017and2018_{}_contam.root".format(shorttrack_tag)
 
 filenames = [d1718, d16]
 
-filepath = "output_unmerged/2017_{0}/signal/".format(tag)
+filepath = "output_unmerged/2017_{0}/signal/".format(shorttrack_tag)
 inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
 inputnamelist = [filename[filename.rfind("/")+1:filename.rfind(".root")].replace("-","_") for filename in inputlist]
 filelist = [ROOT.TFile.Open(infile) for infile in inputlist]
@@ -54,14 +55,14 @@ for filename in filenames:
 
     if filename == d1718:
         print "2017-2018 Data"
-        datafile = ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(tag))
+        datafile = ROOT.TFile.Open("output_merged/data_2017and2018_{}.root".format(shorttrack_tag))
         rescale = 1+(58.83/41.97)
-        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2017and2018_{}.root".format(tag))
+        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2017and2018_{}.root".format(fshort_tag))
     elif filename == d16:
         print "2016 Data"
-        datafile = ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
+        datafile = ROOT.TFile.Open("output_merged/data_2016_{}.root".format(shorttrack_tag))
         rescale = 35.9/41.97
-        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2016_{}.root".format(tag))
+        fsfile = ROOT.TFile.Open("../FshortLooper/output/Sigcontam_2016_{}.root".format(fshort_tag))
 
     for index,signalfile in enumerate(filelist):
         signalname = inputnamelist[index]

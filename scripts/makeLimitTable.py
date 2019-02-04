@@ -64,6 +64,15 @@ def startSRLimitTable(outfile):
     outfile.write("Region(s) & 10 cm & 90 cm & 2016-18 T1qqqq Exp & 2016 T1qqqq Exp & 2016 T1qqqq Obs \\\\ \n ")
     outfile.write("\hline\n")
 
+def startSRLimitTableObs(outfile):
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | *2c | *2c | *3c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("\multirow{2}{*}{Region(s)} & \multicolumn{2}{c}{10 cm} & \multicolumn{2}{c}{90 cm} & 2016-18 T1qqqq     & \multicolumn{2}{c}{2016 T1qqqq} \\\\ \n ")
+    outfile.write("                           & Exp      & Obs            & Exp       & Obs           & Exp                & Exp         & Obs               \\\\ \n ")
+    outfile.write("\hline\n")
+
 def printFooter(outfile):
     outfile.write("\\bottomrule\n")
     outfile.write("\end{tabular}\n\n")
@@ -324,11 +333,70 @@ def getSRLineWithErrors(njht,pt="",cat="",year="",m1="",m2=""):
     line_to_return = "{} & \\textbf{{{:2.2g}}} (+ {:2.2g} - {:2.2g})  & \\textbf{{{:2.2g}}} (+ {:2.2g} - {:2.2g}) & {} & {} & {}\\\\ \n".format(printable_region.replace("and","\&"),limit_Data_SR_10,limit_Data_SR_10_p1,limit_Data_SR_10_m1,limit_Data_SR_90,limit_Data_SR_90_p1,limit_Data_SR_90_m1,limit_16to18,limit_16_exp,limit_16_obs)
     return line_to_return.replace("-1","--").replace("e+01","0")
 
+
+def getSRLineObs(njht,pt="",cat="",year="",m1="",m2=""):
+    if njht == "All" or njht == "hi" or njht == "lo" or njht == "Long":
+        printable_region = "All"
+        if njht != "All" and njht != "Long": printable_region = "All " + njht +" $p_{T}$"
+        elif njht == "Long": printable_region = "All L"
+        filename = "limits_{}_10cm_{}-{}_Data_SR/higgsCombine{}.AsymptoticLimits.mH120.root".format(tag,m1,m2,njht)
+        f_Data_SR_10=ROOT.TFile.Open(filename) if os.path.isfile(filename) else None
+        filename = "limits_{}_90cm_{}-{}_Data_SR/higgsCombine{}.AsymptoticLimits.mH120.root".format(tag,m1,m2,njht)
+        f_Data_SR_90=ROOT.TFile.Open(filename) if os.path.isfile(filename) else None
+    else:
+        nj = "4" if njht[0] == "H" else "23"
+        post_region = "{}_{}_{}_{}_fastsim_ctaucm_{}-{}_{}_{}".format(nj,pt,cat,year,m1,m2,m1,m2) if len(pt) > 0 else "{}_{}_{}_fastsim_ctaucm_{}-{}_{}_{}".format(nj,cat,year,m1,m2,m1,m2)
+        printable_region = cat+ " " + njht + " "+pt+" "+year
+        filename="limits_{}_10cm_{}-{}_Data_SR/higgsCombine{}_SR_{}.AsymptoticLimits.mH120.root".format(tag,m1,m2,njht,post_region.replace("ctau","10")) 
+        f_Data_SR_10=ROOT.TFile.Open(filename) if os.path.isfile(filename) else None
+        filename="limits_{}_90cm_{}-{}_Data_SR/higgsCombine{}_SR_{}.AsymptoticLimits.mH120.root".format(tag,m1,m2,njht,post_region.replace("ctau","90")) 
+        f_Data_SR_90=ROOT.TFile.Open(filename) if os.path.isfile(filename) else None
+
+    exp_Data_SR_10 = -1
+    obs_Data_SR_10 = -1
+    if f_Data_SR_10 != None:
+        t_Data_SR_10 = f_Data_SR_10.Get("limit")
+        if t_Data_SR_10 != None:
+            if t_Data_SR_10.GetEntries() == 6:
+                t_Data_SR_10.GetEntry(5)
+                obs_limit = t_Data_SR_10.limit
+                obs_Data_SR_10 = float(obs_limit)
+                t_Data_SR_10.GetEntry(2)
+                exp_limit_50 = t_Data_SR_10.limit
+                exp_Data_SR_10 = float(exp_limit_50)
+    exp_Data_SR_90 = -1
+    obs_Data_SR_90 = -1
+    if f_Data_SR_90 != None:
+        t_Data_SR_90 = f_Data_SR_90.Get("limit")
+        if t_Data_SR_90 != None:
+            if t_Data_SR_90.GetEntries() == 6:
+                t_Data_SR_90.GetEntry(5)
+                obs_limit = t_Data_SR_90.limit
+                obs_Data_SR_90 = float(obs_limit)
+                t_Data_SR_90.GetEntry(2)
+                exp_limit_50 = t_Data_SR_90.limit
+                exp_Data_SR_90 = float(exp_limit_50)
+
+    main_limit = main_limits[(int(m1),int(m2))]
+    limit_16to18 = main_limit[0] if njht == "All" else " "
+    limit_16_exp     = main_limit[1] if njht == "All" else " "
+    limit_16_obs     = main_limit[2] if njht == "All" else " "
+
+    exp_10 = "\\textbf{{{:2.2g}}}".format(exp_Data_SR_10) if exp_Data_SR_10 > 0 else "--"
+    obs_10 = "\\textbf{{{:2.2g}}}".format(obs_Data_SR_10) if obs_Data_SR_10 > 0 else "--"
+    exp_90 = "\\textbf{{{:2.2g}}}".format(exp_Data_SR_90) if exp_Data_SR_90 > 0 else "--"
+    obs_90 = "\\textbf{{{:2.2g}}}".format(obs_Data_SR_90) if obs_Data_SR_90 > 0 else "--"
+
+    line_to_return = "{} & {} & {} & {} & {} & {} & {} & {}\\\\ \n".format(printable_region.replace("and","\&"),exp_10,obs_10,exp_90,obs_90,limit_16to18,limit_16_exp,limit_16_obs)
+    return line_to_return
+
+
 #############
 # Make output
 #############
 
-masses=[ ("1800","1400"), ("1800","1600"), ("1800","1700"), ("1700","1600") ]
+#masses=[ ("1800","1400"), ("1800","1600"), ("1800","1700"), ("1700","1600") ]
+masses=[ ("1800","1400"), ("1800","1600"), ("1800","1700") ]
 
 for m1,m2 in masses:
 
@@ -338,50 +406,45 @@ for m1,m2 in masses:
     regions += [(njht,pt,"M",year,m1,m2) for njht in ["LLM","LH","HLM","HH"] for year in ["2016","2017and2018"] for pt in ["lo","hi"]]
     regions += [(njht,"","L",year,m1,m2) for njht in ["LLM","LH","HLM","HH"] for year in ["2016","2017and2018"]]
 
-#    output = open("limit_tables/limits_{0}_{1}_{2}.tex".format(tag,m1,m2),"w")
-#    printHeader(output)
-#    startLimitTable(output)
-#    output.write("\\rowcolor{white}") 
-#    output.write(getLine("All",m1=m1,m2=m2))
-#    output.write("\hline\n")
-#    output.write("\\rowcolor{white}",) 
-#    output.write(getLine("hi",m1=m1,m2=m2))
-#    output.write("\\rowcolor{white}") 
-#    output.write(getLine("lo",m1=m1,m2=m2))
-#    output.write("\hline\n")
-#    for region in regions: 
-#        if region[2] == "M":
-#            output.write("\\rowcolor{blue!25}") 
-#        elif region[2] == "L":
-#            output.write("\\rowcolor{red!25}") 
-#        else:
-#            output.write("\\rowcolor{green!25}") 
-#        output.write(getLine(region[0],region[1],region[2],region[3],region[4],region[5]))
-#    printFooter(output)
-#    output.close()
-
     output = open("limit_tables/limits_{0}_{1}_{2}_SR.tex".format(tag,m1,m2),"w")
     printHeader(output)
-    startSRLimitTable(output)
+    startSRLimitTableObs(output)
     output.write("\\rowcolor{white}") 
-    output.write(getSRLine("All",m1=m1,m2=m2))
+    output.write(getSRLineObs("All",m1=m1,m2=m2))
     output.write("\hline\n")
     output.write("\\rowcolor{white}",) 
-    output.write(getSRLine("hi",m1=m1,m2=m2))
+    output.write(getSRLineObs("hi",m1=m1,m2=m2))
     output.write("\\rowcolor{white}") 
-    output.write(getSRLine("lo",m1=m1,m2=m2))
+    output.write(getSRLineObs("lo",m1=m1,m2=m2))
     output.write("\\rowcolor{white}") 
-    output.write(getSRLine("Long",m1=m1,m2=m2))
+    output.write(getSRLineObs("Long",m1=m1,m2=m2))
     output.write("\hline\n")
-#    for region in regions: 
-#        if region[2] == "M":
-#            output.write("\\rowcolor{blue!25}") 
-#        elif region[2] == "L":
-#            output.write("\\rowcolor{red!25}") 
-#        else:
-#            output.write("\\rowcolor{green!25}") 
-#        output.write(getSRLine(region[0],region[1],region[2],region[3],region[4],region[5]))
     printFooter(output)
     output.close()
+
+    output = open("limit_tables/limits_{0}_{1}_{2}_SR_fullset.tex".format(tag,m1,m2),"w")
+    printHeader(output)
+    startSRLimitTableObs(output)
+    output.write("\\rowcolor{white}") 
+    output.write(getSRLineObs("All",m1=m1,m2=m2))
+    output.write("\hline\n")
+    output.write("\\rowcolor{white}",) 
+    output.write(getSRLineObs("hi",m1=m1,m2=m2))
+    output.write("\\rowcolor{white}") 
+    output.write(getSRLineObs("lo",m1=m1,m2=m2))
+    output.write("\\rowcolor{white}") 
+    output.write(getSRLineObs("Long",m1=m1,m2=m2))
+    output.write("\hline\n")
+    for region in regions: 
+        if region[2] == "M":
+            output.write("\\rowcolor{blue!25}") 
+        elif region[2] == "L":
+            output.write("\\rowcolor{red!25}") 
+        else:
+            output.write("\\rowcolor{green!25}") 
+        output.write(getSRLineObs(region[0],region[1],region[2],region[3],region[4],region[5]))
+    printFooter(output)
+    output.close()
+
 
 print "Done"

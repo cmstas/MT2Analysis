@@ -6,6 +6,7 @@ import re
 import sys
 import os
 import subprocess
+import ppmUtils as utils
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
@@ -47,6 +48,7 @@ pads[1].Draw()
 
 
 tl=ROOT.TLegend(0.2,0.60,0.4,0.85)
+tr=ROOT.TLegend(0.55,0.70,0.75,0.90)
 
 if len(sys.argv) < 2: 
     print "Which tag?"
@@ -694,7 +696,72 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
     tlfs.Draw()
     simplecanvas.SaveAs("{0}/{1}_fshort.png".format(plotdir,desc.replace(" ","_")))
 
+def getBinLabelColor(region):
+    tokens = region.split(" ")
+    track_category = tokens[0]
+    njet = tokens[1][0]
+    pt = "" if len(tokens) < 4 else tokens[3]
+    if track_category == "P":
+        if njet == "L":
+            if pt == "hi":
+                color = ROOT.kRed    
+            else:
+                color = ROOT.kYellow+1
+        else:
+            if pt == "hi":
+                color = ROOT.kBlack
+            else:
+                color = ROOT.kGray+2
+    elif track_category == "P3":
+        if njet == "L":
+            if pt == "hi":
+                color = ROOT.kBlue
+            else:
+                color = ROOT.kBlue+2
+        else:
+            if pt == "hi":
+                color = ROOT.kGreen+1
+            else:
+                color = ROOT.kGreen+3
+    elif track_category == "P4":
+        if njet == "L":
+            if pt == "hi":
+                color = ROOT.kCyan
+            else:
+                color = ROOT.kCyan+3
+        else:
+            if pt == "hi":
+                color = ROOT.kMagenta
+            else:
+                color = ROOT.kMagenta+3
+    elif track_category == "M":
+        if njet == "L":
+            if pt == "hi":
+                color = ROOT.kRed+2
+            else:
+                color = ROOT.kYellow+3
+        else:
+            if pt == "hi":
+                color = ROOT.kRed-9
+            else:
+                color = ROOT.kPink-9
+    else:
+       if njet == "L":
+           color = ROOT.kOrange-3
+       else:
+           color = ROOT.kOrange+4
+    return color
+
 def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
+    if desc.find("16") >= 0:
+        lumi = 35.9
+    elif desc.find("17"):
+        lumi = 41.97
+        if desc.find("18"):
+            lumi += 58.83
+    elif desc.find("18"):
+        lumi = 58.83
+    else: lumi = 1.0
     ratiocanvas.cd()
     tl.Clear()
     nregions=len(regions)
@@ -705,9 +772,14 @@ def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True):
     oerrs = []
     perrs_withfs = []
     perrs_all = []
+    most_discrepant_sigma = 0
+    most_discrepant_obs = 0
+    most_discrepant_pred = 0
+    most_discrepant_perr = 0
+    most_discrepant_region = "None"
     for index,region in enumerate(regions):
         bin_index = index+1
-        hpred.GetXaxis().SetBinLabel(bin_index,region)
+        hpred.GetXaxis().SetBinLabel(bin_index,"#color[{}]{{{}}}".format(getBinLabelColor(region),region))
         pred = vals[region+" pre"]*rescale
         perr = [stats[region+" pre"][i] * rescale for i in [0,1]]
         obs = vals[region+" obs"]
@@ -721,6 +793,19 @@ def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True):
         perrs_all.append( [sqrt(perr[i]**2 + perr_fs**2 + perr_nc**2) for i in [0,1]] )
         hobs.SetBinContent(bin_index,obs)
         oerrs.append(oerr)
+        # find maximally discrepant bin
+        relevant_perr = perrs_all[index][0] if obs > pred else perrs_all[index][1]
+        relevant_oerr = oerr[0] if obs < pred else oerr[1]
+        total_err = sqrt(relevant_perr**2 + relevant_oerr**2)
+        delta = abs(pred - obs)
+        sigma = delta / total_err if total_err > 0 else -1
+        if sigma > most_discrepant_sigma:
+            most_discrepant_sigma = sigma
+            most_discrepant_obs = obs
+            most_discrepant_pred = pred
+            most_discrepant_perr = relevant_perr
+            most_discrepant_region = region
+    print desc,"Most discrepant:",most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
     hpred.GetXaxis().LabelsOption("v")
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
@@ -752,6 +837,8 @@ def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True):
     gobs.SetMarkerColor(ROOT.kBlack)
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
     hpred.Draw("AXIS same") # make tick marks show above fill areas
+    utils.DrawCmsText(pads[0])
+    utils.DrawLumiText(pads[0],lumi)
     tl.AddEntry(gobs,"Observation","pLE")
     tl.AddEntry(gpred_stat,"Prediction, Statistical Errors")
     if not combineSysts:
@@ -812,6 +899,217 @@ def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True):
     gobs_norm.Draw("0 p same")
     h1.Draw("same")
     ratiocanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
+    pads[0].cd()
+    hpred.SetMinimum(0.1)
+    hpred.SetMaximum(200)
+    hpred.Draw("") # only want the axis from the histogram, for bin titles
+    gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
+    if not combineSysts:
+        gpred_withfs.Draw("2 same")
+    gpred_stat.Draw("2 same")
+    hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
+    gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    hpred.Draw("AXIS same") # make tick marks show above fill areas
+    utils.DrawCmsText(pads[0])
+    utils.DrawLumiText(pads[0],lumi)
+    tr.Clear()
+    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors")
+    if not combineSysts:
+        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
+    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    tr.Draw()
+    pads[0].SetLogy(True)
+    ratiocanvas.SaveAs("{0}/{1}_raw_logscale.png".format(plotdir,desc.replace(" ","_")))
+    pads[0].SetLogy(False)
+
+def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, combineSysts = True): # make plots of merged regions
+    if desc.find("16") >= 0:
+        lumi = 35.9
+    elif desc.find("17"):
+        lumi = 41.97
+        if desc.find("18"):
+            lumi += 58.83
+    elif desc.find("18"):
+        lumi = 58.83
+    else: lumi = 1.0
+    ratiocanvas.cd()
+    tr.Clear()
+    ssr_info = []    
+    for region_set in region_sets:
+        total_obs = 0
+        total_pred = 0
+        stat_pred_err = [0,0]
+        withfs_pred_err = [0,0]
+        total_pred_err = [0,0]
+        for region in region_set:
+            pred = vals[region+" pre"]*rescale
+            total_pred += pred
+            perr = [stats[region+" pre"][i] * rescale for i in [0,1]]
+            stat_pred_err[0] = sqrt(perr[0]**2 + stat_pred_err[0]**2)
+            stat_pred_err[1] = sqrt(perr[1]**2 + stat_pred_err[1]**2)
+            obs = vals[region+" obs"]*rescale
+            total_obs += obs
+            perr_fs = systs[region+" fs"] * rescale
+            perr_nc = systs[region+" nc"] * rescale
+            withfs_pred_err[0] = sqrt(withfs_pred_err[0]**2 + perr[0]**2 + perr_fs**2)
+            withfs_pred_err[1] = sqrt(withfs_pred_err[1]**2 + perr[1]**2 + perr_fs**2)
+            total_pred_err[0] = sqrt(total_pred_err[0]**2 + perr[0]**2 + perr_fs**2 + perr_nc**2)
+            total_pred_err[1] = sqrt(total_pred_err[1]**2 + perr[1]**2 + perr_fs**2 + perr_nc**2)
+        ssr_info.append( (total_pred,stat_pred_err,total_obs,getAsymmetricErrors(total_obs),withfs_pred_err,total_pred_err) )
+    nregions=len(ssr_info)
+    hobs=ROOT.TH1D(desc,desc+";;Short Track Counts",nregions,0,nregions)
+    hobs.SetLineWidth(3)
+    hpred=hobs.Clone(hobs.GetName()+"_prediction")
+    perrs = []
+    oerrs = []
+    perrs_withfs = []
+    perrs_all = []
+    most_discrepant_sigma = 0
+    most_discrepant_obs = 0
+    most_discrepant_pred = 0
+    most_discrepant_perr = 0
+    most_discrepant_region = "None"            
+    for index,region in enumerate(ssr_names):
+        bin_index = index+1
+        hpred.GetXaxis().SetBinLabel(bin_index,region)
+        pred,perr,obs,oerr,perr_withfs,perr_total = ssr_info[index]
+        hpred.SetBinContent(bin_index,pred)
+        hpred.SetBinError(bin_index,1e-9) # Need to explictly set bin error to epsilon so lines aren't connected when drawing later (as for "hist" style)
+        perrs.append(perr)
+        perrs_withfs.append( perr_withfs  )
+        perrs_all.append( perr_total )
+        hobs.SetBinContent(bin_index,obs)
+        oerrs.append(oerr)
+        # find maximally discrepant bin
+        relevant_perr = perrs_all[index][0] if obs > pred else perrs_all[index][1]
+        relevant_oerr = oerr[0] if obs < pred else oerr[1]
+        total_err = sqrt(relevant_perr**2 + relevant_oerr**2)
+        delta = abs(pred - obs)
+        sigma = delta / total_err if total_err > 0 else -1
+        if sigma > most_discrepant_sigma:
+            most_discrepant_sigma = sigma
+            most_discrepant_obs = obs
+            most_discrepant_pred = pred
+            most_discrepant_perr = relevant_perr
+            most_discrepant_region = region
+    print desc,"Most discrepant:",most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
+    hpred.GetXaxis().LabelsOption("v")
+    hpred.GetXaxis().SetTitleOffset(4.8)
+    hpred.SetMinimum(-0.001)
+    hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
+    hobs.SetLineColor(ROOT.kBlack)
+    hobs.SetMinimum(hpred.GetMinimum())
+    hobs.SetMaximum(hpred.GetMaximum())
+    hpred.SetLineColor(ROOT.kRed)
+    pads[0].cd()    
+    gpred_stat = getPoissonGraph( hpred, perrs )
+    gpred_stat.SetName("stat"+desc.replace("-","_").replace(" ","_"))
+    gpred_withfs = getPoissonGraph( hpred, perrs_withfs )
+    gpred_withfs.SetName("withfs"+desc.replace("-","_").replace(" ","_"))
+    gpred_all = getPoissonGraph( hpred, perrs_all )
+    gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
+    gobs = getPoissonGraph( hobs, oerrs, False )
+    gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
+    gpred_stat.SetFillColor(ROOT.kCyan-8)
+    gpred_withfs.SetFillColor(ROOT.kGray)
+    gpred_all.SetFillColor(ROOT.kGray+2)
+    hpred.Draw("") # only want the axis from the histogram, for bin titles
+    gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
+    if not combineSysts:
+        gpred_withfs.Draw("2 same")
+    gpred_stat.Draw("2 same")
+    hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
+    gobs.SetMarkerStyle(20)
+    gobs.SetMarkerSize(2)
+    gobs.SetMarkerColor(ROOT.kBlack)
+    gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    hpred.Draw("AXIS same") # make tick marks show above fill areas
+    utils.DrawCmsText(pads[0])
+    utils.DrawLumiText(pads[0],lumi)
+    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors")
+    if not combineSysts:
+        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
+    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    tr.Draw()
+    pads[1].cd()
+    h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs),0,len(perrs))
+    h1.SetLineWidth(3)
+    h1.SetLineColor(ROOT.kRed)
+    hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
+    perrs_all_norm = []
+    perrs_withfs_norm = []
+    perrs_stat_norm = []
+    oerrs_norm = []
+    maxval = 0.0
+    for bin in range(1,len(perrs)+1):
+        h1.GetXaxis().SetBinLabel(bin,"")
+        this_pred = hpred.GetBinContent(bin)
+        h1.SetBinContent(bin,1)
+        if this_pred == 0:
+            hobs_norm.SetBinContent(bin,-1)
+            perrs_all_norm.append( [0,0] )
+            perrs_withfs_norm.append( [0,0] )
+            perrs_stat_norm.append( [0,0] )
+            oerrs_norm.append( [0,0] )
+        else: 
+            hobs_norm.SetBinContent(bin,hobs.GetBinContent(bin) / this_pred)
+            this_perr_all = perrs_all[bin-1]
+            this_perr_withfs = perrs_withfs[bin-1]
+            this_perr_stat = perrs[bin-1]
+            this_oerr = oerrs[bin-1]
+            perrs_all_norm.append( [this_perr_all[i]/this_pred for i in [0,1]] )
+            perrs_withfs_norm.append( [this_perr_withfs[i]/this_pred for i in [0,1]] )
+            perrs_stat_norm.append( [this_perr_stat[i]/this_pred for i in [0,1]] )
+            oerrs_norm.append( [this_oerr[i]/this_pred for i in [0,1]] )
+    h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
+    h1.SetMinimum(-0.001)
+    gall_norm = getPoissonGraph( h1, perrs_all_norm )
+    gall_norm.SetFillColor(ROOT.kGray+2)
+    gwithfs_norm = getPoissonGraph( h1, perrs_withfs_norm )
+    gwithfs_norm.SetFillColor(ROOT.kGray)
+    gstat_norm = getPoissonGraph( h1, perrs_stat_norm)
+    gstat_norm.SetFillColor(ROOT.kCyan-8)
+    gobs_norm = getPoissonGraph(hobs_norm, oerrs_norm, False)
+    gobs_norm.SetMarkerStyle(20)
+    gobs_norm.SetMarkerSize(2)
+    gobs_norm.SetMarkerColor(ROOT.kBlack)
+    h1.GetYaxis().SetLabelSize(hpred.GetYaxis().GetLabelSize()*.83/.16/2)
+    h1.GetYaxis().SetTitleSize(hpred.GetYaxis().GetTitleSize()*.83/.16/2)
+    h1.GetYaxis().SetTitleOffset(0.35)
+    h1.Draw("AXIS")
+    # "0" option forces the drawing of error bars even if the central value is off-scale
+    gall_norm.Draw("0 2 same")
+    if not combineSysts:
+        gwithfs_norm.Draw("0 2 same")
+    gstat_norm.Draw("0 2 same")
+    gobs_norm.Draw("0 p same")
+    h1.Draw("same")
+    ratiocanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
+    pads[0].cd()
+    hpred.SetMinimum(0.1)
+    hpred.SetMaximum(200)
+    hpred.Draw("") # only want the axis from the histogram, for bin titles
+    gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
+    if not combineSysts:
+        gpred_withfs.Draw("2 same")
+    gpred_stat.Draw("2 same")
+    hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
+    gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    hpred.Draw("AXIS same") # make tick marks show above fill areas
+    utils.DrawCmsText(pads[0])
+    utils.DrawLumiText(pads[0],lumi)
+    tr.Clear()
+    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors")
+    if not combineSysts:
+        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
+    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    tr.Draw()
+    pads[0].SetLogy(True)
+    ratiocanvas.SaveAs("{0}/{1}_raw_logscale.png".format(plotdir,desc.replace(" ","_")))
+    pads[0].SetLogy(False)
 
 def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_errs_sig, rescale_lumi, desc, sig_tags, sig_colors, rescale_unblind, combineErrors = True): 
     ratiocanvas.cd()
@@ -1429,13 +1727,174 @@ def get17vs18FSLineMC(cat):
         colorline = "\\rowcolor{red!25}"                                   
     return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],eM17f[cat][1],sM17f[cat],M18f[cat],eM18f[cat][0],eM18f[cat][1],sM18f[cat])
 
-#d18=ROOT.TFile.Open("output_merged/data_2018_{}.root".format(tag))
-#d17=ROOT.TFile.Open("output_merged/data_2017_{}.root".format(tag))
+d18=ROOT.TFile.Open("output_merged/data_2018_{}.root".format(tag))
+d17=ROOT.TFile.Open("output_merged/data_2017_{}.root".format(tag))
 #m18=ROOT.TFile.Open("output_merged/mc_2018_{}.root".format(tag))
 #m17=ROOT.TFile.Open("output_merged/mc_2017_{}.root".format(tag))
 
-#D17f,eD17f,sD17f=getFshorts(d17)
-#D18f,eD18f,sD18f=getFshorts(d18)
+if False:
+    D17f,eD17f,sD17f=getFshorts(d17)
+    D18f,eD18f,sD18f=getFshorts(d18)
+
+    D17,eD17,sD17=getCounts(d17,D17f,sD17f)
+    D18,eD18,sD18=getCounts(d18,D18f,sD18f)
+
+    regionsP31718MR = [cat + " " + kin + " " + reg + " " + pt for reg in ["MR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsP41718MR = [cat + " " + kin + " " + reg + " " + pt for reg in ["MR"] for cat in ["P4"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsM1718MR = [cat + " " + kin + " " + reg + " " + pt for reg in ["MR"] for cat in ["M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsLMR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["MR"]]
+
+    MRP3 = [0,0]
+    MRP4 = [0,0]
+    MRM = [0,0]
+    MRL = [0,0]
+
+    for region in regionsP31718MR:
+        MRP3[0] += D17[region+" STC"]
+        MRP3[1] += D18[region+" STC"]
+
+    for region in regionsP41718MR:
+        MRP4[0] += D17[region+" STC"]
+        MRP4[1] += D18[region+" STC"]
+
+    for region in regionsM1718MR:
+        MRM[0] += D17[region+" STC"]
+        MRM[1] += D18[region+" STC"]
+
+    for region in regionsLMR:
+        MRL[0] += D17[region+" STC"]
+        MRL[1] += D18[region+" STC"]
+
+    MR_total=[ MRP3[0] + MRP4[0] + MRM[0] + MRL[0], MRP3[1] + MRP4[1] + MRM[1] + MRL[1] ]
+
+    regionsP31718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsP41718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P4"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsM1718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsLVR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["VR"]]
+
+    VRP3 = [0,0]
+    VRP4 = [0,0]
+    VRM = [0,0]
+    VRL = [0,0]
+
+    for region in regionsP31718VR:
+        VRP3[0] += D17[region+" STC"]
+        VRP3[1] += D18[region+" STC"]
+
+    for region in regionsP41718VR:
+        VRP4[0] += D17[region+" STC"]
+        VRP4[1] += D18[region+" STC"]
+
+    for region in regionsM1718VR:
+        VRM[0] += D17[region+" STC"]
+        VRM[1] += D18[region+" STC"]
+
+    for region in regionsLVR:
+        VRL[0] += D17[region+" STC"]
+        VRL[1] += D18[region+" STC"]
+
+    VR_total=[ VRP3[0] + VRP4[0] + VRM[0] + VRL[0], VRP3[1] + VRP4[1] + VRM[1] + VRL[1] ]
+
+    regionsP31718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsP41718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P4"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsM1718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+    regionsLSR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["SR"]]
+
+    SRP3 = [0,0]
+    SRP4 = [0,0]
+    SRM = [0,0]
+    SRL = [0,0]
+
+    for region in regionsP31718SR:
+        SRP3[0] += D17[region+" STC"]
+        SRP3[1] += D18[region+" STC"]
+
+    for region in regionsP41718SR:
+        SRP4[0] += D17[region+" STC"]
+        SRP4[1] += D18[region+" STC"]
+
+    for region in regionsM1718SR:
+        SRM[0] += D17[region+" STC"]
+        SRM[1] += D18[region+" STC"]
+
+    for region in regionsLSR:
+        SRL[0] += D17[region+" STC"]
+        SRL[1] += D18[region+" STC"]
+
+    SR_total=[ SRP3[0] + SRP4[0] + SRM[0] + SRL[0], SRP3[1] + SRP4[1] + SRM[1] + SRL[1] ]
+
+    print "2017 lumi    :","{:.0f}%".format(41.97/100.8*100)
+    print " "
+    print "MR 2017 total:","{:.0f}% +".format(MR_total[0]/(MR_total[0]+MR_total[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MR_total[0])[0]/MR_total[0])**2 + (getAsymmetricErrors(MR_total[0]+MR_total[1])[0]/(MR_total[0]+MR_total[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MR_total[0])[1]/MR_total[0])**2 + (getAsymmetricErrors(MR_total[0]+MR_total[1])[1]/(MR_total[0]+MR_total[1]))**2))
+    print "MR 2017 P3   :","{:.0f}% +".format(MRP3[0]/(MRP3[0]+MRP3[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRP3[0])[0]/MRP3[0])**2 + (getAsymmetricErrors(MRP3[0]+MRP3[1])[0]/(MRP3[0]+MRP3[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRP3[0])[1]/MRP3[0])**2 + (getAsymmetricErrors(MRP3[0]+MRP3[1])[1]/(MRP3[0]+MRP3[1]))**2))
+    print "MR 2017 P4   :","{:.0f}% +".format(MRP4[0]/(MRP4[0]+MRP4[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRP4[0])[0]/MRP4[0])**2 + (getAsymmetricErrors(MRP4[0]+MRP4[1])[0]/(MRP4[0]+MRP4[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRP4[0])[1]/MRP4[0])**2 + (getAsymmetricErrors(MRP4[0]+MRP4[1])[1]/(MRP4[0]+MRP4[1]))**2))
+    print "MR 2017 M    :","{:.0f}% +".format(MRM[0]/(MRM[0]+MRM[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRM[0])[0]/MRM[0])**2 + (getAsymmetricErrors(MRM[0]+MRM[1])[0]/(MRM[0]+MRM[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRM[0])[1]/MRM[0])**2 + (getAsymmetricErrors(MRM[0]+MRM[1])[1]/(MRM[0]+MRM[1]))**2))
+    print "MR 2017 L    :","{:.0f}% +".format(MRL[0]/(MRL[0]+MRL[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRL[0])[0]/MRL[0])**2 + (getAsymmetricErrors(MRL[0]+MRL[1])[0]/(MRL[0]+MRL[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRL[0])[1]/MRL[0])**2 + (getAsymmetricErrors(MRL[0]+MRL[1])[1]/(MRL[0]+MRL[1]))**2))
+    print " "
+    print "VR 2017 total:","{:.0f}% +".format(VR_total[0]/(VR_total[0]+VR_total[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VR_total[0])[0]/VR_total[0])**2 + (getAsymmetricErrors(VR_total[0]+VR_total[1])[0]/(VR_total[0]+VR_total[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VR_total[0])[1]/VR_total[0])**2 + (getAsymmetricErrors(VR_total[0]+VR_total[1])[1]/(VR_total[0]+VR_total[1]))**2))
+    print "VR 2017 P3   :","{:.0f}% +".format(VRP3[0]/(VRP3[0]+VRP3[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRP3[0])[0]/VRP3[0])**2 + (getAsymmetricErrors(VRP3[0]+VRP3[1])[0]/(VRP3[0]+VRP3[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRP3[0])[1]/VRP3[0])**2 + (getAsymmetricErrors(VRP3[0]+VRP3[1])[1]/(VRP3[0]+VRP3[1]))**2))
+    print "VR 2017 P4   :","{:.0f}% +".format(VRP4[0]/(VRP4[0]+VRP4[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRP4[0])[0]/VRP4[0])**2 + (getAsymmetricErrors(VRP4[0]+VRP4[1])[0]/(VRP4[0]+VRP4[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRP4[0])[1]/VRP4[0])**2 + (getAsymmetricErrors(VRP4[0]+VRP4[1])[1]/(VRP4[0]+VRP4[1]))**2))
+    print "VR 2017 M    :","{:.0f}% +".format(VRM[0]/(VRM[0]+VRM[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRM[0])[0]/VRM[0])**2 + (getAsymmetricErrors(VRM[0]+VRM[1])[0]/(VRM[0]+VRM[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRM[0])[1]/VRM[0])**2 + (getAsymmetricErrors(VRM[0]+VRM[1])[1]/(VRM[0]+VRM[1]))**2))
+    print "VR 2017 L    :","{:.0f}% +".format(VRL[0]/(VRL[0]+VRL[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRL[0])[0]/VRL[0])**2 + (getAsymmetricErrors(VRL[0]+VRL[1])[0]/(VRL[0]+VRL[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRL[0])[1]/VRL[0])**2 + (getAsymmetricErrors(VRL[0]+VRL[1])[1]/(VRL[0]+VRL[1]))**2))
+    print " "
+    print "SR 2017 total:","{:.0f}% +".format(SR_total[0]/(SR_total[0]+SR_total[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(SR_total[0])[0]/SR_total[0])**2 + (getAsymmetricErrors(SR_total[0]+SR_total[1])[0]/(SR_total[0]+SR_total[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(SR_total[0])[1]/SR_total[0])**2 + (getAsymmetricErrors(SR_total[0]+SR_total[1])[1]/(SR_total[0]+SR_total[1]))**2))
+    print "SR 2017 P3   :","{:.0f}% +".format(SRP3[0]/(SRP3[0]+SRP3[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(SRP3[0])[0]/SRP3[0])**2 + (getAsymmetricErrors(SRP3[0]+SRP3[1])[0]/(SRP3[0]+SRP3[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(SRP3[0])[1]/SRP3[0])**2 + (getAsymmetricErrors(SRP3[0]+SRP3[1])[1]/(SRP3[0]+SRP3[1]))**2))
+    print "SR 2017 P4   :","{:.0f}% +".format(SRP4[0]/(SRP4[0]+SRP4[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(SRP4[0])[0]/SRP4[0])**2 + (getAsymmetricErrors(SRP4[0]+SRP4[1])[0]/(SRP4[0]+SRP4[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(SRP4[0])[1]/SRP4[0])**2 + (getAsymmetricErrors(SRP4[0]+SRP4[1])[1]/(SRP4[0]+SRP4[1]))**2))
+    print "SR 2017 M    :","{:.0f}% +".format(SRM[0]/(SRM[0]+SRM[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(SRM[0])[0]/SRM[0])**2 + (getAsymmetricErrors(SRM[0]+SRM[1])[0]/(SRM[0]+SRM[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(SRM[0])[1]/SRM[0])**2 + (getAsymmetricErrors(SRM[0]+SRM[1])[1]/(SRM[0]+SRM[1]))**2))
+    print "SR 2017 L    :","{:.0f}% +".format(SRL[0]/(SRL[0]+SRL[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(SRL[0])[0]/SRL[0])**2 + (getAsymmetricErrors(SRL[0]+SRL[1])[0]/(SRL[0]+SRL[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(SRL[0])[1]/SRL[0])**2 + (getAsymmetricErrors(SRL[0]+SRL[1])[1]/(SRL[0]+SRL[1]))**2))
+    print " "
+    print "****"
+    print " "
+    print " Now STs "
+    print " "
+    for region in regionsP31718MR:
+        MRP3[0] += D17[region+" obs"]
+        MRP3[1] += D18[region+" obs"]
+
+    for region in regionsP41718MR:
+        MRP4[0] += D17[region+" obs"]
+        MRP4[1] += D18[region+" obs"]
+
+    for region in regionsM1718MR:
+        MRM[0] += D17[region+" obs"]
+        MRM[1] += D18[region+" obs"]
+
+    for region in regionsLMR:
+        MRL[0] += D17[region+" obs"]
+        MRL[1] += D18[region+" obs"]
+
+    for region in regionsP31718VR:
+        VRP3[0] += D17[region+" obs"]
+        VRP3[1] += D18[region+" obs"]
+
+    for region in regionsP41718VR:
+        VRP4[0] += D17[region+" obs"]
+        VRP4[1] += D18[region+" obs"]
+
+    for region in regionsM1718VR:
+        VRM[0] += D17[region+" obs"]
+        VRM[1] += D18[region+" obs"]
+
+    for region in regionsLVR:
+        VRL[0] += D17[region+" obs"]
+        VRL[1] += D18[region+" obs"]
+
+    print "MR 2017 total:","{:.0f}% +".format(MR_total[0]/(MR_total[0]+MR_total[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MR_total[0])[0]/MR_total[0])**2 + (getAsymmetricErrors(MR_total[0]+MR_total[1])[0]/(MR_total[0]+MR_total[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MR_total[0])[1]/MR_total[0])**2 + (getAsymmetricErrors(MR_total[0]+MR_total[1])[1]/(MR_total[0]+MR_total[1]))**2))
+    print "MR 2017 P3   :","{:.0f}% +".format(MRP3[0]/(MRP3[0]+MRP3[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRP3[0])[0]/MRP3[0])**2 + (getAsymmetricErrors(MRP3[0]+MRP3[1])[0]/(MRP3[0]+MRP3[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRP3[0])[1]/MRP3[0])**2 + (getAsymmetricErrors(MRP3[0]+MRP3[1])[1]/(MRP3[0]+MRP3[1]))**2))
+    print "MR 2017 P4   :","{:.0f}% +".format(MRP4[0]/(MRP4[0]+MRP4[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRP4[0])[0]/MRP4[0])**2 + (getAsymmetricErrors(MRP4[0]+MRP4[1])[0]/(MRP4[0]+MRP4[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRP4[0])[1]/MRP4[0])**2 + (getAsymmetricErrors(MRP4[0]+MRP4[1])[1]/(MRP4[0]+MRP4[1]))**2))
+    print "MR 2017 M    :","{:.0f}% +".format(MRM[0]/(MRM[0]+MRM[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRM[0])[0]/MRM[0])**2 + (getAsymmetricErrors(MRM[0]+MRM[1])[0]/(MRM[0]+MRM[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRM[0])[1]/MRM[0])**2 + (getAsymmetricErrors(MRM[0]+MRM[1])[1]/(MRM[0]+MRM[1]))**2))
+    print "MR 2017 L    :","{:.0f}% +".format(MRL[0]/(MRL[0]+MRL[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(MRL[0])[0]/MRL[0])**2 + (getAsymmetricErrors(MRL[0]+MRL[1])[0]/(MRL[0]+MRL[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(MRL[0])[1]/MRL[0])**2 + (getAsymmetricErrors(MRL[0]+MRL[1])[1]/(MRL[0]+MRL[1]))**2))
+    print " "
+    print "VR 2017 total:","{:.0f}% +".format(VR_total[0]/(VR_total[0]+VR_total[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VR_total[0])[0]/VR_total[0])**2 + (getAsymmetricErrors(VR_total[0]+VR_total[1])[0]/(VR_total[0]+VR_total[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VR_total[0])[1]/VR_total[0])**2 + (getAsymmetricErrors(VR_total[0]+VR_total[1])[1]/(VR_total[0]+VR_total[1]))**2))
+    print "VR 2017 P3   :","{:.0f}% +".format(VRP3[0]/(VRP3[0]+VRP3[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRP3[0])[0]/VRP3[0])**2 + (getAsymmetricErrors(VRP3[0]+VRP3[1])[0]/(VRP3[0]+VRP3[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRP3[0])[1]/VRP3[0])**2 + (getAsymmetricErrors(VRP3[0]+VRP3[1])[1]/(VRP3[0]+VRP3[1]))**2))
+    print "VR 2017 P4   :","{:.0f}% +".format(VRP4[0]/(VRP4[0]+VRP4[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRP4[0])[0]/VRP4[0])**2 + (getAsymmetricErrors(VRP4[0]+VRP4[1])[0]/(VRP4[0]+VRP4[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRP4[0])[1]/VRP4[0])**2 + (getAsymmetricErrors(VRP4[0]+VRP4[1])[1]/(VRP4[0]+VRP4[1]))**2))
+    print "VR 2017 M    :","{:.0f}% +".format(VRM[0]/(VRM[0]+VRM[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRM[0])[0]/VRM[0])**2 + (getAsymmetricErrors(VRM[0]+VRM[1])[0]/(VRM[0]+VRM[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRM[0])[1]/VRM[0])**2 + (getAsymmetricErrors(VRM[0]+VRM[1])[1]/(VRM[0]+VRM[1]))**2))
+    print "VR 2017 L    :","{:.0f}% +".format(VRL[0]/(VRL[0]+VRL[1])*100),"{:.0f}% -".format(100*sqrt((getAsymmetricErrors(VRL[0])[0]/VRL[0])**2 + (getAsymmetricErrors(VRL[0]+VRL[1])[0]/(VRL[0]+VRL[1]))**2)),"{:.0f}%".format(100*sqrt((getAsymmetricErrors(VRL[0])[1]/VRL[0])**2 + (getAsymmetricErrors(VRL[0]+VRL[1])[1]/(VRL[0]+VRL[1]))**2))
+    print " "
+    print "Done 17-18 MR/VR/SR compare"
+    exit(1)
+
+
 #fs_regions = [cat + " " + nj + " " + pt for cat in ["P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 #fs_regions += ["L 23","L 4"]
 #output = open("{0}/fshorts_data_{1}.tex".format(tabledir,tag),"w")
@@ -1493,8 +1952,6 @@ if doMC:
 signal_points=[(1800,1400,10),(1800,1600,10),(1800,1700,10),(1800,1400,90),(1800,1600,90),(1800,1700,90)]
 signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
 signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
-#D18,eD18=getCounts(d18)
-#D17,eD17=getCounts(d17)
 D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f)
 D16,eD16,sD16=getCounts(d16,D16f,sD16f)
 if doMC:
@@ -1547,6 +2004,29 @@ allregions = allVR + allSR
 rescale16 = 1/4.0 if not full_unblind else 1.0
 rescale1718 = 1/5.0 if not full_unblind else 1.0
 
+# SSRs, 2017-18
+regionsPVR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsP3VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsP4VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P4"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsMVR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsLVR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["VR"]]
+
+svr_16 = [regionsPVR, regionsMVR, regionsLVR]
+svr_16_names = ["P SVR","M SVR","L SVR"]
+svr_1718 = [regionsP3VR, regionsP4VR, regionsMVR, regionsLVR]
+svr_1718_names = ["P3 SVR","P4 SVR","M SVR","L SVR"]
+
+regionsPSR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsP3SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsP4SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P4"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsMSR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["M"] for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
+regionsLSR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["SR"]]
+
+ssr_16 = [regionsPSR, regionsMSR, regionsLSR]
+ssr_16_names = ["P SSR","M SSR","L SSR"]
+ssr_1718 = [regionsP3SR, regionsP4SR, regionsMSR, regionsLSR]
+ssr_1718_names = ["P3 SSR","P4 SSR","M SSR","L SSR"]
+
 #for region in allVR:
 #    print region, D16[region+" pre"],eD16[region+" pre"],sD16[region+" fs"],sD16[region+" nc"]
 
@@ -1560,6 +2040,11 @@ makePlotRaw(allVR1718,D1718,eD1718,sD1718,"2017-18 DATA VR")
 makePlotRaw(allVR16,D16,eD16,sD16,"2016 DATA VR")
 makePlotRaw(allSR1718,D1718,eD1718,sD1718,"2017-18 DATA SR",rescale1718)
 makePlotRaw(allSR16,D16,eD16,sD16,"2016 DATA SR",rescale16)
+
+makePlotSSRs(svr_1718,D1718,eD1718,sD1718,"2017-18 DATA SVR",svr_1718_names)
+makePlotSSRs(svr_16,D16,eD16,sD16,"2016 DATA SVR",svr_16_names)
+makePlotSSRs(ssr_1718,D1718,eD1718,sD1718,"2017-18 DATA SSR",ssr_1718_names,rescale1718)
+makePlotSSRs(ssr_16,D16,eD16,sD16,"2016 DATA SSRs",ssr_16_names,rescale16)
 
 if doMC:
     makePlotRaw(allVR1718,M1718,eM1718,sM1718,"2017-18 MC VR")
