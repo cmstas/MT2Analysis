@@ -12,7 +12,7 @@ const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
 
-const bool merge17and18 = false;
+const bool merge17and18 = true;
 
 // turn on to apply json file to data
 const bool applyJSON = true;
@@ -47,6 +47,7 @@ int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi, int year) {
 int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, char * runtag) {
   string tag(outtag);
   bool isSignal = tag.find("sim") != std::string::npos;
+  bool useGENMET = tag.find("GENMET") != std::string::npos && isSignal;
   const bool isMC = isSignal || config_tag.find("mc") != std::string::npos;
 
 
@@ -922,6 +923,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
 
+    const float deltaPhiMin = useGENMET ? t.deltaPhiMin : t.deltaPhiMin_genmet;
+    const float diffMetMht = useGENMET ? t.diffMetMht_genmet/t.met_genPt : t.diffMetMht/t.met_pt;
+    const float mt2 = useGENMET ? t.mt2_genmet : t.mt2;
+    const float met_pt = useGENMET ? t.met_genPt : t.met_pt;
+
     if (t.nJet30 < 2) {
       continue;
     }
@@ -932,16 +938,16 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (unlikely(t.nJet30FailId != 0)) {
       continue;
     }
-    if (t.mt2 < 60) {
+    if (mt2 < 60) {
       continue;
     }
 
     // Let low met events through regardless of Ht if they're in MR
-    if (t.met_pt < 30 || (t.ht < 1200 && t.met_pt < 250 && t.mt2 > 100)) {
+    if (met_pt < 30 || (t.ht < 1200 && met_pt < 250 && mt2 > 100)) {
 	continue;
     }
 
-    if (t.diffMetMht / t.met_pt > 0.5) {
+    if (diffMetMht > 0.5) {
       continue;
     }
 
@@ -958,7 +964,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       continue;
     }
 
-    if (t.deltaPhiMin < 0.3) {
+    if (deltaPhiMin < 0.3) {
       continue;
     }
 
@@ -1011,12 +1017,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // LH
       if (t.ht >= 1200) {
 	// MR
-	if (t.mt2 < 100) {
+	if (mt2 < 100) {
 	  hist = h_LH_MR;
 	  hist_Nj = h_LH_MR_23;
 	}
 	// VR
-	else if (t.mt2 < 200) {
+	else if (mt2 < 200) {
 	  hist = h_LH_VR;
 	  hist_Nj = h_LH_VR_23;
 	}
@@ -1029,12 +1035,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // LM
       else if (t.ht >= 450) {
 	// MR
-	if (t.mt2 < 100) {
+	if (mt2 < 100) {
 	  hist = h_LM_MR;
 	  hist_Nj = h_LM_MR_23;
 	}
 	// VR
-	else if (t.mt2 < 200) {
+	else if (mt2 < 200) {
 	  hist = h_LM_VR;
 	  hist_Nj = h_LM_VR_23;
 	}
@@ -1047,12 +1053,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // LL
       else {
 	// MR
-	if (t.mt2 < 100) {
+	if (mt2 < 100) {
 	  hist = h_LL_MR;
 	  hist_Nj = h_LL_MR_23;
 	}
 	// VR
-	else if (t.mt2 < 200) {
+	else if (mt2 < 200) {
 	  hist = h_LL_VR;
 	  hist_Nj = h_LL_VR_23;
 	}
@@ -1068,12 +1074,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // HH
       if (t.ht >= 1200) {
 	// MR
-	if (t.mt2 < 100) {
+	if (mt2 < 100) {
 	  hist = h_HH_MR;
 	  hist_Nj = h_HH_MR_4;
 	}
 	// VR
-	else if (t.mt2 < 200) {
+	else if (mt2 < 200) {
 	  hist = h_HH_VR;
 	  hist_Nj = h_HH_VR_4;
 	}
@@ -1086,12 +1092,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // HM
       else if (t.ht >= 450) {
 	// MR
-	if (t.mt2 < 100) {
+	if (mt2 < 100) {
 	  hist = h_HM_MR;
 	  hist_Nj = h_HM_MR_4;
 	}
 	// VR
-	else if (t.mt2 < 200) {
+	else if (mt2 < 200) {
 	  hist = h_HM_VR;
 	  hist_Nj = h_HM_VR_4;
 	}
@@ -1104,12 +1110,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       // HL
       else {
 	// MR
-	if (t.mt2 < 100) {
+	if (mt2 < 100) {
 	  hist = h_HL_MR;
 	  hist_Nj = h_HL_MR_4;
 	}
 	// VR
-	else if (t.mt2 < 200) {
+	else if (mt2 < 200) {
 	  hist = h_HL_VR;
 	  hist_Nj = h_HL_VR_4;
 	}
@@ -1161,10 +1167,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
 	// L ST
 	if (t.track_islong[i_trk]) {
-	  MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi ) < 100 && t.track_pt[i_trk] < 150 ? nSTl_rej++ : nSTl_acc++;
+	  MT( t.track_pt[i_trk], t.track_phi[i_trk], met_pt, t.met_phi ) < 100 && t.track_pt[i_trk] < 150 ? nSTl_rej++ : nSTl_acc++;
 	} 
 	else if (t.track_islongcandidate[i_trk]) {
-	  MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi ) < 100 && t.track_pt[i_trk] < 150 ? nSTCl_rej++ : nSTCl_acc++;
+	  MT( t.track_pt[i_trk], t.track_phi[i_trk], met_pt, t.met_phi ) < 100 && t.track_pt[i_trk] < 150 ? nSTCl_rej++ : nSTCl_acc++;
 	}
       }
     }
@@ -1316,11 +1322,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	//	isSTC = !isST && (isP || iso > 30 || reliso > 0.4);
 	if (! (isST || isSTC)) continue;       
 
-	if ( isST && (blind && t.isData && t.mt2 >= 200 && !partial_unblind)) {
+	if ( isST && (blind && t.isData && mt2 >= 200 && !partial_unblind)) {
 	  continue;
 	}
 
-	const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], t.met_pt, t.met_phi );	
+	const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], met_pt, t.met_phi );	
 	const bool vetoMtPt = mt < 100 && t.track_pt[i_trk] < 150;
 
 	if (isSignal && !isChargino && !(lenIndex == 3 && vetoMtPt)) {
@@ -1408,12 +1414,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	pred_weight *= pow(fs_P3,nSTCp3);
 	pred_weight *= pow(fs_P4,nSTCp4);
       }
-      if (t.mt2 < 100) {
+      if (mt2 < 100) {
 	cout << ", MR" << endl;
 	h_2STC_MR->Fill(0.0,2.0,weight);
 	h_2STC_MR->Fill(0.0,1.0,pred_weight);
       }
-      else if (t.mt2 < 200) {
+      else if (mt2 < 200) {
 	cout << ", VR" << endl;
 	h_2STC_VR->Fill(0.0,2.0,weight);
 	h_2STC_VR->Fill(0.0,1.0,pred_weight);
@@ -1463,11 +1469,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     
     if (nSTl_acc + nSTm + nSTp > 1 && EventWise) {
       cout << "2 ST, P3: " << nSTp3 << " P4: " << nSTp4 << " M: " << nSTm << " L: " << nSTl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
-      if (t.mt2 < 100) {
+      if (mt2 < 100) {
 	cout << ", MR" << endl;
 	h_2STC_MR->Fill(0.0,0.0,weight);
       }
-      else if (t.mt2 < 200) {
+      else if (mt2 < 200) {
 	cout << ", VR" << endl;
 	h_2STC_VR->Fill(0.0,0.0,weight);
       }
@@ -1482,7 +1488,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	hist_Nj->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
       }
       if (nSTm > 0) {
-	if (t.mt2 > 200) cout << "M ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	if (mt2 > 200) cout << "M ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	hist->Fill(Midx-0.5,0.0,weight*nSTm);
 	hist_Nj->Fill(Midx-0.5,0.0,weight*nSTm);
       }
@@ -1585,7 +1591,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       hist_Nj_hi->Fill(Pidx-0.5,0.0,weight*nSTp_hi);
     }
     if (nSTp3_hi > 0) {
-      if (t.mt2 > 100 && t.mt2 < 200 && hist_Nj_hi == h_LM_VR_23_hi) cout << "P3 LM VR hi ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+      if (mt2 > 100 && mt2 < 200 && hist_Nj_hi == h_LM_VR_23_hi) cout << "P3 LM VR hi ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
       hist_hi->Fill(P3idx-0.5,0.0,weight*nSTp3_hi);
       hist_Nj_hi->Fill(P3idx-0.5,0.0,weight*nSTp3_hi);
     }

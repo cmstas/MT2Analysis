@@ -11,6 +11,9 @@ import subprocess
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
+format = "pdf"
+
+
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
 ROOT.gStyle.SetLegendTextSize(0.1)
@@ -29,7 +32,7 @@ if len(sys.argv) < 2:
     print "Which tag?"
     exit(1)
 
-os.system("mkdir -p pngs_contam")
+os.system("mkdir -p contam_plots")
 
 tag = sys.argv[1]
 
@@ -90,6 +93,6 @@ for fileindex,f in enumerate(files):
                 simplecanvas.SetLogy()
                 h_output.GetYaxis().SetTitle("Events, in 2017 (41.97/fb)")
             h_output.Draw("E")
-            simplecanvas.SaveAs("pngs_contam/{}.png".format(h_output.GetName()))
+            simplecanvas.SaveAs("contam_plots/{}.{}".format(h_output.GetName(),format))
             simplecanvas.SetLogy(False)
 print "Done"

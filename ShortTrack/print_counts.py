@@ -15,6 +15,7 @@ verbose = False # Print more status messages
 printTables = True
 full_unblind = True
 doMC = True
+format = "pdf"
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
@@ -645,6 +646,15 @@ def getCounts(f,fshorts,fshort_systs,isMC = False,isSig = False):
     return vals,stats,systs
 
 def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
+    if desc.find("16") >= 0:
+        lumi = 35.9
+    elif desc.find("17"):
+        lumi = 41.97
+        if desc.find("18"):
+            lumi += 58.83
+    elif desc.find("18"):
+        lumi = 58.83
+    else: lumi = 1.0
     simplecanvas.cd()
     tlfs=ROOT.TLegend(0.5,0.65,0.7,0.85)
     tlfs.Clear()
@@ -694,7 +704,9 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
 #    hdata_syst.Draw("same E")
     gmc_syst.Draw("p same")
     tlfs.Draw()
-    simplecanvas.SaveAs("{0}/{1}_fshort.png".format(plotdir,desc.replace(" ","_")))
+    utils.DrawCmsText(simplecanvas)
+    utils.DrawLumiText(simplecanvas,lumi)
+    simplecanvas.SaveAs("{}/{}_fshort.{}".format(plotdir,desc.replace(" ","_"),format))
 
 def getBinLabelColor(region):
     tokens = region.split(" ")
@@ -898,7 +910,7 @@ def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True):
     gstat_norm.Draw("0 2 same")
     gobs_norm.Draw("0 p same")
     h1.Draw("same")
-    ratiocanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
+    ratiocanvas.SaveAs("{}/{}_raw.{}".format(plotdir,desc.replace(" ","_"),format))
     pads[0].cd()
     hpred.SetMinimum(0.1)
     hpred.SetMaximum(200)
@@ -920,7 +932,7 @@ def makePlotRaw(regions,vals,stats,systs,desc,rescale=1.0, combineSysts = True):
     tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
     tr.Draw()
     pads[0].SetLogy(True)
-    ratiocanvas.SaveAs("{0}/{1}_raw_logscale.png".format(plotdir,desc.replace(" ","_")))
+    ratiocanvas.SaveAs("{}/{}_raw_logscale.{}".format(plotdir,desc.replace(" ","_"),format))
     pads[0].SetLogy(False)
 
 def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, combineSysts = True): # make plots of merged regions
@@ -1086,7 +1098,7 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     gstat_norm.Draw("0 2 same")
     gobs_norm.Draw("0 p same")
     h1.Draw("same")
-    ratiocanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
+    ratiocanvas.SaveAs("{}/{}_raw.{}".format(plotdir,desc.replace(" ","_"),format))
     pads[0].cd()
     hpred.SetMinimum(0.1)
     hpred.SetMaximum(200)
@@ -1108,10 +1120,20 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
     tr.Draw()
     pads[0].SetLogy(True)
-    ratiocanvas.SaveAs("{0}/{1}_raw_logscale.png".format(plotdir,desc.replace(" ","_")))
+    ratiocanvas.SaveAs("{}/{}_raw_logscale.{}".format(plotdir,desc.replace(" ","_"),format))
     pads[0].SetLogy(False)
 
 def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_errs_sig, rescale_lumi, desc, sig_tags, sig_colors, rescale_unblind, combineErrors = True): 
+    year_token = desc.split("_")[0]
+    if year_token.find("16") >= 0:
+        lumi = 35.9
+    elif year_token.find("17"):
+        lumi = 41.97
+        if year_token.find("18"):
+            lumi += 58.83
+    elif year_token.find("18"):
+        lumi = 58.83
+    else: lumi = 1.0
     ratiocanvas.cd()
     tl.Clear()
     nregions=len(regions)
@@ -1187,8 +1209,10 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
         hsig.Draw("E same")
         tl.AddEntry(hsig,sig_tags[sig_index]+" Pred BG (MC Stat Error)")
     tl.Draw()
+    utils.DrawCmsText(simplecanvas)
+    utils.DrawLumiText(simplecanvas,lumi)
     unblind = "partialunblind" if rescale_unblind < 1.0 else "fullunblind"
-    simplecanvas.SaveAs("{}/{}_counts_{}.png".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",",""),unblind))
+    simplecanvas.SaveAs("{}/{}_counts_{}.{}".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",",""),unblind,format))
 
 def makePlotDiscrepancies(regions_sets,vals_sets,errs_sets,systs_sets,desc,onlyNonMin=False,rescale=[1.0,1.0]): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
     simplecanvas.cd()
@@ -1237,7 +1261,7 @@ def makePlotDiscrepancies(regions_sets,vals_sets,errs_sets,systs_sets,desc,onlyN
     tl.AddEntry(hsigma,"(N_{{Pred}}-N_{{Obs}})/#sigma, Mean = {:.2f}, Deviation = {:.2f}".format(hsigma.GetMean(),hsigma.GetStdDev()))
     tl.AddEntry(hno0,"Suppressed for Obs = 0 and Pred < 0.5")
     tl.Draw()
-    simplecanvas.SaveAs("{0}/{1}_sigma.png".format(plotdir,desc.replace(" ","_")))
+    simplecanvas.SaveAs("{}/{}_sigma.{}".format(plotdir,desc.replace(" ","_"),format))
 
 # compare signal yields at limiting mu, and systematic error, in VR
 def makePlotSigErr(regions,vals,nonncerrs,ncsysts,list_of_sigvals,sigtags,sigcolors,limits,rescale_lumi,desc):
@@ -1286,7 +1310,7 @@ def makePlotSigErr(regions,vals,nonncerrs,ncsysts,list_of_sigvals,sigtags,sigcol
     tl.AddEntry(hobserr,"Total Error, incl Obs Stat")
     tl.Draw()
     simplecanvas.SetLogy()
-    simplecanvas.SaveAs("{0}/{1}_systcontam.png".format(plotdir,desc.replace(" ","_")))
+    simplecanvas.SaveAs("{}/{}_systcontam.{}".format(plotdir,desc.replace(" ","_"),format))
     simplecanvas.SetLogy(False)
 
 def getMergedCountsLine(region,year=None):
@@ -2063,8 +2087,8 @@ if doMC:
         m1=sp[0]
         m2=sp[1]
         ct=sp[2]
-        makeSignalPlot(allSR1718,D1718,eD1718,sD1718,[S1718[sp]],[eS1718[sp]],1+(58.83/41.97),"2017-18 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed],rescale1718)
-        makeSignalPlot(allSR16,D16,eD16,sD16,[S1718[sp]],[eS1718[sp]],35.9/41.97,"2016 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kRed],rescale16)
+        makeSignalPlot(allSR1718,D1718,eD1718,sD1718,[S1718[sp]],[eS1718[sp]],1+(58.83/41.97),"2017-18 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kGreen],rescale1718)
+        makeSignalPlot(allSR16,D16,eD16,sD16,[S1718[sp]],[eS1718[sp]],35.9/41.97,"2016 ({}, {}) GeV, {} cm".format(m1,m2,ct),["({}, {}) GeV".format(m1,m2)],[ROOT.kGreen],rescale16)
 
         list_of_vals_10 = [S1718[sp] for sp in signal_points_10]
         list_of_errs_10 = [eS1718[sp] for sp in signal_points_10]
@@ -5003,7 +5027,7 @@ def makePlot(regions,vals,errs,systs,desc):
     hpred_nofill.Draw("hist same")
     hobs.Draw("same E0")
     tl.Draw()
-    simplecanvas.SaveAs("{0}/{1}.png".format(plotdir,desc.replace(" ","_")))
+    simplecanvas.SaveAs("{}/{}.{}".format(plotdir,desc.replace(" ","_"),format))
 
 def makePlotRawOld(regions,vals,errs,systs,desc,rescale=1.0): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
     ratiocanvas.cd()
@@ -5090,10 +5114,10 @@ def makePlotRawOld(regions,vals,errs,systs,desc,rescale=1.0): # Raw means non-no
     h1.SetLineColor(ROOT.kBlack)
     h1.Draw("hist same")
     hratio.Draw("same")
-    ratiocanvas.SaveAs("{0}/{1}_raw.png".format(plotdir,desc.replace(" ","_")))
+    ratiocanvas.SaveAs("{}/{}_raw.{}".format(plotdir,desc.replace(" ","_"),format))
     simplecanvas.cd()
     hprojection.Draw()
-    simplecanvas.SaveAs("{0}/{1}_ratios_zerosuppressed.png".format(plotdir,desc.replace(" ","_")))
+    simplecanvas.SaveAs("{}/{}_ratios_zerosuppressed.{}".format(plotdir,desc.replace(" ","_"),format))
 
 def makePlotDiscrepanciesOld(regions_sets,vals_sets,errs_sets,systs_sets,desc,onlyNonMin=False,rescale=[1.0,1.0]): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
     simplecanvas.cd()
@@ -5132,7 +5156,7 @@ def makePlotDiscrepanciesOld(regions_sets,vals_sets,errs_sets,systs_sets,desc,on
     hsigma.Draw("hist")
     tl.AddEntry(hsigma,"(N_{{Pred}}-N_{{Obs}})/#sigma, Mean = {:.2f}, Deviation = {:.2f}".format(hsigma.GetMean(),hsigma.GetStdDev()))
     tl.Draw()
-    simplecanvas.SaveAs("{0}/{1}_sigma_zerosuppressed.png".format(plotdir,desc.replace(" ","_")))
+    simplecanvas.SaveAs("{}/{}_sigma_zerosuppressed.{}".format(plotdir,desc.replace(" ","_"),format))
 
 
 def makeSignalPlotOld(regions,vals_bg,errs_bg,list_of_vals_sig,list_of_errs_sig, systs, rescale_lumi, desc, sig_tags, sig_colors): # Don't rescale counts
@@ -5180,7 +5204,7 @@ def makeSignalPlotOld(regions,vals_bg,errs_bg,list_of_vals_sig,list_of_errs_sig,
         hsig.Draw("same E0")
         tl.AddEntry(hsig,sig_tags[sig_index]+" + Pred BG (Signal MC Errors)")
     tl.Draw()
-    simplecanvas.SaveAs("{0}/{1}_counts.png".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",","")))
+    simplecanvas.SaveAs("{}/{}_counts.{}".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",",""),format))
 
 def getMergedLineDataSTCOld(region,rescale16=1.0,rescale1718=1.0): # rescale multiplies prediction to enable partial unblinding
     if region[0] == "P":

@@ -32,7 +32,7 @@ simplecanvas.SetRightMargin(0.16)
 
 ROOT.gPad.SetPhi(-135)
 
-makepngs = True
+makepdfs = True
 
 if len(sys.argv) < 2: 
     print "Which file?"
@@ -53,7 +53,7 @@ for filepath in filepaths:
     filelist += [ROOT.TFile.Open(infile) for infile in inputlist]
 
 os.system("mkdir -p output")
-os.system("mkdir -p pngs/{0}".format(shortname))
+os.system("mkdir -p distributions/{0}".format(shortname))
 
 tfile = ROOT.TFile.Open(filename,"READ")
 names = tfile.GetKeyNames()
@@ -120,12 +120,12 @@ for rawname in names:
             h_fs_dn.SetBinError(length, 1, newerr_dn)
         h_fs.SetMarkerSize(1.8)
         h_fs.Draw("text E")
-        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
         h_fs.Write()
         h_fs_up.Write()
         h_fs_dn.Write()
     # etaphi histograms
-    elif not makepngs: continue
+    elif not makepdfs: continue
     elif name.find("etaphi") > 0:
         h_etaphi = tfile.Get(name)
         st_or_stc = "STC" if name.find("STC") >= 0 else "ST"
@@ -133,14 +133,14 @@ for rawname in names:
         if track_type[0:4] == "Lrej": track_type = "L " + st_or_stc +"s in Rejected M_{T}p_{T} Box"
         h_etaphi.SetTitle(h_etaphi.GetTitle()+", "+track_type+" ("+year+");#eta;#phi")
         h_etaphi.Draw()
-        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
 #    # Look at transfer factor as a function of MT2
 #    elif name.find("mt2") > 0:
 #        h_mt2 = tfile.Get(name)
 #        h_mt2.SetLineWidth(3)
 #        h_mt2.SetTitle(h_mt2.GetTitle()+";M_{T2} (GeV);Count")
 #        h_mt2.Draw()
-#        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+#        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
 #    # Track mt x pt distribution
     elif name.find("mtpt") > 0:
         h_mtpt = tfile.Get(name)
@@ -159,7 +159,7 @@ for rawname in names:
         upper_right_overflow = h_mtpt.GetBinContent(xmax+1,ymax+1)
         h_mtpt.SetBinContent(xmax,ymax,h_mtpt.GetBinContent(xmax,ymax)+upper_right_overflow)            
         h_mtpt.Draw("LEGO2Z")
-        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
     # else it's a 1D plot
     elif name.find("layer") > 0:
         h = tfile.Get(name)
@@ -168,12 +168,12 @@ for rawname in names:
         h.SetLineWidth(3)
         simplecanvas.SetLogy()
         h.Draw()
-        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
         simplecanvas.SetLogy(False)
     else:
         h = tfile.Get(name)
         h.Draw()
-        simplecanvas.SaveAs("pngs/{0}/{1}.png".format(shortname,name))
+        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
         
 # Now that we've processed every hist, loop back over and find the systematic associated with every baseline hist
 for rawname in names:

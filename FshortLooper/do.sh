@@ -3,14 +3,14 @@
 make -j 12 || return $?
 
 doD16=1
-doM16=1
-doD17=1
-doM17=1
-doD18=1
-doM18=1
-doS17=1
+doM16=0
+doD17=0
+doM17=0
+doD18=0
+doM18=0
+doS17=0
 
-tag=FullMC
+tag=FullMCnm1
 mode=default
 #mode=useZll
 skim_string=_skim_ST
@@ -41,7 +41,7 @@ if [ "$doD16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2016_94x
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2016fullYear${skim_string}/data/extmerge
+    INDIR=/nfs-7/userdata/mt2/V00-10-10_2016fullYear${skim_string}/extmerge
     declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}.txt &"

@@ -2,16 +2,16 @@
 
 make -j 12 || return $?
 
-doD16=1
-doM16=1
-doD17=1
-doM17=1
-doD18=1
-doM18=1
+doD16=0
+doM16=0
+doD17=0
+doM17=0
+doD18=0
+doM18=0
 doS17=1
 
 tag=FullMC
-outtag=FullMC_Separate18
+outtag=FullMCv2
 LOGDIR=logs/${outtag}
 mkdir -p ${LOGDIR}
 
@@ -112,6 +112,9 @@ if [ "$doS17" -eq "1" ]; then
     
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/fastsim_${SAMPLE} ${INDIR}/fastsim_${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
+	echo $command
+	eval $command
+	command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/fastsim_${SAMPLE}_GENMET ${INDIR}/fastsim_${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017_GENMET.txt &"
 	echo $command
 	eval $command
     done
