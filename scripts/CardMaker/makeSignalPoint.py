@@ -6,8 +6,8 @@ from math import isnan, isinf
 import cPickle as pickle
 from copy import deepcopy
 
-if len(sys.argv) < 5:
-    print "usage: {0} <tag> <signame> <M1> <M2>".format(sys.argv[0])
+if len(sys.argv) < 6:
+    print "usage: {0} <tag> <signame> <M1> <M2> <dc_name>".format(sys.argv[0])
     exit(1)
 
 TAG = sys.argv[1]
@@ -23,20 +23,29 @@ signame = sys.argv[2]
 # set these to None to do a full scan; set to mass values to do a single point
 M1 = int(sys.argv[3])
 M2 = int(sys.argv[4])
+dc_name = sys.argv[5]
 
 f_sig = {}
-f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2016fullYear_v2/{0}.root".format(signame))
-f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
-f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+sig_scale = {}
+if "80x" in tag:
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/{0}.root".format(signame))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/{0}.root".format(signame))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/{0}.root".format(signame))
+    # ad-hoc scaling if signals aren't normalized to right lumi
+    # (e.g. if using 2017 signal for 2018)
+    sig_scale[16] = 1.0
+    sig_scale[17] = 41.53 / 35.92
+    sig_scale[18] = 59.97 / 35.92
+else:
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2016fullYear_v2/{0}.root".format(signame))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+    sig_scale[16] = 1.0
+    sig_scale[17] = 1.0
+    sig_scale[18] = 59.97 / 41.53
 
 years = [16, 17, 18]
 
-# ad-hoc scaling if signals aren't normalized to right lumi
-# (e.g. if using 2017 signal for 2018)
-sig_scale = {}
-sig_scale[16] = 1.0
-sig_scale[17] = 1.0
-sig_scale[18] = 58.8 / 41.5
 
 outdir = "cards_"+TAG
 
@@ -97,7 +106,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                                                                                                          im1, im2, imt2),
                                                                   bin1, bin1, bin2, bin2)
     else:
-        # doint a single-point sample
+        # doing a single-point sample
         # not implemented yet
         raise Exception("non-scan samples not implemented yet!")
 
@@ -132,9 +141,9 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                 h_aux["genmet"][y].Scale(0.0)
             n_sig[y] = h_sig[y].GetBinContent(imt2)
             n_sig_topo[y] = h_sig[y].Integral(0,-1)
-            err_sig_mcstat[y] = h_sig[y].GetBinContent(imt2)
+            err_sig_mcstat[y] = h_sig[y].GetBinError(imt2)
             if n_sig[y] > 0:
-                err_sig_mcstat_rel[y] = err_sig_mcstat[y] / n_sig[y] - 1.0
+                err_sig_mcstat_rel[y] = err_sig_mcstat[y] / n_sig[y]
 
         for an in aux_names:
             n_aux[an][y] = n_sig[y]
@@ -239,7 +248,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                     errup = (n_aux["isr_UP"][y] / n_sig[y] - 1.0)
                     errdn = (n_aux["isr_DN"][y] / n_sig[y] - 1.0)
                     err = max(abs(errup), abs(errdn))
-                    err = 1.0+err if errup>0 else 1.0-err
+                    err = 1.0+err if errup>0 else 1.0/(1.0+err)
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
         if nuis == "sig_bTagHeavySyst":
@@ -249,7 +258,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                     errup = (n_aux["btagsf_heavy_UP"][y] / n_sig[y] - 1.0)
                     errdn = (n_aux["btagsf_heavy_DN"][y] / n_sig[y] - 1.0)
                     err = max(abs(errup), abs(errdn))
-                    err = 1.0+err if errup>0 else 1.0-err
+                    err = 1.0+err if errup>0 else 1.0/(1.0+err)
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
         if nuis == "sig_bTagLightSyst":
@@ -259,12 +268,22 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                     errup = (n_aux["btagsf_light_UP"][y] / n_sig[y] - 1.0)
                     errdn = (n_aux["btagsf_light_DN"][y] / n_sig[y] - 1.0)
                     err = max(abs(errup), abs(errdn))
-                    err = 1.0+err if errup>0 else 1.0-err
+                    err = 1.0+err if errup>0 else 1.0/(1.0+err)
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
         if nuis == "sig_MCstat":
             for y in years:
-                err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.005)**0.5
+                err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis == "sig_jec":
+            for y in years:
+                err = 1.0 + 0.05
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis == "sig_renorm":
+            for y in years:
+                err = 1.0 + 0.05
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
         if nuis== "lep_eff":
@@ -274,7 +293,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                     errup = (n_aux["lepeff_UP"][y] / n_sig[y] - 1.0)
                     errdn = (n_aux["lepeff_DN"][y] / n_sig[y] - 1.0)
                     err = max(abs(errup), abs(errdn))
-                    err = 1.0+err if errup>0 else 1.0-err
+                    err = 1.0+err if errup>0 else 1.0/(1.0+err)
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
 
@@ -289,13 +308,21 @@ def printFullCard(signal_dc, im1, im2, output_dir):
 
 templates = pickle.load(open(os.path.join(outdir, "templates", "template_datacards.pkl"), 'rb'))
 
-allfalse = True
-for dc in templates.values():
-    full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
+# allfalse = True
+# for dc in templates.values():
+#     full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
 
-    result = printFullCard(dc, M1, M2, full_outdir)
-    if result:
-        allfalse = False
+#     result = printFullCard(dc, M1, M2, full_outdir)
+#     if result:
+#         allfalse = False
 
-exit(allfalse)
+#     r.gDirectory.DeleteAll()
+
+# exit(allfalse)
+
+print dc_name
+full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
+result = printFullCard(templates[dc_name], M1, M2, full_outdir)
+exit(0 if result else 1)
+
 

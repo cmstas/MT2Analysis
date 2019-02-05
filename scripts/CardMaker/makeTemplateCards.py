@@ -7,13 +7,13 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "FullRunII_17MCfor18_ttbbWeights"
+TAG = "FullRunII_17MCfor18_ttbbWeights_80x_fastsim"
 
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
 RsfofErr = 0.15
 lumi_syst_16 = 0.025
-lumi_syst_17 = 0.024
+lumi_syst_17 = 0.023
 lumi_syst_18 = 0.050
 
 verbose = False
@@ -378,11 +378,11 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 err_UP = abs(1.0 - h_UP.Integral(lowmt2bin,-1) / baseline_int)
                 err_DN = abs(1.0 - h_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(err_UP, err_DN)
-                direc = 1 if h_UP.Integral(lowmt2bin,-1) < baseline_int else -1
+                direc = 1 if h_UP.Integral(lowmt2bin,-1) > baseline_int else -1
                 err = 1.0 + direc*err                
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
-                zinv_err = 1.05
+                zinv_err = 0.95
                 dc.SetNuisanceBkgValue(nuis_name, zinv_err, "zinv", y)
 
         if nuis=="zinv_alphaErr":
