@@ -344,6 +344,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
     for nuis in nuisances:
         corr = nuisances[nuis]["correlation"]
         split_by_year = nuisances[nuis]["splitByYear"]
+        nuis_type = nuisances[nuis]["type"] if "type" in nuisances[nuis] else "lnN"
 
         nuis_name = nuis
         if corr == PER_HT_REG:
@@ -354,8 +355,8 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
             nuis_name += "_"+crsl_name_per_topo_reg
         if corr == PER_MT2_BIN:
             nuis_name += "_"+name
-
-        dc.AddNuisance(nuis_name, "lnN", split_by_year=split_by_year)
+            
+        dc.AddNuisance(nuis_name, nuis_type, split_by_year=split_by_year)
 
         if nuis == "lumi_syst":
             dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_16, 16)

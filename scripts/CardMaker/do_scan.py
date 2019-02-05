@@ -5,7 +5,7 @@ import subprocess
 # this assumes you've already made template datacards for this tag! (makeTemplateCards.py)
 
 TAG = "FullRunII_17MCfor18_ttbbWeights_80x_fastsim"
-MODEL = "T1qqqq"
+MODEL = "T2bb"
 
 MAXLOCALJOBS=25
 

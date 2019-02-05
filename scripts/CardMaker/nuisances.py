@@ -8,6 +8,8 @@ PER_MT2_BIN = 4
 
 DEFAULT_splitByYear = False
 
+# default type is lnN. Can optionally set "type" to "lnU"
+
 nuisances = {
     "lumi_syst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
@@ -20,6 +22,7 @@ nuisances = {
     "sig_gensyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
+        "type" : "lnU",
         },
     "sig_IsrSyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,

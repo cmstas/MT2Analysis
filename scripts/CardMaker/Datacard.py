@@ -158,19 +158,19 @@ class Datacard:
         fullidx = self.split_bkg_names.index(fullbkg)
 
         if type(value)==tuple:
-            if self.nuisances[fullname].type != "lnN":
-                raise Exception("ERROR: only lnN nuisances support 2-sided values!")
+            if self.nuisances[fullname].type not in  ["lnN","lnU"]:
+                raise Exception("ERROR: only lnN/lnU nuisances support 2-sided values!")
             if value[0]>2.0 or value[1]>2.0 or value[0]<0.3 or value[1]<0.3:
                 print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
             if isnan(value[0]) or isinf(value[0]) or isnan(value[1]) or isinf(value[1]):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
         elif type(value)==float:
-            if self.nuisances[fullname].type=="lnN" and (value > 2.0 or value < 0.3):
+            if self.nuisances[fullname].type in ["lnN","lnU"] and (value > 2.0 or value < 0.3):
                 print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
             if isnan(value) or isinf(value):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
         else:
-            raise Exception("ERROR: value must be a float or tuple of 2 float (upper,lower) (lnN only)")
+            raise Exception("ERROR: value must be a float or tuple of 2 float (upper,lower) (lnN/lnU only)")
 
         self.nuisances[fullname].bkg_values[fullidx] = value
 
@@ -182,7 +182,7 @@ class Datacard:
         for nuis in self.nuisances.values():
             err_up = 0.0
             err_dn = 0.0
-            if nuis.type == "lnN":
+            if nuis.type in ["lnN","lnU"]:
                 for i,val in enumerate(nuis.bkg_values):
                     bkg = self.split_bkg_names[i]
                     if val is None:
@@ -263,7 +263,7 @@ class Datacard:
             sigval = self.nuisances[nuis].sig_value
             bkgvals = self.nuisances[nuis].bkg_values
 
-            if tp=="lnN":
+            if tp in ["lnN","lnU"]:
                 fid.write(ml(tp, colsizes[1]))                
                 for i in range(self.nsig):
                     if sigval[i] is None:
@@ -306,8 +306,8 @@ class Datacard:
 class Nuisance:
     def __init__(self, name, nuisType, nsig, nbkg):
         self.name = name
-        if nuisType not in ["gmN", "lnN"]:
-            raise Exception("ERROR: nuisance type {0} not supported. Only gmN and lnN".format(nuisType))
+        if nuisType not in ["gmN", "lnN", "lnU"]:
+            raise Exception("ERROR: nuisance type {0} not supported. Only gmN, lnN, and lnU".format(nuisType))
         self.type = nuisType
         self.nbkg = nbkg
         self.nsig = nsig
@@ -316,7 +316,7 @@ class Nuisance:
             self.N = 0
             self.bkg_values = [None]*nbkg
             self.sig_value = [None]*nsig
-        elif self.type=="lnN":
+        elif self.type in ["lnN", "lnU"]:
             self.N = None
             self.bkg_values = [None]*nbkg
             self.sig_value = [None]*nsig

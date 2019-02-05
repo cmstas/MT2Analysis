@@ -12,9 +12,11 @@ if len(sys.argv) < 6:
 
 TAG = sys.argv[1]
 
-verbose = False
+verbose = True
 doSuperSignalRegions = False
 subtractSignalContam = True
+suppressZeroBins = False
+suppressZeroTRs = True
 
 sig_PUsyst = 1.046
 
@@ -120,12 +122,12 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
                     h_crsl_aux[an][y] = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_"+an)
 
 
-    allnone = True
+    totTR = 0.0
     for y in years:
         if h_sig[y] is not None:
-            allnone = False
-    if allnone:
-        if verbose: print "Couldn't find signal for any year, skipping"
+            totTR += h_sig[y].Integral(1,-1)
+    if (suppressZeroTRs or suppressZeroBins) and totTR < 0.001:
+        if verbose: print "Looks like total TR signal is zero for all years, directory {0}. Skipping".format(dirname)
         return False
 
     # loop over years and get histogram contents. Skip if no histo for any year
@@ -161,8 +163,8 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
 
         totsig += (n_sig[y] + n_aux["genmet"][y]) / 2.0
 
-    if totsig < 0.001:
-        if verbose: print "No signal found for {0} point {1},{2}, dir {3}. Skipping".format(signame, im1, im2, dirname)
+    if suppressZeroBins and totsig < 0.001:
+        if verbose: print "No signal found for {0} point {1},{2}, dir {3}, imt2 {4}. Skipping".format(signame, im1, im2, dirname, imt2)
         return False
 
 
@@ -221,8 +223,8 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
         n_sig_cor_recogenaverage[y] *= 1.0 * sig_scale[y]
         totsig += n_sig_cor_recogenaverage[y]
 
-    if totsig < 0.001:
-        if verbose: print "Skipping {0}, imt2 {1} for point {2},{3} due to 0 bin content ".format(dirname, imt2, im1, im2)
+    if suppressZeroBins and totsig < 0.001:
+        if verbose: print "Skipping {0}, imt2 {1} for point {2},{3} due to 0 signal after sig contam subtraction.".format(dirname, imt2, im1, im2)
         return False
 
     for y in years:
