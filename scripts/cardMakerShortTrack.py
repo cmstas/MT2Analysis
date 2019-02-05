@@ -13,7 +13,7 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 verbose = False # Print more error messages
 suppressZeroBins = True # Don't print cards for any bin with 0 signal, even if other bins in its region have nonzero signal
 suppressZeroTRs = False # Don't print cards for any of the bins in a region with 0 signal in any bin
-doDummySignalSyst = True 
+doDummySignalSyst = False
 subtractSignalContam = True
 doDummyBackgroundSyst = False
 saveTemplates = True # Save templates separately from cards
@@ -55,8 +55,11 @@ f_1718 = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}.root".form
 f_16_contam = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}_contam.root".format(tag))
 f_1718_contam = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017and2018_{0}_contam.root".format(tag))
 #f_sig_16 = ROOT.TFile("../ShortTrack/output_unmerged/2016_{0}/signal/{1}.root".format(tag,signal))
+#f_sig_16_GENMET = ROOT.TFile("../ShortTrack/output_unmerged/2016_{0}/signal/{1}_GENMET.root".format(tag,signal))
 f_sig_1718 = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}.root".format(tag,signal))
 f_sig_16 = f_sig_1718 # for now, just use 2017 signal for 2016
+f_sig_1718_GENMET = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}_GENMET.root".format(tag,signal))
+f_sig_16_GENMET = f_sig_1718_GENMET # for now, just use 2017 signal for 2016
 
 if (f_16.IsZombie()):
     print "2016 not found"
@@ -76,6 +79,12 @@ if (f_sig_16.IsZombie()):
     exit(1)
 if (f_sig_1718.IsZombie()):
     print "2017 signal not found"
+    exit(1)
+if (f_sig_16_GENMET.IsZombie()):
+    print "2016 GENMET signal not found"
+    exit(1)
+if (f_sig_1718_GENMET.IsZombie()):
+    print "2017 GENMET signal not found"
     exit(1)
 
 # All signal mass points share the same backgrounds. Assemble the background portion of the 
@@ -101,7 +110,7 @@ def makeTemplate(year,region,length):
     h_fs_stat_dn = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring+"_dn").Clone("h_fs_{}_dn".format(channel))
     fserr_stat_up = 1+(h_fs_stat_up.GetBinError(length)/fs)
     fserr_stat_dn = 1-(h_fs_stat_dn.GetBinError(length)/fs)
-    fshort_id_string = "{}_{}{}".format(category,"23" if region.find("23") > 0 else "4",ptstring)
+    fshort_id_string = "{}_{}{}_{}".format(category,"23" if region.find("23") > 0 else "4",ptstring,year)
 
     if verbose: 
         print f.GetName()
@@ -137,16 +146,27 @@ def makeTemplate(year,region,length):
     template_list.append("process           0                   1\n")
     template_list.append("rate             n_sig          {0:.3f}\n".format(n_bkg))
 
-    # Write in signal placeholders
-    if subtractSignalContam: template_list.append("name_sig_contam        lnN   sig_contam_val -\n")
-    if (doDummySignalSyst):
-        template_list.append("name_sig_syst      lnN   sig_syst    -\n")
+    # Write in signal uncertainties, including placeholders
+    if year == "2016":
+        lumi_syst_16 = 1.025
+        template_list.append("lumi_syst_2016    lnN   {:.3f}     -\n".format(lumi_syst_16))
     else:
-        template_list.append("name_sig_lumi                    lnN    sig_lumi   -\n")
-        template_list.append("name_sig_pu                    lnN    sig_pu   -\n")
-        template_list.append("name_sig_mcstat     lnN    sig_mcstat   -\n")
-        template_list.append("name_sig_genmet                  lnU    sig_genmet   -\n")
-        template_list.append("name_sig_isr                  lnN    sig_isr   -\n")
+        lumi_syst_17 = 0.023
+        lumi_syst_18 = 0.050
+        lumi_syst_1718 = 1+sqrt(lumi_syst_17**2 + lumi_syst_18**2)
+        template_list.append("lumi_syst_2017and2018    lnN   {:.3f}     -\n".format(lumi_syst_1718))
+
+
+    template_list.append("name_sig_mcstat lnN    mcstat_sig - \n") # fully uncorrelated in all bins
+    if subtractSignalContam: template_list.append("name_sig_contam        lnN   sig_contam_val -\n") # fully uncorrelated in all bins
+    if (doDummySignalSyst):
+        template_list.append("name_syst_sig      lnN   sig_syst    -\n")
+    else:
+        template_list.append("sig_pu                    lnN    1.046   -\n") # fully correlated across all bins, and years
+        template_list.append("sig_jec_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == 2016 else 1+sqrt(2)*0.05)) # correlated across bins, but not years
+        template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == 2016 else 1+sqrt(2)*0.05)) # correlated across bins, but not years
+        template_list.append("sig_gen_{}                  lnU    genmet_sig   -\n".format(year)) # correlated across bins, but not years
+        template_list.append("sig_isr_{}                  lnN    isr_sig   -\n".format(year)) # sig_isr is fully correlated across all bins, but not years
 
     # background errors
     
@@ -154,7 +174,6 @@ def makeTemplate(year,region,length):
     template_list.append("alphaerr_{0}        lnN    -    {1:.3f}/{2:.3f}\n".format(fshort_id_string,fserr_stat_dn,fserr_stat_up))
     template_list.append("crstat_{0}        gmN {1:.0f}    -    {2:.5f}\n".format(channel,n_stc,alpha))
 
-    # systematics
     if (doDummyBackgroundSyst):     # ad hoc 100% error on L tracks, 50% on P and M
         template_list.append("adhoc_{0}         lnN     -   {1:.3f}\n".format(channel,2 if length == 5 else 1.5))
     else:
@@ -181,17 +200,34 @@ def makeCard(year,region,template,signal,outdir,length,im1=-1,im2=-1):
 
     to_print = template
 
-    name_sig_syst = "adhoc_sig_"+channel
+    name_syst_sig = "adhoc_sig_"+channel
 
     if year == "2016": 
         f = f_sig_16
+        f_gen = f_sig_16_GENMET
         f_contam = f_16_contam
     if year == "2017and2018": 
         f = f_sig_1718
+        f_gen = f_sig_1718_GENMET
         f_contam = f_1718_contam
 
-    h_sig = f.Get("h_"+region).Clone("sig_{}".format(channel))
-    n_sig = h_sig.GetBinContent(length,1)
+    h_sig_reco = f.Get("h_"+region).Clone("sig_{}".format(channel))
+    n_sig_reco = h_sig_reco.GetBinContent(length,1)
+    h_sig_gen = f_gen.Get("h_"+region).Clone("sig_{}_GEN".format(channel))
+    n_sig_gen = h_sig_gen.GetBinContent(length,1)
+    n_sig = (n_sig_gen + n_sig_reco)/2
+    mcstat_sig = 1 + h_sig_reco.GetBinError(length,1) / n_sig if n_sig > 0 else 1 # use pre-adjusted n_sig for mc error
+# sig isr not implemented yet
+#    h_isr_up = f.Get("h_isr_up").Clone("h_isr_up_{}".format(region+signal))
+#    h_isr_dn = f.Get("h_isr_dn").Clone("h_isr_dn_{}".format(region+signal))
+#   isr_sig_up = h_isr_up.GetBinContent(1) / n_sig - 1 if n_sig > 0 else 0
+#   isr_sig_dn = h_isr_dn.GetBinContent(1) / n_sig - 1 if n_sig > 0 else 0
+#   isr_sig = max(abs(isr_sig_up),abs(isr_sig_dn))
+#    isr_sig = 1.0 + isr_sig if isr_sig_up > 0 else 1.0/(1.0+isr_sig)
+    isr_sig = 1.0
+
+    # error assessed due to difference between reco and gen sig results
+    genmet_sig = 1.0 + (n_sig_reco - n_sig_gen)/2/n_sig if n_sig > 0 else 1.0
 
     # For now, 16 and 18 signals are rescaled 2017
     if year == "2016": n_sig *= 35.9 / 41.97
@@ -213,23 +249,14 @@ def makeCard(year,region,template,signal,outdir,length,im1=-1,im2=-1):
 
     to_print = to_print.replace("n_sig","{:.3f}".format(n_sig))
     if (doDummySignalSyst):
-        to_print = to_print.replace("name_sig_syst",name_sig_syst)
+        to_print = to_print.replace("name_sig_syst",name_syst_sig)
         to_print = to_print.replace("sig_syst","1.3") # arbitrary 30% signal systematic
     else:
-        to_print = to_print.replace("name_sig_lumi",name_sig_lumi)
-        to_print = to_print.replace("sig_lumi","{0:.3f}".format(sig_lumi))
-        to_print = to_print.replace("name_sig_pu",name_sig_pu)
-        to_print = to_print.replace("sig_pu","{0:.3f}".format(sig_pu))
-        to_print = to_print.replace("name_sig_mcstat",name_sig_mcstat)
-        to_print = to_print.replace("sig_mcstat","{0:.3f}".format(sig_mcstat))
-        to_print = to_print.replace("name_sig_genmet",name_sig_genmet)
-        to_print = to_print.replace("sig_genmet","{0:.3f}".format(sig_genmet))
-        to_print = to_print.replace("name_sig_isr",name_sig_isr)
-        to_print = to_print.replace("sig_isr","{0:.3f}".format(sig_isr))
-        to_print = to_print.replace("name_sig_btagsf_heavy",name_sig_btagsf_heavy)
-        to_print = to_print.replace("sig_btagsf_heavy","{0:.3f}".format(sig_btagsf_heavy))
-        to_print = to_print.replace("name_sig_btagsf_light",name_sig_btagsf_light)
-        to_print = to_print.replace("sig_btagsf_light","{0:.3f}".format(sig_btagsf_light))
+        to_print = to_print.replace("name_sig_mcstat","sig_mcstat_{}".format(channel))
+        to_print = to_print.replace("mcstat_sig","{0:.3f}".format(mcstat_sig))
+        to_print = to_print.replace("isr_sig","{0:.3f}".format(isr_sig))
+        to_print = to_print.replace("genmet_sig","{0:.3f}".format(genmet_sig))
+
     outfile = open(cardname,"w")
     outfile.write(to_print)
     outfile.close()

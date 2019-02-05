@@ -13,6 +13,7 @@
 *.display.screen
 *.pdf
 *.png
+*.pdf
 babymaker/processBaby
 babymaker/*.root
 babymaker/*.txt
@@ -30,5 +31,8 @@ ShortTrack/output*/*
 FshortLooper/output*/*
 ShortTrack/region*/*
 scripts/limit*/**
+scripts/**/cards*/**
 scripts/cards*/**
 **/CMSSW*/**
+ShortTrackTagAndProbeLooper/*.root
+scripts/CardMaker/test.txt

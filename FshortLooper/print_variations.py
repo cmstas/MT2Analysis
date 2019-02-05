@@ -12,6 +12,7 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more status messages
 printTables = False
+format = "pdf"
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
@@ -399,7 +400,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     hist.Draw("same")
     hsyst.Draw("AXIS same")
     tl.Draw()
-    simplecanvas.SaveAs("fshort_plots/{}.png".format(hist.GetName()+"_"+desc))
+    simplecanvas.SaveAs("fshort_plots/{}.{}".format(hist.GetName()+"_"+desc,format))
 
 tablevariations = [variation + ptstring for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"] for ptstring in ["","_lowpt","_hipt"]]
 plotvariations = list(tablevariations)

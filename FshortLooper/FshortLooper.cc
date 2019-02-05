@@ -27,7 +27,7 @@ const bool skipHighWeights = true; // turn on to skip MC events with weight > 1,
 const bool fillCutHists = true; // turn on to fill extra histograms
 const bool fillUnimportantCutHists = false; // turn on to fill Nvertex, Eta, Ntag, DphiMet, and HitSignature histograms
 
-const bool fillNM1Hists = false; // turn on to fill NM1 histograms (need to set recalculate and fillCutHists to true)
+const bool fillNM1Hists = true; // turn on to fill NM1 histograms (need to set recalculate and fillCutHists to true)
 
 bool onlyMatchedTracks = true; // for fshort, use only matched chargino tracks if signal
 
