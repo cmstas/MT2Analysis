@@ -7,7 +7,7 @@ import cPickle as pickle
 from copy import deepcopy
 
 if len(sys.argv) < 6:
-    print "usage: {0} <tag> <signame> <M1> <M2> <dc_name>".format(sys.argv[0])
+    print "usage: {0} <tag> <signame> <M1> <M2> <isScan>".format(sys.argv[0])
     exit(1)
 
 TAG = sys.argv[1]
@@ -23,23 +23,23 @@ signame = sys.argv[2]
 # set these to None to do a full scan; set to mass values to do a single point
 M1 = int(sys.argv[3])
 M2 = int(sys.argv[4])
-dc_name = sys.argv[5]
+isScan = bool(int(sys.argv[5]))
 
 f_sig = {}
 sig_scale = {}
-if "80x" in tag:
-    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/{0}.root".format(signame))
-    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/{0}.root".format(signame))
-    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/{0}.root".format(signame))
+if "80x" in TAG:
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_80x_2016_fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     # ad-hoc scaling if signals aren't normalized to right lumi
     # (e.g. if using 2017 signal for 2018)
     sig_scale[16] = 1.0
     sig_scale[17] = 41.53 / 35.92
     sig_scale[18] = 59.97 / 35.92
 else:
-    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2016fullYear_v2/{0}.root".format(signame))
-    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
-    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/{0}.root".format(signame))
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2016fullYear_v2/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     sig_scale[16] = 1.0
     sig_scale[17] = 1.0
     sig_scale[18] = 59.97 / 41.53
@@ -50,13 +50,13 @@ years = [16, 17, 18]
 outdir = "cards_"+TAG
 
 
-def printFullCard(signal_dc, im1, im2, output_dir):
+def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
     dc = signal_dc
 
     dirname = dc.info["dirname"]
     imt2 = dc.info["imt2"]
 
-    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame
+    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame
 
     name = "{0}_{1}_{2}_{3}".format(dc.GetName(), signame, im1, im2)
     dc.SetName(name)
@@ -75,7 +75,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
         for y in years:
             h_aux[an][y] = None
             h_crsl_aux[an][y] = None
-    if im1 >= 0 and im2 >= 0:
+    if isScan:
         # doing a full scan (or one point of one)
         for y in years:
             h_sigscan = f_sig[y].Get(dirname+"/h_mt2bins_sigscan")
@@ -93,7 +93,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                 if h_sigscan:
                     h_aux[an][y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}_{5}".format(an, y, dirname, im1, im2, imt2),
                                                          bin1, bin1, bin2, bin2)
-            if subtractSignalContam:
+            if subtractSignalContam and isSignalWithLeptons:
                 h_sigscan = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_sigscan")
                 if h_sigscan:
                     h_crsl_sig[y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}".format(y, dirname+"sl", im1, im2, imt2),
@@ -103,12 +103,21 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                     h_crsl_aux[an][y] = None
                     if h_sigscan and an=="genmet":
                         h_crsl_aux[an][y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}_{5}".format(an, y, dirname+"sl", 
-                                                                                                         im1, im2, imt2),
+                                                                                                             im1, im2, imt2),
                                                                   bin1, bin1, bin2, bin2)
     else:
         # doing a single-point sample
-        # not implemented yet
-        raise Exception("non-scan samples not implemented yet!")
+        for y in years:
+            h_sig[y] = f_sig[y].Get(dirname+"/h_mt2bins")
+            if not h_sig[y]:
+                if verbose: print "Could not get h_mt2bins for dir {0}, year {1}, skipping".format(dirname, y)
+                continue
+            for an in aux_names:
+                h_aux[an][y] = f_sig[y].Get(dirname+"/h_mt2bins_"+an)
+            if subtractSignalContam and isSignalWithLeptons:
+                h_crsl_sig[y] = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins")
+                for an in aux_names:
+                    h_crsl_aux[an][y] = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_"+an)
 
 
     allnone = True
@@ -183,7 +192,7 @@ def printFullCard(signal_dc, im1, im2, output_dir):
             n_aux_cor[an][y] = n_aux[an][y]
             n_aux_crsl[an][y] = 0.0
 
-        if subtractSignalContam:
+        if subtractSignalContam and isSignalWithLeptons:
             if h_crsl_sig[y]:
                 if imt2 >= dc.info["lostlep_lastbin_hybrid"]:
                     n_sig_crsl[y] = h_crsl_sig[y].Integral(dc.info["lostlep_lastbin_hybrid"], -1)
@@ -206,8 +215,6 @@ def printFullCard(signal_dc, im1, im2, output_dir):
                 if n_sig_cor_recogenaverage[y] > 0:
                     err_sig_recogenaverage[y] = abs(n_sig_cor[y] - n_sig_cor_recogenaverage[y]) / 2.0 / n_sig_cor_recogenaverage[y]
 
-            elif isSignalWithLeptons:
-                pass
 
     totsig = 0.0
     for y in years:
@@ -308,21 +315,13 @@ def printFullCard(signal_dc, im1, im2, output_dir):
 
 templates = pickle.load(open(os.path.join(outdir, "templates", "template_datacards.pkl"), 'rb'))
 
-# allfalse = True
-# for dc in templates.values():
-#     full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
+allfalse = True
+for dc in templates.values():
+    full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
 
-#     result = printFullCard(dc, M1, M2, full_outdir)
-#     if result:
-#         allfalse = False
-
-#     r.gDirectory.DeleteAll()
-
-# exit(allfalse)
-
-print dc_name
-full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
-result = printFullCard(templates[dc_name], M1, M2, full_outdir)
-exit(0 if result else 1)
+    result = printFullCard(dc, M1, M2, full_outdir, isScan=isScan)
+    if result:
+        allfalse = False
 
 
+exit(allfalse)
