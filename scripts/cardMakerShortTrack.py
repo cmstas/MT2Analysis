@@ -165,7 +165,7 @@ def makeTemplate(year,region,length):
         template_list.append("sig_pu                    lnN    1.046   -\n") # fully correlated across all bins, and years
         template_list.append("sig_jec_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == 2016 else 1+sqrt(2)*0.05)) # correlated across bins, but not years
         template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == 2016 else 1+sqrt(2)*0.05)) # correlated across bins, but not years
-        template_list.append("sig_gen_{}                  lnU    genmet_sig   -\n".format(year)) # correlated across bins, but not years
+        template_list.append("sig_gen_{}                  lnN    genmet_sig   -\n".format(year)) # correlated across bins, but not years
         template_list.append("sig_isr_{}                  lnN    isr_sig   -\n".format(year)) # sig_isr is fully correlated across all bins, but not years
 
     # background errors
