@@ -15,7 +15,7 @@ nuisances = {
         },
     "sig_PUsyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
-        "splitByYear" : DEFAULT_splitByYear,
+        "splitByYear" : False,
         },
     "sig_gensyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
@@ -37,6 +37,14 @@ nuisances = {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : True,
         },
+    "sig_jec" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : DEFAULT_splitByYear,
+        },
+    "sig_renorm" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : DEFAULT_splitByYear,
+        },
     "jec" : {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
@@ -47,7 +55,7 @@ nuisances = {
         },
     "zinv_alphaErr" : {
         "correlation" : PER_MT2_BIN,
-        "splitByYear" : DEFAULT_splitByYear,
+        "splitByYear" : True,
         },
     "zinv_purity" : {
         "correlation" : PER_TOPO_REG,
@@ -83,7 +91,7 @@ nuisances = {
         },
     "llep_MCstat" : {
         "correlation" : PER_MT2_BIN,
-        "splitByYear" : DEFAULT_splitByYear,
+        "splitByYear" : True,
         },
     "llep_shape" : {
         "correlation" : PER_TOPO_REG_CRSL,
