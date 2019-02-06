@@ -294,7 +294,7 @@ class Datacard:
                         fid.write(ml("{{0:.{0}f}}".format(nround).format(bkgvals[i]), colsizes[i+2+self.nsig]))
                         if self.bkg_rates[self.split_bkg_names[i]] > 0 and \
                                 abs(bkgvals[i]*N / self.bkg_rates[self.split_bkg_names[i]] - 1) > 1e-5:
-                            raise Exception("ERROR: gmN values and rate don't line up! Nuis: {0}, Bkg: {1}".format(nuis, self.split_bkg_names[i]))
+                            raise Exception("ERROR: gmN values and rate don't line up! Nuis: {0}, Bkg: {1}, alpha: {2}, N: {3}".format(nuis, self.split_bkg_names[i], bkgvals[i], N))
                         if self.bkg_rates[self.split_bkg_names[i]] == 0.0 and bkgvals[i]*N != 0.0:
                             raise Exception("ERROR: gmN values and rate don't line up! Nuis: {0}, Bkg: {1}".format(nuis, self.split_bkg_names[i]))
 

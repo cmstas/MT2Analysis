@@ -4,7 +4,8 @@ CORR_ACROSS_ALLBINS = 0
 PER_HT_REG = 1
 PER_TOPO_REG = 2
 PER_TOPO_REG_CRSL = 3
-PER_MT2_BIN = 4
+PER_TOPO_REG_CRDY = 4
+PER_MT2_BIN = 5
 
 DEFAULT_splitByYear = False
 
@@ -57,7 +58,7 @@ nuisances = {
         "splitByYear" : True,
         },
     "zinv_purity" : {
-        "correlation" : PER_TOPO_REG,
+        "correlation" : PER_TOPO_REG_CRDY,
         "splitByYear" : False,
         },
     "zinv_Rsfof" : {

@@ -353,6 +353,8 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
             nuis_name += "_"+name_per_topo_reg
         if corr == PER_TOPO_REG_CRSL:
             nuis_name += "_"+crsl_name_per_topo_reg
+        if corr == PER_TOPO_REG_CRDY:
+            nuis_name += "_"+crdy_name_per_topo_reg
         if corr == PER_MT2_BIN:
             nuis_name += "_"+name
             
