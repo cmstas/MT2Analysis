@@ -40,12 +40,8 @@ nuisances = {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : True,
         },
-    "sig_jec" : {
-        "correlation" : CORR_ACROSS_ALLBINS,
-        "splitByYear" : DEFAULT_splitByYear,
-        },
-    "sig_renorm" : {
-        "correlation" : CORR_ACROSS_ALLBINS,
+    "sig_jec_renorm" : {
+        "correlation" : PER_MT2_BIN,
         "splitByYear" : DEFAULT_splitByYear,
         },
     "jec" : {

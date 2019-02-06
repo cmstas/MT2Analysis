@@ -124,7 +124,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
 
     totTR = 0.0
     for y in years:
-        if h_sig[y] is not None:
+        if h_sig[y]:
             totTR += h_sig[y].Integral(1,-1)
     if (suppressZeroTRs or suppressZeroBins) and totTR < 0.001:
         if verbose: print "Looks like total TR signal is zero for all years, directory {0}. Skipping".format(dirname)
@@ -285,14 +285,9 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
                 err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
-        if nuis == "sig_jec":
+        if nuis == "sig_jec_renorm":
             for y in years:
-                err = 1.0 + 0.05
-                dc.SetNuisanceSignalValue(nuis_name, err, y)
-
-        if nuis == "sig_renorm":
-            for y in years:
-                err = 1.0 + 0.05
+                err = 1.0 + 0.071
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
         if nuis== "lep_eff":
