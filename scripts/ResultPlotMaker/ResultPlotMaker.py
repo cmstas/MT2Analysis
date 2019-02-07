@@ -7,18 +7,22 @@ from array import *
 
 ROOT.gROOT.SetBatch(1)
 
-def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePred=1.0, ratioRange=(0,2),
+def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPull=False,
              drawObs=False, drawSignal=False, sigName=""):
+
+    if len(utils.datacards)==0:
+        print "ERROR: must load pickled datacards first! (utils.LoadPickledDatacards)"
+        return
+
     jbj_regs = utils.GetJBJregions(ht_reg)
 
     #list of lists, one per jbj region, of low edges of MT2 bins
     mt2bins = utils.GetMT2bins(ht_reg)
 
     # nBinsTotal = sum([len(bins)-1 for bins in mt2bins]) + 1
-    nBinsTotal = sum([(len(bins)-1 if len(bins)>2 else len(bins)) for bins in mt2bins])
-    nBinsPadding = 2 if ht_reg in ["HT575to1200", "HT1200to1500", "HT1500toInf"] else 0
+    nBinsTotal = sum([(len(bins)-1 if len(bins)>2 else len(bins)) for bins in mt2bins]) # always at least 2 for readability
+    nBinsPadding = 2 if ht_reg in ["HT575to1200", "HT1200to1500", "HT1500toInf"] else 0 # extra bins to add to right for readability
     nBinsTotal += nBinsPadding
-    print nBinsTotal
     bkg_processes = ["zinv","llep","qcd"]
     nBkgs = len(bkg_processes)
 
@@ -40,46 +44,44 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePre
             mt2left = mt2bins[ijbj][imt2]
             mt2right = mt2bins[ijbj][imt2+1]
             mt2name = utils.GetMT2name(mt2left,mt2right)
+            
             if ht_reg != "monojet":
-                datacard_name_fmt = datacard_name.format(ht_reg,jbj_reg,mt2name)
+                datacard_name = "{0}_{1}_{2}".format(ht_reg,jbj_reg,mt2name)
             else:
                 ht_name = "HT{0}to{1}".format(mt2left,mt2right)
                 ht_name = ht_name.replace("-1","Inf")
-                datacard_name_fmt = datacard_name.format(ht_name,jbj_reg,"m0toInf")
+                datacard_name = "{0}_{1}_{2}".format(ht_name,jbj_reg,"m0toInf")
+
+            dc = utils.datacards[datacard_name]
 
             # get yields. first entry is data, rest are background predictions
-            yields = utils.GetYieldsFromDatacard(os.path.join(datacard_dir,datacard_name_fmt),bkg_processes)
-            for i in range(1, len(yields)):
-                if yields[i] < 0:
-                    yields[i] = 0.0
-                yields[i] *= scalePred
-            h_data.SetBinContent(ibin, yields[0])
-            for j in range(1,nBkgs+1):
-                h_bkg_vec[j-1].SetBinContent(ibin, yields[j])
-            tot_pred = sum(yields[1:])
+            obs = int(round(dc.GetObservation()))
+            yields = dc.GetBackgroundRates()
+            for bkg in yields:
+                if yields[bkg] < 0:
+                    print "WARNING: negative prediction for bkg {0} in card {1}. Setting to 0.0".format(bkg, datacard_name)
+                    yields[bkg] = 0.0
+                yields[bkg] *= scalePred
+            h_data.SetBinContent(ibin, obs)
+            for i,bkg in enumerate(bkg_processes):
+                h_bkg_vec[i].SetBinContent(ibin, yields[bkg])
+            tot_pred = sum(yields.values())
                 
             # get uncertainties
-            pred_unc = utils.GetUncertaintiesFromDatacard(os.path.join(datacard_dir,datacard_name_fmt),bkg_processes)
-            tot_unc_up   = ROOT.TMath.Sqrt(sum([(pred_unc[i][0]*yields[i+1])**2 for i in range(nBkgs)]))
-            tot_unc_down = ROOT.TMath.Sqrt(sum([(pred_unc[i][1]*yields[i+1])**2 for i in range(nBkgs)]))
+            tot_unc_up, tot_unc_down = dc.GetTotalUncertainty()
             thisPoint = g_unc.GetN()
             g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
             g_unc.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down, tot_unc_up)            
             g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
             g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down/tot_pred, tot_unc_up/tot_pred)
-            # if ht_reg=="HT1500toInf" and jbj_reg=="j10toInf_b0" and imt2 == 0:
-            #     print ht_reg + "_" + jbj_reg
-            #     print pred_unc
-            #     print tot_unc_up / tot_pred
-            #     print tot_unc_down / tot_pred
 
             binLabels.append(utils.GetMT2label(mt2left,mt2right))
 
-            # add an extra bin if only 1 in this topo reg, for readability
-            if len(mt2bins[ijbj])-1==1:
-                ibin += 1
-                h_data.SetBinContent(ibin, -1)
-                binLabels.append("")
+        # add an extra bin if only 1 in this topo reg, for readability
+        if len(mt2bins[ijbj])-1==1:
+            ibin += 1
+            h_data.SetBinContent(ibin, -1)
+            binLabels.append("")
 
     for i in range(nBinsPadding):
         binLabels.append("")
@@ -96,8 +98,10 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePre
         h_bkg_vec[nBkgs-1-j].SetLineColor(ROOT.kBlack)
         stack.Add(h_bkg_vec[nBkgs-1-j])
 
+    markerSize = min(75.0 / nBinsTotal, 1.0)
+
     h_data.SetMarkerStyle(20)
-    h_data.SetMarkerSize(1.3)
+    h_data.SetMarkerSize(1.3 * markerSize)
     h_data.SetMarkerColor(ROOT.kBlack)
     h_data.SetLineColor(ROOT.kBlack)
 
@@ -252,18 +256,31 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePre
     ####################
     #### RATIO PLOT ####
     ####################
+
+    if ratioRange is None:
+        if doPull:
+            ratioRange = (-3, 3)
+        else:
+            ratioRange = (0, 2)
     
     pads[1].cd()
     h_ratio = h_bkg_vec[0].Clone("h_ratio") #h_ratio is just a dummy histogram to draw axes correctly
     h_ratio.Reset()
     g_ratio = ROOT.TGraphAsymmErrors()
     h_pred = h_bkg_vec[0].Clone("h_pred")
-    for i in range(1,nBkgs):
-        h_pred.Add(h_bkg_vec[i])
-    ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, useMCErr=False)
+    if not doPull:
+        for i in range(1,nBkgs):
+            h_pred.Add(h_bkg_vec[i])
+        ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, useMCErr=False)
+    else:
+        utils.GetPullPlot(g_data, g_unc, g_ratio)
+        g_unc_ratio = ROOT.TGraphAsymmErrors()
+        for i in range(nBinsTotal):
+            g_unc_ratio.SetPoint(i, i+0.5, 0)
+            g_unc_ratio.SetPointError(i, 0.5, 0.5, 1, 1)
     h_ratio.GetYaxis().SetRangeUser(ratioRange[0], ratioRange[1])
     h_ratio.GetYaxis().SetNdivisions(505)
-    h_ratio.GetYaxis().SetTitle("Data/Pred.")
+    h_ratio.GetYaxis().SetTitle("Pull" if doPull else "Data/Pred.")
     h_ratio.GetYaxis().SetTitleSize(0.16)
     h_ratio.GetYaxis().SetTitleOffset(0.18)
     h_ratio.GetYaxis().SetLabelSize(0.13)
@@ -274,7 +291,7 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePre
     h_ratio.GetXaxis().SetNdivisions(nBinsTotal,0,0)
     h_ratio.GetXaxis().SetTickSize(0.06)
     g_ratio.SetMarkerStyle(20)
-    g_ratio.SetMarkerSize(1.0)
+    g_ratio.SetMarkerSize(markerSize)
     g_ratio.SetLineWidth(1)
 
     g_unc_ratio.SetFillStyle(1001)
@@ -288,7 +305,8 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePre
     line.SetLineStyle(1)
     line.SetLineWidth(1)
     line.SetLineColor(ROOT.kGray+2)
-    line.DrawLine(0,1,nBinsTotal,1)
+    y = 0 if doPull else 1
+    line.DrawLine(0,y,nBinsTotal,y)
 
     #draw the lines separating j-bj region
     line.SetNDC(1)
@@ -297,14 +315,15 @@ def MakePlot(ht_reg, datacard_dir, datacard_name, outdir, userMax=None, scalePre
     line.SetLineColor(ROOT.kBlack)
     ibin = 0
     for i in range(len(jbj_regs)-1):
-        ibin += len(mt2bins[i])-1
-        line.DrawLine(ibin,ratioRange[0],ibin,ratioRange[1])        
+        ibin += len(mt2bins[i])-1 if len(mt2bins[i])>2 else 2
+        line.DrawLine(ibin,ratioRange[0],ibin,ratioRange[1])
+
     
     h_ratio.Draw("SAME AXIS")
     if drawObs:
         g_ratio.Draw("SAME P0")
 
-    name = "prefit_{0}".format(ht_reg)
+    name = "prefit_{0}_{1}".format(ht_reg, "pull" if doPull else "ratio")
     try:
         os.makedirs(outdir)
     except:

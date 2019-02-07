@@ -4,13 +4,59 @@ from Datacard import *
 import ROOT
 import math
 import cPickle as pickle
+import numpy as np
 
 lumi = 35.9
 datacards = {}
 
 def LoadPickledDatacards(pickle_name):
+    global datacards
     datacards = pickle.load(open(pickle_name, 'rb'))
 
+
+def GetPull(pred, syst, obs, N=50000):
+    relsyst = 1.0 + syst/pred
+    s, t = 0, 0
+    for i in range(10000):
+        t += 1
+        toyobs = np.random.poisson(pred*(relsyst**np.random.randn()))
+        if toyobs < obs:
+            s += 1
+        if obs < pred and toyobs == obs:
+            s += 1
+    return ROOT.Math.normal_quantile(float(s)/t, 1)
+
+def GetPullPlot(g_data, g_pred, g_ratio):
+    for ibin in range(g_data.GetN()):
+        x, ydata, ypred = ROOT.Double(), ROOT.Double(), ROOT.Double()
+        g_data.GetPoint(ibin, x, ydata)
+        g_pred.GetPoint(ibin, x, ypred)
+        if ydata==0.0 and ypred==0.0:
+            continue
+        if ypred < 200 and ydata > 0.0:
+            if ydata > ypred:
+                pull = GetPull(ypred, g_pred.GetErrorYhigh(ibin), ydata)
+            else:
+                pull = GetPull(ypred, g_pred.GetErrorYlow(ibin), ydata)
+        else:
+            if ydata > ypred:
+                err_data = sqrt(ypred)
+                err_pred = g_pred.GetErrorYhigh(ibin)
+            else:
+                err_data = sqrt(ypred)
+                err_pred = g_pred.GetErrorYlow(ibin)
+
+            pull = (ydata - ypred) / math.sqrt(err_data**2 + err_pred**2)
+
+
+        if abs(pull) > 2.5:
+            print "BIN WITH BIG PULL: ", pull
+        thisPoint = g_ratio.GetN()
+        g_ratio.SetPoint(thisPoint, x, pull)
+        g_ratio.SetPointError(thisPoint, 0.0, 0.0, 0.0, 0.0)
+
+
+## DEPRECATED, ONLY USE IF USING OLD TEXT CARDS
 ## returns a list of yields, where the first is the data observation
 ## and the rest are background yields from the processes specified
 ## in bkg_names
@@ -50,6 +96,7 @@ def GetYieldsFromDatacard(datacard_fname, bkg_names, doSignal=False):
 
     return [obs]+bkg_rates+sigyield
 
+## DEPRECATED, ONLY USE IF USING OLD TEXT CARDS
 ## returns a list of 2-tuples, one for each background.
 ## numbers are the upper and lower relative uncertainties
 ## for each background process
