@@ -2,20 +2,16 @@ import ROOT as r
 import os, sys
 import time
 import subprocess
-import cPickle as pickle
-from Datacard import *
 # this assumes you've already made template datacards for this tag! (makeTemplateCards.py)
 
 TAG = "FullRunII_17MCfor18_ttbbWeights_80x_fastsim"
-MODEL = "T1tttt"
+MODEL = "T2bb"
 
 MAXLOCALJOBS=25
 
 if not os.path.exists(os.path.join("cards_"+TAG, "templates", "template_datacards.pkl")):
     print "ERROR! you must make template datacards first!"
     exit(1)
-
-templates = pickle.load(open(os.path.join("cards_"+TAG, "templates", "template_datacards.pkl"), 'rb'))
 
 os.system("mkdir -p cards_{0}/logs".format(TAG))
 
@@ -46,13 +42,12 @@ for m1 in range(0, x_max+1, x_binwidth):
         if h_nsig.GetBinContent(xbin, ybin) < 1:
             continue
 
-        for dc_name in templates:
-            logname = "cards_{0}/logs/log_{1}_{2}_{3}".format(TAG, MODEL, m1, m2)
-            cmd = "nice -n 19 python -u makeSignalPoint.py {0} {1} {2} {3} {4} &>> {5}".format(TAG, MODEL, m1, m2, dc_name, logname)
-            points.append((m1,m2))
-            cmds.append(cmd)
+        logname = "cards_{0}/logs/log_{1}_{2}_{3}".format(TAG, MODEL, m1, m2)
+        cmd = "nice -n 19 python -u makeSignalPoint.py {0} {1} {2} {3} {4} &>> {5}".format(TAG, MODEL, m1, m2, 0, logname)
+        points.append((m1,m2))
+        cmds.append(cmd)
 
-print "Found {0} possible datacards. Submitting jobs.".format(len(points))
+print "Found {0} points. Submitting jobs.".format(len(points))
 
 success_points = set()
 ps = []

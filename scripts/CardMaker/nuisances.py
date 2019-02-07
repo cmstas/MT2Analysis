@@ -4,9 +4,12 @@ CORR_ACROSS_ALLBINS = 0
 PER_HT_REG = 1
 PER_TOPO_REG = 2
 PER_TOPO_REG_CRSL = 3
-PER_MT2_BIN = 4
+PER_TOPO_REG_CRDY = 4
+PER_MT2_BIN = 5
 
 DEFAULT_splitByYear = False
+
+# default type is lnN. Can optionally set "type" to "lnU"
 
 nuisances = {
     "lumi_syst" : {
@@ -20,6 +23,7 @@ nuisances = {
     "sig_gensyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
+        "type" : "lnU",
         },
     "sig_IsrSyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
@@ -37,12 +41,8 @@ nuisances = {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : True,
         },
-    "sig_jec" : {
-        "correlation" : CORR_ACROSS_ALLBINS,
-        "splitByYear" : DEFAULT_splitByYear,
-        },
-    "sig_renorm" : {
-        "correlation" : CORR_ACROSS_ALLBINS,
+    "sig_jec_renorm" : {
+        "correlation" : PER_MT2_BIN,
         "splitByYear" : DEFAULT_splitByYear,
         },
     "jec" : {
@@ -58,7 +58,7 @@ nuisances = {
         "splitByYear" : True,
         },
     "zinv_purity" : {
-        "correlation" : PER_TOPO_REG,
+        "correlation" : PER_TOPO_REG_CRDY,
         "splitByYear" : False,
         },
     "zinv_Rsfof" : {

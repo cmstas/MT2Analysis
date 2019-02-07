@@ -1,4 +1,4 @@
-// C++
+T// C++
 #include <iostream>
 #include <vector>
 #include <set>
@@ -47,11 +47,11 @@ std::string toString(float in){
 }
 
 // generic binning for signal scans - need arrays since mt2 dimension will be variable
-//   assuming here: 25 GeV binning, m1 from 0-2300, m2 from 0-2300
+//   assuming here: 25 GeV binning, m1 from 0-2800, m2 from 0-1600
 //   in Loop, also account for 5 GeV binning from 0-800 in T2cc scan
-int n_m1bins = 93;
+int n_m1bins = 113;
 float* m1bins;
-int n_m2bins = 93;
+int n_m2bins = 65;
 float* m2bins;
 
 const int n_htbins = 5;
@@ -144,8 +144,8 @@ float HEM_ptCut = 30.0;  // veto on jets above this threshold
 float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // load rphi fits to perform r_effective calculation.
-bool doReffCalculation = false;
-string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/V00-10-04_94x_Fall17_MC/qcdHistos.root";
+bool doReffCalculation = true;
+string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/<TAG>/qcdHistos.root";
 TFile* rphi_file;
 vector<TF1*> rphi_fits_data;
 vector<TF1*> rphi_fits_mc;
@@ -656,20 +656,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
   // store the fits in a vector if we are doing r_eff calculation
   if(doReffCalculation){
-    rphi_file = new TFile(rphi_file_name.c_str());
-    if(rphi_file->IsZombie()){
-      cout << "WARNING: could not open rphi file: " << rphi_file_name << endl;
-      doReffCalculation = false;
-    }else{
-      string ht_strs[6] = {"ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"};
-      string syst_strs[3] = {"","_systUp","_systDown"};
-      for(int i=0; i<6; i++){
-        for(int j=0; j<3; j++){
-          rphi_fits_data.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_data%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
-          rphi_fits_mc.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_mc%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
-        }
+      int pos = rphi_file_name.find("<TAG>");
+      rphi_file_name.replace(pos, 5, config_.rphi_tag);
+      cout << "[MT2Looper::loop] Doing rphi_effective calculation with tag: " << config_.rphi_tag << endl;
+      rphi_file = new TFile(rphi_file_name.c_str());
+      if(rphi_file->IsZombie()){
+          cout << "WARNING: could not open rphi file: " << rphi_file_name << endl;
+          doReffCalculation = false;
+      }else{
+          string ht_strs[6] = {"ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"};
+          string syst_strs[3] = {"","_systUp","_systDown"};
+          for(int i=0; i<6; i++){
+              for(int j=0; j<3; j++){
+                  rphi_fits_data.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_data%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
+                  rphi_fits_mc.push_back((TF1*)rphi_file->Get(Form("rphi_%s/fit_mc%s",ht_strs[i].c_str(),syst_strs[j].c_str())));
+              }
+          }
       }
-    }
       
   }
 
@@ -718,8 +721,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
     std::string scan_name = sample;
     std::string weights_dir = "";
-    if(config_tag.find("Fall17") != string::npos)
+    if(config_tag.find("80x_fastsim_Moriond17") != string::npos)
+        weights_dir = "../babymaker/data/";
+    else if(config_tag.find("94x_fastsim_Fall17") != string::npos)
         weights_dir = "../babymaker/data/sigweights_Fall17/";
+    else if(config_tag.find("94x_fastsim_Summer16") != string::npos)
+        weights_dir = "../babymaker/data/sigweights_Summer16_94x/";
     if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
     else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
     else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
@@ -914,6 +921,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
       if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
       if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+      if (config_.filters["ecalBadCalibFilterUpdate"] && !t.Flag_ecalBadCalibFilterUpdate) continue;
       if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
       if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
       if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
@@ -1752,7 +1760,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
         if(SRVec.at(srN).GetName()=="25UH" && mt2_>400){
-            cout << endl << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+            // cout << endl << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
         }
       fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
@@ -1904,8 +1912,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
         // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
         fillHistosSingleLepton(SRVec.at(srN).crslHistMap,    SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       }
-      else if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      else if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      // else if(prefix=="crslmu")  fillHistosSingleLepton(SRVec.at(srN).crslmuHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+      // else if(prefix=="crslel")  fillHistosSingleLepton(SRVec.at(srN).crslelHistMap,  SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //      break;//control regions are not necessarily orthogonal
     }
   }
@@ -1945,8 +1953,8 @@ void MT2Looper::fillHistosCRSL(const std::string& prefix, const std::string& suf
           fillHistosSingleLepton(SRVecMonojet.at(srN).crslHistMap,    SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
           // cout << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
         }
-	else if(prefix=="crslmu")  fillHistosSingleLepton(SRVecMonojet.at(srN).crslmuHistMap,  SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
-	else if(prefix=="crslel")  fillHistosSingleLepton(SRVecMonojet.at(srN).crslelHistMap,  SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+	// else if(prefix=="crslmu")  fillHistosSingleLepton(SRVecMonojet.at(srN).crslmuHistMap,  SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
+	// else if(prefix=="crslel")  fillHistosSingleLepton(SRVecMonojet.at(srN).crslelHistMap,  SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
 	//      break;//control regions are not necessarily orthogonal
       }
     }
@@ -2546,6 +2554,17 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
 
 
   TString directoryname(dirname);
+  if(directoryname.Contains("baseJ")){
+      plot1D("h_j1chf"+s,  t.jet_chf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1chf", 100, 0, 1);      
+      plot1D("h_j1nhf"+s,  t.jet_nhf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1nhf", 100, 0, 1);      
+      plot1D("h_j1cemf"+s,  t.jet_cemf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1cemf", 100, 0, 1);      
+      plot1D("h_j1nemf"+s,  t.jet_nemf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1nemf", 100, 0, 1);      
+      plot1D("h_j1muf"+s,  t.jet_muf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1muf", 100, 0, 1);      
+      if(directoryname.Contains("srbaseJ") && t.jet_nemf[t.good_jet_idxs[0]] > 0.8)
+          cout << endl << "FOUNDEVENT: " << t.run << ":" <<t.lumi << ":" << t.evt << endl;
+  }
+
+
   if (directoryname.Contains("nocut") && !t.isData && !doMinimalPlots) {
     
     float genHT = 0;
