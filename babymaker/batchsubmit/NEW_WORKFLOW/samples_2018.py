@@ -101,7 +101,7 @@ samples_2018 = {
         "/TTTT_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM" : [0.008213, 1.0, 1.0, "tttt"],
         },
     "diboson" : {
-        "/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [75.80, 1.878, 1.0, "ww"],
+        "/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [75.80, 1.566, 1.0, "ww"],
         "/WZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [27.57, 1.0, 1.0, "wz"],
         },
     "qcd_ht" : {

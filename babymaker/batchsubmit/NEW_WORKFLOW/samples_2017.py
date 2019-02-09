@@ -123,7 +123,7 @@ samples_2017 = {
         "/TTTT_TuneCP5_PSweights_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [0.008213, 1.0, 1.0, "tttt"],
         },
     "diboson" : {
-        "/WW_TuneCP5_13TeV-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [75.80, 1.878, 1.0, "ww"],
+        "/WW_TuneCP5_13TeV-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [75.80, 1.566, 1.0, "ww"],
         "/WZ_TuneCP5_13TeV-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM" : [27.57, 1.0, 1.0, "wz"],
         },
     "qcd_ht" : {
