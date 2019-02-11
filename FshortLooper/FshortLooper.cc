@@ -125,15 +125,14 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       }
     }
   }
-  unordered_map<string,TH2D*> fsHistsMono;
-  string jetpt[] = {"SR","VR","MR","pt60","pt100","pt200"};
+  string jetpt[] = {"SR","VR","MR","pt60","pt100","pt150"};
   string trackpt[] = {"","_hipt","_lowpt"};
   for (int jetptbin = 0; jetptbin < 6; jetptbin++) {
     string jpt = jetpt[jetptbin];
     for (int trackptbin = 0; trackptbin < 3; trackptbin++) {
-      string hname = "h_fsMono_"+jpt+trackpt[trackptbin];
+      string hname = "h_fs_1_"+jpt+trackpt[trackptbin];
       cout << hname << endl;
-      fsHistsMono[hname] = (TH2D*) h_fsMR_Base->Clone(hname.c_str());
+      fsHists[hname] = (TH2D*) h_fsMR_Base->Clone(hname.c_str());
     }
   }
 
@@ -486,30 +485,11 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       
     if (lepveto) continue;
       
-    if (applyKinematicPreselection) {
-      if (diffMet > 0.5) {
-	continue;
-      }
+    bool passMonojet = met >= 250 && t.jet1_pt >= 250 && (t.nJet30 == 1 || DeltaPhi(met_phi, t.jet_phi[1]) < 0.3) && diffMet < 0.5;
+    bool passMultijet = diffMet < 0.5 && t.nJet30 > 1 && ht >= 250 && mt2 >= 60 && met >= 30 && deltaPhiMin < 0.3;
 
-      if (t.nJet30 < 2) {
-	continue;
-      }    
-      
-      if (ht < 250) {
-	continue;
-      }
-	
-      if (mt2 < 60) {
-	continue;
-      }
-	
-      if (met < 30) {
-	continue;
-      }  
-	
-      if (deltaPhiMin < 0.3) {
-	continue;
-      }
+    if (applyKinematicPreselection && !(passMonojet || passMultijet)) {
+      continue;
     }
 
     if (t.isData) {
@@ -577,95 +557,129 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
 
     vector<TH2D*> histsToFill; 
-    vector<string> regsToFill = {"Incl"};
-    vector<string> njhtToFill = {""};
+    vector<string> regsToFill;
+    vector<string> njhtToFill;
 
-    // Measurement Region
-    if (mt2 < 100) {
-      regsToFill.push_back("MR");
-      histsToFill.push_back(fsHists["h_fsMR_Baseline"]);
-      ht < 1200 ? histsToFill.push_back(fsHists["h_fsMR_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsMR_gt1200HT"]);
-      ht < 450 ? histsToFill.push_back(fsHists["h_fsMR_HT250"]) : histsToFill.push_back(fsHists["h_fsMR_HT450"]);
-      if (met < 100) histsToFill.push_back(fsHists["h_fsMR_MET30"]);
-      else if (met < 250) histsToFill.push_back(fsHists["h_fsMR_MET100"]);
-      else histsToFill.push_back(fsHists["h_fsMR_MET250"]);
-      if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsMR_HT450MET100"]);
-      if (t.nJet30 < 4) {
-	histsToFill.push_back(fsHists["h_fsMR_23_Baseline"]);
-	ht < 1200 ? histsToFill.push_back(fsHists["h_fsMR_23_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsMR_23_gt1200HT"]);
-	ht < 450 ? histsToFill.push_back(fsHists["h_fsMR_23_HT250"]) : histsToFill.push_back(fsHists["h_fsMR_23_HT450"]);
-	if (met < 100) histsToFill.push_back(fsHists["h_fsMR_23_MET30"]);
-	else if (met < 250) histsToFill.push_back(fsHists["h_fsMR_23_MET100"]);
-	else histsToFill.push_back(fsHists["h_fsMR_23_MET250"]);
-	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsMR_23_HT450MET100"]);
-      } else {
-	histsToFill.push_back(fsHists["h_fsMR_4_Baseline"]);
-	ht < 1200 ? histsToFill.push_back(fsHists["h_fsMR_4_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsMR_4_gt1200HT"]);
-	ht < 450 ? histsToFill.push_back(fsHists["h_fsMR_4_HT250"]) : histsToFill.push_back(fsHists["h_fsMR_4_HT450"]);
-	if (met < 100) histsToFill.push_back(fsHists["h_fsMR_4_MET30"]);
-	else if (met < 250) histsToFill.push_back(fsHists["h_fsMR_4_MET100"]);
-	else histsToFill.push_back(fsHists["h_fsMR_4_MET250"]);
-	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsMR_4_HT450MET100"]);
+    if (passMultijet || !applyKinematicPreselection) {
+      regsToFill.push_back("Incl");
+      njhtToFill.push_back("");
+      // Measurement Region
+      if (mt2 < 100) {
+	regsToFill.push_back("MR");
+	histsToFill.push_back(fsHists["h_fsMR_Baseline"]);
+	ht < 1200 ? histsToFill.push_back(fsHists["h_fsMR_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsMR_gt1200HT"]);
+	ht < 450 ? histsToFill.push_back(fsHists["h_fsMR_HT250"]) : histsToFill.push_back(fsHists["h_fsMR_HT450"]);
+	if (met < 100) histsToFill.push_back(fsHists["h_fsMR_MET30"]);
+	else if (met < 250) histsToFill.push_back(fsHists["h_fsMR_MET100"]);
+	else histsToFill.push_back(fsHists["h_fsMR_MET250"]);
+	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsMR_HT450MET100"]);
+	if (t.nJet30 < 4) {
+	  histsToFill.push_back(fsHists["h_fsMR_23_Baseline"]);
+	  ht < 1200 ? histsToFill.push_back(fsHists["h_fsMR_23_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsMR_23_gt1200HT"]);
+	  ht < 450 ? histsToFill.push_back(fsHists["h_fsMR_23_HT250"]) : histsToFill.push_back(fsHists["h_fsMR_23_HT450"]);
+	  if (met < 100) histsToFill.push_back(fsHists["h_fsMR_23_MET30"]);
+	  else if (met < 250) histsToFill.push_back(fsHists["h_fsMR_23_MET100"]);
+	  else histsToFill.push_back(fsHists["h_fsMR_23_MET250"]);
+	  if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsMR_23_HT450MET100"]);
+	} else {
+	  histsToFill.push_back(fsHists["h_fsMR_4_Baseline"]);
+	  ht < 1200 ? histsToFill.push_back(fsHists["h_fsMR_4_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsMR_4_gt1200HT"]);
+	  ht < 450 ? histsToFill.push_back(fsHists["h_fsMR_4_HT250"]) : histsToFill.push_back(fsHists["h_fsMR_4_HT450"]);
+	  if (met < 100) histsToFill.push_back(fsHists["h_fsMR_4_MET30"]);
+	  else if (met < 250) histsToFill.push_back(fsHists["h_fsMR_4_MET100"]);
+	  else histsToFill.push_back(fsHists["h_fsMR_4_MET250"]);
+	  if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsMR_4_HT450MET100"]);
+	}
+      }
+      else if (mt2 < 200 && mt2 >= 100) {
+	regsToFill.push_back("VR");
+	histsToFill.push_back(fsHists["h_fsVR_Baseline"]);
+	ht < 1200 ? histsToFill.push_back(fsHists["h_fsVR_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsVR_gt1200HT"]);
+	ht < 450 ? histsToFill.push_back(fsHists["h_fsVR_HT250"]) : histsToFill.push_back(fsHists["h_fsVR_HT450"]);
+	if (met < 100) histsToFill.push_back(fsHists["h_fsVR_MET30"]);
+	else if (met < 250) histsToFill.push_back(fsHists["h_fsVR_MET100"]);
+	else histsToFill.push_back(fsHists["h_fsVR_MET250"]);
+	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsVR_HT450MET100"]);
+	if (t.nJet30 < 4) {
+	  histsToFill.push_back(fsHists["h_fsVR_23_Baseline"]);
+	  ht < 1200 ? histsToFill.push_back(fsHists["h_fsVR_23_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsVR_23_gt1200HT"]);
+	  ht < 450 ? histsToFill.push_back(fsHists["h_fsVR_23_HT250"]) : histsToFill.push_back(fsHists["h_fsVR_23_HT450"]);
+	  if (met < 100) histsToFill.push_back(fsHists["h_fsVR_23_MET30"]);
+	  else if (met < 250) histsToFill.push_back(fsHists["h_fsVR_23_MET100"]);
+	  else histsToFill.push_back(fsHists["h_fsVR_23_MET250"]);
+	  if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsVR_23_HT450MET100"]);
+	} else {
+	  histsToFill.push_back(fsHists["h_fsVR_4_Baseline"]);
+	  ht < 1200 ? histsToFill.push_back(fsHists["h_fsVR_4_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsVR_4_gt1200HT"]);
+	  ht < 450 ? histsToFill.push_back(fsHists["h_fsVR_4_HT250"]) : histsToFill.push_back(fsHists["h_fsVR_4_HT450"]);
+	  if (met < 100) histsToFill.push_back(fsHists["h_fsVR_4_MET30"]);
+	  else if (met < 250) histsToFill.push_back(fsHists["h_fsVR_4_MET100"]);
+	  else histsToFill.push_back(fsHists["h_fsVR_4_MET250"]);
+	  if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsVR_4_HT450MET100"]);
+	}
+      }
+      // Signal Region
+      else if ( !(blind && t.isData && doNoLeps) ) { // Only look at MT2 > 200 GeV in data if unblinded or looking in lepton CR
+	if (met > 250 || (ht > 1200 && met > 30)) regsToFill.push_back("SR"); // Apply full selection for cut hists for SR points
+	histsToFill.push_back(fsHists["h_fsSR_Baseline"]);
+	ht < 1200 ? histsToFill.push_back(fsHists["h_fsSR_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsSR_gt1200HT"]);
+	ht < 450 ? histsToFill.push_back(fsHists["h_fsSR_HT250"]) : histsToFill.push_back(fsHists["h_fsSR_HT450"]);
+	if (met < 100) histsToFill.push_back(fsHists["h_fsSR_MET30"]);
+	else if (met < 250) histsToFill.push_back(fsHists["h_fsSR_MET100"]);
+	else histsToFill.push_back(fsHists["h_fsSR_MET250"]);
+	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsSR_HT450MET100"]);
+	if (t.nJet30 < 4) {
+	  histsToFill.push_back(fsHists["h_fsSR_23_Baseline"]);
+	  ht < 1200 ? histsToFill.push_back(fsHists["h_fsSR_23_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsSR_23_gt1200HT"]);
+	  ht < 450 ? histsToFill.push_back(fsHists["h_fsSR_23_HT250"]) : histsToFill.push_back(fsHists["h_fsSR_23_HT450"]);
+	  if (met < 100) histsToFill.push_back(fsHists["h_fsSR_23_MET30"]);
+	  else if (met < 250) histsToFill.push_back(fsHists["h_fsSR_23_MET100"]);
+	  else histsToFill.push_back(fsHists["h_fsSR_23_MET250"]);
+	  if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsSR_23_HT450MET100"]);
+	} else {
+	  histsToFill.push_back(fsHists["h_fsSR_4_Baseline"]);
+	  ht < 1200 ? histsToFill.push_back(fsHists["h_fsSR_4_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsSR_4_gt1200HT"]);
+	  ht < 450 ? histsToFill.push_back(fsHists["h_fsSR_4_HT250"]) : histsToFill.push_back(fsHists["h_fsSR_4_HT450"]);
+	  if (met < 100) histsToFill.push_back(fsHists["h_fsSR_4_MET30"]);
+	  else if (met < 250) histsToFill.push_back(fsHists["h_fsSR_4_MET100"]);
+	  else histsToFill.push_back(fsHists["h_fsSR_4_MET250"]);
+	  if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsSR_4_HT450MET100"]);
+	}
+      }
+      // Should only get here if looking at data while blinded
+      else {
+	continue; // No need to consider this event if not filling any hists
       }
     }
-    else if (mt2 < 200 && mt2 >= 100) {
-      regsToFill.push_back("VR");
-      histsToFill.push_back(fsHists["h_fsVR_Baseline"]);
-      ht < 1200 ? histsToFill.push_back(fsHists["h_fsVR_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsVR_gt1200HT"]);
-      ht < 450 ? histsToFill.push_back(fsHists["h_fsVR_HT250"]) : histsToFill.push_back(fsHists["h_fsVR_HT450"]);
-      if (met < 100) histsToFill.push_back(fsHists["h_fsVR_MET30"]);
-      else if (met < 250) histsToFill.push_back(fsHists["h_fsVR_MET100"]);
-      else histsToFill.push_back(fsHists["h_fsVR_MET250"]);
-      if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsVR_HT450MET100"]);
-      if (t.nJet30 < 4) {
-	histsToFill.push_back(fsHists["h_fsVR_23_Baseline"]);
-	ht < 1200 ? histsToFill.push_back(fsHists["h_fsVR_23_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsVR_23_gt1200HT"]);
-	ht < 450 ? histsToFill.push_back(fsHists["h_fsVR_23_HT250"]) : histsToFill.push_back(fsHists["h_fsVR_23_HT450"]);
-	if (met < 100) histsToFill.push_back(fsHists["h_fsVR_23_MET30"]);
-	else if (met < 250) histsToFill.push_back(fsHists["h_fsVR_23_MET100"]);
-	else histsToFill.push_back(fsHists["h_fsVR_23_MET250"]);
-	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsVR_23_HT450MET100"]);
-      } else {
-	histsToFill.push_back(fsHists["h_fsVR_4_Baseline"]);
-	ht < 1200 ? histsToFill.push_back(fsHists["h_fsVR_4_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsVR_4_gt1200HT"]);
-	ht < 450 ? histsToFill.push_back(fsHists["h_fsVR_4_HT250"]) : histsToFill.push_back(fsHists["h_fsVR_4_HT450"]);
-	if (met < 100) histsToFill.push_back(fsHists["h_fsVR_4_MET30"]);
-	else if (met < 250) histsToFill.push_back(fsHists["h_fsVR_4_MET100"]);
-	else histsToFill.push_back(fsHists["h_fsVR_4_MET250"]);
-	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsVR_4_HT450MET100"]);
-      }
-    }
-    // Signal Region
-    else if ( !(blind && t.isData && doNoLeps) ) { // Only look at MT2 > 200 GeV in data if unblinded or looking in lepton CR
-      if (met > 250 || (ht > 1200 && met > 30)) regsToFill.push_back("SR"); // Apply full selection for cut hists for SR points
-      histsToFill.push_back(fsHists["h_fsSR_Baseline"]);
-      ht < 1200 ? histsToFill.push_back(fsHists["h_fsSR_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsSR_gt1200HT"]);
-      ht < 450 ? histsToFill.push_back(fsHists["h_fsSR_HT250"]) : histsToFill.push_back(fsHists["h_fsSR_HT450"]);
-      if (met < 100) histsToFill.push_back(fsHists["h_fsSR_MET30"]);
-      else if (met < 250) histsToFill.push_back(fsHists["h_fsSR_MET100"]);
-      else histsToFill.push_back(fsHists["h_fsSR_MET250"]);
-      if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsSR_HT450MET100"]);
-      if (t.nJet30 < 4) {
-	histsToFill.push_back(fsHists["h_fsSR_23_Baseline"]);
-	ht < 1200 ? histsToFill.push_back(fsHists["h_fsSR_23_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsSR_23_gt1200HT"]);
-	ht < 450 ? histsToFill.push_back(fsHists["h_fsSR_23_HT250"]) : histsToFill.push_back(fsHists["h_fsSR_23_HT450"]);
-	if (met < 100) histsToFill.push_back(fsHists["h_fsSR_23_MET30"]);
-	else if (met < 250) histsToFill.push_back(fsHists["h_fsSR_23_MET100"]);
-	else histsToFill.push_back(fsHists["h_fsSR_23_MET250"]);
-	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsSR_23_HT450MET100"]);
-      } else {
-	histsToFill.push_back(fsHists["h_fsSR_4_Baseline"]);
-	ht < 1200 ? histsToFill.push_back(fsHists["h_fsSR_4_lt1200HT"]) : histsToFill.push_back(fsHists["h_fsSR_4_gt1200HT"]);
-	ht < 450 ? histsToFill.push_back(fsHists["h_fsSR_4_HT250"]) : histsToFill.push_back(fsHists["h_fsSR_4_HT450"]);
-	if (met < 100) histsToFill.push_back(fsHists["h_fsSR_4_MET30"]);
-	else if (met < 250) histsToFill.push_back(fsHists["h_fsSR_4_MET100"]);
-	else histsToFill.push_back(fsHists["h_fsSR_4_MET250"]);
-	if (met >= 100 && ht >= 450) histsToFill.push_back(fsHists["h_fsSR_4_HT450MET100"]);
-      }
-    }
-    // Should only get here if looking at data while blinded
+    // Monojet
     else {
-      continue; // No need to consider this event if not filling any hists
+      // SR 
+      if (t.nJet30 == 1 && !(blind && t.isData)) {
+	histsToFill.push_back(fsHists["h_fs_1_SR"]);
+      }
+      // VR and MR, unbalanced dijet
+      else if (t.nJet30 == 2) {
+	const float jet2pt = t.jet_pt[1];
+	if (jet2pt < 60) {
+	  histsToFill.push_back(fsHists["h_fs_1_VR"]);	  
+	}
+	// MR and variations
+	else {
+	  histsToFill.push_back(fsHists["h_fs_1_MR"]);
+	  if (jet2pt < 100) {
+	    histsToFill.push_back(fsHists["h_fs_1_pt60"]);
+	  }
+	  else if (jet2pt < 200) {
+	    histsToFill.push_back(fsHists["h_fs_1_pt100"]);
+	  }
+	  else {
+	    histsToFill.push_back(fsHists["h_fs_1_pt150"]);
+	  }
+	}
+      }
+      else {
+	continue; // to get here, must be blinded and in data
+      }
     }
 
     // Analysis code

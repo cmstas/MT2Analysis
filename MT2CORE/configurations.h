@@ -35,6 +35,7 @@ struct MT2Configuration {
     int ea_version;
     std::string JRT_file;
     std::string jet_id;
+    std::string rphi_tag;
     std::vector<std::pair<std::string, std::string> > JECs;
     std::map<std::string, bool> filters;
     std::map<std::string, std::vector<std::string> > triggers;
