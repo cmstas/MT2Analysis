@@ -46,9 +46,11 @@ m16 = "output_merged/mc_2016_{}.root".format(outtag)
 d1718 = "output_merged/data_2017and2018_{}.root".format(outtag)
 m1718 = "output_merged/mc_2017and2018_{}.root".format(outtag)
 
-filenames = [d18, d17, m18, m17]
+#filenames = [d18, d17, m18, m17]
 #filenames = [d1718, m1718, d16, m16]
 #filenames = [d1718, d16]
+filenames = [d1718, m1718, d18, m18, d17, m17, d16, m16]
+#filenames = [m16]
 
 def ErrorTuple(h):
     return (h.GetBinError(1,1),h.GetBinError(2,1),h.GetBinError(3,1),h.GetBinError(4,1),h.GetBinError(5,1))
@@ -762,7 +764,7 @@ for filename in filenames:
             h_stat = h_stat_up if obs > pred else h_stat_dn
             h_allButNC = h_allButNC_up if obs > pred else h_allButNC_dn
             pred_err = h_allButNC.GetBinError(length,2)
-            obs_err = getAsymmetricErrors(obs)[1 if obs > pred else 0]
+            obs_err = getAsymmetricErrors(obs)[1 if obs > pred else 0] if isData else h.GetBinError(length,1)
             total_err = sqrt(pred_err**2 + obs_err**2)
             expr = (pred-obs)**2 - total_err**2
             if pred > 0:
@@ -784,7 +786,9 @@ for filename in filenames:
                 systematic_percent = 0
             # Set systematic to either the calculated systematic, or the prediction statistical error if it is larger
             h_nc.SetBinContent(length,min(max(systematic_percent,minimal_rel_error),1.0)) # cap at 100%, can be larger if statistical error is gigantic
-            if verbose: print histname,minimal_rel_error,h_nc.GetBinContent(length)
+            if histname == "h_LL_VR_23_lo": 
+                print "histname,expr,pred-obs,pred,obs,total_err,pred_err,obs_err,minimal_rel_error,systematic_percent,h_nc.GetBinContent(length)"
+                print histname,expr,pred-obs,pred,obs,total_err,pred_err,obs_err,minimal_rel_error,systematic_percent,h_nc.GetBinContent(length)
         outfile.cd()
         h_nc.Write()
 

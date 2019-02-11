@@ -13,7 +13,7 @@ simplecanvas.SetTopMargin(0.12)
 simplecanvas.SetRightMargin(0.12)
 simplecanvas.cd()
 
-os.system("mkdir -p pngs_vetohist")
+os.system("mkdir -p etaphi_veto_maps")
 
 def SetVetoBins(th1, rectangles):
     for rectangle in rectangles:
@@ -114,18 +114,18 @@ outfile.cd()
 veto_hist_16.Write()
 simplecanvas.cd()
 veto_hist_16.Draw("col")
-simplecanvas.SaveAs("pngs_vetohist/etaphi_veto_16.png")
+simplecanvas.SaveAs("etaphi_veto_maps/etaphi_veto_16.pdf")
 
 veto_hist_17 = veto_hist_16.Clone("etaphi_veto_17")
 veto_hist_17 = SetVetoBins(veto_hist_17,extra_veto_xy_17)
 outfile.cd()
 veto_hist_17.Write()
 veto_hist_17.Draw("col")
-simplecanvas.SaveAs("pngs_vetohist/etaphi_veto_17.png")
+simplecanvas.SaveAs("etaphi_veto_maps/etaphi_veto_17.pdf")
 
 veto_hist_18 = veto_hist_17.Clone("etaphi_veto_18")
 veto_hist_18 = SetVetoBins(veto_hist_18,extra_veto_xy_18)
 outfile.cd()
 veto_hist_18.Write()
 veto_hist_18.Draw("col")
-simplecanvas.SaveAs("pngs_vetohist/etaphi_veto_18.png")
+simplecanvas.SaveAs("etaphi_veto_maps/etaphi_veto_18.pdf")

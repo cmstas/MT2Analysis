@@ -43,7 +43,7 @@ files = [ROOT.TFile.Open(filename) for filename in [d16, d1718]]
 tags = ["2016","2017-18"]
 
 filepath = "output_unmerged/2017_{0}/signal/".format(tag)
-sigfiles = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+sigfiles = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f)) and f.find("GENMET") < 0]
 signamelist = [filename[filename.rfind("/")+1:filename.rfind(".root")].replace("-","_") for filename in sigfiles]
 
 #regions16 = [length + "_" + nj + ht + ptstring for length in ["P"] for nj in ["L","H"] for ht in ["L","M","H"] for ptstring in ["_lo","_hi"]]

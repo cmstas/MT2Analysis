@@ -37,7 +37,7 @@ d1718 = "output_merged/data_2017and2018_{}_contam.root".format(shorttrack_tag)
 filenames = [d1718, d16]
 
 filepath = "output_unmerged/2017_{0}/signal/".format(shorttrack_tag)
-inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f))]
+inputlist = [filepath+f for f in os.listdir(filepath) if isfile(join(filepath, f)) if f.find("GENMET") < 0]
 inputnamelist = [filename[filename.rfind("/")+1:filename.rfind(".root")].replace("-","_") for filename in inputlist]
 filelist = [ROOT.TFile.Open(infile) for infile in inputlist]
 

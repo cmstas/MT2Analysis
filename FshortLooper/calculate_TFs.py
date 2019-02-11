@@ -32,7 +32,7 @@ simplecanvas.SetRightMargin(0.16)
 
 ROOT.gPad.SetPhi(-135)
 
-makepdfs = True
+makepdfs = False
 
 if len(sys.argv) < 2: 
     print "Which file?"
@@ -54,6 +54,7 @@ for filepath in filepaths:
 
 os.system("mkdir -p output")
 os.system("mkdir -p distributions/{0}".format(shortname))
+os.system("mkdir -p distributionsNM1/{0}".format(shortname))
 
 tfile = ROOT.TFile.Open(filename,"READ")
 names = tfile.GetKeyNames()
@@ -83,6 +84,7 @@ for rawname in names:
     name = rawname[1:] # Get rid of leading /
     # Fshort histograms
     if name.find("max_weight") >= 0: continue
+    if name.find("sigeff") >= 0: continue
     if name.find("fs") > 0:
         h_fs = tfile.Get(name)
         h_fs_up = h_fs.Clone(name+"_up")
@@ -104,7 +106,7 @@ for rawname in names:
             nerr = getAsymmetricErrors(num) if isData else [h_fs.GetBinError(length, 2)]*2
             # there's an additional statistical error in the MC numerator coming from high weight events in the denominator not entering the numerator that we don't handle
             # quick check of where our largest events are from / how large they are
-            if not isData: 
+            if verbose and not isData: 
                 max_weight = 0
                 max_f = None
                 for f in filelist:
@@ -118,9 +120,12 @@ for rawname in names:
             newerr_dn = sqrt( (derr[1]/den)**2 + (nerr[1]/num)**2 ) * num/den            
             h_fs_up.SetBinError(length, 1, newerr_up)
             h_fs_dn.SetBinError(length, 1, newerr_dn)
+        if name == "h_fsVR_4_Baseline_lowpt":
+            h_fs_up.Print("all")
+            h_fs_dn.Print("all")
         h_fs.SetMarkerSize(1.8)
         h_fs.Draw("text E")
-        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
+        simplecanvas.SaveAs("distributions{}/{}/{}.pdf".format("NM1" if name.find("NM1") > 0 else "",shortname,name))
         h_fs.Write()
         h_fs_up.Write()
         h_fs_dn.Write()
@@ -133,7 +138,7 @@ for rawname in names:
         if track_type[0:4] == "Lrej": track_type = "L " + st_or_stc +"s in Rejected M_{T}p_{T} Box"
         h_etaphi.SetTitle(h_etaphi.GetTitle()+", "+track_type+" ("+year+");#eta;#phi")
         h_etaphi.Draw()
-        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
+        simplecanvas.SaveAs("distributions{}/{}/{}.pdf".format("NM1" if name.find("NM1") > 0 else "",shortname,name))
 #    # Look at transfer factor as a function of MT2
 #    elif name.find("mt2") > 0:
 #        h_mt2 = tfile.Get(name)
@@ -159,7 +164,7 @@ for rawname in names:
         upper_right_overflow = h_mtpt.GetBinContent(xmax+1,ymax+1)
         h_mtpt.SetBinContent(xmax,ymax,h_mtpt.GetBinContent(xmax,ymax)+upper_right_overflow)            
         h_mtpt.Draw("LEGO2Z")
-        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
+        simplecanvas.SaveAs("distributions{}/{}/{}.pdf".format("NM1" if name.find("NM1") > 0 else "",shortname,name))
     # else it's a 1D plot
     elif name.find("layer") > 0:
         h = tfile.Get(name)
@@ -168,12 +173,12 @@ for rawname in names:
         h.SetLineWidth(3)
         simplecanvas.SetLogy()
         h.Draw()
-        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
+        simplecanvas.SaveAs("distributions{}/{}/{}.pdf".format("NM1" if name.find("NM1") > 0 else "",shortname,name))
         simplecanvas.SetLogy(False)
     else:
         h = tfile.Get(name)
         h.Draw()
-        simplecanvas.SaveAs("distributions/{0}/{1}.pdf".format(shortname,name))
+        simplecanvas.SaveAs("distributions{}/{}/{}.pdf".format("NM1" if name.find("NM1") > 0 else "",shortname,name))
         
 # Now that we've processed every hist, loop back over and find the systematic associated with every baseline hist
 for rawname in names:
@@ -198,42 +203,35 @@ for rawname in names:
         else:
             fserr_up = h_fs_up.GetBinError(length,1)
             fserr_dn = h_fs_dn.GetBinError(length,1)
-            max_variation_in_sigma = 0
+            max_correction_needed = 0.1*fs
             max_delta = 0
             max_variation_total_error = 0
-            max_variation_stat_error = 0
-            max_var = ""
+            max_var = "Minimal"
             for variation in ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
-                h_fs_var = outfile.Get(name.replace("Baseline",variation))
-                h_fs_var_up = outfile.Get(name.replace("Baseline",variation)+"_up")
-                h_fs_var_dn = outfile.Get(name.replace("Baseline",variation)+"_dn")
+                hnamevar = name.replace("Baseline",variation)
+                h_fs_var = outfile.Get(hnamevar)
+                h_fs_var_up = outfile.Get(hnamevar+"_up")
+                h_fs_var_dn = outfile.Get(hnamevar+"_dn")
                 fs_var = h_fs_var.GetBinContent(length,1)
                 if fs_var <= 0: continue
-                if isData:
-                    if fs_var < fs:
-                        fserr = fserr_dn
-                        fserr_var = h_fs_var_up.GetBinError(length,1)
-                    else:
-                        fserr = fserr_up
-                        fserr_var = h_fs_var_dn.GetBinError(length,1)
+                if fs_var < fs:
+                    fserr = fserr_dn
+                    fserr_var = h_fs_var_up.GetBinError(length,1)
                 else:
-                    fserr = h_fs.GetBinError(length,1)
-                    fserr_var = h_fs_var.GetBinError(length,1)
+                    fserr = fserr_up
+                    fserr_var = h_fs_var_dn.GetBinError(length,1)                    
                 overall_error = sqrt(fserr**2 + fserr_var**2)
-                delta_in_sigma = abs(fs - fs_var) / overall_error if overall_error > 0 else -1
-                if delta_in_sigma < 0: print "total error 0 for",name,variation
-                if delta_in_sigma > max_variation_in_sigma:
-                    max_variation_in_sigma = delta_in_sigma
+                expr = (fs-fs_var)**2-(fserr)**2-(fserr_var)**2
+                correction_needed = sqrt(expr) if expr > 0 else 0
+                if correction_needed > max_correction_needed:
+                    max_correction_needed = correction_needed
                     max_delta = fs-fs_var
-                    max_variation_stat_error = fserr_var                    
-                    max_var = variation
-            # Now assign systematic large enough to move largest variation within 1 sigma of baseline
-            # max_delta**2 = syst**2 + fserr**2 + fs_var**2 => syst = sqrt(max_delta**2 - fs**2 - fs_var**2)
-            # If max_delta < sqrt(fserr**2*maxerr**2) already, no systematic is needed, but assign 10% anyway
-            expr = max_delta**2-(fserr_up if max_delta < 0 else fserr_dn)**2-max_variation_stat_error**2
-            if expr < 0: systematic = 0.1*fs
-            else: systematic = max( sqrt(expr), 0.1*fs )
-            if verbose: print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_stat_error: {} max_var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_stat_error,max_var,systematic)
+                    max_total_error = sqrt(fserr**2+fserr_var**2)
+                    max_var = variation                
+            systematic = max_correction_needed
+#            if verbose: print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_stat_error: {} max_var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_stat_error,max_var,systematic)
+            if variation == "MET250" and name == "h_fsMR_4_Baseline_lowpt" and length == 3:
+                print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_total_error {}  max var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_total_error,max_var,systematic)
 #        if verbose: print name,length,fs,fserr,systematic
         h_syst.SetBinContent(length, 1, systematic)
     h_syst.Write()

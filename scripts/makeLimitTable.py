@@ -398,6 +398,8 @@ def getSRLineObs(njht,pt="",cat="",year="",m1="",m2=""):
 #masses=[ ("1800","1400"), ("1800","1600"), ("1800","1700"), ("1700","1600") ]
 masses=[ ("1800","1400"), ("1800","1600"), ("1800","1700") ]
 
+os.system("mkdir -p limit_tables/{}".format(tag))
+
 for m1,m2 in masses:
 
     regions = [(njht,pt,"P","2016",m1,m2) for njht in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]]
@@ -406,7 +408,7 @@ for m1,m2 in masses:
     regions += [(njht,pt,"M",year,m1,m2) for njht in ["LLM","LH","HLM","HH"] for year in ["2016","2017and2018"] for pt in ["lo","hi"]]
     regions += [(njht,"","L",year,m1,m2) for njht in ["LLM","LH","HLM","HH"] for year in ["2016","2017and2018"]]
 
-    output = open("limit_tables/limits_{0}_{1}_{2}_SR.tex".format(tag,m1,m2),"w")
+    output = open("limit_tables/{}/limits_{}_{}_SR.tex".format(tag,m1,m2),"w")
     printHeader(output)
     startSRLimitTableObs(output)
     output.write("\\rowcolor{white}") 
@@ -422,7 +424,7 @@ for m1,m2 in masses:
     printFooter(output)
     output.close()
 
-    output = open("limit_tables/limits_{0}_{1}_{2}_SR_fullset.tex".format(tag,m1,m2),"w")
+    output = open("limit_tables/{}/limits_{}_{}_SR_fullset.tex".format(tag,m1,m2),"w")
     printHeader(output)
     startSRLimitTableObs(output)
     output.write("\\rowcolor{white}") 

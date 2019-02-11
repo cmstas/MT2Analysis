@@ -34,9 +34,8 @@ if len(sys.argv) < 2:
     exit(1)
 
 tag=sys.argv[1]
-merge2017and2018 = len(sys.argv) == 2
 
-os.system("mkdir -p fshort_plots")
+os.system("mkdir -p fshort_variations")
 
 def getAsymmetricErrors(y):
     yp=0.0
@@ -118,7 +117,7 @@ def printHeader(outfile):
     outfile.write("\\newcolumntype{g}{>{\\columncolor{blue!25}}c}\n\n")
 
 
-def startFshortTableData(outfile):
+def startFshortTableData(outfile, merge2017and2018=False):
     outfile.write("\chead{Fshort Table}\n")
     outfile.write("\\begin{document}\n\n")
 
@@ -216,10 +215,16 @@ def getFshort(region,data):
 
 def getFshortMerged(region,data):
     vals1718 = {}
+    vals18 = {}
+    vals17 = {}
     vals16 = {}
     errs1718 = {}
+    errs18 = {}
+    errs17 = {}    
     errs16 = {}
     systs1718 = {}
+    systs18 = {}
+    systs17 = {}
     systs16 = {}
     if region[0] == "P":
         if region[1] == "3":
@@ -242,15 +247,18 @@ def getFshortMerged(region,data):
         fileregion = region[2:]
     else: 
         print "Did not recognize region",region
+    data_string = "data" if data else "mc"
     d1718=ROOT.TFile.Open("output/Fshort_data_2017and2018_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2017and2018_{}.root".format(tag))
+    d18=ROOT.TFile.Open("output/Fshort_data_2018_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2018_{}.root".format(tag))
+    d17=ROOT.TFile.Open("output/Fshort_data_2017_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2017_{}.root".format(tag))
     d16=ROOT.TFile.Open("output/Fshort_data_2016_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2016_{}.root".format(tag))
     for ptstring in ["","_lowpt","_hipt"]:
         for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
             hname = "h_fs"+fileregion+"_"+variation+ptstring
 
-            h = d1718.Get(hname)
-            h_up = d1718.Get(hname+"_up")
-            h_dn = d1718.Get(hname+"_dn")
+            h = d1718.Get(hname).Clone(data_string+hname+"1718")
+            h_up = d1718.Get(hname+"_up").Clone(data_string+hname+"_up1718")
+            h_dn = d1718.Get(hname+"_dn").Clone(data_string+hname+"_dn1718")
             vals1718[variation+ptstring + " STC"] = h.GetBinContent(cat,3)
             vals1718[variation+ptstring + " ST"] = h.GetBinContent(cat,2)
             vals1718[variation+ptstring + " FS"] = h.GetBinContent(cat,1)
@@ -258,9 +266,29 @@ def getFshortMerged(region,data):
             errs1718[variation+ptstring + " ST"] = h.GetBinError(cat,2)
             errs1718[variation+ptstring + " FS"] = (h_up.GetBinError(cat,1),h_dn.GetBinError(cat,1))
 
-            h = d16.Get(hname)
-            h_up = d16.Get(hname+"_up")
-            h_dn = d16.Get(hname+"_dn")
+            h = d18.Get(hname).Clone(data_string+hname+"18")
+            h_up = d18.Get(hname+"_up").Clone(data_string+hname+"_up18")
+            h_dn = d18.Get(hname+"_dn").Clone(data_string+hname+"_dn18")
+            vals18[variation+ptstring + " STC"] = h.GetBinContent(cat,3)
+            vals18[variation+ptstring + " ST"] = h.GetBinContent(cat,2)
+            vals18[variation+ptstring + " FS"] = h.GetBinContent(cat,1)
+            errs18[variation+ptstring + " STC"] = h.GetBinError(cat,3)
+            errs18[variation+ptstring + " ST"] = h.GetBinError(cat,2)
+            errs18[variation+ptstring + " FS"] = (h_up.GetBinError(cat,1), h_dn.GetBinError(cat,1))
+            
+            h = d17.Get(hname).Clone(data_string+hname+"17")
+            h_up = d17.Get(hname+"_up").Clone(data_string+hname+"_up17")
+            h_dn = d17.Get(hname+"_dn").Clone(data_string+hname+"_dn17")
+            vals17[variation+ptstring + " STC"] = h.GetBinContent(cat,3)
+            vals17[variation+ptstring + " ST"] = h.GetBinContent(cat,2)
+            vals17[variation+ptstring + " FS"] = h.GetBinContent(cat,1)
+            errs17[variation+ptstring + " STC"] = h.GetBinError(cat,3)
+            errs17[variation+ptstring + " ST"] = h.GetBinError(cat,2)
+            errs17[variation+ptstring + " FS"] = (h_up.GetBinError(cat,1), h_dn.GetBinError(cat,1))
+            
+            h = d16.Get(hname).Clone(data_string+hname+"16")
+            h_up = d16.Get(hname+"_up").Clone(data_string+hname+"_up16")
+            h_dn = d16.Get(hname+"_dn").Clone(data_string+hname+"_dn16")
             vals16[variation+ptstring + " STC"] = h.GetBinContent(cat,3)
             vals16[variation+ptstring + " ST"] = h.GetBinContent(cat,2)
             vals16[variation+ptstring + " FS"] = h.GetBinContent(cat,1)
@@ -270,15 +298,21 @@ def getFshortMerged(region,data):
             
 
         hnamesyst = "h_fs"+fileregion+"_Baseline"+ptstring+"_syst"
-        h = d1718.Get(hnamesyst)
+        h = d1718.Get(hnamesyst).Clone(data_string+hnamesyst+"_1718")
         systs1718["Baseline"+ptstring] = h.GetBinContent(cat)
-        h = d16.Get(hnamesyst)
+        h = d18.Get(hnamesyst).Clone(data_string+hnamesyst+"_18")
+        systs18["Baseline"+ptstring] = h.GetBinContent(cat)
+        h = d17.Get(hnamesyst).Clone(data_string+hnamesyst+"_17")
+        systs17["Baseline"+ptstring] = h.GetBinContent(cat)
+        h = d16.Get(hnamesyst).Clone(data_string+hnamesyst+"_16")
         systs16["Baseline"+ptstring] = h.GetBinContent(cat)
 
     d1718.Close()
+    d18.Close()
+    d17.Close()
     d16.Close()
 
-    return vals1718,errs1718,vals16,errs16,systs1718,systs16
+    return vals1718,errs1718,systs1718,vals18,errs18,systs18,vals17,errs17,systs17,vals16,errs16,systs16
 
 writeabletag = { "Baseline" : "Baseline",
                  "HT250"   : "$250 < H_{T} < 450$ GeV",
@@ -361,7 +395,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     title = title.replace("PN_{Jet}>3","P4")
     hist=ROOT.TH1D(region+ptstring,title + " Kinematical Variations;;f_{short}",nvariations,0,nvariations)            
     hist.SetLineWidth(3)
-    hdef=hist.Clone(region+ptstring+"_Baseline")
+    hdef=hist.Clone(desc+region+ptstring+"_Baseline")
     variation_index = 1
     var_errs = []
     def_errs = []
@@ -387,7 +421,12 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     gdef = getPoissonGraph(hdef, def_errs)
     gvar = getPoissonGraph(hist, var_errs)
     syst_errs = [sqrt(systs["Baseline"+ptstring]**2+errs["Baseline"+ptstring+" FS"][i]**2) for i in [0,1]]
-    if verbose: print syst_errs
+#    if verbose: print syst_errs
+    if region+ptstring == "P4_VR_4_lowpt": 
+        print hsyst.GetName()
+        print desc
+        print syst_errs
+        print errs["Baseline"+ptstring+" FS"]
     gsyst = getPoissonGraph( hsyst, [syst_errs for i in range(len(def_errs))] )
     tl.AddEntry(hist,"Variations")
     tl.AddEntry(hdef,"Baseline, Stat Error Only")
@@ -400,7 +439,8 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     hist.Draw("same")
     hsyst.Draw("AXIS same")
     tl.Draw()
-    simplecanvas.SaveAs("fshort_plots/{}.{}".format(hist.GetName()+"_"+desc,format))
+    os.system("mkdir -p fshort_variations/{}".format(desc))
+    simplecanvas.SaveAs("fshort_variations/{}/{}.{}".format(desc,hist.GetName(),format))
 
 tablevariations = [variation + ptstring for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"] for ptstring in ["","_lowpt","_hipt"]]
 plotvariations = list(tablevariations)
@@ -414,37 +454,31 @@ plotvariations_hipt = ["HT250_hipt","HT450_hipt","HT450MET100_hipt","MET30_hipt"
 for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4"]:
     print region
 
-    if not merge2017and2018:
-        D18,eD18,D17,eD17,D16,eD16=getFshort(region,True)
-    else:
-        D1718,eD1718,D16,eD16,sD1718,sD16=getFshortMerged(region,True)
+    D1718,eD1718,sD1718,D18,eD18,sD18,D17,eD17,sD17,D16,eD16,sD16=getFshortMerged(region,True)
 
-    M1718,eM1718,M16,eM16,sM1718,sM16=getFshortMerged(region,False)
+    M1718,eM1718,sM1718,M18,eM18,sM18,M17,eM17,sM17,M16,eM16,sM16=getFshortMerged(region,False)
 
-    if not merge2017and2018:
-#        makePlot(region,plotvariations,D18,eD18,"2018_DATA")
-#        makePlot(region,plotvariations,D17,eD17,"2017_DATA")
-#        makePlot(region,plotvariations_nopt,D18,eD18,"2018_DATA_NoPtSplit")
-#        makePlot(region,plotvariations_nopt,D17,eD17,"2017_DATA_NoPtSplit")
-        makePlot(region,plotvariations_lowpt,D18,eD18,sD18,"2018_DATA_lowpt","_lowpt")
-        makePlot(region,plotvariations_hipt,D17,eD17,sD17,"2017_DATA_hipt","_hipt")
-    else:
-#        makePlot(region,plotvariations,D1718,eD1718,sD1718,"2017-18_DATA")
-        makePlot(region,plotvariations_lowpt,D1718,eD1718,sD1718,"2017-2018_DATA_lowpt","_lowpt")
-        makePlot(region,plotvariations_hipt,D1718,eD1718,sD1718,"2017-2018_DATA_hipt","_hipt")
-#    makePlot(region,plotvariations,D16,eD16,sD16,"2016_DATA")
+    makePlot(region,plotvariations_lowpt,D1718,eD1718,sD1718,"2017-2018_DATA_lowpt","_lowpt")
+    makePlot(region,plotvariations_lowpt,D18,eD18,sD18,"2018_DATA_lowpt","_lowpt")
+    makePlot(region,plotvariations_lowpt,D17,eD17,sD17,"2017_DATA_lowpt","_lowpt")
     makePlot(region,plotvariations_lowpt,D16,eD16,sD16,"2016_DATA_lowpt","_lowpt")
+
+    makePlot(region,plotvariations_hipt,D1718,eD1718,sD1718,"2017-2018_DATA_hipt","_hipt")
+    makePlot(region,plotvariations_hipt,D18,eD18,sD18,"2018_DATA_hipt","_hipt")
+    makePlot(region,plotvariations_hipt,D17,eD17,sD17,"2017_DATA_hipt","_hipt")
     makePlot(region,plotvariations_hipt,D16,eD16,sD16,"2016_DATA_hipt","_hipt")
 
 
-#    makePlot(region,plotvariations,M1718,eM1718,sM1718,"2017_MC")
-#    makePlot(region,plotvariations,M16,eM16,sM16,"2016_MC")
-#    makePlot(region,plotvariations_nopt,M1718,eM1718,sM1718,"2017_MC_NoPtSplit")
-#    makePlot(region,plotvariations_nopt,M16,eM16,sM16,"2016_MC_NoPtSplit")
-    makePlot(region,plotvariations_lowpt,M16,eM16,sM16,"2016_MC_lowpt","_lowpt")
+
     makePlot(region,plotvariations_lowpt,M1718,eM1718,sM1718,"2017_MC_lowpt","_lowpt")
-    makePlot(region,plotvariations_hipt,M16,eM16,sM16,"2016_MC_hipt","_hipt")
+    makePlot(region,plotvariations_lowpt,M18,eM18,sM18,"2018_MC_lowpt","_lowpt")
+    makePlot(region,plotvariations_lowpt,M17,eM17,sM17,"2017_MC_lowpt","_lowpt")
+    makePlot(region,plotvariations_lowpt,M16,eM16,sM16,"2016_MC_lowpt","_lowpt")
+
     makePlot(region,plotvariations_hipt,M1718,eM1718,sM1718,"2017_MC_hipt","_hipt")
+    makePlot(region,plotvariations_hipt,M18,eM18,sM18,"2018_MC_hipt","_hipt")
+    makePlot(region,plotvariations_hipt,M17,eM17,sM17,"2017_MC_hipt","_hipt")
+    makePlot(region,plotvariations_hipt,M16,eM16,sM16,"2016_MC_hipt","_hipt")
 
     if not printTables: continue
 

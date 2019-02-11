@@ -22,7 +22,7 @@ const bool applyDileptonTriggerWeights = true;
 
 const bool blind = false;
 
-const bool skipHighWeights = true; // turn on to skip MC events with weight > 1, to keep errors reasonable
+const bool skipHighWeights = false; // turn on to skip MC events with weight > 1, to keep errors reasonable
 
 const bool fillCutHists = true; // turn on to fill extra histograms
 const bool fillUnimportantCutHists = false; // turn on to fill Nvertex, Eta, Ntag, DphiMet, and HitSignature histograms
@@ -125,6 +125,18 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       }
     }
   }
+  unordered_map<string,TH2D*> fsHistsMono;
+  string jetpt[] = {"SR","VR","MR","pt60","pt100","pt200"};
+  string trackpt[] = {"","_hipt","_lowpt"};
+  for (int jetptbin = 0; jetptbin < 6; jetptbin++) {
+    string jpt = jetpt[jetptbin];
+    for (int trackptbin = 0; trackptbin < 3; trackptbin++) {
+      string hname = "h_fsMono_"+jpt+trackpt[trackptbin];
+      cout << hname << endl;
+      fsHistsMono[hname] = (TH2D*) h_fsMR_Base->Clone(hname.c_str());
+    }
+  }
+
   std::unordered_map<TH2D*, TH1D*> max_stc_weights;
   std::unordered_map<TH2D*, TH1D*> max_st_weights;
   for (std::unordered_map<string,TH2D*>::iterator fshist = fsHists.begin(); fshist != fsHists.end(); fshist++) {
@@ -139,6 +151,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   cout << "Booked fs hists" << endl;
 
   // Signal efficiency
+  TH1D* h_sigpassST = new TH1D("h_sigpass","Signal Tracks Passing Selections vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
+  TH1D* h_sigpassSTC = new TH1D("h_sigpassSTC","Signal Tracks Passing Selections vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
   TH1D* h_sigeffST = new TH1D("h_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
   TH1D* h_sigeffSTC = new TH1D("h_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
   TH1D* h_CharLength = new TH1D("h_CharLength","Chargino Track Length",10,0,100);
@@ -658,6 +672,10 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
     // Main Looper
 
+    for (int i_chargino = 0; i_chargino < t.nCharginos; i_chargino++) {
+      h_CharLength->Fill( t.chargino_decayXY[i_chargino], weight );
+    }
+
     const int ntracks = t.ntracks;
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
       bool PassesFullIsoSel = false; bool PassesFullIsoSelSTC = false;
@@ -679,9 +697,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  }
 	}
       }
-      if (isChargino) {
-	h_CharLength->Fill( t.track_decayXY[i_trk], weight );
-      }
+    
       string ptstring = t.track_pt[i_trk] < 50 ? "_lowpt" : "_hipt";
       bool isST = false, isSTC = false;//, isST1 = false, isSTC1 = false;
       if (recalculate) {
@@ -838,10 +854,10 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
       if (isChargino) {
 	if (isST) {
-	  h_sigeffST->Fill( t.track_decayXY[i_trk], weight);
+	  h_sigpassST->Fill( t.chargino_decayXY[t.track_matchedCharginoIdx[i_trk]], weight);
 	}
 	else if (isSTC) {
-	  h_sigeffSTC->Fill( t.track_decayXY[i_trk], weight);
+	  h_sigpassSTC->Fill( t.chargino_decayXY[t.track_matchedCharginoIdx[i_trk]], weight);
 	}
       }
 
@@ -1088,9 +1104,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     
   // Post-processing
 
-  // Chargino efficiency division
-  h_sigeffST->Divide(h_CharLength);
-  h_sigeffSTC->Divide(h_CharLength);
+  // Chargino efficiency division, need the complex divide to get binomial errors
+  h_sigeffST->Divide(h_sigpassST,h_CharLength,1,1,"B");
+  h_sigeffSTC->Divide(h_sigpassSTC,h_CharLength,1,1,"B");
 
   // Calculate Fshort for this particular sample
   for (unordered_map<string,TH2D*>::iterator hist = fsHists.begin(); hist != fsHists.end(); hist++) {
@@ -1142,6 +1158,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
   h_sigeffST->Write();
   h_sigeffSTC->Write();
+  h_sigpassST->Write();
+  h_sigpassSTC->Write();
   h_CharLength->Write();
 
   outfile_.Close();

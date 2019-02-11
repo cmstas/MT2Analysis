@@ -163,8 +163,8 @@ def makeTemplate(year,region,length):
         template_list.append("name_syst_sig      lnN   sig_syst    -\n")
     else:
         template_list.append("sig_pu                    lnN    1.046   -\n") # fully correlated across all bins, and years
-        template_list.append("sig_jec_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == 2016 else 1+sqrt(2)*0.05)) # correlated across bins, but not years
-        template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == 2016 else 1+sqrt(2)*0.05)) # correlated across bins, but not years
+        template_list.append("sig_jec_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == "2016" else 1+sqrt(2)*0.05)) # correlated across bins, but not years
+        template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == "2016" else 1+sqrt(2)*0.05)) # correlated across bins, but not years
         template_list.append("sig_gen_{}                  lnN    genmet_sig   -\n".format(year)) # correlated across bins, but not years
         template_list.append("sig_isr_{}                  lnN    isr_sig   -\n".format(year)) # sig_isr is fully correlated across all bins, but not years
 
@@ -245,7 +245,7 @@ def makeCard(year,region,template,signal,outdir,length,im1=-1,im2=-1):
 
     # Replace signal placeholders in template with actual values.
 
-    if n_sig == 0: return False
+    if n_sig == 0 and suppressZeroBins: return False
 
     to_print = to_print.replace("n_sig","{:.3f}".format(n_sig))
     if (doDummySignalSyst):
