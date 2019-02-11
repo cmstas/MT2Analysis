@@ -28,6 +28,7 @@ MT2Config_defs["data_2017_31Mar2018"] = {
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-09_2017fullYear",
     "JECs" : [ ["2017B", "Fall17_17Nov2017B_V32_DATA"],
                ["2017C", "Fall17_17Nov2017C_V32_DATA"],
                ["2017D", "Fall17_17Nov2017DE_V32_DATA"],
@@ -111,6 +112,7 @@ MT2Config_defs["data_2017_Prompt"] = {
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-09_2017fullYear",
     "JECs" : [ ["", "Summer16_23Sep2016HV4_DATA"] 
                ],
     "filters" : [ "eeBadScFilter",
@@ -127,7 +129,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
-    "lumi" : 58.83,
+    "lumi" : 59.97,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -135,6 +137,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-09_2018fullYear",
     "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
@@ -145,15 +148,16 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
-    "lumi" : 58.83,
+    "lumi" : 59.97,
     "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
     "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
-    "jet_id" : "2017_v1",
+    "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
-    "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
+    "rphi_tag" : "V00-10-09_2018fullYear",
+    "JECs" : [ ["", "Autumn18_V1_DATAdummy"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
@@ -171,6 +175,7 @@ MT2Config_defs["data_2016_Moriond17"] = {
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-10_2016fullYear",
     "JECs" : [ ["2016B", "Summer16_23Sep2016BCDV4_DATA"],
                ["2016C", "Summer16_23Sep2016BCDV4_DATA"],
                ["2016D", "Summer16_23Sep2016BCDV4_DATA"],
@@ -284,6 +289,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "ea_version" : 3,
     "jet_id" : "2017_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-09_2017fullYear",
     "JECs" : [ ["", "Fall17_17Nov2017_V32_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
@@ -297,15 +303,45 @@ MT2Config_defs["mc_94x_Fall17"] = {
                   ],
 }
 
-MT2Config_defs["mc_102x_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
-MT2Config_defs["mc_102x_Autumn18"]["year"] = 2018
-MT2Config_defs["mc_102x_Autumn18"]["cmssw_ver"] = 102
-MT2Config_defs["mc_102x_Autumn18"]["lumi"] = 58.83
-MT2Config_defs["mc_102x_Autumn18"]["btageff_file"] = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root"
-MT2Config_defs["mc_102x_Autumn18"]["btag_med_threshold_DeepCSV"] = 0.4184
-MT2Config_defs["mc_102x_Autumn18"]["pu_weights_file"] = "puWeight2018.root"
-MT2Config_defs["mc_102x_Autumn18"]["JRT_file"] = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root"
-MT2Config_defs["mc_102x_Autumn18"]["dilep_trigeff_file"] = "lepsf/trigeff/trigeff_dilep_2018fullYear.root"
+MT2Config_defs["mc_102x_Autumn18"] = {
+    "year" : 2018,
+    "cmssw_ver" : 102,
+    "lumi" : 59.97,
+    "btagcalib_csv" : "DeepCSV_94XSF_V3_B_F.csv",
+    "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
+    "btag_med_threshold_DeepCSV" : 0.4184,
+    "btag_med_threshold_CSVv2" : 0.8838,
+    "pu_weights_file" : "puWeight2018.root",
+    "elSF_IDISOfile" : "lepsf/Fall17/ElectronScaleFactors_Run2017.root",
+    "elSF_TRKfile" : "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
+    "elSF_IDhistName" : "Run2017_CutBasedVetoNoIso94XV2",
+    "elSF_ISOhistName" : "Run2017_MVAVLooseTightIP2DMini",
+    "muSF_IDfile" : "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root",
+    "muSF_ISOfile" : "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root",
+    "muSF_IPfile" : "",
+    "muSF_TRKfile" : "",
+    "muSF_IDhistName": "NUM_LooseID_DEN_genTracks_pt_abseta",
+    "muSF_ISOhistName" : "TnP_MC_NUM_MiniIso02Cut_DEN_LooseID_PAR_pt_eta",
+    "muSF_IPhistName" : "",
+    "muSF_TRKLT10histName" : "",
+    "muSF_TRKGT10histName" : "",
+    "dilep_trigeff_file" : "lepsf/trigeff/trigeff_dilep_2018fullYear.root",
+    "ea_version" : 3,
+    "jet_id" : "2018_v1",
+    "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-09_2018fullYear",
+    "JECs" : [ ["", "Autumn18_V1_MC"]
+               ],
+    "filters" : [ "globalSuperTightHalo2016Filter",
+                  "goodVertices",
+                  "HBHENoiseFilter",
+                  "HBHENoiseIsoFilter",
+                  "EcalDeadCellTriggerPrimitiveFilter",
+                  "ecalBadCalibFilterUpdate",
+                  "badMuonFilter",
+                  "badChargedCandidateFilter"
+                  ],
+}
 
 
 MT2Config_defs["mc_80x_Summer16"] = {
@@ -334,6 +370,7 @@ MT2Config_defs["mc_80x_Summer16"] = {
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-10_2016fullYear",
     "JECs" : [ ["", "Summer16_23Sep2016V4_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
@@ -372,6 +409,7 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "ea_version" : 1,
     "jet_id" : "50nsV1",
     "JRT_file" : "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root",
+    "rphi_tag" : "V00-10-10_2016fullYear",
     "JECs" : [ ["", "Summer16_07Aug2017_V11_MC"]
                ],
     "filters" : [ "eeBadScFilter",
@@ -394,6 +432,17 @@ MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     "EcalDeadCellTriggerPrimitiveFilter",
     "badMuonFilterV2",
     "badChargedHadronFilterV2"
+    ]
+
+MT2Config_defs["mc_94x_fastsim_Summer16"] = copy.deepcopy(MT2Config_defs["mc_94x_Summer16"])
+MT2Config_defs["mc_94x_fastsim_Summer16"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
+MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
+    "goodVertices",
+    "HBHENoiseFilter",
+    "HBHENoiseIsoFilter",
+    "EcalDeadCellTriggerPrimitiveFilter",
+    "badMuonFilter",
+    "badChargedCandidateFilter"
     ]
 
 MT2Config_defs["mc_94x_fastsim_Fall17"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
@@ -544,6 +593,7 @@ MT2Configuration GetMT2Config(std::string tag){
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
         fout.write("        c.jet_id             = \"{0}\";\n".format(c[tag]["jet_id"]))
         fout.write("        c.JRT_file           = \"{0}\";\n".format(c[tag]["JRT_file"]))
+        fout.write("        c.rphi_tag           = \"{0}\";\n".format(c[tag]["rphi_tag"]))
         for jec in c[tag]["JECs"]:
             fout.write("        c.JECs.push_back(std::pair<std::string, std::string> (\"{0}\", \"{1}\"));\n".format(jec[0], jec[1]))
         for filter in c[tag]["filters"]:            

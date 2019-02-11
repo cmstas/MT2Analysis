@@ -69,6 +69,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-10_2016fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_07Aug2017BCD_V11_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_07Aug2017BCD_V11_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_07Aug2017BCD_V11_DATA"));
@@ -134,6 +135,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-10_2016fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("2016B", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016C", "Summer16_23Sep2016BCDV4_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2016D", "Summer16_23Sep2016BCDV4_DATA"));
@@ -199,6 +201,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-09_2017fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("2017B", "Fall17_17Nov2017B_V32_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017C", "Fall17_17Nov2017C_V32_DATA"));
         c.JECs.push_back(std::pair<std::string, std::string> ("2017D", "Fall17_17Nov2017DE_V32_DATA"));
@@ -270,6 +273,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-09_2017fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016HV4_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -326,15 +330,16 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2018;
         c.cmssw_ver          = 102;
         c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-        c.lumi               = 58.83;
+        c.lumi               = 59.97;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root";
         c.btag_med_threshold_DeepCSV = 0.4184;
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.ea_version         = 3;
-        c.jet_id             = "2017_v1";
+        c.jet_id             = "2018_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
+        c.rphi_tag           = "V00-10-09_2018fullYear";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V1_DATAdummy"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -393,7 +398,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2018;
         c.cmssw_ver          = 102;
         c.json               = "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-        c.lumi               = 58.83;
+        c.lumi               = 59.97;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root";
         c.btag_med_threshold_DeepCSV = 0.4184;
@@ -401,6 +406,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-09_2018fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017C_V32_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -459,7 +465,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2018;
         c.cmssw_ver          = 102;
-        c.lumi               = 58.83;
+        c.lumi               = 59.97;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root";
         c.btag_med_threshold_DeepCSV = 0.4184;
@@ -480,9 +486,10 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_TRKGT10histName = "";
         c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2018fullYear.root";
         c.ea_version         = 3;
-        c.jet_id             = "2017_v1";
+        c.jet_id             = "2018_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
+        c.rphi_tag           = "V00-10-09_2018fullYear";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V1_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
@@ -519,6 +526,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-10_2016fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_23Sep2016V4_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -555,6 +563,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-10_2016fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
@@ -590,6 +599,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-09_2017fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -627,6 +637,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 1;
         c.jet_id             = "50nsV1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-10_2016fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Summer16_07Aug2017_V11_MC"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
@@ -664,6 +675,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.ea_version         = 3;
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-09_2017fullYear";
         c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
@@ -672,6 +684,42 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
+
+    }else if(tag == "mc_94x_fastsim_Summer16"){
+
+        c.year               = 2016;
+        c.cmssw_ver          = 94;
+        c.lumi               = 35.922;
+        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
+        c.btag_med_threshold_DeepCSV = 0.6321;
+        c.btag_med_threshold_CSVv2   = 0.8484;
+        c.pu_weights_file    = "puWeight2016.root";
+        c.elSF_IDISOfile     = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
+        c.elSF_TRKfile       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSF_IDhistName    = "GsfElectronToCutBasedSpring15V";
+        c.elSF_ISOhistName   = "MVAVLooseElectronToMini";
+        c.muSF_IDfile        = "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root";
+        c.muSF_ISOfile       = "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root";
+        c.muSF_IPfile        = "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root";
+        c.muSF_TRKfile       = "lepsf/moriond17/Tracking_EfficienciesAndSF_BCDEFGH_hists.root";
+        c.muSF_IDhistName    = "SF";
+        c.muSF_ISOhistName   = "SF";
+        c.muSF_IPhistName    = "SF";
+        c.muSF_TRKLT10histName = "ratio_eff_eta3_tk0_dr030e030_corr";
+        c.muSF_TRKGT10histName = "ratio_eff_eta3_dr030e030_corr";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2016fullYear.root";
+        c.ea_version         = 1;
+        c.jet_id             = "50nsV1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_80x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-10_2016fullYear";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
 
     }else{
         std::cout << "[MT2Configuration] ERROR! invalid tag \""+tag+"\"" << std::endl;
