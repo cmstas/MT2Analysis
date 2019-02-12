@@ -17,6 +17,7 @@ doSuperSignalRegions = False
 subtractSignalContam = True
 suppressZeroBins = False
 suppressZeroTRs = True
+savePickle = False
 
 sig_PUsyst = 1.046
 
@@ -39,12 +40,13 @@ if "80x" in TAG:
     sig_scale[17] = 41.53 / 35.92
     sig_scale[18] = 59.97 / 35.92
 else:
-    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-10_2016fullYear_v2/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-10_2017fullYear_v2/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-11_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-11_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-11_2018fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     sig_scale[16] = 1.0
     sig_scale[17] = 1.0
-    sig_scale[18] = 59.97 / 41.53
+    # sig_scale[18] = 59.97 / 41.53
+    sig_scale[18] = 1.0
 
 years = [16, 17, 18]
 
@@ -128,7 +130,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
             totTR += h_sig[y].Integral(1,-1)
     if (suppressZeroTRs or suppressZeroBins) and totTR < 0.001:
         if verbose: print "Looks like total TR signal is zero for all years, directory {0}. Skipping".format(dirname)
-        return False
+        return None
 
     # loop over years and get histogram contents. Skip if no histo for any year
     n_sig = {}
@@ -165,7 +167,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
 
     if suppressZeroBins and totsig < 0.001:
         if verbose: print "No signal found for {0} point {1},{2}, dir {3}, imt2 {4}. Skipping".format(signame, im1, im2, dirname, imt2)
-        return False
+        return None
 
 
     # do reco/gen averaging
@@ -194,7 +196,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
             n_aux_cor[an][y] = n_aux[an][y]
             n_aux_crsl[an][y] = 0.0
 
-        if subtractSignalContam and isSignalWithLeptons:
+        if subtractSignalContam and isSignalWithLeptons and h_sig[y]:
             if h_crsl_sig[y]:
                 if imt2 >= dc.info["lostlep_lastbin_hybrid"]:
                     n_sig_crsl[y] = h_crsl_sig[y].Integral(dc.info["lostlep_lastbin_hybrid"], -1)
@@ -225,7 +227,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
 
     if suppressZeroBins and totsig < 0.001:
         if verbose: print "Skipping {0}, imt2 {1} for point {2},{3} due to 0 signal after sig contam subtraction.".format(dirname, imt2, im1, im2)
-        return False
+        return None
 
     for y in years:
         dc.SetSignalRate(n_sig_cor_recogenaverage[y], y)
@@ -306,19 +308,23 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
         outname = os.path.join(output_dir, "datacard_"+name+".txt")
         dc.Write(outname, sortkey=customNuisanceSort)
 
-    return True
+    return dc
 
 
 
 templates = pickle.load(open(os.path.join(outdir, "templates", "template_datacards.pkl"), 'rb'))
+datacards = {}
+full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
 
 allfalse = True
-for dc in templates.values():
-    full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
+for name,dc in templates.items():
 
     result = printFullCard(dc, M1, M2, full_outdir, isScan=isScan)
-    if result:
+    if result is not None:
         allfalse = False
+        datacards[name] = result
 
+if not allfalse and savePickle:
+    pickle.dump(datacards, open(os.path.join(full_outdir, "signal_datacards.pkl"), 'wb'))
 
 exit(allfalse)

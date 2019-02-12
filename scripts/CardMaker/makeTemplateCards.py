@@ -7,7 +7,7 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "FullRunII_17MCfor18_ttbbWeights_80x_fastsim"
+TAG = "FullRunII_17MCfor18_ttbbWeights_v3"
 
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
@@ -35,6 +35,7 @@ f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWei
 f_data = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/data_RunAll.root")
 
 years = [16, 17, 18]
+# years = [18]
 
 outdir = "cards_"+TAG
 os.system("mkdir -p "+outdir)
@@ -116,12 +117,12 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
     # Get kinematic limits in SL control region (ht doesn't change)
     
-    h_njets_LOW = f_lostlep[16].Get(dirname+"/h_njets_LOW")
-    h_njets_HI = f_lostlep[16].Get(dirname+"/h_njets_HI")
-    h_nbjets_LOW = f_lostlep[16].Get(dirname+"/h_nbjets_LOW")
-    h_nbjets_HI = f_lostlep[16].Get(dirname+"/h_nbjets_HI")
-    h_lastbin_hybrid = f_lostlep[16].Get(dirname+"/h_lastbinHybrid")
-    h_lastmt2_hybrid = f_lostlep[16].Get(dirname+"/h_lastmt2Hybrid")
+    h_njets_LOW = f_lostlep[years[0]].Get(dirname+"/h_njets_LOW")
+    h_njets_HI = f_lostlep[years[0]].Get(dirname+"/h_njets_HI")
+    h_nbjets_LOW = f_lostlep[years[0]].Get(dirname+"/h_nbjets_LOW")
+    h_nbjets_HI = f_lostlep[years[0]].Get(dirname+"/h_nbjets_HI")
+    h_lastbin_hybrid = f_lostlep[years[0]].Get(dirname+"/h_lastbinHybrid")
+    h_lastmt2_hybrid = f_lostlep[years[0]].Get(dirname+"/h_lastmt2Hybrid")
 
     crsl_njets_LOW = int(h_njets_LOW.GetBinContent(1))
     crsl_njets_HI = int(h_njets_HI.GetBinContent(1))
@@ -144,12 +145,12 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
     # Get kinematic limits in DY control region (ht doesn't change)
 
-    h_njets_LOW = f_zinvDY[16].Get(dirname+"/h_njets_LOW")
-    h_njets_HI = f_zinvDY[16].Get(dirname+"/h_njets_HI")
-    h_nbjets_LOW = f_zinvDY[16].Get(dirname+"/h_nbjets_LOW")
-    h_nbjets_HI = f_zinvDY[16].Get(dirname+"/h_nbjets_HI")
-    h_lastbin_hybrid = f_zinvDY[16].Get(dirname+"/h_lastbinHybrid")
-    h_lastmt2_hybrid = f_zinvDY[16].Get(dirname+"/h_lastmt2Hybrid")
+    h_njets_LOW = f_zinvDY[years[0]].Get(dirname+"/h_njets_LOW")
+    h_njets_HI = f_zinvDY[years[0]].Get(dirname+"/h_njets_HI")
+    h_nbjets_LOW = f_zinvDY[years[0]].Get(dirname+"/h_nbjets_LOW")
+    h_nbjets_HI = f_zinvDY[years[0]].Get(dirname+"/h_nbjets_HI")
+    h_lastbin_hybrid = f_zinvDY[years[0]].Get(dirname+"/h_lastbinHybrid")
+    h_lastmt2_hybrid = f_zinvDY[years[0]].Get(dirname+"/h_lastmt2Hybrid")
 
     crdy_njets_LOW = int(h_njets_LOW.GetBinContent(1))
     crdy_njets_HI = int(h_njets_HI.GetBinContent(1))
@@ -178,7 +179,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
 
 
-    dc = Datacard(name, 3, ["zinv", "llep", "qcd"], years=[16,17,18], split_bkg_by_year=True, split_sig_by_year=True)
+    dc = Datacard(name, 3, ["zinv", "llep", "qcd"], years=years, split_bkg_by_year=True, split_sig_by_year=True)
     # use this later in signal part
     dc.info["dirname"] = dirname
     dc.info["imt2"] = imt2
@@ -232,10 +233,10 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         dc.SetObservation(h_data_mt2bins.GetBinContent(imt2))
 
     # do the gmN CR stat nuisances (combined CR so not separated by year)
-    n_llep_CR = int(f_lostlep[16].Get(dirname+"/h_mt2binsCRyieldDatacard").GetBinContent(imt2))
-    n_llep_MCCR = float(f_lostlep[16].Get(dirname+"/h_lostlepMC_cr").GetBinContent(imt2))
+    n_llep_CR = int(f_lostlep[years[0]].Get(dirname+"/h_mt2binsCRyieldDatacard").GetBinContent(imt2))
+    n_llep_MCCR = float(f_lostlep[years[0]].Get(dirname+"/h_lostlepMC_cr").GetBinContent(imt2))
     if imt2 >= crsl_lastbin_hybrid:
-        n_llep_MCCR = float(f_lostlep[16].Get(dirname+"/h_lostlepMC_cr").Integral(crsl_lastbin_hybrid, -1))
+        n_llep_MCCR = float(f_lostlep[years[0]].Get(dirname+"/h_lostlepMC_cr").Integral(crsl_lastbin_hybrid, -1))
     llep_zero_alpha = {}
     dc.info["lostlep_alpha"] = {}
     for y in years:
@@ -285,12 +286,12 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
             print "WARNING: llep alpha is very large ({0}) for directory {1}, imt2 {2}".format(alpha, dirname, imt2)
 
 
-    n_zinv_CR = int(f_zinvDY[16].Get(dirname+"/CRyieldCard").GetBinContent(imt2))
-    h_zinv_CRyieldEM = f_zinvDY[16].Get(dirname+"/CRyieldEMCard")
+    n_zinv_CR = int(f_zinvDY[years[0]].Get(dirname+"/CRyieldCard").GetBinContent(imt2))
+    h_zinv_CRyieldEM = f_zinvDY[years[0]].Get(dirname+"/CRyieldEMCard")
     n_zinv_CROF = int(h_zinv_CRyieldEM.GetBinContent(imt2)) if h_zinv_CRyieldEM else 0
-    n_zinv_MCCR = float(f_zinvDY[16].Get(dirname+"/h_mt2binsMCCR").GetBinContent(imt2))
+    n_zinv_MCCR = float(f_zinvDY[years[0]].Get(dirname+"/h_mt2binsMCCR").GetBinContent(imt2))
     if imt2 >= crdy_lastbin_hybrid:
-        n_zinv_MCCR = float(f_zinvDY[16].Get(dirname+"/h_mt2binsMCCR").Integral(crdy_lastbin_hybrid, -1))
+        n_zinv_MCCR = float(f_zinvDY[years[0]].Get(dirname+"/h_mt2binsMCCR").Integral(crdy_lastbin_hybrid, -1))
     zinv_zero_alpha = {}
     for y in years:
         alpha = h_zinv_purity[y].GetBinContent(imt2) * h_zinv_ratio[y].GetBinContent(imt2)
@@ -361,9 +362,12 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         dc.AddNuisance(nuis_name, nuis_type, split_by_year=split_by_year)
 
         if nuis == "lumi_syst":
-            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_16, 16)
-            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_17, 17)
-            dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_18, 18)
+            if 16 in years:
+                dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_16, 16)
+            if 17 in years:
+                dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_17, 17)
+            if 18 in years:
+                dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_18, 18)
 
         if nuis == "jec":
             llep_val = 1.02
@@ -527,42 +531,42 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
         if nuis == "qcd_JERvar":
             for y in years:
                 err_qcd = 1.0
-                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0 and h_qcd_mt2bins[y].GetBinContent(imt2)>0.001:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_JERvar").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_RSstat":
             for y in years:
                 err_qcd = 1.0
-                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0 and h_qcd_mt2bins[y].GetBinContent(imt2)>0.001:
                     err_qcd = 1.0 + h_qcd_mt2bins[y].GetBinError(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_TailVar":
             for y in years:
                 err_qcd = 1.0
-                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0 and h_qcd_mt2bins[y].GetBinContent(imt2)>0.001:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_TailVar").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_SigmaSoftVar":
             for y in years:
                 err_qcd = 1.0
-                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0 and h_qcd_mt2bins[y].GetBinContent(imt2)>0.001:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_SigmaSoftVar").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_NJetShape":
             for y in years:
                 err_qcd = 1.0
-                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0 and h_qcd_mt2bins[y].GetBinContent(imt2)>0.001:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_NJetShape").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
         if nuis == "qcd_NBJetShape":
             for y in years:
                 err_qcd = 1.0
-                if not no_qcd_hist[y] and n_qcd[y] > 0.0:
+                if not no_qcd_hist[y] and n_qcd[y] > 0.0 and h_qcd_mt2bins[y].GetBinContent(imt2)>0.001:
                     err_qcd = f_qcd[y].Get(dirname+"/h_mt2bins_NBJetShape").GetBinContent(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
@@ -581,7 +585,7 @@ os.system("mkdir -p "+template_dir)
 
 template_datacards = {}
 signal_points = set()
-iterator = f_lostlep[16].GetListOfKeys()
+iterator = f_lostlep[years[0]].GetListOfKeys()
 keep = "sr"
 skip = "srbase"
 for key in iterator:
@@ -599,10 +603,10 @@ for key in iterator:
         continue
 
     # print dirname
-    # if dirname != "sr25UH":
+    # if dirname != "sr1J":
     #     continue
 
-    h_mt2bins = f_lostlep[16].Get(dirname+"/h_mt2bins")
+    h_mt2bins = f_lostlep[years[0]].Get(dirname+"/h_mt2bins")
     for imt2 in range(1, h_mt2bins.GetNbinsX()+1):
         if suppressFirstUHmt2bin and "UH" in dirname and imt2==1:
             continue

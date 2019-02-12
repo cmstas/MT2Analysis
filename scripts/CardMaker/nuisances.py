@@ -23,7 +23,7 @@ nuisances = {
     "sig_gensyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
-        "type" : "lnU",
+        "type" : "lnN",
         },
     "sig_IsrSyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,

@@ -70,6 +70,32 @@ class Datacard:
     def GetObservation(self):
         return self.obs
 
+    def GetBackgroundRates(self, splitByYear=False):
+        yields = {}
+        if splitByYear:
+            for bkg in self.split_bkg_names:
+                yields[bkg] = self.bkg_rates[bkg]
+        else:
+            for bkg in self.bkg_names:
+                yields[bkg] = 0.0
+            for bkgsplit in self.split_bkg_names:
+                for bkg in self.bkg_names:
+                    if bkgsplit.startswith(bkg):
+                        yields[bkg] += self.bkg_rates[bkgsplit]
+
+        return yields
+
+    def GetSignalRate(self, splitByYear=False):
+        if splitByYear and not self.split_sig_by_year:
+            raise Exception("ERROR: this datacard doesn't have signal split by year!")
+        if splitByYear:
+            return self.sig_rate
+        else:
+            if self.split_sig_by_year:
+                return sum(self.sig_rate.values())
+            else:
+                return self.sig_rate
+
     def GetNuisanceNames(self):
         return self.nuisances.keys()
 
@@ -161,12 +187,12 @@ class Datacard:
             if self.nuisances[fullname].type not in  ["lnN","lnU"]:
                 raise Exception("ERROR: only lnN/lnU nuisances support 2-sided values!")
             if value[0]>2.0 or value[1]>2.0 or value[0]<0.3 or value[1]<0.3:
-                print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
+                print "WARNING: nuisance {0} has a large value {1} (year {2}). Card: {3}".format(fullname, value, year, self.name)
             if isnan(value[0]) or isinf(value[0]) or isnan(value[1]) or isinf(value[1]):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
         elif type(value)==float:
             if self.nuisances[fullname].type in ["lnN","lnU"] and (value > 2.0 or value < 0.3):
-                print "WARNING: nuisance {0} has a large value {1} (year {2})".format(fullname, value, year)
+                print "WARNING: nuisance {0} has a large value {1} (year {2}). Card: {3}".format(fullname, value, year, self.name)
             if isnan(value) or isinf(value):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
         else:
@@ -225,7 +251,7 @@ class Datacard:
         fid.write("observation {0}\n".format(self.obs))
         unc_up, unc_dn = self.GetTotalUncertainty()
         fid.write("# total prediction: {0:.3f} + {1:.3f} - {2:.3f}\n".format(sum(self.bkg_rates.values()), unc_up, unc_dn))
-        fid.write("# total signal: {0:.3f}\n".format(self.sig_rate if self.nsig==1 else sum(self.sig_rate.values())))
+        fid.write("# total signal: {0:.3f}\n".format(self.sig_rate if not self.split_sig_by_year else sum(self.sig_rate.values())))
         fid.write("------------\n")
         fid.write(ml("bin", colsizes[0]))
         fid.write(ml("", colsizes[1]))
