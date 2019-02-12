@@ -18,9 +18,9 @@ using namespace std;
 bool doHybridSimple = false; // hybrid estimate: uses CR MT2 binning until the (MC) integral is less than the threshold below
 bool doHybridInclusiveTemplate = true; // take kMT2 from inclusive templates
 float hybrid_nevent_threshold = 50.;
-float rSFOF = 1.15;
+float rSFOF = 1.07;
 float rSFOFerr = 0.15;
-bool verbose = true;
+bool verbose = false;
 
 int findLastMT2Hardcoded(TString srname){ 
 
@@ -467,10 +467,10 @@ void makeZinvFromGJets( TFile* fZinv , TFile* fGJet , TFile* fZll , vector<strin
     PreviousBinRatio->Write();
     ratio->Write();
     ratioInt->Write();
-    hZinvHT->Write();
-    hZinvHT2->Write();
-    hZinvNJ->Write();
-    hZinvNB->Write();
+    if(hZinvHT)  hZinvHT->Write();
+    if(hZinvHT2) hZinvHT2->Write();
+    if(hZinvNJ)  hZinvNJ->Write();
+    if(hZinvNB)  hZinvNB->Write();
     //    hZinvPT->Write();
   } // loop over signal regions
 
@@ -542,6 +542,13 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     TH1D* hDataEM   = (TH1D*) fData->Get(fullhistnameEM);    
     TH1D* hZinv = (TH1D*) fZinv->Get(fullhistname);    
     TH1D* hTop  = (TH1D*) fTop->Get(fullhistnameDY);    
+
+    TH1D* hDY_lepeff_UP   = (TH1D*) fDY->Get(fullhistnameDY+"_lepeff_UP");
+    TH1D* hDY_lepeff_DN   = (TH1D*) fDY->Get(fullhistnameDY+"_lepeff_DN");
+    TH1D* hDY_ZNJet_UP   = (TH1D*) fDY->Get(fullhistnameDY+"_ZNJet_UP");
+    TH1D* hDY_ZNJet_DN   = (TH1D*) fDY->Get(fullhistnameDY+"_ZNJet_DN");
+    TH1D* hZinv_ZNJet_UP   = (TH1D*) fZinv->Get(fullhistname+"_ZNJet_UP");
+    TH1D* hZinv_ZNJet_DN   = (TH1D*) fZinv->Get(fullhistname+"_ZNJet_DN");
     
     // If Zinv or DY histograms are not filled, just leave (shouldn't happen when running on full stat MC)
     if(!hDY || !hZinv || !hData){
@@ -591,6 +598,12 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       //Determine which inclusive template to use. If none works, this reverts to HybridSimple, taking template from its own TopoRegion 
       // Start from the Aggregate Regions (hardcoded, since they can partially overlap with the standard regions)
       if (srname == "20") inclusiveTemplateName = "crdy20/h_mt2bins";  // self (2j, HT1200)
+      else if (srname == "base") inclusiveTemplateName = "crdybase/h_mt2bins";
+      else if (srname == "baseVL") inclusiveTemplateName = "crdybaseVL/h_mt2bins";
+      else if (srname == "baseL") inclusiveTemplateName = "crdybaseL/h_mt2bins";
+      else if (srname == "baseM") inclusiveTemplateName = "crdybaseM/h_mt2bins";
+      else if (srname == "baseH") inclusiveTemplateName = "crdybaseH/h_mt2bins";
+      else if (srname == "baseUH") inclusiveTemplateName = "crdybaseUH/h_mt2bins";
       else if (srname == "21") inclusiveTemplateName = "crdy21/h_mt2bins"; // self (2j, HT1500)
       else if (srname == "22") inclusiveTemplateName = "crdy22/h_mt2bins"; // self (4j, HT1200)
       else if (srname == "23") inclusiveTemplateName = "crdy21/h_mt2bins"; // from 21 
@@ -647,7 +660,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 	// Get the template
 	lastbin_hybrid = makeHybridTemplate(srname, h_MT2Template, inclusiveTemplateName , fData, fZinv, fDY, lastmt2val_hybrid);
 	cout<<"lastbin_hybrid "<<lastbin_hybrid<<" and lastmt2val_hybrid "<<lastmt2val_hybrid<<endl;
-	if (h_MT2Template!=0) h_MT2Template->Print("all");
+	if (h_MT2Template!=0) h_MT2Template->Print();
 	else cout<<"h_MT2Template is 0, using hybrid within this region (no external templates)"<<endl;
       }
 
@@ -819,6 +832,17 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     }
 
+    TH1D* ratioCard_lepeff_UP = (TH1D*)ratioCard->Clone("ratioCard_lepeff_UP");
+    TH1D* ratioCard_lepeff_DN = (TH1D*)ratioCard->Clone("ratioCard_lepeff_DN");
+    if(hDY_lepeff_UP) ratioCard_lepeff_UP->Scale(hDY->Integral() / hDY_lepeff_UP->Integral());
+    if(hDY_lepeff_DN) ratioCard_lepeff_DN->Scale(hDY->Integral() / hDY_lepeff_DN->Integral());
+
+    TH1D* ratioCard_ZNJet_UP = (TH1D*)ratioCard->Clone("ratioCard_ZNJet_UP");
+    TH1D* ratioCard_ZNJet_DN = (TH1D*)ratioCard->Clone("ratioCard_ZNJet_DN");
+    if(hDY_ZNJet_UP && hZinv_ZNJet_UP) ratioCard_ZNJet_UP->Scale(hDY->Integral() / hDY_ZNJet_UP->Integral() * hZinv_ZNJet_UP->Integral() / hZinv->Integral());
+    if(hDY_ZNJet_DN && hZinv_ZNJet_DN) ratioCard_ZNJet_DN->Scale(hDY->Integral() / hDY_ZNJet_DN->Integral() * hZinv_ZNJet_DN->Integral() / hZinv->Integral());
+
+
     TH1D* hybridEstimate  = (TH1D*) CRyieldCard->Clone("hybridEstimate");
     hybridEstimate->Multiply(purityCard);
     hybridEstimate->Multiply(ratioCard);
@@ -838,6 +862,10 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     CRyield->Write();
 
     ratioCard->Write();
+    ratioCard_lepeff_UP->Write();
+    ratioCard_lepeff_DN->Write();
+    ratioCard_ZNJet_UP->Write();
+    ratioCard_ZNJet_DN->Write();
     purityCard->Write();
     CRyieldCard->Write();
     h_lastbinHybrid->Write();
@@ -849,13 +877,15 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     hDY->Write("h_mt2binsMCCR");
     hZinv->Write("h_mt2binsMCSR");
 
-    // we want these for crdy
-    h_ht_LOW = (TH1D*) fData->Get(directoryDY+"/h_ht_LOW");
-    h_ht_HI  = (TH1D*) fData->Get(directoryDY+"/h_ht_HI");
-    h_njets_LOW = (TH1D*) fData->Get(directoryDY+"/h_njets_LOW");
-    h_njets_HI  = (TH1D*) fData->Get(directoryDY+"/h_njets_HI");
-    h_nbjets_LOW = (TH1D*) fData->Get(directoryDY+"/h_nbjets_LOW");
-    h_nbjets_HI  = (TH1D*) fData->Get(directoryDY+"/h_nbjets_HI");
+    if(!directoryDY.Contains("J")){
+        // we want these for crdy (not saved for monojet, but they're the same as SR anyway)
+        h_ht_LOW = (TH1D*) fData->Get(directoryDY+"/h_ht_LOW");
+        h_ht_HI  = (TH1D*) fData->Get(directoryDY+"/h_ht_HI");
+        h_njets_LOW = (TH1D*) fData->Get(directoryDY+"/h_njets_LOW");
+        h_njets_HI  = (TH1D*) fData->Get(directoryDY+"/h_njets_HI");
+        h_nbjets_LOW = (TH1D*) fData->Get(directoryDY+"/h_nbjets_LOW");
+        h_nbjets_HI  = (TH1D*) fData->Get(directoryDY+"/h_nbjets_HI");
+    }
 
     if(h_ht_LOW) h_ht_LOW->Write();
     if(h_ht_HI)  h_ht_HI->Write();
@@ -876,7 +906,8 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 //_______________________________________________________________________________
 void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto"){
 
-    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_with2018MC";
+    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights";
+    // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-11_2018fullYear_with2018MC";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_pred2016withFullCR";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_unblinded1718";
 
@@ -892,7 +923,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
 
   // get input files
   TFile* f_data = new TFile(Form("%s/data_RunAll.root",input_dir.c_str()));
-  TFile* f_zinv = new TFile(Form("%s/zinv_ht_2016.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht_2018.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
@@ -915,7 +946,8 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   std::string keep = "sr";
   std::string skip = "srbase";
   while ((k = (TKey *)it())) {
-   if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+   // if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) == 0) continue;
+      // if (strncmp (k->GetTitle(), skip.c_str(), skip.length()) != 0) continue;
     if (strncmp (k->GetTitle(), keep.c_str(), keep.length()) == 0 
 ) {//it is a signal region
       std::string sr_string = k->GetTitle();
@@ -924,11 +956,10 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
     }
   }
 
-  //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
+  // //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
   // makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
-   output_name = input_dir+"/zinvFromDY_2016.root";
-
+   output_name = input_dir+"/zinvFromDY_blah.root";
    makeZinvFromDY( f_data, f_zinv , f_dy , f_top, dirs, output_name ); 
 
 

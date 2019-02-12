@@ -5,15 +5,15 @@ import numpy as np
 ROOT.gROOT.SetBatch(1)
 ROOT.gStyle.SetOptStat(0)
 
-fin = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-08_combined/data_RunAll.root")
+fin = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/data_RunAll.root")
 # fin = ROOT.TFile("/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-18_reminiaod/data_Run2016.root")
 # fin = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/full2016_data/data_Run2016.root")
 # lumi = 42.0
 # lumi = 4.79 + 9.79
 # lumi = 4.32 + 9.42
-lumi = 136.3
+lumi = 137.4
 # lumi = 35.9
-outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/V00-10-08_combined"
+outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/V00-10-10_combined"
 # outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/full2016"
 # outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/full2016_dom"
 
@@ -85,7 +85,7 @@ os.system("cp ~/scripts/index.php "+outdir)
 ## as a function of HT
 h_ht_SF = fin.Get("crdybaseIncl/h_htLowPt")
 h_ht_OF = fin.Get("crdybaseIncl/h_htLowPtemu")
-ht_bins = np.array([250, 450, 575, 1000, 2000], dtype=float)
+ht_bins = np.array([250, 450, 575, 1200, 2000], dtype=float)
 h_ht_SF = h_ht_SF.Rebin(ht_bins.size-1, "h_ht_RSFOF", ht_bins)
 h_ht_OF = h_ht_OF.Rebin(ht_bins.size-1, "h_ht_OF", ht_bins)
 
@@ -113,7 +113,7 @@ makePlot(h_mt2_SF, rSFOF, rSFOFerr, outdir=outdir, name="rsfof_mt2", xaxis="M_{T
 ## as a function of njets
 h_nJet30_SF = fin.Get("crdybaseIncl/h_nJet30LowPt")
 h_nJet30_OF = fin.Get("crdybaseIncl/h_nJet30LowPtemu")
-nJet30_bins = np.array([1,2,4,7,10,13], dtype=float)
+nJet30_bins = np.array([1,2,4,7,13], dtype=float)
 h_nJet30_SF = h_nJet30_SF.Rebin(nJet30_bins.size-1, "h_nJet30_RSFOF", nJet30_bins)
 h_nJet30_OF = h_nJet30_OF.Rebin(nJet30_bins.size-1, "h_nJet30_OF", nJet30_bins)
 

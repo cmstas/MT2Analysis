@@ -25,7 +25,7 @@ input_dir = sys.argv[1]
 data_tag = sys.argv[2]
 lostlepSR = sys.argv[3] if len(sys.argv) >= 4 else "lostlep"
 
-output_name = os.path.join(input_dir, "lostlepFromCRs.root")
+output_name = os.path.join(input_dir, "{0}.root".format(lostlepSR.replace("lostlep", "lostlepFromCRs")))
 print "Writing to file:", output_name
 
 f_data = r.TFile("{0}/{1}.root".format(input_dir, data_tag))
@@ -81,6 +81,8 @@ for idir, dsuff in enumerate(dirs):
     histMap["h_lostlepMC_sr_btagsf_heavy_DN"] = f_lostlepSR.Get(mt2_histname+"_btagsf_heavy_DN")
     histMap["h_lostlepMC_sr_btagsf_light_UP"] = f_lostlepSR.Get(mt2_histname+"_btagsf_light_UP")
     histMap["h_lostlepMC_sr_btagsf_light_DN"] = f_lostlepSR.Get(mt2_histname+"_btagsf_light_DN")
+    histMap["h_lostlepMC_sr_TTHF_UP"] = f_lostlepSR.Get(mt2_histname+"_TTHF_UP")
+    histMap["h_lostlepMC_sr_TTHF_DN"] = f_lostlepSR.Get(mt2_histname+"_TTHF_DN")
 
 
     # make sure everything exists; if not, set to nominal histogram
@@ -142,14 +144,14 @@ for idir, dsuff in enumerate(dirs):
     h_data_cr = f_data.Get(mt2_histname_SL)
     if not histMapCR["h_lostlepMC_cr"]:
         print "couldn't find lostlep MC CR hist:", mt2_histname_SL, "SHOULDN'T GET HERE"
-    elif not h_data_cr:
-        print "couldn't find lostlep data CR hist:", mt2_histname_SL, "SHOULDN'T GET HERE"
+    # elif not h_data_cr:
+    #     print "couldn't find lostlep data CR hist:", mt2_histname_SL, "SHOULDN'T GET HERE"
     else:
         if doHybrid:
             for ibin in range(n_mt2bins, 0, -1):
                 if histMapCR["h_lostlepMC_cr"].Integral(ibin, -1) >= hybrid_nevent_threshold:
                     lastbin_hybrid = ibin
-                    lastmt2val_hybrid = h_data_cr.GetBinLowEdge(ibin)
+                    lastmt2val_hybrid = histMapCR["h_lostlepMC_cr"].GetBinLowEdge(ibin)
                     break
 
         for h in histMap:
@@ -185,7 +187,7 @@ for idir, dsuff in enumerate(dirs):
             h_lostlepDD_cr_datacard.SetBinContent(ibin, cr_yield)
             h_lostlepDD_cr_datacard.SetBinError(ibin, err_cr_yield)
     else:
-        print "couldn't find data CR hist: " << mt2_histname_SL
+        print "couldn't find data CR hist: ", mt2_histname_SL
         h_lostlepDD_cr = r.TH1D("h_mt2binsCRyield", "h_mt2binsCRyield", n_mt2bins, mt2bins)
         h_lostlepDD_cr_datacard = r.TH1D("h_mt2binsCRyieldDatacard", "h_mt2binsCRyieldDatacard", n_mt2bins, mt2bins)
 
@@ -298,12 +300,12 @@ for idir, dsuff in enumerate(dirs):
     pred = h_lostlepDD_sr.Clone("h_mt2bins")
     pred_finebin = h_lostlepDD_sr_finebin.Clone("h_mt2")
 
-    h_ht_LOW = f_lostlep.Get(crdir+"/h_ht_LOW");
-    h_ht_HI = f_lostlep.Get(crdir+"/h_ht_HI");
-    h_nbjets_LOW = f_lostlep.Get(crdir+"/h_nbjets_LOW");
-    h_nbjets_HI = f_lostlep.Get(crdir+"/h_nbjets_HI");
-    h_njets_LOW = f_lostlep.Get(crdir+"/h_njets_LOW");
-    h_njets_HI = f_lostlep.Get(crdir+"/h_njets_HI");
+    h_ht_LOW = f_lostlepSR.Get(crdir+"/h_ht_LOW");
+    h_ht_HI = f_lostlepSR.Get(crdir+"/h_ht_HI");
+    h_nbjets_LOW = f_lostlepSR.Get(crdir+"/h_nbjets_LOW");
+    h_nbjets_HI = f_lostlepSR.Get(crdir+"/h_nbjets_HI");
+    h_njets_LOW = f_lostlepSR.Get(crdir+"/h_njets_LOW");
+    h_njets_HI = f_lostlepSR.Get(crdir+"/h_njets_HI");
 
     if h_ht_LOW:
         ht_LOW = h_ht_LOW.GetBinContent(1)
