@@ -2,16 +2,16 @@
 
 make -j 12 || return $?
 
-doD16=0
+doD16=1
 doM16=0
-doD17=0
+doD17=1
 doM17=0
-doD18=0
+doD18=1
 doM18=0
-doS17=1
+doS17=0
 
-tag=FullMC
-outtag=FullMCv2
+tag=AllWeights
+outtag=AllWeights
 LOGDIR=logs/${outtag}
 mkdir -p ${LOGDIR}
 

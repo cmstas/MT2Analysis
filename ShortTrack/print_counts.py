@@ -19,6 +19,7 @@ full_unblind = True
 doMC = True
 colorTables = False
 format = "pdf"
+makePullPlots = False
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(False)
@@ -283,12 +284,14 @@ def getPoissonGraph( histo, errors = None, drawXline = True):
 
   return graph
 
-def GetPull(pred, syst, obs, nstc, fshort, N=1000000):
+def GetPullGamma(pred, syst, obs, nstc, fshort, N=1000000):
     s, t = 0, 0
     for i in range( N ):
-        gamma_toy = fshort * np.random.gamma(nstc + 1)
+        #gamma_toy = fshort * np.random.gamma(nstc + 1)
+        gamma_toy = np.random.gamma(nstc + 1,fshort)
         if gamma_toy <= 0: continue
-        relsyst = 1.0 + syst/gamma_toy
+        #    relsyst = 1.0 + syst/gamma_toy
+        relsyst = 1.0 + syst
         seed = gamma_toy*(relsyst**np.random.randn())
         seed = int(seed) & 0xFFFFFFFF
         try: toyobs = np.random.poisson(seed)
@@ -302,7 +305,7 @@ def GetPull(pred, syst, obs, nstc, fshort, N=1000000):
             s += 1
     return ROOT.Math.normal_quantile(float(s)/t, 1)
 
-def getPullPlot(g_data, g_pred, g_ratio, nstcs, fshorts):
+def getPullPlotGamma(g_data, g_pred, g_ratio, nstcs, fshorts):
     for ibin in range(g_data.GetN()):
         nstc = nstcs[ibin-1]
         fshort = fshorts[ibin-1]
@@ -330,7 +333,51 @@ def getPullPlot(g_data, g_pred, g_ratio, nstcs, fshorts):
             pull = (ydata - ypred) / math.sqrt(err_data**2 + err_pred**2)
 
 
-        if abs(pull) > 3.5:
+        if abs(pull) > 2.5:
+            print "BIN WITH BIG PULL: ", pull
+        thisPoint = g_ratio.GetN()
+        g_ratio.SetPoint(thisPoint, x, pull)
+        g_ratio.SetPointError(thisPoint, 0.0, 0.0, 0.0, 0.0)
+
+def GetPull(pred, syst, obs, N=500000):
+    relsyst = 1.0 + syst/pred
+    s, t = 0, 0
+    for i in range( N ):
+        t += 1
+        toyobs = np.random.poisson(pred*(relsyst**np.random.randn()))
+        if toyobs < obs:
+            s += 1
+        if obs < pred and toyobs == obs:
+            s += 1
+    return ROOT.Math.normal_quantile(float(s)/t, 1)
+
+def getPullPlot(g_data, g_pred, g_ratio):
+    for ibin in range(g_data.GetN()):
+        x, ydata, ypred = ROOT.Double(), ROOT.Double(), ROOT.Double()
+        g_data.GetPoint(ibin, x, ydata)
+        g_pred.GetPoint(ibin, x, ypred)
+        if ydata==0.0 and ypred==0.0:
+            continue
+        elif ypred == 0:
+            print "prediction 0 but obs nonzero",x
+            continue
+        if ypred < 200 and ydata > 0.0:
+            if ydata > ypred:
+                pull = GetPull(ypred, g_pred.GetErrorYhigh(ibin), ydata)
+            else:
+                pull = GetPull(ypred, g_pred.GetErrorYlow(ibin), ydata)
+        else:
+            if ydata > ypred:
+                err_data = sqrt(ypred)
+                err_pred = g_pred.GetErrorYhigh(ibin)
+            else:
+                err_data = sqrt(ypred)
+                err_pred = g_pred.GetErrorYlow(ibin)
+
+            pull = (ydata - ypred) / math.sqrt(err_data**2 + err_pred**2)
+
+
+        if abs(pull) > 3.0:
             print "BIN WITH BIG PULL: ", pull
         thisPoint = g_ratio.GetN()
         g_ratio.SetPoint(thisPoint, x, pull)
@@ -344,7 +391,7 @@ def getRatioGraph( histo_data, histo_mc, data_errs = None, mc_errs = None ):
     
     graph  = ROOT.TGraphAsymmErrors()
     graph_data = getPoissonGraph(histo_data, data_errs)
-    graph_mc = getPoissonGraph(histo_mc, mc_errs)
+    graph_mc = getPoissoGraph(histo_mc, mc_errs)
     for i in xrange(0,graph_data.GetN()):
         x_tmp=ROOT.Double(0.0)
         data=ROOT.Double(0.0)
@@ -863,7 +910,6 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         perrs.append(perr)
         perrs_withfs.append( [sqrt(perr[i]**2 + perr_fs**2) for i in [0,1]]  )
         perrs_all.append( [sqrt(perr[i]**2 + perr_fs**2 + perr_nc**2) for i in [0,1]] )
-        perrs_justsyst.append( [sqrt(perr_fs**2 + perr_nc**2) for i in [0,1]] )
         hobs.SetBinContent(bin_index,obs)
         oerrs.append(oerr)
         # find maximally discrepant bin
@@ -924,19 +970,30 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         h1 = ROOT.TH1D("fill_for_"+desc,";;Pull",len(regions),0,len(regions))
         h2 = ROOT.TH1D("fill2_for_"+desc,";;Pull",len(regions),0,len(regions))
         h2.GetYaxis().SetTitleSize(h2.GetYaxis().GetTitleSize()*2)
+        h2.GetYaxis().SetTitleOffset(0.6)
+        h2.GetYaxis().SetLabelSize(h2.GetYaxis().GetLabelSize()*2)
         h1.SetFillColor(ROOT.kWhite)
-        h1.SetLineColor(ROOT.kWhite)
+        h1.SetLineColor(ROOT.kBlack)
         h2.SetFillColor(ROOT.kGray)
         h2.SetLineColor(ROOT.kGray)
-        h2.SetMaximum(3.5)
-        h2.SetMinimum(-3.5)
-        fshort_list = []
-        nstcs = []
+        h2.SetMaximum(2.5)
+        h2.SetMinimum(-2.5)
+#        fshort_list = []
+#        nstcs = []
+        perrs_justsyst = []
         for index,region in enumerate(regions):
             bin_index = index+1
-            fshort_name = correspondingFshort(region)
-            fshort_list.append(fshorts[fshort_name])
-            nstcs.append(vals[region+" STC"])
+#            perr_fsrel = systs[region+" fsrel"] * rescale
+#            perr_ncrel = systs[region+" ncrel"] * rescale
+#            syst_err = sqrt(perr_fsrel**2 + perr_ncrel**2)
+#            perrs_justsyst.append([syst_err, syst_err])
+#            fshort_name = correspondingFshort(region)
+#            fshort_list.append(fshorts[fshort_name])
+#            nstcs.append(vals[region+" STC"])
+            perr_fs = systs[region+" fs"] * rescale
+            perr_nc = systs[region+" nc"] * rescale
+            syst_err = sqrt(perr_fs**2 + perr_nc**2)
+            perrs_justsyst.append( [syst_err, syst_err] )
             h2.SetBinContent(bin_index,0)
             h2.SetBinError(bin_index,2)
             h2.GetXaxis().SetBinLabel(bin_index,"")
@@ -945,19 +1002,21 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         hpred.GetXaxis().LabelsOption("v")
         hpred.GetXaxis().SetTitleOffset(4.8)
         simplecanvas.cd()
-        g_pred_all = getPoissonGraph( hpred, perrs_justsyst )
+#        g_pred_all = getPoissonGraph( hpred, perrs_justsyst )
+        g_pred_all = getPoissonGraph( hpred, perrs_all )
         g_obs = gobs.Clone()
         g_pull = ROOT.TGraphAsymmErrors()
-        getPullPlot(g_obs, g_pred_all, g_pull, nstcs, fshort_list)
+#        getPullPlot(g_obs, g_pred_all, g_pull, nstcs, fshort_list)
+        getPullPlot(g_obs, g_pred_all, g_pull)
         g_pull.SetMarkerStyle(20)
         g_pull.SetMarkerSize(1)
         g_pull.SetLineWidth(1)
         pads[1].cd()
         h2.Draw("E2")
         h1.Draw("same E2")
+        h1.Draw("same hist")
         g_pull.Draw("SAME P0")
-        h1.SetLineColor(ROOT.kBlack)
-        h1.Draw("SAME HIST")
+        h2.Draw("same axis")
     else:        
         h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs),0,len(perrs))
         h1.SetLineWidth(3)
@@ -1800,7 +1859,7 @@ def getMergedLineMC(region,rescale16=1.0,rescale17=1.0): # rescale multiplies pr
                                                                                                                                                                                                                                     pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"])
 
     else:
@@ -2219,10 +2278,10 @@ ssr_1718_names = ["P3 SSR","P4 SSR","M SSR","L SSR"]
 #print "Made pull plots"
 #exit(1)
 
-makePlotRaw(allVR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA VR",doPullPlot=True)
-makePlotRaw(allVR16,D16,eD16,sD16,D16f,"2016 DATA VR",doPullPlot=True)
-makePlotRaw(allSR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA SR",rescale1718,doPullPlot=True)
-makePlotRaw(allSR16,D16,eD16,sD16,D16f,"2016 DATA SR",rescale16,doPullPlot=True)
+makePlotRaw(allVR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA VR",doPullPlot=False)
+makePlotRaw(allVR16,D16,eD16,sD16,D16f,"2016 DATA VR",doPullPlot=False)
+makePlotRaw(allSR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA SR",rescale1718,doPullPlot=makePullPlots)
+makePlotRaw(allSR16,D16,eD16,sD16,D16f,"2016 DATA SR",rescale16,doPullPlot=makePullPlots)
 
 makePlotSSRs(svr_1718,D1718,eD1718,sD1718,"2017-18 DATA SVR",svr_1718_names)
 makePlotSSRs(svr_16,D16,eD16,sD16,"2016 DATA SVR",svr_16_names)

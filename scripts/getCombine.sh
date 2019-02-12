@@ -17,6 +17,10 @@ git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsA
 cd HiggsAnalysis/CombinedLimit
 git fetch origin
 git checkout v7.0.9
+
+cd ../..
+
+git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 scramv1 b clean; scramv1 b
 
 popd
