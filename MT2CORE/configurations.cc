@@ -29,6 +29,7 @@ MT2Configuration GetMT2Config(std::string tag){
     c.pu_weights_file = "";
     c.elSF_IDISOfile = "";
     c.elSF_TRKfile = "";
+    c.elSF_TRKfileLowPt = "";
     c.elSF_IDhistName = "";
     c.elSF_ISOhistName = "";
     c.muSF_IDfile = "";
@@ -471,10 +472,11 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_DeepCSV = 0.4184;
         c.btag_med_threshold_CSVv2   = 0.8838;
         c.pu_weights_file    = "puWeight2018.root";
-        c.elSF_IDISOfile     = "lepsf/Fall17/ElectronScaleFactors_Run2017.root";
-        c.elSF_TRKfile       = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
-        c.elSF_IDhistName    = "Run2017_CutBasedVetoNoIso94XV2";
-        c.elSF_ISOhistName   = "Run2017_MVAVLooseTightIP2DMini";
+        c.elSF_IDISOfile     = "lepsf/Autumn18/ElectronScaleFactors_Run2018.root";
+        c.elSF_TRKfile       = "lepsf/Autumn18/egammaEffi.txt_EGM2D.root";
+        c.elSF_TRKfileLowPt  = "lepsf/Autumn18/egammaEffi.txt_EGM2D.root";
+        c.elSF_IDhistName    = "Run2018_CutBasedVetoNoIso94XV2";
+        c.elSF_ISOhistName   = "Run2018_Mini";
         c.muSF_IDfile        = "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root";
         c.muSF_ISOfile       = "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root";
         c.muSF_IPfile        = "";
@@ -499,6 +501,45 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["badMuonFilter"] = true;
         c.filters["badChargedCandidateFilter"] = true;
 
+    }else if(tag == "mc_102x_fastsim_Autumn18"){
+
+        c.year               = 2018;
+        c.cmssw_ver          = 94;
+        c.lumi               = 59.97;
+        c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
+        c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
+        c.btag_med_threshold_DeepCSV = 0.4941;
+        c.btag_med_threshold_CSVv2   = 0.8838;
+        c.pu_weights_file    = "puWeight2017.root";
+        c.elSF_IDISOfile     = "lepsf/Fall17/ElectronScaleFactors_Run2017.root";
+        c.elSF_TRKfile       = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
+        c.elSF_TRKfileLowPt  = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root";
+        c.elSF_IDhistName    = "Run2017_CutBasedVetoNoIso94XV2";
+        c.elSF_ISOhistName   = "Run2017_MVAVLooseTightIP2DMini";
+        c.muSF_IDfile        = "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root";
+        c.muSF_ISOfile       = "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root";
+        c.muSF_IPfile        = "";
+        c.muSF_TRKfile       = "";
+        c.muSF_IDhistName    = "NUM_LooseID_DEN_genTracks_pt_abseta";
+        c.muSF_ISOhistName   = "TnP_MC_NUM_MiniIso02Cut_DEN_LooseID_PAR_pt_eta";
+        c.muSF_IPhistName    = "";
+        c.muSF_TRKLT10histName = "";
+        c.muSF_TRKGT10histName = "";
+        c.dilep_trigeff_file = "lepsf/trigeff/trigeff_dilep_2017fullYear.root";
+        c.ea_version         = 3;
+        c.jet_id             = "2017_v1";
+        c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
+        c.rphi_tag           = "V00-10-09_2017fullYear";
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_17Nov2017_V32_MC"));
+        c.filters["globalSuperTightHalo2016Filter"] = true;
+        c.filters["goodVertices"] = true;
+        c.filters["HBHENoiseFilter"] = true;
+        c.filters["HBHENoiseIsoFilter"] = true;
+        c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
+        c.filters["ecalBadCalibFilterUpdate"] = true;
+        c.filters["badMuonFilter"] = true;
+        c.filters["badChargedCandidateFilter"] = true;
+
     }else if(tag == "mc_80x_Summer16"){
 
         c.year               = 2016;
@@ -511,6 +552,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2016.root";
         c.elSF_IDISOfile     = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
         c.elSF_TRKfile       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSF_TRKfileLowPt  = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
         c.elSF_IDhistName    = "GsfElectronToCutBasedSpring15V";
         c.elSF_ISOhistName   = "MVAVLooseElectronToMini";
         c.muSF_IDfile        = "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root";
@@ -548,6 +590,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2016.root";
         c.elSF_IDISOfile     = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
         c.elSF_TRKfile       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSF_TRKfileLowPt  = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
         c.elSF_IDhistName    = "GsfElectronToCutBasedSpring15V";
         c.elSF_ISOhistName   = "MVAVLooseElectronToMini";
         c.muSF_IDfile        = "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root";
@@ -584,6 +627,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2017.root";
         c.elSF_IDISOfile     = "lepsf/Fall17/ElectronScaleFactors_Run2017.root";
         c.elSF_TRKfile       = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
+        c.elSF_TRKfileLowPt  = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root";
         c.elSF_IDhistName    = "Run2017_CutBasedVetoNoIso94XV2";
         c.elSF_ISOhistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.muSF_IDfile        = "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root";
@@ -620,10 +664,11 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
-        c.elSF_IDISOfile     = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
+        c.elSF_IDISOfile     = "lepsf/Summer16_94x/ElectronScaleFactors_Run2016.root";
         c.elSF_TRKfile       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_IDhistName    = "GsfElectronToCutBasedSpring15V";
-        c.elSF_ISOhistName   = "MVAVLooseElectronToMini";
+        c.elSF_TRKfileLowPt  = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSF_IDhistName    = "Run2016_CutBasedVetoNoIso94XV2";
+        c.elSF_ISOhistName   = "Run2016_Mini";
         c.muSF_IDfile        = "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root";
         c.muSF_ISOfile       = "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root";
         c.muSF_IPfile        = "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root";
@@ -660,6 +705,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.pu_weights_file    = "puWeight2017.root";
         c.elSF_IDISOfile     = "lepsf/Fall17/ElectronScaleFactors_Run2017.root";
         c.elSF_TRKfile       = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root";
+        c.elSF_TRKfileLowPt  = "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root";
         c.elSF_IDhistName    = "Run2017_CutBasedVetoNoIso94XV2";
         c.elSF_ISOhistName   = "Run2017_MVAVLooseTightIP2DMini";
         c.muSF_IDfile        = "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root";
@@ -695,10 +741,11 @@ MT2Configuration GetMT2Config(std::string tag){
         c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;
         c.pu_weights_file    = "puWeight2016.root";
-        c.elSF_IDISOfile     = "lepsf/moriond17/scaleFactors_el_moriond_2017.root";
+        c.elSF_IDISOfile     = "lepsf/Summer16_94x/ElectronScaleFactors_Run2016.root";
         c.elSF_TRKfile       = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
-        c.elSF_IDhistName    = "GsfElectronToCutBasedSpring15V";
-        c.elSF_ISOhistName   = "MVAVLooseElectronToMini";
+        c.elSF_TRKfileLowPt  = "lepsf/moriond17/egammaEffi.txt_EGM2D.root";
+        c.elSF_IDhistName    = "Run2016_CutBasedVetoNoIso94XV2";
+        c.elSF_ISOhistName   = "Run2016_Mini";
         c.muSF_IDfile        = "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root";
         c.muSF_ISOfile       = "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root";
         c.muSF_IPfile        = "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root";

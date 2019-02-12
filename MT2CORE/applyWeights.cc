@@ -39,15 +39,18 @@ weightStruct getLepSF(float pt, float, int pdgId) {
 }
 
 //_________________________________________________________
-bool setElSFfile(TString filenameIDISO, TString filenameTRK, TString histName, TString isoHistName){
+bool setElSFfile(TString filenameIDISO, TString filenameTRK, TString filenameTRKlowPt, TString histName, TString isoHistName){
   TFile * f1 = new TFile(filenameIDISO);
   TFile * f2 = new TFile(filenameTRK);
+  TFile * f3 = new TFile(filenameTRKlowPt);
   if (!f1->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
   if (!f2->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find track scale factor file "<<filenameTRK<<std::endl;
+  if (!f3->IsOpen()) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find low pT track scale factor file "<<filenameTRKlowPt<<std::endl;
   TH2D* h_id = 0;
   h_id = (TH2D*) f1->Get(histName);
   TH2D* h_iso = (TH2D*) f1->Get(isoHistName);
   TH2D* h_trk = (TH2D*) f2->Get("EGamma_SF2D");
+  TH2D* h_trk_lowPt = (TH2D*) f3->Get("EGamma_SF2D");
   if (!h_id || !h_iso || !h_trk) std::cout<<"applyWeights::setElSFfile: ERROR: Could not find scale factor histogram"<<std::endl;
   h_elSF = (TH2D*) h_id->Clone("h_elSF");
   h_elSF->SetDirectory(0);
@@ -55,6 +58,8 @@ bool setElSFfile(TString filenameIDISO, TString filenameTRK, TString histName, T
   //h_elSF->Print("all");
   h_elSF_trk = (TH2D*) h_trk->Clone("h_elSF_trk");
   h_elSF_trk->SetDirectory(0);
+  h_elSF_trk_lowPt = (TH2D*) h_trk_lowPt->Clone("h_elSF_trk");
+  h_elSF_trk_lowPt->SetDirectory(0);
   return true;
 }
 
@@ -169,11 +174,14 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     float central = h_elSF->GetBinContent(binx,biny);
     float err  = h_elSF->GetBinError(binx,biny);
     // get also trk sf
-    int binx_trk = h_elSF_trk->GetXaxis()->FindBin(eta_cutoff);
-    int biny_trk = h_elSF_trk->GetYaxis()->FindBin(pt_cutoff);
+    TH2D * h_trk = 0;
+    if(pt > 20) h_trk = h_elSF_trk;
+    else        h_trk = h_elSF_trk_lowPt;
+    int binx_trk = h_trk->GetXaxis()->FindBin(eta_cutoff);
+    int biny_trk = h_trk->GetYaxis()->FindBin(pt_cutoff);
     if(biny_trk < 1) biny_trk = 1;
-    central *= h_elSF_trk->GetBinContent(binx_trk,biny_trk);
-    float trk_err = h_elSF_trk->GetBinError(binx_trk,biny_trk);
+    central *= h_trk->GetBinContent(binx_trk,biny_trk);
+    float trk_err = h_trk->GetBinError(binx_trk,biny_trk);
     if (pt_cutoff < 20. || pt_cutoff > 80.) err = sqrt(err*err + trk_err*trk_err + 0.01*0.01); // extra 1% error for pt < 20 OR pt > 80
     else err = sqrt(err*err + trk_err*trk_err); // otherwise just use histogram error
     weights.cent = central;

@@ -1,4 +1,4 @@
-T// C++
+// C++
 #include <iostream>
 #include <vector>
 #include <set>
@@ -87,9 +87,9 @@ bool applyWeights = false;
 // turn on to apply btag sf to central value
 bool applyBtagSF = true; // default true
 // turn on to apply lepton sf to central value - take from babies
-bool applyLeptonSFfromBabies = true;
+bool applyLeptonSFfromBabies = false;
 // turn on to apply lepton sf to central value - reread from files
-bool applyLeptonSFfromFiles = false; // default true
+bool applyLeptonSFfromFiles = true; // default true
 // turn on to apply lepton sf to central value also for 0L SR. values chosen by options above
 bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
@@ -110,6 +110,8 @@ bool doNTrueIntReweight = true;
 bool applyL1PrefireWeights = true;
 // apply ttbar heavy-flavor correctio weight
 bool applyTTHFWeights = true;
+// apply Z njet re-weight (2017+18)
+bool applyZNJetWeights = false;
 // turn on to apply json file to data
 bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -144,7 +146,7 @@ float HEM_ptCut = 30.0;  // veto on jets above this threshold
 float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // load rphi fits to perform r_effective calculation.
-bool doReffCalculation = true;
+bool doReffCalculation = false;
 string rphi_file_name = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/<TAG>/qcdHistos.root";
 TFile* rphi_file;
 vector<TF1*> rphi_fits_data;
@@ -647,6 +649,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   if(config_.year != 2016)
       applyISRWeights = false;
 
+  if(config_.year != 2017 && config_.year != 2018)
+      applyZNJetWeights = false;
+
   if (applyJSON && config_.json != "") {
     cout << "[MT2Looper::loop] Loading json file: " << config_.json << endl;
     set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
@@ -723,6 +728,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
     std::string weights_dir = "";
     if(config_tag.find("80x_fastsim_Moriond17") != string::npos)
         weights_dir = "../babymaker/data/";
+    else if(config_tag.find("102x_fastsim_Autumn18") != string::npos)
+        weights_dir = "../babymaker/data/sigweights_Fall17/";
     else if(config_tag.find("94x_fastsim_Fall17") != string::npos)
         weights_dir = "../babymaker/data/sigweights_Fall17/";
     else if(config_tag.find("94x_fastsim_Summer16") != string::npos)
@@ -765,8 +772,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
   if (config_tag.find("data") == string::npos && applyLeptonSFfromFiles) {
       cout << "Applying lepton scale factors from the following files:\n";
-      cout << "    els IDISO: " << config_.elSF_IDISOfile << ": " << config_.elSF_IDhistName << " (id), " << config_.elSF_ISOhistName << " (iso)" << endl;
-      cout << "    els TRK  : " << config_.elSF_TRKfile << endl;
+      cout << "    els IDISO      : " << config_.elSF_IDISOfile << ": " << config_.elSF_IDhistName << " (id), " << config_.elSF_ISOhistName << " (iso)" << endl;
+      cout << "    els TRK        : " << config_.elSF_TRKfile << endl;
+      cout << "    els TRK low pT : " << config_.elSF_TRKfileLowPt << endl;
       cout << "    muons ID : " << config_.muSF_IDfile << ": " << config_.muSF_IDhistName << endl;
       cout << "    muons ISO: " << config_.muSF_ISOfile << ": " << config_.muSF_ISOhistName << endl;
       if(config_.muSF_IPfile!="")
@@ -777,7 +785,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
           cout << "    muons TRK: " << config_.muSF_TRKfile << ": " << config_.muSF_TRKLT10histName << " (pT<10), " << config_.muSF_TRKGT10histName << " (pt>10)" << endl;
       else
           cout << "    muons TRK: not applying" << endl;
-      setElSFfile("../babymaker/"+config_.elSF_IDISOfile, "../babymaker/"+config_.elSF_TRKfile, config_.elSF_IDhistName, config_.elSF_ISOhistName);
+      setElSFfile("../babymaker/"+config_.elSF_IDISOfile, "../babymaker/"+config_.elSF_TRKfile, "../babymaker/"+config_.elSF_TRKfileLowPt, config_.elSF_IDhistName, config_.elSF_ISOhistName);
       setMuSFfile("../babymaker/"+config_.muSF_IDfile, "../babymaker/"+config_.muSF_ISOfile, "../babymaker/"+config_.muSF_IPfile, "../babymaker/"+config_.muSF_TRKfile,
                   config_.muSF_IDhistName, config_.muSF_ISOhistName, config_.muSF_IPhistName, config_.muSF_TRKLT10histName, config_.muSF_TRKGT10histName);
       setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
@@ -1188,6 +1196,27 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
                 weight_TTHF_DN_ = 1.0;
             }
         }
+
+        if(applyZNJetWeights && t.evt_id>=600 && t.evt_id<800){
+            if(t.nJet30 >= 2){
+                float baseweight;
+                if     (t.nJet30==2) baseweight = 0.945;
+                else if(t.nJet30==3) baseweight = 1.011;
+                else if(t.nJet30==4) baseweight = 1.048;
+                else                 baseweight = min(2.0, 0.1538*t.nJet30 + 0.4285);
+                baseweight /= getAverageZNJetWeight(t.evt_id, 0);
+                weight_ZNJet_UP_ = (baseweight + 0.5*(baseweight - 1.0)) / baseweight;
+                weight_ZNJet_DN_ = (baseweight - 0.5*(baseweight - 1.0)) / baseweight;
+                weight_ZNJet_UP_ /= getAverageZNJetWeight(t.evt_id, 1);
+                weight_ZNJet_DN_ /= getAverageZNJetWeight(t.evt_id, -1);
+                evtweight_ *= baseweight;
+            }else{
+                evtweight_ *= 1.0;
+                weight_ZNJet_UP_ = 1.0;
+                weight_ZNJet_DN_ = 1.0;
+            }
+        }
+
       } // !isData
 
       //weights for renorm/factorization scale variations
@@ -1381,6 +1410,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       bool doLowPtSFplots = false;
       bool doOFplots = false;
       bool doLowPtOFplots = false;
+      bool doInclusivePtPlot = false;
       if (t.nlep == 2 && !isSignal_) {
         bool passSFtrig = passTrigger(t, trigs_DilepSF_);
 	bool passOFtrig = passTrigger(t, trigs_DilepOF_);
@@ -1394,6 +1424,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  if (abs(t.lep_pdgId[0]) == abs(t.lep_pdgId[1]) && passSFtrig ) { // SF
 	    if      (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                     doDYplots = true;
 	    else if (t.zll_pt < 200 && fabs(t.zll_mass - 91.19) > 20 && t.zll_mass > 50.) doLowPtSFplots = true;
+            if (fabs(t.zll_mass - 91.19) < 20) doInclusivePtPlot = true;
 	  }
 	  else if (abs(t.lep_pdgId[0]) != abs(t.lep_pdgId[1]) && passOFtrig ) { // OF
 	    if      (t.zll_pt > 200 && fabs(t.zll_mass - 91.19) < 20)                     doOFplots = true;
@@ -1484,6 +1515,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
         if (doOFplots) fillHistosCRDY("crdy", "emu");
         if (doLowPtSFplots) fillHistosCRDY("crdy", "LowPt");
         if (doLowPtOFplots) fillHistosCRDY("crdy", "LowPtemu");
+        if (doInclusivePtPlot) fillHistosCRDY("crdy", "InclusivePt");
       }
       if (doRLplots) {
         saveRLplots = true;
@@ -2738,6 +2770,11 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_TTHF_UP"+s,        mt2_temp,   evtweight_ * weight_TTHF_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_TTHF_DN"+s,        mt2_temp,   evtweight_ * weight_TTHF_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
+
+  if (!t.isData && applyZNJetWeights && t.evt_id>=600 && t.evt_id<800){
+    plot1D("h_mt2bins_ZNJet_UP"+s,       mt2_temp,   evtweight_ * weight_ZNJet_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_ZNJet_DN"+s,       mt2_temp,   evtweight_ * weight_ZNJet_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
     
   outfile_->cd();
   return;
@@ -2930,6 +2967,12 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   } 
   dir->cd();
 
+  if(s=="InclusivePt"){
+      // only care about the zll_pt plot here
+      plot1D("h_zllpt"+s, t.zll_pt, evtweight_, h_1d, "; Z p_{T} [GeV]", 50, 0, 1000);
+      return;
+  }
+
   plot2D("h_ZpT_met"+s, t.zll_pt, t.zll_met_pt, evtweight_, h_1d, ";Z pt; met", 48, 0, 1200, 48, 0, 1200);
 
   // workaround for monojet bins
@@ -3069,6 +3112,11 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_mt2bins_lepeff_UP"+s,       zll_mt2_temp,   evtweight_ / weight_lepsf_cr_ * weight_lepsf_cr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepeff_DN"+s,       zll_mt2_temp,   evtweight_ / weight_lepsf_cr_ * weight_lepsf_cr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     
+  }
+
+  if (!t.isData && applyZNJetWeights && t.evt_id>=600 && t.evt_id<800){
+    plot1D("h_mt2bins_ZNJet_UP"+s,       zll_mt2_temp,   evtweight_ * weight_ZNJet_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_ZNJet_DN"+s,       zll_mt2_temp,   evtweight_ * weight_ZNJet_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   
   outfile_->cd();
@@ -3370,3 +3418,21 @@ float MT2Looper::getAverageISRWeight(const int evt_id, const int var) {
   return 1.;
 }
 
+float MT2Looper::getAverageZNJetWeight(const int evt_id, const int var){
+    // DYJets
+    if(evt_id>=700 && evt_id<800){
+        if(var==0) return 0.9818;
+        else if(var==-1) return 0.9909;
+        else if(var==1)  return 0.9727;
+    }
+    // ZJetsToNuNu
+    else if(evt_id>=600 && evt_id<700){
+        if(var==0) return 0.9720;
+        else if(var==-1) return 0.9860;
+        else if(var==1)  return 0.9580;
+    }
+
+    std::cout << "WARNING: MT2Looper::getAverageZNJetWeight: didn't recognnize evt_id: " << evt_id << endl;
+
+    return 1.0;
+}

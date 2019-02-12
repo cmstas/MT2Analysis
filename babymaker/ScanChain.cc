@@ -212,8 +212,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
   // Lepton Scale Factors
   if (!isDataFromFileName && applyLeptonSFs) {
       cout << "Applying lepton scale factors from the following files:\n";
-      cout << "    els IDISO: " << config_.elSF_IDISOfile << ": " << config_.elSF_IDhistName << " (id), " << config_.elSF_ISOhistName << " (iso)" << endl;
-      cout << "    els TRK  : " << config_.elSF_TRKfile << endl;
+      cout << "    els IDISO     : " << config_.elSF_IDISOfile << ": " << config_.elSF_IDhistName << " (id), " << config_.elSF_ISOhistName << " (iso)" << endl;
+      cout << "    els TRK       : " << config_.elSF_TRKfile << endl;
+      cout << "    els TRK low pT: " << config_.elSF_TRKfileLowPt << endl;
       cout << "    muons ID : " << config_.muSF_IDfile << ": " << config_.muSF_IDhistName << endl;
       cout << "    muons ISO: " << config_.muSF_ISOfile << ": " << config_.muSF_ISOhistName << endl;
       if(config_.muSF_IPfile!="")
@@ -224,7 +225,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           cout << "    muons TRK: " << config_.muSF_TRKfile << ": " << config_.muSF_TRKLT10histName << " (pT<10), " << config_.muSF_TRKGT10histName << " (pt>10)" << endl;
       else
           cout << "    muons TRK: not applying" << endl;
-      setElSFfile(config_.elSF_IDISOfile, config_.elSF_TRKfile, config_.elSF_IDhistName, config_.elSF_ISOhistName);
+      setElSFfile(config_.elSF_IDISOfile, config_.elSF_TRKfile, config_.elSF_TRKfileLowPt, config_.elSF_IDhistName, config_.elSF_ISOhistName);
       setMuSFfile(config_.muSF_IDfile, config_.muSF_ISOfile, config_.muSF_IPfile, config_.muSF_TRKfile,
                   config_.muSF_IDhistName, config_.muSF_ISOhistName, config_.muSF_IPhistName, config_.muSF_TRKLT10histName, config_.muSF_TRKGT10histName);
       setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
@@ -247,7 +248,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     else if ((baby_name.find("T2qq") != std::string::npos) || (baby_name.find("T6qq") != std::string::npos)) sparticle = "squark";
     if (sparticle == "") std::cout << "WARNING: didn't recognize signal sample from name: " << baby_name << std::endl;
     
-    TFile* f_xsec = new TFile("data/xsec_susy_13tev.root");
+    TFile* f_xsec = new TFile("data/xsec_susy_13tev_run2.root");
     TH1F* h_sig_xsec_temp = (TH1F*) f_xsec->Get(Form("h_xsec_%s",sparticle.Data()));
     h_sig_xsec = (TH1F*) h_sig_xsec_temp->Clone("h_sig_xsec");
     h_sig_xsec->SetDirectory(rootdir);
@@ -2158,6 +2159,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               passJetID = isLoosePFJet_50nsV1(iJet);
           else if(config_.jet_id == "2017_v1")
               passJetID = isTightPFJet_2017_v1(iJet);
+          else if(config_.jet_id == "2018_v1")
+              passJetID = isTightPFJet_2018_v1(iJet);
           else
               cout << "WARNING! unknown jet ID '" << config_.jet_id << "'! Assuming all jets pass for now. Fix your config." << endl;
           if(!passJetID && !isFastsim) {
@@ -2223,6 +2226,11 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
               else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
               else if (isTightPFJet_2017_v1(iJet)) jet_id[njet] = 3;
+              else jet_id[njet] = 0;
+          }else if(config_.jet_id == "2018_v1"){
+              if (isMonoPFJet_Monojet(iJet)) jet_id[njet] = 5;
+              else if (isMonoPFJet_MT2(iJet)) jet_id[njet] = 4;
+              else if (isTightPFJet_2018_v1(iJet)) jet_id[njet] = 3;
               else jet_id[njet] = 0;
           }              
               

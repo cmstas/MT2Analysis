@@ -274,6 +274,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
     "pu_weights_file" : "puWeight2017.root",
     "elSF_IDISOfile" : "lepsf/Fall17/ElectronScaleFactors_Run2017.root",
     "elSF_TRKfile" : "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
+    "elSF_TRKfileLowPt" : "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root",
     "elSF_IDhistName" : "Run2017_CutBasedVetoNoIso94XV2",
     "elSF_ISOhistName" : "Run2017_MVAVLooseTightIP2DMini",
     "muSF_IDfile" : "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root",
@@ -312,10 +313,12 @@ MT2Config_defs["mc_102x_Autumn18"] = {
     "btag_med_threshold_DeepCSV" : 0.4184,
     "btag_med_threshold_CSVv2" : 0.8838,
     "pu_weights_file" : "puWeight2018.root",
-    "elSF_IDISOfile" : "lepsf/Fall17/ElectronScaleFactors_Run2017.root",
-    "elSF_TRKfile" : "lepsf/Fall17/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root",
-    "elSF_IDhistName" : "Run2017_CutBasedVetoNoIso94XV2",
-    "elSF_ISOhistName" : "Run2017_MVAVLooseTightIP2DMini",
+    "elSF_IDISOfile" : "lepsf/Autumn18/ElectronScaleFactors_Run2018.root",
+    "elSF_TRKfile" : "lepsf/Autumn18/egammaEffi.txt_EGM2D.root",
+    # "elSF_TRKfileLowPt" : "lepsf/Autumn18/egammaEffi.txt_EGM2D_low.root",  # DO NOT TRUST, getting scale factors >1.9
+    "elSF_TRKfileLowPt" : "lepsf/Autumn18/egammaEffi.txt_EGM2D.root",        # use above bin instead
+    "elSF_IDhistName" : "Run2018_CutBasedVetoNoIso94XV2",
+    "elSF_ISOhistName" : "Run2018_Mini",
     "muSF_IDfile" : "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root",
     "muSF_ISOfile" : "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root",
     "muSF_IPfile" : "",
@@ -392,10 +395,10 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "btag_med_threshold_DeepCSV" : 0.6321,
     "btag_med_threshold_CSVv2" : 0.8484,
     "pu_weights_file" : "puWeight2016.root",
-    "elSF_IDISOfile" : "lepsf/moriond17/scaleFactors_el_moriond_2017.root",
+    "elSF_IDISOfile" : "lepsf/Summer16_94x/ElectronScaleFactors_Run2016.root",
     "elSF_TRKfile" : "lepsf/moriond17/egammaEffi.txt_EGM2D.root",
-    "elSF_IDhistName" : "GsfElectronToCutBasedSpring15V",
-    "elSF_ISOhistName" : "MVAVLooseElectronToMini",
+    "elSF_IDhistName" : "Run2016_CutBasedVetoNoIso94XV2",
+    "elSF_ISOhistName" : "Run2016_Mini",
     "muSF_IDfile" : "lepsf/moriond17/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root",
     "muSF_ISOfile" : "lepsf/moriond17/TnP_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root",
     "muSF_IPfile" : "lepsf/moriond17/TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
@@ -457,6 +460,9 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
     "ecalBadCalibFilterUpdate"
     ]
 
+MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["year"] = 2018
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.97
 
 def GetFilterString(config_tag):
     if config_tag not in MT2Config_defs:
@@ -539,6 +545,7 @@ MT2Configuration GetMT2Config(std::string tag){
     c.pu_weights_file = "";
     c.elSF_IDISOfile = "";
     c.elSF_TRKfile = "";
+    c.elSF_TRKfileLowPt = "";
     c.elSF_IDhistName = "";
     c.elSF_ISOhistName = "";
     c.muSF_IDfile = "";
@@ -576,6 +583,10 @@ MT2Configuration GetMT2Config(std::string tag){
         if "elSF_IDISOfile" in c[tag]:
             fout.write("        c.elSF_IDISOfile     = \"{0}\";\n".format(c[tag]["elSF_IDISOfile"]))
             fout.write("        c.elSF_TRKfile       = \"{0}\";\n".format(c[tag]["elSF_TRKfile"]))
+            if "elSF_TRKfileLowPt" in c[tag]:
+                fout.write("        c.elSF_TRKfileLowPt  = \"{0}\";\n".format(c[tag]["elSF_TRKfileLowPt"]))
+            else:
+                fout.write("        c.elSF_TRKfileLowPt  = \"{0}\";\n".format(c[tag]["elSF_TRKfile"]))                
             fout.write("        c.elSF_IDhistName    = \"{0}\";\n".format(c[tag]["elSF_IDhistName"]))
             fout.write("        c.elSF_ISOhistName   = \"{0}\";\n".format(c[tag]["elSF_ISOhistName"]))
         if "muSF_IDfile" in c[tag]:

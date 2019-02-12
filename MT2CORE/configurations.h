@@ -20,6 +20,7 @@ struct MT2Configuration {
     std::string pu_weights_file;
     std::string elSF_IDISOfile;
     std::string elSF_TRKfile;
+    std::string elSF_TRKfileLowPt;
     std::string elSF_IDhistName;
     std::string elSF_ISOhistName;
     std::string muSF_IDfile;
@@ -34,6 +35,7 @@ struct MT2Configuration {
     std::string dilep_trigeff_file;
     int ea_version;
     std::string JRT_file;
+    std::string rphi_tag;
     std::string jet_id;
     std::vector<std::pair<std::string, std::string> > JECs;
     std::map<std::string, bool> filters;
