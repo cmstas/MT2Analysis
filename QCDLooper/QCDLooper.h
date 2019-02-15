@@ -19,6 +19,7 @@
 #include "../MT2CORE/mt2tree.h"
 #include "../MT2CORE/sigSelections.h"
 #include "../MT2CORE/SR.h"
+#include "../MT2CORE/configurations.h"
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 using namespace mt2;
@@ -30,7 +31,7 @@ public:
     ~QCDLooper();
 
     void SetSignalRegions();
-    void loop(TChain* chain, std::string output_name = "test.root");
+    void loop(TChain* chain, std::string config_tag, std::string output_name = "test.root");
     void fillHistosRphi(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
     void fillHistosFj(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
     void fillHistosRb(std::map<std::string, TH1*>& h_1d, const std::string& dirname, const std::string& s = "");
@@ -39,6 +40,7 @@ public:
 private:
 
     TFile * outfile_;
+    MT2Configuration config_;
     mt2tree t;
     float evtweight_;
     float prescale_;

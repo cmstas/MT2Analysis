@@ -8,16 +8,22 @@ import cPickle as pickle
 from utils import *
 
 
-tag = "V00-10-08_2016fullYear_17Jul2018"
-# tag = "V00-10-08_2017fullYear_31Mar2018"
-# tag = "V00-10-08_2018fullYear_17Sep2018"
-skims = []
-skims.append("base")
-skims.append("ST")
-skims.append("RS")
-skims.append("qcd")
+tag = "V00-10-12_2016fullYear"
+# tag = "V00-10-12_2017fullYear"
+# tag = "V00-10-12_2018fullYear"
+# tag = "RebalanceAndSmear_V00-10-09_2016fullYear"
+# tag = "RebalanceAndSmear_V00-10-09_2017fullYear"
+# tag = "RebalanceAndSmear_V00-10-09_2018fullYear"
+skims = {}
+skims["base"] = [""]
+skims["ST"] = [""]
+# skims["qcd"] = [""]
+# skims["RS"] = [""]
+# skims["dilep"] = [""]
+# skims["ZllLowMET"] = ["DoubleMuon", "DoubleEG", "EGamma", "dyjetsll_ht", "ttsl", "ttdl", "ttw", "ttz", "tttt", "singletop"]
+# skims["ZllLowMET2"] = ["DoubleMuon", "DoubleEG", "EGamma", "dyjetsll_ht", "ttsl", "ttdl", "ttw", "ttz", "tttt", "singletop"]
 
-doMerge = False
+doMerge = True
 forceRecheckExist = True
 
 if os.path.exists("{0}/progress.pkl".format(tag)):
@@ -37,10 +43,13 @@ for s in sampnames:
     fl = open("{0}/file_lists/{1}.txt".format(tag, s))
     metadata = fl.readline().strip().split()
     nevents = int(metadata[2])
+    xsec_corr = float(metadata[6])
     d[s].nevents = nevents
     outdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}".format(tag, s)
     job_ids = []
     for line in fl:
+        if line.startswith("#"):
+            continue
         fid = line.strip().split()[0].split(".")[0]
         indir = line.strip().split()[1]
         fidx = int(fid.split("_")[-1])
@@ -48,28 +57,39 @@ for s in sampnames:
         bid = "mt2_baby_{0}".format(fidx)
         fbaby = os.path.join(outdir, "{0}.root".format(bid))
         exe = "wrapper.sh"
-        args = [bid, fin, outdir, "1" if "RebalanceAndSmear" in tag else "0"]
+        tarball = "job_input/input.tar.xz"
+        args = [bid, fin, outdir, "1" if "RebalanceAndSmear" in tag else "0", str(xsec_corr)]
         job_ids.append(bid)
         if bid not in d[s].jobs:
-            d[s].add_job(Job(bid, fin, fbaby, exe, args, True, "mt2"))
+            d[s].add_job(Job(bid, fin, fbaby, exe, tarball, args, True, "mt2"))
         elif forceRecheckExist and not os.path.exists(d[s].jobs[bid].output):
+            d[s].jobs[bid].args = args
             d[s].jobs[bid].done = False
             d[s].jobs[bid].sweeprooted = False
 
         for skim in skims:
+            doskim = False
+            for skimsamp in skims[skim]:
+                if skimsamp in s:
+                    doskim = True
+                    break
+            if not doskim:
+                continue
             fskim = os.path.join(outdir, "skim_"+skim, "skim_{0}_{1}.root".format(skim, fidx))
             sid = "skim_{0}_{1}".format(skim, fidx)
             exe = "wrapper_skim.sh"
+            tarball = "job_input/skiminput.tar.xz"
             args = [sid, fbaby, os.path.join(outdir, "skim_"+skim), skim]
             job_ids.append(sid)
             if sid not in d[s].jobs:
-                d[s].add_job(Job(sid, fbaby, fskim, exe, args, False, "mt2"))
+                d[s].add_job(Job(sid, fbaby, fskim, exe, tarball, args, False, "mt2"))
             elif forceRecheckExist and not os.path.exists(d[s].jobs[sid].output):
                 d[s].jobs[sid].done = False
                 d[s].jobs[sid].sweeprooted = False
 
     for bid in d[s].jobs.keys():
-        if bid not in job_ids:
+        parent = "mt2_baby_"+bid.split("_")[-1]
+        if bid not in job_ids and parent not in job_ids:
             print "Job deleted! {0} from sample {1}".format(bid, s)
             d[s].remove_job(bid)
 
@@ -104,6 +124,7 @@ while not alldone:
 
     alldone = True
     N_submitted = 0
+    problem_inputs = []
     for s in sampnames:
         print "Checking sample", s
         n_babies_newly_done = 0
@@ -142,8 +163,12 @@ while not alldone:
                 if len(condor_out)+N_submitted < 20000:
                     d[s].running += 1
                     to_submit.append(job)
+                    job.incrementNTries()
                 else:
                     d[s].waiting += 1
+
+            if hasattr(job, "ntries") and job.ntries > 5:
+                problem_inputs.append(job.input)
 
         if n_babies_newly_done > 0 or n_skims_newly_done > 0:
             print "** {0} babies and {1} skims newly finished!".format(n_babies_newly_done, n_skims_newly_done)
@@ -157,6 +182,11 @@ while not alldone:
     savepkl(d)
 
     writeSummary(d, tag, summarydir)
+
+    if len(problem_inputs) > 0:
+        print "Seem to be having some trouble with these input files:"
+        for inp in problem_inputs:
+            print "   ", inp
 
     if not alldone:
         print "Checking again in 20 min..."
@@ -179,6 +209,8 @@ cmds = []
 for s in sampnames:
     for skim in skims:
         hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}/skim_{2}".format(tag, s, skim)
+        if not os.path.exists(hadoopdir):
+            continue
         nfsdir = os.path.join(basedir, "{0}_skim_{1}".format(tag, skim))
         os.system("mkdir -p "+nfsdir)
         os.system("chmod -R a+wrx "+nfsdir)
@@ -209,7 +241,10 @@ samp_counts = {}
 samp_events = {}
 maxcount = -1
 for s in sampnames:
-    base = s.split("_ext")[0]
+    if s.startswith("T1") or s.startswith("T2"): # don't want to extmerge signals
+        base = s
+    else:
+        base = s.split("_ext")[0]
     if base not in samp_counts:
         samp_counts[base] = 1
         samp_events[base] = d[s].nevents
@@ -237,7 +272,9 @@ for skimname in skims:
             for f in glob.glob("{0}/{1}*.root".format(skimdir, s)):
                 subprocess.call("ln -s -t {0} {1}".format(extmergedir, f), shell=True)
         else:
-            ps.append(subprocess.Popen("nice -n 19 python skim_bennettworkflow/mergeFixScale1fb.py {0} {1} {2} {3} > {4}/log_{5}_{3}.txt".format(samp_events[s], skimdir, extmergedir, s, logdir, skimname), shell=True))
+            hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}/skim_{2}".format(tag, s, skim)
+            if os.path.exists(hadoopdir):
+                ps.append(subprocess.Popen("nice -n 19 python skim_bennettworkflow/mergeFixScale1fb.py {0} {1} {2} {3} > {4}/log_{5}_{3}.txt".format(samp_events[s], skimdir, extmergedir, s, logdir, skimname), shell=True))
 
     Nleft = 1
     while Nleft > 0:

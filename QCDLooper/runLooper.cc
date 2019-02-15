@@ -7,13 +7,14 @@
 int main(int argc, char **argv) {
 
   if (argc < 4) {
-    std::cout << "USAGE: runLooper <input_dir> <sample> <output_dir>" << std::endl;
+    std::cout << "USAGE: runLooper <input_dir> <sample> <config tag> <output_dir>" << std::endl;
     return 1;
   }
 
   std::string input_dir(argv[1]); 
   std::string sample(argv[2]); 
-  std::string output_dir(argv[3]);
+  std::string config_tag(argv[3]); 
+  std::string output_dir(argv[4]);
 
   TChain *ch = new TChain("mt2"); 
  
@@ -25,6 +26,6 @@ int main(int argc, char **argv) {
   }
 
   QCDLooper *looper = new QCDLooper();
-  looper->loop(ch, output_dir + "/" + sample + ".root"); 
+  looper->loop(ch, config_tag, output_dir + "/" + sample + ".root"); 
   return 0;
 }

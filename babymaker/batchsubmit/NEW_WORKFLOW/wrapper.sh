@@ -8,11 +8,13 @@ FILEID=$1
 FILE=$2
 COPYDIR=$3
 DOREBAL=$4
+XSECCORR=$5
 
 echo "[wrapper] FILEID    = " ${FILEID}
 echo "[wrapper] FILE      = " ${FILE}
 echo "[wrapper] COPYDIR   = " ${COPYDIR}
 echo "[wrapper] DOREBAL   = " ${DOREBAL}
+echo "[wrapper] XSECCORR  = " ${XSECCORR}
 
 #
 # set up environment
@@ -84,9 +86,9 @@ ls
 #
 # run it
 #
-echo "[wrapper] running: ./processBaby ${FILEID} ${FILE}"
+echo "[wrapper] running: ./processBaby ${FILEID} ${FILE} -1 ${DOREBAL} 1 ${XSECCORR}"
 
-./processBaby ${FILEID} ${FILE} -1 ${DOREBAL}
+./processBaby ${FILEID} ${FILE} -1 ${DOREBAL} 1 ${XSECCORR}
 
 #
 # do something with output

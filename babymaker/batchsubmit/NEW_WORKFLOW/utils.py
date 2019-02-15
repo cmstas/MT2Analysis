@@ -3,17 +3,25 @@ import subprocess
 import datetime as dt
 
 class Job:
-    def __init__(self, id, input_file, output_file, exe, args=[], err_if_no_input=False, tree_name="mt2", do_sweeproot=True):
+    def __init__(self, id, input_file, output_file, exe, tarball, args=[], err_if_no_input=False, tree_name="mt2", do_sweeproot=True):
         self.done = False
         self.sweeprooted = False
+        self.ntries = 0
         self.id = id
         self.input = input_file
         self.output = output_file
         self.exe = exe
+        self.tarball = tarball
         self.args = args
         self.err_if_no_input = err_if_no_input
         self.tree_name = tree_name
         self.do_sweeproot = do_sweeproot
+
+    def incrementNTries(self):
+        if not hasattr(self, "ntries"):
+            self.ntries = 1
+        else:
+            self.ntries += 1
 
 class Sample:
     def __init__(self, name):
@@ -65,7 +73,6 @@ def writeConfig(tag, samp, jobs):
     fout.write("""
 universe=vanilla
 when_to_transfer_output = ON_EXIT
-transfer_input_files=job_input/input.tar.xz
 +DESIRED_Sites="T2_US_UCSD"
 +remote_DESIRED_Sites="T2_US_UCSD"
 +Owner = undefined
@@ -79,6 +86,7 @@ x509userproxy=/tmp/x509up_u31592
 
     for job in jobs:
         fout.write("executable={0}\n".format(job.exe))
+        fout.write("transfer_input_files={0}\n".format(job.tarball))
         fout.write("transfer_executable=True\n")
         fout.write("arguments={0}\n".format(" ".join(job.args)))
         fout.write("queue\n\n")

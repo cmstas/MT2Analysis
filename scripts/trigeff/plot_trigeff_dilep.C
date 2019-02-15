@@ -49,13 +49,17 @@ void drawBinText(TCanvas *c, TH2D *num, TH2D *den){
 
 }
 
-void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-09-04_json_294927-306462_PromptReco_41p96fb_dilep_skim/") {
+// void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-10-07_2016fullYear_17Jul2018_dilep_skim/") {
+void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-10-07_2017fullYear_31Mar2018_dilep_skim/") {
+// void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-10-07_2018fullYear_17Sep2018_dilep_skim/") {
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "42.0 fb^{-1}";
+  // lumi_13TeV = "35.9 fb^{-1}";
+  lumi_13TeV = "41.5 fb^{-1}";
+  // lumi_13TeV = "58.8 fb^{-1}";
   //  lumi_13TeV = "Period 2016H";
   
   gStyle->SetOptStat(0);
@@ -68,7 +72,9 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-09-04_j
 
   TH1::SetDefaultSumw2();
   
-  TString suffix = "_41p96fb";
+  // TString suffix = "_2016fullYear";
+  TString suffix = "_2017fullYear";
+  // TString suffix = "_2018fullYear";
   
   TChain* t_ht = new TChain("mt2");
   TChain* t_met = new TChain("mt2");
@@ -79,20 +85,35 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-09-04_j
   t_ht->Add(Form("%s/*Run2017*JetHT*.root", indir.Data()));
   t_met->Add(Form("%s/*Run2017*MET*.root", indir.Data()));
 
+  // t_ht->Add(Form("%s/*Run2018*JetHT*.root", indir.Data()));
+  // t_met->Add(Form("%s/*Run2018*MET*.root", indir.Data()));
+
   TFile* f_out = new TFile(Form("trigeff_dilep%s.root",suffix.Data()),"RECREATE");
 
-  TCut base = "nVert > 0 && nJet30 >= 1 && Flag_globalSuperTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && isGolden";
-  TCut dilep = base + "nlep == 2 && lep_charge[0] * lep_charge[1] == -1 && (abs(lep_pdgId[0]) == 13 ||  lep_tightId[0] > 0 ) && (abs(lep_pdgId[1]) == 13 ||  lep_tightId[1] > 0 ) && lep_pt[1] > 20.";
+  // // 2016
+  // TCut base = "nVert > 0 && nJet30 >= 1 && Flag_globalSuperTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && Flag_badMuonFilter && Flag_badChargedCandidateFilter && isGolden";
+  // TCut trigs_ht = "HLT_PFHT900 || HLT_PFJet450 || HLT_PFHT600_Prescale || HLT_PFHT475_Prescale || HLT_PFHT350_Prescale || HLT_PFHT300_Prescale || HLT_PFHT200_Prescale || HLT_PFHT125_Prescale";
+  // TCut trigs_met = "HLT_PFMETNoMu120_PFMHTNoMu120 || HLT_PFMET120_PFMHT120";
+  // TCut trigs_ee = "HLT_DoubleEl || HLT_Photon165_HE10 || HLT_DoubleEl33";
+  // TCut trigs_mm = "HLT_DoubleMu || HLT_DoubleMu_NonIso || HLT_SingleMu_NonIso";
+  // TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu12_EleX || HLT_Mu8_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso || HLT_SingleMu_NonIso || HLT_Photon165_HE10";
+
+  // 2017,18
+  TCut base = "nVert > 0 && nJet30 >= 1 && Flag_globalSuperTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && Flag_ecalBadCalibFilter && Flag_badMuonFilter && Flag_badChargedCandidateFilter && isGolden";
+  TCut trigs_ht = "HLT_PFHT1050 || HLT_PFHT890_Prescale || HLT_PFHT780_Prescale || HLT_PFHT680_Prescale || HLT_PFHT590_Prescale || HLT_PFHT510_Prescale || HLT_PFHT430_Prescale || HLT_PFHT370_Prescale || HLT_PFHT250_Prescale || HLT_PFHT180_Prescale";
+  TCut trigs_met = "HLT_PFMETNoMu120_PFMHTNoMu120 || HLT_PFMET120_PFMHT120 || HLT_PFMETNoMu120_PFMHTNoMu120_PFHT60 || HLT_PFMET120_PFMHT120_PFHT60";
+  // TCut trigs_ee = "HLT_DoubleEl || HLT_Photon200 || HLT_DoubleEl33";
+  TCut trigs_ee = "HLT_DoubleEl";
+  // TCut trigs_mm = "HLT_DoubleMu || HLT_DoubleMu_NonIso || HLT_SingleMu_NonIso";
+  TCut trigs_mm = "HLT_DoubleMu";
+  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu12_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso || HLT_Mu37_Ele27_NonIso || HLT_Mu27_Ele37_NonIso || HLT_SingleMu_NonIso || HLT_Photon200";
+
+
+  TCut dilep = base + "nlep == 2 && lep_charge[0] * lep_charge[1] == -1 && (abs(lep_pdgId[0]) == 13 ||  lep_tightId[0] > 0 ) && (abs(lep_pdgId[1]) == 13 ||  lep_tightId[1] > 0 ) && lep_pt[1] > 10.";
   TCut ee = dilep + "abs(lep_pdgId[0]) == 11 && abs(lep_pdgId[1]) == 11";
   TCut mm = dilep + "abs(lep_pdgId[0]) == 13 && abs(lep_pdgId[1]) == 13";
   TCut em = dilep + "abs(lep_pdgId[0]) != abs(lep_pdgId[1])";
 
-  TCut trigs_ht = "HLT_PFHT1050 || HLT_PFHT890_Prescale || HLT_PFHT780_Prescale || HLT_PFHT680_Prescale || HLT_PFHT590_Prescale || HLT_PFHT510_Prescale || HLT_PFHT430_Prescale || HLT_PFHT370_Prescale || HLT_PFHT250_Prescale || HLT_PFHT180_Prescale";
-  TCut trigs_met = "HLT_PFMETNoMu120_PFMHTNoMu120 || HLT_PFMET120_PFMHT120";
-  TCut trigs_ee = "HLT_DoubleEl || HLT_Photon200 || HLT_DoubleEl33";
-  TCut trigs_mm = "HLT_DoubleMu || HLT_DoubleMu_NonIso || HLT_SingleMu_NonIso";
-  //  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu8_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso";
-  TCut trigs_em = "HLT_MuX_Ele12 || HLT_Mu12_EleX || HLT_Mu30_Ele30_NonIso || HLT_Mu33_Ele33_NonIso || HLT_SingleMu_NonIso || HLT_Photon200";
   
   // const int nbins_lead = 12;
   // const Double_t bins_lead[nbins+1] = {20, 25, 30, 35, 40, 
@@ -100,11 +121,16 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-09-04_j
   // const int nbins_subl = 12;
   // const Double_t bins_subl[nbins+1] = {20, 25, 30, 35, 40, 
   // 				       50, 60, 80, 100, 120, 150, 200, 300};
-  const int nbins_lead = 4;
-  const Double_t bins_lead[nbins_lead+1] = {100, 140, 180, 240, 300};
+
+  // const int nbins_lead = 3;
+  const int nbins_lead = 8;
+  // const Double_t bins_lead[nbins_lead+1] = {100, 180, 240, 300};
+  // const Double_t bins_lead[nbins_lead+1] = {100, 160, 220, 300};
+  const Double_t bins_lead[nbins_lead+1] = {20,25,30,40,60,80,100,150,200};
   
-  const int nbins_subl = 8;
-  const Double_t bins_subl[nbins_subl+1] = {35, 45, 55, 75, 100, 140, 180, 240, 300};
+  const int nbins_subl = 9;
+  // const Double_t bins_subl[nbins_subl+1] = {30, 35, 45, 60, 80, 100, 140, 180, 240, 300};
+  const Double_t bins_subl[nbins_subl+1] = {10, 15, 20, 30, 40, 60, 80, 100, 150, 200};
   
   // TH1D* h_ee_leadpt_denom_ht = new TH1D("h_ee_leadpt_denom_ht",";lead p_{T} [GeV]",nbins, bins);
   // TH1D* h_ee_leadpt_num_ht = (TH1D*) h_ee_leadpt_denom_ht->Clone("h_ee_leadpt_num_ht");
@@ -294,7 +320,6 @@ void plot_trigeff_dilep (const TString& indir = "/nfs-6/userdata/mt2/V00-09-04_j
   
   CMS_lumi( c_em_2d_ht, iPeriod, iPos );
   c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.pdf",suffix.Data()));
-  c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.eps",suffix.Data()));
   c_em_2d_ht->SaveAs(Form("trigeff_dilep_em_2d_ht%s.png",suffix.Data()));
 
   // TCanvas* c_em_2d_met = new TCanvas("c_em_2d_met","c_em_2d_met");

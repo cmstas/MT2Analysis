@@ -1,5 +1,6 @@
 import ROOT
 import os
+from math import sqrt
 import ResultPlotUtils as utils
 import sys
 import ppmUtils
@@ -7,11 +8,16 @@ from array import *
 
 ROOT.gROOT.SetBatch(1)
 
-def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPull=False,
-             drawObs=False, drawSignal=False, sigName=""):
+def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratioRange=None, doPull=False,
+             drawObs=False, drawSignal=False, sigName="", makeSBplot=False):
 
-    if len(utils.datacards)==0:
+    if (not doPostfit or drawSignal) and len(utils.datacards)==0:
         print "ERROR: must load pickled datacards first! (utils.LoadPickledDatacards)"
+        return
+
+    if doPostfit and utils.postfit_file is None:
+        print "ERROR: must load postfit file first! (utils.LoadPostfitFile)"
+        print "       (make with combine -M FitDiagnostics)"
         return
 
     jbj_regs = utils.GetJBJregions(ht_reg)
@@ -28,6 +34,8 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
 
     ## setup histograms
     h_data = ROOT.TH1D("h_data","",nBinsTotal,0,nBinsTotal)
+    h_sig = ROOT.TH1D("h_sig","",nBinsTotal,0,nBinsTotal)
+    h_SB = ROOT.TH1D("h_SB","",nBinsTotal,0,nBinsTotal)
     h_bkg_vec = []
     for i,proc in enumerate(bkg_processes):
         h_bkg_vec.append(ROOT.TH1D("h_"+proc,"",nBinsTotal,0,nBinsTotal))
@@ -37,6 +45,7 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
     ## fill histograms
     ibin = 0
     binLabels = []
+    SB_ratio = []
     
     for ijbj, jbj_reg in enumerate(jbj_regs):
         for imt2 in range(len(mt2bins[ijbj])-1):
@@ -52,28 +61,75 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
                 ht_name = ht_name.replace("-1","Inf")
                 datacard_name = "{0}_{1}_{2}".format(ht_name,jbj_reg,"m0toInf")
 
-            dc = utils.datacards[datacard_name]
-
-            # get yields. first entry is data, rest are background predictions
-            obs = int(round(dc.GetObservation()))
-            yields = dc.GetBackgroundRates()
-            for bkg in yields:
-                if yields[bkg] < 0:
-                    print "WARNING: negative prediction for bkg {0} in card {1}. Setting to 0.0".format(bkg, datacard_name)
-                    yields[bkg] = 0.0
-                yields[bkg] *= scalePred
-            h_data.SetBinContent(ibin, obs)
-            for i,bkg in enumerate(bkg_processes):
-                h_bkg_vec[i].SetBinContent(ibin, yields[bkg])
-            tot_pred = sum(yields.values())
+            if not doPostfit:
+                dc = utils.datacards[datacard_name]
                 
-            # get uncertainties
-            tot_unc_up, tot_unc_down = dc.GetTotalUncertainty()
-            thisPoint = g_unc.GetN()
-            g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
-            g_unc.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down, tot_unc_up)            
-            g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
-            g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down/tot_pred, tot_unc_up/tot_pred)
+                # get yields. first entry is data, rest are background predictions
+                obs = int(round(dc.GetObservation()))
+                yields = dc.GetBackgroundRates()
+                for bkg in yields:
+                    if yields[bkg] < 0:
+                        print "WARNING: negative prediction for bkg {0} in card {1}. Setting to 0.0".format(bkg, datacard_name)
+                        yields[bkg] = 0.0
+                    yields[bkg] *= scalePred
+                h_data.SetBinContent(ibin, obs)
+                for i,bkg in enumerate(bkg_processes):
+                    h_bkg_vec[i].SetBinContent(ibin, yields[bkg])
+                tot_pred = sum(yields.values())
+
+                sig = dc.GetSignalRate()
+                sigerr = dc.GetTotalUncertainty(signal=True)[0]
+                h_sig.SetBinContent(ibin, sig)
+                h_sig.SetBinError(ibin, sigerr)
+
+                # get uncertainties
+                tot_unc_up, tot_unc_down = dc.GetTotalUncertainty()
+                thisPoint = g_unc.GetN()
+                g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
+                g_unc.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down, tot_unc_up)            
+                g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
+                g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, tot_unc_down/tot_pred, tot_unc_up/tot_pred)
+
+                # divide S by total error (signal syst + background syst + sqrt(pred) stat uncert on obs) for a rough measure of expected significance
+                SB_ratio.append((datacard_name, sig / sqrt(tot_unc_up**2 + sigerr**2 + tot_pred)))
+                h_SB.SetBinContent(ibin, SB_ratio[-1][1])
+
+            else:
+                d = utils.postfit_file.Get("shapes_fit_b/{0}".format(datacard_name))
+                yields = {}
+                for bkg in bkg_processes:
+                    yields[bkg] = 0.0
+                for key in d.GetListOfKeys():
+                    name = key.GetName()
+                    for bkg in bkg_processes:
+                        if name.startswith(bkg):
+                            h = d.Get(name)
+                            yields[bkg] += h.GetBinContent(1)
+                for i,bkg in enumerate(bkg_processes):
+                    h_bkg_vec[i].SetBinContent(ibin, yields[bkg])
+                tot_pred = sum(yields.values())
+                x,y = ROOT.Double(), ROOT.Double()
+                d.Get("data").GetPoint(0, x, y)
+                obs = int(y)
+                h_data.SetBinContent(ibin, obs)
+                
+                unc = d.Get("total_background").GetBinError(1)
+                thisPoint = g_unc.GetN()
+                g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
+                g_unc.SetPointError(thisPoint, 0.5, 0.5, unc, unc)
+                g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
+                g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, unc/tot_pred, unc/tot_pred)
+
+                if drawSignal:
+                    dc = utils.datacards[datacard_name]
+                    sig = dc.GetSignalRate()
+                    sigerr = dc.GetTotalUncertainty(signal=True)[0]
+                    h_sig.SetBinContent(ibin, sig)
+                    h_sig.SetBinError(ibin, sigerr)
+                    # divide S by total error (signal syst + background syst + sqrt(pred) stat uncert on obs) for a rough measure of expected significance
+                    SB_ratio.append((datacard_name, sig / sqrt(unc**2 + sigerr**2 + tot_pred)))
+                    h_SB.SetBinContent(ibin, SB_ratio[-1][1])
+                
 
             binLabels.append(utils.GetMT2label(mt2left,mt2right))
 
@@ -87,6 +143,11 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
         binLabels.append("")
         h_data.SetBinContent(nBinsTotal-i, -1)
                     
+        
+    # if drawSignal and len(SB_ratio)>0:
+    #     print "Bins with highest S/B:"
+    #     for name,sb in sorted(SB_ratio, key=lambda x:x[1], reverse=True)[:5]:
+    #         print "   {0:.4f} {1}".format(sb, name)
 
     h_bkg_vec[0].SetFillColor(418)
     h_bkg_vec[1].SetFillColor(ROOT.kAzure+4)
@@ -107,22 +168,43 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
 
     ROOT.gStyle.SetOptStat(0)
     ROOT.gStyle.SetLineWidth(1)
-    c = ROOT.TCanvas("c","c",900,600)
+
+    npads = 3 if (drawSignal and makeSBplot) else 2
 
     pads = []
-    pads.append(ROOT.TPad("1","1",0.0,0.18,1.0,1.0))
-    pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.19))
+    if npads==2:
+        c = ROOT.TCanvas("c","c",900,600)
+        pads.append(ROOT.TPad("1","1",0.0,0.18,1.0,1.0))
+        pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.19))
 
-    pads[0].SetTopMargin(0.08)
-    pads[0].SetBottomMargin(0.13)
-    pads[0].SetRightMargin(0.05)
-    pads[0].SetLeftMargin(0.10)
+        pads[0].SetTopMargin(0.08)
+        pads[0].SetBottomMargin(0.13)
+        pads[0].SetRightMargin(0.05)
+        pads[0].SetLeftMargin(0.10)
+        
+        pads[1].SetRightMargin(0.05)
+        pads[1].SetLeftMargin(0.10)
+    elif npads==3:
+        c = ROOT.TCanvas("c","c",900,715)
+        pads.append(ROOT.TPad("1","1",0.0, 0.31, 1.0, 1.0))
+        pads.append(ROOT.TPad("2","2",0.0, 0.16, 1.0, 0.32))
+        pads.append(ROOT.TPad("3","3",0.0, 0.0,  1.0, 0.16))
 
-    pads[1].SetRightMargin(0.05)
-    pads[1].SetLeftMargin(0.10)
+        pads[0].SetTopMargin(0.08)
+        pads[0].SetBottomMargin(0.13)
+        pads[0].SetRightMargin(0.05)
+        pads[0].SetLeftMargin(0.10)
+        
+        pads[1].SetRightMargin(0.05)
+        pads[1].SetLeftMargin(0.10)
+
+        pads[2].SetRightMargin(0.05)
+        pads[2].SetLeftMargin(0.10)
 
     pads[0].Draw()
     pads[1].Draw()
+    if npads>2: pads[2].Draw()
+
     pads[0].cd()
 
     pads[0].SetLogy(1)
@@ -130,8 +212,12 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
     pads[1].SetTickx(1)
     pads[0].SetTicky(1)
     pads[1].SetTicky(1)
+    if npads>2:
+        pads[2].SetTickx(1)
+        pads[2].SetTicky(1)
+        # pads[2].SetLogy(1)
     
-    yMin = 1e-3
+    yMin = 1e-2
     if userMax!=None:
         yMax = userMax
     else:
@@ -156,6 +242,12 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
     g_unc.SetFillStyle(3244)
     g_unc.SetFillColor(ROOT.kGray+3)
     g_unc.Draw("SAME 2")
+
+    # draw the signal, if desired
+    if drawSignal:
+        h_sig.SetLineColor(ROOT.kRed)
+        h_sig.SetLineWidth(2)
+        h_sig.Draw("HIST SAME")
 
     # get a graph using proper asymmetric poissonian errors
     g_data = ROOT.TGraphAsymmErrors()
@@ -189,12 +281,15 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
         y = pads[0].GetBottomMargin()-0.009
         text.DrawLatex(x,y,binLabels[ibin])
         
-    # draw the "Pre-fit background" text
+    # draw the "Pre/Post-fit background" text
     text.SetTextAlign(13)
     text.SetTextFont(42)
     text.SetTextAngle(0)
     text.SetTextSize(0.05)
-    text.DrawLatex(left+0.04,1-top-0.01, "Pre-fit background")
+    if doPostfit:
+        text.DrawLatex(left+0.04,1-top-0.01, "Post-fit background")
+    else:
+        text.DrawLatex(left+0.04,1-top-0.01, "Pre-fit background")
 
     # draw the HT bin  in upper middle
     text.SetTextAlign(21)
@@ -250,6 +345,8 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
     leg.AddEntry(g_data,"Data","lp")
     for i in range(nBkgs):
         leg.AddEntry(h_bkg_vec[i], utils.GetLegendName(bkg_processes[i]),'f')
+    if drawSignal:
+        leg.AddEntry(h_sig, "{0} ({1},{2})".format(*sigName.split("_")), 'l')
     leg.Draw()
 
 
@@ -323,7 +420,50 @@ def MakePlot(ht_reg, outdir, userMax=None, scalePred=1.0, ratioRange=None, doPul
     if drawObs:
         g_ratio.Draw("SAME P0")
 
-    name = "prefit_{0}_{1}".format(ht_reg, "pull" if doPull else "ratio")
+
+    if drawSignal and makeSBplot:
+        pads[2].cd()
+        h_SB.SetLineColor(ROOT.kRed)
+        h_SB.SetLineWidth(2)
+        # h_SB.GetYaxis().SetRangeUser(1e-2,10)
+        h_SB.GetYaxis().SetRangeUser(0,2)
+        h_SB.GetYaxis().SetNdivisions(505)
+        h_SB.GetYaxis().SetTitle("S/#sigma_{S+B}")
+        h_SB.GetYaxis().SetTitleSize(0.16)
+        h_SB.GetYaxis().SetTitleOffset(0.25)
+        h_SB.GetYaxis().SetLabelSize(0.13)
+        h_SB.GetYaxis().CenterTitle()
+        h_SB.GetYaxis().SetTickLength(0.02)
+        h_SB.GetXaxis().SetLabelSize(0)
+        h_SB.GetXaxis().SetTitle("")
+        h_SB.GetXaxis().SetNdivisions(nBinsTotal,0,0)
+        h_SB.GetXaxis().SetTickSize(0.06)
+
+        h_SB.Draw("HIST")
+
+        line = ROOT.TLine()
+        line.SetLineStyle(1)
+        line.SetLineWidth(1)
+        line.SetLineColor(ROOT.kGray+1)
+        # line.DrawLine(0,1e-1,nBinsTotal,1e-1)
+        line.DrawLine(0,1e0,nBinsTotal,1e0)
+
+        #draw the lines separating j-bj region
+        line.SetNDC(1)
+        line.SetLineStyle(2)
+        line.SetLineWidth(1)
+        line.SetLineColor(ROOT.kBlack)
+        ibin = 0
+        for i in range(len(jbj_regs)-1):
+            ibin += len(mt2bins[i])-1 if len(mt2bins[i])>2 else 2
+            # line.DrawLine(ibin,1e-2,ibin,10)
+            line.DrawLine(ibin,0,ibin,2)
+
+        
+    if drawSignal:
+        outdir = os.path.join(outdir,sigName)
+
+    name = "{0}_{1}_{2}".format("postfit" if doPostfit else "prefit", ht_reg, "pull" if doPull else "ratio")
     try:
         os.makedirs(outdir)
     except:

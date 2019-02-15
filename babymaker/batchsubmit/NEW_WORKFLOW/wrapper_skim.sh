@@ -66,14 +66,14 @@ fi
 #
 
 mkdir condorsucks
-mv input.tar.xz *.sh condorsucks
+mv skiminput.tar.xz *.sh condorsucks
 cd condorsucks
 
 echo "[wrapper] current directory is:"
 pwd
 
 echo "[wrapper] extracting input sandbox"
-tar -xJf input.tar.xz
+tar -xJf skiminput.tar.xz
 
 #source job_input/setupenv.sh
 #printenv

@@ -8,10 +8,15 @@ import numpy as np
 
 lumi = 35.9
 datacards = {}
+postfit_file = None
 
 def LoadPickledDatacards(pickle_name):
     global datacards
     datacards = pickle.load(open(pickle_name, 'rb'))
+
+def LoadPostfitFile(fname):
+    global postfit_file
+    postfit_file = ROOT.TFile(fname)
 
 
 def GetPull(pred, syst, obs, N=50000):

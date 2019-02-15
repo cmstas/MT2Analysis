@@ -25,14 +25,17 @@ const int iPeriod = 4; // 13 tev
 //   iPos = 10*(alignement 1/2/3) + position (1/2/3 = left/center/right)
 const int iPos = 3;
 
-void plot_trigeff_Photon200 (const TString& indir = "/nfs-6/userdata/mt2/V00-09-02_json_294927-302663_PromptReco_18p26fb") {
+void plot_trigeff_Photon200 (TString indir = "/nfs-6/userdata/mt2/V00-09-02_json_294927-302663_PromptReco_18p26fb") {
+
+    // indir = "/nfs-6/userdata/mt2/V00-10-07_2017fullYear_31Mar2018/";
+    indir = "/nfs-6/userdata/mt2/V00-10-07_2018fullYear_17Sep2018/";
 
   cmsText = "CMS Preliminary";
   cmsTextSize = 0.5;
   lumiTextSize = 0.4;
   writeExtraText = false;
-  lumi_13TeV = "18.26 fb^{-1}";
-  //lumi_13TeV = "589 pb^{-1}";
+  // lumi_13TeV = "41.5 fb^{-1}";
+  lumi_13TeV = "58.8 fb^{-1}";
   
   gStyle->SetOptStat(0);
   gStyle->SetPadTopMargin(0.08);
@@ -44,12 +47,13 @@ void plot_trigeff_Photon200 (const TString& indir = "/nfs-6/userdata/mt2/V00-09-
 
   //TString suffix = "_hovere001";
   // TString suffix = "";
-   TString suffix = "";
+   TString suffix = "2018fullYear";
   
   TChain* t_jetht = new TChain("mt2");
   // TChain* t_muon = new TChain("mt2");
 
-  t_jetht->Add(Form("%s/*Run2017*JetHT*.root", indir.Data()));
+  // t_jetht->Add(Form("%s/*Run2017*JetHT*.root", indir.Data()));
+  t_jetht->Add(Form("%s/*Run2018*JetHT*.root", indir.Data()));
   //  t_muon->Add(Form("%s/*Run2016*SingleMuon*.root", indir.Data()));
 
   TFile* f_out = new TFile(Form("trigeff_Photon200%s.root",suffix.Data()),"RECREATE");
@@ -71,7 +75,10 @@ void plot_trigeff_Photon200 (const TString& indir = "/nfs-6/userdata/mt2/V00-09-
   c->SetGrid(1,1);
   c->cd();
 
-  TCut base = "nVert > 0 && Flag_globalSuperTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && isGolden && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 && (gamma_eta[0]<1.479&&gamma_hOverE015[0]<0.15 || gamma_eta[0]>=1.479&&gamma_hOverE015[0]<0.10) && gamma_eta[0]<2.4 && run>=0";
+  TCut base = "nVert > 0 && Flag_globalSuperTightHalo2016Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && \
+Flag_badMuonFilter && Flag_badChargedCandidateFilter && isGolden && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 && \
+(gamma_eta[0]<1.479&&gamma_hOverE015[0]<0.15 || gamma_eta[0]>=1.479&&gamma_hOverE015[0]<0.10) && gamma_eta[0]<2.4 && run>=0";
+
   //  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && ngamma > 0 && gamma_idCutBased[0] > 0 && gamma_chHadIso[0] < 2.5 && gamma_hOverE[0] < 0.01 ";
   // -- cuts for ZMET 2016, or as close as I can get..
   //  TCut base = "nVert > 0 && Flag_CSCTightHalo2015Filter && Flag_eeBadScFilter && Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && nElectrons10 == 0 && ngamma > 0 && gamma_idCutBased[0] > 0 && ( (fabs(gamma_eta[0]) < 1.442 && gamma_chHadIso[0] < 3.32 && (gamma_neuHadIso[0] < 1.92 + 0.014  * gamma_pt[0] + 0.000019*pow(gamma_pt[0],2)) && gamma_phIso[0] < 0.81 + 0.0053 * gamma_pt[0]) || ((fabs(gamma_eta[0]) > 1.566 && fabs(gamma_eta[0]) < 2.4 && gamma_chHadIso[0] < 1.97 && (gamma_neuHadIso[0] < 11.86 + 0.0139  * gamma_pt[0] + 0.000025*pow(gamma_pt[0],2)) && gamma_phIso[0] < 0.83 + 0.0034 * gamma_pt[0]) ) ) ";
@@ -115,9 +122,9 @@ void plot_trigeff_Photon200 (const TString& indir = "/nfs-6/userdata/mt2/V00-09-
   leg->Draw("same");
 
   CMS_lumi( c, iPeriod, iPos );
-  c->SaveAs(Form("trigeff_Photon200%s.pdf",suffix.Data()));
+  // c->SaveAs(Form("trigeff_Photon200%s.pdf",suffix.Data()));
   // c->SaveAs(Form("trigeff_Photon200%s.eps",suffix.Data()));
-  c->SaveAs(Form("trigeff_Photon200%s.png",suffix.Data()));
+  // c->SaveAs(Form("trigeff_Photon200%s.png",suffix.Data()));
 
   // ----- EB -----------
   
@@ -136,9 +143,9 @@ void plot_trigeff_Photon200 (const TString& indir = "/nfs-6/userdata/mt2/V00-09-
   leg_eb->Draw("same");
 
   CMS_lumi( c_eb, iPeriod, iPos );
-  c_eb->SaveAs(Form("trigeff_Photon200_EBEE%s.pdf",suffix.Data()));
+  // c_eb->SaveAs(Form("trigeff_Photon200_EBEE%s.pdf",suffix.Data()));
   // c_eb->SaveAs(Form("trigeff_Photon165_EBEE%s.eps",suffix.Data()));
-  c_eb->SaveAs(Form("trigeff_Photon200_EBEE%s.png",suffix.Data()));
+  // c_eb->SaveAs(Form("trigeff_Photon200_EBEE%s.png",suffix.Data()));
 
   // // ----- EE -----------
 

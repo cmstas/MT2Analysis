@@ -10,5 +10,8 @@ cp -r ../sweeproot .
 cp -r ../skim_bennettworkflow .
 cp ../../mergeHadoopFiles.C .
 tar -hcJf input.tar.xz *
+tar -hcJf skiminput.tar.xz skim_bennettworkflow
 # gzip input.tar
 cd ..
+
+echo "Remember to move from job_input2 to job_input!!!"

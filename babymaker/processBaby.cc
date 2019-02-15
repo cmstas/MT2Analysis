@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 
   std::cout<<"sample is "<<sample<<std::endl;
 
-  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast") || infile.Contains("Fall17Fast"));
+  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast") || infile.Contains("Summer16v3Fast") || infile.Contains("Fall17Fast"));
 
   string config_tag = "";
   if     (infile.Contains("Run2016") && infile.Contains("03Feb2017"))  config_tag = "data_2016_Moriond17";
@@ -240,6 +240,7 @@ int main(int argc, char **argv) {
   else if(infile.Contains("Run2018") && infile.Contains("26Sep2018"))  config_tag = "data_2018_17Sep2018";
   else if(infile.Contains("dataRun2") && infile.Contains("2018"))      config_tag = "data_2018_Prompt";
   else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Summer16";
+  else if(infile.Contains("RunIISummer16") && infile.Contains("Fast") && infile.Contains("94X"))  config_tag = "mc_94x_fastsim_Summer16";
   else if(infile.Contains("RunIISummer16") && infile.Contains("94X"))  config_tag = "mc_94x_Summer16";
   else if(infile.Contains("Private_94x"))                              config_tag = "mc_94x_Summer16";
   else if(infile.Contains("RunIIFall17") && infile.Contains("Fast") && infile.Contains("94X"))  config_tag = "mc_94x_fastsim_Fall17";
