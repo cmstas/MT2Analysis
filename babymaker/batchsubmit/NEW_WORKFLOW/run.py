@@ -8,8 +8,8 @@ import cPickle as pickle
 from utils import *
 
 
-tag = "V00-10-12_2016fullYear"
-# tag = "V00-10-12_2017fullYear"
+# tag = "V00-10-12_2016fullYear"
+tag = "V00-10-12_2017fullYear"
 # tag = "V00-10-12_2018fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2016fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2017fullYear"

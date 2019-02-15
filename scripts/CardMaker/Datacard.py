@@ -201,7 +201,8 @@ class Datacard:
         self.nuisances[fullname].bkg_values[fullidx] = value
 
 
-    def GetTotalUncertainty(self):
+    def GetTotalUncertainty(self, signal=False):
+        # get total background uncertainty (if signal==False) or total signal uncertainty
         alpha = 1-0.6827
         tot_err_up = 0.0
         tot_err_dn = 0.0
@@ -209,23 +210,40 @@ class Datacard:
             err_up = 0.0
             err_dn = 0.0
             if nuis.type in ["lnN","lnU"]:
-                for i,val in enumerate(nuis.bkg_values):
-                    bkg = self.split_bkg_names[i]
-                    if val is None:
-                        continue
-                    if type(val)==tuple:
-                        err_up += (val[0]-1.0) * self.bkg_rates[bkg]
-                        err_dn += (val[1]-1.0) * self.bkg_rates[bkg]
-                    else:
-                        err_up += (val-1.0) * self.bkg_rates[bkg]
-                        err_dn += (val-1.0) * self.bkg_rates[bkg]
+                if signal:
+                    sigrates = [self.sig_rate[y] for y in self.years] if self.split_sig_by_year else [self.sig_rate]
+                    for i,val in enumerate(nuis.sig_value):
+                        if val is None:
+                            continue
+                        if type(val)==tuple:
+                            err_up += (val[0]-1.0) * sigrates[i]
+                            err_dn += (val[1]-1.0) * sigrates[i]
+                        else:
+                            err_up += (val-1.0) * sigrates[i]
+                            err_dn += (val-1.0) * sigrates[i]
+                        
+                else:
+                    for i,val in enumerate(nuis.bkg_values):
+                        bkg = self.split_bkg_names[i]
+                        if val is None:
+                            continue
+                        if type(val)==tuple:
+                            err_up += (val[0]-1.0) * self.bkg_rates[bkg]
+                            err_dn += (val[1]-1.0) * self.bkg_rates[bkg]
+                        else:
+                            err_up += (val-1.0) * self.bkg_rates[bkg]
+                            err_dn += (val-1.0) * self.bkg_rates[bkg]
+
             if nuis.type == "gmN":                
-                for i,val in enumerate(nuis.bkg_values):
-                    bkg = self.split_bkg_names[i]
-                    if val is None:
-                        continue
-                    err_up += val * (ROOT.Math.gamma_quantile_c(alpha/2, nuis.N+1, 1) - nuis.N)
-                    err_dn += val * (0 if nuis.N==0 else nuis.N-ROOT.Math.gamma_quantile(alpha/2, nuis.N, 1))
+                if signal:
+                    pass
+                else:
+                    for i,val in enumerate(nuis.bkg_values):
+                        bkg = self.split_bkg_names[i]
+                        if val is None:
+                            continue
+                        err_up += val * (ROOT.Math.gamma_quantile_c(alpha/2, nuis.N+1, 1) - nuis.N)
+                        err_dn += val * (0 if nuis.N==0 else nuis.N-ROOT.Math.gamma_quantile(alpha/2, nuis.N, 1))
 
             # print nuis.name, err_up, err_dn
             tot_err_up += err_up**2
