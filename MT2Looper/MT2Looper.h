@@ -67,6 +67,7 @@ class MT2Looper {
   void fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bins, float* mt2bins,
 			const std::string& dir = "", const std::string& suffix = ""); 
   float getAverageISRWeight(const int evt_id, const int var = 0);
+  float getAverageZNJetWeight(const int evt_id, const int var = 0);
 
 
   
@@ -139,6 +140,8 @@ class MT2Looper {
   float evtweight_renormDn_;
   float weight_TTHF_UP_;
   float weight_TTHF_DN_;
+  float weight_ZNJet_UP_;
+  float weight_ZNJet_DN_;
 
   std::vector<const Int_t*> trigs_SR_;
   std::vector<const Int_t*> trigs_Photon_;
