@@ -204,7 +204,7 @@ float JRTreader::GetJERCorrection(float eta, int unc_var){
         else if (eta >= 3.0 && eta < 3.2) return 1.187 + unc_var * 0.1243;
         else                              return 1.192 + unc_var * 0.1488;
     }
-    else if(config_tag == "data_2017_31Mar2018"){
+    else if(config_tag == "data_2017_31Mar2018" || config_tag == "data_2018_17Sep2018"){
         if      (eta >= 0.0 && eta < 0.5) return 1.143 + unc_var * 0.0222;
         else if (eta >= 0.5 && eta < 0.8) return 1.182 + unc_var * 0.0484;
         else if (eta >= 0.8 && eta < 1.1) return 1.099 + unc_var * 0.0456;

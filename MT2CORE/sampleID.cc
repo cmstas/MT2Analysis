@@ -71,14 +71,12 @@ int sampleID (const string& name) {
 
   }
 
-  else if (name.find("GJet") != string::npos) {
-    if (name.find("GJet_Pt-15to3000") != string::npos) return 200;
-    else if (name.find("GJets_DR-0p4_HT-40To100") != string::npos || name.find("GJets_HT-40To100") != string::npos) return 201;
-    else if (name.find("GJets_DR-0p4_HT-100To200") != string::npos || name.find("GJets_HT-100To200") != string::npos) return 202;
-    else if (name.find("GJets_DR-0p4_HT-200To400") != string::npos || name.find("GJets_HT-200To400") != string::npos) return 203;
-    else if (name.find("GJets_DR-0p4_HT-400To600") != string::npos || name.find("GJets_HT-400To600") != string::npos) return 204;
-    else if (name.find("GJets_DR-0p4_HT-600ToInf") != string::npos || name.find("GJets_HT-600ToInf") != string::npos) return 205;
-  }
+  else if (name.find("GJet_Pt-15to3000") != string::npos) return 200;
+  else if (name.find("GJets_DR-0p4_HT-40To100") != string::npos || name.find("GJets_HT-40To100") != string::npos) return 201;
+  else if (name.find("GJets_DR-0p4_HT-100To200") != string::npos || name.find("GJets_HT-100To200") != string::npos) return 202;
+  else if (name.find("GJets_DR-0p4_HT-200To400") != string::npos || name.find("GJets_HT-200To400") != string::npos) return 203;
+  else if (name.find("GJets_DR-0p4_HT-400To600") != string::npos || name.find("GJets_HT-400To600") != string::npos) return 204;
+  else if (name.find("GJets_DR-0p4_HT-600ToInf") != string::npos || name.find("GJets_HT-600ToInf") != string::npos) return 205;
 
   else if (name.find("TTJets") != string::npos) {
     if (name.find("TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 300;
@@ -87,6 +85,7 @@ int sampleID (const string& name) {
     else if (name.find("TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8") != string::npos) return 301;
     else if (name.find("TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8") != string::npos) return 302;
     else if (name.find("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
+    else if (name.find("TTJets_DiLept_TuneCP5_13TeV-madgraphMLM-pythia8") != string::npos) return 303;
     else if (name.find("TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8") != string::npos) return 306;
     
     else if (name.find("TTJets_HT-600to800") != string::npos) return 311;
@@ -150,7 +149,11 @@ int sampleID (const string& name) {
     else if ((name.find("DYJetsToLL_M-50_HT-100to200")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-100To200") != string::npos)) return 702;
     else if ((name.find("DYJetsToLL_M-50_HT-200to400")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-200To400") != string::npos)) return 703;
     else if ((name.find("DYJetsToLL_M-50_HT-400to600")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-400To600") != string::npos)) return 704;
-    else if ((name.find("DYJetsToLL_M-50_HT-600toInf")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-600ToInf") != string::npos)) return 705;
+    else if ((name.find("DYJetsToLL_M-50_HT-600to800")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-600To800") != string::npos)) return 705;
+    else if ((name.find("DYJetsToLL_M-50_HT-800to1200")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-800To1200") != string::npos)) return 706;
+    else if ((name.find("DYJetsToLL_M-50_HT-1200to2500")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-1200To2500") != string::npos)) return 707;
+    else if ((name.find("DYJetsToLL_M-50_HT-2500toInf")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-2500ToInf") != string::npos)) return 708;
+    else if ((name.find("DYJetsToLL_M-50_HT-600toInf")  != string::npos) || (name.find("DYJetsToLL_M-50_HT-600ToInf") != string::npos)) return 709;
   }
 
   // 800 block: diboson etc

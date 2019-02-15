@@ -340,7 +340,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.jet_id             = "2018_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
         c.rphi_tag           = "V00-10-09_2018fullYear";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V1_DATAdummy"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V3_DATAdummy"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -491,7 +491,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.jet_id             = "2018_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
         c.rphi_tag           = "V00-10-09_2018fullYear";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V1_MC"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V3_MC"));
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;

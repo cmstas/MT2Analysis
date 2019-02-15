@@ -157,7 +157,7 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "rphi_tag" : "V00-10-09_2018fullYear",
-    "JECs" : [ ["", "Autumn18_V1_DATAdummy"]
+    "JECs" : [ ["", "Autumn18_V3_DATAdummy"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
@@ -333,7 +333,7 @@ MT2Config_defs["mc_102x_Autumn18"] = {
     "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "rphi_tag" : "V00-10-09_2018fullYear",
-    "JECs" : [ ["", "Autumn18_V1_MC"]
+    "JECs" : [ ["", "Autumn18_V3_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
                   "goodVertices",

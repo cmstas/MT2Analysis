@@ -674,6 +674,7 @@ class babyMaker {
   Float_t         genRecoil_pt;
   Float_t         genTop_pt;
   Float_t         genTbar_pt;
+  Float_t         genZ_pt;
   Int_t           genProd_pdgId;
   Float_t         weight_pol_L;
   Float_t         weight_pol_R;

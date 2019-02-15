@@ -3726,7 +3726,7 @@ namespace mt2 {
       else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[9] = {200, 400, 600, 800, 1000, 1200, 1400, 1600, 2400}; fullSR.SetMT2Bins(8, mt2bins);}
       else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 2400};             fullSR.SetMT2Bins(4, mt2bins);}
-      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 2400};       fullSR.SetMT2Bins(6, mt2bins);}
+      else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 2400};             fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 2400};             fullSR.SetMT2Bins(4, mt2bins);}
       else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 2400};                  fullSR.SetMT2Bins(3, mt2bins);}

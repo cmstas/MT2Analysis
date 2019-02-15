@@ -1790,8 +1790,8 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("jet_btagDeepCSV"))                        fChain->SetBranchAddress("jet_btagDeepCSV", jet_btagDeepCSV, &b_jet_btagDeepCSV);
    if(bs->FindObject("jet_chf"))                                fChain->SetBranchAddress("jet_chf", jet_chf, &b_jet_chf);
    if(bs->FindObject("jet_nhf"))                                fChain->SetBranchAddress("jet_nhf", jet_nhf, &b_jet_nhf);
-   if(bs->FindObject("jet_nemf"))                               fChain->SetBranchAddress("jet_nemf", jet_cemf, &b_jet_cemf);
-   if(bs->FindObject("jet_cemf"))                               fChain->SetBranchAddress("jet_cemf", jet_nemf, &b_jet_nemf);
+   if(bs->FindObject("jet_nemf"))                               fChain->SetBranchAddress("jet_nemf", jet_nemf, &b_jet_nemf);
+   if(bs->FindObject("jet_cemf"))                               fChain->SetBranchAddress("jet_cemf", jet_cemf, &b_jet_cemf);
    if(bs->FindObject("jet_muf"))                                fChain->SetBranchAddress("jet_muf", jet_muf, &b_jet_muf);
    if(bs->FindObject("jet_rawPt"))                              fChain->SetBranchAddress("jet_rawPt", jet_rawPt, &b_jet_rawPt);
    if(bs->FindObject("jet_mcPt"))                               fChain->SetBranchAddress("jet_mcPt", jet_mcPt, &b_jet_mcPt);

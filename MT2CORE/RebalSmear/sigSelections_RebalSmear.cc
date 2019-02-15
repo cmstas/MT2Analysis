@@ -1551,10 +1551,10 @@ std::vector<SRRS> getSignalRegions2018_RS(){
     fullSR.SetVarCRRSDPhiMT2("met", 30, -1);
     int njets_lo = fullSR.GetLowerBound("njets");
     int nbjets_lo = fullSR.GetLowerBound("nbjets");
-    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(7, mt2bins);}
+    if     (njets_lo == 2 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
     else if(njets_lo == 2 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
     else if(njets_lo == 2 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 2400};       fullSR.SetMT2Bins(5, mt2bins);}
-    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(7, mt2bins);}
+    else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
     else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1200, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
     else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[6] = {200, 400, 600, 800, 1000, 2400};       fullSR.SetMT2Bins(5, mt2bins);}
     else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[6] = {200, 400, 600, 800, 1000, 2400};       fullSR.SetMT2Bins(5, mt2bins);}
@@ -1603,7 +1603,7 @@ std::vector<SRRS> getSignalRegions2018_RS(){
     else if(njets_lo == 4 && nbjets_lo == 0){float mt2bins[9] = {200, 400, 600, 800, 1000, 1200, 1400, 1600, 2400}; fullSR.SetMT2Bins(8, mt2bins);}
     else if(njets_lo == 4 && nbjets_lo == 1){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
     else if(njets_lo == 4 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 2400};             fullSR.SetMT2Bins(4, mt2bins);}
-    else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 2400};       fullSR.SetMT2Bins(6, mt2bins);}
+    else if(njets_lo == 7 && nbjets_lo == 0){float mt2bins[7] = {200, 400, 600, 800, 1000, 1400, 2400}; fullSR.SetMT2Bins(6, mt2bins);}
     else if(njets_lo == 7 && nbjets_lo == 1){float mt2bins[5] = {200, 400, 600, 800, 2400};             fullSR.SetMT2Bins(4, mt2bins);}
     else if(njets_lo == 7 && nbjets_lo == 2){float mt2bins[5] = {200, 400, 600, 800, 2400};             fullSR.SetMT2Bins(4, mt2bins);}
     else if(njets_lo == 2 && nbjets_lo == 3){float mt2bins[4] = {200, 400, 600, 2400};                  fullSR.SetMT2Bins(3, mt2bins);}
@@ -1735,8 +1735,8 @@ std::vector<SRRS> getSignalRegionsMonojet_RS(){
 
     // fine binning in HT
     const unsigned int nbins_monojet_0b = 7;
-    float htbins_0b[nbins_monojet_0b+1] = {250, 350, 450, 575, 700, 1000, 1500, -1};
-    float htbins_0b_forPlotting[nbins_monojet_0b+1] = {250, 350, 450, 575, 700, 1000, 1500, 2000};
+    float htbins_0b[nbins_monojet_0b+1] = {250, 350, 450, 575, 700, 1000, 1200, -1};
+    float htbins_0b_forPlotting[nbins_monojet_0b+1] = {250, 350, 450, 575, 700, 1000, 1200, 2000};
     const unsigned int nbins_monojet_1b = 5;
     float htbins_1b[nbins_monojet_1b+1] = {250, 350, 450, 575, 700, -1};
     float htbins_1b_forPlotting[nbins_monojet_1b+1] = {250, 350, 450, 575, 700, 1500};

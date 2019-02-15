@@ -735,6 +735,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         int nHardScatter = 0;
 	genTop_pt = -1.;
 	genTbar_pt = -1.;
+	genZ_pt = -1.;
         extraGenB = 0;
         std::vector<uint> foundBGenJetIdxs;
 	if (cms3.genps_p4().size() != cms3.genps_isLastCopy().size()) {
@@ -801,6 +802,10 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
               ++nHardScatter;
             }
             if (nHardScatter > 1) std::cout << "WARNING: found too many Ws in Wjets MC!" << std::endl;
+          }
+          else if (evt_id >= 600 && evt_id < 800){
+              if(isLastCopy==1 and pdgId==23)
+                  genZ_pt = cms3.genps_p4().at(iGen).pt();
           }
           else if (evt_id >= 1000 && evt_id < 1100) {
             // SMS T1 and T5 models - gluinos
@@ -4060,6 +4065,7 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("genRecoil_pt", &genRecoil_pt );
   BabyTree_->Branch("genTop_pt", &genTop_pt );
   BabyTree_->Branch("genTbar_pt", &genTbar_pt );
+  BabyTree_->Branch("genZ_pt", &genZ_pt );
   BabyTree_->Branch("genProd_pdgId", &genProd_pdgId );
   BabyTree_->Branch("weight_pol_L", &weight_pol_L );
   BabyTree_->Branch("weight_pol_R", &weight_pol_R );
@@ -4565,6 +4571,7 @@ void babyMaker::InitBabyNtuple () {
   genRecoil_pt = -999.;
   genTop_pt = -999.;
   genTbar_pt = -999.;
+  genZ_pt = -999.;
   genProd_pdgId = -999;
   nLHEweight = -999;
   weight_pol_L = -999;
