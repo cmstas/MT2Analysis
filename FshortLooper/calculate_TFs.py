@@ -120,9 +120,6 @@ for rawname in names:
             newerr_dn = sqrt( (derr[1]/den)**2 + (nerr[1]/num)**2 ) * num/den            
             h_fs_up.SetBinError(length, 1, newerr_up)
             h_fs_dn.SetBinError(length, 1, newerr_dn)
-        if name == "h_fsVR_4_Baseline_lowpt":
-            h_fs_up.Print("all")
-            h_fs_dn.Print("all")
         h_fs.SetMarkerSize(1.8)
         h_fs.Draw("text E")
         simplecanvas.SaveAs("distributions{}/{}/{}.pdf".format("NM1" if name.find("NM1") > 0 else "",shortname,name))
@@ -186,10 +183,17 @@ for rawname in names:
     # Fshort histograms
     if name.find("fs") < 0: continue
     if name.find("max_weight") >= 0: continue
-    if name.find("Baseline") < 0: continue
+    if name.find("Baseline") < 0 and not (name.find("_1_") >= 0 and name.find("MR") >= 0): continue
     if name.find("MR") < 0 and name.find("VR") < 0: continue
     if name.find("_dn") >= 0 or name.find("_up") >= 0: continue
     if verbose: print name
+    if name.find("_1_") >= 0: # Monojet
+        monojet = True
+        if name.find("VR") >= 0: continue
+        variations = variations = ["pt60","pt100","pt150"]
+    else:
+        monojet = False
+        variations = ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]
     h_fs = outfile.Get(name)
     h_fs_up = outfile.Get(name+"_up")
     h_fs_dn = outfile.Get(name+"_dn")
@@ -207,8 +211,8 @@ for rawname in names:
             max_delta = 0
             max_variation_total_error = 0
             max_var = "Minimal"
-            for variation in ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
-                hnamevar = name.replace("Baseline",variation)
+            for variation in variations:
+                hnamevar = name.replace("Baseline",variation) if not monojet else name.replace("MR",variation)
                 h_fs_var = outfile.Get(hnamevar)
                 h_fs_var_up = outfile.Get(hnamevar+"_up")
                 h_fs_var_dn = outfile.Get(hnamevar+"_dn")
@@ -229,10 +233,7 @@ for rawname in names:
                     max_total_error = sqrt(fserr**2+fserr_var**2)
                     max_var = variation                
             systematic = max_correction_needed
-#            if verbose: print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_stat_error: {} max_var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_stat_error,max_var,systematic)
-            if variation == "MET250" and name == "h_fsMR_4_Baseline_lowpt" and length == 3:
-                print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_total_error {}  max var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_total_error,max_var,systematic)
-#        if verbose: print name,length,fs,fserr,systematic
+            if verbose: print "name: {} length: {} fs: {} fserr: {} max_delta: {} max_variation_stat_error: {} max_var: {} systematic: {}".format(name,length,fs,fserr,max_delta,max_variation_stat_error,max_var,systematic)
         h_syst.SetBinContent(length, 1, systematic)
     h_syst.Write()
 

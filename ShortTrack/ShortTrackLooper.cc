@@ -11,6 +11,7 @@ const bool increment17 = false;
 const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
+const bool skipHighEventWeights = true;
 
 const bool merge17and18 = true;
 
@@ -1006,7 +1007,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
 
-    //    if (weight > 1.0) continue;
+    if (weight > 1.0 && skipHighEventWeights) continue;
 
     
     TH2D* hist;    

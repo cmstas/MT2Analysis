@@ -12,7 +12,7 @@ verbose = False # Print more status messages
 printTables = True
 full_unblind = True
 doMC = True
-makePullPlots = True
+makePullPlots = False
 makePostFitPlots = True
 makeSSRplots = True
 format = "pdf"
@@ -221,21 +221,25 @@ if makePullPlots:
     makePlotRaw(allSR16,D16,eD16,sD16,D16f,"2016 DATA SR",rescale16,doPullPlot=True)
 
 if makePostFitPlots:
-    fpostfit=ROOT.TFile.Open("fit_CRonly_{}.root".format(tag))
+    fpostfit=ROOT.TFile.Open("../scripts/fits_{}_10cm_1800-1400_Data_SR/fitDiagnostics_fit_CRonly_result.root".format(tag))
     if fpostfit == None:
-        print "Couldn't find postfit file","fit_CRonly_{}.root".format(tag)
-        print "Need to copy a BG-only fits file produced by scripts/getFits.sh, or produced manually using something like combine -M FitDiagnostics -d combined.txt -n _fit_CRonly_result --saveShapes --saveWithUncertainties --setParameters mask_ch1=1 (with correctly named channels; see scripts/combineDir.sh)"
+        print "Couldn't find postfit file"
+        print "Run scripts/getShortTrackFits.sh, or produced manually using something like combine -M FitDiagnostics -d combined.txt -n _fit_CRonly_result --saveShapes --saveWithUncertainties --setParameters mask_ch1=1 (with correctly named channels; see scripts/combineDir.sh)"
         exit(1)
     D16p,eD16p=getCountsPostfit(fpostfit,"2016")
     D1718p,eD1718p=getCountsPostfit(fpostfit,"2017and2018")
 
-    f_pf = ROOT.TFile.Open("fit_10cm_1800-1400_{}.root".format(tag))
+    f_pf = ROOT.TFile.Open("../scripts/fits_{}_10cm_1800-1400_Data_SR/fitDiagnostics_fit_result.root".format(tag))
+    if f_pf == None:
+        print "Couldn't find postfit signal counts for 10cm 1800-1400. Use combine -M FitDiagnostics -d combined.txt -n _fit_10cm_1800-1400 --saveShapes --saveWithUncertainties --setParameters"
     S16p,eS16p = getSignalCountsPostfit(f_pf,"2016")
     S1718p,eS1718p = getSignalCountsPostfit(f_pf,"2017and2018")
     f_pf.Close()
     makePlotPostfitSvsBG(allSR1718,D1718,S1718p,eS1718p,"2017-18 DATA SR 10-1800-1400",rescale1718,doPullPlot=False)
     makePlotPostfitSvsBG(allSR16,D16,S16p,eS16p,"2016 DATA SR 10-1800-1400",rescale16,doPullPlot=False)
-    f_pf = ROOT.TFile.Open("fit_90cm_1800-1600_{}.root".format(tag))
+    f_pf = ROOT.TFile.Open("../scripts/fits_{}_90cm_1800-1600_Data_SR/fitDiagnostics_fit_result.root".format(tag))
+    if f_pf == None:
+        print "Couldn't find postfit signal counts for 90cm 1800-1600. Use combine -M FitDiagnostics -d combined.txt -n _fit_90cm_1800-1600 --saveShapes --saveWithUncertainties --setParameters"
     S16p,eS16p = getSignalCountsPostfit(f_pf,"2016")
     S1718p,eS1718p = getSignalCountsPostfit(f_pf,"2017and2018")
     f_pf.Close()
@@ -253,20 +257,30 @@ if makePostFitPlots:
     makePlotPostfitOnly(allSR1718,D1718,D1718p,eD1718p,"2017-18 DATA SR",rescale1718,doPullPlot=False)
     makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=False)
 
-    makePlotPostfitOnly(allSR1718,D1718,D1718p,eD1718p,"2017-18 DATA SR",rescale1718,doPullPlot=True)
-    makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=True)
-
     makePlotPostfitOnly(allSR1718,D1718,D1718p,eD1718p,"2017-18 DATA SR",rescale1718,doPullPlot=False)
     makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=False)
 
-    makePlotPostfitOnly(allSR1718,D1718,D1718p,eD1718p,"2017-18 DATA SR",rescale1718,doPullPlot=True)
-    makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=True)
+    if makePullPlots:
+        makePlotPostfitOnly(allSR1718,D1718,D1718p,eD1718p,"2017-18 DATA SR",rescale1718,doPullPlot=True)
+        makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=True)
+
+        makePlotPostfitOnly(allSR1718,D1718,D1718p,eD1718p,"2017-18 DATA SR",rescale1718,doPullPlot=True)
+        makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=True)
 
 if makeSSRplots:
-    makePlotSSRs(svr_1718,D1718,eD1718,sD1718,"2017-18 DATA SVR",svr_1718_names)
-    makePlotSSRs(svr_16,D16,eD16,sD16,"2016 DATA SVR",svr_16_names)
-    makePlotSSRs(ssr_1718,D1718,eD1718,sD1718,"2017-18 DATA SSR",ssr_1718_names,rescale1718)
-    makePlotSSRs(ssr_16,D16,eD16,sD16,"2016 DATA SSRs",ssr_16_names,rescale16)
+    fcorr = ROOT.TFile.Open("../scripts/fits_preapproval_10cm_1800-1400_Data_SR/fitDiagnostics_covariance.root")
+    if fcorr == None:
+        print "Couldn't find a background-only covariance file. Make it using combine -M FitDiagnostics -t -1 --expectSignal 0 --rMin -1 [COMBINED DATACARD] --forceRecreateNLL  --saveWithUncertainties --saveOverallShapes --numToysForShapes 200"
+    CORR = getCorr(fcorr)
+    makePlotSSRsCorr(svr_1718,D1718,eD1718,sD1718,CORR,"2017-18 DATA SVR",svr_1718_names)
+    makePlotSSRsCorr(svr_16,D16,eD16,sD16,CORR,"2016 DATA SVR",svr_16_names)
+    makePlotSSRsCorr(ssr_1718,D1718,eD1718,sD1718,CORR,"2017-18 DATA SSR",ssr_1718_names,rescale1718)
+    makePlotSSRsCorr(ssr_16,D16,eD16,sD16,CORR,"2016 DATA SSR",ssr_16_names,rescale16)
+
+    makePlotSSRsCorr(svr_1718,D1718,eD1718,sD1718,CORR,"2017-18 DATA SVR",svr_1718_names,doFullCovariance=False)
+    makePlotSSRsCorr(svr_16,D16,eD16,sD16,CORR,"2016 DATA SVR",svr_16_names,doFullCovariance=False)
+    makePlotSSRsCorr(ssr_1718,D1718,eD1718,sD1718,CORR,"2017-18 DATA SSR",ssr_1718_names,rescale1718,doFullCovariance=False)
+    makePlotSSRsCorr(ssr_16,D16,eD16,sD16,CORR,"2016 DATA SSR",ssr_16_names,rescale16,doFullCovariance=False)
 
 if doMC:
     makePlotRaw(allVR1718,M1718,eM1718,sM1718,M1718f,"2017-18 MC VR",doPullPlot=False)

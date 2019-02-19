@@ -11,13 +11,14 @@ import os
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more error messages
-suppressZeroBins = True # Don't print cards for any bin with 0 signal, even if other bins in its region have nonzero signal
+suppressZeroBins = False # Don't print cards for any bin with 0 signal, even if other bins in its region have nonzero signal
 suppressZeroTRs = False # Don't print cards for any of the bins in a region with 0 signal in any bin
 doDummySignalSyst = False
 subtractSignalContam = True
 doDummyBackgroundSyst = False
 saveTemplates = True # Save templates separately from cards
 setBGtoObs = False
+setBGplusSigToObs = False
 
 # We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
 n_zero = 1e-3
@@ -139,7 +140,10 @@ def makeTemplate(year,region,length):
     template_list.append("kmax *\n")
     template_list.append("------------\n")
     template_list.append("bin         {0}\n".format(channel))
-    template_list.append("observation {0:.3f}\n".format(n_obs))
+    if not setBGplusSigToObs:
+        template_list.append("observation {0:.3f}\n".format(n_obs))
+    else:
+        template_list.append("observation n_obs\n")
     template_list.append("------------\n")
     template_list.append("bin             {0} {0}\n".format(channel))
     template_list.append("process          sig                  bg\n")
@@ -191,9 +195,9 @@ def makeTemplate(year,region,length):
     # The template contains background information used for all signal mass points.
     # channel is needed to name the output file produced in makeCard.
     # lostlep_alpha and lastbin_hybrid are needed for signal contamination subtraction.
-    return template
+    return template,n_bkg
 
-def makeCard(year,region,template,signal,outdir,length,im1=-1,im2=-1):
+def makeCard(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
     category = ["P","P3","P4","M","L"][length-1]
     channel = region+"_"+category+"_"+year
     cardname = "{0}/datacard_{1}_{2}_{3}_{4}.txt".format(outdir,channel,signal,im1,im2)
@@ -247,6 +251,8 @@ def makeCard(year,region,template,signal,outdir,length,im1=-1,im2=-1):
 
     if n_sig == 0 and suppressZeroBins: return False
 
+    if setBGplusSigToObs:
+        to_print = to_print.replace("n_obs","{:.3f}".format(n_sig+n_bkg))
     to_print = to_print.replace("n_sig","{:.3f}".format(n_sig))
     if (doDummySignalSyst):
         to_print = to_print.replace("name_sig_syst",name_syst_sig)
@@ -291,7 +297,7 @@ for region in regions:
             for ptstr in ptstrings:
                 fullregion = region+ptstr
                 # Make a template for this bin containing the common background components of the card, with placeholders for signal.
-                template = makeTemplate(year,fullregion,length) 
+                template,background = makeTemplate(year,fullregion,length) 
                 if template == None: 
                     if not (suppressZeroBins or suppressZeroTRs):
                         print "Template could not be formed due to missing histograms in region {0}, but we're not suppressing zero bins. Aborting.".format(fullregion)
@@ -318,7 +324,7 @@ for region in regions:
                             if success:
                                 signal_points.add( (im1,im2) )
                 else:
-                    makeCard(year,fullregion,template,signal,outdir,length,im1,im2)
+                    makeCard(year,fullregion,template,signal,outdir,length,background,im1,im2)
 
         # The 'del's throughout this script remove the python interpreter's reference to the object, which would normally cause an object
         # to be garbage collected. Unfortunately, only TObjects created by constructors are owned by python; all others are owned by ROOT. 

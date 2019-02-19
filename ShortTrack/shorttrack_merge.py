@@ -36,6 +36,8 @@ tag = sys.argv[1]
 # Can give the output a new name using the second argument, if you wish.
 outtag = sys.argv[2] if len(sys.argv) > 2 else tag
 
+os.system("mkdir -p output_merged")
+
 d18 = "output_merged/data_2018_{}.root".format(outtag)
 d17 = "output_merged/data_2017_{}.root".format(outtag)
 d16 = "output_merged/data_2016_{}.root".format(outtag)
@@ -596,8 +598,7 @@ for filename in filenames:
 
     for histname in histnames:
         h = filelist[0].Get(histname)
-        print_debug = histname == "h_LM_VR_23_hi" and filename == d1718
-        if print_debug:
+        if verbose:
             print filelist[0].GetName()
             print "start:",h.GetBinContent(2,3),h.GetBinContent(2,2),h.GetBinContent(2,1)
             if h.GetBinContent(2,3) > 0: print "inferred fs:",h.GetBinContent(2,2)/h.GetBinContent(2,3)
@@ -605,7 +606,7 @@ for filename in filenames:
         for f in filelist[1:]:
             hminor = f.Get(histname)
             h.Add(hminor)
-            if print_debug:
+            if verbose:
                 print f.GetName()
                 print "adding:",hminor.GetBinContent(2,3),hminor.GetBinContent(2,2),hminor.GetBinContent(2,1)
                 print "Running total:",h.GetBinContent(2,3),hminor.GetBinContent(2,2),h.GetBinContent(2,1)
@@ -786,9 +787,6 @@ for filename in filenames:
                 systematic_percent = 0
             # Set systematic to either the calculated systematic, or the prediction statistical error if it is larger
             h_nc.SetBinContent(length,min(max(systematic_percent,minimal_rel_error),1.0)) # cap at 100%, can be larger if statistical error is gigantic
-            if histname == "h_LL_VR_23_lo": 
-                print "histname,expr,pred-obs,pred,obs,total_err,pred_err,obs_err,minimal_rel_error,systematic_percent,h_nc.GetBinContent(length)"
-                print histname,expr,pred-obs,pred,obs,total_err,pred_err,obs_err,minimal_rel_error,systematic_percent,h_nc.GetBinContent(length)
         outfile.cd()
         h_nc.Write()
 

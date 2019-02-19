@@ -22,10 +22,11 @@ const bool applyDileptonTriggerWeights = true;
 
 const bool blind = false;
 
-const bool skipHighWeights = false; // turn on to skip MC events with weight > 1, to keep errors reasonable
+const bool skipHighWeights = true; // turn on to skip MC events with weight > 1, to keep errors reasonable
 
 const bool fillCutHists = true; // turn on to fill extra histograms
 const bool fillUnimportantCutHists = false; // turn on to fill Nvertex, Eta, Ntag, DphiMet, and HitSignature histograms
+const bool doMatching = false; // turn on gen-matching (chargino matching is always on, for signal)
 
 const bool fillNM1Hists = true; // turn on to fill NM1 histograms (need to set recalculate and fillCutHists to true)
 
@@ -106,6 +107,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   h_fsMR_Base->GetYaxis()->SetBinLabel(2,"ST");
   h_fsMR_Base->GetYaxis()->SetBinLabel(3,"STC");
 
+  // Multijet
   unordered_map<string,TH2D*> fsHists;
   string variations[] = {"Baseline","gt1200HT","lt1200HT","MET30","MET100","MET250","HT250","HT450","HT450MET100"};
   string njets[] = {"","_23","_4"};
@@ -125,6 +127,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       }
     }
   }
+  // Monojet
   string jetpt[] = {"SR","VR","MR","pt60","pt100","pt150"};
   string trackpt[] = {"","_hipt","_lowpt"};
   for (int jetptbin = 0; jetptbin < 6; jetptbin++) {
@@ -167,8 +170,18 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   string lengths[] = {"All","P","P3","P4","M","L","Lrej"};
   //  string njethts[] = {"","_23","_4","_L","_H","_23L","_23H","_4L","_4H"};
   string njethts[] = {""};
-  //  string matches[] = {"_","_ewke_","_ewkm_","_tewke_","_tewkm_","_newk_","_1newk_","_3newk_","_chargino_"};
-  string matches[] = {"_"};
+  vector<string> matches;
+  matches.push_back("_");
+  if (isSignal || doMatching) matches.push_back("_chargino_");
+  if (doMatching) {
+    matches.push_back("_ewke_");
+    matches.push_back("_ewkm_");
+    matches.push_back("_tewke_");
+    matches.push_back("_tewkm_");
+    matches.push_back("_newk_");
+    matches.push_back("_1newk_");
+    matches.push_back("_3newk_");
+  }
   if (fillCutHists) {
     TH2D* h_mtpt_base = new TH2D("h_mtpt_base","p_{T} x M_{T}(Track,MET)",10,0,200,10,0,500);
     TH2D* h_mtmet_base = new TH2D("h_mtmet_base","MET x M_{T}(Track,MET);M_{T} (GeV);MET (GeV)",10,0,500,10,0,500);
@@ -205,8 +218,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       for (int len = 0; len < 7; len++) {
 	string length = lengths[len];
 	cout << "Booked cut hists for " << category + " " + length << endl;
-	//	for (int matchidx = 0; matchidx < 9; matchidx++) {
-	for (int matchidx = 0; matchidx < 1; matchidx++) {
+	for (unsigned int matchidx = 0; matchidx < matches.size(); matchidx++) {
 	  string match = matches[matchidx];
 	  //	  for (int njht = 0; njht < 9; njht++) {
 	  for (int njht = 0; njht < 1; njht++) {
@@ -486,7 +498,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     if (lepveto) continue;
       
     bool passMonojet = met >= 250 && t.jet1_pt >= 250 && (t.nJet30 == 1 || DeltaPhi(met_phi, t.jet_phi[1]) < 0.3) && diffMet < 0.5;
-    bool passMultijet = diffMet < 0.5 && t.nJet30 > 1 && ht >= 250 && mt2 >= 60 && met >= 30 && deltaPhiMin < 0.3;
+    bool passMultijet = diffMet < 0.5 && t.nJet30 > 1 && ht >= 250 && mt2 >= 60 && met >= 30 && deltaPhiMin > 0.3;
 
     if (applyKinematicPreselection && !(passMonojet || passMultijet)) {
       continue;
@@ -877,11 +889,11 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
       vector<string> matches = {"_"};
       // Check gen match
-      if (!t.isData && false) {
+      if (!t.isData) {
 	if (isChargino) {
 	  matches.push_back("_chargino_");
 	}
-	else {
+	else if (doMatching) {
 	  bool genPromptE = false, genPromptM = false, genTauE = false, genTauM = false, genTau1 = false, genTau3 = false;
 	  for (int i_gl = 0; i_gl < t.ngenLep; i_gl++) {
 	    if (DeltaR(t.genLep_eta[i_gl], t.track_eta[i_trk], t.genLep_phi[i_gl], t.track_phi[i_trk]) < 0.05) {
@@ -942,6 +954,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       else { // lenIndex == 3
 	if (!rejected) {
 	  fillIndices.push_back(5);
+	  if (isST) cout << "L ST with weight " << weight << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	  lengths.push_back("L");
 	} else {
 	  fillIndices.push_back(6);
@@ -958,7 +971,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       const float dphiMet = DeltaPhi(t.track_phi[i_trk],met_phi);
       
       // Fills
-      if (fillNM1Hists) {
+      if (fillNM1Hists && passMultijet) {
 	for (vector<string>::iterator length = lengths.begin(); length != lengths.end(); length++) {
 	  for (vector<string>::iterator match = matches.begin(); match != matches.end(); match++) {
 	    for (vector<string>::iterator njht = njhtToFill.begin(); njht != njhtToFill.end(); njht++) {
@@ -1025,7 +1038,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	}
       }
 
-      if (fillCutHists) {
+      if (fillCutHists && passMultijet) {
 	string category = isST ? "ST" : "STC";
 	for (vector<string>::iterator length = lengths.begin(); length != lengths.end(); length++) {
 	  for (vector<string>::iterator match = matches.begin(); match != matches.end(); match++) {

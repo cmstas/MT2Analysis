@@ -33,8 +33,6 @@ if len(sys.argv) < 2:
     print "Which tag?"
     exit(1)
 
-os.system("mkdir -p pngs_contam")
-
 tag = sys.argv[1]
 
 fbg = ROOT.TFile.Open("output_unmerged/2017_{}/ttsl.root".format(tag))

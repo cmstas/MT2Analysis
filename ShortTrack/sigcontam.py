@@ -111,14 +111,6 @@ for filename in filenames:
                 #adj_stc = stc_data - stc_sig
                 delta_fs = max(h_deltafs.GetBinContent(length),0)                    
                 delta_count_fs = stc_data * delta_fs # instead of using adj_stc, use stc_data. This is conservative, and makes contam proportional to signal strength.
-                if deltafs_name == "h_fsMR_4_Baseline_lowpt_deltafs_fastsim_90cm_1800_1400" and filename == d1718 and length == 2 and histname.find("_HL_") > 0 and histname.find("_SR_") > 0:
-                    h_deltafs.Print("all")
-                    hsig.Print("all")
-                    print "delta fs",delta_fs
-                    #print "new Nstc",adj_stc
-                    print "change in count due to fs",delta_count_fs
-                    print "Nst sig",st_sig
-                    print "Nst'/Nst",(new_st_count-delta_count_fs)/st_sig if st_sig > 0 else "0 denom"
                 h_FS.SetBinContent(length,delta_count_fs / new_st_count if new_st_count > 0 else 0)
                 h_FS.SetBinError(length,0 if h_FS.GetBinContent(length) <= 0 else h_deltafs.GetBinError(length)/delta_fs * h_FS.GetBinContent(length))
 

@@ -1764,47 +1764,94 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
     ratiocanvas.SaveAs("{}/{}_postonlySvsBG_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
     pads[0].SetLogy(False)
 
-def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, combineSysts = True): # make plots of merged regions
+def convertCovarLabel(label):
+    tokens = label.split("_")
+    njht = tokens[0]
+    if tokens[3] == "hi" or tokens[3] == "lo":
+        pt = " "+tokens[3]
+        length = tokens[4]
+    else:
+        pt = ""
+        length = tokens[3]
+    year = tokens[len(tokens)-2]
+    return length + " " + njht + pt + " " + year 
+
+def getCorr(f):
+    dict_corr = {}
+    h_covar = f.Get("shapes_prefit/overall_total_covar").Clone("h_corr")
+    for i in range(1,h_covar.GetNbinsX()+1):
+        for j in range(1,h_covar.GetNbinsY()+1):
+            xlabel = convertCovarLabel(h_covar.GetXaxis().GetBinLabel(i))
+            ylabel = convertCovarLabel(h_covar.GetYaxis().GetBinLabel(j))
+            val = h_covar.GetBinContent(i,j)
+            correlation = val/sqrt(h_covar.GetBinContent(i,i)*h_covar.GetBinContent(j,j))
+            dict_corr[xlabel+" "+ylabel] = correlation
+    return dict_corr
+
+def getCovar(f):
+    dict_covar = {}
+    h_covar = f.Get("shapes_prefit/overall_total_covar").Clone("h_covar")
+    for i in range(1,h_covar.GetNbinsX()+1):
+        for j in range(1,h_covar.GetNbinsY()+1):
+            xlabel = convertCovarLabel(h_covar.GetXaxis().GetBinLabel(i))
+            ylabel = convertCovarLabel(h_covar.GetYaxis().GetBinLabel(j))
+            val = h_covar.GetBinContent(i,j)
+            err = h_covar.GetBinError(i,j)
+            dict_covar[xlabel+" "+ylabel+" val"] = val
+            dict_covar[xlabel+" "+ylabel+" err"] = err
+    return dict_covar
+
+def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, rescale=1.0, doFullCovariance = True): # make plots of merged regions
     if desc.find("16") >= 0:
         lumi = 35.92
+        year = "2016"
     elif desc.find("17"):
         lumi = 41.53
+        year = "2017"
         if desc.find("18"):
             lumi += 59.97
+            year = "2017and2018"
     elif desc.find("18"):
         lumi = 59.97
-    else: lumi = 1.0
+        year = "2018"
+    else: 
+        lumi = 1.0
+        year = ""
     ratiocanvas.cd()
     tr.Clear()
     ssr_info = []    
     for region_set in region_sets:
         total_obs = 0
         total_pred = 0
-        stat_pred_err = [0,0]
-        withfs_pred_err = [0,0]
-        total_pred_err = [0,0]
+        pred_err = []
         for region in region_set:
             pred = vals[region+" pre"]*rescale
             total_pred += pred
-            perr = [stats[region+" pre"][i] * rescale for i in [0,1]]
-            stat_pred_err[0] = sqrt(perr[0]**2 + stat_pred_err[0]**2)
-            stat_pred_err[1] = sqrt(perr[1]**2 + stat_pred_err[1]**2)
+            perr = [stats[region+" pre"][i] * rescale for i in [0,1]]            
             obs = vals[region+" obs"]*rescale
             total_obs += obs
             perr_fs = systs[region+" fs"] * rescale
             perr_nc = systs[region+" nc"] * rescale
-            withfs_pred_err[0] = sqrt(withfs_pred_err[0]**2 + perr[0]**2 + perr_fs**2)
-            withfs_pred_err[1] = sqrt(withfs_pred_err[1]**2 + perr[1]**2 + perr_fs**2)
-            total_pred_err[0] = sqrt(total_pred_err[0]**2 + perr[0]**2 + perr_fs**2 + perr_nc**2)
-            total_pred_err[1] = sqrt(total_pred_err[1]**2 + perr[1]**2 + perr_fs**2 + perr_nc**2)
-        ssr_info.append( (total_pred,stat_pred_err,total_obs,getAsymmetricErrors(total_obs),withfs_pred_err,total_pred_err) )
+            pred_err.append( tuple( [sqrt(perr[0]**2 + perr_fs**2 + perr_nc**2), sqrt(perr[1]**2 + perr_fs**2 + perr_nc**2)] ) )
+        total_pred_err_sq = [0,0]
+        if doFullCovariance:
+            for i,region_i in enumerate(region_set):
+                covar_region_i = region_i.replace(" SR","").replace(" VR","") + " " + year
+                for j,region_j in enumerate(region_set):                
+                    covar_region_j = region_j.replace(" SR","").replace(" VR","") + " " + year
+                    total_pred_err_sq[0] += covars[covar_region_i + " " + covar_region_j+ " val"] * covars[covar_region_i + " " + covar_region_j+ " err"]
+                    total_pred_err_sq[1] += covars[covar_region_i + " " + covar_region_j+ " val"] * covars[covar_region_i + " " + covar_region_j+ " err"]
+        else:
+            for i in range(len(pred_err)):
+                total_pred_err_sq[0] += pred_err[i][0]**2
+                total_pred_err_sq[1] += pred_err[i][1]**2
+        total_pred_err = tuple( [sqrt(total_pred_err_sq[0]),sqrt(total_pred_err_sq[1])] )
+        ssr_info.append( (total_pred,total_obs,getAsymmetricErrors(total_obs),total_pred_err) )
     nregions=len(ssr_info)
     hobs=ROOT.TH1D(desc,desc+";;Short Track Counts",nregions,0,nregions)
     hobs.SetLineWidth(3)
     hpred=hobs.Clone(hobs.GetName()+"_prediction")
-    perrs = []
     oerrs = []
-    perrs_withfs = []
     perrs_all = []
     most_discrepant_sigma = 0
     most_discrepant_obs = 0
@@ -1814,11 +1861,9 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     for index,region in enumerate(ssr_names):
         bin_index = index+1
         hpred.GetXaxis().SetBinLabel(bin_index,region)
-        pred,perr,obs,oerr,perr_withfs,perr_total = ssr_info[index]
+        pred,obs,oerr,perr_total = ssr_info[index]
         hpred.SetBinContent(bin_index,pred)
         hpred.SetBinError(bin_index,1e-9) # Need to explictly set bin error to epsilon so lines aren't connected when drawing later (as for "hist" style)
-        perrs.append(perr)
-        perrs_withfs.append( perr_withfs  )
         perrs_all.append( perr_total )
         hobs.SetBinContent(bin_index,obs)
         oerrs.append(oerr)
@@ -1834,7 +1879,7 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
             most_discrepant_pred = pred
             most_discrepant_perr = relevant_perr
             most_discrepant_region = region
-    print desc,"Most discrepant:",most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
+    print desc,"Most discrepant{}:".format("" if doFullCovariance else " (uncorrelated)"),most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
     hpred.GetXaxis().LabelsOption("v")
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
@@ -1844,22 +1889,13 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     hobs.SetMaximum(hpred.GetMaximum())
     hpred.SetLineColor(ROOT.kRed)
     pads[0].cd()    
-    gpred_stat = getPoissonGraph( hpred, perrs )
-    gpred_stat.SetName("stat"+desc.replace("-","_").replace(" ","_"))
-    gpred_withfs = getPoissonGraph( hpred, perrs_withfs )
-    gpred_withfs.SetName("withfs"+desc.replace("-","_").replace(" ","_"))
     gpred_all = getPoissonGraph( hpred, perrs_all )
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_stat.SetFillColor(ROOT.kCyan-8)
-    gpred_withfs.SetFillColor(ROOT.kGray)
     gpred_all.SetFillColor(ROOT.kGray+2)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
-    if not combineSysts:
-        gpred_withfs.Draw("2 same")
-    gpred_stat.Draw("2 same")
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
     gobs.SetMarkerStyle(20)
     gobs.SetMarkerSize(2)
@@ -1869,49 +1905,34 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     utils.DrawCmsText(pads[0])
     utils.DrawLumiText(pads[0],lumi)
     tr.AddEntry(gobs,"Observation","pLE")
-    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors")
-    if not combineSysts:
-        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
-    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
     tr.Draw()
     pads[1].cd()
-    h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs),0,len(perrs))
+    h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs_all),0,len(perrs_all))
     h1.SetLineWidth(3)
     h1.SetLineColor(ROOT.kRed)
     hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
     perrs_all_norm = []
-    perrs_withfs_norm = []
-    perrs_stat_norm = []
     oerrs_norm = []
     maxval = 0.0
-    for bin in range(1,len(perrs)+1):
+    for bin in range(1,len(perrs_all)+1):
         h1.GetXaxis().SetBinLabel(bin,"")
         this_pred = hpred.GetBinContent(bin)
         h1.SetBinContent(bin,1)
         if this_pred == 0:
             hobs_norm.SetBinContent(bin,-1)
             perrs_all_norm.append( [0,0] )
-            perrs_withfs_norm.append( [0,0] )
-            perrs_stat_norm.append( [0,0] )
             oerrs_norm.append( [0,0] )
         else: 
             hobs_norm.SetBinContent(bin,hobs.GetBinContent(bin) / this_pred)
             this_perr_all = perrs_all[bin-1]
-            this_perr_withfs = perrs_withfs[bin-1]
-            this_perr_stat = perrs[bin-1]
             this_oerr = oerrs[bin-1]
             perrs_all_norm.append( [this_perr_all[i]/this_pred for i in [0,1]] )
-            perrs_withfs_norm.append( [this_perr_withfs[i]/this_pred for i in [0,1]] )
-            perrs_stat_norm.append( [this_perr_stat[i]/this_pred for i in [0,1]] )
             oerrs_norm.append( [this_oerr[i]/this_pred for i in [0,1]] )
     h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
     h1.SetMinimum(-0.001)
     gall_norm = getPoissonGraph( h1, perrs_all_norm )
     gall_norm.SetFillColor(ROOT.kGray+2)
-    gwithfs_norm = getPoissonGraph( h1, perrs_withfs_norm )
-    gwithfs_norm.SetFillColor(ROOT.kGray)
-    gstat_norm = getPoissonGraph( h1, perrs_stat_norm)
-    gstat_norm.SetFillColor(ROOT.kCyan-8)
     gobs_norm = getPoissonGraph(hobs_norm, oerrs_norm, False)
     gobs_norm.SetMarkerStyle(20)
     gobs_norm.SetMarkerSize(2)
@@ -1922,20 +1943,14 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     h1.Draw("AXIS")
     # "0" option forces the drawing of error bars even if the central value is off-scale
     gall_norm.Draw("0 2 same")
-    if not combineSysts:
-        gwithfs_norm.Draw("0 2 same")
-    gstat_norm.Draw("0 2 same")
     gobs_norm.Draw("0 p same")
     h1.Draw("same")
-    ratiocanvas.SaveAs("{}/{}_raw.{}".format(plotdir,desc.replace(" ","_"),format))
+    ratiocanvas.SaveAs("{}/{}_raw{}.{}".format(plotdir,desc.replace(" ","_"),"" if doFullCovariance else "_uncorr",format))
     pads[0].cd()
     hpred.SetMinimum(0.1)
     hpred.SetMaximum(200)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
-    if not combineSysts:
-        gpred_withfs.Draw("2 same")
-    gpred_stat.Draw("2 same")
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
     hpred.Draw("AXIS same") # make tick marks show above fill areas
@@ -1943,13 +1958,173 @@ def makePlotSSRs(region_sets,vals,stats,systs,desc, ssr_names, rescale=1.0, comb
     utils.DrawLumiText(pads[0],lumi)
     tr.Clear()
     tr.AddEntry(gobs,"Observation","pLE")
-    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors")
-    if not combineSysts:
-        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
-    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
     tr.Draw()
     pads[0].SetLogy(True)
-    ratiocanvas.SaveAs("{}/{}_raw_logscale.{}".format(plotdir,desc.replace(" ","_"),format))
+    ratiocanvas.SaveAs("{}/{}_raw_logscale{}.{}".format(plotdir,desc.replace(" ","_"),"" if doFullCovariance else "_uncorr",format))
+    pads[0].SetLogy(False)
+
+def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, rescale=1.0, doFullCovariance = True): # make plots of merged regions
+    if desc.find("16") >= 0:
+        lumi = 35.92
+        year = "2016"
+    elif desc.find("17"):
+        lumi = 41.53
+        year = "2017"
+        if desc.find("18"):
+            lumi += 59.97
+            year = "2017and2018"
+    elif desc.find("18"):
+        lumi = 59.97
+        year = "2018"
+    else: 
+        lumi = 1.0
+        year = ""
+    ratiocanvas.cd()
+    tr.Clear()
+    ssr_info = []    
+    for region_set in region_sets:
+        total_obs = 0
+        total_pred = 0
+        pred_err = []
+        for region in region_set:
+            pred = vals[region+" pre"]*rescale
+            total_pred += pred
+            perr = [stats[region+" pre"][i] * rescale for i in [0,1]]            
+            obs = vals[region+" obs"]*rescale
+            total_obs += obs
+            perr_fs = systs[region+" fs"] * rescale
+            perr_nc = systs[region+" nc"] * rescale
+            pred_err.append( tuple( [sqrt(perr[0]**2 + perr_fs**2 + perr_nc**2), sqrt(perr[1]**2 + perr_fs**2 + perr_nc**2)] ) )
+        total_pred_err_sq = [0,0]
+        if doFullCovariance:
+            for i,region_i in enumerate(region_set):
+                covar_region_i = region_i.replace(" SR","").replace(" VR","") + " " + year
+                for j,region_j in enumerate(region_set):                
+                    covar_region_j = region_j.replace(" SR","").replace(" VR","") + " " + year
+                    total_pred_err_sq[0] += covars[covar_region_i + " " + covar_region_j] * pred_err[i][0] * pred_err[j][0]
+                    total_pred_err_sq[1] += covars[covar_region_i + " " + covar_region_j] * pred_err[i][1] * pred_err[j][1]
+        else:
+            for i in range(len(pred_err)):
+                total_pred_err_sq[0] += pred_err[i][0]**2
+                total_pred_err_sq[1] += pred_err[i][1]**2
+        total_pred_err = tuple( [sqrt(total_pred_err_sq[0]),sqrt(total_pred_err_sq[1])] )
+        ssr_info.append( (total_pred,total_obs,getAsymmetricErrors(total_obs),total_pred_err) )
+    nregions=len(ssr_info)
+    hobs=ROOT.TH1D(desc,desc+";;Short Track Counts",nregions,0,nregions)
+    hobs.SetLineWidth(3)
+    hpred=hobs.Clone(hobs.GetName()+"_prediction")
+    oerrs = []
+    perrs_all = []
+    most_discrepant_sigma = 0
+    most_discrepant_obs = 0
+    most_discrepant_pred = 0
+    most_discrepant_perr = 0
+    most_discrepant_region = "None"            
+    for index,region in enumerate(ssr_names):
+        bin_index = index+1
+        hpred.GetXaxis().SetBinLabel(bin_index,region)
+        pred,obs,oerr,perr_total = ssr_info[index]
+        hpred.SetBinContent(bin_index,pred)
+        hpred.SetBinError(bin_index,1e-9) # Need to explictly set bin error to epsilon so lines aren't connected when drawing later (as for "hist" style)
+        perrs_all.append( perr_total )
+        hobs.SetBinContent(bin_index,obs)
+        oerrs.append(oerr)
+        # find maximally discrepant bin
+        relevant_perr = perrs_all[index][0] if obs > pred else perrs_all[index][1]
+        relevant_oerr = oerr[0] if obs < pred else oerr[1]
+        total_err = sqrt(relevant_perr**2 + relevant_oerr**2)
+        delta = abs(pred - obs)
+        sigma = delta / total_err if total_err > 0 else -1
+        if sigma > most_discrepant_sigma:
+            most_discrepant_sigma = sigma
+            most_discrepant_obs = obs
+            most_discrepant_pred = pred
+            most_discrepant_perr = relevant_perr
+            most_discrepant_region = region
+    print desc,"Most discrepant{}:".format("" if doFullCovariance else " (uncorrelated)"),most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
+    hpred.GetXaxis().LabelsOption("v")
+    hpred.GetXaxis().SetTitleOffset(4.8)
+    hpred.SetMinimum(-0.001)
+    hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
+    hobs.SetLineColor(ROOT.kBlack)
+    hobs.SetMinimum(hpred.GetMinimum())
+    hobs.SetMaximum(hpred.GetMaximum())
+    hpred.SetLineColor(ROOT.kRed)
+    pads[0].cd()    
+    gpred_all = getPoissonGraph( hpred, perrs_all )
+    gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
+    gobs = getPoissonGraph( hobs, oerrs, False )
+    gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
+    gpred_all.SetFillColor(ROOT.kGray+2)
+    hpred.Draw("") # only want the axis from the histogram, for bin titles
+    gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
+    hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
+    gobs.SetMarkerStyle(20)
+    gobs.SetMarkerSize(2)
+    gobs.SetMarkerColor(ROOT.kBlack)
+    gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    hpred.Draw("AXIS same") # make tick marks show above fill areas
+    utils.DrawCmsText(pads[0])
+    utils.DrawLumiText(pads[0],lumi)
+    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
+    tr.Draw()
+    pads[1].cd()
+    h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs_all),0,len(perrs_all))
+    h1.SetLineWidth(3)
+    h1.SetLineColor(ROOT.kRed)
+    hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
+    perrs_all_norm = []
+    oerrs_norm = []
+    maxval = 0.0
+    for bin in range(1,len(perrs_all)+1):
+        h1.GetXaxis().SetBinLabel(bin,"")
+        this_pred = hpred.GetBinContent(bin)
+        h1.SetBinContent(bin,1)
+        if this_pred == 0:
+            hobs_norm.SetBinContent(bin,-1)
+            perrs_all_norm.append( [0,0] )
+            oerrs_norm.append( [0,0] )
+        else: 
+            hobs_norm.SetBinContent(bin,hobs.GetBinContent(bin) / this_pred)
+            this_perr_all = perrs_all[bin-1]
+            this_oerr = oerrs[bin-1]
+            perrs_all_norm.append( [this_perr_all[i]/this_pred for i in [0,1]] )
+            oerrs_norm.append( [this_oerr[i]/this_pred for i in [0,1]] )
+    h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
+    h1.SetMinimum(-0.001)
+    gall_norm = getPoissonGraph( h1, perrs_all_norm )
+    gall_norm.SetFillColor(ROOT.kGray+2)
+    gobs_norm = getPoissonGraph(hobs_norm, oerrs_norm, False)
+    gobs_norm.SetMarkerStyle(20)
+    gobs_norm.SetMarkerSize(2)
+    gobs_norm.SetMarkerColor(ROOT.kBlack)
+    h1.GetYaxis().SetLabelSize(hpred.GetYaxis().GetLabelSize()*.83/.16/2)
+    h1.GetYaxis().SetTitleSize(hpred.GetYaxis().GetTitleSize()*.83/.16/2)
+    h1.GetYaxis().SetTitleOffset(0.35)
+    h1.Draw("AXIS")
+    # "0" option forces the drawing of error bars even if the central value is off-scale
+    gall_norm.Draw("0 2 same")
+    gobs_norm.Draw("0 p same")
+    h1.Draw("same")
+    ratiocanvas.SaveAs("{}/{}_raw{}.{}".format(plotdir,desc.replace(" ","_"),"" if doFullCovariance else "_uncorr",format))
+    pads[0].cd()
+    hpred.SetMinimum(0.1)
+    hpred.SetMaximum(200)
+    hpred.Draw("") # only want the axis from the histogram, for bin titles
+    gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
+    hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
+    gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    hpred.Draw("AXIS same") # make tick marks show above fill areas
+    utils.DrawCmsText(pads[0])
+    utils.DrawLumiText(pads[0],lumi)
+    tr.Clear()
+    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
+    tr.Draw()
+    pads[0].SetLogy(True)
+    ratiocanvas.SaveAs("{}/{}_raw_logscale{}.{}".format(plotdir,desc.replace(" ","_"),"" if doFullCovariance else "_uncorr",format))
     pads[0].SetLogy(False)
 
 def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_errs_sig, rescale_lumi, desc, sig_tags, sig_colors, rescale_unblind, combineErrors = True): 

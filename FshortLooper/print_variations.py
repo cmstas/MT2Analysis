@@ -422,7 +422,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     gvar = getPoissonGraph(hist, var_errs)
     syst_errs = [sqrt(systs["Baseline"+ptstring]**2+errs["Baseline"+ptstring+" FS"][i]**2) for i in [0,1]]
 #    if verbose: print syst_errs
-    if region+ptstring == "P4_VR_4_lowpt": 
+    if verbose:
         print hsyst.GetName()
         print desc
         print syst_errs

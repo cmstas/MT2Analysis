@@ -36,3 +36,4 @@ scripts/cards*/**
 **/CMSSW*/**
 ShortTrackTagAndProbeLooper/*.root
 scripts/CardMaker/test.txt
+scripts/fits*/**

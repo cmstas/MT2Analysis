@@ -43,7 +43,7 @@ for sample in ${Samples[@]}; do
 	echo "skipping Long"
     fi
     echo "combining full set"
-    combineCards.py -S ../cards_${tag}_${sample}_Data_SR/datacard*.txt > combined.txt &
+    ../combineDir.sh ../cards_${tag}_${sample}_Data_SR `pwd`
     combine -M AsymptoticLimits -n All combined.txt &>> combine.log
     popd
 done

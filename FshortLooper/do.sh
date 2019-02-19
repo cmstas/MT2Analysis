@@ -3,14 +3,14 @@
 make -j 12 || return $?
 
 doD16=0
-doM16=1
+doM16=0
 doD17=0
-doM17=1
+doM17=0
 doD18=0
-doM18=1
+doM18=0
 doS17=1
 
-tag=AllWeights
+tag=preapproval
 mode=default
 #mode=useZll
 skim_string=_skim_ST
@@ -26,7 +26,7 @@ if [ "$doM16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Summer16
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2016fullYear${skim_string}/extmerge
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2016fullYear${skim_string}/extmerge
     declare -a Samples=(ttsl ttdl singletop qcd ttw ttz ttg tttt dy wjets_ht zinv ww wz)
     
     for SAMPLE in ${Samples[@]}; do
@@ -41,7 +41,7 @@ if [ "$doD16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2016_94x
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2016fullYear${skim_string}/extmerge
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2016fullYear${skim_string}/extmerge
     declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}.txt &"
@@ -56,7 +56,7 @@ if [ "$doM17" -eq "1" ]; then
     OUTDIR=output_unmerged/2017_${tag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Fall17
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2017fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2017fullYear${skim_string}
     declare -a Samples=(ttsl ttdl singletop qcd ttw ttz tttt ttg dy gjets wjets_ht zinv ww wz)    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
@@ -70,7 +70,7 @@ if [ "$doD17" -eq "1" ]; then
     OUTDIR=output_unmerged/2017_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2017_31Mar2018
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2017fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2017fullYear${skim_string}
     declare -a Samples=(data_Run2017B data_Run2017C data_Run2017D data_Run2017E data_Run2017F)    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}.txt &"
@@ -84,7 +84,7 @@ if [ "$doM18" -eq "1" ]; then
     OUTDIR=output_unmerged/2018_${tag}/
     mkdir -p ${OUTDIR}
     CONFIG=mc_102x_Autumn18
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2018fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2018fullYear${skim_string}
     declare -a Samples=(ttsl ttdl qcd ttw ttz tttt dy wjets_ht zinv ww wz) # excluding singletop due to missing/2017 duplicated samples and gjets because no events pass skim
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2018.txt &"
@@ -98,7 +98,7 @@ if [ "$doD18" -eq "1" ]; then
     OUTDIR=output_unmerged/2018_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2018_Prompt
-    INDIR=/nfs-7/userdata/mt2/V00-10-10_2018fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2018fullYear${skim_string}
     declare -a Samples=(data_Run2018A data_Run2018B data_Run2018C data_Run2018D)
     
     for SAMPLE in ${Samples[@]}; do
