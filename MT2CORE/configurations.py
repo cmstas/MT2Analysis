@@ -129,7 +129,7 @@ MT2Config_defs["data_2018_Prompt"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
-    "lumi" : 59.97,
+    "lumi" : 59.61,
     "btagcalib_csv" : "DeepCSV_102XSF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -148,7 +148,7 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
     "json" : "Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt",
-    "lumi" : 59.97,
+    "lumi" : 59.61,
     "btagcalib_csv" : "DeepCSV_102XSF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -308,7 +308,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
 MT2Config_defs["mc_102x_Autumn18"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
-    "lumi" : 59.97,
+    "lumi" : 59.61,
     "btagcalib_csv" : "DeepCSV_102XSF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -480,7 +480,7 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
 
 MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["year"] = 2018
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.97
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.61
 
 def GetFilterString(config_tag):
     if config_tag not in MT2Config_defs:
