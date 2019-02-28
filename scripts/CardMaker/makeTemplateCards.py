@@ -7,7 +7,7 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "FullRunII_17MCfor18_ttbbWeights_v3"
+TAG = "V00-10-12_FullRunII"
 
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
@@ -23,16 +23,16 @@ f_lostlep = {}
 f_qcd = {}
 f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/qcdFromRS_2018.root")
-f_data = r.TFile("../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/data_RunAll.root")
+f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-12_combined/zinvFromDY_2016.root")
+f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-12_combined/zinvFromDY_2017.root")
+f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-12_combined/zinvFromDY_2018.root")
+f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-12_combined/lostlepFromCRs_2016.root")
+f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-12_combined/lostlepFromCRs_2017.root")
+f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-12_combined/lostlepFromCRs_2018.root")
+f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-12_combined/qcdFromRS_2016.root")
+f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-12_combined/qcdFromRS_2017.root")
+f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-12_combined/qcdFromRS_2018.root")
+f_data = r.TFile("../../MT2Looper/output/V00-10-12_combined/data_RunAll.root")
 
 years = [16, 17, 18]
 # years = [18]
@@ -358,7 +358,13 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
             nuis_name += "_"+crdy_name_per_topo_reg
         if corr == PER_MT2_BIN:
             nuis_name += "_"+name
-            
+
+        if nuis=="zinv_alphaErr":
+            # only decorrelate where we significantly extrapolate, where zinv MCstat err is more important
+            split_by_year = False
+            if imt2 >= crdy_lastbin_hybrid + 2:
+                split_by_year = True
+           
         dc.AddNuisance(nuis_name, nuis_type, split_by_year=split_by_year)
 
         if nuis == "lumi_syst":
@@ -389,8 +395,20 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 err = 1.0 + direc*err                
                 dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
-                zinv_err = 0.95
-                dc.SetNuisanceBkgValue(nuis_name, zinv_err, "zinv", y)
+                # zinv
+                h_UP = f_zinvDY[y].Get(dirname+"/ratioCard_lepeff_UP")
+                h_DN = f_zinvDY[y].Get(dirname+"/ratioCard_lepeff_DN")                
+                rCN = h_zinv_ratio[y].GetBinContent(1)
+                rUP = h_UP.GetBinContent(1)
+                rDN = h_DN.GetBinContent(1)
+                err = 0.0
+                if rCN > 0:
+                    err_UP = abs(1.0 - rUP / rCN)
+                    err_DN = abs(1.0 - rDN / rCN)
+                    err = max(err_UP, err_DN)
+                direc = 1 if rUP > rCN else -1
+                err = 1.0 + direc*err
+                dc.SetNuisanceBkgValue(nuis_name, err, "zinv", y)
 
         if nuis=="zinv_alphaErr":
             for y in years:
@@ -542,6 +560,14 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                     err_qcd = 1.0 + h_qcd_mt2bins[y].GetBinError(imt2) / n_qcd[y]
                 dc.SetNuisanceBkgValue(nuis_name, err_qcd, "qcd", y)
 
+        if nuis == "qcd_HEM":
+            h_nohem = f_qcd[18].Get(dirname+"/h_mt2bins_noHEM")
+            if h_nohem and  not no_qcd_hist[18] and n_qcd[18] > 0.0 and h_qcd_mt2bins[18].GetBinContent(imt2)>0.001:
+                err = 1.0 + abs(n_qcd[18] - h_nohem.GetBinContent(imt2)) * 0.5 / n_qcd[18]
+                if err > 2.0:
+                    err = 2.0
+                dc.SetNuisanceBkgValue(nuis_name, err, "qcd", 18)
+
         if nuis == "qcd_TailVar":
             for y in years:
                 err_qcd = 1.0
@@ -574,7 +600,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
     if template_output_dir is not None:
         outname = os.path.join(template_output_dir, "datacard_"+name+".txt")
-        dc.Write(outname, sortkey=customNuisanceSort)
+        dc.Write(outname, sortkey=customNuisanceSort, suppressPointlessNuis=False)
 
     return dc
 

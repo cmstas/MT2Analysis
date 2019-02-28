@@ -63,7 +63,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.cmssw_ver          = 94;
         c.json               = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_snt.txt";
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btagcalib_csv      = "DeepCSV_2016LegacySF_V1.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
         c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;
@@ -340,7 +340,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.jet_id             = "2018_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root";
         c.rphi_tag           = "V00-10-09_2018fullYear";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V3_DATAdummy"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Autumn18_V3_OldRes_DATA"));
         c.filters["eeBadScFilter"] = true;
         c.filters["globalSuperTightHalo2016Filter"] = true;
         c.filters["goodVertices"] = true;
@@ -659,7 +659,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2016;
         c.cmssw_ver          = 94;
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btagcalib_csv      = "DeepCSV_2016LegacySF_V1.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
         c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;
@@ -736,7 +736,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.year               = 2016;
         c.cmssw_ver          = 94;
         c.lumi               = 35.922;
-        c.btagcalib_csv      = "DeepCSV_Moriond17_B_H.csv";
+        c.btagcalib_csv      = "DeepCSV_2016LegacySF_V1.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root";
         c.btag_med_threshold_DeepCSV = 0.6321;
         c.btag_med_threshold_CSVv2   = 0.8484;

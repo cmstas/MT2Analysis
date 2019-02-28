@@ -54,7 +54,7 @@ years = [16, 17, 18]
 outdir = "cards_"+TAG
 
 
-def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
+def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=False):
     dc = signal_dc
 
     dirname = dc.info["dirname"]
@@ -229,6 +229,9 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
         if verbose: print "Skipping {0}, imt2 {1} for point {2},{3} due to 0 signal after sig contam subtraction.".format(dirname, imt2, im1, im2)
         return None
 
+    if addSigToObs:
+        dc.SetObservation(dc.GetObservation() + totsig)
+
     for y in years:
         dc.SetSignalRate(n_sig_cor_recogenaverage[y], y)
 
@@ -282,8 +285,12 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False):
                     err = 1.0+err if errup>0 else 1.0/(1.0+err)
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
-        if nuis == "sig_MCstat":
-            for y in years:
+        if nuis == "sig_MCstat_16":
+            err = 1.0 + ((err_sig_mcstat_rel[16])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
+            dc.SetNuisanceSignalValue(nuis_name, err, 16)
+
+        if nuis == "sig_MCstat_1718":
+            for y in [17,18]:
                 err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
@@ -319,7 +326,7 @@ full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2
 allfalse = True
 for name,dc in templates.items():
 
-    result = printFullCard(dc, M1, M2, full_outdir, isScan=isScan)
+    result = printFullCard(dc, M1, M2, full_outdir, isScan=isScan, addSigToObs=False)
     if result is not None:
         allfalse = False
         datacards[name] = result

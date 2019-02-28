@@ -37,9 +37,14 @@ nuisances = {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
         },
-    "sig_MCstat" : {
+    # special handling of signal MCstat, since 17+18 are correlated (same MC)
+    "sig_MCstat_16" : {
         "correlation" : PER_MT2_BIN,
-        "splitByYear" : True,
+        "splitByYear" : False,
+        },
+    "sig_MCstat_1718" : {
+        "correlation" : PER_MT2_BIN,
+        "splitByYear" : False,
         },
     "sig_jec_renorm" : {
         "correlation" : PER_MT2_BIN,
@@ -55,7 +60,7 @@ nuisances = {
         },
     "zinv_alphaErr" : {
         "correlation" : PER_MT2_BIN,
-        "splitByYear" : True,
+        "splitByYear" : False, # overwritten in cardmaker anyway (depends on if we're extrapolating or not)
         },
     "zinv_purity" : {
         "correlation" : PER_TOPO_REG_CRDY,
@@ -100,6 +105,10 @@ nuisances = {
     "qcd_RSstat" : {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : True,
+        },
+    "qcd_HEM" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : False,
         },
     "qcd_JERvar" : {
         "correlation" : CORR_ACROSS_ALLBINS,

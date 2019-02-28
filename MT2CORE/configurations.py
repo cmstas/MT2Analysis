@@ -157,7 +157,7 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "rphi_tag" : "V00-10-09_2018fullYear",
-    "JECs" : [ ["", "Autumn18_V3_DATAdummy"]
+    "JECs" : [ ["", "Autumn18_V3_OldRes_DATA"]
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
@@ -242,6 +242,7 @@ MT2Config_defs["data_2016_Moriond17"] = {
 
 MT2Config_defs["data_2016_94x"] = copy.deepcopy(MT2Config_defs["data_2016_Moriond17"])
 MT2Config_defs["data_2016_94x"]["cmssw_ver"] = 94
+MT2Config_defs["data_2016_94x"]["btagcalib_csv"] = "DeepCSV_2016LegacySF_V1.csv"
 MT2Config_defs["data_2016_94x"]["btag_med_threshold_DeepCSV"] = 0.6321
 MT2Config_defs["data_2016_94x"]["JECs"] = [
     ["2016B", "Summer16_07Aug2017BCD_V11_DATA"],
@@ -407,7 +408,7 @@ MT2Config_defs["mc_94x_Summer16"] = {
     "year" : 2016,
     "cmssw_ver" : 94,
     "lumi" : 35.922,
-    "btagcalib_csv" : "DeepCSV_Moriond17_B_H.csv",
+    "btagcalib_csv" : "DeepCSV_2016LegacySF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Summer16_94x.root",
     "btag_med_threshold_DeepCSV" : 0.6321,
     "btag_med_threshold_CSVv2" : 0.8484,
