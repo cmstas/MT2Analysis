@@ -397,20 +397,26 @@ def GetInclusiveRegions(doMonojet=True):
 
     return regions
 
-def GetInclusiveDatacards(datacard_dir, datacard_name, regions):
+def GetInclusiveDatacards(datacard_dir, datacard_name, regions, fullPath=True):
     datacards = []
     for reg in regions:
         ht_reg = reg.split("_")[0]
         jbj_reg = reg[reg.find("_")+1:]
         if "j1_" in reg:
-            dname = os.path.join(datacard_dir, datacard_name).format(ht_reg, jbj_reg, "m0toInf")
+            if fullPath:
+                dname = os.path.join(datacard_dir, datacard_name).format(ht_reg, jbj_reg, "m0toInf")
+            else:
+                dname = "{0}_{1}_m0toInf".format(ht_reg, jbj_reg)
             datacards.append([dname])
         else:
             mt2bins = GetMT2bins(ht_reg, jbj_reg)[0]
             dnames = []
             for i in range(len(mt2bins)-1):
                 mt2bin = "m{0}to{1}".format(mt2bins[i], mt2bins[i+1]).replace("-1","Inf")
-                dname = os.path.join(datacard_dir, datacard_name).format(ht_reg, jbj_reg, mt2bin)
+                if fullPath:
+                    dname = os.path.join(datacard_dir, datacard_name).format(ht_reg, jbj_reg, mt2bin)
+                else:
+                    dname = "{0}_{1}_{2}".format(ht_reg, jbj_reg, mt2bin)
                 dnames.append(dname)
             datacards.append(dnames)
 

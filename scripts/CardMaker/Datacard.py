@@ -186,12 +186,12 @@ class Datacard:
         if type(value)==tuple:
             if self.nuisances[fullname].type not in  ["lnN","lnU"]:
                 raise Exception("ERROR: only lnN/lnU nuisances support 2-sided values!")
-            if value[0]>2.0 or value[1]>2.0 or value[0]<0.3 or value[1]<0.3:
+            if value[0]>2.05 or value[1]>2.05 or value[0]<0.3 or value[1]<0.3:
                 print "WARNING: nuisance {0} has a large value {1} (year {2}). Card: {3}".format(fullname, value, year, self.name)
             if isnan(value[0]) or isinf(value[0]) or isnan(value[1]) or isinf(value[1]):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
         elif type(value)==float:
-            if self.nuisances[fullname].type in ["lnN","lnU"] and (value > 2.0 or value < 0.3):
+            if self.nuisances[fullname].type in ["lnN","lnU"] and (value > 2.05 or value < 0.3):
                 print "WARNING: nuisance {0} has a large value {1} (year {2}). Card: {3}".format(fullname, value, year, self.name)
             if isnan(value) or isinf(value):
                 raise Exception("ERROR: nuisance value is nan or inf for nuis {0}, background {1}, year {2}".format(nuisname, bkg_name, year))
@@ -201,12 +201,13 @@ class Datacard:
         self.nuisances[fullname].bkg_values[fullidx] = value
 
 
-    def GetTotalUncertainty(self, signal=False):
+    def GetTotalUncertainty(self, signal=False, returnDict=False):
         # get total background uncertainty (if signal==False) or total signal uncertainty
         alpha = 1-0.6827
         tot_err_up = 0.0
         tot_err_dn = 0.0
-        for nuis in self.nuisances.values():
+        nuis_dict = {}
+        for name,nuis in self.nuisances.items():
             err_up = 0.0
             err_dn = 0.0
             if nuis.type in ["lnN","lnU"]:
@@ -245,13 +246,45 @@ class Datacard:
                         err_up += val * (ROOT.Math.gamma_quantile_c(alpha/2, nuis.N+1, 1) - nuis.N)
                         err_dn += val * (0 if nuis.N==0 else nuis.N-ROOT.Math.gamma_quantile(alpha/2, nuis.N, 1))
 
+            nuis_dict[name] = [err_up, err_dn]
+
             # print nuis.name, err_up, err_dn
             tot_err_up += err_up**2
             tot_err_dn += err_dn**2
 
-        return (sqrt(tot_err_up), sqrt(tot_err_dn))
+        if returnDict:
+            return nuis_dict
+        else:
+            return (sqrt(tot_err_up), sqrt(tot_err_dn))
 
-    def Write(self, outname, sortkey=str):
+    @staticmethod
+    def GetTotalMergedUncertainty(datacards):
+        # given a list of datacards, get the total uncertainty on the sum of predictions,
+        # taking into account correlations between nuisances
+        nuis_dict = {}
+        for dc in datacards:
+            this_dict = dc.GetTotalUncertainty(returnDict=True)
+            for name in this_dict:
+                if name not in nuis_dict:
+                    nuis_dict[name] = list(this_dict[name])
+                else:
+                    nuis_dict[name][0] += this_dict[name][0]
+                    nuis_dict[name][1] += this_dict[name][1]
+
+        tot_up = 0.0
+        tot_dn = 0.0
+        for name in nuis_dict:
+            tot_up += nuis_dict[name][0]**2
+            tot_dn += nuis_dict[name][1]**2
+        
+        return (sqrt(tot_up), sqrt(tot_dn))
+
+
+    def Write(self, outname, sortkey=str, suppressPointlessNuis=True):
+        # write a nicely formatted datacard
+        # sortkey is an optional custom sorting function for ordering the nuisances (default is alphabetical)
+        # setting suppressPointlessNuis to True will avoid writing nuisances that have no value for any background, or that are 1.000 for all (for lnN)
+
         fid = open(outname, 'w')
 
         maxNuisLength = 20
@@ -302,10 +335,21 @@ class Datacard:
         fid.write("-"*sum(colsizes)+'\n')
 
         for nuis in sorted(self.nuisances.keys(), key=sortkey):
-            fid.write(ml(nuis, colsizes[0]))
             tp = self.nuisances[nuis].type
             sigval = self.nuisances[nuis].sig_value
             bkgvals = self.nuisances[nuis].bkg_values
+
+            # don't write if no actual values
+            allnone = True
+            for x in sigval+bkgvals:
+                if type(x)==tuple:
+                    x = max(abs(x[0]-1.0), abs(x[1]-1.0)) + 1.0
+                if not (x is None or (tp=="lnN" and abs(x-1.0)<1e-4)):
+                    allnone = False
+            if allnone and suppressPointlessNuis:
+                continue
+
+            fid.write(ml(nuis, colsizes[0]))
 
             if tp in ["lnN","lnU"]:
                 fid.write(ml(tp, colsizes[1]))                

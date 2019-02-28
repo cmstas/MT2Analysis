@@ -1,8 +1,9 @@
 import ROOT
-import os
+import os,sys
+sys.path.append("../CardMaker")
 from math import sqrt
 import ResultPlotUtils as utils
-import sys
+from Datacard import Datacard
 import ppmUtils
 from array import *
 
@@ -426,7 +427,7 @@ def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratio
         h_SB.SetLineColor(ROOT.kRed)
         h_SB.SetLineWidth(2)
         # h_SB.GetYaxis().SetRangeUser(1e-2,10)
-        h_SB.GetYaxis().SetRangeUser(0,2)
+        h_SB.GetYaxis().SetRangeUser(0,4)
         h_SB.GetYaxis().SetNdivisions(505)
         h_SB.GetYaxis().SetTitle("S/#sigma_{S+B}")
         h_SB.GetYaxis().SetTitleSize(0.16)
@@ -457,7 +458,7 @@ def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratio
         for i in range(len(jbj_regs)-1):
             ibin += len(mt2bins[i])-1 if len(mt2bins[i])>2 else 2
             # line.DrawLine(ibin,1e-2,ibin,10)
-            line.DrawLine(ibin,0,ibin,2)
+            line.DrawLine(ibin,0,ibin,4)
 
         
     if drawSignal:
@@ -751,13 +752,17 @@ def MakeMacroRegionPlot(macro_reg, datacard_dir, datacard_name, outdir, userMax=
     
 
 
-def MakeInclusivePlot(datacard_dir, datacard_name, outdir, userMax=None, ratioRange=(0,2),
+def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
                       drawSignal=False, sigName=""):
     # plot of topo regions summed over mt2 bins
 
+    if len(utils.datacards)==0:
+        print "ERROR: must load pickled datacards first! (utils.LoadPickledDatacards)"
+        return
+
     incl_regs = utils.GetInclusiveRegions()
 
-    incl_datacards = utils.GetInclusiveDatacards(datacard_dir, datacard_name, incl_regs)
+    incl_datacards = utils.GetInclusiveDatacards(None, None, incl_regs, fullPath=False)
 
     # for i in range(min(len(incl_regs),len(incl_datacards))):
     #     print incl_regs[i]
@@ -789,42 +794,43 @@ def MakeInclusivePlot(datacard_dir, datacard_name, outdir, userMax=None, ratioRa
         ibin += 1
 
         data_yield = 0
-        bkg_yields = [0 for i in range(nBkgs)]
+        bkg_yields = [0.0 for i in range(nBkgs)]
         sig_yield = 0
 
         binLabels.append(utils.GetInclusiveBinLabel(reg))
+        
+        dcs = []
+        for idc, datacard_name in enumerate(incl_datacards[ireg]):
 
-        for idc, dc in enumerate(incl_datacards[ireg]):
+            dc = utils.datacards[datacard_name]
+            dcs.append(dc)
 
-            # get yields. first entry is data, rest are background predictions
-            #print datacard_name_fmt
-            yields = utils.GetYieldsFromDatacard(dc, bkg_processes, drawSignal)
-            data_yield += yields[0]
-            for j in range(1,nBkgs+1):
-                bkg_yields[j-1] += yields[j]
+            data_yield += int(round(dc.GetObservation()))
+            yields = dc.GetBackgroundRates()
+            for bkg in yields:
+                if yields[bkg] < 0:
+                    print "WARNING: negative prediction for bkg {0} in card {1}. Setting to 0.0".format(bkg, datacard_name)
+                    yields[bkg] = 0.0
+            for i,bkg in enumerate(bkg_processes):
+                bkg_yields[i] += yields[bkg]
 
             if drawSignal:
-                sig_yield += yields[nBkgs+1]
+                sig_yield += dc.GetSignalRate()
 
         tot_pred = sum(bkg_yields)
-
-        # print "{0}: {1:.2f} {2:.2f} {3:.2f}".format(reg, yields[1]/tot_pred,yields[2]/tot_pred,yields[3]/tot_pred)
 
         h_data.SetBinContent(ibin, data_yield)
         h_bkg_tot.SetBinContent(ibin, tot_pred)
         for i in range(nBkgs):
             h_bkg_vec[i].SetBinContent(ibin, bkg_yields[i])
 
-        if drawSignal:
-            bkg_unc, sig_unc = utils.getMacroRegionUncertainties(0, incl_datacards[ireg], doSignal=drawSignal)
-        else:
-            bkg_unc = utils.getMacroRegionUncertainties(reg, incl_datacards[ireg], doSignal=drawSignal)
+        bkg_unc = Datacard.GetTotalMergedUncertainty(dcs)
             
         thisPoint = g_unc.GetN()
         g_unc.SetPoint(thisPoint, ibin-0.5, tot_pred)
-        g_unc.SetPointError(thisPoint, 0.5, 0.5, bkg_unc, bkg_unc)
+        g_unc.SetPointError(thisPoint, 0.5, 0.5, bkg_unc[1], bkg_unc[0])
         g_unc_ratio.SetPoint(thisPoint, ibin-0.5, 1)
-        g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, bkg_unc/tot_pred, bkg_unc/tot_pred)
+        g_unc_ratio.SetPointError(thisPoint, 0.5, 0.5, bkg_unc[1]/tot_pred, bkg_unc[0]/tot_pred)
         
         if drawSignal:
             h_sig.SetBinContent(ibin, sig_yield)

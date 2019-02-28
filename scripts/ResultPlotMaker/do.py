@@ -3,17 +3,17 @@ import ROOT
 from ResultPlotMaker import *
 import ResultPlotUtils as utils
 
-datacard_dir = "../CardMaker/cards_FullRunII_17MCfor18_ttbbWeights_forPlotting"
+datacard_dir = "../CardMaker/cards_V00-10-13_FullRunII"
 
 # datacard_dir = "../cards_V00-10-10_FullRunII_17MCfor18_ttbbWeights_withZNJetWeights/"
 # datacard_name = "datacard_{0}_{1}_{2}_DUMMYSIG_-1_-1.txt"
 
-doSignal = True
+doSignal = False
 MODEL = "T2qq"
-point = (950, 650)
+point = (600, 350)
 sigName = "{0}_{1}_{2}".format(MODEL, *point)
 
-doPostfit = False
+doPostfit = True
 
 if not doPostfit or doSignal:
     if not doSignal:
@@ -22,10 +22,10 @@ if not doPostfit or doSignal:
         utils.LoadPickledDatacards(os.path.join(datacard_dir,MODEL, sigName, "signal_datacards.pkl"))
 
 if doPostfit:
-    utils.LoadPostfitFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/limits/postfit/FullRunII_17MCfor18_ttbbWeights_v3/fitDiagnostics_all.root")
+    utils.LoadPostfitFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/limits/postfit/V00-10-13_FullRunII/fitDiagnostics_all.root")
 
 
-outdir = "/home/users/bemarsh/public_html/mt2/result_plots/2019_FSR/V00-10-10_FullRunII_17MCfor18_ttbbWeights_v2"
+outdir = "/home/users/bemarsh/public_html/mt2/result_plots/2019_FSR/V00-10-13_FullRunII"
 
 # utils.lumi = 59.97
 # utils.lumi = 35.9
@@ -52,7 +52,7 @@ MakePlot("monojet", outdir, userMax=7e7, drawObs=True, doPostfit=doPostfit, scal
 
 # MakeHTBinPlot(datacard_dir, datacard_name, outdir, userMax=1e8, scalePred=scalePred, ratioRange=(0.5,1.5))
 
-# MakeInclusivePlot(datacard_dir, datacard_name, outdir, userMax=1e8, ratioRange=(0,2))
+# MakeInclusivePlot(outdir, userMax=1e8, ratioRange=(0,2))
 
 
 
