@@ -54,7 +54,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   TH1F* h_xsec = 0;
   if (isSignal) {
-    TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev.root");
+    TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev_run2.root");
     TH1F* h_xsec_orig = (TH1F*) f_xsec->Get("h_xsec_gluino");
     h_xsec = (TH1F*) h_xsec_orig->Clone("h_xsec");
     h_xsec->SetDirectory(0);
@@ -1007,8 +1007,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
 
-    if (weight > 1.0 && skipHighEventWeights) continue;
-
+    if (weight > 1.0 && !t.isData && skipHighEventWeights) continue;
     
     TH2D* hist;    
     TH2D* hist_Nj;
@@ -1368,7 +1367,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
 	      nSTCp3++;
 	      t.track_pt[i_trk] < 50 ? nSTCp3_lo++ : nSTCp3_hi++;
-	      if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "P3 LH VR hi STC: pt = " << t.track_pt[i_trk] << " pterr = " << t.track_ptErr[i_trk] << endl;
 	    }
 	    else {
 	      nSTCp4++;
@@ -1377,41 +1375,58 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  }
 	  else if (lenIndex == 2) {
 	    nSTCm++;
-	    t.track_pt[i_trk] < 50 ? nSTCm_lo++ : nSTCm_hi++;
-	    if (t.track_pt[i_trk] > 50 && mt2 > 200 && t.nJet30 < 4 && (t.ht > 450 && t.ht < 1200)) {
-	      cout << "M STC LM hi: run " << t.run << ":" << t.lumi << ":" << t.evt << " pt " << t.track_pt[i_trk] << " ht " << t.track_pt[i_trk] << " jet1 " << t.jet_pt[0] << " jet2 " << t.jet_pt[1] << " met_pt " << met_pt << " mt2 " << mt2 << endl;	      
-	    }
+	    t.track_pt[i_trk] < 50 ? nSTCm_lo++ : nSTCm_hi++;	    
 	  }
 	}
 	else if (isST) {
 	  numberOfAllSTs++;
 	  if (lenIndex == 1) {
 	    nSTp++; 
-	    if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "P HM VR hi ST: met = " << met_pt << endl;
-	    if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "P HH VR lo ST: met = " << met_pt << endl;
-	    if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "P HM SR hi ST: met = " << met_pt << endl;
-	    if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "P HH SR lo ST: met = " << met_pt << endl;
+	    if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "P HM VR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "P HH VR lo ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "P HM SR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "P HH SR lo ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "P LM VR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LH_VR_23 && t.track_pt[i_trk] < 50) cout << "P LH VR lo ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LM_SR_23 && t.track_pt[i_trk] > 50) cout << "P LM SR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LH_SR_23 && t.track_pt[i_trk] < 50) cout << "P LH SR lo ST: evt = " << t.evt << endl;
 	    t.track_pt[i_trk] < 50 ? nSTp_lo++ : nSTp_hi++;
 	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
 	      nSTp3++;
 	      t.track_pt[i_trk] < 50 ? nSTp3_lo++ : nSTp3_hi++;
-	      if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "P3 HM VR hi ST: met = " << met_pt << endl;
-	      if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "P3 HH VR lo ST: met = " << met_pt << endl;
-	      if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "P3 HM SR hi ST: met = " << met_pt << endl;
-	      if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "P3 HH SR lo ST: met = " << met_pt << endl;
+	      if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "P3 HM VR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "P3 HH VR lo ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "P3 HM SR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "P3 HH SR lo ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "P3 LM VR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LH_VR_23 && t.track_pt[i_trk] < 50) cout << "P3 LH VR lo ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LM_SR_23 && t.track_pt[i_trk] > 50) cout << "P3 LM SR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LH_SR_23 && t.track_pt[i_trk] < 50) cout << "P3 LH SR lo ST: evt = " << t.evt << endl;
  	    }
 	    else {
 	      nSTp4++;
 	      t.track_pt[i_trk] < 50 ? nSTp4_lo++ : nSTp4_hi++;
-	      if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "P4 HM VR hi ST: met = " << met_pt << endl;
-	      if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "P4 HH VR lo ST: met = " << met_pt << endl;
-	      if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "P4 HM SR hi ST: met = " << met_pt << endl;
-	      if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "P4 HH SR lo ST: met = " << met_pt << endl;
+	      if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "P4 HM VR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "P4 HH VR lo ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "P4 HM SR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "P4 HH SR lo ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "P4 LM VR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LH_VR_23 && t.track_pt[i_trk] < 50) cout << "P4 LH VR lo ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LM_SR_23 && t.track_pt[i_trk] > 50) cout << "P4 LM SR hi ST: evt = " << t.evt << endl;
+	      if (hist_Nj == h_LH_SR_23 && t.track_pt[i_trk] < 50) cout << "P4 LH SR lo ST: evt = " << t.evt << endl;
 	    }
 	  }
 	  else if (lenIndex == 2) {
 	    nSTm++;
 	    t.track_pt[i_trk] < 50 ? nSTm_lo++ : nSTm_hi++;
+	    if (hist_Nj == h_HM_VR_4 && t.track_pt[i_trk] > 50) cout << "M HM VR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_HH_VR_4 && t.track_pt[i_trk] < 50) cout << "M HH VR lo ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_HM_SR_4 && t.track_pt[i_trk] > 50) cout << "M HM SR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_HH_SR_4 && t.track_pt[i_trk] < 50) cout << "M HH SR lo ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LM_VR_23 && t.track_pt[i_trk] > 50) cout << "M LM VR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LH_VR_23 && t.track_pt[i_trk] < 50) cout << "M LH VR lo ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LM_SR_23 && t.track_pt[i_trk] > 50) cout << "M LM SR hi ST: evt = " << t.evt << endl;
+	    if (hist_Nj == h_LH_SR_23 && t.track_pt[i_trk] < 50) cout << "M LH SR lo ST: evt = " << t.evt << endl;
 	  }
 	}
       } // Track loop
@@ -1503,7 +1518,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	hist_Nj->Fill(Lidx-0.5,0.0,weight*nSTl_acc);
       }
       if (nSTm > 0) {
-	if (mt2 > 200) cout << "M ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	hist->Fill(Midx-0.5,0.0,weight*nSTm);
 	hist_Nj->Fill(Midx-0.5,0.0,weight*nSTm);
       }
@@ -1585,7 +1599,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (nSTCp3_hi > 0) {
       hist_hi->Fill(P3idx-0.5,2.0,weight*nSTCp3_hi); // Fill CR
       hist_Nj_hi->Fill(P3idx-0.5,2.0,weight*nSTCp3_hi); // Fill CR
-      if (hist_Nj_hi == h_LM_VR_23_hi) cout << "P3 LH VR hi STC event, with nSTCp3_hi = " << nSTCp3_hi << endl;
       hist_hi->Fill(P3idx-0.5,1.0, weight * ( fs_P3_hi * nSTCp3_hi) ); // Fill expected SR count
       hist_Nj_hi->Fill(P3idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P3_hi : fs_Nj23_P3_hi) * nSTCp3_hi ); // Fill expected SR count with separate Nj fs
     }
@@ -1606,7 +1619,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       hist_Nj_hi->Fill(Pidx-0.5,0.0,weight*nSTp_hi);
     }
     if (nSTp3_hi > 0) {
-      if (mt2 > 100 && mt2 < 200 && hist_Nj_hi == h_LM_VR_23_hi) cout << "P3 LM VR hi ST event: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
       hist_hi->Fill(P3idx-0.5,0.0,weight*nSTp3_hi);
       hist_Nj_hi->Fill(P3idx-0.5,0.0,weight*nSTp3_hi);
     }

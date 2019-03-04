@@ -12,6 +12,11 @@ tabledir = ""
 colorTables = False
 format = "pdf"
 
+pred_color = ROOT.kRed-4
+stat_color = ROOT.kCyan
+fs_color = ROOT.kGray+1
+all_color = ROOT.kGray+2
+
 def SetTag(toSet):
     global tag
     tag = toSet
@@ -38,18 +43,26 @@ ROOT.gStyle.SetLegendTextSize(0.03)
 ROOT.gStyle.SetPaintTextFormat("#3.3g")
 ROOT.gStyle.SetLegendBorderSize(0)
 simplecanvas = ROOT.TCanvas("plotter_simple")
-simplecanvas.SetCanvasSize(1000,600)
+simplecanvas.SetCanvasSize(1400,600)
 simplecanvas.SetTicks(1,1)
 simplecanvas.SetLeftMargin(0.16)
 simplecanvas.SetTopMargin(0.12)
 simplecanvas.SetRightMargin(0.16)
 simplecanvas.SetBottomMargin(0.16)
 
+singlecanvas = ROOT.TCanvas("plotter_single")
+singlecanvas.SetCanvasSize(1400,600)
+singlecanvas.SetTicks(1,1)
+singlecanvas.SetLeftMargin(0.1)
+singlecanvas.SetTopMargin(0.12)
+singlecanvas.SetRightMargin(0.06)
+singlecanvas.SetBottomMargin(0.205)
+
 ratiocanvas = ROOT.TCanvas("plotter_ratio")
-ratiocanvas.SetCanvasSize(1000,1000)
+ratiocanvas.SetCanvasSize(1600,1000)
 ratiocanvas.SetTicks(1,0)
 ratiocanvas.SetLeftMargin(0.16)
-ratiocanvas.SetTopMargin(0.12)
+ratiocanvas.SetTopMargin(0.3)
 ratiocanvas.SetRightMargin(0.16)
 ratiocanvas.SetBottomMargin(0.16)
 pads = []
@@ -352,7 +365,7 @@ def GetPull(pred, syst, obs, N=500000):
             s += 1
     return ROOT.Math.normal_quantile(float(s)/t, 1)
 
-def getPullPlot(g_data, g_pred, g_ratio):
+def getPullPlot(g_data, g_pred, g_ratio, desc=""):
     for ibin in range(g_data.GetN()):
         x, ydata, ypred = ROOT.Double(), ROOT.Double(), ROOT.Double()
         g_data.GetPoint(ibin, x, ydata)
@@ -379,7 +392,7 @@ def getPullPlot(g_data, g_pred, g_ratio):
 
 
         if abs(pull) > 3.0:
-            print "BIN WITH BIG PULL: ", pull
+            print "In", desc, ", BIN WITH BIG PULL:", pull, "obs:", ydata, "pred:", ypred, "bin:", math.ceil(x)
         thisPoint = g_ratio.GetN()
         g_ratio.SetPoint(thisPoint, x, pull)
         g_ratio.SetPointError(thisPoint, 0.0, 0.0, 0.0, 0.0)
@@ -903,7 +916,7 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
     elif desc.find("18"):
         lumi = 59.97
     else: lumi = 1.0
-    simplecanvas.cd()
+    singlecanvas.cd()
     tlfs=ROOT.TLegend(0.5,0.65,0.7,0.85)
     tlfs.Clear()
     nregions=len(regions)
@@ -930,13 +943,14 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
         hdata.SetBinContent(bin_index,dval)
         hdata_syst.SetBinContent(bin_index,dval)
     hmc_syst.GetXaxis().LabelsOption("v")
+    hmc_syst.GetXaxis().SetLabelSize(1.5*hmc_syst.GetXaxis().GetLabelSize())
     hmc_syst.GetXaxis().SetTitleOffset(4.8)
     hmc_syst.SetMinimum(0)
     hmc_syst.SetMaximum(1.5*max(hmc.GetMaximum(),hdata.GetMaximum()))
     hdata.SetFillColor(ROOT.kRed)
     hmc.SetFillColor(ROOT.kBlue)
     hdata_syst.SetLineColor(ROOT.kRed)
-    hmc_syst.SetLineColor(ROOT.kBlue)
+    hmc_syst.SetLineColor(ROOT.kGreen)
     gdata = getPoissonGraph( hdata, derr_list )
     gmc = getPoissonGraph( hmc, merr_list )
     gdata_syst = getPoissonGraph( hdata_syst, dsyst_list )
@@ -952,9 +966,9 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
 #    hdata_syst.Draw("same E")
     gmc_syst.Draw("p same")
     tlfs.Draw()
-    utils.DrawCmsText(simplecanvas)
-    utils.DrawLumiText(simplecanvas,lumi)
-    simplecanvas.SaveAs("{}/{}_fshort.{}".format(plotdir,desc.replace(" ","_"),format))
+    utils.DrawCmsText(singlecanvas)
+    utils.DrawLumiText(singlecanvas,lumi)
+    singlecanvas.SaveAs("{}/{}_fshort.{}".format(plotdir,desc.replace(" ","_"),format))
 
 def getBinLabelColor(region):
     tokens = region.split(" ")
@@ -1012,7 +1026,7 @@ def getBinLabelColor(region):
            color = ROOT.kOrange+4
     return color
 
-def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts = True, doPullPlot = False): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
+def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts = True, doPullPlot = False, inclNCsyst = True): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
     if desc.find("16") >= 0:
         lumi = 35.92
     elif desc.find("17"):
@@ -1051,7 +1065,10 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         hpred.SetBinError(bin_index,1e-9) # Need to explictly set bin error to epsilon so lines aren't connected when drawing later (as for "hist" style)
         perrs.append(perr)
         perrs_withfs.append( [sqrt(perr[i]**2 + perr_fs**2) for i in [0,1]]  )
-        perrs_all.append( [sqrt(perr[i]**2 + perr_fs**2 + perr_nc**2) for i in [0,1]] )
+        if inclNCsyst:
+            perrs_all.append( [sqrt(perr[i]**2 + perr_fs**2 + perr_nc**2) for i in [0,1]] )
+        else:
+            perrs_all.append( [sqrt(perr[i]**2 + perr_fs**2) for i in [0,1]] )
         hobs.SetBinContent(bin_index,obs)
         oerrs.append(oerr)
         # find maximally discrepant bin
@@ -1068,13 +1085,15 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
             most_discrepant_region = region
     print desc,"Most discrepant:",most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
     hpred.GetXaxis().LabelsOption("v")
+    size_fac = 1.7 if not doPullPlot else 1.3
+    hpred.GetXaxis().SetLabelSize(size_fac*hpred.GetXaxis().GetLabelSize())
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
     hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
     hobs.SetLineColor(ROOT.kBlack)
     hobs.SetMinimum(hpred.GetMinimum())
     hobs.SetMaximum(hpred.GetMaximum())
-    hpred.SetLineColor(ROOT.kRed)
+    hpred.SetLineColor(pred_color)
     pads[0].cd()    
     gpred_stat = getPoissonGraph( hpred, perrs )
     gpred_stat.SetName("stat"+desc.replace("-","_").replace(" ","_"))
@@ -1084,9 +1103,9 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_stat.SetFillColor(ROOT.kCyan-8)
-    gpred_withfs.SetFillColor(ROOT.kGray)
-    gpred_all.SetFillColor(ROOT.kGray+2)
+    gpred_stat.SetFillColor(stat_color)
+    gpred_withfs.SetFillColor(fs_color)
+    gpred_all.SetFillColor(all_color)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
     if not combineSysts:
@@ -1102,9 +1121,10 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     utils.DrawLumiText(pads[0],lumi)
     tl.AddEntry(gobs,"Observation","pLE")
     tl.AddEntry(gpred_stat,"Prediction, Statistical Errors")
-    if not combineSysts:
+    if not combineSysts or not inclNCsyst:
         tl.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
-    tl.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    if inclNCsyst:
+        tl.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
     tl.Draw()
     pads[1].cd()
     if doPullPlot:
@@ -1142,6 +1162,8 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
             h1.SetBinContent(bin_index,0)
             h1.SetBinError(bin_index,1)
         hpred.GetXaxis().LabelsOption("v")
+        size_fac = 1.7 if not doPullPlot else 1.3
+        hpred.GetXaxis().SetLabelSize(size_fac*hpred.GetXaxis().GetLabelSize())
         hpred.GetXaxis().SetTitleOffset(4.8)
         simplecanvas.cd()
 #        g_pred_all = getPoissonGraph( hpred, perrs_justsyst )
@@ -1149,7 +1171,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         g_obs = gobs.Clone()
         g_pull = ROOT.TGraphAsymmErrors()
 #        getPullPlot(g_obs, g_pred_all, g_pull, nstcs, fshort_list)
-        getPullPlot(g_obs, g_pred_all, g_pull)
+        getPullPlot(g_obs, g_pred_all, g_pull, desc+" RAW")
         g_pull.SetMarkerStyle(20)
         g_pull.SetMarkerSize(1)
         g_pull.SetLineWidth(1)
@@ -1162,7 +1184,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     else:        
         h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs),0,len(perrs))
         h1.SetLineWidth(3)
-        h1.SetLineColor(ROOT.kRed)
+        h1.SetLineColor(pred_color)
         hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
         perrs_all_norm = []
         perrs_withfs_norm = []
@@ -1192,11 +1214,11 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
         h1.SetMinimum(-0.001)
         gall_norm = getPoissonGraph( h1, perrs_all_norm )
-        gall_norm.SetFillColor(ROOT.kGray+2)
+        gall_norm.SetFillColor(all_color)
         gwithfs_norm = getPoissonGraph( h1, perrs_withfs_norm )
-        gwithfs_norm.SetFillColor(ROOT.kGray)
+        gwithfs_norm.SetFillColor(fs_color)
         gstat_norm = getPoissonGraph( h1, perrs_stat_norm)
-        gstat_norm.SetFillColor(ROOT.kCyan-8)
+        gstat_norm.SetFillColor(stat_color)
         gobs_norm = getPoissonGraph(hobs_norm, oerrs_norm, False)
         gobs_norm.SetMarkerStyle(20)
         gobs_norm.SetMarkerSize(2)
@@ -1217,8 +1239,9 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     hpred.SetMinimum(0.1)
     hpred.SetMaximum(200)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
-    gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
-    if not combineSysts:
+    if inclNCsyst:
+        gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
+    if not combineSysts or not inclNCsyst:
         gpred_withfs.Draw("2 same")
     gpred_stat.Draw("2 same")
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
@@ -1229,9 +1252,10 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     tr.Clear()
     tr.AddEntry(gobs,"Observation","pLE")
     tr.AddEntry(gpred_stat,"Prediction, Statistical Errors")
-    if not combineSysts:
+    if not combineSysts or not inclNCsyst:
         tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
-    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
+    if inclNCsyst:
+        tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst")
     tr.Draw()
     pads[0].SetLogy(True)
     ratiocanvas.SaveAs("{}/{}_raw_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
@@ -1278,13 +1302,15 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
         hpost.SetBinContent(bin_index,vals_postfit[region]*rescale)
         hpost.SetBinError(bin_index,errs_postfit[region]*rescale)
     hpred.GetXaxis().LabelsOption("v")
+    size_fac = 1.6 if not doPullPlot else 1.3
+    hpred.GetXaxis().SetLabelSize(size_fac*hpred.GetXaxis().GetLabelSize())
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
     hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
     hobs.SetLineColor(ROOT.kBlack)
     hobs.SetMinimum(hpred.GetMinimum())
     hobs.SetMaximum(hpred.GetMaximum())
-    hpred.SetLineColor(ROOT.kRed)
+    hpred.SetLineColor(pred_color)
     hpost.SetLineColor(ROOT.kBlue)
     hpost_noerr = hpost.Clone(hpost.GetName()+"_noerr")
     for bin in range(1,hpost.GetNbinsX()+1): hpost_noerr.SetBinError(bin,1e-9)
@@ -1299,9 +1325,9 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_stat.SetFillColor(ROOT.kCyan-8)
-    gpred_withfs.SetFillColor(ROOT.kGray)
-    gpred_all.SetFillColor(ROOT.kGray+2)
+    gpred_stat.SetFillColor(stat_color)
+    gpred_withfs.SetFillColor(fs_color)
+    gpred_all.SetFillColor(all_color)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
     if not combineSysts:
@@ -1360,6 +1386,8 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
             h1.SetBinContent(bin_index,0)
             h1.SetBinError(bin_index,1)
         hpred.GetXaxis().LabelsOption("v")
+        size_fac = 1.7 if not doPullPlot else 1.3
+        hpred.GetXaxis().SetLabelSize(size_fac*hpred.GetXaxis().GetLabelSize())
         hpred.GetXaxis().SetTitleOffset(4.8)
         simplecanvas.cd()
 #        g_pred_all = getPoissonGraph( hpred, perrs_justsyst )
@@ -1367,7 +1395,7 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
         g_obs = gobs.Clone()
         g_pull = ROOT.TGraphAsymmErrors()
 #        getPullPlot(g_obs, g_pred_all, g_pull, nstcs, fshort_list)
-        getPullPlot(g_obs, g_pred_all, g_pull)
+        getPullPlot(g_obs, g_pred_all, g_pull, desc+" POSTFIT")
         g_pull.SetMarkerStyle(20)
         g_pull.SetMarkerSize(1)
         g_pull.SetLineWidth(1)
@@ -1380,7 +1408,7 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
     else:        
         h1=ROOT.TH1D("hratiopost"+desc,";;Post-fit / Pre-fit",len(perrs),0,len(perrs))
         h1.SetLineWidth(3)
-        h1.SetLineColor(ROOT.kRed)
+        h1.SetLineColor(pred_color)
         hpost_norm = hpost.Clone(hpost.GetName()+"_norm")
         perrs_all_norm = []
         perrs_withfs_norm = []
@@ -1410,11 +1438,11 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
         h1.SetMaximum(min(round(hpost_norm.GetMaximum()+1),5))
         h1.SetMinimum(-0.001)
         gall_norm = getPoissonGraph( h1, perrs_all_norm )
-        gall_norm.SetFillColor(ROOT.kGray+2)
+        gall_norm.SetFillColor(all_color)
         gwithfs_norm = getPoissonGraph( h1, perrs_withfs_norm )
-        gwithfs_norm.SetFillColor(ROOT.kGray)
+        gwithfs_norm.SetFillColor(fs_color)
         gstat_norm = getPoissonGraph( h1, perrs_stat_norm)
-        gstat_norm.SetFillColor(ROOT.kCyan-8)
+        gstat_norm.SetFillColor(stat_color)
         gpost_norm = getPoissonGraph(hpost_norm, posterrs_norm, False)
         gpost_norm.SetMarkerStyle(20)
         gpost_norm.SetMarkerSize(2)
@@ -1487,6 +1515,8 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
         hpost.SetBinContent(bin_index,vals_postfit[region]*rescale)
         hpost.SetBinError(bin_index,errs_postfit[region]*rescale)
     hpost.GetXaxis().LabelsOption("v")
+    size_fac = 1.6 if not doPullPlot else 1.3
+    hpost.GetXaxis().SetLabelSize(size_fac*hpost.GetXaxis().GetLabelSize())
     hpost.GetXaxis().SetTitleOffset(4.8)
     hpost.SetMinimum(-0.001)
     hpost.SetMaximum(2.0*max(hpost.GetMaximum(),hobs.GetMaximum()))
@@ -1534,12 +1564,14 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
             h1.SetBinContent(bin_index,0)
             h1.SetBinError(bin_index,1)
         hpost.GetXaxis().LabelsOption("v")
+        size_fac = 1.7 if not doPullPlot else 1.3
+        hpost.GetXaxis().SetLabelSize(size_fac*hpost.GetXaxis().GetLabelSize())
         hpost.GetXaxis().SetTitleOffset(4.8)
         simplecanvas.cd()
         g_post = getPoissonGraph( hpost, perrs )
         g_obs = gobs.Clone()
         g_pull = ROOT.TGraphAsymmErrors()
-        getPullPlot(g_obs, g_post, g_pull)
+        getPullPlot(g_obs, g_post, g_pull, desc+" POSTFIT-ONLY")
         g_pull.SetMarkerStyle(20)
         g_pull.SetMarkerSize(1)
         g_pull.SetLineWidth(1)
@@ -1636,6 +1668,8 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
         hpostS.SetBinContent(bin_index,vals_postfit[region+" S"]*rescale)
         hpostS.SetBinError(bin_index,errs_postfit[region+" S"]*rescale)
     hpost.GetXaxis().LabelsOption("v")
+    size_fac = 1.7 if not doPullPlot else 1.3
+    hpost.GetXaxis().SetLabelSize(size_fac*hpost.GetXaxis().GetLabelSize())
     hpost.GetXaxis().SetTitleOffset(4.8)
     hpost.SetMinimum(-0.001)
     hpost.SetMaximum(2.0*max(hpost.GetMaximum(),hobs.GetMaximum()))
@@ -1656,9 +1690,11 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
     pads[0].cd()    
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
+    hpost.SetMinimum(0)
+    hpost.SetMaximum(max([hpostS.GetMaximum(),hpost.GetMaximum(),hobs.GetMaximum()]))
     hpost.Draw("E2")
     hpost_noerr.Draw("same")
-    hpostS.Draw("E2")
+    hpostS.Draw("E2 same")
     hpostS_noerr.Draw("same")
     gobs.SetMarkerStyle(20)
     gobs.SetMarkerSize(2)
@@ -1668,7 +1704,8 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
     utils.DrawCmsText(pads[0])
     utils.DrawLumiText(pads[0],lumi)
     tl.AddEntry(gobs,"Observation","pLE")
-    tl.AddEntry(hpost,"Prediction, Post-Fit")
+    tl.AddEntry(hpost,"Predicted Background, Post-Fit")
+    tl.AddEntry(hpostS,"Predicted Signal")
     tl.Draw()
     pads[1].cd()
     if doPullPlot:
@@ -1691,12 +1728,14 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
             h1.SetBinContent(bin_index,0)
             h1.SetBinError(bin_index,1)
         hpost.GetXaxis().LabelsOption("v")
+        size_fac = 1.7 if not doPullPlot else 1.3
+        hpost.GetXaxis().SetLabelSize(size_fac*hpost.GetXaxis().GetLabelSize())
         hpost.GetXaxis().SetTitleOffset(4.8)
         simplecanvas.cd()
         g_post = getPoissonGraph( hpost, perrs )
         g_obs = gobs.Clone()
         g_pull = ROOT.TGraphAsymmErrors()
-        getPullPlot(g_obs, g_post, g_pull)
+        getPullPlot(g_obs, g_post, g_pull, desc+" SvsBG")
         g_pull.SetMarkerStyle(20)
         g_pull.SetMarkerSize(1)
         g_pull.SetLineWidth(1)
@@ -1881,19 +1920,21 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
             most_discrepant_region = region
     print desc,"Most discrepant{}:".format("" if doFullCovariance else " (uncorrelated)"),most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
     hpred.GetXaxis().LabelsOption("v")
+    size_fac = 1.7 if not doPullPlot else 1.3
+    hpred.GetXaxis().SetLabelSize(size_fac*hpred.GetXaxis().GetLabelSize())
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
     hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
     hobs.SetLineColor(ROOT.kBlack)
     hobs.SetMinimum(hpred.GetMinimum())
     hobs.SetMaximum(hpred.GetMaximum())
-    hpred.SetLineColor(ROOT.kRed)
+    hpred.SetLineColor(pred_color)
     pads[0].cd()    
     gpred_all = getPoissonGraph( hpred, perrs_all )
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_all.SetFillColor(ROOT.kGray+2)
+    gpred_all.SetFillColor(all_color)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
@@ -1910,7 +1951,7 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
     pads[1].cd()
     h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs_all),0,len(perrs_all))
     h1.SetLineWidth(3)
-    h1.SetLineColor(ROOT.kRed)
+    h1.SetLineColor(pred_color)
     hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
     perrs_all_norm = []
     oerrs_norm = []
@@ -1932,7 +1973,7 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
     h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
     h1.SetMinimum(-0.001)
     gall_norm = getPoissonGraph( h1, perrs_all_norm )
-    gall_norm.SetFillColor(ROOT.kGray+2)
+    gall_norm.SetFillColor(all_color)
     gobs_norm = getPoissonGraph(hobs_norm, oerrs_norm, False)
     gobs_norm.SetMarkerStyle(20)
     gobs_norm.SetMarkerSize(2)
@@ -2044,19 +2085,20 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
             most_discrepant_region = region
     print desc,"Most discrepant{}:".format("" if doFullCovariance else " (uncorrelated)"),most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
     hpred.GetXaxis().LabelsOption("v")
+    hpred.GetXaxis().SetLabelSize(1.5*hpred.GetXaxis().GetLabelSize())
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
     hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
     hobs.SetLineColor(ROOT.kBlack)
     hobs.SetMinimum(hpred.GetMinimum())
     hobs.SetMaximum(hpred.GetMaximum())
-    hpred.SetLineColor(ROOT.kRed)
+    hpred.SetLineColor(pred_color)
     pads[0].cd()    
     gpred_all = getPoissonGraph( hpred, perrs_all )
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_all.SetFillColor(ROOT.kGray+2)
+    gpred_all.SetFillColor(all_color)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
@@ -2073,7 +2115,7 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
     pads[1].cd()
     h1=ROOT.TH1D("hratio"+desc,";;Obs / Pred",len(perrs_all),0,len(perrs_all))
     h1.SetLineWidth(3)
-    h1.SetLineColor(ROOT.kRed)
+    h1.SetLineColor(pred_color)
     hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
     perrs_all_norm = []
     oerrs_norm = []
@@ -2095,7 +2137,7 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
     h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
     h1.SetMinimum(-0.001)
     gall_norm = getPoissonGraph( h1, perrs_all_norm )
-    gall_norm.SetFillColor(ROOT.kGray+2)
+    gall_norm.SetFillColor(all_color)
     gobs_norm = getPoissonGraph(hobs_norm, oerrs_norm, False)
     gobs_norm.SetMarkerStyle(20)
     gobs_norm.SetMarkerSize(2)
@@ -2142,7 +2184,7 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
     tl.Clear()
     nregions=len(regions)
     hobs=ROOT.TH1D(desc,desc+";;Short Track Counts",nregions,0,nregions)
-    hobs.SetLineWidth(3)
+    hobs.SetLineWidth(2)
     hpred=hobs.Clone(hobs.GetName()+"_prediction")
     list_of_hsigs = []
     for sig_tag in sig_tags:
@@ -2173,14 +2215,15 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
         hobs.SetBinContent(bin_index,obs)
         oerrs.append(oerr)
     hpred.GetXaxis().LabelsOption("v")
+    hpred.GetXaxis().SetLabelSize(1.5*hpred.GetXaxis().GetLabelSize())
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
     hpred.SetMaximum(2.0*max(hpred.GetMaximum(),hobs.GetMaximum()))
     hobs.SetLineColor(ROOT.kBlack)
     hobs.SetMinimum(hpred.GetMinimum())
     hobs.SetMaximum(hpred.GetMaximum())
-    hpred.SetLineColor(ROOT.kRed)
-    simplecanvas.cd()
+    hpred.SetLineColor(pred_color)
+    singlecanvas.cd()
     gpred_stat = getPoissonGraph( hpred, perrs )
     gpred_stat.SetName("stat"+desc.replace("-","_").replace(" ","_"))
     gpred_withfs = getPoissonGraph( hpred, perrs_withfs )
@@ -2189,9 +2232,9 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_stat.SetFillColor(ROOT.kCyan-8)
-    gpred_withfs.SetFillColor(ROOT.kGray)
-    gpred_all.SetFillColor(ROOT.kGray+2)
+    gpred_stat.SetFillColor(stat_color)
+    gpred_withfs.SetFillColor(fs_color)
+    gpred_all.SetFillColor(all_color)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
     if not combineErrors:
@@ -2199,7 +2242,7 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
         gpred_stat.Draw("2 same")
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
     gobs.SetMarkerStyle(20)
-    gobs.SetMarkerSize(2)
+    gobs.SetMarkerSize(1)
     gobs.SetMarkerColor(ROOT.kBlack)
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
     hpred.Draw("AXIS same") # make tick marks show above fill areas
@@ -2210,13 +2253,16 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
     tl.AddEntry(gpred_all,("Prediction, with also VR Syst" if not combineErrors else "Prediction, with Total Error"))
     for sig_index,hsig in enumerate(list_of_hsigs):
         hsig.SetLineColor(sig_colors[sig_index])
-        hsig.Draw("E same")
-        tl.AddEntry(hsig,sig_tags[sig_index]+" Pred BG (MC Stat Error)")
+        hsig.SetMarkerColor(sig_colors[sig_index])
+        hsig.SetMarkerStyle(21+sig_index)
+        hsig.SetMarkerSize(1.5)
+        hsig.Draw("EX0 same")
+        tl.AddEntry(hsig,sig_tags[sig_index]+" Pred BG (MC Stat Error)","P")
     tl.Draw()
-    utils.DrawCmsText(simplecanvas)
-    utils.DrawLumiText(simplecanvas,lumi)
+    utils.DrawCmsText(singlecanvas)
+    utils.DrawLumiText(singlecanvas,lumi)
     unblind = "partialunblind" if rescale_unblind < 1.0 else "fullunblind"
-    simplecanvas.SaveAs("{}/{}_counts_{}.{}".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",",""),unblind,format))
+    singlecanvas.SaveAs("{}/{}_counts_{}.{}".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",",""),unblind,format))
 
 
 def makePullPlot(regions,vals,stats,systs,desc,rescale=1.0):
@@ -2269,10 +2315,10 @@ def makePullPlot(regions,vals,stats,systs,desc,rescale=1.0):
     gpred_all.SetName("all"+desc.replace("-","_").replace(" ","_"))
     gobs = getPoissonGraph( hobs, oerrs, False )
     gobs.SetName("obs"+desc.replace("-","_").replace(" ","_"))
-    gpred_all.SetFillColor(ROOT.kGray+2)
+    gpred_all.SetFillColor(all_color)
     print desc,"Pull"
     g_pull = ROOT.TGraphAsymmErrors()
-    getPullPlot(gobs, gpred_all, g_pull)
+    getPullPlot(gobs, gpred_all, g_pull, desc)
     g_pull.SetMarkerStyle(20)
     g_pull.SetMarkerSize(1)
     g_pull.SetLineWidth(1)
@@ -2298,11 +2344,11 @@ def makePlotSigErr(regions,vals,nonncerrs,ncsysts,list_of_sigvals,sigtags,sigcol
         hsigs.append(hsig.Clone(hsig.GetName()+str(i_sig)))        
         hsigs[i_sig].SetLineColor(sigcolors[i_sig])
     herr=hsig.Clone(desc+"_err")
-    herr.SetLineColor(ROOT.kGray)
+    herr.SetLineColor(fs_color)
     hobserr=herr.Clone(desc+"_errobs")
     hobserr.SetLineColor(ROOT.kYellow+2)
     hnc=hsig.Clone(desc+"_ncerr")
-    hnc.SetLineColor(ROOT.kGray+2)
+    hnc.SetLineColor(all_color)
     for index,region in enumerate(regions):
         isVR = region.find("VR") >= 0
         bin_index = index+1
@@ -2322,6 +2368,7 @@ def makePlotSigErr(regions,vals,nonncerrs,ncsysts,list_of_sigvals,sigtags,sigcol
     herr.SetMinimum(1e-3)
     herr.SetMaximum(100*herr.GetMaximum())
     herr.GetXaxis().LabelsOption("v")
+    herr.GetXaxis().SetLabelSize(1.5*hpred.GetXaxis().GetLabelSize())
     herr.Draw("hist")
     for i_sig,h in enumerate(hsigs):
         h.Draw("hist same")
@@ -2348,20 +2395,20 @@ def getMergedCountsLine(region,year,D16,eD16,sD16,D1718,eD1718,sD1718,S1718,eS17
     cat = region[0:2]    
     if year == "2016": # don't return 2017-2018
         lumi = 35.9/41.97
-        return colorline+"{} & {:.3f} +{:.3f}-{:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
-                                                                                                                                                                                                                                    D16[region+" pre"], sqrt(eD16[region+" pre"][0]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), sqrt(eD16[region+" pre"][1]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), D16[region+" obs"], S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"][0]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"][0]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"][0]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"][0]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"][0]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"][0]*lumi)
+        return colorline+"{} & {} +{}-{} & {:.0f} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
+                                                                                                                                                                                                                                    "%#.2g"%D16[region+" pre"], "%#.2g"%sqrt(eD16[region+" pre"][0]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), "%#.2g"%sqrt(eD16[region+" pre"][1]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), D16[region+" obs"], "%#.2g"%(S1718[(1800,1400,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1400,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1600,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1600,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1700,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1700,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1400,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1400,90)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1600,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1600,90)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1700,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1700,90)][region+" obs"][0]*lumi))
     elif year == "2017and2018": # don't return 2016
         lumi = 1+(59.97/41.97)
-        return colorline+"{} & {:.3f} +{:.3f}-{:.3f} & {:.0f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",
-                                                                                                                                                                                                                                    D1718[region+" pre"], sqrt(eD1718[region+" pre"][0]**2+sD1718[region+" nc"]**2+sD1718[region+" fs"]**2), sqrt(eD1718[region+" pre"][1]**2+sD1718[region+" nc"]**2+sD1718[region+" fs"]**2), D1718[region+" obs"], S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"][0]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"][0]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"][0]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"][0]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"][0]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"][0]*lumi)
+        return colorline+"{} & {} +{}-{} & {:.0f} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",
+                                                                                                                                                                                                                                    "%#.2g"%D1718[region+" pre"], "%#.2g"%sqrt(eD1718[region+" pre"][0]**2+sD1718[region+" nc"]**2+sD1718[region+" fs"]**2), "%#.2g"%sqrt(eD1718[region+" pre"][1]**2+sD1718[region+" nc"]**2+sD1718[region+" fs"]**2), D1718[region+" obs"], "%#.2g"%(S1718[(1800,1400,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1400,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1600,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1600,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1700,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1700,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1400,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1400,90)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1600,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1600,90)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1700,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1700,90)][region+" obs"][0]*lumi))
     else:
         print "getMergedCountsLine: Unrecognized year",year
         return ""
 #        lumi = (35.9/41.97)
-#        line_for_2016 = colorline+"{} & - & {:.3f} +{:.3f}-{:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
+#        line_for_2016 = colorline+"{} & - & {:2.2g} +{:2.2g}-{:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
                                                                                                                                                                                     #                                                D16[region+" pre"], sqrt(eD16[region+" pre"][0]**2+sD16[region+" fs"]**2+sD16[region+" nc"]**2), sqrt(eD16[region+" pre"][1]**2+sD16[region+" fs"]**2+sD16[region+" nc"]**2), S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"][0]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"][0]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"][0]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"][0]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"][0]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"][0]*lumi)
 #        lumi = 1+(59.97/41.97)
-#        line_for_2017and2018 = colorline+"{} & {:.3f} +{:.3f}-{:.3f} & - & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f} & {:.3f} $\pm$ {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",
+#        line_for_2017and2018 = colorline+"{} & {:2.2g} +{:2.2g}-{:2.2g} & - & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g} & {:2.2g} $\pm$ {:2.2g}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",
                                                                                                                                                                                     #                                                D1718[region+" pre"], sqrt(eD1718[region+" pre"][0]**2+sD1718[region+" fs"]**2+sD1718[region+" nc"]**2), sqrt(eD1718[region+" pre"][1]**2+sD1718[region+" fs"]**2+sD1718[region+" nc"]**2), S1718[(1800,1400,10)][region+" obs"]*lumi, eS1718[(1800,1400,10)][region+" obs"][0]*lumi, S1718[(1800,1600,10)][region+" obs"]*lumi, eS1718[(1800,1600,10)][region+" obs"][0]*lumi, S1718[(1800,1700,10)][region+" obs"]*lumi, eS1718[(1800,1700,10)][region+" obs"][0]*lumi, S1718[(1800,1400,90)][region+" obs"]*lumi, eS1718[(1800,1400,90)][region+" obs"][0]*lumi, S1718[(1800,1600,90)][region+" obs"]*lumi, eS1718[(1800,1600,90)][region+" obs"][0]*lumi, S1718[(1800,1700,90)][region+" obs"]*lumi, eS1718[(1800,1700,90)][region+" obs"][0]*lumi)
 #        return line_for_2016 + line_for_2017and2018
 
@@ -2470,32 +2517,32 @@ def getMergedLineDataSTC(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale16=1.0,
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = D16[region+" pre"]*rescale16
-    pred1718 = D1718[region+" pre"]*rescale1718
+    pred16 = "%#.2g"%(D16[region+" pre"]*rescale16)
+    pred1718 = "%#.2g"%(D1718[region+" pre"]*rescale1718)
     if pred16 > 0:
-        systFS16 = "{:.3f}".format(sD16[region+" fs"])
-        systNC16 = "{:.3f}".format(sD16[region+" nc"])
+        systFS16 = "%#.2g"%(sD16[region+" fs"])
+        systNC16 = "%#.2g"%(sD16[region+" nc"])
     else: 
         systFS16 = "$<${:.1f}\%$>$".format(100*sD16[region+" fsrel"])
         systNC16 = "$<${:.1f}\%$>$".format(100*sD16[region+" ncrel"])
     if pred1718 > 0:
-        systFS1718 = "{:.3f}".format(sD1718[region+" fs"])
-        systNC1718 = "{:.3f}".format(sD1718[region+" nc"])
+        systFS1718 = "%#.2g"%(sD1718[region+" fs"])
+        systNC1718 = "%#.2g"%(sD1718[region+" nc"])
     else: 
         systFS1718 = "$<${:.1f}\%$>$".format(100*sD1718[region+" fsrel"])
         systNC1718 = "$<${:.1f}\%$>$".format(100*sD1718[region+" ncrel"])
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & - & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D16[region+" STC"], pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, systFS16, systNC16, D16[region+" obs"])
+        return colorline+"{} & - & - & - & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D16[region+" STC"], pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), systFS16, systNC16, D16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, systFS1718, systNC1718, D1718[region+" obs"])
+        return colorline+"{} & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), systFS1718, systNC1718, D1718[region+" obs"])
 
     else:
-        return colorline+"{} & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$) $\pm$ {} (VR syst) & {:.0f} & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, systFS1718, systNC1718, D1718[region+" obs"],
-                           D16[region+" STC"], pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, systFS16, systNC16, D16[region+" obs"])
+        return colorline+"{} & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$) $\pm$ {} (VR syst) & {:.0f} & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), systFS1718, systNC1718, D1718[region+" obs"],
+                           D16[region+" STC"], pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), systFS16, systNC16, D16[region+" obs"])
 
 def getMergedLineDataSTC_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale16=1.0,rescale1718=1.0): # rescale multiplies prediction to enable partial unblinding
     if not colorTables:
@@ -2507,29 +2554,29 @@ def getMergedLineDataSTC_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718,resca
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = D16[region+" pre"]*rescale16
-    pred1718 = D1718[region+" pre"]*rescale1718
+    pred16 = "%#.2g"%(D16[region+" pre"]*rescale16)
+    pred1718 = "%#.2g"%(D1718[region+" pre"]*rescale1718)
     if pred16 > 0:
-        syst16 = "{:.3f}".format(sqrt(sD16[region+" fs"]**2 + sD16[region+" nc"]**2))
+        syst16 = "%#.2g" % (sqrt(sD16[region+" fs"]**2 + sD16[region+" nc"]**2))
     else: 
         syst16 = "$<${:.1f}\%$>$".format(100*sqrt(sD16[region+" fsrel"]**2 + sD16[region+" ncrel"]**2))
     if pred1718 > 0:
-        syst1718 = "{:.3f}".format(sqrt(sD1718[region+" fs"]**2 + sD1718[region+" nc"]**2))
+        syst1718 = "%#.2g"%(sqrt(sD1718[region+" fs"]**2 + sD1718[region+" nc"]**2))
     else: 
         syst1718 = "$<${:.1f}\%$>$".format(100*sqrt(sD1718[region+" fsrel"]**2 + sD1718[region+" ncrel"]**2))
 
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & - & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D16[region+" STC"], pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, syst16, D16[region+" obs"])
+        return colorline+"{} & - & - & - & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D16[region+" STC"], pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), syst16, D16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (syst) & {:.0f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, syst1718, D1718[region+" obs"])
+        return colorline+"{} & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), syst1718, D1718[region+" obs"])
 
     else:
-        return colorline+"{} & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (VR syst) & {:.0f} & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, syst1718, D1718[region+" obs"],
-                           D16[region+" STC"], pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, syst16, D16[region+" obs"])
+        return colorline+"{} & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (VR syst) & {:.0f} & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    D1718[region+" STC"], pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), syst1718, D1718[region+" obs"],
+                           D16[region+" STC"], pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), syst16, D16[region+" obs"])
 
 def getMergedLineData(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale16=1.0,rescale1718=1.0): # rescale multiplies prediction to enable partial unblinding
     if not colorTables:
@@ -2541,32 +2588,32 @@ def getMergedLineData(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale16=1.0,res
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = D16[region+" pre"]*rescale16
-    pred1718 = D1718[region+" pre"]*rescale1718
+    pred16 = "%#.2g"%(D16[region+" pre"]*rescale16)
+    pred1718 = "%#.2g"%(D1718[region+" pre"]*rescale1718)
     if pred16 > 0:
-        systFS16 = "{:.3f}".format(sD16[region+" fs"])
-        systNC16 = "{:.3f}".format(sD16[region+" nc"])
+        systFS16 = "%#.2g"%(sD16[region+" fs"])
+        systNC16 = "%#.2g"%(sD16[region+" nc"])
     else: 
         systFS16 = "$<${:.1f}\%$>$".format(100*sD16[region+" fsrel"])
         systNC16 = "$<${:.1f}\%$>$".format(100*sD16[region+" ncrel"])
     if pred1718 > 0:
-        systFS1718 = "{:.3f}".format(sD1718[region+" fs"])
-        systNC1718 = "{:.3f}".format(sD1718[region+" nc"])
+        systFS1718 = "%#.2g"%(sD1718[region+" fs"])
+        systNC1718 = "%#.2g"%(sD1718[region+" nc"])
     else: 
         systFS1718 = "$<${:.1f}\%$>$".format(100*sD1718[region+" fsrel"])
         systNC1718 = "$<${:.1f}\%$>$".format(100*sD1718[region+" ncrel"])
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, systFS16, systNC16, D16[region+" obs"])
+        return colorline+"{} & - & - & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), systFS16, systNC16, D16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, systFS1718, systNC1718, D1718[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), systFS1718, systNC1718, D1718[region+" obs"])
 
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, systFS1718, systNC1718, D1718[region+" obs"],
-                           pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, systFS16, systNC16, D16[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), systFS1718, systNC1718, D1718[region+" obs"],
+                           pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), systFS16, systNC16, D16[region+" obs"])
 
 def getMergedLineData_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale16=1.0,rescale1718=1.0): # rescale multiplies prediction to enable partial unblinding
     if not colorTables:
@@ -2578,29 +2625,29 @@ def getMergedLineData_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale1
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = D16[region+" pre"]*rescale16
-    pred1718 = D1718[region+" pre"]*rescale1718
+    pred16 = "%#.2g"%(D16[region+" pre"]*rescale16)
+    pred1718 = "%#.2g"%(D1718[region+" pre"]*rescale1718)
     if pred16 > 0:
-        syst16 = "{:.3f}".format(sqrt(sD16[region+" fs"]**2 + sD16[region+" nc"]**2))
+        syst16 = "%#.2g"%(sqrt(sD16[region+" fs"]**2 + sD16[region+" nc"]**2))
     else: 
-        syst16 = "$<${:.1f}\%$>$".format(100*sqrt(sD16[region+" fsrel"]**2 + sD16[region+" ncrel"]**2))
+        syst16 = "%#.2g"%(100*sqrt(sD16[region+" fsrel"]**2 + sD16[region+" ncrel"]**2))
     if pred1718 > 0:
-        syst1718 = "{:.3f}".format(sqrt(sD1718[region+" fs"]**2 + sD1718[region+" nc"]**2))
+        syst1718 = "%#.2g"%(sqrt(sD1718[region+" fs"]**2 + sD1718[region+" nc"]**2))
     else: 
         syst1718 = "$<${:.1f}\%$>$".format(100*sqrt(sD1718[region+" fsrel"]**2 + sD1718[region+" ncrel"]**2))
 
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, syst16, D16[region+" obs"])
+        return colorline+"{} & - & - & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), syst16, D16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, syst1718, D1718[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), syst1718, D1718[region+" obs"])
 
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (syst) & {:.0f} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred1718, eD1718[region+" pre"][0]*rescale1718, eD1718[region+" pre"][1]*rescale1718, syst1718, D1718[region+" obs"],
-                           pred16, eD16[region+" pre"][0]*rescale16, eD16[region+" pre"][1]*rescale16, syst16, D16[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), syst1718, D1718[region+" obs"],
+                           pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), syst16, D16[region+" obs"])
 
 def getMergedLineMCSTC(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,rescale17=1.0): # rescale multiplies prediction to enable partial unblinding
     if not colorTables:
@@ -2612,32 +2659,32 @@ def getMergedLineMCSTC(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,re
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = M16[region+" pre"]*rescale16
-    pred17 = M1718[region+" pre"]*rescale17
+    pred16 = "%#.2g"%(M16[region+" pre"]*rescale16)
+    pred17 = "%#.2g"%(M1718[region+" pre"]*rescale17)
     if pred16 > 0:
-        systFS16 = "{:.3f}".format(sM16[region+" fs"])
-        systNC16 = "{:.3f}".format(sM16[region+" nc"])
+        systFS16 = "%#.2g"%(sM16[region+" fs"])
+        systNC16 = "%#.2g"%(sM16[region+" nc"])
     else: 
         systFS16 = "$<${:.1f}\%$>$".format(100*sM16[region+" fsrel"])
         systNC16 = "$<${:.1f}\%$>$".format(100*sM16[region+" ncrel"])
     if pred17 > 0:
-        systFS17 = "{:.3f}".format(sM1718[region+" fs"])
-        systNC17 = "{:.3f}".format(sM1718[region+" nc"])
+        systFS17 = "%#.2g"%(sM1718[region+" fs"])
+        systNC17 = "%#.2g"%(sM1718[region+" nc"])
     else: 
         systFS17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" fsrel"])
         systNC17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" ncrel"])
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & - & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
+        return colorline+"{} & - & - & - & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    "%#.2g"%(M16[region+" STC"]), pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), systFS16, systNC16, "%#.2g"%(M16[region+" obs"]))
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"])
+        return colorline+"{} & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    "%#.2g"%(M1718[region+" STC"]), pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), systFS17, systNC17, "%#.2g"%(M1718[region+" obs"]))
 
     else:
-        return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$) $\pm$ {} (VR syst) & {:.3f} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"],
-                           M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
+        return colorline+"{} & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$) $\pm$ {} (VR syst) & {} & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    "%#.2g"%(M1718[region+" STC"]), pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), systFS17, systNC17, "%#.2g"%(M1718[region+" obs"]),
+                           "%#.2g"%(M16[region+" STC"]), pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), systFS16, systNC16, "%#.2g"%(M16[region+" obs"]))
 
 def getMergedLineMCSTC_Combined(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,rescale17=1.0): # rescale multiplies prediction to enable partial unblinding
     if not colorTables:
@@ -2649,29 +2696,29 @@ def getMergedLineMCSTC_Combined(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = M16[region+" pre"]*rescale16
-    pred17 = M1718[region+" pre"]*rescale17
+    pred16 = "%#.2g"%(M16[region+" pre"]*rescale16)
+    pred17 = "%#.2g"%(M1718[region+" pre"]*rescale17)
     if pred16 > 0:
-        syst16 = "{:.3f}".format(sqrt(sM16[region+" fs"]**2 + sM16[region+" nc"]**2))
+        syst16 = "%#.2g"%(sqrt(sM16[region+" fs"]**2 + sM16[region+" nc"]**2))
     else: 
         syst16 = "$<${:.1f}\%$>$".format(100*sqrt(sM16[region+" fsrel"]**2 + sM16[region+" ncrel"]**2))
     if pred17 > 0:
-        syst17 = "{:.3f}".format(sqrt(sM1718[region+" fs"]**2 + sM1718[region+" nc"]**2))
+        syst17 = "%#.2g"%(sqrt(sM1718[region+" fs"]**2 + sM1718[region+" nc"]**2))
     else: 
         syst17 = "$<${:.1f}\%$>$".format(100*sqrt(sM1718[region+" fsrel"]**2 + sM1718[region+" ncrel"]**2))
 
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & - & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
+        return colorline+"{} & - & - & - & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    "%#.2g"%M16[region+" STC"], pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), syst16, "%#.2g"%M16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"])
+        return colorline+"{} & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {} & - & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    "%#.2g"%M1718[region+" STC"], pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), syst17, "%#.2g"%M1718[region+" obs"])
 
     else:
-        return colorline+"{} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f} & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    M1718[region+" STC"], pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"],
-                           M16[region+" STC"], pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
+        return colorline+"{} & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {} & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    "%#.2g"%M1718[region+" STC"], pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), syst17, "%#.2g"%M1718[region+" obs"],
+                           "%#.2g"%M16[region+" STC"], pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), syst16, "%#.2g"%M16[region+" obs"])
 
 
 def getMergedLineMC(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,rescale17=1.0): # rescale multiplies prediction to enable partial unblinding
@@ -2684,32 +2731,32 @@ def getMergedLineMC(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,resca
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = M16[region+" pre"]*rescale16
-    pred17 = M1718[region+" pre"]*rescale17
+    pred16 = "%#.2g"%(M16[region+" pre"]*rescale16)
+    pred17 = "%#.2g"%(M1718[region+" pre"]*rescale17)
     if pred16 > 0:
-        systFS16 = "{:.3f}".format(sM16[region+" fs"])
-        systNC16 = "{:.3f}".format(sM16[region+" nc"])
+        systFS16 = "%#.2g"%(sM16[region+" fs"])
+        systNC16 = "%#.2g"%(sM16[region+" nc"])
     else: 
         systFS16 = "$<${:.1f}\%$>$".format(100*sM16[region+" fsrel"])
         systNC16 = "$<${:.1f}\%$>$".format(100*sM16[region+" ncrel"])
     if pred17 > 0:
-        systFS17 = "{:.3f}".format(sM1718[region+" fs"])
-        systNC17 = "{:.3f}".format(sM1718[region+" nc"])
+        systFS17 = "%#.2g"%(sM1718[region+" fs"])
+        systNC17 = "%#.2g"%(sM1718[region+" nc"])
     else: 
         systFS17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" fsrel"])
         systNC17 = "$<${:.1f}\%$>$".format(100*sM1718[region+" ncrel"])
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
+        return colorline+"{} & - & - & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), systFS16, systNC16, "%#.2g"%(M16[region+" obs"]))
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), systFS17, systNC17, "%#.2g"%(M1718[region+" obs"]))
 
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, systFS17, systNC17, M1718[region+" obs"],
-                           pred16, eM16[region+" pre"][0]*rescale16, systFS16, systNC16, M16[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (f$_{{short}}$ syst) $\pm$ {} (VR syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), systFS17, systNC17, "%#.2g"%(M1718[region+" obs"]),
+                           pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), systFS16, systNC16, "%#.2g"%(M16[region+" obs"]))
 
 
 def getMergedLineMC_Combined(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,rescale17=1.0): # rescale multiplies prediction to enable partial unblinding
@@ -2722,29 +2769,29 @@ def getMergedLineMC_Combined(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=
     else:
         colorline = "\\rowcolor{red!25}"
     cat = region[0:2]    
-    pred16 = M16[region+" pre"]*rescale16
-    pred17 = M1718[region+" pre"]*rescale17
+    pred16 = "%#.2g"%(M16[region+" pre"]*rescale16)
+    pred17 = "%#.2g"%(M1718[region+" pre"]*rescale17)
     if pred16 > 0:
-        syst16 = "{:.3f}".format(sqrt(sM16[region+" fs"]**2 + sM16[region+" nc"]**2))
+        syst16 = "%#.2g"%(sqrt(sM16[region+" fs"]**2 + sM16[region+" nc"]**2))
     else: 
         syst16 = "$<${:.1f}\%$>$".format(100*sqrt(sM16[region+" fsrel"]**2 + sM16[region+" ncrel"]**2))
     if pred17 > 0:
-        syst17 = "{:.3f}".format(sqrt(sM1718[region+" fs"]**2 + sM1718[region+" nc"]**2))
+        syst17 = "%#.2g"%(sqrt(sM1718[region+" fs"]**2 + sM1718[region+" nc"]**2))
     else: 
         syst17 = "$<${:.1f}\%$>$".format(100*sqrt(sM1718[region+" fsrel"]**2 + sM1718[region+" ncrel"]**2))
 
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
+        return colorline+"{} & - & - & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), syst16, "%#.2g"%(M16[region+" obs"]))
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), syst17, "%#.2g"%(M1718[region+" obs"]))
 
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {} (syst) & {:.3f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
-                                                                                                                                                                                                                                    pred17, eM1718[region+" pre"][0]*rescale17, syst17, M1718[region+" obs"],
-                           pred16, eM16[region+" pre"][0]*rescale16, syst16, M16[region+" obs"])
+        return colorline+"{} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {} & \\textbf{{{}}} $\pm$ {} (stat) $\pm$ {} (syst) & {}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+                                                                                                                                                                                                                                    pred17, "%#.2g"%(eM1718[region+" pre"][0]*rescale17), syst17, "%#.2g"%(M1718[region+" obs"]),
+                           pred16, "%#.2g"%(eM16[region+" pre"][0]*rescale16), syst16, "%#.2g"%(M16[region+" obs"]))
 
 
 
@@ -2759,11 +2806,11 @@ def getMergedFSLineData(cat,D16f,eD16f,sD16f,D1718f,eD1718f,sD1718f):
         colorline = "\\rowcolor{red!25}"                                   
     subcat = cat[0:2]
     if subcat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,D16f[cat],eD16f[cat][0],eD16f[cat][1],sD16f[cat])
+        return colorline+"{} & - & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,D16f[cat],eD16f[cat][0],eD16f[cat][1],sD16f[cat])
     elif subcat == "P3" or subcat == "P4": # don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & -\\\\ \n".format(cat,D1718f[cat],eD1718f[cat][0],eD1718f[cat][1],sD1718f[cat])
+        return colorline+"{} & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst) & -\\\\ \n".format(cat,D1718f[cat],eD1718f[cat][0],eD1718f[cat][1],sD1718f[cat])
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,D1718f[cat],eD1718f[cat][0],eD1718f[cat][1],sD1718f[cat],D16f[cat],eD16f[cat][0],eD16f[cat][1],sD16f[cat])
+        return colorline+"{} & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst) & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,D1718f[cat],eD1718f[cat][0],eD1718f[cat][1],sD1718f[cat],D16f[cat],eD16f[cat][0],eD16f[cat][1],sD16f[cat])
 
 def getMergedFSLineMC(cat,M16f,eM16f,sM16f,M1718f,eM1718f,sM1718f):
     if not colorTables:
@@ -2776,11 +2823,11 @@ def getMergedFSLineMC(cat,M16f,eM16f,sM16f,M1718f,eM1718f,sM1718f):
         colorline = "\\rowcolor{red!25}"                                   
     subcat = cat[0:2]
     if subcat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M16f[cat],eM16f[cat][0],sM16f[cat])
+        return colorline+"{} & - & \\textbf{{{:2.2g}}} $\pm$ {:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,M16f[cat],eM16f[cat][0],sM16f[cat])
     elif subcat == "P3" or subcat == "P4": # don't return 2016
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & -\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat])
+        return colorline+"{} & \\textbf{{{:2.2g}}} $\pm$ {:2.2g} (stat) $\pm$ {:2.2g} (syst) & -\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat])
     else:
-        return colorline+"{} & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} $\pm$ {:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat],M16f[cat],eM16f[cat][0],eM16f[cat][1],sM16f[cat])
+        return colorline+"{} & \\textbf{{{:2.2g}}} $\pm$ {:2.2g} (stat) $\pm$ {:2.2g} (syst) & \\textbf{{{:2.2g}}} $\pm$ {:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,M1718f[cat],eM1718f[cat][0],sM1718f[cat],M16f[cat],eM16f[cat][0],eM16f[cat][1],sM16f[cat])
 
 def get17vs18FSLineData(cat):
     if not colorTables:
@@ -2791,7 +2838,7 @@ def get17vs18FSLineData(cat):
         colorline = "\\rowcolor{blue!25}"
     else:
         colorline = "\\rowcolor{red!25}"                                   
-    return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,D17f[cat],eD17f[cat][0],eD17f[cat][1],sD17f[cat],D18f[cat],eD18f[cat][0],eD18f[cat][1],sD18f[cat])
+    return colorline+"{} & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst) & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,D17f[cat],eD17f[cat][0],eD17f[cat][1],sD17f[cat],D18f[cat],eD18f[cat][0],eD18f[cat][1],sD18f[cat])
 
 def get17vs18FSLineMC(cat):
     if not colorTables:
@@ -2802,4 +2849,4 @@ def get17vs18FSLineMC(cat):
         colorline = "\\rowcolor{blue!25}"
     else:
         colorline = "\\rowcolor{red!25}"                                   
-    return colorline+"{} & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst) & \\textbf{{{:.3f}}} +{:.3f}-{:.3f} (stat) $\pm$ {:.3f} (syst)\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],eM17f[cat][1],sM17f[cat],M18f[cat],eM18f[cat][0],eM18f[cat][1],sM18f[cat])
+    return colorline+"{} & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst) & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],eM17f[cat][1],sM17f[cat],M18f[cat],eM18f[cat][0],eM18f[cat][1],sM18f[cat])

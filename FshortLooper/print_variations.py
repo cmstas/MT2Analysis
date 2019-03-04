@@ -431,6 +431,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     tl.AddEntry(hist,"Variations")
     tl.AddEntry(hdef,"Baseline, Stat Error Only")
     tl.AddEntry(hsyst,"Baseline, Quadrature(Stat, Syst)")    
+    hsyst.GetYaxis().SetTitleOffset(1.7)
     hsyst.Draw("AXIS")
     gsyst.Draw("2 same")
     gdef.Draw("2 same")

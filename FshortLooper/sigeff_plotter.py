@@ -37,6 +37,7 @@ os.system("mkdir -p sigeff_plots")
 format = "pdf"
 
 tag = sys.argv[1]
+includeEtaphi = True # include etaphi in denom, or not?
 
 filepath = "output_unmerged/2017_{0}/signal/".format(tag)
 sigfiles = [ROOT.TFile.Open(filepath+f) for f in os.listdir(filepath) if isfile(join(filepath, f))]
@@ -52,7 +53,10 @@ for sigindex,sigfile in enumerate(sigfiles):
     h_sigeff.SetLineColor(ROOT.kRed)
     h_denom.SetLineColor(ROOT.kGray)
     h_raw = sigfile.Get("h_sigpass").Clone("h_raw_"+signame)
-    h_DecayXY = sigfile.Get("h_CharLength").Clone("h_DecayXY_"+signame)
+    h_DecayXY = sigfile.Get("h_CharLength").Clone("h_DecayXY_"+signame) if not includeEtaphi else sigfile.Get("h_CharLength_etaphi").Clone("h_DecayXY_etaphi_"+signame)
+    if signame.find("90cm_1800_1400") >= 0 :
+        h_raw.Print("all")
+        h_DecayXY.Print("all")
     full_integral = h_DecayXY.Integral(1,-1)
     integral_fraction = h_DecayXY.Integral()/full_integral
     if signame.find("90cm") >= 0:
@@ -61,7 +65,7 @@ for sigindex,sigfile in enumerate(sigfiles):
             h_sigeff.SetBinError(bin,h_raw.GetBinError(bin))
             h_denom.SetBinContent(bin,h_DecayXY.GetBinContent(bin))
             h_denom.SetBinError(bin,h_DecayXY.GetBinError(bin))
-    else:
+    else: # merge last bins for 10cm signals
         for bin in range(1,h_sigeff.GetNbinsX()):
             h_sigeff.SetBinContent(bin,h_raw.GetBinContent(bin))
             h_sigeff.SetBinError(bin,h_raw.GetBinError(bin))

@@ -126,11 +126,11 @@ def makeTemplate(year,region,length):
     n_obs = n_obs if n_obs >= n_zero else 0
 
     # arbitrarily say that cr stats are 2 with alpha = 0 if cr is empty
-    if n_stc == 0:
-        n_stc = 2
-        alpha = 0
-    else:
-        alpha = n_bkg / n_stc
+#    if n_stc == 0:
+#        n_stc = 2
+#        alpha = n_bkg/n_stc # alpha can't be literally 0 since n_bkg > 0 to keep combine from crashing
+#    else:
+    alpha = n_bkg / n_stc if n_stc > 0 else fs
     
     # Assemble background estimate for this signal region. Write in variable names directly for signal quantities, and sub them in later point-by-point
     # within makeCard.
@@ -171,6 +171,8 @@ def makeTemplate(year,region,length):
         template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == "2016" else 1+sqrt(2)*0.05)) # correlated across bins, but not years
         template_list.append("sig_gen_{}                  lnN    genmet_sig   -\n".format(year)) # correlated across bins, but not years
         template_list.append("sig_isr_{}                  lnN    isr_sig   -\n".format(year)) # sig_isr is fully correlated across all bins, but not years
+        template_list.append("sig_fastsim                 lnN    1.06  -\n") # fully correlated error assessed to cover fastsim vs fullsim signal efficiency
+        template_list.append("sig_acceptance                 lnN    1.10  -\n") # fully correlated error assessed to cover signal acceptance uncertainty
 
     # background errors
     

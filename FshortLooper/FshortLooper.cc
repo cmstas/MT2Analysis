@@ -84,7 +84,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
   TH1F* h_xsec = 0;
   if (isSignal) {
-    TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev.root");
+    TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev_run2.root");
     TH1F* h_xsec_orig = (TH1F*) f_xsec->Get("h_xsec_gluino");
     h_xsec = (TH1F*) h_xsec_orig->Clone("h_xsec");
     h_xsec->SetDirectory(0);
@@ -158,6 +158,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   TH1D* h_sigeffST = new TH1D("h_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
   TH1D* h_sigeffSTC = new TH1D("h_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
   TH1D* h_CharLength = new TH1D("h_CharLength","Chargino Track Length",10,0,100);
+  TH1D* h_CharLength_etaphi = new TH1D("h_CharLength_etaphi","Chargino Track Length (within #eta-#phi Acceptance)",10,0,100);
 
   unordered_map<string,TH2D*> mtptHists;
   unordered_map<string,TH2D*> mtmetHists;
@@ -212,6 +213,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     TH1D* h_ht_base = new TH1D("h_ht_base","H_{T}",10,250,1250);
     TH1D* h_nj_base = new TH1D("h_nj_base","N_{Jet}",8,2,10);
     TH1D* h_dphiMet_base = new TH1D("h_dphiMet_base", "#Delta#phi(MET,ST)",10,0,TMath::Pi());
+    TH1D* h_adjMet_base = new TH1D("h_adjMet_base", "MET-ST",15,0,750);
+    TH1D* h_deltaMet_base = new TH1D("h_deltaMet_base", "#DeltaMET, after subtracting ST",9,-1,1);
     TH1D* h_nb_base = new TH1D("h_nb_base","N_{Tag}",4,0,4);
     for (int cat = 0; cat < 2; cat++) {
       string category = categories[cat];
@@ -269,6 +272,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	      // Pt
 	      hname = "h_pt_"+suffix;
 	      cutHists[hname] = (TH1D*) h_pt_base->Clone(hname.c_str());	    
+	      // Eta
+	      hname = "h_eta_"+suffix;
+	      cutHists[hname] = (TH1D*) h_eta_base->Clone(hname.c_str());	    
 	      // Mt
 	      hname = "h_mt_"+suffix;
 	      cutHists[hname] = (TH1D*) h_mt_base->Clone(hname.c_str());	    
@@ -287,6 +293,15 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	      // N layer
 	      hname = "h_nlayer_"+suffix;
 	      cutHists[hname] = (TH1D*) h_nlayer_base->Clone(hname.c_str());
+	      // dphi Met
+	      hname = "h_dphiMet_"+suffix;
+	      cutHists[hname] = (TH1D*) h_dphiMet_base->Clone(hname.c_str());	    
+	      // adj Met
+	      hname = "h_adjMet_"+suffix;
+	      cutHists[hname] = (TH1D*) h_adjMet_base->Clone(hname.c_str());	    
+	      // delta Met
+	      hname = "h_deltaMet_"+suffix;
+	      cutHists[hname] = (TH1D*) h_deltaMet_base->Clone(hname.c_str());	    
 	      if (fillUnimportantCutHists) {
 		// Ntag
 		hname = "h_nb_"+suffix;
@@ -299,12 +314,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 		// N vertex
 		hname = "h_nv_"+suffix;
 		cutHists[hname] = (TH1D*) h_nv_base->Clone(hname.c_str());
-		// dphi Met
-		hname = "h_dphiMet_"+suffix;
-		cutHists[hname] = (TH1D*) h_dphiMet_base->Clone(hname.c_str());	    
-		// Eta
-		hname = "h_eta_"+suffix;
-		cutHists[hname] = (TH1D*) h_eta_base->Clone(hname.c_str());	    
 	      }
 	    }
 	  }
@@ -700,6 +709,10 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
     for (int i_chargino = 0; i_chargino < t.nCharginos; i_chargino++) {
       h_CharLength->Fill( t.chargino_decayXY[i_chargino], weight );
+      const float char_phi = t.chargino_phi[i_chargino];
+      const float char_eta = t.chargino_eta[i_chargino];
+      bool chargino_calosel = InEtaPhiVetoRegion(char_eta,char_phi,year) == 0;
+      if (chargino_calosel) h_CharLength_etaphi->Fill( t.chargino_decayXY[i_chargino], weight );
     }
 
     const int ntracks = t.ntracks;
@@ -723,7 +736,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  }
 	}
       }
-    
+
       string ptstring = t.track_pt[i_trk] < 50 ? "_lowpt" : "_hipt";
       bool isST = false, isSTC = false;//, isST1 = false, isSTC1 = false;
       if (recalculate) {
@@ -969,6 +982,13 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       */
 
       const float dphiMet = DeltaPhi(t.track_phi[i_trk],met_phi);
+      const float met_x = cos(met_phi) * met;
+      const float met_y = sin(met_phi) * met;
+      const float trk_x = cos(t.track_phi[i_trk]) * t.track_pt[i_trk];
+      const float trk_y = sin(t.track_phi[i_trk]) * t.track_pt[i_trk];
+      const float adj_x = met_x - trk_x;
+      const float adj_y = met_y - trk_y;
+      const float adjMet = sqrt( adj_x*adj_x + adj_y*adj_y );
       
       // Fills
       if (fillNM1Hists && passMultijet) {
@@ -1085,6 +1105,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 		// Pt
 		hname = "h_pt_"+suffix;
 		cutHists[hname]->Fill(t.track_pt[i_trk],weight);
+		// Eta
+		hname = "h_eta_"+suffix;
+		cutHists[hname]->Fill(fabs(t.track_eta[i_trk]),weight);
 		// Mt
 		hname = "h_mt_"+suffix;
 		cutHists[hname]->Fill(mt,weight);
@@ -1103,13 +1126,16 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 		// N layer
 		hname = "h_nlayer_"+suffix;
 		cutHists[hname]->Fill(t.track_nLayersWithMeasurement[i_trk],weight);
+		// dphi Met
+		hname = "h_dphiMet_"+suffix;
+		cutHists[hname]->Fill(dphiMet,weight);
+		// adj Met
+		hname = "h_adjMet_"+suffix;
+		cutHists[hname]->Fill(adjMet,weight);
+		// delta Met
+		hname = "h_deltaMet_"+suffix;
+		cutHists[hname]->Fill((met - adjMet)/met,weight);
 		if (fillUnimportantCutHists) {
-		  // Eta
-		  hname = "h_eta_"+suffix;
-		  cutHists[hname]->Fill(fabs(t.track_eta[i_trk]),weight);
-		  // dphi Met
-		  hname = "h_dphiMet_"+suffix;
-		  cutHists[hname]->Fill(dphiMet,weight);
 		  // Ntag
 		  hname = "h_nb_"+suffix;
 		  cutHists[hname]->Fill(t.nBJet20,weight);
@@ -1188,6 +1214,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   h_sigpassST->Write();
   h_sigpassSTC->Write();
   h_CharLength->Write();
+  h_CharLength_etaphi->Write();
 
   outfile_.Close();
   cout << "Wrote everything" << endl;
