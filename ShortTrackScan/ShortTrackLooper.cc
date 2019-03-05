@@ -1381,11 +1381,116 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   }//end loop on events in a file
 
+  // Post-process
+
+  // STCs
+  TH3D* h_LLM_SR_STC = (TH3D*) h_LL_SR_STC->Clone("h_LLM_SR_STC");
+  h_LLM_SR_STC->Add(h_LM_SR_STC);
+  TH3D* h_LLM_VR_STC = (TH3D*) h_LL_VR_STC->Clone("h_LLM_VR_STC");
+  h_LLM_VR_STC->Add(h_LM_VR_STC);
+  TH3D* h_LLM_MR_STC = (TH3D*) h_LL_MR_STC->Clone("h_LLM_MR_STC");
+  h_LLM_MR_STC->Add(h_LM_MR_STC);
+  TH3D* h_HLM_SR_STC = (TH3D*) h_HL_SR_STC->Clone("h_HLM_SR_STC");
+  h_HLM_SR_STC->Add(h_HM_SR_STC);
+  TH3D* h_HLM_VR_STC = (TH3D*) h_HL_VR_STC->Clone("h_HLM_VR_STC");
+  h_HLM_VR_STC->Add(h_HM_VR_STC);
+  TH3D* h_HLM_MR_STC = (TH3D*) h_HL_MR_STC->Clone("h_HLM_MR_STC");
+  h_HLM_MR_STC->Add(h_HM_MR_STC);
+
+  TH3D* h_LLM_SR_hi_STC = (TH3D*) h_LL_SR_hi_STC->Clone("h_LLM_SR_hi_STC");
+  h_LLM_SR_hi_STC->Add(h_LM_SR_hi_STC);
+  hi_hists[h_LLM_SR_STC] = h_LLM_SR_hi_STC;
+  TH3D* h_LLM_VR_hi_STC = (TH3D*) h_LL_VR_hi_STC->Clone("h_LLM_VR_hi_STC");
+  h_LLM_VR_hi_STC->Add(h_LM_VR_hi_STC);
+  hi_hists[h_LLM_VR_STC] = h_LLM_VR_hi_STC;
+  TH3D* h_LLM_MR_hi_STC = (TH3D*) h_LL_MR_hi_STC->Clone("h_LLM_MR_hi_STC");
+  h_LLM_MR_hi_STC->Add(h_LM_MR_hi_STC);
+  hi_hists[h_LLM_MR_STC] = h_LLM_MR_hi_STC;
+  TH3D* h_HLM_SR_hi_STC = (TH3D*) h_HL_SR_hi_STC->Clone("h_HLM_SR_hi_STC");
+  h_HLM_SR_hi_STC->Add(h_HM_SR_hi_STC);
+  hi_hists[h_HLM_SR_STC] = h_HLM_SR_hi_STC;
+  TH3D* h_HLM_VR_hi_STC = (TH3D*) h_HL_VR_hi_STC->Clone("h_HLM_VR_hi_STC");
+  h_HLM_VR_hi_STC->Add(h_HM_VR_hi_STC);
+  hi_hists[h_HLM_VR_STC] = h_HLM_VR_hi_STC;
+  TH3D* h_HLM_MR_hi_STC = (TH3D*) h_HL_MR_hi_STC->Clone("h_HLM_MR_hi_STC");
+  h_HLM_MR_hi_STC->Add(h_HM_MR_hi_STC);
+  hi_hists[h_HLM_MR_STC] = h_HLM_MR_hi_STC;
+
+  TH3D* h_LLM_SR_lo_STC = (TH3D*) h_LL_SR_lo_STC->Clone("h_LLM_SR_lo_STC");
+  h_LLM_SR_lo_STC->Add(h_LM_SR_lo_STC);
+  low_hists[h_LLM_SR_STC] = h_LLM_SR_lo_STC;
+  TH3D* h_LLM_VR_lo_STC = (TH3D*) h_LL_VR_lo_STC->Clone("h_LLM_VR_lo_STC");
+  h_LLM_VR_lo_STC->Add(h_LM_VR_lo_STC);
+  low_hists[h_LLM_VR_STC] = h_LLM_VR_lo_STC;
+  TH3D* h_LLM_MR_lo_STC = (TH3D*) h_LL_MR_lo_STC->Clone("h_LLM_MR_lo_STC");
+  h_LLM_MR_lo_STC->Add(h_LM_MR_lo_STC);
+  low_hists[h_LLM_MR_STC] = h_LLM_MR_lo_STC;
+  TH3D* h_HLM_SR_lo_STC = (TH3D*) h_HL_SR_lo_STC->Clone("h_HLM_SR_lo_STC");
+  h_HLM_SR_lo_STC->Add(h_HM_SR_lo_STC);
+  low_hists[h_HLM_SR_STC] = h_HLM_SR_lo_STC;
+  TH3D* h_HLM_VR_lo_STC = (TH3D*) h_HL_VR_lo_STC->Clone("h_HLM_VR_lo_STC");
+  h_HLM_VR_lo_STC->Add(h_HM_VR_lo_STC);
+  low_hists[h_HLM_VR_STC] = h_HLM_VR_lo_STC;
+  TH3D* h_HLM_MR_lo_STC = (TH3D*) h_HL_MR_lo_STC->Clone("h_HLM_MR_lo_STC");
+  h_HLM_MR_lo_STC->Add(h_HM_MR_lo_STC);
+  low_hists[h_HLM_MR_STC] = h_HLM_MR_lo_STC;
+
+  // STs
+  TH3D* h_LLM_SR_ST = (TH3D*) h_LL_SR_ST->Clone("h_LLM_SR_ST");
+  h_LLM_SR_ST->Add(h_LM_SR_ST);
+  TH3D* h_LLM_VR_ST = (TH3D*) h_LL_VR_ST->Clone("h_LLM_VR_ST");
+  h_LLM_VR_ST->Add(h_LM_VR_ST);
+  TH3D* h_LLM_MR_ST = (TH3D*) h_LL_MR_ST->Clone("h_LLM_MR_ST");
+  h_LLM_MR_ST->Add(h_LM_MR_ST);
+  TH3D* h_HLM_SR_ST = (TH3D*) h_HL_SR_ST->Clone("h_HLM_SR_ST");
+  h_HLM_SR_ST->Add(h_HM_SR_ST);
+  TH3D* h_HLM_VR_ST = (TH3D*) h_HL_VR_ST->Clone("h_HLM_VR_ST");
+  h_HLM_VR_ST->Add(h_HM_VR_ST);
+  TH3D* h_HLM_MR_ST = (TH3D*) h_HL_MR_ST->Clone("h_HLM_MR_ST");
+  h_HLM_MR_ST->Add(h_HM_MR_ST);
+
+  TH3D* h_LLM_SR_hi_ST = (TH3D*) h_LL_SR_hi_ST->Clone("h_LLM_SR_hi_ST");
+  h_LLM_SR_hi_ST->Add(h_LM_SR_hi_ST);
+  hi_hists[h_LLM_SR_ST] = h_LLM_SR_hi_ST;
+  TH3D* h_LLM_VR_hi_ST = (TH3D*) h_LL_VR_hi_ST->Clone("h_LLM_VR_hi_ST");
+  h_LLM_VR_hi_ST->Add(h_LM_VR_hi_ST);
+  hi_hists[h_LLM_VR_ST] = h_LLM_VR_hi_ST;
+  TH3D* h_LLM_MR_hi_ST = (TH3D*) h_LL_MR_hi_ST->Clone("h_LLM_MR_hi_ST");
+  h_LLM_MR_hi_ST->Add(h_LM_MR_hi_ST);
+  hi_hists[h_LLM_MR_ST] = h_LLM_MR_hi_ST;
+  TH3D* h_HLM_SR_hi_ST = (TH3D*) h_HL_SR_hi_ST->Clone("h_HLM_SR_hi_ST");
+  h_HLM_SR_hi_ST->Add(h_HM_SR_hi_ST);
+  hi_hists[h_HLM_SR_ST] = h_HLM_SR_hi_ST;
+  TH3D* h_HLM_VR_hi_ST = (TH3D*) h_HL_VR_hi_ST->Clone("h_HLM_VR_hi_ST");
+  h_HLM_VR_hi_ST->Add(h_HM_VR_hi_ST);
+  hi_hists[h_HLM_VR_ST] = h_HLM_VR_hi_ST;
+  TH3D* h_HLM_MR_hi_ST = (TH3D*) h_HL_MR_hi_ST->Clone("h_HLM_MR_hi_ST");
+  h_HLM_MR_hi_ST->Add(h_HM_MR_hi_ST);
+  hi_hists[h_HLM_MR_ST] = h_HLM_MR_hi_ST;
+
+  TH3D* h_LLM_SR_lo_ST = (TH3D*) h_LL_SR_lo_ST->Clone("h_LLM_SR_lo_ST");
+  h_LLM_SR_lo_ST->Add(h_LM_SR_lo_ST);
+  low_hists[h_LLM_SR_ST] = h_LLM_SR_lo_ST;
+  TH3D* h_LLM_VR_lo_ST = (TH3D*) h_LL_VR_lo_ST->Clone("h_LLM_VR_lo_ST");
+  h_LLM_VR_lo_ST->Add(h_LM_VR_lo_ST);
+  low_hists[h_LLM_VR_ST] = h_LLM_VR_lo_ST;
+  TH3D* h_LLM_MR_lo_ST = (TH3D*) h_LL_MR_lo_ST->Clone("h_LLM_MR_lo_ST");
+  h_LLM_MR_lo_ST->Add(h_LM_MR_lo_ST);
+  low_hists[h_LLM_MR_ST] = h_LLM_MR_lo_ST;
+  TH3D* h_HLM_SR_lo_ST = (TH3D*) h_HL_SR_lo_ST->Clone("h_HLM_SR_lo_ST");
+  h_HLM_SR_lo_ST->Add(h_HM_SR_lo_ST);
+  low_hists[h_HLM_SR_ST] = h_HLM_SR_lo_ST;
+  TH3D* h_HLM_VR_lo_ST = (TH3D*) h_HL_VR_lo_ST->Clone("h_HLM_VR_lo_ST");
+  h_HLM_VR_lo_ST->Add(h_HM_VR_lo_ST);
+  low_hists[h_HLM_VR_ST] = h_HLM_VR_lo_ST;
+  TH3D* h_HLM_MR_lo_ST = (TH3D*) h_HL_MR_lo_ST->Clone("h_HLM_MR_lo_ST");
+  h_HLM_MR_lo_ST->Add(h_HM_MR_lo_ST);
+  low_hists[h_HLM_MR_ST] = h_HLM_MR_lo_ST;
 
   vector<TH3D*> hists = {
-    h_LL_MR_STC,  h_LM_MR_STC,  h_LH_MR_STC,  h_HL_MR_STC,   h_HM_MR_STC,  h_HH_MR_STC,  h_LL_VR_STC,  h_LM_VR_STC,  h_LH_VR_STC,  h_HL_VR_STC,  h_HM_VR_STC,  h_HH_VR_STC,  h_LL_SR_STC,  h_LM_SR_STC,  h_LH_SR_STC,  h_HL_SR_STC,  h_HM_SR_STC,  h_HH_SR_STC,
+    h_LL_MR_STC,  h_LM_MR_STC,  h_LLM_MR_STC, h_LH_MR_STC,  h_HL_MR_STC,   h_HM_MR_STC,  h_HLM_MR_STC, h_HH_MR_STC,  h_LL_VR_STC,  h_LM_VR_STC,  h_LLM_VR_STC, h_LH_VR_STC,  h_HL_VR_STC,  h_HM_VR_STC,  h_HLM_VR_STC, h_HH_VR_STC,  h_LL_SR_STC,  h_LM_SR_STC,  h_LLM_SR_STC, h_LH_SR_STC,  h_HL_SR_STC,  h_HM_SR_STC,  h_HLM_SR_STC, h_HH_SR_STC,
 
-    h_LL_MR_ST,  h_LM_MR_ST,  h_LH_MR_ST,  h_HL_MR_ST,   h_HM_MR_ST,  h_HH_MR_ST,  h_LL_VR_ST,  h_LM_VR_ST,  h_LH_VR_ST,  h_HL_VR_ST,  h_HM_VR_ST,  h_HH_VR_ST,  h_LL_SR_ST,  h_LM_SR_ST,  h_LH_SR_ST,  h_HL_SR_ST,  h_HM_SR_ST,  h_HH_SR_ST,
+    h_LL_MR_ST,  h_LM_MR_ST,  h_LLM_MR_ST, h_LH_MR_ST,  h_HL_MR_ST,   h_HM_MR_ST,  h_HLM_MR_ST, h_HH_MR_ST,  h_LL_VR_ST,  h_LM_VR_ST,  h_LLM_VR_ST, h_LH_VR_ST,  h_HL_VR_ST,  h_HM_VR_ST,  h_HLM_VR_ST, h_HH_VR_ST,  h_LL_SR_ST,  h_LM_SR_ST,  h_LLM_SR_ST, h_LH_SR_ST,  h_HL_SR_ST,  h_HM_SR_ST,  h_HLM_SR_ST, h_HH_SR_ST,
 
     h_fracFS_23, h_fracFS_4};
 
