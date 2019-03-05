@@ -3150,7 +3150,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  // find charginos and see if they have decay lengths in the range of interest, 10 to 100 cm
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
 	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != charginoStatus) continue; // looking for final state charginos
-	    // chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
+	    chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
 	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
 	    chargino_phi[nCharginos] = cms3.genps_p4().at(iGen).phi();
 	    chargino_pt[nCharginos] = cms3.genps_p4().at(iGen).pt();  
@@ -3201,14 +3201,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  // If this track is to be saved only because a chargino matches to it, set bits indicating why it wouldn't normally be saved.
 	  if (!cms3.isotracks_isLostTrack().at(i_it)) {
 	    track_isBadCharginoTrack[ntracks] += 1<<0;
-	    cout << "Non-lostTrack chargino, track " << i_it << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand "  : ": General " ) << cms3.isotracks_particleId().at(i_it) << " decayXY " << chargino_decayXY[track_matchedCharginoIdx[ntracks]] << " nLayers " << cms3.isotracks_trackerLayersWithMeasurement().at(i_it) << " genpt " << chargino_pt[track_matchedCharginoIdx[ntracks]] << " recopt " << cms3.isotracks_pttrk().at(i_it) << endl;
+	    float this_decayXY = chargino_decayXY[track_matchedCharginoIdx[ntracks]];
+	    if (this_decayXY > 0 && this_decayXY < 100) {
+	      cout << "Non-lostTrack disappearing chargino, track " << i_it << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand "  : ": General " ) << cms3.isotracks_particleId().at(i_it) << " decayXY " << chargino_decayXY[track_matchedCharginoIdx[ntracks]] << " nLayers " << cms3.isotracks_trackerLayersWithMeasurement().at(i_it) << endl;
+	    }
 	  }
 	  if (cms3.isotracks_pttrk().at(i_it) < 15) {
 	    track_isBadCharginoTrack[ntracks] += 1<<1;
 	    cout << "Chargino with pt < 15 GeV" << endl;
 	  }
-
-	  if (verbose) std::cout << "Before short track gen matching" << std::endl;
 
 	  //	  cout << "matched chargino index for track " << i_it << " (cms4) " << ntracks << " (baby): " << track_matchedCharginoIdx[ntracks] << ", ch1 = " << Ch1_idx << ", ch2 = " << Ch2_idx << endl;
 
@@ -3236,7 +3237,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      track_genPdgId[ntracks] = cms3.genps_id().at(genIdx);
 	      // If we matched a chargino ...
 	      if (abs(track_genPdgId[ntracks]) == 1000024) {
-		// track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
+		track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
 		track_isDisappearingChargino[ntracks] = track_decayXY[ntracks] > 10 && track_decayXY[ntracks] < 100;
 	      } 
 	      // if a chargino matched this track, but this track did not match a chargino...

@@ -11,13 +11,13 @@ void make_nsig_weight_hists(TString dir, TString sample) {
 
   TFile* fout = new TFile(Form("nsig_weights_%s.root",sample.Data()),"RECREATE");
 
-  // default: 25 GeV binning, m1 from 0-3000, m2 from 0-2100
+  // default: 25 GeV binning, m1 from 0-3000, m2 from 0-3000 (to cover very compressed short track signals)
   int x_nbins = 121;
   float x_min = -12.5;
   float x_max = 3012.5;
-  int y_nbins = 85;
+  int y_nbins = 121;
   float y_min = -12.5;
-  float y_max = 2112.5;
+  float y_max = 3012.5;
 
   // for T2cc: 25 GeV in x, 5 GeV in y binning, m1 from 0-2000, m2 from 0-1000
   if (sample.Contains("T2cc")) {
