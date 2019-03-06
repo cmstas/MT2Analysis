@@ -96,7 +96,6 @@ for filename in filenames:
         h_STC_scan.SetTitle("Efficiency from STC Contam;Mass 1 (GeV);Mass 2 (GeV)")
         h_FS_scan = h_correction_scan.Clone(histname+"_contamFS_"+signalname)
         h_FS_scan.SetTitle("Efficiency from f_{short} Contam;Mass 1 (GeV);Mass 2 (GeV)")
-        print hsig_STC_scan.GetNbinsY()*hsig_STC_scan.GetNbinsZ()
         for biny in range(1,hsig_STC_scan.GetNbinsY()+1):
             for binz in range(1,biny): # mLSP < mPrimary
                 hsig_STC = hsig_STC_scan.ProjectionX("projection_STC_{}_{}".format(biny,binz),biny,biny,binz,binz)
@@ -117,7 +116,7 @@ for filename in filenames:
                     eff_from_fs = max(1 - lost_from_fs/st_sig,0)
                     h_FS_scan.SetBinContent(length,biny,binz,eff_from_fs)
 
-                    lost_from_stc = hsig_STC.GetBinContent(length)/hdata.GetBinContent(length,3) # = Nstc(sig)/Nstc(data) => eff * Npred = fs(data)*Nstc(sig)
+                    lost_from_stc = hsig_STC.GetBinContent(length)/hdata.GetBinContent(length,3)*pred_data # = Nstc(sig)/Nstc(data) => eff * Npred = fs(data)*Nstc(sig)
                     eff_from_stc = max(1 - lost_from_stc/st_sig,0)
                     h_STC_scan.SetBinContent(length,biny,binz,max(eff_from_stc,0))
 
