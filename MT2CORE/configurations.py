@@ -135,10 +135,13 @@ MT2Config_defs["data_2018_Prompt"] = {
     "btag_med_threshold_DeepCSV" : 0.4184,
     "btag_med_threshold_CSVv2" : 0.8838,
     "ea_version" : 3,
-    "jet_id" : "2017_v1",
+    "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "rphi_tag" : "V00-10-09_2018fullYear",
-    "JECs" : [ ["", "Fall17_17Nov2017C_V32_DATA"]
+    "JECs" : [ ["2018A", "Autumn18_RunA_V8_DATA"],
+               ["2018B", "Autumn18_RunB_V8_DATA"],
+               ["2018C", "Autumn18_RunC_V8_DATA"],
+               ["2018D", "Autumn18_RunD_V8_DATA"],
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
@@ -157,7 +160,10 @@ MT2Config_defs["data_2018_17Sep2018"] = {
     "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "rphi_tag" : "V00-10-09_2018fullYear",
-    "JECs" : [ ["", "Autumn18_V3_OldRes_DATA"]
+    "JECs" : [ ["2018A", "Autumn18_RunA_V8_DATA"],
+               ["2018B", "Autumn18_RunB_V8_DATA"],
+               ["2018C", "Autumn18_RunC_V8_DATA"],
+               ["2018D", "Autumn18_RunD_V8_DATA"],
                ],
     "filters"  : MT2Config_defs["data_2017_31Mar2018"]["filters"],
     "triggers" : MT2Config_defs["data_2017_31Mar2018"]["triggers"]
@@ -321,7 +327,7 @@ MT2Config_defs["mc_102x_Autumn18"] = {
     "elSF_TRKfileLowPt" : "lepsf/Autumn18/egammaEffi.txt_EGM2D.root",        # use above bin instead
     "elSF_IDhistName" : "Run2018_CutBasedVetoNoIso94XV2",
     "elSF_ISOhistName" : "Run2018_Mini",
-    "muSF_IDfile" : "lepsf/Fall17/MuonPOG_SF_ID_2017BCDEF.root",
+    "muSF_IDfile" : "lepsf/Autumn18/MuonPOG_RunABCD_SF_ID.root",
     "muSF_ISOfile" : "lepsf/Fall17/SUS_MuSF_MiniIso2_LooseID.root",
     "muSF_IPfile" : "",
     "muSF_TRKfile" : "",
@@ -351,7 +357,7 @@ MT2Config_defs["mc_102x_Autumn18"] = {
     "jet_id" : "2018_v1",
     "JRT_file" : "JetResponseTemplates_ptBinned_102x_JetID_PUID_BTagSFs_core2sigma.root",
     "rphi_tag" : "V00-10-09_2018fullYear",
-    "JECs" : [ ["", "Autumn18_V3_MC"]
+    "JECs" : [ ["", "Autumn18_V8_MC"]
                ],
     "filters" : [ "globalSuperTightHalo2016Filter",
                   "goodVertices",
