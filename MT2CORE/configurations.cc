@@ -728,7 +728,7 @@ MT2Configuration GetMT2Config(std::string tag){
         c.jet_id             = "2017_v1";
         c.JRT_file           = "JetResponseTemplates_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma.root";
         c.rphi_tag           = "V00-10-09_2017fullYear";
-        c.JECs.push_back(std::pair<std::string, std::string> ("", "Spring16_FastSimV1_MC"));
+        c.JECs.push_back(std::pair<std::string, std::string> ("", "Fall17_FastsimV1"));
         c.filters["goodVertices"] = true;
         c.filters["HBHENoiseFilter"] = true;
         c.filters["HBHENoiseIsoFilter"] = true;

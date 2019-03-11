@@ -473,7 +473,7 @@ MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_fastsim_Fall17"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
-MT2Config_defs["mc_94x_fastsim_Fall17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
+MT2Config_defs["mc_94x_fastsim_Fall17"]["JECs"] = [ ["", "Fall17_FastsimV1"] ]
 MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
     "goodVertices",
     "HBHENoiseFilter",
