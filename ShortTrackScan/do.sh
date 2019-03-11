@@ -23,4 +23,7 @@ for SAMPLE in ${Samples[@]}; do
     command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/${SAMPLE}_GENMET ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017_GENMET.txt &"
     echo $command
     eval $command
+    command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/${SAMPLE}_ISR ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2017_GENMET.txt &"
+    echo $command
+    eval $command
 done

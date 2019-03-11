@@ -299,8 +299,10 @@ def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
 
     sigscan_name = "h_{}_{}{}_ST".format(njht,MT2,pt)
     sigscan_delta_name = "h_{}_{}{}_ST_RECO_MINUS_GENMET".format(njht,MT2,pt)
+    sigscan_isr_name = "h_{}_{}{}_ST_ISR".format(njht,MT2,pt)
     h_sigscan = f_sigscan.Get(sigscan_name).Clone("{}_{}_{}".format(channel,im1,im2))
     h_deltascan = f_sigscan.Get(sigscan_delta_name).Clone("{}_{}_{}_RECO_MINUS_GENMET".format(channel,im1,im2))
+    h_isrscan = f_sigscan.Get(sigscan_isr_name).Clone("{}_{}_{}_ISR".format(channel,im1,im2))
     biny = h_sigscan.GetYaxis().FindBin(im1)
     binz = h_sigscan.GetZaxis().FindBin(im2)
 
@@ -320,14 +322,12 @@ def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
 #    print channel,n_sig
     delta_sig = h_deltascan.GetBinContent(length,biny,binz) * rescale_sig
     mcstat_sig = 1 + h_sigscan.GetBinError(length,biny,binz) * rescale_sig / n_sig if n_sig > 0 else 1 # use pre-adjusted n_sig for mc error
-# sig isr not implemented yet
-#    h_isr_up = f.Get("h_isr_up").Clone("h_isr_up_{}".format(region+signal))
-#    h_isr_dn = f.Get("h_isr_dn").Clone("h_isr_dn_{}".format(region+signal))
-#   isr_sig_up = h_isr_up.GetBinContent(1) / n_sig - 1 if n_sig > 0 else 0
-#   isr_sig_dn = h_isr_dn.GetBinContent(1) / n_sig - 1 if n_sig > 0 else 0
-#   isr_sig = max(abs(isr_sig_up),abs(isr_sig_dn))
-#    isr_sig = 1.0 + isr_sig if isr_sig_up > 0 else 1.0/(1.0+isr_sig)
+
     isr_sig = 1.0
+    if n_sig > 0:
+        h_isr_up = f.Get("h_isr_up").Clone("h_isr_up_{}".format(region+signal))
+        isr_sig = h_isr_up.GetBinContent(length,biny,binz)
+
 
     # error assessed due to difference between reco and gen sig results
     genmet_sig = 1.0 + delta_sig/2/n_sig if n_sig > 0 else 1.0

@@ -66,6 +66,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   }
 
   bool useGENMET = tag.find("GENMET") != std::string::npos;
+  bool useISR_UP = tag.find("ISR") != std::string::npos;
   bool useMC = tag.find("MC") != std::string::npos;
 
   TH1F* h_xsec = 0;
@@ -743,13 +744,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
     double nevents = h_sig_nevents_->GetBinContent(binx,biny);
     float weight = lumi * xs * 1000 / nevents;
-
-    if (applyISRWeights && (tag == "ttsl" || tag == "ttdl")) {
-      int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
-      int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
-      float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
-      weight *= t.weight_isr / avgweight_isr;
-    }
     
     if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80) {
       weight *= t.weight_L1prefire;
@@ -762,6 +756,19 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	int nTrueInt_input = t.nTrueInt;
 	float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
 	weight *= puWeight;
+      }
+    }
+
+    if (applyISRWeights && (tag == "ttsl" || tag == "ttdl")) {
+      int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
+      int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+      if (!useISR_UP) {
+	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+	weight *= t.weight_isr / avgweight_isr;
+      }
+      else {
+	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
+	weight *= t.weight_isr_UP / avgweight_isr_UP;
       }
     }
 
