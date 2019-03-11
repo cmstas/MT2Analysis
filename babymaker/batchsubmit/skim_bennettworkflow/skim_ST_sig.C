@@ -16,8 +16,8 @@ void skim_ST(string inpath = "/nfs-6/userdata/mt2/V00-00-03", string outpath = "
   //--------------------------------------------------
  
   string sel = "ht > 250. "; // common to multijet and monojet
-  sel += "&& ( ( (met_pt > 30. || rl_met_pt > 30 || zll_met_pt > 30) && nJet30 >= 2 && (mt2 > 60. || rl_mt2 > 60 || zll_mt2 > 60) ) || ( (nJet30 == 1 || nJet30 == 2) && jet1_pt >= 250 && met_pt >= 250 && deltaPhiMin < 0.3) )"; // multijet or monojet
-  sel += "&& Sum$(track_nLostOuterHits >= 2) > 0"; // very loose short track selection
+  sel += "&& ( ( (met_pt > 30. || met_genPt > 30.) && nJet30 >= 2 && (mt2 > 60. || mt2_genmet > 60) ) && (deltaPhiMin > 0.3 || deltaPhiMin_genmet > 0.3) )"; // multijet
+  sel += "&& (nshorttracks > 0 || nshorttrackcandidates > 0)"; // short track selection
 
   cout << "Skimming with selection : "<< sel<<endl;
 
