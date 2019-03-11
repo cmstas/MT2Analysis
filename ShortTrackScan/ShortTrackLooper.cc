@@ -759,7 +759,19 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
 
-    if (applyISRWeights && (tag == "ttsl" || tag == "ttdl")) {
+    if (applyISRWeights) {
+      // Only use this to set the correction. Don't actually apply isr reweighting
+      if (useISR_UP) {
+	int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
+	int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+	float weight_isr = t.weight_isr / avgweight_isr;
+	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
+	float weight_isr_UP = t.weight_isr_UP / avgweight_isr_UP;
+	float isr_weight_ratio = weight_isr_UP / weight_isr;
+	weight *= isr_weight_ratio;
+      }
+      /*
       int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
       int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
       if (!useISR_UP) {
@@ -770,6 +782,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
 	weight *= t.weight_isr_UP / avgweight_isr_UP;
       }
+      */
     }
 
     if (weight > 1.0 && !t.isData && !isSignal && skipHighEventWeights) continue;
