@@ -49,6 +49,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   string tag(outtag);
 
   string signame = tag.substr(tag.rfind("/") + 1);
+  bool isT2bt = signame.find("bt") != std::string::npos;
 
   unsigned int genmet_idx = signame.find("_GENMET");
   if (genmet_idx != std::string::npos) signame = signame.substr(0,genmet_idx);
@@ -78,6 +79,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       xsec_name = "h_xsec_squark";
     }
   }
+
+  cout << "Pulling xsec from " << xsec_name << endl;
+
   TH1F* h_xsec_orig = (TH1F*) f_xsec->Get( xsec_name );
   h_xsec = (TH1F*) h_xsec_orig->Clone("h_xsec");
   h_xsec->SetDirectory(0);
@@ -136,23 +140,20 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const int n_track_bins = 5;
   const float track_bins[6] = {0.,1.,2.,3.,4.,5.};
   
-  const int n_m1bins = 113;
+  // 0 to 2825 in steps of 25 for non T2bt, else 0 to 1600 in steps of 17-ish: 0, 17, 33, 50, 67, 83
+  int n_m1bins = isT2bt ? 97 : 113;
   float* m1bins = new float[n_m1bins+1];
-  const int n_m2bins = 113;
+  int n_m2bins = isT2bt ? 97 : 113;
   float* m2bins = new float[n_m2bins+1];
-
+  float stepsize = isT2bt ? 16.6667 : 25.0;
   for (int i = 0; i <= n_m1bins; i++) {
-    m1bins[i] = i*25.0;
+    m1bins[i] = i*stepsize;
   }
   for (int i = 0; i <= n_m2bins; i++) {
-    m2bins[i] = i*25.0;
+    m2bins[i] = i*stepsize;
   }
 
-
-
-
   TH3D h_counts_STC ("h_counts_STC","STC Counts by Length;",n_track_bins,track_bins,n_m1bins,m1bins,n_m2bins,m2bins);
-  h_counts_STC.GetYaxis()->SetTitleOffset(3.0);
   h_counts_STC.GetXaxis()->SetBinLabel(Pidx,"P");
   h_counts_STC.GetXaxis()->SetBinLabel(P3idx,"P3");
   h_counts_STC.GetXaxis()->SetBinLabel(P4idx,"P4");
@@ -160,7 +161,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_counts_STC.GetXaxis()->SetBinLabel(Lidx,"L (acc)");
 
   TH3D h_counts_ST ("h_counts_ST","ST Counts by Length;",n_track_bins,track_bins,n_m1bins,m1bins,n_m2bins,m2bins);
-  h_counts_ST.GetYaxis()->SetTitleOffset(3.0);
   h_counts_ST.GetXaxis()->SetBinLabel(Pidx,"P");
   h_counts_ST.GetXaxis()->SetBinLabel(P3idx,"P3");
   h_counts_ST.GetXaxis()->SetBinLabel(P4idx,"P4");
@@ -600,6 +600,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   int nDuplicates = 0; int numberOfAllSTs = 0; int numberOfAllSTCs = 0; int numberOfUnmatchedSTs = 0; int numberOfUnmatchedSTCs = 0;
   int GoodEventCounter = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
+  //  for( unsigned int event = 0; event < 2; ++event) {    
     //    if (event % 1000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
 
     t.GetEntry(event); 

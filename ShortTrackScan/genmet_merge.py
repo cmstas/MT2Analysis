@@ -43,9 +43,12 @@ outfile.cd()
 for hname in histnames:
     h = infile.Get(hname)
     h_GENMET = infile_GENMET.Get(hname)
+    h_err = h.Clone(h.GetName()+"_RECO_MINUS_GENMET")
     h.Add(h_GENMET)
     h.Scale(0.5)
+    h_err.Add(h_GENMET,-1)
     h.Write()
+    h_err.Write()
 
 outfile.Close()
 infile.Close()
