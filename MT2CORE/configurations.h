@@ -34,6 +34,15 @@ struct MT2Configuration {
     std::string muSF_IPhistName;
     std::string muSF_TRKLT10histName;
     std::string muSF_TRKGT10histName;
+    std::string elSF_IDISOfile_fastsim;
+    std::string elSF_IDhistName_fastsim;
+    std::string elSF_ISOhistName_fastsim;
+    std::string muSF_IDfile_fastsim;
+    std::string muSF_ISOfile_fastsim;
+    std::string muSF_IPfile_fastsim; 
+    std::string muSF_IDhistName_fastsim;
+    std::string muSF_ISOhistName_fastsim;
+    std::string muSF_IPhistName_fastsim;
     std::string dilep_trigeff_file;
     int ea_version;
     std::string JRT_file;

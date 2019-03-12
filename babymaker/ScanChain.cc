@@ -186,26 +186,28 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     // extra copy for fastsim -> fullsim SFs
     if (isFastsim) {
       // setup btag calibration readers
-      calib_fastsim = new BTagCalibration("CSV", "btagsf/fastsim_csvv2_ttbar_26_1_2017.csv"); // 80x Moriond17 fastsim version of SFs
-      reader_fastsim = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central",{"up","down"});
-      reader_fastsim->load(*calib_fastsim, BTagEntry::JetFlavor::FLAV_UDSG, "fastsim");
-      reader_fastsim->load(*calib_fastsim, BTagEntry::JetFlavor::FLAV_B, "fastsim");
-      reader_fastsim->load(*calib_fastsim, BTagEntry::JetFlavor::FLAV_C, "fastsim");
-
-      // get btag efficiencies
-      TFile* f_btag_eff_fastsim = new TFile("btagsf/btageff__SMS-T1bbbb-T1qqqq_25ns_Moriond17.root");
-      TH2D* h_btag_eff_b_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_b");
-      TH2D* h_btag_eff_c_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_c");
-      TH2D* h_btag_eff_udsg_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_udsg");
-      h_btag_eff_b_fastsim = (TH2D*) h_btag_eff_b_fastsim_temp->Clone("h_btag_eff_b_fastsim");
-      h_btag_eff_b_fastsim->SetDirectory(rootdir);
-      h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
-      h_btag_eff_c_fastsim->SetDirectory(rootdir);
-      h_btag_eff_udsg_fastsim = (TH2D*) h_btag_eff_udsg_fastsim_temp->Clone("h_btag_eff_udsg_fastsim");
-      h_btag_eff_udsg_fastsim->SetDirectory(rootdir);
-      f_btag_eff_fastsim->Close();
-      
-      std::cout << "loaded fastsim btag SFs" << std::endl;
+        cout << "Applying fastsim btag scale factors from btagsf/" << config_.btagcalib_csv_fastsim << endl;
+        calib_fastsim = new BTagCalibration("CSV", "btagsf/"+config_.btagcalib_csv_fastsim); // 80x Moriond17 fastsim version of SFs
+        reader_fastsim = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central",{"up","down"});
+        reader_fastsim->load(*calib_fastsim, BTagEntry::JetFlavor::FLAV_UDSG, "fastsim");
+        reader_fastsim->load(*calib_fastsim, BTagEntry::JetFlavor::FLAV_B, "fastsim");
+        reader_fastsim->load(*calib_fastsim, BTagEntry::JetFlavor::FLAV_C, "fastsim");
+        
+        // get btag efficiencies
+        cout << "Using fastsim btag efficiencies from btagsf/" << config_.btageff_file_fastsim << endl;
+        TFile* f_btag_eff_fastsim = new TFile(("btagsf/"+config_.btageff_file_fastsim).c_str());
+        TH2D* h_btag_eff_b_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_b");
+        TH2D* h_btag_eff_c_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_c");
+        TH2D* h_btag_eff_udsg_fastsim_temp = (TH2D*) f_btag_eff_fastsim->Get("h2_BTaggingEff_csv_med_Eff_udsg");
+        h_btag_eff_b_fastsim = (TH2D*) h_btag_eff_b_fastsim_temp->Clone("h_btag_eff_b_fastsim");
+        h_btag_eff_b_fastsim->SetDirectory(rootdir);
+        h_btag_eff_c_fastsim = (TH2D*) h_btag_eff_c_fastsim_temp->Clone("h_btag_eff_c_fastsim");
+        h_btag_eff_c_fastsim->SetDirectory(rootdir);
+        h_btag_eff_udsg_fastsim = (TH2D*) h_btag_eff_udsg_fastsim_temp->Clone("h_btag_eff_udsg_fastsim");
+        h_btag_eff_udsg_fastsim->SetDirectory(rootdir);
+        f_btag_eff_fastsim->Close();
+        
+        std::cout << "loaded fastsim btag SFs" << std::endl;
     } // if (isFastsim)
   }
 
@@ -230,10 +232,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
                   config_.muSF_IDhistName, config_.muSF_ISOhistName, config_.muSF_IPhistName, config_.muSF_TRKLT10histName, config_.muSF_TRKGT10histName);
       setVetoEffFile_fullsim("lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
       if (isFastsim) {
-          setElSFfile_fastsim("lepsf/moriond17/sf_el_vetoCB_mini01.root");
-          setMuSFfile_fastsim("lepsf/moriond17/sf_mu_looseID.root",
-                              "lepsf/moriond17/sf_mu_looseID_mini02.root",
-                              "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
+          cout << "Applying fastsim lepton scale factors from the following files:\n";
+          cout << "    els IDISO : " << config_.elSF_IDISOfile_fastsim << ": " << config_.elSF_IDhistName_fastsim << " (id), " << config_.elSF_ISOhistName_fastsim << " (iso)" << endl;
+          cout << "    muons ID  : " << config_.muSF_IDfile_fastsim << ": " << config_.muSF_IDhistName_fastsim << endl;
+          cout << "    muons ISO : " << config_.muSF_ISOfile_fastsim << ": " << config_.muSF_ISOhistName_fastsim << endl;
+          if(config_.muSF_IPfile_fastsim!="")
+              cout << "    muons IP : " << config_.muSF_IPfile_fastsim << ": " << config_.muSF_IPhistName_fastsim << endl;
+          setElSFfile_fastsim(config_.elSF_IDISOfile_fastsim, config_.elSF_IDhistName_fastsim, config_.elSF_ISOhistName_fastsim);
+          setMuSFfile_fastsim(config_.muSF_IDfile_fastsim, config_.muSF_ISOfile_fastsim, config_.muSF_IPfile_fastsim, 
+                              config_.muSF_IDhistName_fastsim, config_.muSF_ISOhistName_fastsim, config_.muSF_IPhistName_fastsim);
           setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
       }
   }
