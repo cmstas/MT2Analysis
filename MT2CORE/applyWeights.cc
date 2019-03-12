@@ -121,6 +121,11 @@ bool setMuSFfile(TString filenameID, TString filenameISO, TString filenameIP, TS
       h_muSF_trk_ptgt10->SetDirectory(0);
   }
 
+  TFile *f = new TFile("test.root", "RECREATE");
+  f->cd();
+  h_muSF->Write("muSF");
+  f->Close();
+
   return true;
 }
 
@@ -182,7 +187,8 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
     if(biny_trk < 1) biny_trk = 1;
     central *= h_trk->GetBinContent(binx_trk,biny_trk);
     float trk_err = h_trk->GetBinError(binx_trk,biny_trk);
-    if (pt_cutoff < 20. || pt_cutoff > 80.) err = sqrt(err*err + trk_err*trk_err + 0.01*0.01); // extra 1% error for pt < 20 OR pt > 80
+    // if (pt_cutoff < 20. || pt_cutoff > 80.) err = sqrt(err*err + trk_err*trk_err + 0.01*0.01); // extra 1% error for pt < 20 OR pt > 80
+    if (pt_cutoff < 20. || pt_cutoff > 99.) err = 2*sqrt(err*err + trk_err*trk_err); // double error for leptons past pT threshold
     else err = sqrt(err*err + trk_err*trk_err); // otherwise just use histogram error
     weights.cent = central;
     weights.up = central+err;
@@ -214,28 +220,35 @@ weightStruct getLepSFFromFile(float pt, float eta, int pdgId) {
 
 
 //_________________________________________________________
-bool setElSFfile_fastsim(TString filename){
-  TFile * f = new TFile(filename);
-  if (!f->IsOpen()) std::cout<<"applyWeights::setElSFfile_fastsim: ERROR: Could not find scale factor file "<<filename<<std::endl;
-  TH2D* h_eff = (TH2D*) f->Get("histo2D");
-  if (!h_eff) std::cout<<"applyWeights::setElSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl;
-  h_elSF_fastsim = (TH2D*) h_eff->Clone("h_elSF_fastsim");
+bool setElSFfile_fastsim(TString filenameIDISO, TString histnameID, TString histnameISO){
+  TFile * f = new TFile(filenameIDISO);
+  if (!f->IsOpen()) std::cout<<"applyWeights::setElSFfile_fastsim: ERROR: Could not find scale factor file "<<filenameIDISO<<std::endl;
+  TH2D* h_ID = (TH2D*) f->Get(histnameID);
+  if (!h_ID) std::cout<<"applyWeights::setElSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl;
+  h_elSF_fastsim = (TH2D*) h_ID->Clone("h_elSF_fastsim");
   h_elSF_fastsim->SetDirectory(0);
+  if(histnameISO != ""){
+      TH2D* h_ISO = (TH2D*) f->Get(histnameISO);
+      if (!h_ISO) 
+          std::cout<<"applyWeights::setElSFfile_fastsim: WARNING: Could not find ISO SF histogram "<< histnameISO << std::endl;
+      else
+          h_elSF_fastsim->Multiply(h_ISO);
+  }
   //h_elSF_fastsim->Print("all");
   return true;
 }
 
 //_________________________________________________________
-bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP){
+bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP, TString histnameID, TString histnameISO, TString histnameIP){
   TFile * f1 = new TFile(filenameID);
   TFile * f2 = new TFile(filenameISO);
   TFile * f3 = new TFile(filenameIP);
   if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
   if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
   if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
-  TH2D* h_id = (TH2D*) f1->Get("histo2D");
-  TH2D* h_iso = (TH2D*) f2->Get("histo2D");
-  TH2D* h_ip = (TH2D*) f3->Get("histo2D");
+  TH2D* h_id = (TH2D*) f1->Get(histnameID);
+  TH2D* h_iso = (TH2D*) f2->Get(histnameISO);
+  TH2D* h_ip = (TH2D*) f3->Get(histnameIP);
   if (!h_id || !h_iso || !h_ip) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
   h_muSF_fastsim = (TH2D*) h_id->Clone("h_muSF_fastsim");
   h_muSF_fastsim->SetDirectory(0);
@@ -273,7 +286,7 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
     int binx = h_muSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
     int biny = h_muSF_fastsim->GetYaxis()->FindBin(fabs(eta_cutoff));
     float central = h_muSF_fastsim->GetBinContent(binx,biny);
-    float err  = 0.02; // 2% for all pt
+    float err  = 0.03; // 3% for all pt
     weights.cent = central;
     weights.up = central+err;
     weights.dn = central-err;
@@ -567,7 +580,7 @@ float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int
 
   // return SF;
     
-    pt1 = std::max(30.f, std::min(299.f, pt1));
+    pt1 = std::max(100.f, std::min(299.f, pt1));
     pt2 = std::max(30.f, std::min(299.f, pt2));
     float val, err;
     if(abs(pdgId1)==11 && abs(pdgId2)==11){
@@ -589,7 +602,7 @@ float getDileptonTriggerWeight(float pt1, int pdgId1, float pt2, int pdgId2, int
         err = h_dilep_trigeff_em->GetBinError(binx, biny);
     }
 
-    // std::cout << "DILEP WEIGHT: " << pdgId1 << " " << pdgId2 << " " << pt1 << " " << pt2 << " " << std::min(1.0f, val + unc*err) << std::endl;
+    // std::cout << "DILEP WEIGHT: " << pdgId1 << " " << pdgId2 << " " << pt1 << " " << pt2 << " " << val << " " << err << std::endl;
 
     return std::min(1.0f, val + unc*err);
 

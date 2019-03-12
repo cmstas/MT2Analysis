@@ -451,6 +451,17 @@ MT2Config_defs["mc_94x_Summer16"] = {
 }
 
 MT2Config_defs["mc_80x_fastsim_Moriond17"] = copy.deepcopy(MT2Config_defs["mc_80x_Summer16"])
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2016_Fastsim.csv"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2016_80X_deepCSV.root"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["elSF_IDISOfile_fastsim"] = "lepsf/moriond17/sf_el_vetoCB_mini01.root"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["elSF_IDhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["elSF_ISOhistName_fastsim"] = ""
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["muSF_IDfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID.root"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["muSF_ISOfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID_mini02.root"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["muSF_IPfile_fastsim"] = "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["muSF_IDhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["muSF_ISOhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["muSF_IPhistName_fastsim"] = "histo2D"
 MT2Config_defs["mc_80x_fastsim_Moriond17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
 MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     "goodVertices",
@@ -462,6 +473,17 @@ MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_fastsim_Summer16"] = copy.deepcopy(MT2Config_defs["mc_94x_Summer16"])
+MT2Config_defs["mc_94x_fastsim_Summer16"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2016_Fastsim.csv"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2016_80X_deepCSV.root"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["elSF_IDISOfile_fastsim"] = "lepsf/moriond17/sf_el_vetoCB_mini01.root"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["elSF_IDhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["elSF_ISOhistName_fastsim"] = ""
+MT2Config_defs["mc_94x_fastsim_Summer16"]["muSF_IDfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID.root"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["muSF_ISOfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID_mini02.root"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["muSF_IPfile_fastsim"] = "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["muSF_IDhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["muSF_ISOhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["muSF_IPhistName_fastsim"] = "histo2D"
 MT2Config_defs["mc_94x_fastsim_Summer16"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
 MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
     "goodVertices",
@@ -473,6 +495,17 @@ MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_fastsim_Fall17"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_94x_fastsim_Fall17"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2017_Fastsim.csv"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["elSF_IDISOfile_fastsim"] = "lepsf/Fall17/ElectronScaleFactors_Run2017_Fastsim.root"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["elSF_IDhistName_fastsim"] = "CutBasedVetoNoIso94XV2_sf"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["elSF_ISOhistName_fastsim"] = "MVAVLooseTightIP2DMini_sf"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["muSF_IDfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID.root"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["muSF_ISOfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID_mini02.root"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["muSF_IPfile_fastsim"] = "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["muSF_IDhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["muSF_ISOhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["muSF_IPhistName_fastsim"] = "histo2D"
 MT2Config_defs["mc_94x_fastsim_Fall17"]["JECs"] = [ ["", "Fall17_FastsimV1"] ]
 MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
     "goodVertices",
@@ -487,6 +520,27 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
 MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["year"] = 2018
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.61
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2017_Fastsim.csv"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_IDISOfile_fastsim"] = "lepsf/Fall17/ElectronScaleFactors_Run2017_Fastsim.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_IDhistName_fastsim"] = "CutBasedVetoNoIso94XV2_sf"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_ISOhistName_fastsim"] = "MVAVLooseTightIP2DMini_sf"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IDfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_ISOfile_fastsim"] = "lepsf/moriond17/sf_mu_looseID_mini02.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IPfile_fastsim"] = "lepsf/moriond17/sf_mu_mediumID_looseIP2D.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IDhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_ISOhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IPhistName_fastsim"] = "histo2D"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["JECs"] = [ ["", "Fall17_FastsimV1"] ]
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["filters"] = [
+    "goodVertices",
+    "HBHENoiseFilter",
+    "HBHENoiseIsoFilter",
+    "EcalDeadCellTriggerPrimitiveFilter",
+    "badMuonFilter",
+    "badChargedCandidateFilter",
+    "ecalBadCalibFilterUpdate"
+    ]
 
 def GetFilterString(config_tag):
     if config_tag not in MT2Config_defs:
@@ -567,6 +621,8 @@ MT2Configuration GetMT2Config(std::string tag){
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
+    c.btagcalib_csv_fastsim = "";
+    c.btageff_file_fastsim = "";
     c.elSF_IDISOfile = "";
     c.elSF_TRKfile = "";
     c.elSF_TRKfileLowPt = "";
@@ -581,6 +637,15 @@ MT2Configuration GetMT2Config(std::string tag){
     c.muSF_IPhistName = "";
     c.muSF_TRKLT10histName = "";
     c.muSF_TRKGT10histName = "";
+    c.elSF_IDISOfile_fastsim = "";
+    c.elSF_IDhistName_fastsim = "";
+    c.elSF_ISOhistName_fastsim = "";
+    c.muSF_IDfile_fastsim = "";
+    c.muSF_ISOfile_fastsim = "";
+    c.muSF_IPfile_fastsim = "";
+    c.muSF_IDhistName_fastsim = "";
+    c.muSF_ISOhistName_fastsim = "";
+    c.muSF_IPhistName_fastsim = "";
     c.dilep_trigeff_file = "";
     c.triggers = std::map<std::string, std::vector<std::string> > ();
 """)
@@ -600,6 +665,9 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.lumi               = {0};\n".format(c[tag]["lumi"]))
         fout.write("        c.btagcalib_csv      = \"{0}\";\n".format(c[tag]["btagcalib_csv"]))
         fout.write("        c.btageff_file       = \"{0}\";\n".format(c[tag]["btageff_file"]))
+        if "btagcalib_csv_fastsim" in c[tag]:
+            fout.write("        c.btagcalib_csv_fastsim      = \"{0}\";\n".format(c[tag]["btagcalib_csv_fastsim"]))
+            fout.write("        c.btageff_file_fastsim       = \"{0}\";\n".format(c[tag]["btageff_file_fastsim"]))
         fout.write("        c.btag_med_threshold_DeepCSV = {0};\n".format(c[tag]["btag_med_threshold_DeepCSV"]))
         fout.write("        c.btag_med_threshold_CSVv2   = {0};\n".format(c[tag]["btag_med_threshold_CSVv2"]))
         if "pu_weights_file" in c[tag]:
@@ -623,6 +691,16 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.muSF_IPhistName    = \"{0}\";\n".format(c[tag]["muSF_IPhistName"]))
             fout.write("        c.muSF_TRKLT10histName = \"{0}\";\n".format(c[tag]["muSF_TRKLT10histName"]))
             fout.write("        c.muSF_TRKGT10histName = \"{0}\";\n".format(c[tag]["muSF_TRKGT10histName"]))
+        if "elSF_IDISOfile_fastsim" in c[tag]:
+            fout.write("        c.elSF_IDISOfile_fastsim    = \"{0}\";\n".format(c[tag]["elSF_IDISOfile_fastsim"]))
+            fout.write("        c.elSF_IDhistName_fastsim   = \"{0}\";\n".format(c[tag]["elSF_IDhistName_fastsim"]))
+            fout.write("        c.elSF_ISOhistName_fastsim  = \"{0}\";\n".format(c[tag]["elSF_ISOhistName_fastsim"]))
+            fout.write("        c.muSF_IDfile_fastsim       = \"{0}\";\n".format(c[tag]["muSF_IDfile_fastsim"]))
+            fout.write("        c.muSF_ISOfile_fastsim      = \"{0}\";\n".format(c[tag]["muSF_ISOfile_fastsim"]))
+            fout.write("        c.muSF_IPfile_fastsim       = \"{0}\";\n".format(c[tag]["muSF_IPfile_fastsim"]))
+            fout.write("        c.muSF_IDhistName_fastsim   = \"{0}\";\n".format(c[tag]["muSF_IDhistName_fastsim"]))
+            fout.write("        c.muSF_ISOhistName_fastsim  = \"{0}\";\n".format(c[tag]["muSF_ISOhistName_fastsim"]))
+            fout.write("        c.muSF_IPhistName_fastsim   = \"{0}\";\n".format(c[tag]["muSF_IPhistName_fastsim"]))
         if "dilep_trigeff_file" in c[tag]:
             fout.write("        c.dilep_trigeff_file = \"{0}\";\n".format(c[tag]["dilep_trigeff_file"]))
         fout.write("        c.ea_version         = {0};\n".format(c[tag]["ea_version"]))
