@@ -36,6 +36,9 @@ if (not os.path.exists(outdir)):
     if saveTemplates:
         os.mkdir(outdir+"/templates")
 
+eff_2016_lo = [2.32,0,0,1.17,0.78] # rescale 2017 fastsim counts based on 2016 count ratios
+eff_2016_hi = [0.45,0,0,1.17,0.78] 
+
 doScan = False
 useMC = True
 useSR = True
@@ -53,14 +56,19 @@ bmark.Start("benchmark")
 # See makeDataDrivenEstimates.sh
 f_16 = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}.root".format(tag))
 f_1718 = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017and2018_{0}.root".format(tag))
-f_16_contam = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}_contam.root".format(tag))
-f_1718_contam = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017and2018_{0}_contam.root".format(tag))
+if not doScan:
+    f_16_contam = ROOT.TFile("../ShortTrack/output_merged/data_2016_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2016_{0}_contam.root".format(tag))
+    f_1718_contam = ROOT.TFile("../ShortTrack/output_merged/data_2017and2018_{0}_contam.root".format(tag)) if not useMC else ROOT.TFile("../ShortTrack/output_merged/mc_2017and2018_{0}_contam.root".format(tag))
 #f_sig_16 = ROOT.TFile("../ShortTrack/output_unmerged/2016_{0}/signal/{1}.root".format(tag,signal))
 #f_sig_16_GENMET = ROOT.TFile("../ShortTrack/output_unmerged/2016_{0}/signal/{1}_GENMET.root".format(tag,signal))
-f_sig_1718 = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}.root".format(tag,signal))
-f_sig_16 = f_sig_1718 # for now, just use 2017 signal for 2016
-f_sig_1718_GENMET = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}_GENMET.root".format(tag,signal))
-f_sig_16_GENMET = f_sig_1718_GENMET # for now, just use 2017 signal for 2016
+    f_sig_1718 = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}.root".format(tag,signal))
+    f_sig_16 = f_sig_1718 # for now, just use 2017 signal for 2016
+    f_sig_1718_GENMET = ROOT.TFile("../ShortTrack/output_unmerged/2017_{0}/signal/{1}_GENMET.root".format(tag,signal))
+    f_sig_16_GENMET = f_sig_1718_GENMET # for now, just use 2017 signal for 2016
+else:
+    f_sigscan = ROOT.TFile.Open("../ShortTrackScan/output_merged/{}_{}.root".format(signal,tag))
+    f_16_contam = ROOT.TFile.Open("../ShortTrackScan/output_merged/data_2016_{}_{}_contam.root".format(signal,tag))
+    f_1718_contam = ROOT.TFile.Open("../ShortTrackScan/output_merged/data_2017and2018_{}_{}_contam.root".format(signal,tag))
 
 if (f_16.IsZombie()):
     print "2016 not found"
@@ -68,25 +76,26 @@ if (f_16.IsZombie()):
 if (f_1718.IsZombie()):
     print "2017 and 2018 contam not found"
     exit(1)
-if subtractSignalContam:
-    if (f_16_contam.IsZombie()):
-        print "2016 not found"
+if not doScan:
+    if subtractSignalContam:
+        if (f_16_contam.IsZombie()):
+            print "2016 not found"
+            exit(1)
+        if (f_1718_contam.IsZombie()):
+            print "2017 and 2018 contam not found"
+            exit(1)
+    if (f_sig_16.IsZombie()):
+        print "2016 signal not found"
         exit(1)
-    if (f_1718_contam.IsZombie()):
-        print "2017 and 2018 contam not found"
+    if (f_sig_1718.IsZombie()):
+        print "2017 signal not found"
         exit(1)
-if (f_sig_16.IsZombie()):
-    print "2016 signal not found"
-    exit(1)
-if (f_sig_1718.IsZombie()):
-    print "2017 signal not found"
-    exit(1)
-if (f_sig_16_GENMET.IsZombie()):
-    print "2016 GENMET signal not found"
-    exit(1)
-if (f_sig_1718_GENMET.IsZombie()):
-    print "2017 GENMET signal not found"
-    exit(1)
+    if (f_sig_16_GENMET.IsZombie()):
+        print "2016 GENMET signal not found"
+        exit(1)
+    if (f_sig_1718_GENMET.IsZombie()):
+        print "2017 GENMET signal not found"
+        exit(1)
 
 # All signal mass points share the same backgrounds. Assemble the background portion of the 
 # cards once here, then fill in the mass-point-specific signal information later in makeCard.
@@ -212,17 +221,20 @@ def makeCard(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
         f = f_sig_16
         f_gen = f_sig_16_GENMET
         f_contam = f_16_contam
+        rescale_2016 = eff_2016_hi[length-1] if region.find("hi") >= 0 else eff_2016_lo[length-1]
+        rescale_sig = rescale_2016 * 35.9 / 41.97
     if year == "2017and2018": 
         f = f_sig_1718
         f_gen = f_sig_1718_GENMET
         f_contam = f_1718_contam
+        rescale_sig = (1 + 58.85 / 41.97)
 
     h_sig_reco = f.Get("h_"+region).Clone("sig_{}".format(channel))
-    n_sig_reco = h_sig_reco.GetBinContent(length,1)
+    n_sig_reco = h_sig_reco.GetBinContent(length,1) * rescale_sig
     h_sig_gen = f_gen.Get("h_"+region).Clone("sig_{}_GEN".format(channel))
-    n_sig_gen = h_sig_gen.GetBinContent(length,1)
+    n_sig_gen = h_sig_gen.GetBinContent(length,1) * rescale_sig
     n_sig = (n_sig_gen + n_sig_reco)/2
-    mcstat_sig = 1 + h_sig_reco.GetBinError(length,1) / n_sig if n_sig > 0 else 1 # use pre-adjusted n_sig for mc error
+    mcstat_sig = 1 + h_sig_reco.GetBinError(length,1)*rescale_sig / n_sig if n_sig > 0 else 1 # use pre-adjusted n_sig for mc error
 # sig isr not implemented yet
 #    h_isr_up = f.Get("h_isr_up").Clone("h_isr_up_{}".format(region+signal))
 #    h_isr_dn = f.Get("h_isr_dn").Clone("h_isr_dn_{}".format(region+signal))
@@ -234,10 +246,6 @@ def makeCard(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
 
     # error assessed due to difference between reco and gen sig results
     genmet_sig = 1.0 + (n_sig_reco - n_sig_gen)/2/n_sig if n_sig > 0 else 1.0
-
-    # For now, 16 and 18 signals are rescaled 2017
-    if year == "2016": n_sig *= 35.9 / 41.97
-    if year == "2017and2018": n_sig *= (1 + 58.83 / 41.97)
 
     if subtractSignalContam:
         h_contam = f_contam.Get(("h_"+region+"_contam_"+signal).replace("-","_"))
@@ -260,17 +268,110 @@ def makeCard(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
         to_print = to_print.replace("name_sig_syst",name_syst_sig)
         to_print = to_print.replace("sig_syst","1.3") # arbitrary 30% signal systematic
     else:
-        to_print = to_print.replace("name_sig_mcstat","sig_mcstat_{}".format(channel))
+        mcstat_channel = region+"_"+ (category if category != "P3" else "P") # correlate errors in 2016 and 2017-18, as we use the same signal; correlate P and P3
+        to_print = to_print.replace("name_sig_mcstat","sig_mcstat_{}".format(mcstat_channel)) 
         to_print = to_print.replace("mcstat_sig","{0:.3f}".format(mcstat_sig))
         to_print = to_print.replace("isr_sig","{0:.3f}".format(isr_sig))
         to_print = to_print.replace("genmet_sig","{0:.3f}".format(genmet_sig))
+        if year == "2016": to_print += "rescale_2017to2016_sig_{} lnN  {:.3f}   -\n".format(category, 1+abs(0.5*(1-rescale_2016)))
 
     outfile = open(cardname,"w")
     outfile.write(to_print)
     outfile.close()
-    return True
+    return n_sig > 0
 
-signal_points = set() # This set of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
+def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
+    category = ["P","P3","P4","M","L"][length-1]
+    channel = region+"_"+category+"_"+year
+    cardname = "{0}/datacard_{1}_{2}_{3}_{4}.txt".format(outdir,channel,signal,im1,im2)
+    
+    njht = region[0:region.find("_")]
+    if region.find("lo") >= 0:
+        pt = "_lo"
+    elif region.find("hi") >= 0:
+        pt = "_hi"
+    else:
+        pt = ""
+    if region.find("SR") >= 0:
+        MT2 = "SR"
+    else:
+        MT2 = "VR"
+
+    sigscan_name = "h_{}_{}{}_ST".format(njht,MT2,pt)
+    sigscan_delta_name = "h_{}_{}{}_ST_RECO_MINUS_GENMET".format(njht,MT2,pt)
+    sigscan_isr_name = "h_{}_{}{}_ST_ISR".format(njht,MT2,pt)
+    h_sigscan = f_sigscan.Get(sigscan_name).Clone("{}_{}_{}".format(channel,im1,im2))
+    h_deltascan = f_sigscan.Get(sigscan_delta_name).Clone("{}_{}_{}_RECO_MINUS_GENMET".format(channel,im1,im2))
+    h_isrscan = f_sigscan.Get(sigscan_isr_name).Clone("{}_{}_{}_ISR".format(channel,im1,im2))
+    biny = h_sigscan.GetYaxis().FindBin(im1)
+    binz = h_sigscan.GetZaxis().FindBin(im2)
+
+    to_print = template
+
+    name_syst_sig = "adhoc_sig_"+channel
+
+    if year == "2016": 
+        f_contam = f_16_contam
+        rescale_2016 = eff_2016_hi[length-1] if region.find("hi") >= 0 else eff_2016_lo[length-1]
+        rescale_sig = rescale_2016 * 35.9 / 41.97
+    if year == "2017and2018": 
+        f_contam = f_1718_contam
+        rescale_sig = 1 + 58.83 / 41.97
+
+    n_sig = h_sigscan.GetBinContent(length,biny,binz) * rescale_sig
+#    print channel,n_sig
+    delta_sig = h_deltascan.GetBinContent(length,biny,binz) * rescale_sig
+    mcstat_sig = 1 + h_sigscan.GetBinError(length,biny,binz) * rescale_sig / n_sig if n_sig > 0 else 1 # use pre-adjusted n_sig for mc error
+
+    isr_sig = 1.0
+    if n_sig > 0:
+        h_isr_up = f.Get("h_isr_up").Clone("h_isr_up_{}".format(region+signal))
+        isr_sig = h_isr_up.GetBinContent(length,biny,binz)
+
+
+    # error assessed due to difference between reco and gen sig results
+    genmet_sig = 1.0 + delta_sig/2/n_sig if n_sig > 0 else 1.0
+
+    if subtractSignalContam:
+        contam_efficiency = 1.0
+        contam_err = 1.0
+        if n_sig > 0:
+            h_contamscan = f_contam.Get(("h_"+region+"_contam_"+signal).replace("-","_"))
+            contam_efficiency = h_contamscan.GetBinContent(length,biny,binz)
+            contam_err = 1 + (1-contam_efficiency)/2
+        if contam_efficiency == 0:
+            print "Signal completely lost to signal contamination in {} for mass point ({},{}); raw count was {}".format(channel,im1,im2,n_sig)
+        n_sig *= contam_efficiency
+        to_print = to_print.replace("sig_contam_val","{:.3f}".format(contam_err))
+        to_print = to_print.replace("name_sig_contam","sig_contam_"+channel)
+
+    n_sig = n_sig if n_sig >= n_zero else 0
+
+    # Replace signal placeholders in template with actual values.
+
+    if n_sig == 0 and suppressZeroBins: return False
+
+    if setBGplusSigToObs:
+        to_print = to_print.replace("n_obs","{:.3f}".format(n_sig+n_bkg))
+    to_print = to_print.replace("n_sig","{:.3f}".format(n_sig))
+    if (doDummySignalSyst):
+        to_print = to_print.replace("name_sig_syst",name_syst_sig)
+        to_print = to_print.replace("sig_syst","1.3") # arbitrary 30% signal systematic
+    else:
+        mcstat_channel = region+"_"+ (category if category != "P3" else "P") # correlate errors in 2016 and 2017-18, as we use the same signal; correlate P and P3
+        to_print = to_print.replace("name_sig_mcstat","sig_mcstat_{}".format(mcstat_channel))
+        to_print = to_print.replace("mcstat_sig","{0:.3f}".format(mcstat_sig))
+        to_print = to_print.replace("isr_sig","{0:.3f}".format(isr_sig))
+        to_print = to_print.replace("genmet_sig","{0:.3f}".format(genmet_sig))
+        if year == "2016": to_print += "rescale_2017to2016_sig_{} lnN  {:.3f}   -\n".format(category, 1+abs(0.5*(1-rescale_2016)))
+
+    outfile = open(cardname,"w")
+    outfile.write(to_print)
+    outfile.close()
+    return n_sig > 0
+
+all_points = set()
+nonzero_points = set() # This set of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
 if useSR: print "Using SRs"
 else: print "Using VRs"
 regions = ["LL_SR_23","LM_SR_23","LLM_SR_23","LH_SR_23","HL_SR_4","HM_SR_4","HLM_SR_4","HH_SR_4"] if useSR else ["LL_VR_23","LM_VR_23","LLM_VR_23","LH_VR_23","HL_VR_4","HM_VR_4","HLM_VR_4","HH_VR_4"]
@@ -313,18 +414,35 @@ for region in regions:
                     templatefile.close()            
                 # If we're doing a full scan, loop over mass points and replace placeholders in the template with appropriate signal values for each point.
                 if (doScan):
+                    x_binwidth = 25
+                    x_max = 3000
                     y_binwidth = 25
-                    y_max = 1600
-                    if signal.find("T2cc") != -1:
-                        y_binwidth = 5
-                        y_max = 800
-                    for im1 in range(0,2301,25):
-                        for im2 in range(0,y_max+1,y_binwidth):
+                    y_max = 3000
+                    if signal.find("T2bt") != -1:
+                        x_binwidth = 16.6667
+                        x_max = 1600
+                        y_binwidth = 16.6667
+                        y_max = 1600
+                    im1 = 0
+                    while im1 < x_max:
+#                    im1 = 1150
+#                    if True:
+                        m1 = int(round(im1))
+                        im2 = 0
+                        while im2 < im1:
+#                        im2 = 800
+#                        if True:
+                            m2 = int(round(im2))
+                            all_points.add( (m1,m2) )
                             # Replace signal placeholders and print the card
-                            success = makeCard(year,fullregion,template,signal,outdir,length,im1,im2)
+                            masspoint_outdir = outdir+"/{}_{}".format(m1,m2)
+                            os.system("mkdir -p "+masspoint_outdir)
+                            nonzero = makeCardScan(year,fullregion,template,signal,masspoint_outdir,length,background,m1,m2)
                             # If no histograms are found for that mass point, don't add it to the list of processed points
-                            if success:
-                                signal_points.add( (im1,im2) )
+                            if nonzero:
+                                nonzero_points.add( (m1,m2) )
+                            im2 += y_binwidth
+                        im1 += x_binwidth
                 else:
                     makeCard(year,fullregion,template,signal,outdir,length,background,im1,im2)
 
@@ -352,13 +470,20 @@ for region in regions:
         points_file = open("{0}/points_{1}.txt".format(outdir,signal),"w")
         points_file.write("--------------------------------------------\n")
         points_file.write("- saw nonzero signal entries for the following points: \n")
-        for mass_point in signal_points:
+        for mass_point in nonzero_points:
             points_file.write("{0}_{1}_{2}\n".format(signal,mass_point[0],mass_point[1]))
+        for mass_point in (all_points - nonzero_points):
+            os.system("rm -rf {}/{}_{}".format(outdir,mass_point[0],mass_point[1]))
         points_file.close()
 
 f_16.Close()
 f_1718.Close()
-f_sig_1718.Close()
+if not doScan:
+    f_sig_1718.Close()
+else:
+    f_sigscan.Close()
+f_16_contam.Close()
+f_1718_contam.Close()
 
 bmark.Stop("benchmark")    
 print "\n"

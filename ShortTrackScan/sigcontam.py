@@ -74,6 +74,7 @@ for filename in filenames:
         rescale = 35.9/41.97
 
     for histname in histnames:
+#        print histname
         hdata = datafile.Get(histname)
         if hdata == None:
             print histname
@@ -97,10 +98,15 @@ for filename in filenames:
         h_FS_scan = h_correction_scan.Clone(histname+"_contamFS_"+signalname)
         h_FS_scan.SetTitle("Efficiency from f_{short} Contam;Mass 1 (GeV);Mass 2 (GeV)")
         for biny in range(1,hsig_STC_scan.GetNbinsY()+1):
+#        for biny in range(47,47+1):
             for binz in range(1,biny): # mLSP < mPrimary
+#            for binz in range(34,34+1): # mLSP < mPrimary
                 hsig_STC = hsig_STC_scan.ProjectionX("projection_STC_{}_{}".format(biny,binz),biny,biny,binz,binz)
                 hsig_ST = hsig_ST_scan.ProjectionX("projection_ST_{}_{}".format(biny,binz),biny,biny,binz,binz)
                 hsig_FS = hsig_FS_scan.ProjectionX("projection_FS_{}_{}".format(biny,binz),biny,biny,binz,binz)
+#                hsig_STC.Print("all")
+#                hsig_ST.Print("all")
+#                hsig_FS.Print("all")
                 for length in range(1,hdata.GetNbinsX()+1):
                     if length == 1 and filename == d1718:
                         continue
@@ -124,12 +130,13 @@ for filename in filenames:
                     total_eff = max(1 - (lost_from_stc + lost_from_fs)/st_sig,0) # linearized, overestimates contam
                     h_correction_scan.SetBinContent(length,biny,binz,total_eff)
                     h_correction_scan.SetBinError(length,biny,binz,0.5*(1-total_eff))
+ #                   print "FS:",lost_from_fs,"STC:",lost_from_stc,"total eff:",total_eff
         outfile.cd()
         h_STC_scan.Write()
         h_FS_scan.Write()
         h_correction_scan.Write()
+    datafile.Close()
 
-for f in filenames: f.Close()
 signalfile.Close()
 outfile.Close()
 

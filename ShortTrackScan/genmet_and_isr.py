@@ -31,10 +31,12 @@ outname = "output_merged/{}_{}.root".format(signame,outtag)
 
 inname = "output_unmerged/2017_{}/signal/{}.root".format(outtag,signame)
 inname_GENMET = "output_unmerged/2017_{}/signal/{}_GENMET.root".format(outtag,signame)
+inname_ISR = "output_unmerged/2017_{}/signal/{}_ISR.root".format(outtag,signame)
 
 outfile = ROOT.TFile.Open(outname,"RECREATE")
 infile = ROOT.TFile.Open(inname)
 infile_GENMET = ROOT.TFile.Open(inname_GENMET)
+infile_ISR = ROOT.TFile.Open(inname_ISR)
 
 infile.cd()
 histnames = [key.GetName() for key in ROOT.gDirectory.GetListOfKeys() if not key.IsFolder()]
@@ -43,12 +45,16 @@ outfile.cd()
 for hname in histnames:
     h = infile.Get(hname)
     h_GENMET = infile_GENMET.Get(hname)
-    h_err = h.Clone(h.GetName()+"_RECO_MINUS_GENMET")
+    h_ISR = infile_ISR.Get(hname)
+    h_genSyst = h.Clone(h.GetName()+"_RECO_MINUS_GENMET")
+    h_isrSyst = h.Clone(h.GetName()+"_ISR")
+    h_isrSyst.Divide(h)
     h.Add(h_GENMET)
     h.Scale(0.5)
-    h_err.Add(h_GENMET,-1)
+    h_genSyst.Add(h_GENMET,-1)
     h.Write()
     h_err.Write()
+    h_isrSyst.Write()
 
 outfile.Close()
 infile.Close()

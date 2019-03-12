@@ -17,6 +17,9 @@ stat_color = ROOT.kCyan
 fs_color = ROOT.kGray+1
 all_color = ROOT.kGray+2
 
+eff_2016_lo = [2.32,0,0,1.17,0.78]
+eff_2016_hi = [0.45,0,0,1.17,0.78]
+
 def SetTag(toSet):
     global tag
     tag = toSet
@@ -2171,8 +2174,14 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
 
 def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_errs_sig, rescale_lumi, desc, sig_tags, sig_colors, rescale_unblind, combineErrors = True): 
     year_token = desc.split("_")[0]
+    rescale_length_lo = [1,1,1,1,1]
+    rescale_length_hi = [1,1,1,1,1]
+    is2016 = False
     if year_token.find("16") >= 0:
         lumi = 35.92
+        rescale_length_lo = eff_2016_lo
+        rescale_length_hi = eff_2016_hi
+        is2016 = True
     elif year_token.find("17"):
         lumi = 41.53
         if year_token.find("18"):
@@ -2193,15 +2202,22 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
     oerrs = []
     perrs_withfs = []
     perrs_all = []
-    for index,region in enumerate(regions):
+    for index,region in enumerate(regions):        
         bin_index = index+1
         hpred.GetXaxis().SetBinLabel(bin_index,region)
         pred = vals_bg[region+" pre"] * rescale_unblind
+        length_rescale = 1.0
+        if is2016:
+            length_rescale_set = rescale_length_lo if region.find("lo") >= 0 else rescale_length_hi
+            length_rescale_index = 0
+            if region[0] == "M": length_rescale_index = 3
+            elif region[0] == "L": length_rescale_index = 4
+            length_rescale = length_rescale_set[length_rescale_index]
         for sig_index,hsig in enumerate(list_of_hsigs):
             vals_sig = list_of_vals_sig[sig_index]
-            val_sig = vals_sig[region+" obs"] * rescale_lumi * rescale_unblind
+            val_sig = vals_sig[region+" obs"] * rescale_lumi * rescale_unblind * length_rescale
             hsig.SetBinContent(bin_index,val_sig + pred)
-            hsig.SetBinError(bin_index,list_of_errs_sig[sig_index][region+" obs"][0] * rescale_lumi * rescale_unblind) # sig errors are symmetric (MC)
+            hsig.SetBinError(bin_index,list_of_errs_sig[sig_index][region+" obs"][0] * rescale_lumi * rescale_unblind * length_rescale) # sig errors are symmetric (MC)
         perr = [stats_bg[region+" pre"][i] * rescale_unblind for i in [0,1]]
         obs = vals_bg[region+" obs"]
         oerr = stats_bg[region+" obs"]
@@ -2395,8 +2411,14 @@ def getMergedCountsLine(region,year,D16,eD16,sD16,D1718,eD1718,sD1718,S1718,eS17
     cat = region[0:2]    
     if year == "2016": # don't return 2017-2018
         lumi = 35.9/41.97
+        length_rescale_set = eff_2016_lo if region.find("lo") >= 0 else eff_2016_hi
+        length_rescale_index = 0
+        if region[0] == "M": length_rescale_index = 3
+        elif region[0] == "L": length_rescale_index = 4
+        length_rescale = length_rescale_set[length_rescale_index]
+
         return colorline+"{} & {} +{}-{} & {:.0f} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {}\\\\ \n".format(region.replace(" VR","").replace(" SR","") + " (2016)",
-                                                                                                                                                                                                                                    "%#.2g"%D16[region+" pre"], "%#.2g"%sqrt(eD16[region+" pre"][0]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), "%#.2g"%sqrt(eD16[region+" pre"][1]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), D16[region+" obs"], "%#.2g"%(S1718[(1800,1400,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1400,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1600,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1600,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1700,10)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1700,10)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1400,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1400,90)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1600,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1600,90)][region+" obs"][0]*lumi), "%#.2g"%(S1718[(1800,1700,90)][region+" obs"]*lumi), "%#.2g"%(eS1718[(1800,1700,90)][region+" obs"][0]*lumi))
+                                                                                                                                                                                                                                    "%#.2g"%D16[region+" pre"], "%#.2g"%sqrt(eD16[region+" pre"][0]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), "%#.2g"%sqrt(eD16[region+" pre"][1]**2 + sD16[region+" nc"]**2 + sD16[region+" fs"]**2), D16[region+" obs"], "%#.2g"%(S1718[(1800,1400,10)][region+" obs"]*lumi*length_rescale), "%#.2g"%(eS1718[(1800,1400,10)][region+" obs"][0]*lumi*length_rescale), "%#.2g"%(S1718[(1800,1600,10)][region+" obs"]*lumi*length_rescale), "%#.2g"%(eS1718[(1800,1600,10)][region+" obs"][0]*lumi*length_rescale), "%#.2g"%(S1718[(1800,1700,10)][region+" obs"]*lumi*length_rescale), "%#.2g"%(eS1718[(1800,1700,10)][region+" obs"][0]*lumi*length_rescale), "%#.2g"%(S1718[(1800,1400,90)][region+" obs"]*lumi*length_rescale), "%#.2g"%(eS1718[(1800,1400,90)][region+" obs"][0]*lumi*length_rescale), "%#.2g"%(S1718[(1800,1600,90)][region+" obs"]*lumi*length_rescale), "%#.2g"%(eS1718[(1800,1600,90)][region+" obs"][0]*lumi*length_rescale), "%#.2g"%(S1718[(1800,1700,90)][region+" obs"]*lumi*length_rescale), "%#.2g"%(eS1718[(1800,1700,90)][region+" obs"][0]*lumi*length_rescale))
     elif year == "2017and2018": # don't return 2016
         lumi = 1+(59.97/41.97)
         return colorline+"{} & {} +{}-{} & {:.0f} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {} & {} $\pm$ {}\\\\ \n".format(region.replace(" VR","").replace(" SR","")+" (2017-18)",

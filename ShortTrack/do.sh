@@ -6,9 +6,9 @@ doD16=0
 doM16=0
 doD17=0
 doM17=0
-doD18=0
-doM18=0
-doS17=1
+doD18=1
+doM18=1
+doS17=0
 
 tag=preapproval
 outtag=preapproval
@@ -79,7 +79,7 @@ if [ "$doM18" -eq "1" ]; then
     OUTDIR=output_unmerged/2018_${outtag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_102x_Autumn18
-    INDIR=/nfs-7/userdata/mt2/V00-10-12_2018fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-14_2018fullYear${skim_string}
     declare -a Samples=(ttsl ttdl qcd ttw ttz tttt dy wjets_ht zinv ww wz) # excluding singletop due to missing/2017 duplicated samples and gjets because no events pass skim    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}_2018.txt &"
@@ -93,7 +93,7 @@ if [ "$doD18" -eq "1" ]; then
     OUTDIR=output_unmerged/2018_${outtag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2018_Prompt
-    INDIR=/nfs-7/userdata/mt2/V00-10-12_2018fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-14_2018fullYear${skim_string}
     declare -a Samples=(data_Run2018A data_Run2018B data_Run2018C data_Run2018D)
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./ShortTrackLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${tag} >& ${LOGDIR}/log_${SAMPLE}.txt &"

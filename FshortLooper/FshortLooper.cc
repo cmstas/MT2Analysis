@@ -66,7 +66,7 @@ bool FshortLooper::FillHists(const vector<TH2D*>& hists, const double weight, co
 int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::string mode) {
   string tag(outtag);
 
-  //    bool isSignal_ = t.evt_id >= 1000;
+  //bool isSignal_ = t.evt_id >= 1000;
   bool isSignal = tag.find("sim") != std::string::npos;
 
   cout << "mode: " << mode << endl;
@@ -413,6 +413,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   const unsigned int nEventsTree = ch->GetEntries();
   cout << "processing " << nEventsTree << " events" << endl;
   int nDuplicates = 0;
+  int denomChargino15 = 0; int denomChargino50 = 0;
+  int chSTp15 = 0; int chSTm15 = 0; int chSTl15 = 0;
+  int chSTp50 = 0; int chSTm50 = 0; int chSTl50 = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
   //  for( unsigned int event = 0; event < 10; ++event) {    
     if (event % 100000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
@@ -488,12 +491,13 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     if (unlikely(t.nJet30FailId != 0)) {
       continue;
     }
+    if (isSignal && t.nJet20BadFastsim > 0) continue;
     if (unlikely(t.met_miniaodPt / t.met_caloPt >= 5.0)) {
       continue;
     }
     if (unlikely(t.nJet200MuFrac50DphiMet > 0)) {
       continue;
-    }
+    }    
     
     const float met = doNoLeps ? t.met_pt : t.rl_met_pt;//t.zll_met_pt;
     const float met_phi = doNoLeps ? t.met_phi : t.rl_met_phi;//t.zll_met_phi;
@@ -707,12 +711,26 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
     // Main Looper
 
+    int match_track_index_1 = -1; int match_track_index_2 = -1;
     for (int i_chargino = 0; i_chargino < t.nCharginos; i_chargino++) {
       h_CharLength->Fill( t.chargino_decayXY[i_chargino], weight );
       const float char_phi = t.chargino_phi[i_chargino];
       const float char_eta = t.chargino_eta[i_chargino];
       bool chargino_calosel = InEtaPhiVetoRegion(char_eta,char_phi,year) == 0;
-      if (chargino_calosel) h_CharLength_etaphi->Fill( t.chargino_decayXY[i_chargino], weight );
+      if (chargino_calosel) {
+	h_CharLength_etaphi->Fill( t.chargino_decayXY[i_chargino], weight );
+	float chargino_pt = t.chargino_pt[i_chargino];
+	if (t.chargino_decayXY[i_chargino] > 10 && t.chargino_decayXY[i_chargino] < 100 && chargino_pt > 15) {
+	  if (chargino_pt < 50) {
+	    denomChargino15++;
+	  }
+	  else {
+	    denomChargino50++;
+	  }
+	  if (match_track_index_1 >= 0) match_track_index_1 = t.chargino_matchedTrackIdx[i_chargino];
+	  else match_track_index_2 = t.chargino_matchedTrackIdx[i_chargino];
+	}
+      }
     }
 
     const int ntracks = t.ntracks;
@@ -861,6 +879,20 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
 	// Candidate (loosened isolation, quality)...already checked for Iso and Quality above
 	isSTC = !isST && PassesFullIsoSelSTC && isQualityTrackSTC;
+
+
+	if (isST && (i_trk == match_track_index_1 || i_trk == match_track_index_2)) {
+	  bool loPt = t.track_pt[i_trk] < 50;
+	  if (isP) {
+	    loPt ? chSTp15++ : chSTp50++;
+	  }
+	  else if (isM) {
+	    loPt ? chSTm15++ : chSTm50++;
+	  }
+	  else {
+	    loPt ? chSTl15++ : chSTl50++;
+	  }
+	}
 
 	/*
 	if (isSTC || isST) {	  
@@ -1154,6 +1186,16 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     } // Track loop
     
   }//end loop on events in a file
+
+  cout << "15 to 50 GeV charginos/tracks:" << endl;
+  cout << "P: " << chSTp15 << " / " << denomChargino15 << endl;
+  cout << "M: " << chSTm15 << " / " << denomChargino15 << endl;
+  cout << "L: " << chSTl15 << " / " << denomChargino15 << endl;
+  cout << "> 50 GeV charginos/tracks:" << endl;
+  cout << "P: " << chSTp50 << " / " << denomChargino50 << endl;
+  cout << "M: " << chSTm50 << " / " << denomChargino50 << endl;
+  cout << "L: " << chSTl50 << " / " << denomChargino50 << endl;
+
     
   // Post-processing
 
