@@ -451,6 +451,8 @@ MT2Config_defs["mc_94x_Summer16"] = {
 }
 
 MT2Config_defs["mc_80x_fastsim_Moriond17"] = copy.deepcopy(MT2Config_defs["mc_80x_Summer16"])
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2016_Fastsim.csv"
+MT2Config_defs["mc_80x_fastsim_Moriond17"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2016_80X_deepCSV.root"
 MT2Config_defs["mc_80x_fastsim_Moriond17"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
 MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     "goodVertices",
@@ -462,6 +464,8 @@ MT2Config_defs["mc_80x_fastsim_Moriond17"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_fastsim_Summer16"] = copy.deepcopy(MT2Config_defs["mc_94x_Summer16"])
+MT2Config_defs["mc_94x_fastsim_Summer16"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2016_Fastsim.csv"
+MT2Config_defs["mc_94x_fastsim_Summer16"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2016_80X_deepCSV.root"
 MT2Config_defs["mc_94x_fastsim_Summer16"]["JECs"] = [ ["", "Spring16_FastSimV1_MC"] ]
 MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
     "goodVertices",
@@ -473,6 +477,8 @@ MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
     ]
 
 MT2Config_defs["mc_94x_fastsim_Fall17"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
+MT2Config_defs["mc_94x_fastsim_Fall17"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2017_Fastsim.csv"
+MT2Config_defs["mc_94x_fastsim_Fall17"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
 MT2Config_defs["mc_94x_fastsim_Fall17"]["JECs"] = [ ["", "Fall17_FastsimV1"] ]
 MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
     "goodVertices",
@@ -487,6 +493,18 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
 MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["year"] = 2018
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.61
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2017_Fastsim.csv"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["JECs"] = [ ["", "Fall17_FastsimV1"] ]
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["filters"] = [
+    "goodVertices",
+    "HBHENoiseFilter",
+    "HBHENoiseIsoFilter",
+    "EcalDeadCellTriggerPrimitiveFilter",
+    "badMuonFilter",
+    "badChargedCandidateFilter",
+    "ecalBadCalibFilterUpdate"
+    ]
 
 def GetFilterString(config_tag):
     if config_tag not in MT2Config_defs:
@@ -567,6 +585,8 @@ MT2Configuration GetMT2Config(std::string tag){
     c.json = "";
     c.lumi = 1.0;
     c.pu_weights_file = "";
+    c.btagcalib_csv_fastsim = "";
+    c.btageff_file_fastsim = "";
     c.elSF_IDISOfile = "";
     c.elSF_TRKfile = "";
     c.elSF_TRKfileLowPt = "";
@@ -600,6 +620,9 @@ MT2Configuration GetMT2Config(std::string tag){
             fout.write("        c.lumi               = {0};\n".format(c[tag]["lumi"]))
         fout.write("        c.btagcalib_csv      = \"{0}\";\n".format(c[tag]["btagcalib_csv"]))
         fout.write("        c.btageff_file       = \"{0}\";\n".format(c[tag]["btageff_file"]))
+        if "btagcalib_csv_fastsim" in c[tag]:
+            fout.write("        c.btagcalib_csv_fastsim      = \"{0}\";\n".format(c[tag]["btagcalib_csv_fastsim"]))
+            fout.write("        c.btageff_file_fastsim       = \"{0}\";\n".format(c[tag]["btageff_file_fastsim"]))
         fout.write("        c.btag_med_threshold_DeepCSV = {0};\n".format(c[tag]["btag_med_threshold_DeepCSV"]))
         fout.write("        c.btag_med_threshold_CSVv2   = {0};\n".format(c[tag]["btag_med_threshold_CSVv2"]))
         if "pu_weights_file" in c[tag]:

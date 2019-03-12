@@ -15,6 +15,8 @@ struct MT2Configuration {
     float lumi = -1;
     std::string btagcalib_csv;
     std::string btageff_file;
+    std::string btagcalib_csv_fastsim;
+    std::string btageff_file_fastsim;
     float btag_med_threshold_DeepCSV;
     float btag_med_threshold_CSVv2;
     std::string pu_weights_file;
