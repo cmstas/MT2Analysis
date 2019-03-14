@@ -72,7 +72,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = false;
+const bool removePostProcVars = true;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
@@ -371,7 +371,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
       InitBabyNtuple();
 
-      isData = cms3.evt_isRealData();
+      isData = false; //cms3.evt_isRealData();
       // sanity check on whether this is data
       if (bool(isData) != isDataFromFileName) {
         cout << "ERROR: file name and content disagree on whether this is real data!! Exiting" << endl;
@@ -690,7 +690,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
 	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
         if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
-        if(config_.filters["ecalBadCalibFilterUpdate"] && !cms3_version.Contains("V09"))  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
+	if(config_.filters["ecalBadCalibFilterUpdate"] && !cms3_version.Contains("V09"))  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
         if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
         if(config_.filters["badChargedCandidateFilter"]) Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
         Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
