@@ -341,8 +341,8 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2018;
         c.cmssw_ver          = 102;
-        c.json               = "2018_rereco_recovery_snt.txt";
-        c.lumi               = 59.76;
+        c.json               = "Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON_snt.txt";
+        c.lumi               = 59.74;
         c.btagcalib_csv      = "DeepCSV_102XSF_V1.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root";
         c.btag_med_threshold_DeepCSV = 0.4184;
@@ -412,8 +412,8 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2018;
         c.cmssw_ver          = 102;
-        c.json               = "2018_rereco_recovery_snt.txt";
-        c.lumi               = 59.76;
+        c.json               = "Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON_snt.txt";
+        c.lumi               = 59.74;
         c.btagcalib_csv      = "DeepCSV_102XSF_V1.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root";
         c.btag_med_threshold_DeepCSV = 0.4184;
@@ -483,7 +483,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2018;
         c.cmssw_ver          = 102;
-        c.lumi               = 59.76;
+        c.lumi               = 59.74;
         c.btagcalib_csv      = "DeepCSV_102XSF_V1.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root";
         c.btag_med_threshold_DeepCSV = 0.4184;
@@ -522,7 +522,7 @@ MT2Configuration GetMT2Config(std::string tag){
 
         c.year               = 2018;
         c.cmssw_ver          = 94;
-        c.lumi               = 59.61;
+        c.lumi               = 59.74;
         c.btagcalib_csv      = "DeepCSV_94XSF_V3_B_F.csv";
         c.btageff_file       = "btageff__DeepCSV_ttbar_powheg_pythia8_25ns_Fall17.root";
         c.btagcalib_csv_fastsim      = "DeepCSV_94X_2017_Fastsim.csv";

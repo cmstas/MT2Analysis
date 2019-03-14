@@ -128,8 +128,8 @@ MT2Config_defs["data_2017_Prompt"] = {
 MT2Config_defs["data_2018_Prompt"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
-    "json" : "2018_rereco_recovery_snt.txt",
-    "lumi" : 59.76,
+    "json" : "Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON_snt.txt",
+    "lumi" : 59.74,
     "btagcalib_csv" : "DeepCSV_102XSF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -150,8 +150,8 @@ MT2Config_defs["data_2018_Prompt"] = {
 MT2Config_defs["data_2018_17Sep2018"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
-    "json" : "2018_rereco_recovery_snt.txt",
-    "lumi" : 59.76,
+    "json" : "Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON_snt.txt",
+    "lumi" : 59.74,
     "btagcalib_csv" : "DeepCSV_102XSF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -314,7 +314,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
 MT2Config_defs["mc_102x_Autumn18"] = {
     "year" : 2018,
     "cmssw_ver" : 102,
-    "lumi" : 59.76,
+    "lumi" : 59.74,
     "btagcalib_csv" : "DeepCSV_102XSF_V1.csv",
     "btageff_file" : "btageff__DeepCSV_ttbar_MG_pythia8_25ns_Autumn18.root",
     "btag_med_threshold_DeepCSV" : 0.4184,
@@ -519,7 +519,7 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
 
 MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["year"] = 2018
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.61
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.74
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2017_Fastsim.csv"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_IDISOfile_fastsim"] = "lepsf/Fall17/ElectronScaleFactors_Run2017_Fastsim.root"
