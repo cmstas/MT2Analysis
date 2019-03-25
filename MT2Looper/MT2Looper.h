@@ -142,6 +142,10 @@ class MT2Looper {
   float weight_TTHF_DN_;
   float weight_ZNJet_UP_;
   float weight_ZNJet_DN_;
+  float weight_ZMT2_UP_;
+  float weight_ZMT2_DN_;
+  float weight_trigeff_UP_;
+  float weight_trigeff_DN_;
 
   std::vector<const Int_t*> trigs_SR_;
   std::vector<const Int_t*> trigs_Photon_;

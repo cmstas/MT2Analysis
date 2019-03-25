@@ -51,7 +51,7 @@ std::string toString(float in){
 //   in Loop, also account for 5 GeV binning from 0-800 in T2cc scan
 int n_m1bins = 113;
 float* m1bins;
-int n_m2bins = 65;
+int n_m2bins = 77;
 float* m2bins;
 
 const int n_htbins = 5;
@@ -87,9 +87,9 @@ bool applyWeights = false;
 // turn on to apply btag sf to central value
 bool applyBtagSF = true; // default true
 // turn on to apply lepton sf to central value - take from babies
-bool applyLeptonSFfromBabies = false;
+bool applyLeptonSFfromBabies = true;
 // turn on to apply lepton sf to central value - reread from files
-bool applyLeptonSFfromFiles = true; // default true
+bool applyLeptonSFfromFiles = false; // default true
 // turn on to apply lepton sf to central value also for 0L SR. values chosen by options above
 bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
@@ -112,6 +112,8 @@ bool applyL1PrefireWeights = true;
 bool applyTTHFWeights = true;
 // apply Z njet re-weight (2017+18)
 bool applyZNJetWeights = false;
+// apply Z MT2 re-weight
+bool applyZMT2Weights = false;
 // turn on to apply json file to data
 bool applyJSON = true;
 // veto on jets with pt > 30, |eta| > 3.0
@@ -726,17 +728,22 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
     std::string scan_name = sample;
     std::string weights_dir = "";
-    if(config_tag.find("80x_fastsim_Moriond17") != string::npos)
-        weights_dir = "../babymaker/data/";
-    else if(config_tag.find("102x_fastsim_Autumn18") != string::npos)
-        weights_dir = "../babymaker/data/sigweights_Fall17/";
-    else if(config_tag.find("94x_fastsim_Fall17") != string::npos)
-        weights_dir = "../babymaker/data/sigweights_Fall17/";
-    else if(config_tag.find("94x_fastsim_Summer16") != string::npos)
-        weights_dir = "../babymaker/data/sigweights_Summer16_94x/";
-    if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
-    else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
-    else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
+    if(sample.find("_10")!=string::npos || sample.find("_50")!=string::npos || sample.find("_200")!=string::npos){
+        // a short-track sample
+        weights_dir = "../babymaker/data/short_track/";
+    }else{
+        if(config_tag.find("80x_fastsim_Moriond17") != string::npos)
+            weights_dir = "../babymaker/data/";
+        else if(config_tag.find("102x_fastsim_Autumn18") != string::npos)
+            weights_dir = "../babymaker/data/sigweights_Fall17/";
+        else if(config_tag.find("94x_fastsim_Fall17") != string::npos)
+            weights_dir = "../babymaker/data/sigweights_Fall17/";
+        else if(config_tag.find("94x_fastsim_Summer16") != string::npos)
+            weights_dir = "../babymaker/data/sigweights_Summer16_94x/";
+        if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
+        else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
+        else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
+    }
     TFile* f_nsig_weights = new TFile(Form("%s/nsig_weights_%s.root", weights_dir.c_str(), scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
     TH2D* h_sig_avgweight_btagsf_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_btagsf");
@@ -792,11 +799,17 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   }
   
   if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
-    setElSFfile_fastsim("../babymaker/lepsf/moriond17/sf_el_vetoCB_mini01.root");  
-    setMuSFfile_fastsim("../babymaker/lepsf/moriond17/sf_mu_looseID.root",
-			"../babymaker/lepsf/moriond17/sf_mu_looseID_mini02.root",
-			"../babymaker/lepsf/moriond17/sf_mu_mediumID_looseIP2D.root");
-    setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
+      cout << "Applying fastsim lepton scale factors from the following files:\n";
+      cout << "    els IDISO : " << config_.elSF_IDISOfile_fastsim << ": " << config_.elSF_IDhistName_fastsim << " (id), " << config_.elSF_ISOhistName_fastsim << " (iso)" << endl;
+      cout << "    muons ID  : " << config_.muSF_IDfile_fastsim << ": " << config_.muSF_IDhistName_fastsim << endl;
+      cout << "    muons ISO : " << config_.muSF_ISOfile_fastsim << ": " << config_.muSF_ISOhistName_fastsim << endl;
+      if(config_.muSF_IPfile_fastsim!="")
+          cout << "    muons IP : " << config_.muSF_IPfile_fastsim << ": " << config_.muSF_IPhistName_fastsim << endl;
+      setElSFfile_fastsim("../babymaker/"+config_.elSF_IDISOfile_fastsim, "../babymaker/"+config_.elSF_IDhistName_fastsim, "../babymaker/"+config_.elSF_ISOhistName_fastsim);
+      setMuSFfile_fastsim("../babymaker/"+config_.muSF_IDfile_fastsim, "../babymaker/"+config_.muSF_ISOfile_fastsim, "../babymaker/"+config_.muSF_IPfile_fastsim, 
+                          "../babymaker/"+config_.muSF_IDhistName_fastsim, "../babymaker/"+config_.muSF_ISOhistName_fastsim, "../babymaker/"+config_.muSF_IPhistName_fastsim);
+      setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
+      setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
   }
   if (verbose) cout<<__LINE__<<endl;
 
@@ -950,7 +963,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       }
 
       // handle HEM veto
-      // if(t.run < HEM_startRun) continue;
+      // if(t.run >= HEM_startRun) continue;
       bool isHEMaffected = false; // use later to determine whether to veto electrons in HEM region from CRSL
       if(doHEMveto && config_.year == 2018){
           bool hasHEMjet = false;
@@ -1204,9 +1217,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
                 else if(t.nJet30==3) baseweight = 1.011;
                 else if(t.nJet30==4) baseweight = 1.048;
                 else                 baseweight = min(2.0, 0.1538*t.nJet30 + 0.4285);
-                baseweight /= getAverageZNJetWeight(t.evt_id, 0);
                 weight_ZNJet_UP_ = (baseweight + 0.5*(baseweight - 1.0)) / baseweight;
                 weight_ZNJet_DN_ = (baseweight - 0.5*(baseweight - 1.0)) / baseweight;
+                baseweight /= getAverageZNJetWeight(t.evt_id, 0);
                 weight_ZNJet_UP_ /= getAverageZNJetWeight(t.evt_id, 1);
                 weight_ZNJet_DN_ /= getAverageZNJetWeight(t.evt_id, -1);
                 evtweight_ *= baseweight;
@@ -1214,6 +1227,28 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
                 evtweight_ *= 1.0;
                 weight_ZNJet_UP_ = 1.0;
                 weight_ZNJet_DN_ = 1.0;
+            }
+        }
+
+        if(applyZMT2Weights && t.evt_id>=600 && t.evt_id<800){
+            float mt2temp = t.evt_id < 700 ? t.mt2 : t.zll_mt2;
+            weight_ZMT2_UP_ = 1.0;
+            weight_ZMT2_DN_ = 1.0;
+            if(t.nJet30 >= 2){
+                float slope = -0.000902;
+                float start = 301.0;
+                float end = 656.0;
+                float offset = 0.025;
+                float baseweight = 1.0;
+                if(mt2temp < start)
+                    baseweight = 1.0 + offset;
+                else if(mt2temp < end)
+                    baseweight = slope*(mt2temp - start) + 1.0 + offset;
+                else
+                    baseweight = slope*(end - start) + 1.0 + offset;
+                weight_ZMT2_UP_ = (baseweight + 0.5*(baseweight - 1.0)) / baseweight;
+                weight_ZMT2_DN_ = (baseweight - 0.5*(baseweight - 1.0)) / baseweight;
+                evtweight_ *= baseweight;            
             }
         }
 
@@ -1432,7 +1467,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
 	  }
 	  if (!t.isData && applyDileptonTriggerWeights){
-	    evtweight_ *= getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], 0);
+              float cent        = getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], 0);
+              weight_trigeff_UP_ = getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], 1)  / cent;
+              weight_trigeff_DN_ = getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], -1) / cent;
+              evtweight_ *= cent;
 	  }
 	}
       } // nlep == 2
@@ -2659,17 +2697,24 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
-  if (!t.isData && isSignal_ && applyISRWeights && doSystVariationPlots) {
+  if (!t.isData && isSignal_ && doSystVariationPlots) {
     int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
     int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
     // remove central value ISR weight when doing variation
     float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
     float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
     float avgweight_isr_DN = h_sig_avgweight_isr_DN_->GetBinContent(binx,biny);
-    plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    if(applyISRWeights){
+        plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+        plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+        plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    }else{
+        plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+        plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+        plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    }
   }
 
   // ISR reweighting variation for ttbar
@@ -2740,9 +2785,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     //  need to first remove lepeff SF
     plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    
+    if(isSignal_){
+        plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    }    
   }
 
   else if (!t.isData && doLepEffVars && !applyLeptonSFtoSR && (applyLeptonSFfromFiles || applyLeptonSFfromBabies) && directoryname.Contains("sr")) {
@@ -2774,6 +2820,11 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   if (!t.isData && applyZNJetWeights && t.evt_id>=600 && t.evt_id<800){
     plot1D("h_mt2bins_ZNJet_UP"+s,       mt2_temp,   evtweight_ * weight_ZNJet_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_ZNJet_DN"+s,       mt2_temp,   evtweight_ * weight_ZNJet_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if (!t.isData && applyZMT2Weights && t.evt_id>=600 && t.evt_id<800){
+    plot1D("h_mt2bins_ZMT2_UP"+s,       mt2_temp,   evtweight_ * weight_ZMT2_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_ZMT2_DN"+s,       mt2_temp,   evtweight_ * weight_ZMT2_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
     
   outfile_->cd();
@@ -2982,6 +3033,9 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   //const std::string&  NB = nBJet20_ == 0 ? "_0B" : ( nBJet20_ == 1 ? "_1B" : ( nBJet20_ == 2 ? "_2B" : "_3B") );
   plot1D("h_mt2bins"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   //plot1D("h_mt2bins"+NB+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+
+  if (abs(t.lep_pdgId[0])==11) plot1D("h_mt2binsEle"+s,      zll_mt2_temp,   evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins, mt2bins);
+  if (abs(t.lep_pdgId[0])==13) plot1D("h_mt2binsMu"+s,       zll_mt2_temp,   evtweight_, h_1d, ";M_{T2} [GeV]", n_mt2bins, mt2bins);
   
 
   // Templates for hybrid method
@@ -3046,6 +3100,7 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_Events"+s,  1, 1, h_1d, ";Events, Unweighted", 1, 0, 2);
     plot1D("h_Events_w"+s,  1,   evtweight_, h_1d, ";Events, Weighted", 1, 0, 2);
     plot1D("h_mt2"+s,       zll_mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", 150, 0, 1500);
+    plot1D("h_MT2overHT"+s,       zll_mt2_temp/t.zll_ht,   evtweight_, h_1d, "; M_{T2} / H_{T}", 40, 0.0, 2.0);
     plot1D("h_met"+s,       t.zll_met_pt,   evtweight_, h_1d, ";E_{T}^{miss} [GeV]", 150, 0, 1500);
     plot1D("h_ht"+s,       t.zll_ht,   evtweight_, h_1d, ";H_{T} [GeV]", 120, 0, 3000);
     if (abs(t.lep_pdgId[0])==11) plot1D("h_htEle"+s,      t.zll_ht,   evtweight_, h_1d, ";HT [GeV]", 25, 250, 1500);
@@ -3073,6 +3128,10 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_zllpt"+s,      t.zll_pt,   evtweight_, h_1d, ";p_{T}(ll) [GeV]", 40, 0, 1000);
     if (abs(t.lep_pdgId[0])==11) plot1D("h_zllmassEle"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
     if (abs(t.lep_pdgId[0])==13) plot1D("h_zllmassMu"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
+    float lepdr = DeltaR(t.lep_eta[0], t.lep_eta[1], t.lep_phi[0], t.lep_phi[1]);
+    plot1D("h_dRleplep"+s,   lepdr, evtweight_, h_1d, ";dR(lep,lep)", 150, 0, 3);
+    if (abs(t.lep_pdgId[0])==11)  plot1D("h_dRleplepEle"+s,   lepdr, evtweight_, h_1d, ";dR(lep,lep)", 150, 0, 3);
+    if (abs(t.lep_pdgId[0])==13)  plot1D("h_dRleplepMu"+s,   lepdr, evtweight_, h_1d, ";dR(lep,lep)", 150, 0, 3);
     if (t.zll_ht > 250) 
     {
       plot1D("h_bosonptbins"+s,      t.zll_pt,   evtweight_, h_1d, ";p_{T}^{V} [GeV]", n_ptVbins, ptVbins);
@@ -3081,13 +3140,24 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
       float Zrapidity = Zll.Rapidity();
       if ( fabs(Zrapidity)<1.4 ) plot1D("h_bosonptbinsCentral"+s,      t.zll_pt,   evtweight_, h_1d, ";p_{T}^{V} [GeV]", n_ptVbins, ptVbins);
     }
-    plot2D("h2d_ht_mt2"+s,  t.zll_ht, t.zll_mt2, evtweight_, h_1d, ";H_{T} [GeV];M_{T2} [GeV]",48,0,1200,48,0,1200);
-    plot2D("h2d_ht_met"+s,  t.zll_ht, t.zll_met_pt, evtweight_, h_1d, ";H_{T} [GeV];MET [GeV]",48,0,1200,48,0,1200);
-    plot2D("h2d_ht_j1pt"+s, t.zll_ht, jet1_pt_, evtweight_, h_1d, ";H_{T} [GeV];p_{T}(jet1) [GeV]",48,0,1200,48,0,1200);
-    plot2D("h2d_ht_j2pt"+s, t.zll_ht, jet2_pt_, evtweight_, h_1d, ";H_{T} [GeV];p_{T}(jet2) [GeV]",48,0,1200,48,0,1200);
-    plot2D("h2d_ht_j1eta"+s, t.zll_ht, t.jet_eta[0], evtweight_, h_1d, ";H_{T} [GeV];eta(jet2)",48,0,1200,48,-3,3);
-    if(t.zll_ht > 900 && t.zll_ht < 1000)
-        plot1D("h_j1eta"+s,      t.jet_eta[0],   evtweight_, h_1d, ";eta(jet1)", 48, -3, 3);
+
+    plot2D("h2d_lep1_eta_phi"+s,  t.lep_eta[0], t.lep_phi[0], evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
+    if (abs(t.lep_pdgId[0])==11)  plot2D("h2d_lep1_eta_phi_El"+s,  t.lep_eta[0], t.lep_phi[0], evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
+    if (abs(t.lep_pdgId[0])==13)  plot2D("h2d_lep1_eta_phi_Mu"+s,  t.lep_eta[0], t.lep_phi[0], evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
+    plot2D("h2d_lep2_eta_phi"+s,  t.lep_eta[0], t.lep_phi[0], evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
+    if (abs(t.lep_pdgId[1])==11)  plot2D("h2d_lep2_eta_phi_El"+s,  t.lep_eta[1], t.lep_phi[1], evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
+    if (abs(t.lep_pdgId[1])==13)  plot2D("h2d_lep2_eta_phi_Mu"+s,  t.lep_eta[1], t.lep_phi[1], evtweight_, h_1d, ";lep eta; lep phi", 48, -3, 3, 48, -3.14159, 3.14159);
+    plot2D("h2d_dRleplep_zllpt"+s, lepdr, t.zll_pt, evtweight_, h_1d, ";dR(lep,lep);Z p_{T}", 48, 0, 1.5, 6, 200, 800);
+    if (abs(t.lep_pdgId[0])==11)  plot2D("h2d_dRleplep_zllpt_El"+s, lepdr, t.zll_pt, evtweight_, h_1d, ";dR(lep,lep);Z p_{T}", 48, 0, 1.5, 6, 200, 800);
+    if (abs(t.lep_pdgId[0])==13)  plot2D("h2d_dRleplep_zllpt_Mu"+s, lepdr, t.zll_pt, evtweight_, h_1d, ";dR(lep,lep);Z p_{T}", 48, 0, 1.5, 6, 200, 800);
+
+    // plot2D("h2d_ht_mt2"+s,  t.zll_ht, t.zll_mt2, evtweight_, h_1d, ";H_{T} [GeV];M_{T2} [GeV]",48,0,1200,48,0,1200);
+    // plot2D("h2d_ht_met"+s,  t.zll_ht, t.zll_met_pt, evtweight_, h_1d, ";H_{T} [GeV];MET [GeV]",48,0,1200,48,0,1200);
+    // plot2D("h2d_ht_j1pt"+s, t.zll_ht, jet1_pt_, evtweight_, h_1d, ";H_{T} [GeV];p_{T}(jet1) [GeV]",48,0,1200,48,0,1200);
+    // plot2D("h2d_ht_j2pt"+s, t.zll_ht, jet2_pt_, evtweight_, h_1d, ";H_{T} [GeV];p_{T}(jet2) [GeV]",48,0,1200,48,0,1200);
+    // plot2D("h2d_ht_j1eta"+s, t.zll_ht, t.jet_eta[0], evtweight_, h_1d, ";H_{T} [GeV];eta(jet2)",48,0,1200,48,-3,3);
+    // if(t.zll_ht > 900 && t.zll_ht < 1000)
+    //     plot1D("h_j1eta"+s,      t.jet_eta[0],   evtweight_, h_1d, ";eta(jet1)", 48, -3, 3);
 
 
   }
@@ -3117,6 +3187,21 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
   if (!t.isData && applyZNJetWeights && t.evt_id>=600 && t.evt_id<800){
     plot1D("h_mt2bins_ZNJet_UP"+s,       zll_mt2_temp,   evtweight_ * weight_ZNJet_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_ZNJet_DN"+s,       zll_mt2_temp,   evtweight_ * weight_ZNJet_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if (!t.isData && applyZMT2Weights && t.evt_id>=600 && t.evt_id<800){
+    plot1D("h_mt2bins_ZMT2_UP"+s,       zll_mt2_temp,   evtweight_ * weight_ZMT2_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_ZMT2_DN"+s,       zll_mt2_temp,   evtweight_ * weight_ZMT2_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if (!t.isData && applyDileptonTriggerWeights){
+    plot1D("h_mt2bins_trigeff_UP"+s,       zll_mt2_temp,   evtweight_ * weight_trigeff_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_trigeff_DN"+s,       zll_mt2_temp,   evtweight_ * weight_trigeff_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+  }
+
+  if ( !t.isData && doRenormFactScaleReweight) {      
+    plot1D("h_mt2bins_renorm_UP"+s,        zll_mt2_temp,   evtweight_renormUp_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
+    plot1D("h_mt2bins_renorm_DN"+s,        zll_mt2_temp,   evtweight_renormDn_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
   
   outfile_->cd();
