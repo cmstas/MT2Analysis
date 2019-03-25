@@ -23,8 +23,8 @@ def GetExpectedOutputFiles (infile):
 
       # # check for smearbaby
       # fname = (match.group().split()[1].split(',')[0]+'.root').replace("..","._baby.")
-      # fpath = match.group().split()[2] + "/smearbaby"
-      # # print fpath, fname
+      fpath = match.group().split()[2] + "/smearbaby"
+      # print fpath, fname
 
       if not os.path.isfile(os.path.join(fpath,fname)):
         print match.group().split()[0]

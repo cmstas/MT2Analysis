@@ -22,26 +22,31 @@ import re
 #samples = ["data_rereco_data_Run2016C_HTMHT"]
 #samples = ["data_rereco_data_Run2016[B-D]_(JetHT|HTMHT|MET)"]
 # samples = ["qcd_ht", "tt", "singletop", "wjets_ht", "zinv_ht"]
-# samples = ["qcd_ht"]
-samples = ["data_Run2017[B-F]_JetHT_31Mar2018"]
+samples = ["qcd_ht"]
 # samples = ["data_Run2016[B-H]_JetHT_17Jul2018"]
+# samples = ["data_Run2017[B-F]_JetHT_31Mar2018"]
+# samples = ["data_Run2018[A-D]_JetHT_.*"]
 
 test = False
-version="V00-10-04"
+version="V00-10-09"
 doRebalanceAndSmear = True
-# tag="V00-10-01_json_294927-306462_31Mar2018_correctJECs"
-tag="V00-10-04"
-# tag="V00-10-01_94X_mc"
-jrttag = "ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
-# jrttag = "2016JRTs"
+rebaltag="V00-10-09_2016fullYear"
+# rebaltag="V00-10-09_2017fullYear"
+# rebaltag="V00-10-09_2018fullYear"
+jrttag = "ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+jrtnames = {
+    2016 : "ptBinned_80x_JetID_PUID_BTagSFs_core2sigma",
+    2017 : "ptBinned_94x_JECV32_JetID_PUID_BTagSFs_core2sigma",
+    2018 : "ptBinned_102x_JetID_PUID_BTagSFs_core2sigma",
+    }
+# jrttag = "ptBinned_94x_JetID_PUID_BTagSFs"
 extratag = ""
-# extratag = "_noBResp"
-# extratag = "_core25"
-# extratag = "_jetReweight"
-# extratag = "_withMonojet_v2"
+# extratag = "_sigmasoft25"
+# extratag = "_tail25"
+# extratag = "_newJER"
 # extratag = "_noJERsmear_v2"
 # extratag = "_noJERsmear_HEM2veto_pt20"
-extratag = "_jerDOWN"
+# extratag = "_jerUP"
 username = os.environ["USER"]
 use_b_resp = True
 make_baby = False
@@ -49,10 +54,11 @@ use_raw_hists = False
 core_scale = 1.0
 mean_shift = 0.0
 tail_scale = 1.0
-# cut_level = 2 if "qcd" in samples[0].lower() else 1
-cut_level = 1
+cut_level = 2 if "qcd" in samples[0].lower() else 1
+# cut_level = 1
 apply_weights = True
 do_jet_reweighting = False
+njet_reweight_file = "weights_V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear.root"
 indir = "/hadoop/cms/store/user/bemarsh/mt2babies/"
 numFilesPerJob = 4
 append=False
@@ -72,20 +78,35 @@ if doRebalanceAndSmear: options += "-r "
 if apply_weights: options += "-w "
 if isData: options += "-d "
 options += "-c {0} -m {1} -t {2} -l {3} ".format(core_scale, mean_shift, tail_scale, cut_level)
-options += "-f JetResponseTemplates_{0} ".format(jrttag)
+
+if "Run2016" in samples[0]:
+    config_tag = "data_2016_94x"
+    jrtname = jrtnames[2016]
+elif "Run2017" in samples[0]:
+    config_tag = "data_2017_31Mar2018"
+    jrtname = jrtnames[2017]
+elif "Run2018" in samples[0]:
+    config_tag = "data_2018_17Sep2018"
+    jrtname = jrtnames[2018]
+elif "2016" in rebaltag:
+    config_tag = "mc_94x_Summer16"
+    jrtname = jrtnames[2016]
+elif "2017" in rebaltag:
+    config_tag = "mc_94x_Fall17"
+    jrtname = jrtnames[2017]
+elif "2018" in rebaltag:
+    config_tag = "mc_102x_Autumn18"
+    jrtname = jrtnames[2018]
+
+options += "-f JetResponseTemplates_{0} ".format(jrtname)
+
 if do_jet_reweighting:
-    options += "-q njet_reweighting/weights_{0}_{1}.root ".format(version, jrttag+extratag.replace("_jetReweight",""))
+    # options += "-q njet_reweighting/weights_{0}_{1}.root ".format(version, jrttag+extratag.replace("_jetReweight",""))
+    options += "-q njet_reweighting/{0} ".format(njet_reweight_file)
 if "jerup" in extratag.lower():
     options += "-u 1 "
 if "jerdown" in extratag.lower():
     options += "-u -1 "
-
-if "Run2016" in samples[0]:
-    config_tag = "data_2016_94x"
-elif "Run2017" in samples[0]:
-    config_tag = "data_2017_31Mar2018"
-else:
-    config_tag = "mc_94x_Fall17"
 
 options += "-g {0} ".format(config_tag)
 
@@ -94,7 +115,7 @@ os.system("mkdir -p configs_{0}".format(version))
 suffix = ""
 is_first = True
 for sample in samples:
-  re_sample = re.compile("RebalanceAndSmear_"+tag+"_"+sample)
+  re_sample = re.compile("RebalanceAndSmear_"+rebaltag+"_"+sample)
   if "data" in sample:
     if "Run2016" in sample:
       suffix = "_data2016"
@@ -103,7 +124,8 @@ for sample in samples:
     if "Run2018" in sample:
       suffix = "_data2018"
   else:
-    suffix = "_"+sample.replace('_ht','').replace('_pt','')
+    year = 2016 if "2016" in rebaltag else (2017 if "2017" in rebaltag else 2018)
+    suffix = "_"+sample.replace('_ht','').replace('_pt','')+str(year)
   if not doRebalanceAndSmear:
     suffix += "_noRS"
 

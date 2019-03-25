@@ -159,7 +159,7 @@ echo "[wrapper] OUTPUT = " ${OUTPUT}
 have_baby=0
 for outfile in "${OUTPUT[@]}";
 do
-    if [[ ${outfile} =~ .*baby.* ]]
+    if [[ ${outfile} =~ .*smearbaby.* ]]
     then
         have_baby=1
     fi   
@@ -177,7 +177,7 @@ fi
 
 for outfile in "${OUTPUT[@]}";
 do
-    if [[ ${outfile} =~ .*baby.* ]]
+    if [[ ${outfile} =~ .*smearbaby.* ]]
     then
         gfal-copy -p -f -t 4200 --verbose file://`pwd`/${outfile} gsiftp://gftp.t2.ucsd.edu${COPYDIR}/smearbaby/${outfile}
     else

@@ -3,7 +3,7 @@
 make -j12
 
 # INDIR=/hadoop/cms/store/user/bemarsh/mt2babies/RebalanceAndSmear_V00-10-01_json_294927-306462_31Mar2018_correctJECs_data_Run2017C_JetHT_31Mar2018/
-INDIR=/hadoop/cms/store/user/bemarsh/mt2babies/RebalanceAndSmear_V00-10-04_data_Run2017C_JetHT_31Mar2018/
+INDIR=/hadoop/cms/store/user/bemarsh/mt2babies/RebalanceAndSmear_V00-10-09_2017fullYear_data_Run2017D_JetHT_31Mar2018/
 
 OUTDIR=output/test
 
@@ -12,7 +12,7 @@ LOGDIR=logs
 CONFIG=data_2017_31Mar2018
 
 # declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
-declare -a Samples=(data_Run2017C_31Mar2018_merged_ntuple_42.)
+declare -a Samples=(mt2_baby_42.)
 # declare -a Samples=(data_Run2016B_23Sep2016_merged_ntuple_397 data_Run2016B_23Sep2016_merged_ntuple_398 data_Run2016B_23Sep2016_merged_ntuple_399 data_Run2016B_23Sep2016_merged_ntuple_4 data_Run2016B_23Sep2016_merged_ntuple_40 data_Run2016B_23Sep2016_merged_ntuple_400 data_Run2016B_23Sep2016_merged_ntuple_401 data_Run2016B_23Sep2016_merged_ntuple_402 data_Run2016B_23Sep2016_merged_ntuple_403 data_Run2016B_23Sep2016_merged_ntuple_404)
 
 # declare -a Samples=(ttsl ttdl wjets_ht100to200 wjets_ht200to400 wjets_ht400to600 wjets_ht600to800 wjets_ht800to1200 wjets_ht1200to2500 wjets_ht2500toInf )

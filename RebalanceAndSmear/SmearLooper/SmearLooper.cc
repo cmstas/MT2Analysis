@@ -55,7 +55,7 @@ const int n_m2bins = 33;
 float m2bins[n_m2bins+1];
 
 const int n_htbins = 5;
-const float htbins[n_htbins+1] = {250., 450., 575., 1200., 1700., 3000.};
+const float htbins[n_htbins+1] = {250., 450., 575., 1200., 1500., 3000.};
 const int n_njbins = 3;
 const float njbins[n_njbins+1] = {2, 4, 7, 12};
 const int n_nbjbins = 4;
@@ -72,9 +72,11 @@ bool doHFJetVeto = false;
 bool prescalesByEvent = true;
 bool doNTrueIntReweight = true;
 bool doCustomHEMsmear = false;
-bool doHEMregionVeto = false;
-float HEMvetoPtThresh = 20.0;
-
+bool doHEMregionVeto = true;
+float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
+float HEM_ptCut = 30.0;
+int HEM_startRun = 319077; // affects 38.58 out of 58.83 fb-1 in 2018
+uint HEM_fracNum = 1286, HEM_fracDen = 1961;
 const int numberOfSmears = 100;
 const float smearNormalization = 1.0/float(numberOfSmears);
 const int MAX_SMEARS = 5000;
@@ -88,11 +90,11 @@ float prescale_correction = 1.0;  //correct the weight if prescale is too high a
 std::vector<float> jet_pt;
 std::vector<float> jet_eta;
 std::vector<float> jet_phi;
-std::vector<float> jet_btagCSV;
+std::vector<float> jet_btagDeepCSV;
 std::vector<float> PU_passes_id_jet_pt;
 std::vector<float> PU_passes_id_jet_eta;
 std::vector<float> PU_passes_id_jet_phi;
-std::vector<float> PU_passes_id_jet_btagCSV;
+std::vector<float> PU_passes_id_jet_btagDeepCSV;
 std::vector<float> PU_fails_id_jet_pt;
 std::vector<float> PU_fails_id_jet_eta;
 std::vector<float> PU_fails_id_jet_phi;
@@ -139,7 +141,7 @@ void SmearLooper::SetSignalRegions(){
 
     //store histograms with cut values for all variables
     for(unsigned int i = 0; i < SRVec.size(); i++){
-        cout << "SR: " << SRVec.at(i).GetName() << endl;
+        // cout << "SR: " << SRVec.at(i).GetName() << endl;
         std::vector<std::string> vars = SRVec.at(i).GetListOfVariables();
         TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVec.at(i).GetName()).c_str());
         if (dir == 0) {
@@ -552,7 +554,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
     TRandom3 *random = new TRandom3();
 
     if(config_tag_ == ""){
-        cout << "ERROR! need to set the MT2Configuration. use SmearLooper::SetMT2Config()" << endl;
+        cout << "ERROR! need to set the MT2Configuration. use SmearLooper::SetMT2ConfigTag()" << endl;
         return;
     }
 
@@ -595,7 +597,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
     if(doNJetReweighting_){
         const uint n_ht_regs = 5;
-        string ht_regs[n_ht_regs] = {"ht250to450", "ht450to575", "ht575to1200", "ht1200to1700", "ht1700to2000"};
+        string ht_regs[n_ht_regs] = {"ht250to450", "ht450to575", "ht575to1200", "ht1200to1500", "ht1500to2000"};
         TFile *fid_njet_weights_ = new TFile(njet_weights_file_.c_str());
         for(uint iht=0; iht<n_ht_regs; iht++){
             nJetWeights_[ht_regs[iht]] = (TH1D*)fid_njet_weights_->Get((ht_regs[iht] + "/h_weights").c_str());
@@ -726,7 +728,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         dir_SRJustHT6_temp = outfile_->mkdir((SRJustHT6_temp.GetName()).c_str());
     } 
 
-    SRJustHT7.SetName("ht1200to1700");
+    SRJustHT7.SetName("ht1200to1500");
     float SRJustHT7_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
     SRJustHT7.SetMT2Bins(7, SRJustHT7_mt2bins);
 
@@ -737,7 +739,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
         dir_SRJustHT7_temp = outfile_->mkdir((SRJustHT7_temp.GetName()).c_str());
     } 
 
-    SRJustHT8.SetName("ht1700to2000");
+    SRJustHT8.SetName("ht1500to2000");
     float SRJustHT8_mt2bins[8] = {200, 300, 400, 500, 600, 800, 1000, 1500}; 
     SRJustHT8.SetMT2Bins(7, SRJustHT8_mt2bins);
 
@@ -751,7 +753,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
     if (makeSmearBaby_) {
         std::cout << "[SmearLooper::loop] Making baby ntuple..." << std::endl;    
         std::string baby_name = output_name;
-        baby_name.replace(baby_name.end()-5,baby_name.end(),"_baby");
+        baby_name.replace(baby_name.end()-5,baby_name.end(),"_smearbaby");
         MakeBabyNtuple(Form("%s.root", baby_name.c_str()));
     }
     
@@ -892,6 +894,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                 if (t.nJet200MuFrac50DphiMet > 0) continue;
             }
 
+            // decide if we should apply HEM veto based on run number (data) or event number (MC)
+            bool candidateHEMevent = false;
+            if(config_.year == 2018 && ((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)))
+                candidateHEMevent = true;
+
             // flag signal samples
             if (t.evt_id >= 1000) isSignal_ = true;
             else isSignal_ = false; 
@@ -1003,11 +1010,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                 jet_pt.clear();
                 jet_eta.clear();
                 jet_phi.clear();
-                jet_btagCSV.clear();
+                jet_btagDeepCSV.clear();
                 PU_passes_id_jet_pt.clear();
                 PU_passes_id_jet_eta.clear();
                 PU_passes_id_jet_phi.clear();
-                PU_passes_id_jet_btagCSV.clear();
+                PU_passes_id_jet_btagDeepCSV.clear();
                 PU_fails_id_jet_pt.clear();
                 PU_fails_id_jet_eta.clear();
                 PU_fails_id_jet_phi.clear();
@@ -1041,7 +1048,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                             PU_passes_id_jet_pt.push_back(t.jet_pt[i]);
                             PU_passes_id_jet_eta.push_back(t.jet_eta[i]);
                             PU_passes_id_jet_phi.push_back(t.jet_phi[i]);
-                            PU_passes_id_jet_btagCSV.push_back(t.jet_btagCSV[i]);
+                            PU_passes_id_jet_btagDeepCSV.push_back(t.jet_btagDeepCSV[i]);
                         } else {
                             PU_fails_id_jet_pt.push_back(t.jet_pt[i]);
                             PU_fails_id_jet_eta.push_back(t.jet_eta[i]);
@@ -1058,7 +1065,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     jet_pt.push_back(t.jet_pt[i]*rf);
                     jet_eta.push_back(t.jet_eta[i]);
                     jet_phi.push_back(t.jet_phi[i]);
-                    jet_btagCSV.push_back(t.jet_btagCSV[i]);
+                    jet_btagDeepCSV.push_back(t.jet_btagDeepCSV[i]);
 
                     if (makeSmearBaby_){
                         r_ht += jet_pt.back();
@@ -1105,11 +1112,11 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     std::vector<float> jet_pt_smeared = jet_pt;
 
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){
-                        float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagCSV[i]>config_.btag_med_threshold) : false);
+                        float smear = reader.GetRandomResponse(jet_pt[i], jet_eta[i], useBjetResponse_ ? (jet_btagDeepCSV[i]>config_.btag_med_threshold_DeepCSV) : false);
                         plot1D("h_smear",      smear,   evtweight_, h_1d_global, ";smear", 10000, 0, 10);
                         jet_pt_smeared.at(i) *= smear;
                         
-                        if(doCustomHEMsmear){
+                        if(doCustomHEMsmear && candidateHEMevent){
                             if(jet_eta[i] < -1.5 && jet_phi[i] > -1.6 && jet_phi[i] < -0.8){
                                 float smearfact = 1.0;
                                 float pt = jet_pt_smeared.at(i);
@@ -1162,7 +1169,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         jet_y += (jet_pt_smeared.at(i))*sin(jet_phi.at(i));
                         if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.4) ) ht += jet_pt_smeared.at(i);
                         if( (jet_pt_smeared.at(i) > 30.0) && (fabs(jet_eta.at(i)) < 2.4) ) nJet30++;
-                        if( (jet_pt_smeared.at(i) > 20.0) && (fabs(jet_eta.at(i)) < 2.4) && (jet_btagCSV.at(i) > config_.btag_med_threshold) ) nBJet20++;
+                        if( (jet_pt_smeared.at(i) > 20.0) && (fabs(jet_eta.at(i)) < 2.4) && (jet_btagDeepCSV.at(i) > config_.btag_med_threshold_DeepCSV) ) nBJet20++;
                     }
                     for(unsigned int i=0; i<PU_passes_id_jet_pt.size(); i++){
                         new_met_x -= PU_passes_id_jet_pt.at(i)*cos(PU_passes_id_jet_phi.at(i));
@@ -1171,7 +1178,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         jet_y += (PU_passes_id_jet_pt.at(i))*sin(PU_passes_id_jet_phi.at(i));
                         if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) ) ht += PU_passes_id_jet_pt.at(i);
                         if( (PU_passes_id_jet_pt.at(i) > 30.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) ) nJet30++;
-                        if( (PU_passes_id_jet_pt.at(i) > 20.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) && (PU_passes_id_jet_btagCSV.at(i) > config_.btag_med_threshold) ) nBJet20++;
+                        if( (PU_passes_id_jet_pt.at(i) > 20.0) && (fabs(PU_passes_id_jet_eta.at(i)) < 2.4) && (PU_passes_id_jet_btagDeepCSV.at(i) > config_.btag_med_threshold_DeepCSV) ) nBJet20++;
                     }
                     for(unsigned int i=0; i<PU_fails_id_jet_pt.size(); i++){
                         new_met_x -= PU_fails_id_jet_pt.at(i)*cos(PU_fails_id_jet_phi.at(i));
@@ -1204,9 +1211,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     std::vector<LorentzVector> p4sForDphi;
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){                        
                         if(doHEMregionVeto){
-                            if(jet_eta[i] < -1.5 && jet_eta[i] > -4.7 && 
-                               jet_phi[i] < -0.8 && jet_phi[i] > -1.6 && 
-                               jet_pt_smeared[i] > HEMvetoPtThresh)
+                            if(jet_eta[i] > HEM_region[0] && jet_eta[i] < HEM_region[1] && 
+                               jet_phi[i] > HEM_region[2] && jet_phi[i] < HEM_region[3] && 
+                               jet_pt_smeared[i] > HEM_ptCut)
                                 foundHEMjet = true;
                         }
                         if(jet_pt_smeared.at(i) < 30.0 || fabs(jet_eta.at(i)) > 4.7) continue;
@@ -1238,9 +1245,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     }
                     for(unsigned int i=0; i<PU_passes_id_jet_pt.size(); i++){
                         if(doHEMregionVeto){
-                            if(PU_passes_id_jet_eta[i] < -1.5 && PU_passes_id_jet_eta[i] > -4.7 && 
-                               PU_passes_id_jet_phi[i] < -0.8 && PU_passes_id_jet_phi[i] > -1.6 && 
-                               PU_passes_id_jet_pt[i] > HEMvetoPtThresh)
+                            if(PU_passes_id_jet_eta[i] > HEM_region[0] && PU_passes_id_jet_eta[i] < HEM_region[1] && 
+                               PU_passes_id_jet_phi[i] > HEM_region[2] && PU_passes_id_jet_phi[i] < HEM_region[3] && 
+                               PU_passes_id_jet_pt[i] > HEM_ptCut)
                                 foundHEMjet = true;
                         }
                         if(PU_passes_id_jet_pt.at(i) < 30.0 || fabs(PU_passes_id_jet_eta.at(i)) > 4.7) continue;
@@ -1252,7 +1259,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         p4sForDphi.push_back(tempVec);
                     }
 
-                    if(doHEMregionVeto && foundHEMjet)
+                    if(doHEMregionVeto && candidateHEMevent && foundHEMjet)
                         continue;
 
                     sort(p4sForDphi.begin(), p4sForDphi.end(), sortByPt);
@@ -1359,8 +1366,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     //     if(RS_vars_["ht"] >=250  && RS_vars_["ht"]<450)  evtweight_*=1.02;
                     //     if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  evtweight_*=1.02;
                     //     if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) evtweight_*=1.17;
-                    //     if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1700) evtweight_*=1.11;
-                    //     if(RS_vars_["ht"] >=1700)                        evtweight_*=1.07;
+                    //     if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) evtweight_*=1.11;
+                    //     if(RS_vars_["ht"] >=1500)                        evtweight_*=1.07;
                     // }
 
                     if(doNJetReweighting_){
@@ -1368,8 +1375,8 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         if(                         RS_vars_["ht"]<450)  weights = nJetWeights_["ht250to450"];
                         if(RS_vars_["ht"] >=450  && RS_vars_["ht"]<575)  weights = nJetWeights_["ht450to575"];
                         if(RS_vars_["ht"] >=575  && RS_vars_["ht"]<1200) weights = nJetWeights_["ht575to1200"];
-                        if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1700) weights = nJetWeights_["ht1200to1700"];
-                        if(RS_vars_["ht"] >=1700)                        weights = nJetWeights_["ht1700to2000"];
+                        if(RS_vars_["ht"] >=1200 && RS_vars_["ht"]<1500) weights = nJetWeights_["ht1200to1500"];
+                        if(RS_vars_["ht"] >=1500)                        weights = nJetWeights_["ht1500to2000"];
                         evtweight_ *= weights->GetBinContent(weights->FindBin(RS_vars_["nJet30"]));
                     }
 
@@ -1388,9 +1395,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         fillHistos(SRJustHT5_temp.srHistMap, SRJustHT5_temp.GetNumberOfMT2Bins(), SRJustHT5_temp.GetMT2Bins(), SRJustHT5_temp.GetName(), "");
                     if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=575 && RS_vars_["ht"]<1200 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT6_temp.srHistMap, SRJustHT6_temp.GetNumberOfMT2Bins(), SRJustHT6_temp.GetMT2Bins(), SRJustHT6_temp.GetName(), "");
-                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["ht"]<1700 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1200 && RS_vars_["ht"]<1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT7_temp.srHistMap, SRJustHT7_temp.GetNumberOfMT2Bins(), SRJustHT7_temp.GetMT2Bins(), SRJustHT7_temp.GetName(), "");
-                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1700 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
+                    if(RS_vars_["nJet30"]>=2 && RS_vars_["ht"]>=1500 && RS_vars_["met_pt"]>30 && RS_vars_["mt2"]>50) 
                         fillHistos(SRJustHT8_temp.srHistMap, SRJustHT8_temp.GetNumberOfMT2Bins(), SRJustHT8_temp.GetMT2Bins(), SRJustHT8_temp.GetName(), "");          
                     fillHistosSignalRegion("sr");
                     fillHistosSRBase();
@@ -1467,12 +1474,12 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
             else {
 
-                if(doHEMregionVeto){
+                if(doHEMregionVeto && candidateHEMevent){
                     bool foundjet = false;
                     for(int ijet=0; ijet<t.njet; ijet++){
-                        if(t.jet_eta[ijet] > -1.5 || t.jet_eta[ijet] < -4.7) continue;
-                        if(t.jet_phi[ijet] > -0.8 || t.jet_phi[ijet] < -1.6) continue;
-                        if(t.jet_pt[ijet] < HEMvetoPtThresh) continue;
+                        if(t.jet_eta[ijet] < HEM_region[0] || t.jet_eta[ijet] > HEM_region[1]) continue;
+                        if(t.jet_phi[ijet] < HEM_region[2] || t.jet_phi[ijet] > HEM_region[3]) continue;
+                        if(t.jet_pt[ijet] < HEM_ptCut) continue;
                         foundjet = true;
                         break;
                     }
@@ -1515,9 +1522,9 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     fillHistos(SRJustHT5.srHistMap, SRJustHT5.GetNumberOfMT2Bins(), SRJustHT5.GetMT2Bins(), SRJustHT5.GetName(), "");
                 if(t.nJet30>=2 && t.ht>=575 && t.ht<1200 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT6.srHistMap, SRJustHT6.GetNumberOfMT2Bins(), SRJustHT6.GetMT2Bins(), SRJustHT6.GetName(), "");
-                if(t.nJet30>=2 && t.ht>=1200 && t.ht<1700 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=1200 && t.ht<1500 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT7.srHistMap, SRJustHT7.GetNumberOfMT2Bins(), SRJustHT7.GetMT2Bins(), SRJustHT7.GetName(), "");
-                if(t.nJet30>=2 && t.ht>=1700 && t.met_pt>30 && t.mt2>50) 
+                if(t.nJet30>=2 && t.ht>=1500 && t.met_pt>30 && t.mt2>50) 
                     fillHistos(SRJustHT8.srHistMap, SRJustHT8.GetNumberOfMT2Bins(), SRJustHT8.GetMT2Bins(), SRJustHT8.GetName(), "");                  
                 fillHistosSignalRegion("sr");
                 fillHistosSRBase();
@@ -2523,21 +2530,23 @@ bool SmearLooper::passesTrigger() {
         // 2017
         if(t.ht < 250)
             return false;
-        if(t.ht >= 250 && t.ht < 440)
+        if(t.ht >= 250 && t.ht < 340)
             return t.HLT_PFHT180_Prescale;
-        if(t.ht >= 440 && t.ht < 520)
+        if(t.ht >= 340 && t.ht < 480)
+            return t.HLT_PFHT250_Prescale;
+        if(t.ht >= 480 && t.ht < 540)
             return t.HLT_PFHT370_Prescale;
-        if(t.ht >= 520 && t.ht < 620)
+        if(t.ht >= 540 && t.ht < 640)
             return t.HLT_PFHT430_Prescale;
-        if(t.ht >= 620 && t.ht < 700)
+        if(t.ht >= 640 && t.ht < 720)
             return t.HLT_PFHT510_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 700 && t.ht < 800)
+        if(t.ht >= 720 && t.ht < 820)
             return t.HLT_PFHT590_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 800 && t.ht < 900)
+        if(t.ht >= 820 && t.ht < 940)
             return t.HLT_PFHT680_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 900 && t.ht < 1000)
+        if(t.ht >= 940 && t.ht < 1040)
             return t.HLT_PFHT780_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 1000 && t.ht < 1200)
+        if(t.ht >= 1040 && t.ht < 1200)
             return t.HLT_PFHT890_Prescale || t.HLT_PFJet500;
         if(t.ht >= 1200)
             return t.HLT_PFHT1050 || t.HLT_PFJet500;
@@ -2591,50 +2600,106 @@ float SmearLooper::getTriggerPrescale () {
             else
                 return 1;
         }
-    }else{
+    }else if(config_tag_.find("2017") != string::npos){
         if(!prescalesByEvent){
             if(t.ht < 250)
                 return -1;
-            else if(t.ht >= 250 && t.ht < 440)
-                return 1316.;
-            else if(t.ht >= 440 && t.ht < 520)
-                return 707.;
-            else if(t.ht >= 520 && t.ht < 620)
-                return 307.;
+            else if(t.ht >= 250 && t.ht < 340)
+                return 3981.;
+            else if(t.ht >= 340 && t.ht < 480)
+                return 2760.;
+            else if(t.ht >= 480 && t.ht < 540)
+                return 863.3;
+            else if(t.ht >= 540 && t.ht < 640)
+                return 309.6;
             else if(t.HLT_PFJet500)
                 return 1;
-            else if(t.ht >= 620 && t.ht < 700)
-                return 145.;
-            else if(t.ht >= 700 && t.ht < 800)
-                return 67.4;
-            else if(t.ht >= 800 && t.ht < 900)
-                return 47.4;
-            else if(t.ht >= 900 && t.ht < 1000)
-                return 29.5;
-            else if(t.ht >= 1000 && t.ht < 1200)
-                return 17.1;
+            else if(t.ht >= 640 && t.ht < 720)
+                return 190.0;
+            else if(t.ht >= 720 && t.ht < 820)
+                return 94.8;
+            else if(t.ht >= 820 && t.ht < 940)
+                return 53.1;
+            else if(t.ht >= 940 && t.ht < 1040)
+                return 28.5;
+            else if(t.ht >= 1040 && t.ht < 1200)
+                return 14.8;
             else
                 return 1;
         }else{
             if(t.ht < 250)
                 return -1;
-            else if(t.ht >= 250 && t.ht < 440)
+            else if(t.ht >= 250 && t.ht < 340)
                 return t.HLT_PFHT180_Prescale;
-            else if(t.ht >= 440 && t.ht < 520)
+            else if(t.ht >= 340 && t.ht < 480)
+                return t.HLT_PFHT250_Prescale;
+            else if(t.ht >= 480 && t.ht < 540)
                 return t.HLT_PFHT370_Prescale;
-            else if(t.ht >= 520 && t.ht < 620)
+            else if(t.ht >= 540 && t.ht < 640)
                 return t.HLT_PFHT430_Prescale; 
             else if(t.HLT_PFJet500)
                 return 1;
-            else if(t.ht >= 620 && t.ht < 700)
+            else if(t.ht >= 640 && t.ht < 720)
                 return t.HLT_PFHT510_Prescale;
-            else if(t.ht >= 700 && t.ht < 800)
+            else if(t.ht >= 720 && t.ht < 820)
                 return t.HLT_PFHT590_Prescale;
-            else if(t.ht >= 800 && t.ht < 900)
+            else if(t.ht >= 820 && t.ht < 940)
                 return t.HLT_PFHT680_Prescale;
-            else if(t.ht >= 900 && t.ht < 1000)
+            else if(t.ht >= 940 && t.ht < 1040)
                 return t.HLT_PFHT780_Prescale;
-            else if(t.ht >= 1000 && t.ht < 1200)
+            else if(t.ht >= 1040 && t.ht < 1200)
+                return t.HLT_PFHT890_Prescale;
+            else
+                return 1;
+        }
+    }else{
+        if(!prescalesByEvent){
+            if(t.ht < 250)
+                return -1;
+            else if(t.ht >= 250 && t.ht < 340)
+                return 11433.;
+            else if(t.ht >= 340 && t.ht < 480)
+                return 4120.;
+            else if(t.ht >= 480 && t.ht < 540)
+                return 1604.;
+            else if(t.ht >= 540 && t.ht < 640)
+                return 502.5;
+            else if(t.HLT_PFJet500)
+                return 1;
+            else if(t.ht >= 640 && t.ht < 720)
+                return 255.3;
+            else if(t.ht >= 720 && t.ht < 820)
+                return 128.7;
+            else if(t.ht >= 820 && t.ht < 940)
+                return 64.8;
+            else if(t.ht >= 940 && t.ht < 1040)
+                return 32.5;
+            else if(t.ht >= 1040 && t.ht < 1200)
+                return 16.3;
+            else
+                return 1;
+        }else{
+            if(t.ht < 250)
+                return -1;
+            else if(t.ht >= 250 && t.ht < 340)
+                return t.HLT_PFHT180_Prescale;
+            else if(t.ht >= 340 && t.ht < 480)
+                return t.HLT_PFHT250_Prescale;
+            else if(t.ht >= 480 && t.ht < 540)
+                return t.HLT_PFHT370_Prescale;
+            else if(t.ht >= 540 && t.ht < 640)
+                return t.HLT_PFHT430_Prescale; 
+            else if(t.HLT_PFJet500)
+                return 1;
+            else if(t.ht >= 640 && t.ht < 720)
+                return t.HLT_PFHT510_Prescale;
+            else if(t.ht >= 720 && t.ht < 820)
+                return t.HLT_PFHT590_Prescale;
+            else if(t.ht >= 820 && t.ht < 940)
+                return t.HLT_PFHT680_Prescale;
+            else if(t.ht >= 940 && t.ht < 1040)
+                return t.HLT_PFHT780_Prescale;
+            else if(t.ht >= 1040 && t.ht < 1200)
                 return t.HLT_PFHT890_Prescale;
             else
                 return 1;
@@ -2648,7 +2713,7 @@ bool SmearLooper::passesTriggerSR(){
     if(config_tag_.find("2016") != string::npos){
         return t.HLT_PFHT900 || t.HLT_PFJet450 || t.HLT_PFHT300_PFMET110 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
     }else{
-        return t.HLT_PFHT1050 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMET120_PFMHT120_PFHT60 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
+        return t.HLT_PFHT1050 || t.HLT_PFJet500 || t.HLT_PFHT800_PFMET75_PFMHT75 || t.HLT_PFHT500_PFMET100_PFMHT100 || t.HLT_PFMET120_PFMHT120 || t.HLT_PFMET120_PFMHT120_PFHT60 || t.HLT_PFMETNoMu120_PFMHTNoMu120;
     }    
 }
 

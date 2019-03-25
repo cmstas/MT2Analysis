@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
       std::cout << Form("ERROR: no entries in chain. indir/sample is: %s/%s",input_dir.c_str(), sample.c_str()) << std::endl;
       return 2;
   }
-  
+
   SmearLooper *looper = new SmearLooper();
   if (bflag) looper->MakeSmearBaby();
   if (cflag) looper->SetCoreScale(core_scale);
