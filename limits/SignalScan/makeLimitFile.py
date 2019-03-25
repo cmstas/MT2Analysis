@@ -33,15 +33,18 @@ for line in open(POINTSFILE,"r"):
 	
 	line = line.rstrip("\r\n")
 	print line
-	m1 = line.split("_")[1]
-	m2 = line.split("_")[2]
+	m1 = line.split("_")[-2]
+	m2 = line.split("_")[-1]
 
 	if not os.path.isfile(theDir+"limit_"+line+".root"):
-		print "No limit file exists for "+line+"! Skipping..."
-		continue
+            print "No limit file exists for "+line+"! Skipping..."
+            continue
 	
 	f_limit = ROOT.TFile.Open(theDir+"limit_"+line+".root")
 	tree = f_limit.Get("limit")
+	if not tree:
+            print "No limit tree exists in file file for "+line+"! Skipping..."
+            continue
 	# for i in tree:
 	# 	print i.limit
 	tree.GetEntry(0)
@@ -56,8 +59,22 @@ for line in open(POINTSFILE,"r"):
 	ep2s = tree.limit
 	tree.GetEntry(5)
 	obs = tree.limit
+
+        f_limit.Close()
 	
-	f.write(m1+" "+m2+" "+str(exp)+" "+str(obs)+" "+str(ep1s)+" "+str(em1s)+" "+str(ep2s)+" "+str(em2s)+"\n")
+	f_sig = ROOT.TFile.Open(theDir+"sig_"+line+".root")
+	tree = f_sig.Get("limit")
+	if not tree:
+            print "No tree in sig file for {0}. Setting to 0".format(line)
+            sig = 0.0
+        else:
+            tree.GetEntry(0)
+            sig = tree.limit
+
+        f_sig.Close()
+	
+
+	f.write(m1+" "+m2+" "+str(exp)+" "+str(obs)+" "+str(ep1s)+" "+str(em1s)+" "+str(ep2s)+" "+str(em2s)+" "+str(sig)+"\n")
 
 f.close()
 

@@ -28,15 +28,15 @@ for m in models:
 print "model =", model
 
 # xsfile = "SUSYCrossSections13TeVgluglu.root" if "T1" in model else "SUSYCrossSections13TeVstopstop.root" if model=="T2tt" or model=="T2bb" or model=="T2cc" else "SUSYCrossSections13TeVsquarkantisquark.root" if model=="T2qq" else "theXSfile.root"
-f_xs = ROOT.TFile("xsec_susy_13tev.root")
+f_xs = ROOT.TFile("xsec_susy_13tev_run2.root")
 xshist = "h_xsec_gluino" if "T1" in model else "h_xsec_stop" if model=="T2tt" or model=="T2bb" or model=="T2cc" else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
 h_xs = f_xs.Get(xshist)
 
-limits = ["obs", "exp", "ep1s", "em1s", "ep2s", "em2s", "op1s", "om1s"]
+limits = ["obs", "exp", "ep1s", "em1s", "ep2s", "em2s", "op1s", "om1s","sig"]
 #limits = ["obs", "exp"]
 
 # coloum-limit map for txt files (n -> column n+1) 
-fileMap = {"exp":2, "obs":3, "ep1s":4, "em1s":5, "ep2s":6, "em2s":7}
+fileMap = {"exp":2, "obs":3, "ep1s":4, "em1s":5, "ep2s":6, "em2s":7, "sig":8}
 
 
 def getLimitYN ( h_lim_mu, r_exluded=1):
@@ -63,6 +63,8 @@ def getLimitXS ( h_lim_mu, h_xs):
 def readLimitsFromFile(INPUT, fileMap, h_lims_mu0, h_lims_xs0, h_lims_yn0):
     rlim = {}
     for line in open(INPUT, "r"):
+        if line.startswith("#"):
+            continue
         m1        = float(line.split()[0])
         m2        = float(line.split()[1])
         for lim,index in fileMap.iteritems():
@@ -72,8 +74,9 @@ def readLimitsFromFile(INPUT, fileMap, h_lims_mu0, h_lims_xs0, h_lims_yn0):
         xs  = h_xs.GetBinContent(h_xs.FindBin(m1))
         exs = h_xs.GetBinError  (h_xs.FindBin(m1))
 
-        if model == "T2qq":  # mu of T2qq already normilized by 8/10 (8-fold)
+        if model == "T2qq":  # xsecs in file are 10-fold. Correct for that here, to 8-fold
             xs, exs = xs*0.8, exs*0.8
+
 
         rlim['op1s'] = rlim['obs'] * xs / (xs+exs)
         rlim['om1s'] = rlim['obs'] * xs / (xs-exs)
@@ -83,8 +86,12 @@ def readLimitsFromFile(INPUT, fileMap, h_lims_mu0, h_lims_xs0, h_lims_yn0):
         binY=h_lims_mu0[lim].GetYaxis().FindBin(m2)
     
         for lim in limits:
-            if model == "T2qq" and doOneFold:
-                rlim[lim] *= 8 # from 8-fold to 1-fold
+            if model == "T2qq":
+                # limits calculated assuming 10-fold xsec. Correct for that here (we want either 8-fold or 1-fold)
+                if doOneFold:
+                    rlim[lim] *= 10.0/1.0 # from 10-fold to 1-fold
+                else:
+                    rlim[lim] *= 10.0/8.0 # from 10-fold to 8-fold
             h_lims_mu0[lim].SetBinContent(binX, binY, rlim[lim])
             h_lims_xs0[lim].SetBinContent(binX, binY, rlim[lim]*xs)
             h_lims_yn0[lim].SetBinContent(binX, binY, 1 if rlim[lim]<1 else 1e-3)
@@ -244,7 +251,7 @@ h_lims_yn   = {} # limits in excluded/non-exluded, interpolated
 h_lims_xs   = {} # limits in cross-section, interpolated
 g2_lims_mu  = {} # TGraph2D limits in signal-strength, automatic interpolation
 
-m1min, m1max = 0, 2300
+m1min, m1max = 0, 2800
 m2min, m2max = 0, 2000
 xbinSize = 25
 #xbinSize = 25 if model!='T2cc' else 5
@@ -285,12 +292,14 @@ for lim in limits:
     g2_lims_mu[lim] = ROOT.TGraph2D(h_lims_mu0[lim])
     xbinSize_inter = xbinSize/2.
     #xbinSize_inter = xbinSize/2. if model!='T2cc' else ybinSize # bin size of interpolation graph (12.5 GeV as decided in dec7 meeting @ R40) 
-    ybinSize_inter = ybinSize/2. if model!='T2cc' else ybinSize # bin size of interpolation graph (12.5 GeV as decided in dec7 meeting @ R40) 
+    ybinSize_inter = ybinSize/2. if model!='T2cc' else ybinSize/2 # bin size of interpolation graph (12.5 GeV as decided in dec7 meeting @ R40) 
     g2_lims_mu[lim].SetNpx( int((g2_lims_mu[lim].GetXmax()-g2_lims_mu[lim].GetXmin())/xbinSize_inter) )
     g2_lims_mu[lim].SetNpy( int((g2_lims_mu[lim].GetYmax()-g2_lims_mu[lim].GetYmin())/ybinSize_inter) )
     h_lims_mu[lim] = g2_lims_mu[lim].GetHistogram()
     h_lims_mu[lim].SetName( h_lims_mu0[lim].GetName().replace("mu0","mu") )
              
+    if lim=="sig":
+        continue
     #remove negative or nan bins that appear in T2qq for no apparent reason
     for ix in range(1,h_lims_mu[lim].GetNbinsX()+1):
         for iy in range(1,h_lims_mu[lim].GetNbinsY()+1):
@@ -326,6 +335,8 @@ graphs1 = {}  # smoothed
 
 print "extracting contours and saving graphs..."
 for lim in limits:
+    if lim=="sig":
+        continue
     # get contour. choose the one with maximum number of points
     g_list = g2_lims_mu[lim].GetContourList(1.0)
     graphs = []
@@ -345,6 +356,8 @@ for lim in limits:
 
 print "smoothing..."
 for lim in limits:
+    if lim=="sig":
+        continue
     nSmooth = 1 if model=="T2tt" else 2 if model!="T2qq" else 3
     if model!="T2tt" or not divideTopDiagonal:
         graphs = extractSmoothedContour(h_lims_mu[lim], nSmooth)
@@ -371,9 +384,11 @@ can = ROOT.TCanvas("can","can",600,600)
 if( not os.path.isdir(plotsDir) ):
     os.system("mkdir "+plotsDir)
 for lim in limits:
+    if lim=="sig":
+        continue
     ROOT.gStyle.SetNumberContours( 100 )
     xmin = 600 if "T1" in model else 150 if model=="T2tt" or model=='T2cc' else 300 if model=="T2bb" else 300 if model=="T2qq" else 0
-    xmax = 1200 if model=="T2tt"  or model=="T2bb" else 1600 if model=="T2qq" else 800 if model=='T2cc' else 2100 if model=="T1bbbb" else 2200
+    xmax = 1400 if model=="T2tt"  or model=="T2bb" else 1600 if model=="T2qq" else 800 if model=='T2cc' else 2800 if model=="T1bbbb" else 2800
     ymax = 700  if model=="T2tt" else 800 if model=="T2bb" or model=="T2cc" else 1200 if model=="T2qq" else 1800
     h_lims_yn0[lim].GetXaxis().SetRangeUser(xmin, xmax)
     h_lims_yn0[lim].GetYaxis().SetRangeUser(0   , ymax)

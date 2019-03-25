@@ -56,6 +56,8 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
     mkdir ${OUTPUT_DIR}
 fi
 
+echo "HOSTNAME"`hostname`"HOSTNAME" >> log_$SAMPLE.log
+
 echo "running combineCards.py"
 combineCards.py -S "datacard_"*"_$SAMPLE.txt" > "card_all_$SAMPLE.txt"  
 #mv "datacard_${SAMPLE}_combined.txt" "card_all_$SAMPLE.txt"  #use this line instead of combineCards.py if cards are already combined
@@ -80,11 +82,21 @@ mv "higgsCombine"$SAMPLE".AsymptoticLimits.mH120.root" "limit_"$SAMPLE".root"
 echo "ls -lrth after calculating the limit"
 ls -lrth
 
+echo "Log file:"
+cat log_$SAMPLE.log
 
+# stageout_error=1
+# while [ $stageout_error != 0 ]; do
 #Copy the output
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_${SAMPLE}.root gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/limit_${SAMPLE}.root
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/log_${SAMPLE}.log gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/log_${SAMPLE}.log
+env -i X509_USER_PROXY=${X509_USER_PROXY} gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_${SAMPLE}.root gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/limit_${SAMPLE}.root
+env -i X509_USER_PROXY=${X509_USER_PROXY} gfal-copy -p -f -t 4200 --verbose file://`pwd`/sig_${SAMPLE}.root gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/sig_${SAMPLE}.root
+env -i X509_USER_PROXY=${X509_USER_PROXY} gfal-copy -p -f -t 4200 --verbose file://`pwd`/log_${SAMPLE}.log gsiftp://gftp.t2.ucsd.edu${OUTPUT_DIR}/log_${SAMPLE}.log
 stageout_error=$?
+
+    # if [ $stageout_error != 0 ]; then
+        # sleep 60m
+    # fi
+# done
 
 if [ $stageout_error != 0 ]
 then

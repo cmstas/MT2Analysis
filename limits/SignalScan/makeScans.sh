@@ -5,18 +5,19 @@
 #Define MODEL, DATE, and INDIR
 
 #the model name
-MODEL="T1tttt"
-#MODEL="T1bbbb"
-#MODEL="T1qqqq"
-#MODEL="T2tt"
-#MODEL="T2bb"
+# MODEL="T1tttt"
+# MODEL="T1bbbb"
+# MODEL="T1qqqq"
+MODEL="T2tt"
+# MODEL="T2bb"
+# MODEL="T2qq"
 #MODEL="T2-4bd_scan"
 
 #the suffix
-DATE="ETH_Feb2"
+DATE="V00-10-12_FullRunII"
 
 #directory where cards and points_MODEL.txt can be found
-INDIR="/home/users/mderdzinski/winter2017/clean_master/scripts/cards_${MODEL}_${DATE}"
+INDIR="/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/CardMaker/cards_V00-10-12_FullRunII/"
 
 LIMITDIR="/hadoop/cms/store/user/${USER}/combine/limits/${MODEL}_${DATE}"
 
@@ -53,14 +54,14 @@ then
     
     #call script to convert limits to text file
     echo "python makeLimitFile.py ${MODEL} ${DATE} ${INDIR}/points_${MODEL}.txt"
-    python makeLimitFile.py ${MODEL} ${DATE} ${INDIR}/points_${MODEL}.txt >> log_makePlots.log 2>&1
+    python makeLimitFile.py ${MODEL} ${DATE} ${INDIR}/${MODEL}/points.txt #>> log_makePlots.log 2>&1
 
     #take limit text file and feed to ETH plotting script
     echo "python drawSMSlimit.py limits_${MODEL}_${DATE}.txt"
-    python drawSMSlimit.py limits_${MODEL}_${DATE}.txt >> log_makePlots.log 2>&1
+    python drawSMSlimit.py limits_${MODEL}_${DATE}.txt #>> log_makePlots.log 2>&1
 
     #take root file and feed to PlotSMS package
-    cp -v limits_${MODEL}_${DATE}.root PlotsSMS/config/mt2/${MODEL}_results.root >> log_makePlots.log 2>&1
+    cp -v limits_${MODEL}_${DATE}.root PlotsSMS/config/mt2/${MODEL}_results.root #>> log_makePlots.log 2>&1
 elif [ $TYPE == "SNT" ]
 then
     echo "Making SNT scans..."
@@ -103,8 +104,8 @@ else
 fi
 
 echo "Running PlotSMS package..."
-pushd PlotsSMS >> log_makePlots.log 2>&1
-python python/makeSMSplots.py config/mt2/${MODEL}_mt2.cfg $MODEL >> log_makePlots.log 2>&1
-popd >> log_makePlots.log 2>&1
+pushd PlotsSMS #>> log_makePlots.log 2>&1
+python python/makeSMSplots.py config/mt2/${MODEL}_mt2.cfg $MODEL #>> log_makePlots.log 2>&1
+popd #>> log_makePlots.log 2>&1
 
 echo "Done."

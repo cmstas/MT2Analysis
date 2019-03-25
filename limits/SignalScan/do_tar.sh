@@ -5,18 +5,17 @@ DATE=$2
 INDIR=$3
 COMBINED=$4
 
-CARD_DIR="cards_${MODEL}_${DATE}"
+CARD_DIR="card_tarballs/cards_${MODEL}_${DATE}"
 
 if [ -d $CARD_DIR ]
 then
   rm -r $CARD_DIR
-  mkdir  $CARD_DIR
+  mkdir -p $CARD_DIR
 else
-  mkdir  $CARD_DIR
+  mkdir -p $CARD_DIR
 fi
 
-pushd .
-cd $INDIR
+pushd $INDIR/$MODEL
 
 if [ -e log_tar.log ]
 then
@@ -29,16 +28,18 @@ do
   if [[ $i == -* ]]; then
       continue # skip lines starting with -
   fi
+  pushd $i
   if [ $COMBINED == 1 ]
   then
       tar -czvf cards_$i.tar.gz "datacard_"*"${i}_combined.txt" >> log_tar.log 2>&1  #for cards already combined
   else
       tar -czvf cards_$i.tar.gz "datacard_"*"${i}.txt" >> log_tar.log 2>&1
   fi
-done < $INDIR/points_$MODEL.txt
+  popd
+done < $INDIR/$MODEL/points.txt
+
 popd
 
-pushd .
-cd $CARD_DIR
-cp $INDIR/cards_*.tar.gz .
+pushd $CARD_DIR
+cp $INDIR/$MODEL/*/cards_*.tar.gz .
 popd
