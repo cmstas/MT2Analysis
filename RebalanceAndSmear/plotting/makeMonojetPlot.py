@@ -6,34 +6,44 @@ import pyRootPlotMaker as ppm
 r.gROOT.SetBatch(1)
 
 # tag = "V00-10-01_31Mar2018_2016JRTs_withMonojet_v2"
-tag = "V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
+tag = "V00-10-04_fullBinning_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+# tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
 # tag = "V00-10-01_31Mar2018_usedByJason_withMonojet"
-isMC = False
-lumi = 41.4
+isMC = True
+
+year = "All"
+lumi = 77.4
+
+# year = 2017
+# lumi = 41.5
+
+# year = 2016
+# lumi = 35.9
+
 if isMC:
     dirs = ["srbaseJ", "srbaseJ0B", "srbaseJ1B", "crRSInvertDPhibaseJ", "crRSInvertDPhibaseJ0B", "crRSInvertDPhibaseJ1B"]
-    hnames = ["J1pt", "htbins"]
-    xRangeUser=[(30,330), None]
-    isLog=[False, True]
-    xnames=["p_{T}(jet1)", "H_{T}"]
+    hnames = ["J1pt", "htbins", "htbins_jet2pt_30_60"]
+    xRangeUser=[(30,330), None, None]
+    isLog=[False, True, True]
+    xnames=["p_{T}(jet1)", "H_{T}", "H_{T} (30 < p_{T}(jet2) < 60)"]
 else:
-    dirs = ["crRSInvertDPhibaseJ", "crRSInvertDPhibaseJ0B", "crRSInvertDPhibaseJ1B"]
+    dirs = ["srbaseJ", "srbaseJ0B", "srbaseJ1B", "crRSInvertDPhibaseJ", "crRSInvertDPhibaseJ0B", "crRSInvertDPhibaseJ1B"]
     hnames = ["J1pt", "htbins", "htbins_jet2pt_30_60"]
     xRangeUser=[(30,330), None, None]
     isLog=[False, True, True]
     xnames=["p_{T}(jet1)", "H_{T}", "H_{T} (30 < p_{T}(jet2) < 60)"]
 
-dir_RS = "looper_output/{0}/{1}".format(tag, "qcd" if isMC else "data")
-dir_data = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+dir_RS = "looper_output/{0}/{1}".format(tag, "qcd" if isMC else "data{0}".format(year))
+dir_data = "../SmearLooper/output/V00-10-04_94x_2017_noRS_fullBinning/"
 # dir_data = "../SmearLooper/output/test/"
-dir_ewk = "../SmearLooper/output/V00-10-04_94x_2017_noRS"
+dir_ewk = "../SmearLooper/output/V00-10-04_94x_2017_noRS_fullBinning"
 
 ewk_samples = ["wjets_ht", "zinv_ht"]
 
 username = os.environ["USER"]
 
 f_rs = r.TFile(os.path.join(dir_RS,"merged_hists.root"))
-f_data = r.TFile(os.path.join(dir_data,"data_Run2017.root" if not isMC else "qcd_ht.root"))
+f_data = r.TFile(os.path.join(dir_data,"data_Run{0}.root".format(year) if not isMC else "qcd_ht.root"))
 if not isMC:
     f_ewk = [r.TFile(os.path.join(dir_ewk,"{0}.root".format(samp))) for samp in ewk_samples]
 
@@ -42,6 +52,9 @@ for dir in dirs:
     os.system("mkdir -p "+outdir)
     os.system("cp ~/scripts/index.php "+outdir)
     for ih, hname in enumerate(hnames):
+        if "sr" in dir and "30_60" in hname:
+            continue
+
         h_rs = f_rs.Get("{0}/h_{1}".format(dir,hname))
         h_data = f_data.Get("{0}/h_{1}".format(dir,hname))
         if not isMC:
@@ -53,11 +66,15 @@ for dir in dirs:
         else:
             [h.Scale(lumi) for h in h_ewk]
 
-
         h_bkg_vec = [h_rs] if isMC else [h_rs] + h_ewk
         bkg_names = ["RS from MC"] if isMC else ["RS from Data"] + ewk_samples
 
-        saveAs=outdir+"/{0}_{1}_{2}.".format("mc" if isMC else "data", dir, hname)
+        if not isMC and "sr" in dir:
+            h_bkg_vec = [h_rs]
+            bkg_names = ["RS from Data"]
+            h_data = None
+
+        saveAs=outdir+"/{0}_{1}_{2}.".format("mc" if isMC else "data{0}".format(year), dir, hname)
         
         for ext in ["pdf","png"]:
             ppm.plotDataMC(h_bkg_vec, bkg_names, h_data, dataTitle="QCD MC" if isMC else "Data", lumi=lumi,

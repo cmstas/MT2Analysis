@@ -9,24 +9,24 @@ tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
 
 dir = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/qcd"
 dir_tail50 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_tail50/qcd"
-dir_tail100 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_tail100/qcd"
+dir_tail25 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_tail25/qcd"
 dir_noRS = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
 
 hrs = ROOT.TH1D("hrs","",51,0,51)
 h50 = ROOT.TH1D("h50","",51,0,51)
-h100 = ROOT.TH1D("h100","",51,0,51)
+h25 = ROOT.TH1D("h25","",51,0,51)
 hnrs = ROOT.TH1D("hnrs","",51,0,51)
 
 h_evts_rs = ROOT.TH1D("h_evts_rs","",1,0,2)
 h_evts_50 = ROOT.TH1D("h_evts_50","",1,0,2)
-h_evts_100 = ROOT.TH1D("h_evts_100","",1,0,2)
+h_evts_25 = ROOT.TH1D("h_evts_25","",1,0,2)
 h_evts_nrs = ROOT.TH1D("h_evts_nrs","",1,0,2)
 
 ibin = 0
 for ht_reg in ["VL","L","M","H","UH"]:
     sum_rs = 0
     sum_rs50 = 0
-    sum_rs100 = 0    
+    sum_rs25 = 0    
     top_regs = range(1,12)
     if ht_reg=="VL":
         top_regs = [1,2,3,12,13,14,15]
@@ -36,12 +36,12 @@ for ht_reg in ["VL","L","M","H","UH"]:
 
         h_evts_rs.Reset()
         h_evts_50.Reset()
-        h_evts_100.Reset()
+        h_evts_25.Reset()
         h_evts_nrs.Reset()
         bn = "merged_hists.root"
         frs = ROOT.TFile(os.path.join(dir,bn))
         f50 = ROOT.TFile(os.path.join(dir_tail50,bn))
-        f100 = ROOT.TFile(os.path.join(dir_tail100,bn))
+        f25 = ROOT.TFile(os.path.join(dir_tail25,bn))
         fnrs = ROOT.TFile(os.path.join(dir_noRS,"qcd_ht.root"))
         try:
             h_evts_rs.Add(frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
@@ -52,7 +52,7 @@ for ht_reg in ["VL","L","M","H","UH"]:
         except:
             pass
         try:
-            h_evts_100.Add(f100.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
+            h_evts_25.Add(f25.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg)))
         except:
             pass
         try:
@@ -66,18 +66,18 @@ for ht_reg in ["VL","L","M","H","UH"]:
         h50.SetBinContent(ibin, h_evts_50.GetBinContent(1))
         h50.SetBinError(ibin, h_evts_50.GetBinError(1))
 
-        h100.SetBinContent(ibin, h_evts_100.GetBinContent(1))
-        h100.SetBinError(ibin, h_evts_100.GetBinError(1))
+        h25.SetBinContent(ibin, h_evts_25.GetBinContent(1))
+        h25.SetBinError(ibin, h_evts_25.GetBinError(1))
 
         hnrs.SetBinContent(ibin, h_evts_nrs.GetBinContent(1))
         hnrs.SetBinError(ibin, h_evts_nrs.GetBinError(1))
         
         sum_rs += h_evts_rs.GetBinContent(1)
         sum_rs50 += h_evts_50.GetBinContent(1)
-        sum_rs100 += h_evts_100.GetBinContent(1)
+        sum_rs25 += h_evts_25.GetBinContent(1)
         
     print "{0} HT: rs = {1}, rs50 = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_rs50, sum_rs50/sum_rs)
-    print "{0} HT: rs = {1}, rs100 = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_rs100, sum_rs100/sum_rs)        
+    print "{0} HT: rs = {1}, rs25 = {2}, ratio = {3}".format(ht_reg, sum_rs, sum_rs25, sum_rs25/sum_rs)        
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -112,9 +112,9 @@ h50.SetLineColor(ROOT.kBlue)
 h50.SetMarkerColor(ROOT.kBlue)
 h50.SetMarkerStyle(20)
 
-h100.SetLineColor(ROOT.kRed)
-h100.SetMarkerColor(ROOT.kRed)
-h100.SetMarkerStyle(20)
+h25.SetLineColor(ROOT.kRed)
+h25.SetMarkerColor(ROOT.kRed)
+h25.SetMarkerStyle(20)
 
 hnrs.SetLineColor(401)
 hnrs.SetMarkerColor(401)
@@ -126,7 +126,7 @@ hnrs.GetXaxis().SetLabelSize(0)
 hnrs.Draw("PE")
 hrs.Draw("PE SAME")
 h50.Draw("PE SAME")
-h100.Draw("PE SAME")
+h25.Draw("PE SAME")
 
 NBINS = hrs.GetNbinsX()
 bindivs = [7,18,29,40]
@@ -141,8 +141,8 @@ for ix in bindivs:
 leg = ROOT.TLegend(0.78,0.75,0.94,0.9)
 leg.AddEntry(hnrs, "QCD MC")
 leg.AddEntry(hrs, "R&S from MC")
+leg.AddEntry(h25, "Tail +25%")
 leg.AddEntry(h50, "Tail +50%")
-leg.AddEntry(h100, "Tail +100%")
 leg.Draw()
 
 text = ROOT.TLatex()
@@ -160,18 +160,18 @@ for i in range(len(modbindivs)-1):
   text.DrawLatex(xposs[i],ypos,"{0} H_{{T}}".format(names[i]))
   yrs, ers = 0.0, ROOT.Double(0.0)
   y50, e50 = 0.0, ROOT.Double(0.0)
-  y100, e100 = 0.0, ROOT.Double(0.0)
+  y25, e25 = 0.0, ROOT.Double(0.0)
   yrs = hrs.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], ers)
   y50 = h50.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], e50)
-  y100 = h100.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], e100)
+  y25 = h25.IntegralAndError(modbindivs[i]+1, modbindivs[i+1], e25)
   r50 = y50 / yrs
-  r100 = y100 / yrs
+  r25 = y25 / yrs
   e50 = r50 * np.sqrt((e50/y50)**2 + (ers/yrs)**2)
-  e100 = r100 * np.sqrt((e100/y100)**2 + (ers/yrs)**2)
+  e25 = r25 * np.sqrt((e25/y25)**2 + (ers/yrs)**2)
   text.SetTextColor(ROOT.kBlue)
-  text.DrawLatex(xposs[i], ypos-0.03, "{0:.2f} #pm {1:.2f}".format(r50,e50))
+  text.DrawLatex(xposs[i], ypos-0.06, "{0:.2f} #pm {1:.2f}".format(r50,e50))
   text.SetTextColor(ROOT.kRed)
-  text.DrawLatex(xposs[i], ypos-0.06, "{0:.2f} #pm {1:.2f}".format(r100,e100))
+  text.DrawLatex(xposs[i], ypos-0.03, "{0:.2f} #pm {1:.2f}".format(r25,e25))
 
 text.SetTextFont(42)
 text.SetTextSize(0.04)
@@ -208,8 +208,8 @@ pads[1].cd()
 h_ratio50 = h50.Clone("h_ratio")
 h_ratio50.Divide(hrs)
 
-h_ratio100 = h100.Clone("h_ratio")
-h_ratio100.Divide(hrs)
+h_ratio25 = h25.Clone("h_ratio")
+h_ratio25.Divide(hrs)
 
 h_ratio50.GetYaxis().SetRangeUser(0,3)
 h_ratio50.GetYaxis().SetNdivisions(505)
@@ -228,7 +228,7 @@ h_ratio50.SetMarkerSize(1.0)
 h_ratio50.SetLineWidth(1)
 
 h_ratio50.Draw("PE")
-h_ratio100.Draw("PE SAME")
+h_ratio25.Draw("PE SAME")
 
 line = ROOT.TLine()
 line.DrawLine(0,1,51,1)

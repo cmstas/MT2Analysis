@@ -5,11 +5,11 @@ import os
 
 ROOT.gROOT.SetBatch(1)
 
-tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
+tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
 
-dir = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/qcd"
-dir_core10 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core10/qcd"
-dir_core25 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core25/qcd"
+dir = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma/qcd"
+dir_core10 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_core10/qcd"
+dir_core25 = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_core25/qcd"
 dir_noRS = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
 
 hrs = ROOT.TH1D("hrs","",51,0,51)
@@ -211,7 +211,7 @@ h_ratio10.Divide(hrs)
 h_ratio25 = h25.Clone("h_ratio")
 h_ratio25.Divide(hrs)
 
-h_ratio10.GetYaxis().SetRangeUser(0,3)
+h_ratio10.GetYaxis().SetRangeUser(0,2)
 h_ratio10.GetYaxis().SetNdivisions(505)
 h_ratio10.GetYaxis().SetTitle("Shift/R&S")
 h_ratio10.GetYaxis().SetTitleSize(0.16)

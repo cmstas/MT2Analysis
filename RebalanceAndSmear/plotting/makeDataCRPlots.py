@@ -3,21 +3,31 @@ import os
 import pyRootPlotMaker as ppm
 import numpy as np
 import random
+from common import *
 
-tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear_v2"
+tag = "V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 # tag = "V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
 # tag = "V00-10-01_31Mar2018_ptBinned_94x_fixMatching5_ecalDeadCell_noJERsmear"
 # tag = "V00-10-01_31Mar2018_usedByJason"
 RSfromMC = False
 doByTopoReg = False
 
-data_year = 2017
-lumi = 41.5
+data_year = "All"
+data_year_txt = "2016-18"
+lumi = 136.3
+
+# data_year = 2018
+# data_year_txt = "2018"
+# lumi = 58.9
+
+# data_year = 2017
+# data_year_txt = "2017"
+# lumi = 41.5
 
 # data_year = 2016
+# data_year_txt = "2016"
 # lumi = 35.9
 
-top_regs_vl=[1,2,3,12,13,14,15]
 
 def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
   # h is an already made TH1D with the correct binning
@@ -31,11 +41,7 @@ def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
       if ht_reg=="UH": scale = 1#1.0/2  * 1.07
     else:
       scale = 1.0
-    top_regs = []
-    if ht_reg == "VL":
-      top_regs = top_regs_vl
-    else:
-      top_regs.extend(range(1,12))
+    top_regs = topo_reg_defs[ht_reg]
     for top_reg in top_regs:
       # print cr, top_reg, ht_reg, h_name
       try:
@@ -45,9 +51,9 @@ def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
 
 ROOT.gROOT.SetBatch(1)
 
-indir_MC = "../SmearLooper/output/V00-10-04_94x_2017_noRS"
+indir_MC = "../SmearLooper/output/V00-10-09_94x_2017_noRS"
 indir_RS = "looper_output/{0}/{1}/".format(tag, "qcd" if RSfromMC else "data{0}".format(data_year))
-indir_data = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+indir_data = "../SmearLooper/output/V00-10-09_94x_2017_noRS/"
 
 username = os.environ["USER"]
 # tag = "nocut_aht500_10pctCorr"
@@ -170,23 +176,28 @@ for cr, ht_regs in dirs:
     h_RS.Rebin(rebin[ivar])
 
     if var=="nJet30" or var=="nBJet20":
-      bins = np.array([0.,2.,4.,7.,15.]) if var=="nJet30" else np.array([0.,1.,2.,3.,6.])
-      h_data = h_data.Rebin(4, str(random.random()), bins)
-      h_RS = h_RS.Rebin(4, str(random.random()), bins)
+      if var=="nJet30":
+        bins = np.array([0.,2.,4.,7.,10.,15.]) if "H" in ht_regs or "UH" in ht_regs else np.array([0.,2.,4.,7.,15.])
+      else:
+        bins = np.array([0.,1.,2.,3.,6.])
+      h_data = h_data.Rebin(bins.size-1, str(random.random()), bins)
+      h_RS = h_RS.Rebin(bins.size-1, str(random.random()), bins)
       for i,h in enumerate(h_mc_vec):
-        h_mc_vec[i] = h.Rebin(4, str(random.random()), bins)            
+        h_mc_vec[i] = h.Rebin(bins.size-1, str(random.random()), bins)            
 
     tot_ewk = sum(h.Integral(0,-1) for h in h_mc_vec)
     pctdiff = (h_RS.Integral(0,-1) / (h_data.Integral(0,-1) - tot_ewk) - 1) * 100
-    subLegText = "Overpred: {0:.1f}%".format(pctdiff)
+    # subLegText = "Overpred: {0:.1f}%".format(pctdiff)
+    subLegText = None
         
     saveAs = outdir+"/{0}/{1}".format(cr+ht_name,var)
     exts = [".pdf",".png"]
     for ext in exts:
-      ppm.plotDataMC([h_RS]+h_mc_vec[::-1], ["RS QCD Pred", "zinv","wjets","top"], h_data=h_data,
-                     saveAs=saveAs+ext, lumi=lumi, extraEnergyText=str(data_year) if not RSfromMC else None,
+      ppm.plotDataMC([h_RS]+h_mc_vec[::-1], ["RS QCD Pred", "Z(#nu#nu)+Jets", "W+Jets", "Top"], h_data=h_data,
+                     saveAs=saveAs+ext, lumi=lumi, extraEnergyText=str(data_year_txt) if not RSfromMC else None,
                      xAxisTitle=titles[ivar], doMT2Colors=True, xRangeUser=xRangeUser[ivar],
-                     doOverflow=False, xAxisUnit=units[ivar], subLegText=subLegText)
+                     doOverflow=False, xAxisUnit=units[ivar], subLegText=subLegText,
+                     legCoords=(0.60,0.63,0.87,0.89), cmsTextSize=0.045)
 
 
 

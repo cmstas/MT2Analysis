@@ -34,23 +34,22 @@ def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
 
 ROOT.gROOT.SetBatch(1)
 
-indir_RS = "looper_output/v10/qcd/"
-indir_data = "looper_output/v10/qcd_noRS/"
+fin_RS = "looper_output/V00-09-06_fixMatching3_Bennett/qcd/merged_hists.root"
+fin_data = "../SmearLooper/output/V00-09-06_noRS/qcd_pt.root"
 
 username = os.environ["USER"]
-outdir = "/home/users/{0}/public_html/mt2/RebalanceAndSmear/MCtests3/ICHEP".format(username)
+outdir = "/home/users/{0}/public_html/mt2/RebalanceAndSmear/V00-09-06_fixMatching3_Bennett".format(username)
 
-lumi = 36.5
+lumi = 1.0
 
-data_name = "merged_hists"
 
-data_file = ROOT.TFile(os.path.join(indir_data,data_name+".root"))
-rs_file = ROOT.TFile(os.path.join(indir_RS,data_name+".root"))
+data_file = ROOT.TFile(fin_data)
+rs_file = ROOT.TFile(fin_RS)
     
 vars = ["ht", "met", "mt2", "nJet30", "nBJet20"]
 rebin = [2, 2, 2, 1, 1]
 
-xRangeUser = [(1000,3000), (0,1000), (200,500), None, None]
+xRangeUser = [(1200,3000), (0,1200), (200,500), None, None]
 htRangeUser = [(200,500), (400, 600), (550, 1100), (900,1600), (1400,3000)]
 units = ["GeV","GeV","GeV",None,None]
 titles = ["H_{T}","MET","M_{T2}","N-jet","N-bjet"]
@@ -63,19 +62,19 @@ if doByTopoReg:
 for cr, ht_regs in dirs:
   ht_name = ""
   if ht_regs==["L","M"]:
-    ht_name="InclusiveHT450to1000"
+    ht_name="InclusiveHT450to1200"
   if ht_regs==["VL","L","M"]:
-    ht_name="InclusiveHT250to1000"
+    ht_name="InclusiveHT250to1200"
   if ht_regs==["H","UH"]:
-    ht_name="InclusiveHT1000toInf"
+    ht_name="InclusiveHT1200toInf"
   if ht_regs==["VL"]:
     ht_name="InclusiveHT250to450"    
   if ht_regs==["L"]:
     ht_name="InclusiveHT450to575"
   if ht_regs==["M"]:
-    ht_name="InclusiveHT575to1000"
+    ht_name="InclusiveHT575to1200"
   if ht_regs==["H"]:
-    ht_name="InclusiveHT1000to1500"
+    ht_name="InclusiveHT1200to1500"
   if ht_regs==["UH"]:
     ht_name="InclusiveHT1500toInf"
 
@@ -88,19 +87,19 @@ for cr, ht_regs in dirs:
     xRangeUser[2] = (200,500)
   if "MT2SideBand" in cr:
     xRangeUser[2] = (100,200)
-  if "HT250to1000" in ht_name:
-    xRangeUser[0] = (250,1000)
-  if "HT450to1000" in ht_name:
-    xRangeUser[0] = (450,1000)
-  if "HT1000toInf" in ht_name:
-    xRangeUser[0] = (1000,3000)
+  if "HT250to1200" in ht_name:
+    xRangeUser[0] = (250,1200)
+  if "HT450to1200" in ht_name:
+    xRangeUser[0] = (450,1200)
+  if "HT1200toInf" in ht_name:
+    xRangeUser[0] = (1200,3000)
   if "HT250to450" in ht_name:
     xRangeUser[0] = (200,500)
   if "HT450to575" in ht_name:
     xRangeUser[0] = (400,600)
-  if "HT575to1000" in ht_name:
+  if "HT575to1200" in ht_name:
     xRangeUser[0] = (550,1100)
-  if "HT1000to1500" in ht_name:
+  if "HT1200to1500" in ht_name:
     xRangeUser[0] = (900,1600)
   if "HT1500toInf" in ht_name:
     xRangeUser[0] = (1500,3000)

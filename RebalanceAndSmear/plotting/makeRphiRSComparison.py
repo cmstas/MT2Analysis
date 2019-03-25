@@ -2,28 +2,31 @@ import ROOT as r
 import glob
 import os
 import math
+from common import *
 
 doRatioToTotal = False
 
 def getRatioAndError (h1, h2):
   err1 = r.Double(0)
-  val1 = h1.IntegralAndError(0,99,err1)
+  val1 = h1.IntegralAndError(1,-1,err1)
   err2 = r.Double(0)
-  val2 = h2.IntegralAndError(0,99,err2)
+  val2 = h2.IntegralAndError(1,-1,err2)
   val = val1/val2
   err = val * math.sqrt((err1/val1)*(err1/val1) + (err2/val2)*(err2/val2))
   return {'val':val, 'err':err}
   
 # r.gROOT.SetBatch(1)
 
-rphi_file = "/home/users/jguiang/public_html/dump/qcdEstimate.root"
-# rphi_file = "../../scripts/qcdEstimate/output/V00-10-04_94x_Fall17_MC/qcdEstimate.root"
-rs_file = "looper_output/V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear_jetReweight/data/merged_hists.root"
-data_file = "../SmearLooper/output/V00-10-01_noRS/data_Run2017.root"
+rphi_file = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/FullRunII/qcdEstimate.root"
+# rphi_file = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/qcdEstimate/output/V00-10-09_2018fullYear/qcdEstimate.root"
+rs_file = "../estimate/qcdFromRS.root"
+data_file = "../../MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/data_RunAll.root"
 
-hrphi = r.TH1D("hrphi","",51,0,51)
-hrs = r.TH1D("hrs","",51,0,51)
-hdata = r.TH1D("hdata","",51,0,51)
+NBINS = sum([len(x[1]) for x in topo_reg_defs.items()])
+
+hrphi = r.TH1D("hrphi","",NBINS,0,NBINS)
+hrs = r.TH1D("hrs","",NBINS,0,NBINS)
+hdata = r.TH1D("hdata","",NBINS,0,NBINS)
 
 h_evts_rphi = r.TH1D("h_evts_rphi","",1,0,2)
 h_evts_rs = r.TH1D("h_evts_rs","",1,0,2)
@@ -32,21 +35,22 @@ h_evts_data = r.TH1D("h_evts_data","",1,0,2)
 top_regs_vl=[1,2,3,12,13,14,15]
 
 ht_reg_names = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
-top_reg_names = ["j2to3_b0", "j2to3_b1", "j2to3_b2", "j4to6_b0", "j4to6_b1", "j4to6_b2", "j7toInf_b0", "j7toInf_b1", "j7toInf_b2", "j2to6_b3toInf", "j7toInf_b3toInf", "j4toInf_b0", "j4toInf_b1", "j4to3Inf_b2", "j2toInf_b3toInf"]
+vll_top_reg_names = ["j2to3_b0", "j2to3_b1", "j2to3_b2", "j4to6_b0", "j4to6_b1", "j4to6_b2", "j7toInf_b0", "j7toInf_b1", "j7toInf_b2", "j2to6_b3toInf", "j7toInf_b3toInf"]
+mhuh_top_reg_names = ["j2to3_b0", "j2to3_b1", "j2to3_b2", "j4to6_b0", "j4to6_b1", "j4to6_b2", "j2to6_b3toInf", "j7to9_b0", "j7to9_b1", "j7to9_b2", "j7to9_b3", "j7to9_b4toInf", "j10toInf_b0", "j10toInf_b1", "j10toInf_b2", "j10toInf_b3", "j10toInf_b4toInf"]
 
 frphi = r.TFile(rphi_file)
 frs = r.TFile(rs_file)
 fdata = r.TFile(data_file)
 ibin = 0
-for iht,ht_reg in enumerate(["VL","L","M","H","UH"]):
+ht_regs = ["VL","L","M","H","UH"]
+for iht,ht_reg in enumerate(ht_regs):
   sum_rphi = 0
   sum_rs = 0
-  top_regs = []
-  if ht_reg == "VL":
-    top_regs = top_regs_vl
-  else:
-    top_regs.extend(range(1,12))
-  for top_reg in top_regs:
+  top_regs = topo_reg_defs[ht_reg]
+  topo_reg_names = vll_top_reg_names
+  if ht_reg in ["M", "H", "UH"]:
+    topo_reg_names = mhuh_top_reg_names
+  for itop,top_reg in enumerate(top_regs):
     ibin+=1
 
     rphi_err = r.Double(0)
@@ -57,19 +61,15 @@ for iht,ht_reg in enumerate(["VL","L","M","H","UH"]):
     if h_evts_data:
       h_evts_data.Reset()
     try:
-      # h_evts_rphi = frphi.Get("sr{0}{1}/h_mt2bins".format(top_reg,ht_reg))
-      h_evts_rphi = frphi.Get("qcdEstimate/{0}_{1}/yield_qcdEstimate_{0}_{1}".format(ht_reg_names[iht], top_reg_names[top_reg-1]))
-      if ht_reg=="L" and top_reg==4:
-        print ht_reg_names[iht], top_reg_names[top_reg-1]
-        print h_evts_rphi.Integral(1,99)
+      h_evts_rphi = frphi.Get("qcdEstimate/{0}_{1}/yield_qcdEstimate_{0}_{1}".format(ht_reg_names[iht], topo_reg_names[itop]))
     except:
       pass
     try:
-      h_evts_rs = frs.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg))
+      h_evts_rs = frs.Get("sr{0}{1}/h_mt2bins".format(top_reg,ht_reg))
     except:
       pass
     try:
-      h_evts_data = fdata.Get("sr{0}{1}/h_Events_w".format(top_reg,ht_reg))
+      h_evts_data = fdata.Get("sr{0}{1}/h_mt2bins".format(top_reg,ht_reg))
     except:
       pass      
 
@@ -90,7 +90,7 @@ for iht,ht_reg in enumerate(["VL","L","M","H","UH"]):
         hrs.SetBinError(ibin, 0)        
     else:
       if h_evts_rphi:
-        hrphi.SetBinContent(ibin, h_evts_rphi.IntegralAndError(1,99,rphi_err))
+        hrphi.SetBinContent(ibin, h_evts_rphi.IntegralAndError(1,-1,rphi_err))
         hrphi.SetBinError(ibin, rphi_err)
       else:
         hrphi.SetBinContent(ibin, 0)
@@ -142,7 +142,7 @@ hrphi.SetLineColor(401)
 hrphi.SetMarkerColor(401)
 hrphi.SetMarkerStyle(20)
 
-hrphi.GetYaxis().SetRangeUser(1e-3,1e4)
+hrphi.GetYaxis().SetRangeUser(1e-3,1e7)
 if doRatioToTotal:
   hrphi.GetYaxis().SetRangeUser(1e-3,5)
 hrphi.GetXaxis().SetLabelSize(0)
@@ -150,48 +150,49 @@ hrphi.GetXaxis().SetLabelSize(0)
 hrphi.Draw("PE")
 hrs.Draw("PE SAME")
 
+bin_width = (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin()) / NBINS
+bin_divisions = [0]
+for i in range(len(ht_regs)):
+    bin_divisions.append(bin_divisions[i]+len(topo_reg_defs[ht_regs[i]]))
+bin_divisions = bin_divisions[1:-1]
 line = r.TLine()
 line.SetLineStyle(2)
-for ix in [7,18,29,40]:
-  x = pads[0].GetLeftMargin() + ix/51.0 * (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin())
-  line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
+for ix in bin_divisions:
+    x = pads[0].GetLeftMargin() + ix * bin_width
+    line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
 leg = r.TLegend(0.815,0.78,0.94,0.9)
 leg.AddEntry(hrs, "R&S estimate")
 leg.AddEntry(hrphi, "rphi estimate")
 leg.Draw()
 
+
 text = r.TLatex()
 text.SetNDC(1)
 text.SetTextSize(0.03)
 text.DrawLatex(0.12,0.79,"Very Low H_{T}")
-text.DrawLatex(0.3,0.79,"Low H_{T}")
-text.DrawLatex(0.45,0.79,"Medium H_{T}")
-text.DrawLatex(0.65,0.79,"High H_{T}")
+text.DrawLatex(0.27,0.79,"Low H_{T}")
+text.DrawLatex(0.42,0.79,"Medium H_{T}")
+text.DrawLatex(0.62,0.79,"High H_{T}")
 text.DrawLatex(0.8,0.73,"Extreme H_{T}")
 text.SetTextFont(42)
 text.SetTextSize(0.04)
-text.DrawLatex(0.8,0.93,"36.5 fb^{-1} (13 TeV)")
+text.DrawLatex(0.8,0.93,"136.3 fb^{-1} (13 TeV)")
 
 
-binWidth = (1-pads[0].GetLeftMargin()-pads[1].GetRightMargin())/51.0
-binLabels_vl = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "#geq4j, 0b", "#geq4j, 1b", "#geq4j, 2b", "#geq2j, #geq3b"] 
-binLabels = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "4-6j, 0b", "4-6j, 1b", "4-6j, 2b", "#geq7j, 0b", "#geq7j, 1b", "#geq7j, 2b", "2-6j, #geq3b", "#geq7j, #geq3b"]
+binLabels_all = []
+for ht_reg in ht_regs:
+    binLabels_all += [binLabels[tr] for tr in topo_reg_defs[ht_reg]]
 text = r.TLatex()
 text.SetNDC(1)
 text.SetTextAlign(32)
 text.SetTextAngle(90)
-text.SetTextSize(min(binWidth * 1.3,0.027))
+text.SetTextSize(min(bin_width * 1.5,0.027))
 text.SetTextFont(42)
-for ibin in range(11):
-  x = pads[0].GetLeftMargin() + (ibin+0.5)*binWidth
+for ibin in range(NBINS):
+  x = pads[0].GetLeftMargin() + (ibin+0.5)*bin_width
   y = pads[0].GetBottomMargin()-0.009
-  if ibin < 7:
-    text.DrawLatex(x,y,binLabels_vl[ibin])
-  text.DrawLatex(x+7*binWidth,y,binLabels[ibin])    
-  text.DrawLatex(x+18*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+29*binWidth,y,binLabels[ibin])
-  text.DrawLatex(x+40*binWidth,y,binLabels[ibin])
+  text.DrawLatex(x, y, binLabels_all[ibin])    
 
 
 
@@ -202,7 +203,7 @@ pads[1].SetLogy(1)
 h_ratio = hrphi.Clone("h_ratio")
 h_ratio.Divide(hrs)
 
-h_ratio.GetYaxis().SetRangeUser(0.1,20)
+h_ratio.GetYaxis().SetRangeUser(0.1,30)
 h_ratio.GetYaxis().SetNdivisions(505)
 h_ratio.GetYaxis().SetTitle("R&S/rphi")
 h_ratio.GetYaxis().SetTitleSize(0.16)
@@ -212,7 +213,7 @@ h_ratio.GetYaxis().CenterTitle()
 h_ratio.GetYaxis().SetTickLength(0.02)
 h_ratio.GetXaxis().SetLabelSize(0)
 h_ratio.GetXaxis().SetTitle("")
-h_ratio.GetXaxis().SetNdivisions(51,0,0)
+h_ratio.GetXaxis().SetNdivisions(NBINS,0,0)
 h_ratio.GetXaxis().SetTickSize(0.06)
 h_ratio.SetMarkerStyle(20)
 h_ratio.SetMarkerSize(1.0)
@@ -222,7 +223,7 @@ h_ratio.SetLineWidth(1)
 h_ratio.Draw("PE")
 
 line = r.TLine()
-line.DrawLine(0,1,51,1)
+line.DrawLine(0,1,NBINS,1)
 
 username = os.environ["USER"]
 suffix = "_rat" if doRatioToTotal else ""

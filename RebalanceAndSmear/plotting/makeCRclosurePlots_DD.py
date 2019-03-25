@@ -2,6 +2,7 @@ import glob
 import os
 import ROOT as r
 import numpy as np
+from common import *  # useful things that are common to all plotting scripts
 
 r.gROOT.SetBatch(1)
 
@@ -9,23 +10,32 @@ cr="crRSInvertDPhi"
 # cr="crRSMT2SideBand"
 # cr="crRSDPhiMT2"
 
-tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
+tag = "V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 RSfromMC = False
 
-year = 2017
-lumi = 41.5
+year = "All"
+lumi = 137
+
+# year = 2018
+# lumi = 60.0
+
+# year = 2017
+# lumi = 41.5
 
 # year = 2016
 # lumi = 35.9
 
 RSFOF = 1.00
 
+NBINS = sum([len(x[1]) for x in topo_reg_defs.items()])
+print NBINS
+
 username = os.environ["USER"]
 outdir = "/home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/".format(username,tag)
 
 dir_RS = "looper_output/{0}/{1}{2}".format(tag, "qcd" if RSfromMC else "data", year)
-dir_data = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
-dir_mc = "../SmearLooper/output/V00-10-04_94x_2017_noRS/"
+dir_data = "../SmearLooper/output/V00-10-08_94x_2017_noRS/"
+dir_mc = "../SmearLooper/output/V00-10-08_94x_2017_noRS/"
 
 f_rs = r.TFile(os.path.join(dir_RS,"merged_hists.root"))
 f_data = r.TFile(os.path.join(dir_data,"data_Run{0}.root".format(year)))
@@ -34,20 +44,18 @@ f_zinv = r.TFile(os.path.join(dir_mc,"zinv_ht.root"))
 f_top = r.TFile(os.path.join(dir_mc,"top.root"))
 f_wjets = r.TFile(os.path.join(dir_mc,"wjets_ht.root"))
 
-hrs = r.TH1D("hrs","",51,0,51)
-hdata = r.TH1D("hdata","",51,0,51)
-hzinv = r.TH1D("hzinv","",51,0,51)
-hll = r.TH1D("hll","",51,0,51)
+hrs = r.TH1D("hrs","",NBINS,0,NBINS)
+hdata = r.TH1D("hdata","",NBINS,0,NBINS)
+hzinv = r.TH1D("hzinv","",NBINS,0,NBINS)
+hll = r.TH1D("hll","",NBINS,0,NBINS)
 
 os.system("mkdir -p "+outdir)
 os.system("cp ~/scripts/index.php "+outdir)
 
-top_regs_vl=[1,2,3,12,13,14,15]
 ibin = 0
-for ht_reg in ["VL","L","M","H","UH"]:
-    top_regs = list(range(1,12))
-    if ht_reg=="VL":
-        top_regs = top_regs_vl
+ht_regs = ["VL","L","M","H","UH"]
+for ht_reg in ht_regs:
+    top_regs = topo_reg_defs[ht_reg]
     for top_reg in top_regs:
         ibin += 1
 
@@ -111,8 +119,8 @@ for ht_reg in ["VL","L","M","H","UH"]:
         err_wjets_sl *= lumi
         err_wjets_sr *= lumi
 
-        rzinvdy = 1.0
-        rzinvdy_err = 0.0
+        rzinvdy = 0.0
+        rzinvdy_err = 2.5
         if n_dy_dy > 0:
             rzinvdy = n_zinv_sr / n_dy_dy
             if n_zinv_sr > 0:
@@ -122,16 +130,25 @@ for ht_reg in ["VL","L","M","H","UH"]:
         top_contam_err = err_data_of * RSFOF
         n_zinv_est = rzinvdy * (n_data_dy - top_contam)
         err_zinv_est = 0.0
-        if (n_data_dy - top_contam > 0):
+        if (n_data_dy - top_contam > 0 and rzinvdy > 0):
             err_zinv_est = np.sqrt((err_data_dy)**2 + (top_contam_err)**2) / (n_data_dy-top_contam)
             err_zinv_est = n_zinv_est * np.sqrt((rzinvdy_err/rzinvdy)**2 + (err_zinv_est)**2)
+        else:
+            n_zinv_est = n_zinv_sr
+            err_zinv_est = err_zinv_sr * 2
 
-        ll_tf = (n_top_sr + n_wjets_sr) / (n_top_sl + n_wjets_sl)
-        ll_tf_err = ll_tf * np.sqrt((err_top_sr**2+err_wjets_sr**2)/(n_top_sr+n_wjets_sr)**2 + (err_top_sl**2+err_wjets_sl**2)/(n_top_sl+n_wjets_sl)**2)
+        ll_tf = 1.0
+        ll_tf_err = 1.0
+        if n_top_sl + n_wjets_sl > 0.0:
+            ll_tf = (n_top_sr + n_wjets_sr) / (n_top_sl + n_wjets_sl)
+            ll_tf_err = ll_tf * np.sqrt((err_top_sr**2+err_wjets_sr**2)/(n_top_sr+n_wjets_sr)**2 + (err_top_sl**2+err_wjets_sl**2)/(n_top_sl+n_wjets_sl)**2)
         n_ll_est, err_ll_est = 0., 0.
         if n_data_sl > 0:
             n_ll_est = ll_tf * n_data_sl
             err_ll_est = n_ll_est * np.sqrt((ll_tf_err/ll_tf)**2 + (err_data_sl/n_data_sl)**2)
+        else:
+            n_ll_est = n_top_sr + n_wjets_sr
+            err_ll_est = np.sqrt(err_top_sr**2 + err_wjets_sr**2)*2
 
         hrs.SetBinContent(ibin, n_rs)
         hrs.SetBinError(ibin, err_rs)
@@ -183,7 +200,7 @@ hll.SetFillColor(855)
 hrs.SetLineColor(r.kBlack)
 hrs.SetFillColor(401)
 
-hzinv.GetYaxis().SetRangeUser(1e-1,1e6)
+hzinv.GetYaxis().SetRangeUser(1e-1,1e6 if cr=="crRSInvertDPhi" else 1e8)
 hzinv.GetXaxis().SetLabelSize(0)
 hzinv.GetXaxis().SetTickLength(0.02)
 hzinv.GetXaxis().SetNdivisions(hzinv.GetNbinsX(), 0, 0)
@@ -212,16 +229,18 @@ h_pred.Add(hrs)
 hewk = hzinv.Clone("h_ewk")
 hewk.Add(hll)
 
-NBINS = hrs.GetNbinsX()
 bin_width = (1-pads[0].GetLeftMargin()-pads[0].GetRightMargin()) / NBINS
-bin_divisions = [7,18,29,40]
+bin_divisions = [0]
+for i in range(len(ht_regs)):
+    bin_divisions.append(bin_divisions[i]+len(topo_reg_defs[ht_regs[i]]))
+bin_divisions = bin_divisions[1:-1]
 line = r.TLine()
 line.SetLineStyle(2)
 for ix in bin_divisions:
     x = pads[0].GetLeftMargin() + ix * bin_width
     line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
-leg = r.TLegend(0.815,0.78,0.94,0.9)
+leg = r.TLegend(0.76,0.73,0.945,0.91)
 leg.AddEntry(hdata, "Data", 'lp')
 leg.AddEntry(hrs, "R&S from " + ("MC" if RSfromMC else "Data"), 'f')
 leg.AddEntry(hzinv , "Z#rightarrow#nu#bar{#nu}", 'f')
@@ -229,14 +248,18 @@ leg.AddEntry(hll , "Lost Lepton", 'f')
 leg.Draw()
 
 ht_names = ["Very Low", "Low", "Medium", "High", "Extreme"]
-mod_bin_divisions = [0] + bin_divisions + [hrs.GetNbinsX()]
+mod_bin_divisions = [0] + bin_divisions + [NBINS]
+print bin_divisions
+print mod_bin_divisions
 text = r.TLatex()
 text.SetNDC(1)
-text.SetTextSize(0.03)
+text.SetTextSize(0.036)
 text.SetTextAlign(22)
 for i in range(1,len(mod_bin_divisions)):
     x = pads[0].GetLeftMargin() + bin_width*0.5*(mod_bin_divisions[i-1]+mod_bin_divisions[i])
-    y = 0.79 if i<len(mod_bin_divisions)-1 else 0.73
+    if i==1:
+        x += 0.007
+    y = 0.78 if i<len(mod_bin_divisions)-1 else 0.68
     text.DrawLatex(x, y, ht_names[i-1]+" H_{T}")    
     ydata, edata = 0.0, r.Double(0.0)
     yewk, eewk = 0.0, r.Double(0.0)
@@ -244,24 +267,30 @@ for i in range(1,len(mod_bin_divisions)):
     ydata = hdata.IntegralAndError(mod_bin_divisions[i-1]+1, mod_bin_divisions[i], edata)
     yewk = hewk.IntegralAndError(mod_bin_divisions[i-1]+1, mod_bin_divisions[i], eewk)
     yrs = hrs.IntegralAndError(mod_bin_divisions[i-1]+1, mod_bin_divisions[i], ers)
-    ratio = (ydata - yewk)/yrs
-    err = ratio * np.sqrt((ers/yrs)**2 + (edata**2 + eewk**2)/(ydata-yewk)**2)
-    text.DrawLatex(x, y-0.04, "{0:.2f} #pm {1:.2f}".format(ratio, err))
+    if yrs > 0.0:
+        ratio = (ydata - yewk)/yrs
+        err = ratio * np.sqrt((ers/yrs)**2 + (edata**2 + eewk**2)/(ydata-yewk)**2)
+    else:
+        ratio = 999.
+        err = 999.
+    # text.DrawLatex(x, y-0.04, "{0:.2f} #pm {1:.2f}".format(ratio, err))
 
-text.SetTextAlign(11)
+text.SetTextAlign(31)
 text.SetTextFont(42)
 text.SetTextSize(0.04)
-text.DrawLatex(0.8,0.935,"{0} fb^{{-1}} (13 TeV)".format(lumi))
+text.DrawLatex(0.94,0.935,"{0} fb^{{-1}} (13 TeV)".format(lumi))
+text.SetTextFont(62)
+text.SetTextAlign(11)
+text.DrawLatex(0.08, 0.935, "CMS Preliminary")
 
-
-binLabels = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "4-6j, 0b", "4-6j, 1b", "4-6j, 2b", "#geq7j, 0b", "#geq7j, 1b", "#geq7j, 2b", "2-6j, #geq3b", "#geq7j, #geq3b"]
-binLabelsVL = ["2-3j, 0b", "2-3j, 1b", "2-3j, 2b", "#geq4j, 0b", "#geq4j, 1b", "#geq4j, 2b", "#geq2j, #geq3j"]
-binLabels_all = binLabelsVL + 4*(binLabels)
+binLabels_all = []
+for ht_reg in ht_regs:
+    binLabels_all += [binLabels[tr] for tr in topo_reg_defs[ht_reg]]
 text = r.TLatex()
 text.SetNDC(1)
 text.SetTextAlign(32)
 text.SetTextAngle(90)
-text.SetTextSize(min(bin_width * 1.5,0.027))
+text.SetTextSize(min(bin_width * 1.76,0.027))
 text.SetTextFont(42)
 for ibin in range(len(binLabels_all)):
     x = pads[0].GetLeftMargin() + (ibin+0.5)*bin_width
@@ -282,8 +311,18 @@ for i in range(1, h_ratio.GetNbinsX()+1):
     if h_pred.GetBinContent(i) > 0:
         h_ratio.SetBinContent(i, hdata.GetBinContent(i)/h_pred.GetBinContent(i))
         h_ratio.SetBinError(i, hdata.GetBinError(i)/h_pred.GetBinContent(i))
+        relerr = h_pred.GetBinError(i)/h_pred.GetBinContent(i)
+        ht_reg = ibinToHTReg(i)
+        topo_reg = ibinToTopoReg(i)
+        systs = []
+        systs.extend(extraSysts_HT[year][ht_reg])
+        systs.extend(getJBJSysts(ht_reg, topo_reg))
+        for syst in systs:
+            relsyst = syst * hrs.GetBinContent(i) / h_pred.GetBinContent(i)
+            relerr = np.sqrt(relerr**2 + relsyst**2)
         h_ratio_err.SetBinContent(i, 1.0)
-        h_ratio_err.SetBinError(i, h_pred.GetBinError(i)/h_pred.GetBinContent(i))
+        h_ratio_err.SetBinError(i, relerr)
+        
     else:
         h_ratio.SetBinContent(i, 0.0)
         h_ratio.SetBinError(i, 0.0)
@@ -315,6 +354,7 @@ h_ratio_err.SetFillColor(r.kGray)
 h_ratio.Draw("PE")
 h_ratio_err.Draw("E2 SAME")
 h_ratio.Draw("PE SAME")
+h_ratio.Draw("AXIS SAME")
 
 line = r.TLine()
 line.DrawLine(0,1,h_ratio.GetNbinsX(),1)

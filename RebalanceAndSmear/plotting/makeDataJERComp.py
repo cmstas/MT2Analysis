@@ -5,13 +5,13 @@ import os
 
 ROOT.gROOT.SetBatch(1)
 
-tag = "V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
-
-dir = "looper_output/V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma/data/"
-dir_noRS = "looper_output/V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/data/"
+tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
 
 year = 2017
 lumi = 41.5
+
+dir = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma/data{0}/".format(year)
+dir_noRS = "looper_output/V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear/data{0}/".format(year)
 
 hrs = ROOT.TH1D("hrs","",51,0,51)
 hnrs = ROOT.TH1D("hnrs","",51,0,51)

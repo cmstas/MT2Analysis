@@ -58,12 +58,31 @@ declare -a tags=()
 # tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core25)
 # tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_tail50)
 # tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_tail100)
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_tail25)
 # tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_mean04)
 
 # tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear_v2)
 
-tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma)
-tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_core10)
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma)
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_core10)
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_core25)
+
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_jerUP)
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_jerDOWN)
+
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_sigmasoft15)
+# tags+=(V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_sigmasoft25)
+
+# tags+=(V00-10-04_fullBinning_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma)
+# tags+=(V00-10-04_fullBinning_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma_newJER)
+# tags+=(V00-10-04_fullBinning_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+
+# tags+=(V00-10-07_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+# tags+=(V00-10-07_HEMsmear_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+
+tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerDOWN)
+tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerUP)
 
 # for TAG in ${tags[@]}; do
 #     nohup nice -n 10 ./hadd_output.py /hadoop/cms/store/user/bemarsh/smearoutput/${TAG}/ &> logs/log_${TAG}.txt &
