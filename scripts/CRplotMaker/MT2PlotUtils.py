@@ -12,6 +12,7 @@ def GetCRName(cr):
              "crdybaseJ": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crdybaseIncl": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crdybaseInclLowPt": "#font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
+             "crdybaseIncl+crdybaseInclLowPtSF": "Z #rightarrow #font[12]{l}^{#plus}#font[12]{l}^{#minus} CR",
              "crslbase": "Single Lepton CR",
              "crslbaseJ": "Single Lepton CR",
              "crslbaseVL": "Single Lepton CR",
@@ -24,6 +25,8 @@ def GetCRName(cr):
              "crslelbase": "Single Lepton CR (els)",
              "crslmubase": "Single Lepton CR (mus)",
              "crqcdbaseJ": "QCD Monojet CR",
+             "crqcdbase": "Inverted #Delta#phi CR",
+             "crqcdMT2Sideband": "MT2 Sideband",
              }
 
     # use the above name if defined, otherwise use cr itself
@@ -41,10 +44,14 @@ def GetSampleName(sample):
              "zinv_ht": "Z(#nu#nu)+Jets",
              "2015zinv_ht": "Z(#nu#nu)+Jets",
              "top": "Top",
+             "top_nonweighted_lt2b": "Top (<2 genB)",
+             "top_nonweighted_ge2b": "Top (#geq2 genB)",
+             "top_weighted_ge2b": "Top (#geq2 genB)",
              "ww": "WW",
              "gjets_ht": "Prompt #gamma",
              "2015gjets_ht": "Prompt #gamma",
              "gjets_dr0p05_ht": "Prompt #gamma",
+             "gjets_dr0p4_ht": "Prompt #gamma",
              "fakephoton": "Fake #gamma",
              "fragphoton": "Frag. #gamma",
              "qcd_ht": "QCD",
@@ -70,6 +77,9 @@ def GetVarName(var):
              "gammaPt": "P_{T}(#gamma)",
              "gammaEta": "#eta(#gamma)",
              "J1pt": "Subleading jet p_{T}",
+             "dRleplep" : "dR(lep,lep)",
+             "dRleplepEle" : "dR(e,e)",
+             "dRleplepMu" : "dR(#mu,#mu)",
              }
 
     if "SigmaIetaIeta" in var:
@@ -79,7 +89,7 @@ def GetVarName(var):
     return names.get(var,var)
 
 def GetUnit(vn):
-    noUnit = ["nJet","nBJet","eta","nlep","drMin","SigmaIetaIeta"]
+    noUnit = ["nJet","nBJet","eta","nlep","drMin","SigmaIetaIeta","dRleplep"]
     for s in noUnit:
         if s.lower() in vn.lower():
             return None
@@ -90,6 +100,12 @@ def GetSubtitles(dirname):
     # do special cases first
     if dirname=="crqcdbaseJ":
         return ["p_{T}(jet1) > 250 GeV", "N(jet) = 2"]
+    if dirname=="crqcdbase":
+        return ["#Delta#phi > 0.3", "H_{T} > 250 GeV", "M_{T2} > 200 GeV"]
+    if dirname=="crqcdMT2Sideband":
+        return ["H_{T} > 250 GeV", "100 < M_{T2} < 200 GeV"]
+    if dirname=="crdybaseIncl+crdybaseInclLowPtSF":
+        return ["H_{T} > 250 Gev", "#geq 1j, #geq 0b"]
 
     if dirname[-4:]=="Incl":
         return ["H_{T} > 250 GeV", "MET > 250 GeV (1j)", "M_{T2} > 200 GeV (#geq 2j)"]

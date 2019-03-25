@@ -29,13 +29,16 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
     ## deal with suffixes
     # crdybaseInclLowPtOF means that we should take the plots in crdybaseIncl that end in LowPt
     # crdybaseInclLowPtSF means that we should take the plots in crdybaseIncl that end in LowPtemu
-    suffix = None
-    if "LowPtOF" in dirnames[0]:
-        dirnames[0] = dirnames[0].replace("LowPtOF","")
-        suffix = "LowPtemu"
-    if "LowPtSF" in dirnames[0]:
-        dirnames[0] = dirnames[0].replace("LowPtSF","")
-        suffix = "LowPt"
+    suffix = []
+    for i,dn in enumerate(dirnames):
+        if "LowPtOF" in dn:
+            dirnames[i] = dirnames[i].replace("LowPtOF","")
+            suffix.append("LowPtemu")
+        elif "LowPtSF" in dn:
+            dirnames[i] = dirnames[i].replace("LowPtSF","")
+            suffix.append("LowPt")
+        else:
+            suffix.append("")
 
 
     ## get background histograms
@@ -59,10 +62,8 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                     vn = vn.replace("Loose","FakeLoose")
                     vn = vn.replace("AllIso","FakeAllIso")
                     
-            if suffix != None:
-                vn += suffix
             #print (dirnames[0]+"/h_"+vn)
-            h_bkg_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn) )
+            h_bkg_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn+suffix[0]) )
             # histogram won't exist if there are no events. Replace it with None, handle later
             if type(h_bkg_vecs[iplot][-1])==type(ROOT.TObject()):
                 h_bkg_vecs[iplot][-1] = None
@@ -70,7 +71,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                 h_bkg_vecs[iplot][-1].SetDirectory(0)
                 # handle the case with more than one directory
                 for idir in range(1, len(dirnames)):
-                    h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+                    h_bkg_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn+suffix[idir]))
                 if mcScale is not None:
                     h_bkg_vecs[iplot][-1].Scale(mcScale)
         fid.Close()
@@ -85,9 +86,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         for iplot in range(len(plots)):
             vn = plots[iplot][0]
 
-            if suffix != None:
-                vn += suffix
-            h_sig_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn) )
+            h_sig_vecs[iplot].append( fid.Get(dirnames[0]+"/h_"+vn+suffix[0]) )
             # histogram won't exist if there are no events. Replace it with None, handle later
             if type(h_sig_vecs[iplot][-1])==type(ROOT.TObject()):
                 h_sig_vecs[iplot][-1] = None
@@ -95,7 +94,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                 h_sig_vecs[iplot][-1].SetDirectory(0)
                 # handle the case with more than one directory
                 for idir in range(1, len(dirnames)):
-                    h_sig_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+                    h_sig_vecs[iplot][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn+suffix[idir]))
 
         fid.Close()
 
@@ -125,15 +124,13 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                 data_file = os.path.join(rootdir, dname+".root")
                 fid = ROOT.TFile(data_file)
                 vn = pl[0]
-                if suffix != None:
-                    vn += suffix
-                h_data_vec[ip].append( fid.Get(dirnames[0]+"/h_"+vn) )
+                h_data_vec[ip].append( fid.Get(dirnames[0]+"/h_"+vn+suffix[0]) )
                 if type(h_data_vec[ip][-1])==type(ROOT.TObject()):
                     raise Exception("No {0}/h_{1} histogram for {2}!".format(dirname, vn, dname))
                 h_data_vec[ip][-1].SetDirectory(0)
                 # handle the case with more than one directory
                 for idir in range(1, len(dirnames)):
-                    h_data_vec[ip][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn))
+                    h_data_vec[ip][-1].Add(fid.Get(dirnames[idir]+"/h_"+vn+suffix[idir]))
                 if dataScales is not None:
                     h_data_vec[ip][id].Scale(dataScales[id])
             fid.Close()
@@ -174,14 +171,22 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
             drawZeros = True
         sns = [utils.GetSampleName(s) for s in samples]
 
+        yRangeUserRatio = (0,2)
+        scaleMCtoData = True
+        if dirname=="crqcdbase":
+            if "HEMveto" not in output_dir:
+                yRangeUserRatio = (0,10)
+            scaleMCtoData=False
+
         for ext in exts:
             saveAs = os.path.join(output_dir,dirname+tag,"{0}_{1}.{2}".format(dirname,vn,ext))
             ppm.plotDataMC(h_bkg_vecs[i], sns, h_data_vec[i], doPause=False, xAxisTitle=xAxisTitle, lumi=pd.lumi, lumiUnit=pd.lumiUnit,
                            dataTitle=dataNames, title=title, subtitles=subtitles, xRangeUser=plots[i][2], isLog=plots[i][1], saveAs=saveAs, 
-                           scaleMCtoData=True, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, doMT2Colors=True, 
+                           scaleMCtoData=scaleMCtoData, xAxisUnit=unit, userMin=userMin, userMax=userMax, doSort=False, doMT2Colors=True, 
                            markerSize=markerSize, titleSize=0.035, subtitleSize=0.033, legCoords=(0.60,0.70,0.87,0.895), ratioTitle="Data/MC",
                            subLegText=subLegText, subLegTextSize=0.036, doBkgError=True, doOverflow=doOverflow, cmsTextSize=0.04,
-                           convertToPoisson=True, drawZeros=drawZeros, h_sig_vec=h_sig_vecs[i], sig_names=signals, ratioType=0)
+                           convertToPoisson=True, drawZeros=drawZeros, h_sig_vec=h_sig_vecs[i], sig_names=signals, ratioType=0,
+                           yRangeUserRatio=yRangeUserRatio)
             
 
 
@@ -293,8 +298,8 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
     fmc = [ROOT.TFile(os.path.join(indir,s+".root"), "READ") for s in samples]
     fdata = ROOT.TFile(os.path.join(indir,data+".root"), "READ")
 
-    regions_0b = ["1","4","7","12"]
-    regions_ge1b = ["2","3","5","6","8","10","13","14","15"]
+    regions_0b = ["1","4","7","20","25"]
+    regions_ge1b = ["2","3","5","6","8","9","10","11","21","22","23","24","26","27","28","29"]
     regions_incl = regions_0b + regions_ge1b
     
     regions = [regions_0b, regions_ge1b, regions_incl]
@@ -314,6 +319,8 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
 
     last, lastvar = 0., 0.
 
+    binning = np.array([200, 300, 400, 500, 600, 800, 1100, 1400, 1800, 2400], dtype=float)
+
     #loop over sets of regions (0b, >=1b, inclusive)
     for iregs,regs in enumerate(regions):
         h_mt2binsAll_mc_cr_vec = [None for s in samples]
@@ -322,13 +329,13 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
         # loop over set of SRs within the given region
         for isr, sr in enumerate(regs):
             for ht_reg in ht_regs:
-                if ht_reg == "VL" and sr in ["4","5","6","7","8","10"]:
+                if ht_reg in ["VL","L"] and sr in ["20","21","22","23","24","25","26","27","28","29"]:
                     continue
-                elif ht_reg in ["L","M","H","UH"] and sr in ["12","13","14","15"]:
+                elif ht_reg in ["M","H","UH"] and sr in ["7","8","9","11"]:
                     continue
-                # this bin appears to be empty in data and MC..
-                elif ht_reg == "UH" and sr == "3":
-                    continue
+                # # this bin appears to be empty in data and MC..
+                # elif ht_reg == "UH" and sr == "3":
+                #     continue
                 
                 # form the aggregated histograms
                 for i in range(len(fmc)):
@@ -356,6 +363,12 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
                 except (TypeError, AttributeError):
                     pass
 
+        #rebin
+        for i in range(len(h_mt2binsAll_mc_cr_vec)):
+            h_mt2binsAll_mc_cr_vec[i] = h_mt2binsAll_mc_cr_vec[i].Rebin(binning.size-1, h_mt2binsAll_mc_cr_vec[i].GetName()+"rebin", binning)
+            h_mt2binsAll_mc_cr_var_vec[i] = h_mt2binsAll_mc_cr_var_vec[i].Rebin(binning.size-1, h_mt2binsAll_mc_cr_var_vec[i].GetName()+"rebin", binning)
+        h_mt2binsAll_data_cr = h_mt2binsAll_data_cr.Rebin(binning.size-1, h_mt2binsAll_data_cr.GetName()+"rebin", binning)
+
         nbins = h_mt2binsAll_data_cr.GetNbinsX()
         systs = [0. for i in range(nbins)]
         for i in range(nbins):
@@ -365,6 +378,9 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
                 nom_val += h_nom.GetBinContent(i+1)
                 var_val += h_var.GetBinContent(i+1)
             if (nom_val > 0.00001): systs[i] = abs(1. - var_val / nom_val)
+            if ht_reg=="H" and iregs==1 and i==5:
+                print nom_val, h_mt2binsAll_data_cr.GetBinContent(i+1)
+
 
         # ## systematic just based on number of bins
         # incr = 0
@@ -390,17 +406,17 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
             subtitles[2] = "H_{T} > 450 GeV"
             suffix = "_HTge450"
         elif ht_regs[0]=="M" and len(ht_regs) == 1:
-            subtitles[2] = "575 < H_{T} < 1000 GeV"
-            suffix = "_HT575to1000"
+            subtitles[2] = "575 < H_{T} < 1200 GeV"
+            suffix = "_HT575to1200"
         elif ht_regs[0]=="M":
             subtitles[2] = "H_{T} > 575 GeV"
             suffix = "_HTge575"
         elif ht_regs[0]=="H" and len(ht_regs) == 1:
-            subtitles[2] = "1000 < H_{T} < 1500 GeV"
-            suffix = "_HT1000to1500"
+            subtitles[2] = "1200 < H_{T} < 1500 GeV"
+            suffix = "_HT1200to1500"
         elif ht_regs[0]=="H":
-            subtitles[2] = "H_{T} > 1000 GeV"
-            suffix = "_HTge1000"
+            subtitles[2] = "H_{T} > 1200 GeV"
+            suffix = "_HTge1200"
         elif ht_regs[0]=="UH":
             subtitles[2] = "H_{T} > 1500 GeV"
             suffix = "_HTge1500"
