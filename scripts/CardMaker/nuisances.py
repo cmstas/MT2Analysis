@@ -16,10 +16,10 @@ nuisances = {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : True,
         },
-    "sig_PUsyst" : {
-        "correlation" : CORR_ACROSS_ALLBINS,
-        "splitByYear" : False,
-        },
+    # "sig_PUsyst" : {
+    #     "correlation" : CORR_ACROSS_ALLBINS,
+    #     "splitByYear" : False,
+    #     },
     "sig_gensyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
@@ -27,7 +27,7 @@ nuisances = {
         },
     "sig_IsrSyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
-        "splitByYear" : DEFAULT_splitByYear,
+        "splitByYear" : True,
         },
     "sig_bTagHeavySyst" : {
         "correlation" : CORR_ACROSS_ALLBINS,
@@ -58,10 +58,18 @@ nuisances = {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
         },
+    # "lep_eff2" : {
+    #     "correlation" : PER_MT2_BIN,
+    #     "splitByYear" : DEFAULT_splitByYear,
+    #     },
     "zinv_alphaErr" : {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : False, # overwritten in cardmaker anyway (depends on if we're extrapolating or not)
         },
+    # "zinv_alphaErr2" : {
+    #     "correlation" : PER_MT2_BIN,
+    #     "splitByYear" : False, # overwritten in cardmaker anyway (depends on if we're extrapolating or not)
+    #     },
     "zinv_purity" : {
         "correlation" : PER_TOPO_REG_CRDY,
         "splitByYear" : False,
@@ -73,6 +81,14 @@ nuisances = {
     "zinv_shape" : {
         "correlation" : PER_TOPO_REG,
         "splitByYear" : False,
+        },
+    "zinv_trigeff" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : DEFAULT_splitByYear,
+        },
+    "zinv_renorm" : {
+        "correlation" : CORR_ACROSS_ALLBINS,
+        "splitByYear" : DEFAULT_splitByYear,
         },
     "llep_mtcut" : {
         "correlation" : CORR_ACROSS_ALLBINS,

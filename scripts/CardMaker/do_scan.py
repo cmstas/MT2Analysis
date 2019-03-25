@@ -4,8 +4,8 @@ import time
 import subprocess
 # this assumes you've already made template datacards for this tag! (makeTemplateCards.py)
 
-TAG = "FullRunII_17MCfor18_ttbbWeights_80x_fastsim"
-MODEL = "T2bb"
+TAG = "V00-10-15_FullRunII_doubleMCstat"
+MODEL = "T2qq"
 
 MAXLOCALJOBS=25
 
@@ -17,6 +17,9 @@ os.system("mkdir -p cards_{0}/logs".format(TAG))
 
 if "80x" in TAG:
     f_nsig = r.TFile("../../babymaker/data/nsig_weights_{0}.root".format(MODEL))
+elif "_10" in MODEL or "_50" in MODEL or "_200" in MODEL:
+    # short-track
+    f_nsig = r.TFile("../../babymaker/data/short_track/nsig_weights_{0}.root".format(MODEL))
 else:
     f_nsig = r.TFile("../../babymaker/data/sigweights_Fall17/nsig_weights_{0}.root".format(MODEL))
 h_nsig = f_nsig.Get("h_nsig")
@@ -50,6 +53,7 @@ for m1 in range(0, x_max+1, x_binwidth):
 print "Found {0} points. Submitting jobs.".format(len(points))
 
 success_points = set()
+failed_points = set()
 ps = []
 done = 0
 current = 0
@@ -64,6 +68,8 @@ while done < len(points):
             running -= 1
             if res==0:
                 success_points.add(points[i])
+            else:
+                failed_points.add(points[i])
     for cmd in cmds[current:current+MAXLOCALJOBS-running]:
         ps.append(subprocess.Popen(cmd, shell=True))
         running += 1
@@ -78,5 +84,10 @@ while done < len(points):
 
 fout = open(os.path.join("cards_"+TAG, MODEL, "points.txt"), 'w')
 for m1,m2 in sorted(list(success_points)):
+    fout.write("{0}_{1}_{2}\n".format(MODEL,m1,m2))
+fout.close()
+
+fout = open(os.path.join("cards_"+TAG, MODEL, "failed_points.txt"), 'w')
+for m1,m2 in sorted(list(failed_points)):
     fout.write("{0}_{1}_{2}\n".format(MODEL,m1,m2))
 fout.close()

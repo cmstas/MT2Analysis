@@ -40,13 +40,17 @@ if "80x" in TAG:
     sig_scale[17] = 41.53 / 35.92
     sig_scale[18] = 59.97 / 35.92
 else:
-    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-11_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-11_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-11_2018fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-15_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-15_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-15_2018fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     sig_scale[16] = 1.0
     sig_scale[17] = 1.0
     # sig_scale[18] = 59.97 / 41.53
     sig_scale[18] = 1.0
+    
+    # sig_scale[16] = -1.0/999 * 35.9/41.5
+    # sig_scale[17] = -1.0/999
+    # sig_scale[18] = -1.0/999
 
 years = [16, 17, 18]
 
@@ -60,7 +64,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
     dirname = dc.info["dirname"]
     imt2 = dc.info["imt2"]
 
-    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame
+    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame or "T2bt" in signame
 
     name = "{0}_{1}_{2}_{3}".format(dc.GetName(), signame, im1, im2)
     dc.SetName(name)
@@ -127,7 +131,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
     totTR = 0.0
     for y in years:
         if h_sig[y]:
-            totTR += h_sig[y].Integral(1,-1)
+            totTR += h_sig[y].Integral(1,-1) * sig_scale[y]
     if (suppressZeroTRs or suppressZeroBins) and totTR < 0.001:
         if verbose: print "Looks like total TR signal is zero for all years, directory {0}. Skipping".format(dirname)
         return None
@@ -163,7 +167,8 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
             if h_aux[an][y]:
                 n_aux[an][y] = h_aux[an][y].GetBinContent(imt2)
 
-        totsig += (n_sig[y] + n_aux["genmet"][y]) / 2.0
+        totsig += (n_sig[y] + n_aux["genmet"][y]) / 2.0 * sig_scale[y]
+
 
     if suppressZeroBins and totsig < 0.001:
         if verbose: print "No signal found for {0} point {1},{2}, dir {3}, imt2 {4}. Skipping".format(signame, im1, im2, dirname, imt2)
@@ -213,12 +218,16 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
                 nextra = n_sig_crsl[y] * dc.info["lostlep_alpha"][y]
                 nextra_genmet = n_aux_crsl["genmet"][y] * dc.info["lostlep_alpha"][y]
                 nextra_recogenaverage = (nextra + nextra_genmet) / 2.0
-                n_sig_cor[y] = max(0.0, n_sig[y] - nextra)
-                n_sig_cor_recogenaverage[y] = max(0.0, n_sig_recogenaverage[y] - nextra_recogenaverage)
+                n_sig_cor[y] = n_sig[y] - nextra
+                n_sig_cor_recogenaverage[y] = n_sig_recogenaverage[y] - nextra_recogenaverage
+                # prootect against negative values
+                if n_sig_cor[y] * sig_scale[y] < 0.0:
+                    n_sig_cor[y] = 0.0
+                if n_sig_cor_recogenaverage[y] * sig_scale[y] < 0.0:
+                    n_sig_cor_recogenaverage[y] = 0.0
                 err_sig_recogenaverage[y] = 0.0
                 if n_sig_cor_recogenaverage[y] > 0:
                     err_sig_recogenaverage[y] = abs(n_sig_cor[y] - n_sig_cor_recogenaverage[y]) / 2.0 / n_sig_cor_recogenaverage[y]
-
 
     totsig = 0.0
     for y in years:
@@ -259,10 +268,13 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
             for y in years:
                 err = 1.0
                 if n_sig[y] > 0.0:
-                    errup = (n_aux["isr_UP"][y] / n_sig[y] - 1.0)
-                    errdn = (n_aux["isr_DN"][y] / n_sig[y] - 1.0)
-                    err = max(abs(errup), abs(errdn))
-                    err = 1.0+err if errup>0 else 1.0/(1.0+err)
+                    if y==16:
+                        errup = (n_aux["isr_UP"][y] / n_sig[y] - 1.0)
+                        errdn = (n_aux["isr_DN"][y] / n_sig[y] - 1.0)
+                        err = max(abs(errup), abs(errdn))
+                        err = 1.0+err if errup>0 else 1.0/(1.0+err)
+                    else:
+                        err = (n_aux["isr_UP"][y]-n_aux["isr_DN"][y]) / 2.0 / n_sig[y] + 1.0
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
         if nuis == "sig_bTagHeavySyst":
@@ -322,6 +334,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
 templates = pickle.load(open(os.path.join(outdir, "templates", "template_datacards.pkl"), 'rb'))
 datacards = {}
 full_outdir = os.path.join(outdir, signame, "{0}_{1}_{2}".format(signame, M1, M2))
+print full_outdir
 
 allfalse = True
 for name,dc in templates.items():

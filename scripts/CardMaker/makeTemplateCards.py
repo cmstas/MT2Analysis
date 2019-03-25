@@ -7,14 +7,14 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "V00-10-12_FullRunII"
+TAG = "V00-10-15_FullRunII_doubleMCstat"
 
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
 RsfofErr = 0.15
 lumi_syst_16 = 0.025
 lumi_syst_17 = 0.023
-lumi_syst_18 = 0.050
+lumi_syst_18 = 0.025
 
 verbose = False
 
@@ -23,16 +23,16 @@ f_lostlep = {}
 f_qcd = {}
 f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-12_combined/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-12_combined/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-12_combined/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-12_combined/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-12_combined/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-12_combined/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-12_combined/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-12_combined/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-12_combined/qcdFromRS_2018.root")
-f_data = r.TFile("../../MT2Looper/output/V00-10-12_combined/data_RunAll.root")
+f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-14_combined/zinvFromDY_2016.root")
+f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-14_combined/zinvFromDY_2017.root")
+f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-14_combined/zinvFromDY_2018.root")
+f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-14_combined/lostlepFromCRs_2016.root")
+f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-14_combined/lostlepFromCRs_2017.root")
+f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-14_combined/lostlepFromCRs_2018.root")
+f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-14_combined/qcdFromRS_2016.root")
+f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-14_combined/qcdFromRS_2017.root")
+f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-14_combined/qcdFromRS_2018.root")
+f_data = r.TFile("../../MT2Looper/output/V00-10-14_combined/data_RunAll.root")
 
 years = [16, 17, 18]
 # years = [18]
@@ -376,13 +376,13 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 dc.SetNuisanceSignalValue(nuis_name, 1.0 + lumi_syst_18, 18)
 
         if nuis == "jec":
-            llep_val = 1.02
-            zinv_val = 1.05 if ht_HI==450 else 1.02            
+            llep_val = 1.025
+            zinv_val = 1.05 if ht_HI==450 else 1.025
             for y in years:
                 dc.SetNuisanceBkgValue(nuis_name, llep_val, "llep", y)
                 dc.SetNuisanceBkgValue(nuis_name, zinv_val, "zinv", y)
 
-        if nuis == "lep_eff":
+        if nuis == "lep_eff" or nuis == "lep_eff2":
             for y in years:
                 # lostlep
                 h_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_lepeff_UP")
@@ -392,15 +392,16 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 err_DN = abs(1.0 - h_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(err_UP, err_DN)
                 direc = 1 if h_UP.Integral(lowmt2bin,-1) > baseline_int else -1
-                err = 1.0 + direc*err                
-                dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
+                err = 1.0 + direc*err            
+                if nuis == "lep_eff":
+                    dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
                 # zinv
                 h_UP = f_zinvDY[y].Get(dirname+"/ratioCard_lepeff_UP")
                 h_DN = f_zinvDY[y].Get(dirname+"/ratioCard_lepeff_DN")                
-                rCN = h_zinv_ratio[y].GetBinContent(1)
-                rUP = h_UP.GetBinContent(1)
-                rDN = h_DN.GetBinContent(1)
+                rCN = h_zinv_ratio[y].Integral()
+                rUP = h_UP.Integral()
+                rDN = h_DN.Integral()
                 err = 0.0
                 if rCN > 0:
                     err_UP = abs(1.0 - rUP / rCN)
@@ -408,9 +409,11 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                     err = max(err_UP, err_DN)
                 direc = 1 if rUP > rCN else -1
                 err = 1.0 + direc*err
+                if nuis == "lep_eff2":
+                    err = 1.0 + (err-1.0)/2
                 dc.SetNuisanceBkgValue(nuis_name, err, "zinv", y)
 
-        if nuis=="zinv_alphaErr":
+        if nuis=="zinv_alphaErr" or nuis=="zinv_alphaErr2":
             for y in years:
                 err = 1.0
                 if zinv_zero_alpha[y]:
@@ -461,6 +464,38 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                         extrap_err = last_bin_relerr * (imt2 - crdy_lastbin_hybrid) / n_extrap_bins
                 extrap_err = 1.0 + extrap_err
                 dc.SetNuisanceBkgValue(nuis_name, extrap_err, "zinv", y)
+
+        if nuis == "zinv_trigeff":
+            for y in years:
+                h_UP = f_zinvDY[y].Get(dirname+"/ratioCard_trigeff_UP")
+                h_DN = f_zinvDY[y].Get(dirname+"/ratioCard_trigeff_DN")                
+                rCN = h_zinv_ratio[y].Integral()
+                rUP = h_UP.Integral()
+                rDN = h_DN.Integral()
+                err = 0.0
+                if rCN > 0:
+                    err_UP = abs(1.0 - rUP / rCN)
+                    err_DN = abs(1.0 - rDN / rCN)
+                    err = max(err_UP, err_DN)
+                direc = 1 if rUP > rCN else -1
+                err = 1.0 + direc*err
+                dc.SetNuisanceBkgValue(nuis_name, err, "zinv", y)
+
+        if nuis == "zinv_renorm":
+            for y in years:
+                h_UP = f_zinvDY[y].Get(dirname+"/ratioCard_renorm_UP")
+                h_DN = f_zinvDY[y].Get(dirname+"/ratioCard_renorm_DN")                
+                rCN = h_zinv_ratio[y].Integral()
+                rUP = h_UP.Integral()
+                rDN = h_DN.Integral()
+                err = 0.0
+                if rCN > 0:
+                    err_UP = abs(1.0 - rUP / rCN)
+                    err_DN = abs(1.0 - rDN / rCN)
+                    err = max(err_UP, err_DN)
+                direc = 1 if rUP > rCN else -1
+                err = 1.0 + direc*err
+                dc.SetNuisanceBkgValue(nuis_name, err, "zinv", y)
 
         if nuis == "llep_mtcut":
             for y in years:

@@ -17,6 +17,9 @@ os.system("mkdir -p "+outdir)
 
 if "80x" in indir:
     f_nsig = r.TFile("../../babymaker/data/nsig_weights_{0}.root".format(MODEL))
+elif "_10" in MODEL or "_50" in MODEL or "_200" in MODEL:
+    # short-track
+    f_nsig = r.TFile("../../babymaker/data/short_track/nsig_weights_{0}.root".format(MODEL))
 else:
     f_nsig = r.TFile("../../babymaker/data/sigweights_Fall17/nsig_weights_{0}.root".format(MODEL))
 h_nsig = f_nsig.Get("h_nsig")
@@ -45,6 +48,7 @@ for m1 in range(0, x_max+1, x_binwidth):
             continue
         points.append((m1,m2))
 print "Found {0} points".format(len(points))
+
 
 iterator = fin.GetListOfKeys()
 for key in iterator:
@@ -80,8 +84,9 @@ for key in iterator:
             hout = h.ProjectionX(hist.replace("_sigscan",""), bin1, bin1, bin2, bin2)
             hout.Write()
             fout.Close()
-            
+
         del h
+
 
 
 
