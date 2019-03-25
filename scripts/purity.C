@@ -437,9 +437,11 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 //  if (plotname.Contains("mt2bins")) {
 //    h_predFakes = (TH1F*) f_out->Get(srdir+"/h_pred"+FR_type);
 //  }
-  TH1F* h_ratio = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname+"Ratio");
+  // TH1F* h_ratio = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname+"Ratio");
+  TH1F* h_ratio = (TH1F*) f_zinv->Get(srdir+"/ratio");
   if (!plotname.Contains("mt2bins")) {
     h_ratio = (TH1F*) f_zinv->Get("h_"+plotname+"Ratio");
+    // h_ratio = (TH1F*) f_zinv->Get("ratio");
   }
   if (!h_ratio) {cout<<"Ratio not found for plot. GIVING UP FOR THIS REGION. "<<plotname<<endl; return; }
   TH1F* h_trueZinv = (TH1F*) f_zinv->Get(srdir+"/h_"+plotname);
@@ -661,12 +663,16 @@ void purityPlotsNew(TFile* f_out, TFile* f_data, TFile* f_gjet, TFile* f_qcd, TF
 }
 
 
-void purity(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-00-11skim/", string dataname = "data")
+void purity(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/", string dataname = "data_RunAll")
 {
   
+  // //load signal regions
+  // vector<SR> SRVec =  getSignalRegionsJamboree();
+  // vector<SR> SRVec2 =  getSignalRegionsMonojet();
+
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsJamboree();
-  vector<SR> SRVec2 =  getSignalRegionsMonojet();
+  vector<SR> SRVec =  getSignalRegions2018();
+  vector<SR> SRVec2 =  getSignalRegionsMonojet2017();
 
   //open files
   // get input files -- default to faking data with same MC file

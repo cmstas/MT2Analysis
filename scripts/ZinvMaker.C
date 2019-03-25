@@ -260,7 +260,7 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
   float relativeError = integratedYieldErr/integratedYield;
 
   // Hybridize the template: last N bins have a common stat uncertainty, and they follow the Zinv MC shape
-  for ( int ibin=1; ibin <= hZinv_Rebin->GetNbinsX(); ++ibin ) {
+  for ( int ibin=1; ibin <= hZinv_Rebin->GetNbinsX()+1; ++ibin ) {
 
     if (ibin < lastbin_hybrid) {
       // (SF-OF)*Zinv/DY
@@ -275,8 +275,8 @@ int makeHybridTemplate(TString srname, TH1D* & h_template, TString name , TFile 
     }
     else {
       float cont = integratedYield * integratedYieldZinv / integratedYieldDY;
-      float err2 = pow( relativeError, 2 ) + pow( relativeErrorZinv, 2 ) + pow( relativeErrorDY, 2 );
       float kMT2 = hZinv_Rebin->GetBinContent(ibin) / integratedYieldZinv;
+      float err2 = pow( relativeError, 2 )+ pow( relativeErrorDY, 2 ) + pow(hZinv_Rebin->GetBinError(ibin)/hZinv_Rebin->GetBinContent(ibin), 2);
       h_RebinnedTemplate->SetBinContent(ibin, cont * kMT2);
       h_RebinnedTemplate->SetBinError(ibin, cont*sqrt(err2) * kMT2 );
 
@@ -545,10 +545,16 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     TH1D* hDY_lepeff_UP   = (TH1D*) fDY->Get(fullhistnameDY+"_lepeff_UP");
     TH1D* hDY_lepeff_DN   = (TH1D*) fDY->Get(fullhistnameDY+"_lepeff_DN");
+    TH1D* hDY_trigeff_UP   = (TH1D*) fDY->Get(fullhistnameDY+"_trigeff_UP");
+    TH1D* hDY_trigeff_DN   = (TH1D*) fDY->Get(fullhistnameDY+"_trigeff_DN");
     TH1D* hDY_ZNJet_UP   = (TH1D*) fDY->Get(fullhistnameDY+"_ZNJet_UP");
     TH1D* hDY_ZNJet_DN   = (TH1D*) fDY->Get(fullhistnameDY+"_ZNJet_DN");
     TH1D* hZinv_ZNJet_UP   = (TH1D*) fZinv->Get(fullhistname+"_ZNJet_UP");
     TH1D* hZinv_ZNJet_DN   = (TH1D*) fZinv->Get(fullhistname+"_ZNJet_DN");
+    TH1D* hDY_renorm_UP   = (TH1D*) fDY->Get(fullhistnameDY+"_renorm_UP");
+    TH1D* hDY_renorm_DN   = (TH1D*) fDY->Get(fullhistnameDY+"_renorm_DN");
+    TH1D* hZinv_renorm_UP   = (TH1D*) fZinv->Get(fullhistname+"_renorm_UP");
+    TH1D* hZinv_renorm_DN   = (TH1D*) fZinv->Get(fullhistname+"_renorm_DN");
     
     // If Zinv or DY histograms are not filled, just leave (shouldn't happen when running on full stat MC)
     if(!hDY || !hZinv || !hData){
@@ -699,7 +705,9 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 
     TH1D* ratio = (TH1D*) hZinv->Clone("ratio");
     ratio->Divide(hDY);
-    float ratioValue = hZinv->Integral() / hDY->Integral();
+    double errNum, errDen;
+    float ratioValue = hZinv->IntegralAndError(1,-1,errNum) / hDY->IntegralAndError(1,-1,errDen);
+    float ratioErr = ratioValue*sqrt(pow(errNum/hZinv->Integral(), 2) + pow(errDen/hDY->Integral(),2));
 
     TH1D* CRyield = (TH1D*) hData->Clone("h_mt2binsCRyield");
 
@@ -819,13 +827,16 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
       
       if (verbose) cout<<"Found SF="<<integratedYield<<" and OF="<<EM<<", so purity is "<<integratedPurity<<endl;
 
-      for ( int ibin=1; ibin <= hZinv->GetNbinsX(); ++ibin ) {
+      for ( int ibin=1; ibin <= hZinv->GetNbinsX()+1; ++ibin ) {
 	CRyieldCard->SetBinContent(ibin, integratedYield);
 	CRyieldCard->SetBinError(ibin,   integratedYieldErr);
         if (hDataEM) CRyieldEMCard->SetBinContent(ibin, EM);
         if (hDataEM) CRyieldEMCard->SetBinContent(ibin, errEM);
 	ratioCard->SetBinContent(ibin, ratioValue * h_MT2Template->GetBinContent(ibin));
-	ratioCard->SetBinError(ibin,   ratioValue * h_MT2Template->GetBinError(ibin));
+        float err = 0.0;
+        if(ratioValue>0.0 && h_MT2Template->GetBinContent(ibin)>0.0)
+            err = ratioValue * h_MT2Template->GetBinContent(ibin) * sqrt(pow(ratioErr/ratioValue,2) + pow(h_MT2Template->GetBinError(ibin)/h_MT2Template->GetBinContent(ibin),2));
+	ratioCard->SetBinError(ibin,   err);
 	purityCard->SetBinContent(ibin, integratedPurity);
 	purityCard->SetBinError(ibin,   integratedPurityErr);
       }
@@ -837,10 +848,20 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     if(hDY_lepeff_UP) ratioCard_lepeff_UP->Scale(hDY->Integral() / hDY_lepeff_UP->Integral());
     if(hDY_lepeff_DN) ratioCard_lepeff_DN->Scale(hDY->Integral() / hDY_lepeff_DN->Integral());
 
+    TH1D* ratioCard_trigeff_UP = (TH1D*)ratioCard->Clone("ratioCard_trigeff_UP");
+    TH1D* ratioCard_trigeff_DN = (TH1D*)ratioCard->Clone("ratioCard_trigeff_DN");
+    if(hDY_trigeff_UP) ratioCard_trigeff_UP->Scale(hDY->Integral() / hDY_trigeff_UP->Integral());
+    if(hDY_trigeff_DN) ratioCard_trigeff_DN->Scale(hDY->Integral() / hDY_trigeff_DN->Integral());
+
     TH1D* ratioCard_ZNJet_UP = (TH1D*)ratioCard->Clone("ratioCard_ZNJet_UP");
     TH1D* ratioCard_ZNJet_DN = (TH1D*)ratioCard->Clone("ratioCard_ZNJet_DN");
     if(hDY_ZNJet_UP && hZinv_ZNJet_UP) ratioCard_ZNJet_UP->Scale(hDY->Integral() / hDY_ZNJet_UP->Integral() * hZinv_ZNJet_UP->Integral() / hZinv->Integral());
     if(hDY_ZNJet_DN && hZinv_ZNJet_DN) ratioCard_ZNJet_DN->Scale(hDY->Integral() / hDY_ZNJet_DN->Integral() * hZinv_ZNJet_DN->Integral() / hZinv->Integral());
+
+    TH1D* ratioCard_renorm_UP = (TH1D*)ratioCard->Clone("ratioCard_renorm_UP");
+    TH1D* ratioCard_renorm_DN = (TH1D*)ratioCard->Clone("ratioCard_renorm_DN");
+    if(hDY_renorm_UP && hZinv_renorm_UP) ratioCard_renorm_UP->Scale(hDY->Integral() / hDY_renorm_UP->Integral() * hZinv_renorm_UP->Integral() / hZinv->Integral());
+    if(hDY_renorm_DN && hZinv_renorm_DN) ratioCard_renorm_DN->Scale(hDY->Integral() / hDY_renorm_DN->Integral() * hZinv_renorm_DN->Integral() / hZinv->Integral());
 
 
     TH1D* hybridEstimate  = (TH1D*) CRyieldCard->Clone("hybridEstimate");
@@ -864,8 +885,12 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
     ratioCard->Write();
     ratioCard_lepeff_UP->Write();
     ratioCard_lepeff_DN->Write();
+    ratioCard_trigeff_UP->Write();
+    ratioCard_trigeff_DN->Write();
     ratioCard_ZNJet_UP->Write();
     ratioCard_ZNJet_DN->Write();
+    ratioCard_renorm_UP->Write();
+    ratioCard_renorm_DN->Write();
     purityCard->Write();
     CRyieldCard->Write();
     h_lastbinHybrid->Write();
@@ -906,7 +931,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 //_______________________________________________________________________________
 void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto"){
 
-    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights";
+    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-14_combined";
     // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-11_2018fullYear_with2018MC";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_pred2016withFullCR";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_unblinded1718";
@@ -923,7 +948,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
 
   // get input files
   TFile* f_data = new TFile(Form("%s/data_RunAll.root",input_dir.c_str()));
-  TFile* f_zinv = new TFile(Form("%s/zinv_ht_2018.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
@@ -959,7 +984,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   // //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
   // makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
-   output_name = input_dir+"/zinvFromDY_blah.root";
+   output_name = input_dir+"/zinvFromDY.root";
    makeZinvFromDY( f_data, f_zinv , f_dy , f_top, dirs, output_name ); 
 
 

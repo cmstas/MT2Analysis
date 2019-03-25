@@ -160,12 +160,16 @@ void makePred(TFile* f_out, TFile* f_data, TFile* f_w, TFile* f_bkg, TFile* f_z,
 }
 
 
-void purityRL(string input_dir = "/home/users/gzevi/MT2/MT2Analysis/MT2looper/output/V00-01-05_25ns_Cert_246908-255031_skim/", string dataname = "data")
+void purityRL(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/", string dataname = "data_RunAll")
 {
   
+  // //load signal regions
+  // vector<SR> SRVec =  getSignalRegionsJamboree();
+  // vector<SR> SRVec2 =  getSignalRegionsMonojet();
+
   //load signal regions
-  vector<SR> SRVec =  getSignalRegionsJamboree();
-  vector<SR> SRVec2 =  getSignalRegionsMonojet();
+  vector<SR> SRVec =  getSignalRegions2018();
+  vector<SR> SRVec2 =  getSignalRegionsMonojet2017();
 
   //open files
   TString datanamestring(dataname);

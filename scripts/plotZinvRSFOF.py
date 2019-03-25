@@ -5,15 +5,15 @@ import numpy as np
 ROOT.gROOT.SetBatch(1)
 ROOT.gStyle.SetOptStat(0)
 
-fin = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_combined_17MCfor18_ttbbWeights/data_RunAll.root")
+fin = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-14_combined/data_RunAll.root")
 # fin = ROOT.TFile("/home/users/olivito/mt2_80x/MT2Analysis/MT2looper/output/V00-08-18_reminiaod/data_Run2016.root")
 # fin = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/full2016_data/data_Run2016.root")
 # lumi = 42.0
 # lumi = 4.79 + 9.79
 # lumi = 4.32 + 9.42
-lumi = 137.4
+lumi = 137
 # lumi = 35.9
-outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/V00-10-10_combined"
+outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/V00-10-14_combined"
 # outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/full2016"
 # outdir = "/home/users/bemarsh/public_html/mt2/RSFOF/full2016_dom"
 
@@ -69,7 +69,7 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     text.SetTextColor(ROOT.kBlack)
     text.SetTextSize(0.045)
     text.SetTextAlign(31)
-    text.DrawLatex(0.9, 0.91, "{0:.1f} fb^{{-1}} (13 TeV)".format(lumi))
+    text.DrawLatex(0.9, 0.91, "{0} fb^{{-1}} (13 TeV)".format(lumi))
     text.SetTextFont(62)
     text.SetTextAlign(11)
     text.DrawLatex(0.11, 0.91, "CMS Preliminary")
