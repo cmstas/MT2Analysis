@@ -753,14 +753,17 @@ def MakeMacroRegionPlot(macro_reg, datacard_dir, datacard_name, outdir, userMax=
 
 
 def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
-                      drawSignal=False, sigName=""):
+                      drawSignal=False, sigName="", do_ht_regs=None):
     # plot of topo regions summed over mt2 bins
 
     if len(utils.datacards)==0:
         print "ERROR: must load pickled datacards first! (utils.LoadPickledDatacards)"
         return
 
-    incl_regs = utils.GetInclusiveRegions()
+    if do_ht_regs is None:
+        incl_regs = utils.GetInclusiveRegions(doMonojet=True)
+    else:
+        incl_regs = utils.GetInclusiveRegions(doMonojet=False, ht_regs=do_ht_regs)
 
     incl_datacards = utils.GetInclusiveDatacards(None, None, incl_regs, fullPath=False)
 
@@ -855,7 +858,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
 
     ROOT.gStyle.SetOptStat(0)
     ROOT.gStyle.SetLineWidth(1)
-    c = ROOT.TCanvas("c","c",900,600)
+    c = ROOT.TCanvas("c","c",1350 if do_ht_regs is None else 1050,900)
 
     pads = []
     pads.append(ROOT.TPad("1","1",0.0,0.18,1.0,1.0))
@@ -879,7 +882,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     pads[0].SetTicky(1)
     pads[1].SetTicky(1)
     
-    yMin = 1e-1
+    yMin = 1e-1 if do_ht_regs is None else 0.5
     if userMax!=None:
         yMax = userMax
     else:
@@ -919,7 +922,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     ppmUtils.ConvertToPoissonGraph(h_data, g_data, drawZeros=True)
 #    g_data.SetPointError(g_data.GetN()-1, 0, 0, 0, 0)
     g_data.SetMarkerStyle(20)
-    g_data.SetMarkerSize(1.2)
+    g_data.SetMarkerSize(1.8)
     g_data.SetLineWidth(1)
     
     # draw the graph and then axes again on top
@@ -938,7 +941,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     text.SetNDC(1)
     text.SetTextAlign(32)
     text.SetTextAngle(90)
-    text.SetTextSize(min(binWidth * 1.6,0.026))
+    text.SetTextSize(min(binWidth * 1.6, 0.026 if do_ht_regs is None else 0.0262))
     text.SetTextFont(62)
     for ibin in range(nBinsTotal):
         x = left + (ibin+0.5)*binWidth
@@ -949,15 +952,17 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     text.SetTextAlign(13)
     text.SetTextFont(42)
     text.SetTextAngle(0)
-    text.SetTextSize(0.05)
-    text.DrawLatex(left+0.04,1-top-0.01, "Pre-fit background")
+    text.SetTextSize(0.05 if do_ht_regs is None else 0.04)
+    x = left+0.04 if do_ht_regs is None else left+0.02
+    text.DrawLatex(x,1-top-0.01, "Pre-fit background")
 
     # draw the HT bin  in upper middle
     text.SetTextAlign(21)
     text.SetTextFont(62)
     text.SetTextAngle(0)
     text.SetTextSize(0.035)
-    text.DrawLatex(left+(1-right-left)*0.5, 1-top-0.01-0.04, "Integrated over M_{T2}")
+    y = 1-top-0.01-0.04 if do_ht_regs is None else bot+(1-top-bot)*0.88
+    text.DrawLatex(left+(1-right-left)*0.5, y, "Integrated over M_{T2}")
 
     # Draw the CMS and luminosity text
     ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
@@ -970,8 +975,11 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     line.SetLineWidth(1)
     line.SetLineColor(ROOT.kBlack)
     nbins = []
-    nbins += [len(bins)-1 for bins in utils.GetMT2bins("monojet")]
-    ht_regs = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
+    if do_ht_regs is None:
+        nbins += [len(bins)-1 for bins in utils.GetMT2bins("monojet")]
+        ht_regs = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
+    else:
+        ht_regs = do_ht_regs
     nbins += [len(utils.GetJBJregions(ht_reg)) for ht_reg in ht_regs]
     ibin = 0
     for i in nbins:
@@ -982,11 +990,18 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     # draw the  region labels
     ibin = 0
     regtext = ["1j, 0b", "1j, 1b", "H_{T} [250,450]" , "H_{T} [450,575]" , "H_{T} [575,1200]" , "H_{T} [1200,1500]" , "H_{T} [1500, #infty]"]
+    if do_ht_regs is not None:
+        regtext = []
+        for ht_reg in do_ht_regs:
+            if ht_reg=="HT1200to1500":
+                regtext.append("1200 < H_{T} < 1500 GeV")
+            else:
+                regtext.append(ht_reg)
     for i,nbin in enumerate(nbins):
         xcenter = left + binWidth*(ibin+nbin/2.0)        
         text.SetTextAlign(23)
         text.SetTextFont(62)
-        text.SetTextSize(0.025)
+        text.SetTextSize(0.025 if do_ht_regs is None else 0.035)
         # in the 2nd-to-last region, move the text left a bit to avoid overlap with legend
         if i==len(regtext)-2:
             xcenter -= 1*binWidth
@@ -999,7 +1014,8 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
 
     
     # legend
-    leg = ROOT.TLegend(1-right-0.175,1-top-0.23,1-right-0.02,1-top-0.01)
+    x1 = 1-right-0.175 if do_ht_regs is None else 1-right-0.225
+    leg = ROOT.TLegend(x1,1-top-0.23,1-right-0.02,1-top-0.01)
     leg.SetBorderSize(1)
     leg.SetCornerRadius(0.3)
     leg.AddEntry(g_data,"Data","lp")
@@ -1020,12 +1036,13 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     g_ratio = ROOT.TGraphAsymmErrors()
     h_pred = h_bkg_tot.Clone("h_pred")
     ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, useMCErr=False)
-    h_ratio.GetYaxis().SetRangeUser(0,2)
+    h_ratio.GetYaxis().SetRangeUser(*ratioRange)
     h_ratio.GetYaxis().SetNdivisions(505)
     h_ratio.GetYaxis().SetTitle("Data/Pred.")
     h_ratio.GetYaxis().SetTitleSize(0.16)
     h_ratio.GetYaxis().SetTitleOffset(0.25)
-    h_ratio.GetYaxis().SetLabelSize(0.13)
+    h_ratio.GetYaxis().SetLabelSize(0.13 if do_ht_regs is None else 0.16)
+    h_ratio.GetYaxis().SetLabelOffset(0.01)
     h_ratio.GetYaxis().CenterTitle()
     h_ratio.GetYaxis().SetTickLength(0.02)
     h_ratio.GetXaxis().SetLabelSize(0)
@@ -1033,7 +1050,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     #h_ratio.GetXaxis().SetNdivisions(nBinsTotal,0,0)
     h_ratio.GetXaxis().SetTickSize(0.06)
     g_ratio.SetMarkerStyle(20)
-    g_ratio.SetMarkerSize(1.0)
+    g_ratio.SetMarkerSize(1.5)
     g_ratio.SetLineWidth(1)
 
     g_unc_ratio.SetFillStyle(1001)
@@ -1059,16 +1076,21 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     line.SetLineWidth(1)
     line.SetLineColor(ROOT.kBlack)
     nbins = []
-    nbins += [len(bins)-1 for bins in utils.GetMT2bins("monojet")]
-    ht_regs = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
+    if do_ht_regs is None:
+        nbins += [len(bins)-1 for bins in utils.GetMT2bins("monojet")]
+        ht_regs = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
+    else:
+        ht_regs = do_ht_regs
     nbins += [len(utils.GetJBJregions(ht_reg)) for ht_reg in ht_regs]
     ibin = 0
     for i in nbins:
         ibin += i
-        line.DrawLine(ibin, 0, ibin, 2)
+        line.DrawLine(ibin, ratioRange[0], ibin, ratioRange[1])
 
 
     name = "prefit_inclusive"
+    if do_ht_regs is not None:
+        name += "_" + "_".join(do_ht_regs)
     try:
         os.makedirs(outdir)
     except:

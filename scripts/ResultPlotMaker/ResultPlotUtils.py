@@ -19,10 +19,10 @@ def LoadPostfitFile(fname):
     postfit_file = ROOT.TFile(fname)
 
 
-def GetPull(pred, syst, obs, N=50000):
+def GetPull(pred, syst, obs, N=100000):
     relsyst = 1.0 + syst/pred
     s, t = 0, 0
-    for i in range(10000):
+    for i in range(N):
         t += 1
         toyobs = np.random.poisson(pred*(relsyst**np.random.randn()))
         if toyobs < obs:
@@ -374,7 +374,7 @@ def GetMT2binsFull(topo_reg):
     return bins
 
 
-def GetInclusiveRegions(doMonojet=True):
+def GetInclusiveRegions(doMonojet=True, ht_regs=None):
     regions = []
 
     # handle monojet
@@ -387,7 +387,8 @@ def GetInclusiveRegions(doMonojet=True):
                 binname = binname.replace("-1","Inf")
                 regions.append(binname)
 
-    ht_regs = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
+    if ht_regs is None:
+        ht_regs = ["HT250to450", "HT450to575", "HT575to1200", "HT1200to1500", "HT1500toInf"]
 
     for ht_reg in ht_regs:
         jbj_regs = GetJBJregions(ht_reg)
