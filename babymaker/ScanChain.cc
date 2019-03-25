@@ -2079,6 +2079,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       nBJet40 = 0;
       nBJet20csv = 0;    // counters for 2 different algorithms
       nBJet30csv = 0;    // counters for 2 different algorithms
+      nHEMJet20 = 0;
+      nHEMJet30 = 0;
+      nHEMJet40 = 0;
       nJet30FailId = 0;
       nJet100FailId = 0;
       nJet20BadFastsim = 0;
