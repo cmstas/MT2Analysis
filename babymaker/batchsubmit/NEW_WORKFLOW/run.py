@@ -7,16 +7,17 @@ import sys
 import cPickle as pickle
 from utils import *
 
+USER = os.environ["USER"]
 
-# tag = "V00-10-12_2016fullYear"
-tag = "V00-10-12_2017fullYear"
-# tag = "V00-10-12_2018fullYear"
+tag = "V00-10-15_2016fullYear"
+# tag = "V00-10-15_2017fullYear"
+# tag = "V00-10-14_2018fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2016fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2017fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2018fullYear"
 skims = {}
 skims["base"] = [""]
-skims["ST"] = [""]
+# skims["ST"] = [""]
 # skims["qcd"] = [""]
 # skims["RS"] = [""]
 # skims["dilep"] = [""]
@@ -45,7 +46,7 @@ for s in sampnames:
     nevents = int(metadata[2])
     xsec_corr = float(metadata[6])
     d[s].nevents = nevents
-    outdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}".format(tag, s)
+    outdir = "/hadoop/cms/store/user/{0}/mt2babies/{1}_{2}".format(USER, tag, s)
     job_ids = []
     for line in fl:
         if line.startswith("#"):
@@ -99,7 +100,7 @@ savepkl(d)
 for s in sampnames:
     os.system("mkdir -p {0}/condor_configs".format(tag))
 
-summarydir = "/home/users/bemarsh/public_html/mt2/babymaking_summary"
+summarydir = "/home/users/{0}/public_html/mt2/babymaking_summary".format(USER)
 os.system("mkdir -p "+summarydir)
 
 alldone = False
@@ -117,8 +118,8 @@ while not alldone:
     sweeprootJobs(to_sweeproot)
 
     # get the current condor output
-    subprocess.call("condor_release bemarsh > /dev/null", shell=True)
-    p = subprocess.Popen("condor_q {0} -nobatch -wide".format(os.environ["USER"]).split(), stdout=subprocess.PIPE)
+    subprocess.call("condor_release {0} &> /dev/null".format(USER), shell=True)
+    p = subprocess.Popen("condor_q {0} -nobatch -wide".format(USER).split(), stdout=subprocess.PIPE)
     out, err = p.communicate()
     condor_out = out.split("\n")
 
@@ -208,7 +209,7 @@ os.system("mkdir -p "+logdir)
 cmds = []
 for s in sampnames:
     for skim in skims:
-        hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}/skim_{2}".format(tag, s, skim)
+        hadoopdir = "/hadoop/cms/store/user/{0}/mt2babies/{1}_{2}/skim_{3}".format(USER, tag, s, skim)
         if not os.path.exists(hadoopdir):
             continue
         nfsdir = os.path.join(basedir, "{0}_skim_{1}".format(tag, skim))
@@ -257,7 +258,7 @@ if maxcount <= 1:
     sys.exit(0)
 
 print "* Needs an extension merge!"
-logdir = "/nfs-7/userdata/mt2/extmergeLogs_bemarsh"
+logdir = "/nfs-7/userdata/mt2/extmergeLogs_{0}".format(USER)
 subprocess.call("mkdir -p "+logdir, shell=True)
 for skimname in skims:
     print "** Doing {0} skim".format(skimname)
@@ -272,7 +273,7 @@ for skimname in skims:
             for f in glob.glob("{0}/{1}*.root".format(skimdir, s)):
                 subprocess.call("ln -s -t {0} {1}".format(extmergedir, f), shell=True)
         else:
-            hadoopdir = "/hadoop/cms/store/user/bemarsh/mt2babies/{0}_{1}/skim_{2}".format(tag, s, skim)
+            hadoopdir = "/hadoop/cms/store/user/{0}/mt2babies/{1}_{2}/skim_{3}".format(USER, tag, s, skim)
             if os.path.exists(hadoopdir):
                 ps.append(subprocess.Popen("nice -n 19 python skim_bennettworkflow/mergeFixScale1fb.py {0} {1} {2} {3} > {4}/log_{5}_{3}.txt".format(samp_events[s], skimdir, extmergedir, s, logdir, skimname), shell=True))
 

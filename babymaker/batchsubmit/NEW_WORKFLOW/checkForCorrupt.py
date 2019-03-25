@@ -1,7 +1,8 @@
 import subprocess
 import glob
 
-indirs = glob.glob("/hadoop/cms/store/user/jguiang/chronosim/")
+# indirs = glob.glob("/hadoop/cms/store/user/jguiang/chronosim/")
+indirs = glob.glob("/hadoop/cms/store/user/usarica/STOP_1L/*")
 
 badfiles = []
 for indir in indirs:

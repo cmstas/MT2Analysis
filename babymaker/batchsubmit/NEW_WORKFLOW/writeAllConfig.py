@@ -10,32 +10,32 @@ from samples_2018 import samples_2018
 
 checkForScale1fb = True
 
-# tag = "V00-10-12_2016fullYear"
-# tag = "V00-10-12_2017fullYear"
-tag = "V00-10-12_2018fullYear"
+tag = "V00-10-15_2016fullYear"
+# tag = "V00-10-15_2017fullYear"
+# tag = "V00-10-14_2018fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2016fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2017fullYear"
 # tag = "RebalanceAndSmear_V00-10-09_2018fullYear"
-# samples = samples_2016
+samples = samples_2016
 # samples = samples_2017
-samples = samples_2018
+# samples = samples_2018
 
-# cms4tags = ["CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-17", "CMS4_V00-00-02_2017Sep27"]
+cms4tags = ["CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-17", "CMS4_V00-00-02_2017Sep27"]
 # cms4tags = ["CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-19"]
-cms4tags = ["CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04"]
+# cms4tags = ["CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04"]
 
 do = [
-    "data",
-    "ttbar",
-    "wjets",
-    "zinv",
-    "dyjetsll",
-    "qcd_ht",
-    "singletop",
-    "tttt",
-    "gjets",
-    "ttv",
-    "diboson",
+    # "data",
+    # "ttbar",
+    # "wjets",
+    # "zinv",
+    # "dyjetsll",
+    # "qcd_ht",
+    # "singletop",
+    # "tttt",
+    # "gjets",
+    # "ttv",
+    # "diboson",
     "signal",
 ]
 
