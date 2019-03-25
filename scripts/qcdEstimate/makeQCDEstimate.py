@@ -10,17 +10,18 @@ MT2indir    = open('inputs.txt').readlines()[1].strip()
 tag = indir.split("/")[-1]
 outdir = "output/"+tag
 
-data_sample = "data_Run2016"
+data_sample = "data_Run2018"
 qcd_sample = "qcd_ht"
-nonqcd_samples = ["top","wjets_ht","zinv_ht","dyjetsll_ht"]
+nonqcd_samples = ["top","wjets_ht","zinv_ht"]
 
-ht_reg_names = ["ht250to450","ht450to575","ht575to1200","ht1200to1500" ,"ht1500toInf","ht1200toInf","ht1500toInf"]
-nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
-top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
+ht_reg_names = ["ht250to450","ht450to575","ht575to1200","ht1200to1500" ,"ht1500toInf"]
+nj_reg_names = ["j2to3","j4to6","j7to9","j10toInf","j2to6","j7toInf"]
+vll_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
                  "j7toInf_b0","j7toInf_b1","j7toInf_b2","j2to6_b3toInf","j7toInf_b3toInf"]
-vl_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4toInf_b0","j4toInf_b1","j4toInf_b2","j2toInf_b3toInf"]
-ssr_top_reg_names = ["j2toInf_b3toInf","j2toInf_b0toInf","j4toInf_b0toInf","j7toInf_b0toInf","j2toInf_b2toInf","j7toInf_b3toInf"]
-vl_top_reg_nums = [1, 2, 3, 12, 13, 14, 15]
+mhuh_top_reg_names = ["j2to3_b0","j2to3_b1","j2to3_b2","j4to6_b0","j4to6_b1","j4to6_b2",
+                 "j2to6_b3toInf","j7to9_b0","j7to9_b1","j7to9_b2","j7to9_b3","j7to9_b4toInf","j10toInf_b0","j10toInf_b1","j10toInf_b2","j10toInf_b3","j10toInf_b4toInf"]
+vll_top_reg_nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+mhuh_top_reg_nums = [1, 2, 3, 4, 5, 6, 10, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
 ssr_low_top_reg_nums = [i for i in range(20,32,2)]
 ssr_hi_top_reg_nums = [i for i in range(21,32,2)]
 
@@ -76,27 +77,20 @@ rphi_mc_dir = fout.mkdir("r_effectiveMC")
 qcd_estimate_dir = fout.mkdir("qcdEstimate")
 qcd_estimate_mc_dir = fout.mkdir("qcdEstimate_mc")
 for iht,ht_reg in enumerate(ht_reg_names):
-  topo_reg_names = top_reg_names
-  if ht_reg == "ht250to450":
-    topo_reg_names = vl_top_reg_names
-  elif ht_reg == "ht1200toInf":
-    topo_reg_names = ssr_top_reg_names
-  elif ht_reg == "ht1500toInf" and iht == 6:
-    topo_reg_names = ssr_top_reg_names
+  if ht_reg == "ht250to450" or ht_reg == "ht450to575":
+    topo_reg_names = vll_top_reg_names
+    topo_reg_nums = vll_top_reg_nums
+  else:
+    topo_reg_names = mhuh_top_reg_names
+    topo_reg_nums = mhuh_top_reg_nums
   ht_reg_tmp = ht_reg
   for itop,top_reg in enumerate(topo_reg_names):
     ht_reg = ht_reg_tmp
     nj_reg = top_reg.split('_')[0]
     nb_reg = top_reg.split('_')[1]
-    htAbbrev = ["VL","L","M","H","UH","",""][iht]
+    htAbbrev = ["VL","L","M","H","UH"][iht]
      
-    topi = itop+1
-    if ht_reg == "ht250to450":
-      topi = vl_top_reg_nums[itop]
-    elif ht_reg == "ht1200toInf":
-      topi = ssr_low_top_reg_nums[itop]
-    elif ht_reg == "ht1500toInf" and iht == 6:
-        topi = ssr_hi_top_reg_nums[itop]
+    topi = topo_reg_nums[itop]
 
     print "Getting CR yields and forming QCD estimate in region",str(topi)+htAbbrev    
     
@@ -217,9 +211,14 @@ for iht,ht_reg in enumerate(ht_reg_names):
       fj_mc = h_fj_mc.GetBinContent(2)
       fj_data_relerr = h_fj_data.GetBinError(2)/fj_data
       fj_mc_relerr = h_fj_mc.GetBinError(2)/fj_mc
-    elif nj_reg == "j7toInf":
+    elif nj_reg == "j7to9":
       fj_data = h_fj_data.GetBinContent(3)
       fj_mc = h_fj_mc.GetBinContent(3)
+      fj_data_relerr = h_fj_data.GetBinError(3)/fj_data
+      fj_mc_relerr = h_fj_mc.GetBinError(3)/fj_mc
+    elif nj_reg == "j10toInf":
+      fj_data = h_fj_data.GetBinContent(4)
+      fj_mc = h_fj_mc.GetBinContent(4)
       fj_data_relerr = h_fj_data.GetBinError(3)/fj_data
       fj_mc_relerr = h_fj_mc.GetBinError(3)/fj_mc
     elif nj_reg == "j2to6":
@@ -229,18 +228,11 @@ for iht,ht_reg in enumerate(ht_reg_names):
       fj_mc = h_fj_mc.IntegralAndError(1,2,fj_mc_relerr)
       fj_data_relerr /= fj_data
       fj_mc_relerr /= fj_mc
-    elif nj_reg == "j4toInf":
+    elif nj_reg == "j7toInf":
       fj_data_relerr = ROOT.Double(0)
       fj_mc_relerr = ROOT.Double(0)
-      fj_data = h_fj_data.IntegralAndError(2,3,fj_data_relerr)
-      fj_mc = h_fj_mc.IntegralAndError(2,3,fj_mc_relerr)
-      fj_data_relerr /= fj_data
-      fj_mc_relerr /= fj_mc
-    elif nj_reg == "j2toInf":
-      fj_data_relerr = ROOT.Double(0)
-      fj_mc_relerr = ROOT.Double(0)
-      fj_data = h_fj_data.IntegralAndError(1,3,fj_data_relerr)
-      fj_mc = h_fj_mc.IntegralAndError(1,3,fj_mc_relerr)
+      fj_data = h_fj_data.IntegralAndError(3,4,fj_data_relerr)
+      fj_mc = h_fj_mc.IntegralAndError(3,4,fj_mc_relerr)
       fj_data_relerr /= fj_data
       fj_mc_relerr /= fj_mc
     else:
@@ -262,23 +254,35 @@ for iht,ht_reg in enumerate(ht_reg_names):
       rb_mc = h_rb_mc.GetBinContent(3)
       rb_data_err = h_rb_data.GetBinError(3)/rb_data
       rb_mc_err = h_rb_mc.GetBinError(3)/rb_mc
-    elif nb_reg == "b3toInf":
+    elif nb_reg == "b3":
       rb_data = h_rb_data.GetBinContent(4)
       rb_mc = h_rb_mc.GetBinContent(4)
       rb_data_err = h_rb_data.GetBinError(4)/rb_data
       rb_mc_err = h_rb_mc.GetBinError(4)/rb_mc
+    elif nb_reg == "b4toInf":
+      rb_data = h_rb_data.GetBinContent(5)
+      rb_mc = h_rb_mc.GetBinContent(5)
+      rb_data_err = h_rb_data.GetBinError(5)/rb_data
+      rb_mc_err = h_rb_mc.GetBinError(5)/rb_mc
     elif nb_reg == "b0toInf":
       rb_data_err = ROOT.Double(0)
       rb_mc_err = ROOT.Double(0)
-      rb_data = h_rb_data.IntegralAndError(1,4,rb_data_err)
-      rb_mc = h_rb_mc.IntegralAndError(1,4,rb_mc_err)
+      rb_data = h_rb_data.IntegralAndError(1,5,rb_data_err)
+      rb_mc = h_rb_mc.IntegralAndError(1,5,rb_mc_err)
       rb_data_err /= rb_data
       rb_mc_err /= rb_mc
     elif nb_reg == "b2toInf":
       rb_data_err = ROOT.Double(0)
       rb_mc_err = ROOT.Double(0)
-      rb_data = h_rb_data.IntegralAndError(3,4,rb_data_err)
-      rb_mc = h_rb_mc.IntegralAndError(3,4,rb_mc_err)
+      rb_data = h_rb_data.IntegralAndError(3,5,rb_data_err)
+      rb_mc = h_rb_mc.IntegralAndError(3,5,rb_mc_err)
+      rb_data_err /= rb_data
+      rb_mc_err /= rb_mc
+    elif nb_reg == "b3toInf":
+      rb_data_err = ROOT.Double(0)
+      rb_mc_err = ROOT.Double(0)
+      rb_data = h_rb_data.IntegralAndError(4,5,rb_data_err)
+      rb_mc = h_rb_mc.IntegralAndError(4,5,rb_mc_err)
       rb_data_err /= rb_data
       rb_mc_err /= rb_mc
     else:
@@ -289,6 +293,7 @@ for iht,ht_reg in enumerate(ht_reg_names):
 
     # missing correction for purity, add that here
     qcdEstimate_data.Multiply(h_purity)
+    qcdEstimate_mc.Multiply(h_purity)
     
     qcdEstimate_data.Multiply(h_rphi_data)
     qcdEstimate_mc.Multiply(h_rphi_mc)        

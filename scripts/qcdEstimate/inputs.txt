@@ -1,3 +1,5 @@
-/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/V00-09-04_41p96fb
-/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-09-04_41p96fb
+/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/V00-10-09_2018fullYear
+/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-10_forReffective/
 
+/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/V00-10-10_2016fullYear
+/home/users/bemarsh/analysis/mt2/current/MT2Analysis/QCDLooper/output/V00-10-09_2017fullYear

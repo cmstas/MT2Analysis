@@ -9,7 +9,7 @@ import numpy as np
 import ROOT
 
 indir = open('inputs.txt').readlines()[0].strip()
-tag = indir.split("/")[-1]
+tag = indir.strip("/").split("/")[-1]
 outdir = "output/"+tag
 
 try:
@@ -19,10 +19,10 @@ except:
 
 qcd_sample = "qcd_ht"
 nqcd_samples = ["ewk"]
-data_sample = "data_Run2017"
+data_sample = "data_Run2016"
 
 ht_reg_names = ["ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"]
-nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
+nj_reg_names = ["j2to3","j4to6","j7to9","j10toInf","j2to6","j7toInf"]
 
 fout = ROOT.TFile(os.path.join(outdir,"qcdHistos.root"),"RECREATE")
 
@@ -223,7 +223,7 @@ for reg in ht_reg_names:
   h_datasub_fj.Scale(1.0/h_datasub_fj.Integral(0,-1))
 
   # rebin
-  njbins = [2,4,7,11]
+  njbins = [2,4,7,10,14]
   njbins = np.array(njbins, dtype=float)
 
   h_qcd_fj = h_qcd_fj.Rebin(njbins.size-1, "h_qcd_fj", njbins)
@@ -297,7 +297,7 @@ for reg in nj_reg_names:
   h_mcall_rb.Scale(1.0/h_mcall_rb.Integral(0,-1))
   h_datasub_rb.Scale(1.0/h_datasub_rb.Integral(0,-1))
 
-  nbjbins = [0,1,2,3,6]
+  nbjbins = [0,1,2,3,4,6]
   nbjbins = np.array(nbjbins, dtype=float)
 
   h_qcd_rb = h_qcd_rb.Rebin(nbjbins.size-1, "h_qcd_rb", nbjbins)

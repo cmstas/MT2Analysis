@@ -1,4 +1,5 @@
 import ROOT
+import glob
 
 justplot = True
 
@@ -7,7 +8,10 @@ if not justplot:
   ROOT.gROOT.SetBatch(1)
 
   c = ROOT.TChain("mt2")
-  c.Add("/nfs-6/userdata/mt2/V00-10-04_2016fullYear_17Jul2018/data_Run2016*JetHT*.root")
+  files = glob.glob("/hadoop/cms/store/user/bemarsh/mt2babies/V00-10-08_2016fullYear_17Jul2018_data_Run2016*JetHT*/mt2_baby*.root")
+  print "Adding {0} files...".format(len(files))
+  for f in files:
+    c.Add(f)
 
   h_PFHT900 = ROOT.TH1D("h_PFHT900","PFHT900",80,0,2000)    
   h_PFHT800 = ROOT.TH1D("h_PFHT800","PFHT800",80,0,2000)
@@ -64,7 +68,7 @@ if not justplot:
   h_PFHT475over125.Sumw2()
   h_PFHT475over125.Divide(h_PFHT125)
 
-  fout = ROOT.TFile("prescales.root","RECREATE")
+  fout = ROOT.TFile("prescales_2016.root","RECREATE")
   h_PFHT900.Write()
   h_PFHT800.Write()
   h_PFHT600.Write()
@@ -84,11 +88,7 @@ if not justplot:
   h_PFHT475over125.Write()
   fout.Close()
 
-fin = ROOT.TFile("prescales.root")
-
-fit_900_800 = ROOT.TF1("fit_900_800","[0]",1000,2000)
-h_PFHT900over800 = fin.Get("h_PFHT900over800")
-h_PFHT900over800.Fit("fit_900_800","QN","goff",1000,2000)
+fin = ROOT.TFile("prescales_2016.root")
 
 fit_900_600 = ROOT.TF1("fit_900_600","[0]",1000,2000)
 h_PFHT900over600 = fin.Get("h_PFHT900over600")
@@ -125,7 +125,6 @@ h_PFHT475over125.Fit("fit_475_125","QN","goff",575,2000)
 ROOT.gStyle.SetOptStat(0)
 c = ROOT.TCanvas("c1","c1",650,650)
 c.SetLogy(1)
-h_PFHT900over800.SetLineColor(ROOT.kOrange+9)
 h_PFHT900over600.SetLineColor(ROOT.kMagenta)
 h_PFHT900over475.SetLineColor(ROOT.kBlack)
 h_PFHT900over350.SetLineColor(ROOT.kRed)
@@ -134,7 +133,6 @@ h_PFHT475over350.SetLineColor(ROOT.kGreen)
 h_PFHT475over300.SetLineColor(ROOT.kAzure)
 h_PFHT475over200.SetLineColor(ROOT.kOrange+3)
 h_PFHT475over125.SetLineColor(ROOT.kViolet-1)
-h_PFHT900over800.SetLineWidth(2)
 h_PFHT900over600.SetLineWidth(2)
 h_PFHT900over475.SetLineWidth(2)
 h_PFHT900over350.SetLineWidth(2)
@@ -144,7 +142,6 @@ h_PFHT475over300.SetLineWidth(2)
 h_PFHT475over200.SetLineWidth(2)
 h_PFHT475over125.SetLineWidth(2)
 
-fit_900_800.SetLineColor(h_PFHT900over800.GetLineColor())
 fit_900_600.SetLineColor(h_PFHT900over600.GetLineColor())
 fit_900_475.SetLineColor(h_PFHT900over475.GetLineColor())
 fit_900_350.SetLineColor(h_PFHT900over350.GetLineColor())
@@ -153,7 +150,6 @@ fit_475_350.SetLineColor(h_PFHT475over350.GetLineColor())
 fit_475_300.SetLineColor(h_PFHT475over300.GetLineColor())
 fit_475_200.SetLineColor(h_PFHT475over200.GetLineColor())
 fit_475_125.SetLineColor(h_PFHT475over125.GetLineColor())
-fit_900_800.SetLineWidth(2)
 fit_900_600.SetLineWidth(2)
 fit_900_475.SetLineWidth(2)
 fit_900_350.SetLineWidth(2)
@@ -164,7 +160,6 @@ fit_475_200.SetLineWidth(2)
 fit_475_125.SetLineWidth(2)
 
 h_PFHT900over600.GetYaxis().SetRangeUser(0.001,1000)
-# h_PFHT900over800.Draw("E0")
 h_PFHT900over600.Draw("E0 SAME")
 h_PFHT900over475.Draw("E0 SAME")
 h_PFHT900over350.Draw("E0 SAME")
@@ -174,7 +169,6 @@ h_PFHT475over300.Draw("E0 SAME")
 h_PFHT475over200.Draw("E0 SAME")
 h_PFHT475over125.Draw("E0 SAME")
 
-fit_900_800.Draw("SAME")
 fit_900_600.Draw("SAME")
 fit_900_475.Draw("SAME")
 fit_900_350.Draw("SAME")
@@ -187,7 +181,6 @@ fit_475_125.Draw("SAME")
 leg = ROOT.TLegend(0.3,0.12,0.8,0.35)
 leg.SetTextFont(62)
 
-# leg.AddEntry(fit_900_800, "PFHT900/800: {0:.1f} #pm {1:.1f}".format(fit_900_800.GetParameter(0), fit_900_800.GetParError(0)),'l')
 leg.AddEntry(fit_900_600, "PFHT900/600: {0:.1f} #pm {1:.1f}".format(fit_900_600.GetParameter(0), fit_900_600.GetParError(0)),'l')
 leg.AddEntry(fit_900_475, "PFHT900/475: {0:.1f} #pm {1:.1f}".format(fit_900_475.GetParameter(0), fit_900_475.GetParError(0)),'l')
 leg.AddEntry(fit_900_350, "PFHT900/350: {0:.1f} #pm {1:.1f}".format(fit_900_350.GetParameter(0), fit_900_350.GetParError(0)),'l')
@@ -199,6 +192,9 @@ leg.AddEntry(fit_475_125, "PFHT475/125: {0:.1f} #pm {1:.1f}".format(fit_475_125.
 leg.SetFillStyle(0)
 leg.SetBorderSize(0)
 leg.Draw()
+
+c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2016_94x.png")
+c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2016_94x.pdf")
 
 raw_input()
 

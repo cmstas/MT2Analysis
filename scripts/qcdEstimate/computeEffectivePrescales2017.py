@@ -1,3 +1,4 @@
+import glob
 import ROOT
 
 justplot = False
@@ -7,7 +8,11 @@ if not justplot:
   ROOT.gROOT.SetBatch(1)
 
   c = ROOT.TChain("mt2")
-  c.Add("/nfs-6/userdata/mt2/V00-09-04_json_294927-306462_PromptReco_41p96fb/*Run2017*JetHT*.root")
+  files = glob.glob("/hadoop/cms/store/user/bemarsh/mt2babies/V00-10-08_2018fullYear_17Sep2018_data_Run2018*JetHT*/mt2_baby*.root")
+  print "Adding {0} files...".format(len(files))
+  for f in files:
+    c.Add(f)
+
   c.SetBranchStatus("*",0)
   c.SetBranchStatus("HLT_PFHT*",1)
   c.SetBranchStatus("isGolden",1)
@@ -86,7 +91,7 @@ if not justplot:
   h_PFHT510over180.Sumw2()
   h_PFHT510over180.Divide(h_PFHT180)
 
-  fout = ROOT.TFile("prescales.root","RECREATE")
+  fout = ROOT.TFile("prescales_2018.root","RECREATE")
   h_PFHT1050.Write()
   h_PFHT890.Write()
   h_PFHT780.Write()
@@ -112,7 +117,9 @@ if not justplot:
   h_PFHT510over180.Write()
   fout.Close()
 
-fin = ROOT.TFile("prescales.root")
+# exit(0)
+
+fin = ROOT.TFile("prescales_2018.root")
 
 fit_1050_890 = ROOT.TF1("fit_1050_890","[0]",1250,2000)
 h_PFHT1050over890 = fin.Get("h_PFHT1050over890")
@@ -254,8 +261,10 @@ leg.SetFillStyle(0)
 leg.SetBorderSize(0)
 leg.Draw()
 
-c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2017.pdf")
-c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2017.png")
+c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2018.pdf")
+c.SaveAs("~/public_html/mt2/RebalanceAndSmear/prescales/prescales_2018.png")
+
+# c.SaveAs("~/public_html/test.pdf")
 
 raw_input()
 

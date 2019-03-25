@@ -9,7 +9,7 @@ import QCDPlotMaker as pm
 ROOT.gROOT.SetBatch(1)
 
 indir = open('inputs.txt').readlines()[0].strip()
-tag = indir.split("/")[-1]
+tag = indir.strip("/").split("/")[-1]
 
 infile = "output/{0}/qcdHistos.root".format(tag)
 outdir = "qcd_plots/"+tag
@@ -22,7 +22,7 @@ except:
 fin = ROOT.TFile(infile)
 
 ht_reg_names = ["ht250to450","ht450to575","ht575to1200","ht1200to1500","ht1500toInf","ht1200toInf"]
-nj_reg_names = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"]
+nj_reg_names = ["j2to3","j4to6","j7to9","j10toInf","j2to6","j7toInf"]
 
 ## r_phi
 for reg in ht_reg_names:

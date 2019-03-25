@@ -5,10 +5,12 @@ import sys
 import numpy as np
 import ROOT
 
-def makeRbPlot(h_mc, h_data, nj_reg, outfile):
-    nj_reg = ["j2to3","j4to6","j7toInf","j2to6","j4toInf","j2toInf"].index(nj_reg)
+lumi = 35.9
 
-    nj_bounds = [(2,3),(4,6),(2,6),(7,"Inf"),(4,"Inf"),(2,"Inf")]
+def makeRbPlot(h_mc, h_data, nj_reg, outfile):
+    nj_reg = ["j2to3","j4to6","j7to9","j10toInf", "j2to6", "j7toInf"].index(nj_reg)
+
+    nj_bounds = [(2,3),(4,6),(7,9),(10,"Inf"),(2,6),(7,"Inf")]
 
     h_mcerr = h_mc.Clone("h_mcerr")
 
@@ -206,7 +208,7 @@ def drawHeaders(canvas, isData):
         text.SetTextAlign(31)
         text.SetTextSize(0.035)
         text.SetTextFont(42)
-        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(42.0, 'fb', 13))
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(lumi, 'fb', 13))
         cmsText = "CMS Preliminary"
     #CMS text
     text.SetTextSize(0.035)
