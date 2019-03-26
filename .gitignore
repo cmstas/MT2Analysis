@@ -37,3 +37,11 @@ scripts/cards*/**
 ShortTrackTagAndProbeLooper/*.root
 scripts/CardMaker/test.txt
 scripts/fits*/**
+RebalanceAndSmear/plotting/looper_output/V*
+RebalanceAndSmear/SmearLooper/batchsubmit/job_input*
+scripts/trigeff/trigeff*.root
+scripts/trigeff/trigeff*.eps
+limits/SignalScan/limits*.txt
+limits/SignalScan/limits*.root
+babymaker/batchsubmit/NEW_WORKFLOW/V*
+babymaker/batchsubmit/skim_bennettworkflow/log*
