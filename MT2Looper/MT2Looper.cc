@@ -967,6 +967,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       bool isHEMaffected = false; // use later to determine whether to veto electrons in HEM region from CRSL
       if(doHEMveto && config_.year == 2018){
           bool hasHEMjet = false;
+	  float lostHEMtrackPt = 0;
           if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
               isHEMaffected = true;
               for(int i=0; i<t.njet; i++){
@@ -976,11 +977,27 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
                      t.jet_phi[i] > HEM_region[2] && t.jet_phi[i] < HEM_region[3])
                       hasHEMjet = true;
               }
+	      for (int i=0; i<t.ntracks; i++){
+		// Is the track in the HEM region?
+		if ( !(t.track_eta[i] > HEM_region[0] && t.track_eta[i] < HEM_region[1] &&
+		      t.track_phi[i] > HEM_region[2] && t.track_phi[i] < HEM_region[3]))
+		  continue;
+		// Found a track in the HEM region. Is is high enough quality to veto the event?
+		if (!t.track_isHighPurity[i]) continue;
+		if (fabs(t.track_dz[i]) > 0.1 || fabs(t.track_dxy[i]) > 0.03) continue;
+		if (t.track_nPixelLayersWithMeasurement[i] < 3) continue;
+		if (t.track_nLostInnerPixelHits[i] > 0) continue;
+		if (t.track_nLostOuterHits[i] > 1) continue;
+		// May wish to add this guy
+		//if (t.track_ptErr[i_trk] / (t.track_pt[i_trk]*t.track_pt[i_trk]) > 0.02) continue;
+		lostHEMtrackPt += t.track_pt[i];
+	      }
           }
-          if(hasHEMjet){
+	  // May wish to set lostHEMtrackPt threshold to some higher value; this is equivalent to "any lost track" (saving only pT > 15 GeV tracks in babies for now)
+          if(hasHEMjet || lostHEMtrackPt > 0){
               // cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
               continue;
-          }
+          }	  
       }
 
       // // txt MET filters (data only)
