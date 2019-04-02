@@ -822,7 +822,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   // set up signal binning
   if (sample.find("T2cc") != std::string::npos) {
     // 5 GeV binning up to 800 GeV
-    n_m2bins = 161;
+    n_m2bins = 221;
   }
   m1bins = new float[n_m1bins+1];
   m2bins = new float[n_m2bins+1];
@@ -2620,6 +2620,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_nlepveto"+s,     nlepveto_,   evtweight_, h_1d, ";N(leps)", 10, 0, 10);
     plot1D("h_J0pt"+s,       jet1_pt_,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
     plot1D("h_J1pt"+s,       jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+    plot1D("h_J0eta"+s,       t.jet_eta[t.good_jet_idxs[0]],   evtweight_, h_1d, ";eta(jet1)", 48, -3, 3);
+    plot1D("h_J0phi"+s,       t.jet_phi[t.good_jet_idxs[0]],   evtweight_, h_1d, ";phi(jet1)", 48, -3.14159, 3.14159);
   }
 
 
@@ -3122,8 +3124,10 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_nbjbins"+s,       nBJet20_,   evtweight_, h_1d, ";N(bjets)", n_nbjbins, nbjbins);
     plot1D("h_leppt1"+s,      t.lep_pt[0],   evtweight_, h_1d, ";p_{T}(lep1) [GeV]", 20, 0, 500);
     plot1D("h_leppt2"+s,      t.lep_pt[1],   evtweight_, h_1d, ";p_{T}(lep2) [GeV]", 20, 0, 500);
-    plot1D("h_jetpt1"+s,      jet1_pt_,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 24, 0, 1200);
-    plot1D("h_jetpt2"+s,      jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 24, 0, 1200);
+    plot1D("h_jetpt1"+s,      jet1_pt_,   evtweight_, h_1d, ";p_{T}(jet1) [GeV]", 150, 0, 1500);
+    plot1D("h_jetpt2"+s,      jet2_pt_,   evtweight_, h_1d, ";p_{T}(jet2) [GeV]", 150, 0, 1500);
+    plot1D("h_jeteta1"+s,      t.jet_eta[t.good_jet_idxs[0]],   evtweight_, h_1d, ";eta(jet1) [GeV]", 48, -3, 3);
+    plot1D("h_jetphi1"+s,      t.jet_phi[t.good_jet_idxs[0]],   evtweight_, h_1d, ";phi(jet1) [GeV]", 48, -3.14159, 3.14159);
     plot1D("h_zllmass"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
     plot1D("h_zllpt"+s,      t.zll_pt,   evtweight_, h_1d, ";p_{T}(ll) [GeV]", 40, 0, 1000);
     if (abs(t.lep_pdgId[0])==11) plot1D("h_zllmassEle"+s,      t.zll_mass,   evtweight_, h_1d, ";m_{ll} [GeV]", 60, 0, 120);
