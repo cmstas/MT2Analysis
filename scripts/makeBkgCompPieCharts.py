@@ -13,12 +13,36 @@ datacards = pickle.load(open(os.path.join(datacard_dir, "template_datacards.pkl"
 topfile = r.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-14_combined/top.root")
 wjetsfile = r.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-14_combined/wjets_ht.root")
 
+# ht_reg = "HT1500toInf"
 ht_reg = "HT1200to1500"
+# ht_reg = "HT575to1200"
+# ht_reg = "HT450to575"
+# ht_reg = "HT250to450"
 
 # hardcode these because they're different
 monojet_regs = [
+
+    # # VL HT
+    # "HT250to350_j1_b0",
+    # "HT350to450_j1_b0",
+    # "HT250to350_j1_b1toInf",
+    # "HT350to450_j1_b1toInf",
+
+    # # L HT
+    # "HT450to575_j1_b0",
+    # "HT450to575_j1_b1toInf",
+
+    # # M HT
+    # "HT575to700_j1_b0",
+    # "HT700to1000_j1_b0",
+    # "HT1000to1200_j1_b0",
+    # "HT575to700_j1_b1toInf",
+    # "HT700toInf_j1_b1toInf"
+
+    # H or UH HT
     "HT1200toInf_j1_b0",
-    "HT700toInf_j1_b1toInf"
+    "HT700toInf_j1_b1toInf",
+
 ]
 
 MAX_NJ = 10
@@ -101,7 +125,7 @@ htop = r.TH1D("htop", "", 1, 0, 1)
 hwjets = r.TH1D("hwjets", "", 1, 0, 1)
 hqcd = r.TH1D("hqcd", "", 1, 0, 1)
 
-hzinv.SetFillColor(418)
+hzinv.SetFillColor(419)
 htop.SetFillColor(855)
 hwjets.SetFillColor(417)
 hqcd.SetFillColor(401)
@@ -116,7 +140,7 @@ pies = []
 paves = []
 for tr in trs:
     vals = [trs[tr]["zinv"], trs[tr]["wjets"], trs[tr]["top"], trs[tr]["qcd"]]
-    colors = [418, 417, 855, 401]
+    colors = [419, 417, 855, 401]
     pie = r.TPie("pie"+tr, "", 4)
     for i in range(len(vals)):
         pie.SetEntryVal(i, vals[i])
@@ -142,7 +166,8 @@ for tr in trs:
     pave.SetFillStyle(0)
     pave.SetCornerRadius(50)
     # pave.SetLineColor(855)
-    pave.SetLineColor(r.kRed-9)
+    # pave.SetLineColor(r.kRed-9)
+    pave.SetLineColor(r.kGray+1)
     pave.SetLineWidth(3)
     pave.Draw("SAME")
 
@@ -169,7 +194,9 @@ leg.AddEntry(hqcd, "Multijet", 'f')
 leg.Draw()
 
 htlow = int(ht_reg.split("to")[0].split("HT")[-1])
-hthi = int(ht_reg.split("to")[1])
+hthi = ht_reg.split("to")[1]
+if hthi=="Inf":
+    hthi = "#infty"
 
 text = r.TLatex()
 text.SetNDC(1)
