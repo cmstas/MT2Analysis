@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 
   std::cout<<"sample is "<<sample<<std::endl;
 
-  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast") || infile.Contains("Summer16v3Fast") || infile.Contains("Fall17Fast"));
+  bool isFastsim = bool(infile.Contains("FSPremix") || infile.Contains("FastAsympt25ns") || infile.Contains("Spring16Fast") || infile.Contains("Summer16v3Fast") || infile.Contains("Fall17Fast")) || bool(infile.Contains("Fall18Fast"));
 
   string config_tag = "";
   if     (infile.Contains("Run2016") && infile.Contains("03Feb2017"))  config_tag = "data_2016_Moriond17";
@@ -245,11 +245,11 @@ int main(int argc, char **argv) {
   else if(infile.Contains("Private_94x"))                              config_tag = "mc_94x_Summer16";
   else if(infile.Contains("RunIIFall17") && infile.Contains("Fast") && infile.Contains("94X"))  config_tag = "mc_94x_fastsim_Fall17";
   else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";
-  else if(infile.Contains("RunIIAutumn18") && infile.Contains("102X")) config_tag = "mc_102x_Autumn18";
+  else if(infile.Contains("RunIIAutumn18") && infile.Contains("102X")) config_tag = isFastsim ? "mc_102x_fastsim_Autumn18" : "mc_102x_Autumn18";
   else if(infile.Contains("RunIISpring16") && infile.Contains("Fast") && infile.Contains("80X"))  config_tag = "mc_80x_fastsim_Moriond17";
   else{
-      std::cout << "[processBaby] ERROR! could not determine correct configuration to use" << std::endl;
-      return 1;
+    std::cout << "[processBaby] ERROR! could not determine correct configuration to use" << std::endl;
+    return 1;
   }
 
   //--------------------------------
