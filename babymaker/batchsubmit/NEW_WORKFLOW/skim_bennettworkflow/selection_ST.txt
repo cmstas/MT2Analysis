@@ -1,2 +1,2 @@
-ht > 250. && (met_pt > 30. || rl_met_pt > 30 || zll_met_pt > 30) && nJet30 >= 2 && (mt2 > 60. || rl_mt2 > 60 || zll_mt2 > 60) //kinematic selection
+(ht > 250. && (met_pt > 30. || rl_met_pt > 30 || zll_met_pt > 30) && nJet30 >= 2 && (mt2 > 60. || rl_mt2 > 60 || zll_mt2 > 60) ) || (ht > 200. && met_pt > 200 && nJet30 == 1) //kinematic selection
 && Sum$(track_nLostOuterHits >= 2) > 0  // very loose short track selection
