@@ -410,7 +410,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (verbose) cout << "before trigger" << endl;
 
       // for now 2017 fastsim has not trigger info.
-      if(config_tag != "mc_94x_fastsim_Fall17" && config_tag != "mc_94x_fastsim_Summer16"){
+      if(config_tag != "mc_94x_fastsim_Fall17" && config_tag != "mc_94x_fastsim_Summer16" && config_tag != "mc_102x_fastsim_Autumn18"){
           //TRIGGER - check first to enable cuts
           HLT_PFHT1050        = passHLTTriggerPattern("HLT_PFHT1050_v");
           HLT_PFHT900         = passHLTTriggerPattern("HLT_PFHT900_v");
