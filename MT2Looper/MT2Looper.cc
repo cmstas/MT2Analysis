@@ -144,7 +144,7 @@ bool include_pj_eta = false;
 bool doHEMveto = true;
 int HEM_startRun = 319077; // affects 38.58 out of 58.83 fb-1 in 2018
 uint HEM_fracNum = 1286, HEM_fracDen = 1961; // 38.58/58.82 ~= 1286/1961. Used for figuring out if we should veto MC events
-float HEM_ptCut = 30.0;  // veto on jets above this threshold
+float HEM_ptCut = 30.0;  // veto on jets above this threshold. NOTE: THIS IS MODIFIED BELOW FOR MONOJET/L/VL HT
 float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phihigh
 
 // load rphi fits to perform r_effective calculation.
@@ -648,7 +648,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       }
   }
 
-  if(config_.year != 2016)
+  // don't apply ISR weights for 17/18 fullsim
+  if(config_.year != 2016 && config_tag.find("fastsim")==string::npos)
       applyISRWeights = false;
 
   if(config_.year != 2017 && config_.year != 2018)
@@ -893,7 +894,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       
       t.GetEntry(event);
 
-      // if (verbose && t.evt!=109715151) continue; 
+      // if (verbose && t.evt!=19336561) continue; 
 
       //---------------------
       // bookkeeping and progress report
@@ -968,10 +969,13 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       if(doHEMveto && config_.year == 2018){
           bool hasHEMjet = false;
 	  float lostHEMtrackPt = 0;
+          // monojet, VL, and L HT are handled specially (lower pt threshold, and apply lostTrack veto)
+          bool isLowHT = (t.nJet30==1 || (t.nlep != 2 && t.ht < 575) || (t.nlep == 2 && t.zll_ht < 575));
+          float actual_HEM_ptCut = isLowHT ? 20.0 : HEM_ptCut;
           if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
               isHEMaffected = true;
               for(int i=0; i<t.njet; i++){
-                  if(t.jet_pt[i] < HEM_ptCut)
+                  if(t.jet_pt[i] < actual_HEM_ptCut)
                       break;
                   if(t.jet_eta[i] > HEM_region[0] && t.jet_eta[i] < HEM_region[1] && 
                      t.jet_phi[i] > HEM_region[2] && t.jet_phi[i] < HEM_region[3])
@@ -983,18 +987,19 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 		      t.track_phi[i] > HEM_region[2] && t.track_phi[i] < HEM_region[3]))
 		  continue;
 		// Found a track in the HEM region. Is is high enough quality to veto the event?
-		if (!t.track_isHighPurity[i]) continue;
-		if (fabs(t.track_dz[i]) > 0.1 || fabs(t.track_dxy[i]) > 0.03) continue;
-		if (t.track_nPixelLayersWithMeasurement[i] < 3) continue;
-		if (t.track_nLostInnerPixelHits[i] > 0) continue;
-		if (t.track_nLostOuterHits[i] > 1) continue;
+		// if (!t.track_isHighPurity[i]) continue;
+		if (fabs(t.track_dz[i]) > 0.20 || fabs(t.track_dxy[i]) > 0.10) continue;
+		// if (t.track_nPixelLayersWithMeasurement[i] < 3) continue;
+		// if (t.track_nLostInnerPixelHits[i] > 0) continue;
+		// if (t.track_nLostOuterHits[i] > 2) continue;
 		// May wish to add this guy
 		//if (t.track_ptErr[i_trk] / (t.track_pt[i_trk]*t.track_pt[i_trk]) > 0.02) continue;
 		lostHEMtrackPt += t.track_pt[i];
 	      }
           }
 	  // May wish to set lostHEMtrackPt threshold to some higher value; this is equivalent to "any lost track" (saving only pT > 15 GeV tracks in babies for now)
-          if(hasHEMjet || lostHEMtrackPt > 0){
+          if(hasHEMjet || (isLowHT && lostHEMtrackPt > 0)){
+          // if(hasHEMjet){
               // cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
               continue;
           }	  
@@ -1846,11 +1851,9 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
     if(SRVec.at(srN).PassesSelection(values)){
-        if(SRVec.at(srN).GetName()=="25UH" && mt2_>400){
-            // cout << endl << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
-        }
-      fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-      //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
+        // cout << endl << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+        fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+        //break;//signal regions are orthogonal, event cannot be in more than one --> not true now with super signal regions
     }
   }
   
@@ -1869,6 +1872,7 @@ void MT2Looper::fillHistosSignalRegion(const std::string& prefix, const std::str
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelection(values_monojet)){
         //cout << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+        // cout << endl << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	fillHistos(SRVecMonojet.at(srN).srHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix);
 	//break;//signal regions are orthogonal, event cannot be in more than one --> not true for Monojet, since we have inclusive regions
       }
