@@ -72,7 +72,7 @@ const bool applyLeptonSFs = true;
 // turn on to apply json file to data (default true)
 const bool applyJSON = true;
 // for testing purposes, running on unmerged files (default false)
-const bool removePostProcVars = true;
+const bool removePostProcVars = false;
 // turn on to remove jets overlapping with leptons (default true)
 const bool doJetLepOverlapRemoval = true;
 // turn on to save only isolated leptons (default true)
@@ -371,7 +371,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 
       InitBabyNtuple();
 
-      isData = false; //cms3.evt_isRealData();
+      isData = cms3.evt_isRealData();
       // sanity check on whether this is data
       if (bool(isData) != isDataFromFileName) {
         cout << "ERROR: file name and content disagree on whether this is real data!! Exiting" << endl;
