@@ -53,7 +53,7 @@ for hname in histnames:
     h.Scale(0.5)
     h_genSyst.Add(h_GENMET,-1)
     h.Write()
-    h_err.Write()
+    h_genSyst.Write()
     h_isrSyst.Write()
 
 outfile.Close()

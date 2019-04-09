@@ -12,6 +12,7 @@ const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
 const bool skipHighEventWeights = true;
+const bool prioritize = true; // only count the longest, then highest pt, track
 
 const bool merge17and18 = true;
 
@@ -52,7 +53,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   bool isT2bt = signame.find("bt") != std::string::npos;
 
   unsigned int genmet_idx = signame.find("_GENMET");
+  unsigned int isr_idx = signame.find("_ISR");
   if (genmet_idx != std::string::npos) signame = signame.substr(0,genmet_idx);
+  if (isr_idx    != std::string::npos) signame = signame.substr(0,   isr_idx);
 
   mt2tree t;
   t.Init(ch);
@@ -173,6 +176,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   /////////////
 
   // NjHt
+  TH3D* h_1L_MR_STC = (TH3D*)h_counts_STC.Clone("h_1L_MR_STC");
+  TH3D* h_1M_MR_STC = (TH3D*)h_counts_STC.Clone("h_1M_MR_STC");
+  TH3D* h_1H_MR_STC = (TH3D*)h_counts_STC.Clone("h_1H_MR_STC");
   TH3D* h_LL_MR_STC = (TH3D*)h_counts_STC.Clone("h_LL_MR_STC");
   TH3D* h_LM_MR_STC = (TH3D*)h_counts_STC.Clone("h_LM_MR_STC");
   TH3D* h_LH_MR_STC = (TH3D*)h_counts_STC.Clone("h_LH_MR_STC");
@@ -180,6 +186,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_MR_STC = (TH3D*)h_counts_STC.Clone("h_HM_MR_STC");
   TH3D* h_HH_MR_STC = (TH3D*)h_counts_STC.Clone("h_HH_MR_STC");
 
+  TH3D* h_1L_VR_STC = (TH3D*)h_counts_STC.Clone("h_1L_VR_STC");
+  TH3D* h_1M_VR_STC = (TH3D*)h_counts_STC.Clone("h_1M_VR_STC");
+  TH3D* h_1H_VR_STC = (TH3D*)h_counts_STC.Clone("h_1H_VR_STC");
   TH3D* h_LL_VR_STC = (TH3D*)h_counts_STC.Clone("h_LL_VR_STC");
   TH3D* h_LM_VR_STC = (TH3D*)h_counts_STC.Clone("h_LM_VR_STC");
   TH3D* h_LH_VR_STC = (TH3D*)h_counts_STC.Clone("h_LH_VR_STC");
@@ -187,6 +196,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_VR_STC = (TH3D*)h_counts_STC.Clone("h_HM_VR_STC");
   TH3D* h_HH_VR_STC = (TH3D*)h_counts_STC.Clone("h_HH_VR_STC");
 
+  TH3D* h_1L_SR_STC = (TH3D*)h_counts_STC.Clone("h_1L_SR_STC");
+  TH3D* h_1M_SR_STC = (TH3D*)h_counts_STC.Clone("h_1M_SR_STC");
+  TH3D* h_1H_SR_STC = (TH3D*)h_counts_STC.Clone("h_1H_SR_STC");
   TH3D* h_LL_SR_STC = (TH3D*)h_counts_STC.Clone("h_LL_SR_STC");
   TH3D* h_LM_SR_STC = (TH3D*)h_counts_STC.Clone("h_LM_SR_STC");
   TH3D* h_LH_SR_STC = (TH3D*)h_counts_STC.Clone("h_LH_SR_STC");
@@ -197,6 +209,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Hi pt
 
   // NjHt
+  TH3D* h_1L_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1L_MR_hi_STC");
+  TH3D* h_1M_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1M_MR_hi_STC");
+  TH3D* h_1H_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1H_MR_hi_STC");
   TH3D* h_LL_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LL_MR_hi_STC");
   TH3D* h_LM_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LM_MR_hi_STC");
   TH3D* h_LH_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LH_MR_hi_STC");
@@ -204,6 +219,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_HM_MR_hi_STC");
   TH3D* h_HH_MR_hi_STC = (TH3D*)h_counts_STC.Clone("h_HH_MR_hi_STC");
 
+  TH3D* h_1L_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1L_VR_hi_STC");
+  TH3D* h_1M_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1M_VR_hi_STC");
+  TH3D* h_1H_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1H_VR_hi_STC");
   TH3D* h_LL_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LL_VR_hi_STC");
   TH3D* h_LM_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LM_VR_hi_STC");
   TH3D* h_LH_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LH_VR_hi_STC");
@@ -211,6 +229,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_HM_VR_hi_STC");
   TH3D* h_HH_VR_hi_STC = (TH3D*)h_counts_STC.Clone("h_HH_VR_hi_STC");
 
+  TH3D* h_1L_SR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1L_SR_hi_STC");
+  TH3D* h_1M_SR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1M_SR_hi_STC");
+  TH3D* h_1H_SR_hi_STC = (TH3D*)h_counts_STC.Clone("h_1H_SR_hi_STC");
   TH3D* h_LL_SR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LL_SR_hi_STC");
   TH3D* h_LM_SR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LM_SR_hi_STC");
   TH3D* h_LH_SR_hi_STC = (TH3D*)h_counts_STC.Clone("h_LH_SR_hi_STC");
@@ -220,6 +241,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Lo pt
   // NjHt
+  TH3D* h_1L_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1L_MR_lo_STC");
+  TH3D* h_1M_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1M_MR_lo_STC");
+  TH3D* h_1H_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1H_MR_lo_STC");
   TH3D* h_LL_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LL_MR_lo_STC");
   TH3D* h_LM_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LM_MR_lo_STC");
   TH3D* h_LH_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LH_MR_lo_STC");
@@ -227,6 +251,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_HM_MR_lo_STC");
   TH3D* h_HH_MR_lo_STC = (TH3D*)h_counts_STC.Clone("h_HH_MR_lo_STC");
 
+  TH3D* h_1L_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1L_VR_lo_STC");
+  TH3D* h_1M_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1M_VR_lo_STC");
+  TH3D* h_1H_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1H_VR_lo_STC");
   TH3D* h_LL_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LL_VR_lo_STC");
   TH3D* h_LM_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LM_VR_lo_STC");
   TH3D* h_LH_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LH_VR_lo_STC");
@@ -234,6 +261,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_HM_VR_lo_STC");
   TH3D* h_HH_VR_lo_STC = (TH3D*)h_counts_STC.Clone("h_HH_VR_lo_STC");
 
+  TH3D* h_1L_SR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1L_SR_lo_STC");
+  TH3D* h_1M_SR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1M_SR_lo_STC");
+  TH3D* h_1H_SR_lo_STC = (TH3D*)h_counts_STC.Clone("h_1H_SR_lo_STC");
   TH3D* h_LL_SR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LL_SR_lo_STC");
   TH3D* h_LM_SR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LM_SR_lo_STC");
   TH3D* h_LH_SR_lo_STC = (TH3D*)h_counts_STC.Clone("h_LH_SR_lo_STC");
@@ -246,6 +276,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   /////////////
 
   // NjHt
+  TH3D* h_1L_MR_ST = (TH3D*)h_counts_ST.Clone("h_1L_MR_ST");
+  TH3D* h_1M_MR_ST = (TH3D*)h_counts_ST.Clone("h_1M_MR_ST");
+  TH3D* h_1H_MR_ST = (TH3D*)h_counts_ST.Clone("h_1H_MR_ST");
   TH3D* h_LL_MR_ST = (TH3D*)h_counts_ST.Clone("h_LL_MR_ST");
   TH3D* h_LM_MR_ST = (TH3D*)h_counts_ST.Clone("h_LM_MR_ST");
   TH3D* h_LH_MR_ST = (TH3D*)h_counts_ST.Clone("h_LH_MR_ST");
@@ -253,6 +286,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_MR_ST = (TH3D*)h_counts_ST.Clone("h_HM_MR_ST");
   TH3D* h_HH_MR_ST = (TH3D*)h_counts_ST.Clone("h_HH_MR_ST");
 
+  TH3D* h_1L_VR_ST = (TH3D*)h_counts_ST.Clone("h_1L_VR_ST");
+  TH3D* h_1M_VR_ST = (TH3D*)h_counts_ST.Clone("h_1M_VR_ST");
+  TH3D* h_1H_VR_ST = (TH3D*)h_counts_ST.Clone("h_1H_VR_ST");
   TH3D* h_LL_VR_ST = (TH3D*)h_counts_ST.Clone("h_LL_VR_ST");
   TH3D* h_LM_VR_ST = (TH3D*)h_counts_ST.Clone("h_LM_VR_ST");
   TH3D* h_LH_VR_ST = (TH3D*)h_counts_ST.Clone("h_LH_VR_ST");
@@ -260,6 +296,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_VR_ST = (TH3D*)h_counts_ST.Clone("h_HM_VR_ST");
   TH3D* h_HH_VR_ST = (TH3D*)h_counts_ST.Clone("h_HH_VR_ST");
 
+  TH3D* h_1L_SR_ST = (TH3D*)h_counts_ST.Clone("h_1L_SR_ST");
+  TH3D* h_1M_SR_ST = (TH3D*)h_counts_ST.Clone("h_1M_SR_ST");
+  TH3D* h_1H_SR_ST = (TH3D*)h_counts_ST.Clone("h_1H_SR_ST");
   TH3D* h_LL_SR_ST = (TH3D*)h_counts_ST.Clone("h_LL_SR_ST");
   TH3D* h_LM_SR_ST = (TH3D*)h_counts_ST.Clone("h_LM_SR_ST");
   TH3D* h_LH_SR_ST = (TH3D*)h_counts_ST.Clone("h_LH_SR_ST");
@@ -270,6 +309,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Hi pt
 
   // NjHt
+  TH3D* h_1L_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1L_MR_hi_ST");
+  TH3D* h_1M_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1M_MR_hi_ST");
+  TH3D* h_1H_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1H_MR_hi_ST");
   TH3D* h_LL_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LL_MR_hi_ST");
   TH3D* h_LM_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LM_MR_hi_ST");
   TH3D* h_LH_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LH_MR_hi_ST");
@@ -277,6 +319,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_HM_MR_hi_ST");
   TH3D* h_HH_MR_hi_ST = (TH3D*)h_counts_ST.Clone("h_HH_MR_hi_ST");
 
+  TH3D* h_1L_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1L_VR_hi_ST");
+  TH3D* h_1M_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1M_VR_hi_ST");
+  TH3D* h_1H_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1H_VR_hi_ST");
   TH3D* h_LL_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LL_VR_hi_ST");
   TH3D* h_LM_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LM_VR_hi_ST");
   TH3D* h_LH_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LH_VR_hi_ST");
@@ -284,6 +329,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_HM_VR_hi_ST");
   TH3D* h_HH_VR_hi_ST = (TH3D*)h_counts_ST.Clone("h_HH_VR_hi_ST");
 
+  TH3D* h_1L_SR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1L_SR_hi_ST");
+  TH3D* h_1M_SR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1M_SR_hi_ST");
+  TH3D* h_1H_SR_hi_ST = (TH3D*)h_counts_ST.Clone("h_1H_SR_hi_ST");
   TH3D* h_LL_SR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LL_SR_hi_ST");
   TH3D* h_LM_SR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LM_SR_hi_ST");
   TH3D* h_LH_SR_hi_ST = (TH3D*)h_counts_ST.Clone("h_LH_SR_hi_ST");
@@ -293,6 +341,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Lo pt
   // NjHt
+  TH3D* h_1L_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1L_MR_lo_ST");
+  TH3D* h_1M_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1M_MR_lo_ST");
+  TH3D* h_1H_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1H_MR_lo_ST");
   TH3D* h_LL_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LL_MR_lo_ST");
   TH3D* h_LM_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LM_MR_lo_ST");
   TH3D* h_LH_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LH_MR_lo_ST");
@@ -300,6 +351,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_HM_MR_lo_ST");
   TH3D* h_HH_MR_lo_ST = (TH3D*)h_counts_ST.Clone("h_HH_MR_lo_ST");
 
+  TH3D* h_1L_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1L_VR_lo_ST");
+  TH3D* h_1M_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1M_VR_lo_ST");
+  TH3D* h_1H_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1H_VR_lo_ST");
   TH3D* h_LL_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LL_VR_lo_ST");
   TH3D* h_LM_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LM_VR_lo_ST");
   TH3D* h_LH_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LH_VR_lo_ST");
@@ -307,6 +361,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HM_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_HM_VR_lo_ST");
   TH3D* h_HH_VR_lo_ST = (TH3D*)h_counts_ST.Clone("h_HH_VR_lo_ST");
 
+  TH3D* h_1L_SR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1L_SR_lo_ST");
+  TH3D* h_1M_SR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1M_SR_lo_ST");
+  TH3D* h_1H_SR_lo_ST = (TH3D*)h_counts_ST.Clone("h_1H_SR_lo_ST");
   TH3D* h_LL_SR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LL_SR_lo_ST");
   TH3D* h_LM_SR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LM_SR_lo_ST");
   TH3D* h_LH_SR_lo_ST = (TH3D*)h_counts_ST.Clone("h_LH_SR_lo_ST");
@@ -316,26 +373,38 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Save fractional change in fshort, for signal contamination calculation
   TH3D* h_fracFS = new TH3D("h_fracFS","N_{ST}^{Sig#;MR}/N_{ST}^{Obs#;MR};Mass 1 (GeV);Mass 2 (GeV)",n_track_bins,track_bins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_fracFS_1 = (TH3D*) h_fracFS->Clone("h_fracFS_1");
   TH3D* h_fracFS_23 = (TH3D*) h_fracFS->Clone("h_fracFS_23");
   TH3D* h_fracFS_4 = (TH3D*) h_fracFS->Clone("h_fracFS_4");
+  TH3D* h_fracFS_1_hi = (TH3D*) h_fracFS->Clone("h_fracFS_23_hi");
   TH3D* h_fracFS_23_hi = (TH3D*) h_fracFS->Clone("h_fracFS_23_hi");
   TH3D* h_fracFS_4_hi = (TH3D*) h_fracFS->Clone("h_fracFS_4_hi");
+  TH3D* h_fracFS_1_lo = (TH3D*) h_fracFS->Clone("h_fracFS_1_lo");
   TH3D* h_fracFS_23_lo = (TH3D*) h_fracFS->Clone("h_fracFS_23_lo");
   TH3D* h_fracFS_4_lo = (TH3D*) h_fracFS->Clone("h_fracFS_4_lo");
 
   unordered_map<TH3D*,TH3D*> low_hists;
+  low_hists[h_1L_MR_STC] = h_1L_MR_lo_STC;
+  low_hists[h_1M_MR_STC] = h_1M_MR_lo_STC;
+  low_hists[h_1H_MR_STC] = h_1H_MR_lo_STC;
   low_hists[h_LL_MR_STC] = h_LL_MR_lo_STC;
   low_hists[h_LM_MR_STC] = h_LM_MR_lo_STC;
   low_hists[h_LH_MR_STC] = h_LH_MR_lo_STC;
   low_hists[h_HL_MR_STC] = h_HL_MR_lo_STC;
   low_hists[h_HM_MR_STC] = h_HM_MR_lo_STC;
   low_hists[h_HH_MR_STC] = h_HH_MR_lo_STC;
+  low_hists[h_1L_VR_STC] = h_1L_VR_lo_STC;
+  low_hists[h_1M_VR_STC] = h_1M_VR_lo_STC;
+  low_hists[h_1H_VR_STC] = h_1H_VR_lo_STC;
   low_hists[h_LL_VR_STC] = h_LL_VR_lo_STC;
   low_hists[h_LM_VR_STC] = h_LM_VR_lo_STC;
   low_hists[h_LH_VR_STC] = h_LH_VR_lo_STC;
   low_hists[h_HL_VR_STC] = h_HL_VR_lo_STC;
   low_hists[h_HM_VR_STC] = h_HM_VR_lo_STC;
   low_hists[h_HH_VR_STC] = h_HH_VR_lo_STC;
+  low_hists[h_1L_SR_STC] = h_1L_SR_lo_STC;
+  low_hists[h_1M_SR_STC] = h_1M_SR_lo_STC;
+  low_hists[h_1H_SR_STC] = h_1H_SR_lo_STC;
   low_hists[h_LL_SR_STC] = h_LL_SR_lo_STC;
   low_hists[h_LM_SR_STC] = h_LM_SR_lo_STC;
   low_hists[h_LH_SR_STC] = h_LH_SR_lo_STC;
@@ -343,21 +412,31 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HM_SR_STC] = h_HM_SR_lo_STC;
   low_hists[h_HH_SR_STC] = h_HH_SR_lo_STC;
 
+  low_hists[h_fracFS_1] = h_fracFS_1_lo;
   low_hists[h_fracFS_23] = h_fracFS_23_lo;
   low_hists[h_fracFS_4] = h_fracFS_4_lo;
 
+  low_hists[h_1L_MR_ST] = h_1L_MR_lo_ST;
+  low_hists[h_1M_MR_ST] = h_1M_MR_lo_ST;
+  low_hists[h_1H_MR_ST] = h_1H_MR_lo_ST;
   low_hists[h_LL_MR_ST] = h_LL_MR_lo_ST;
   low_hists[h_LM_MR_ST] = h_LM_MR_lo_ST;
   low_hists[h_LH_MR_ST] = h_LH_MR_lo_ST;
   low_hists[h_HL_MR_ST] = h_HL_MR_lo_ST;
   low_hists[h_HM_MR_ST] = h_HM_MR_lo_ST;
   low_hists[h_HH_MR_ST] = h_HH_MR_lo_ST;
+  low_hists[h_1L_VR_ST] = h_1L_VR_lo_ST;
+  low_hists[h_1M_VR_ST] = h_1M_VR_lo_ST;
+  low_hists[h_1H_VR_ST] = h_1H_VR_lo_ST;
   low_hists[h_LL_VR_ST] = h_LL_VR_lo_ST;
   low_hists[h_LM_VR_ST] = h_LM_VR_lo_ST;
   low_hists[h_LH_VR_ST] = h_LH_VR_lo_ST;
   low_hists[h_HL_VR_ST] = h_HL_VR_lo_ST;
   low_hists[h_HM_VR_ST] = h_HM_VR_lo_ST;
   low_hists[h_HH_VR_ST] = h_HH_VR_lo_ST;
+  low_hists[h_1L_SR_ST] = h_1L_SR_lo_ST;
+  low_hists[h_1M_SR_ST] = h_1M_SR_lo_ST;
+  low_hists[h_1H_SR_ST] = h_1H_SR_lo_ST;
   low_hists[h_LL_SR_ST] = h_LL_SR_lo_ST;
   low_hists[h_LM_SR_ST] = h_LM_SR_lo_ST;
   low_hists[h_LH_SR_ST] = h_LH_SR_lo_ST;
@@ -366,18 +445,27 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HH_SR_ST] = h_HH_SR_lo_ST;
 
   unordered_map<TH3D*,TH3D*> hi_hists;
+  hi_hists[h_1L_MR_STC] = h_1L_MR_hi_STC;
+  hi_hists[h_1M_MR_STC] = h_1M_MR_hi_STC;
+  hi_hists[h_1H_MR_STC] = h_1H_MR_hi_STC;
   hi_hists[h_LL_MR_STC] = h_LL_MR_hi_STC;
   hi_hists[h_LM_MR_STC] = h_LM_MR_hi_STC;
   hi_hists[h_LH_MR_STC] = h_LH_MR_hi_STC;
-  hi_hists[h_LL_VR_STC] = h_LL_VR_hi_STC;
-  hi_hists[h_LM_VR_STC] = h_LM_VR_hi_STC;
-  hi_hists[h_LH_VR_STC] = h_LH_VR_hi_STC;
   hi_hists[h_HL_MR_STC] = h_HL_MR_hi_STC;
   hi_hists[h_HM_MR_STC] = h_HM_MR_hi_STC;
   hi_hists[h_HH_MR_STC] = h_HH_MR_hi_STC;
+  hi_hists[h_1L_VR_STC] = h_1L_VR_hi_STC;
+  hi_hists[h_1M_VR_STC] = h_1M_VR_hi_STC;
+  hi_hists[h_1H_VR_STC] = h_1H_VR_hi_STC;
+  hi_hists[h_LL_VR_STC] = h_LL_VR_hi_STC;
+  hi_hists[h_LM_VR_STC] = h_LM_VR_hi_STC;
+  hi_hists[h_LH_VR_STC] = h_LH_VR_hi_STC;
   hi_hists[h_HL_VR_STC] = h_HL_VR_hi_STC;
   hi_hists[h_HM_VR_STC] = h_HM_VR_hi_STC;
   hi_hists[h_HH_VR_STC] = h_HH_VR_hi_STC;
+  hi_hists[h_1L_SR_STC] = h_1L_SR_hi_STC;
+  hi_hists[h_1M_SR_STC] = h_1M_SR_hi_STC;
+  hi_hists[h_1H_SR_STC] = h_1H_SR_hi_STC;
   hi_hists[h_LL_SR_STC] = h_LL_SR_hi_STC;
   hi_hists[h_LM_SR_STC] = h_LM_SR_hi_STC;
   hi_hists[h_LH_SR_STC] = h_LH_SR_hi_STC;
@@ -385,18 +473,27 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   hi_hists[h_HM_SR_STC] = h_HM_SR_hi_STC;
   hi_hists[h_HH_SR_STC] = h_HH_SR_hi_STC;
 
+  hi_hists[h_1L_MR_ST] = h_1L_MR_hi_ST;
+  hi_hists[h_1M_MR_ST] = h_1M_MR_hi_ST;
+  hi_hists[h_1H_MR_ST] = h_1H_MR_hi_ST;
   hi_hists[h_LL_MR_ST] = h_LL_MR_hi_ST;
   hi_hists[h_LM_MR_ST] = h_LM_MR_hi_ST;
   hi_hists[h_LH_MR_ST] = h_LH_MR_hi_ST;
-  hi_hists[h_LL_VR_ST] = h_LL_VR_hi_ST;
-  hi_hists[h_LM_VR_ST] = h_LM_VR_hi_ST;
-  hi_hists[h_LH_VR_ST] = h_LH_VR_hi_ST;
   hi_hists[h_HL_MR_ST] = h_HL_MR_hi_ST;
   hi_hists[h_HM_MR_ST] = h_HM_MR_hi_ST;
   hi_hists[h_HH_MR_ST] = h_HH_MR_hi_ST;
+  hi_hists[h_1L_VR_ST] = h_1L_VR_hi_ST;
+  hi_hists[h_1M_VR_ST] = h_1M_VR_hi_ST;
+  hi_hists[h_1H_VR_ST] = h_1H_VR_hi_ST;
+  hi_hists[h_LL_VR_ST] = h_LL_VR_hi_ST;
+  hi_hists[h_LM_VR_ST] = h_LM_VR_hi_ST;
+  hi_hists[h_LH_VR_ST] = h_LH_VR_hi_ST;
   hi_hists[h_HL_VR_ST] = h_HL_VR_hi_ST;
   hi_hists[h_HM_VR_ST] = h_HM_VR_hi_ST;
   hi_hists[h_HH_VR_ST] = h_HH_VR_hi_ST;
+  hi_hists[h_1L_SR_ST] = h_1L_SR_hi_ST;
+  hi_hists[h_1M_SR_ST] = h_1M_SR_hi_ST;
+  hi_hists[h_1H_SR_ST] = h_1H_SR_hi_ST;
   hi_hists[h_LL_SR_ST] = h_LL_SR_hi_ST;
   hi_hists[h_LM_SR_ST] = h_LM_SR_hi_ST;
   hi_hists[h_LH_SR_ST] = h_LH_SR_hi_ST;
@@ -404,6 +501,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   hi_hists[h_HM_SR_ST] = h_HM_SR_hi_ST;
   hi_hists[h_HH_SR_ST] = h_HH_SR_hi_ST;
 
+  hi_hists[h_fracFS_1] = h_fracFS_1_hi;
   hi_hists[h_fracFS_23] = h_fracFS_23_hi;
   hi_hists[h_fracFS_4] = h_fracFS_4_hi;
 
@@ -502,12 +600,21 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   TFile* FshortFile = TFile::Open(FshortName,"READ");
 
+  TH1D* h_fs_Nj1;
   TH1D* h_fs_Nj23;
   TH1D* h_fs_Nj4;
+  // Monojet turned on
+  h_fs_Nj1 = ((TH2D*) FshortFile->Get("h_fsMR_1_Baseline"))->ProjectionX("h_fs_1",2,2);
   h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23",2,2);
   h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4",2,2);
+  h_fs_Nj1->SetDirectory(0);
   h_fs_Nj23->SetDirectory(0);
   h_fs_Nj4->SetDirectory(0);
+
+  const double st_Nj1_P = h_fs_Nj1->GetBinContent(Pidx);
+  const double st_Nj1_P3 = h_fs_Nj1->GetBinContent(P3idx);
+  const double st_Nj1_P4 = h_fs_Nj1->GetBinContent(P4idx);
+  const double st_Nj1_M = h_fs_Nj1->GetBinContent(Midx);
 
   const double st_Nj23_P = h_fs_Nj23->GetBinContent(Pidx);
   const double st_Nj23_P3 = h_fs_Nj23->GetBinContent(P3idx);
@@ -519,12 +626,21 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const double st_Nj4_P4 = h_fs_Nj4->GetBinContent(P4idx);
   const double st_Nj4_M = h_fs_Nj4->GetBinContent(Midx);
 
+  TH1D* h_fs_Nj1_hi;
   TH1D* h_fs_Nj23_hi;
   TH1D* h_fs_Nj4_hi;
+  // Monojet turned on
+  h_fs_Nj1_hi = ((TH2D*) FshortFile->Get("h_fsMR_1_Baseline_hipt"))->ProjectionX("h_fs_1_hi",2,2);
   h_fs_Nj23_hi = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt"))->ProjectionX("h_fs_23_hi",2,2);
   h_fs_Nj4_hi = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_hipt"))->ProjectionX("h_fs_4_hi",2,2);
+  h_fs_Nj1_hi->SetDirectory(0);
   h_fs_Nj23_hi->SetDirectory(0);
   h_fs_Nj4_hi->SetDirectory(0);
+
+  const double st_Nj1_P_hi = h_fs_Nj1_hi->GetBinContent(Pidx);
+  const double st_Nj1_P3_hi = h_fs_Nj1_hi->GetBinContent(P3idx);
+  const double st_Nj1_P4_hi = h_fs_Nj1_hi->GetBinContent(P4idx);
+  const double st_Nj1_M_hi = h_fs_Nj1_hi->GetBinContent(Midx);
 
   const double st_Nj23_P_hi = h_fs_Nj23_hi->GetBinContent(Pidx);
   const double st_Nj23_P3_hi = h_fs_Nj23_hi->GetBinContent(P3idx);
@@ -536,12 +652,21 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const double st_Nj4_P4_hi = h_fs_Nj4_hi->GetBinContent(P4idx);
   const double st_Nj4_M_hi = h_fs_Nj4_hi->GetBinContent(Midx);
 
+  TH1D* h_fs_Nj1_lo;
   TH1D* h_fs_Nj23_lo;
   TH1D* h_fs_Nj4_lo;
+  // Monojet turned on
+  h_fs_Nj1_lo = ((TH2D*) FshortFile->Get("h_fsMR_1_Baseline_lowpt"))->ProjectionX("h_fs_1_lo",2,2);
   h_fs_Nj23_lo = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt"))->ProjectionX("h_fs_23_lo",2,2);
   h_fs_Nj4_lo = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt"))->ProjectionX("h_fs_4_lo",2,2);
+  h_fs_Nj1_lo->SetDirectory(0);
   h_fs_Nj23_lo->SetDirectory(0);
   h_fs_Nj4_lo->SetDirectory(0);
+
+  const double st_Nj1_P_lo = h_fs_Nj1_lo->GetBinContent(Pidx);
+  const double st_Nj1_P3_lo = h_fs_Nj1_lo->GetBinContent(P3idx);
+  const double st_Nj1_P4_lo = h_fs_Nj1_lo->GetBinContent(P4idx);
+  const double st_Nj1_M_lo = h_fs_Nj1_lo->GetBinContent(Midx);
 
   const double st_Nj23_P_lo = h_fs_Nj23_lo->GetBinContent(Pidx);
   const double st_Nj23_P3_lo = h_fs_Nj23_lo->GetBinContent(P3idx);
@@ -555,6 +680,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << "Loaded observed MR ST counts" << endl;
 
+  cout << "st_Nj1_P         : " << st_Nj1_P << endl;
+  cout << "st_Nj1_P3        : " << st_Nj1_P3 << endl;
+  cout << "st_Nj1_P4        : " << st_Nj1_P4 << endl;
+  cout << "st_Nj1_M         : " << st_Nj1_M << endl;
   cout << "st_Nj23_P        : " << st_Nj23_P << endl;
   cout << "st_Nj23_P3       : " << st_Nj23_P3 << endl;
   cout << "st_Nj23_P4       : " << st_Nj23_P4 << endl;
@@ -566,6 +695,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << "/nHi Pt/n" << endl;
 
+  cout << "st_Nj1_P         : " << st_Nj1_P_hi << endl;
+  cout << "st_Nj1_P3        : " << st_Nj1_P3_hi << endl;
+  cout << "st_Nj1_P4        : " << st_Nj1_P4_hi << endl;
+  cout << "st_Nj1_M         : " << st_Nj1_M_hi << endl;
   cout << "st_Nj23_P        : " << st_Nj23_P_hi << endl;
   cout << "st_Nj23_P3       : " << st_Nj23_P3_hi << endl;
   cout << "st_Nj23_P4       : " << st_Nj23_P4_hi << endl;
@@ -577,6 +710,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << "/nLow Pt/n" << endl;
 
+  cout << "st_Nj1_P         : " << st_Nj1_P_lo << endl;
+  cout << "st_Nj1_P3        : " << st_Nj1_P3_lo << endl;
+  cout << "st_Nj1_P4        : " << st_Nj1_P4_lo << endl;
+  cout << "st_Nj1_M         : " << st_Nj1_M_lo << endl;
   cout << "st_Nj23_P        : " << st_Nj23_P_lo << endl;
   cout << "st_Nj23_P3       : " << st_Nj23_P3_lo << endl;
   cout << "st_Nj23_P4       : " << st_Nj23_P4_lo << endl;
@@ -587,10 +724,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "st_Nj4_M         : " << st_Nj4_M_lo << endl;
 
   unordered_map<TH3D*,TH1D*> obs_mr_st;
+  obs_mr_st[h_fracFS_1] = h_fs_Nj1;
   obs_mr_st[h_fracFS_23] = h_fs_Nj23;
   obs_mr_st[h_fracFS_4] = h_fs_Nj4;
+  obs_mr_st[h_fracFS_1_lo] = h_fs_Nj1_lo;
   obs_mr_st[h_fracFS_23_lo] = h_fs_Nj23_lo;
   obs_mr_st[h_fracFS_4_lo] = h_fs_Nj4_lo;
+  obs_mr_st[h_fracFS_1_hi] = h_fs_Nj1_hi;
   obs_mr_st[h_fracFS_23_hi] = h_fs_Nj23_hi;
   obs_mr_st[h_fracFS_4_hi] = h_fs_Nj4_hi;
 
@@ -671,17 +811,36 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     // apply HEM veto, and simulate effects in MC
     if(doHEMveto && config_.year == 2018){
       bool hasHEMjet = false;
+      float lostHEMtrackPt = 0;
+      // monojet, VL, and L HT are handled specially (lower pt threshold, and apply lostTrack veto)
+      bool isLowHT = (t.nJet30==1 || (t.nlep != 2 && t.ht < 575) || (t.nlep == 2 && t.zll_ht < 575));
+      float actual_HEM_ptCut = isLowHT ? 20.0 : HEM_ptCut;
       if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
 	for(int i=0; i<t.njet; i++){
-	  if(t.jet_pt[i] < HEM_ptCut)
+	  if(t.jet_pt[i] < actual_HEM_ptCut)
 	    break;
 	  if(t.jet_eta[i] > HEM_region[0] && t.jet_eta[i] < HEM_region[1] && 
 	     t.jet_phi[i] > HEM_region[2] && t.jet_phi[i] < HEM_region[3])
 	    hasHEMjet = true;
 	}
+	for (int i=0; i<t.ntracks; i++){
+	  // Is the track in the HEM region?
+	  if ( !(t.track_eta[i] > HEM_region[0] && t.track_eta[i] < HEM_region[1] &&
+		 t.track_phi[i] > HEM_region[2] && t.track_phi[i] < HEM_region[3]))
+	    continue;
+	  // Found a track in the HEM region. Is is high enough quality to veto the event?
+	  // if (!t.track_isHighPurity[i]) continue;
+	  if (fabs(t.track_dz[i]) > 0.20 || fabs(t.track_dxy[i]) > 0.10) continue;
+	  // if (t.track_nPixelLayersWithMeasurement[i] < 3) continue;
+	  // if (t.track_nLostInnerPixelHits[i] > 0) continue;
+	  // if (t.track_nLostOuterHits[i] > 2) continue;
+	  // May wish to add this guy
+	  //if (t.track_ptErr[i_trk] / (t.track_pt[i_trk]*t.track_pt[i_trk]) > 0.02) continue;
+	  lostHEMtrackPt += t.track_pt[i];
+	}
       }
-      if(hasHEMjet){
-	// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+      // May wish to set lostHEMtrackPt threshold to some higher value; this is equivalent to "any lost track" (saving only pT > 15 GeV tracks in babies for now)
+      if(hasHEMjet || (isLowHT && lostHEMtrackPt > 0)){// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	continue;
       }
     }
@@ -691,25 +850,10 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     const float mt2 = useGENMET ? t.mt2_genmet : t.mt2;
     const float met_pt = useGENMET ? t.met_genPt : t.met_pt;
 
-    if (t.nJet30 < 2) {
-      continue;
-    }
-    if (t.ht < 250) {
-
-      continue;
-    }
     if (unlikely(t.nJet30FailId != 0)) {
       continue;
     }
-    if (mt2 < 60) {
-      continue;
-    }
-
-    // Let low met events through regardless of Ht if they're in MR
-    if (met_pt < 30 || (t.ht < 1200 && met_pt < 250 && mt2 > 100)) {
-	continue;
-    }
-
+      
     if (diffMetMht > 0.5) {
       continue;
     }
@@ -720,7 +864,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (unlikely(t.nJet200MuFrac50DphiMet > 0)) {
       continue;
     }
-
+    
     const bool lepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0;
 
     if (lepveto) {
@@ -729,6 +873,28 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
     if (deltaPhiMin < 0.3) {
       continue;
+    }
+
+    if (t.ht < 250) {
+      continue;
+    }
+
+    if (t.nJet30 < 1) {
+      continue;
+    }
+    else if (t.nJet30 < 2) {
+      if (met_pt < 250) {
+	continue;
+      }
+    }
+    else {
+      if (mt2 < 60) {
+	continue;
+      }
+      // Let low met events through regardless of Ht if they're in MR
+      if (met_pt < 30 || (t.ht < 1200 && met_pt < 250 && mt2 > 100)) {
+	continue;
+      }
     }
 
     //    const bool passPrescaleTrigger = passTrigger(t, trigs_prescaled_);
@@ -760,29 +926,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     }
 
     if (applyISRWeights) {
-      // Only use this to set the correction. Don't actually apply isr reweighting
-      if (useISR_UP) {
-	int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
-	int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
-	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
-	float weight_isr = t.weight_isr / avgweight_isr;
-	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
-	float weight_isr_UP = t.weight_isr_UP / avgweight_isr_UP;
-	float isr_weight_ratio = weight_isr_UP / weight_isr;
-	weight *= isr_weight_ratio;
-      }
-      /*
       int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
       int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
-      if (!useISR_UP) {
-	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
-	weight *= t.weight_isr / avgweight_isr;
+      if (useISR_UP) {
+	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
+	float weight_isr_UP = t.weight_isr_UP / avgweight_isr_UP;
+	weight *= weight_isr_UP;
       }
       else {
-	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
-	weight *= t.weight_isr_UP / avgweight_isr_UP;
+	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+	float weight_isr = t.weight_isr / avgweight_isr;
+	weight *= weight_isr;
       }
-      */
     }
 
     if (weight > 1.0 && !t.isData && !isSignal && skipHighEventWeights) continue;
@@ -791,8 +946,44 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     TH3D* hist_ST;
     TH3D* hist_fracFS;
     
-    // L*
-    if (t.nJet30 < 4) {
+    // Monojet FIXME
+    /*
+    if (t.nJet30 == 1) {
+      if (t.jet1_pt >= 1200) {
+	hist_STC = h_1H_SR_STC;
+	hist_ST = h_1H_SR_ST;
+      }
+      else if (t.jet1_pt >= 450) {
+	hist_STC = h_1M_SR_STC;
+	hist_ST = h_1M_SR_ST;
+      }
+      else if (t.jet1_pt >= 350) { // low Ht
+	hist_STC = h_1L_SR_STC;
+	hist_ST = h_1L_SR_ST;
+      }
+      else if (t.jet1_pt >= 250) {
+      }
+    }
+    */
+    // Just call everything the 1L region for now
+    if (t.nJet30 == 1) {
+      if (t.jet1_pt >= 350 && met > 250 && t.ht > 250) {
+	hist_STC = h_1L_SR_STC;
+	hist_ST = h_1L_SR_ST;
+      }
+      if (t.jet1_pt >= 300 && met > 250 && t.ht > 250) {
+	hist_STC = h_1L_VR_STC;
+	hist_ST = h_1L_VR_ST;
+      }
+      else if (t.jet1_pt >= 200 && met > 200 && t.ht > 200) { // low Ht
+	hist_STC = h_1L_MR_STC;
+	hist_ST = h_1L_MR_ST;
+      }
+      else {
+	continue; // probably some pathological monojet event with high jet1_pt but low met and ht
+      }
+    }
+    else if (t.nJet30 < 4) {
       // LH
       if (t.ht >= 1200) {
 	// MR
@@ -912,7 +1103,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
 
-    bool doContam = mt2 < 100;
+    bool doContam = mt2 < 100 && t.nJet30 > 1;
 
     // Analysis code
 
@@ -975,8 +1166,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       nSTm = 0;      
       nSTl_rej = 0;
       nSTl_acc = 0;
+
+      bool overlapping_track[t.ntracks];
+      for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
+	overlapping_track[i_trk] = false;
+      }
+      for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
+	for (int j_trk = i_trk + 1; j_trk < t.ntracks; j_trk++) {
+	  if (DeltaR(t.track_eta[i_trk],t.track_eta[j_trk],t.track_phi[i_trk],t.track_phi[j_trk]) < 0.1) {
+	    overlapping_track[i_trk] = true;
+	    overlapping_track[j_trk] = true;
+	  }
+	}
+      }
       
       for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {   
+
+	if (overlapping_track[i_trk]) continue; // veto any tracks closely overlapping other lost tracks (pt > 15 GeV, with iso cut for 15-20 GeV)
 
 	bool isChargino = isSignal && t.track_matchedCharginoIdx[i_trk] >= 0;
 	if (isSignal && !isChargino) {
@@ -1192,6 +1398,73 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       } // Track loop
     } // recalculate
     
+    if (prioritize) {
+      if (nSTl_acc + nSTm + nSTp > 1) {
+	// if has ST, don't count STCs
+	nSTCl_acc = 0;
+	nSTCm = 0; nSTCm_hi = 0; nSTCm_lo = 0;
+	nSTCp = 0; nSTCp_hi = 0; nSTCp_lo = 0;
+	nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	nSTCp4 = 0; nSTCp4_hi = 0; nSTCp4_lo = 0;
+	if (nSTl_acc > 0) {
+	  nSTl_acc = 1;
+	  nSTm = 0; nSTm_hi = 0; nSTm_lo = 0;
+	  nSTp = 0; nSTp_hi = 0; nSTp_lo = 0;
+	  nSTp3 = 0; nSTp3_hi = 0; nSTp3_lo = 0;
+	  nSTp4 = 0; nSTp4_hi = 0; nSTp4_lo = 0;
+	}
+	if (nSTm > 0) {
+	  nSTm = 1; nSTm_hi = 0; nSTm_lo = 0;
+	  if (nSTm_hi > 0) {nSTm_hi = 1; nSTm_lo = 0;} else {nSTm_lo = 1;}
+	  nSTp = 0; nSTp_hi = 0; nSTp_lo = 0;
+	  nSTp3 = 0; nSTp3_hi = 0; nSTp3_lo = 0;
+	  nSTp4 = 0; nSTp4_hi = 0; nSTp4_lo = 0;
+	}
+	if (nSTp > 0) {
+	  nSTp = 1; 
+	  if (nSTp_hi > 0) {nSTp_hi = 1; nSTp_lo = 0;} else {nSTp_lo = 1;}
+	  if (nSTp4 > 0) {
+	    nSTp4 = 1; 
+	    if (nSTp4_hi > 0) {nSTp4_hi = 1; nSTp4_lo = 0;} else {nSTp4_lo = 1;}
+	    nSTp3 = 0; nSTp3_hi = 0; nSTp3_lo = 0;
+	  }
+	  else {
+	    nSTp3 = 1; 
+	    if (nSTp3_hi > 0) {nSTp3_hi = 1; nSTp3_lo = 0;} else {nSTp3_lo = 1;} 
+	  }
+	}
+      }
+      else if (nSTCl_acc + nSTCm + nSTCp > 1) {
+	if (nSTCl_acc > 0) {
+	  nSTCl_acc = 1;
+	  nSTCm = 0; nSTCm_hi = 0; nSTCm_lo = 0;
+	  nSTCp = 0; nSTCp_hi = 0; nSTCp_lo = 0;
+	  nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	  nSTCp4 = 0; nSTCp4_hi = 0; nSTCp4_lo = 0;
+	}
+	if (nSTCm > 0) {
+	  nSTCm = 1; nSTCm_hi = 0; nSTCm_lo = 0;
+	  if (nSTCm_hi > 0) {nSTCm_hi = 1; nSTCm_lo = 0;} else {nSTCm_lo = 1;}
+	  nSTCp = 0; nSTCp_hi = 0; nSTCp_lo = 0;
+	  nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	  nSTCp4 = 0; nSTCp4_hi = 0; nSTCp4_lo = 0;
+	}
+	if (nSTCp > 0) {
+	  nSTCp = 1; 
+	  if (nSTCp_hi > 0) {nSTCp_hi = 1; nSTCp_lo = 0;} else {nSTCp_lo = 1;}
+	  if (nSTCp4 > 0) {
+	    nSTCp4 = 1; 
+	    if (nSTCp4_hi > 0) {nSTCp4_hi = 1; nSTCp4_lo = 0;} else {nSTCp4_lo = 1;}
+	    nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	  }
+	  else {
+	    nSTCp3 = 1; 
+	    if (nSTCp3_hi > 0) {nSTCp3_hi = 1; nSTCp3_lo = 0;} else {nSTCp3_lo = 1;} 
+	  }
+	}
+      }
+    }
+
     if (nSTCl_acc + nSTCm + nSTCp == 2 && EventWise) {
       cout << "2 STC, P3: " << nSTCp3 << " P4: " << nSTCp4 << " M: " << nSTCm << " L: " << nSTCl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
       /*
@@ -1405,6 +1678,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Post-process
 
   // STCs
+  TH3D* h_1LM_SR_STC = (TH3D*) h_1L_SR_STC->Clone("h_1LM_SR_STC");
+  h_1LM_SR_STC->Add(h_1M_SR_STC);
+  TH3D* h_1LM_VR_STC = (TH3D*) h_1L_VR_STC->Clone("h_1LM_VR_STC");
+  h_1LM_VR_STC->Add(h_LM_VR_STC);
+  TH3D* h_1LM_MR_STC = (TH3D*) h_1L_MR_STC->Clone("h_1LM_MR_STC");
+  h_1LM_MR_STC->Add(h_1M_MR_STC);
   TH3D* h_LLM_SR_STC = (TH3D*) h_LL_SR_STC->Clone("h_LLM_SR_STC");
   h_LLM_SR_STC->Add(h_LM_SR_STC);
   TH3D* h_LLM_VR_STC = (TH3D*) h_LL_VR_STC->Clone("h_LLM_VR_STC");
@@ -1418,6 +1697,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HLM_MR_STC = (TH3D*) h_HL_MR_STC->Clone("h_HLM_MR_STC");
   h_HLM_MR_STC->Add(h_HM_MR_STC);
 
+  TH3D* h_1LM_SR_hi_STC = (TH3D*) h_1L_SR_hi_STC->Clone("h_1LM_SR_hi_STC");
+  h_1LM_SR_hi_STC->Add(h_1M_SR_hi_STC);
+  hi_hists[h_1LM_SR_STC] = h_1LM_SR_hi_STC;
+  TH3D* h_1LM_VR_hi_STC = (TH3D*) h_LL_VR_hi_STC->Clone("h_1LM_VR_hi_STC");
+  h_1LM_VR_hi_STC->Add(h_LM_VR_hi_STC);
+  hi_hists[h_1LM_VR_STC] = h_1LM_VR_hi_STC;
+  TH3D* h_1LM_MR_hi_STC = (TH3D*) h_LL_MR_hi_STC->Clone("h_1LM_MR_hi_STC");
+  h_1LM_MR_hi_STC->Add(h_LM_MR_hi_STC);
+  hi_hists[h_1LM_MR_STC] = h_1LM_MR_hi_STC;
   TH3D* h_LLM_SR_hi_STC = (TH3D*) h_LL_SR_hi_STC->Clone("h_LLM_SR_hi_STC");
   h_LLM_SR_hi_STC->Add(h_LM_SR_hi_STC);
   hi_hists[h_LLM_SR_STC] = h_LLM_SR_hi_STC;
@@ -1437,6 +1725,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_HLM_MR_hi_STC->Add(h_HM_MR_hi_STC);
   hi_hists[h_HLM_MR_STC] = h_HLM_MR_hi_STC;
 
+  TH3D* h_1LM_SR_lo_STC = (TH3D*) h_1L_SR_lo_STC->Clone("h_1LM_SR_lo_STC");
+  h_1LM_SR_lo_STC->Add(h_1M_SR_lo_STC);
+  low_hists[h_1LM_SR_STC] = h_1LM_SR_lo_STC;
+  TH3D* h_1LM_VR_lo_STC = (TH3D*) h_1L_VR_lo_STC->Clone("h_1LM_VR_lo_STC");
+  h_1LM_VR_lo_STC->Add(h_1M_VR_lo_STC);
+  low_hists[h_1LM_VR_STC] = h_1LM_VR_lo_STC;
+  TH3D* h_1LM_MR_lo_STC = (TH3D*) h_1L_MR_lo_STC->Clone("h_1LM_MR_lo_STC");
+  h_1LM_MR_lo_STC->Add(h_1M_MR_lo_STC);
+  low_hists[h_1LM_MR_STC] = h_1LM_MR_lo_STC;
   TH3D* h_LLM_SR_lo_STC = (TH3D*) h_LL_SR_lo_STC->Clone("h_LLM_SR_lo_STC");
   h_LLM_SR_lo_STC->Add(h_LM_SR_lo_STC);
   low_hists[h_LLM_SR_STC] = h_LLM_SR_lo_STC;
@@ -1457,6 +1754,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HLM_MR_STC] = h_HLM_MR_lo_STC;
 
   // STs
+  TH3D* h_1LM_SR_ST = (TH3D*) h_1L_SR_ST->Clone("h_1LM_SR_ST");
+  h_1LM_SR_ST->Add(h_1M_SR_ST);
+  TH3D* h_1LM_VR_ST = (TH3D*) h_1L_VR_ST->Clone("h_1LM_VR_ST");
+  h_1LM_VR_ST->Add(h_1M_VR_ST);
+  TH3D* h_1LM_MR_ST = (TH3D*) h_1L_MR_ST->Clone("h_1LM_MR_ST");
+  h_1LM_MR_ST->Add(h_1M_MR_ST);
   TH3D* h_LLM_SR_ST = (TH3D*) h_LL_SR_ST->Clone("h_LLM_SR_ST");
   h_LLM_SR_ST->Add(h_LM_SR_ST);
   TH3D* h_LLM_VR_ST = (TH3D*) h_LL_VR_ST->Clone("h_LLM_VR_ST");
@@ -1470,6 +1773,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_HLM_MR_ST = (TH3D*) h_HL_MR_ST->Clone("h_HLM_MR_ST");
   h_HLM_MR_ST->Add(h_HM_MR_ST);
 
+  TH3D* h_1LM_SR_hi_ST = (TH3D*) h_1L_SR_hi_ST->Clone("h_1LM_SR_hi_ST");
+  h_1LM_SR_hi_ST->Add(h_1M_SR_hi_ST);
+  hi_hists[h_1LM_SR_ST] = h_1LM_SR_hi_ST;
+  TH3D* h_1LM_VR_hi_ST = (TH3D*) h_1L_VR_hi_ST->Clone("h_1LM_VR_hi_ST");
+  h_1LM_VR_hi_ST->Add(h_1M_VR_hi_ST);
+  hi_hists[h_1LM_VR_ST] = h_1LM_VR_hi_ST;
+  TH3D* h_1LM_MR_hi_ST = (TH3D*) h_1L_MR_hi_ST->Clone("h_1LM_MR_hi_ST");
+  h_1LM_MR_hi_ST->Add(h_1M_MR_hi_ST);
+  hi_hists[h_1LM_MR_ST] = h_1LM_MR_hi_ST;
   TH3D* h_LLM_SR_hi_ST = (TH3D*) h_LL_SR_hi_ST->Clone("h_LLM_SR_hi_ST");
   h_LLM_SR_hi_ST->Add(h_LM_SR_hi_ST);
   hi_hists[h_LLM_SR_ST] = h_LLM_SR_hi_ST;
@@ -1489,6 +1801,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_HLM_MR_hi_ST->Add(h_HM_MR_hi_ST);
   hi_hists[h_HLM_MR_ST] = h_HLM_MR_hi_ST;
 
+  TH3D* h_1LM_SR_lo_ST = (TH3D*) h_1L_SR_lo_ST->Clone("h_1LM_SR_lo_ST");
+  h_1LM_SR_lo_ST->Add(h_1M_SR_lo_ST);
+  low_hists[h_1LM_SR_ST] = h_1LM_SR_lo_ST;
+  TH3D* h_1LM_VR_lo_ST = (TH3D*) h_1L_VR_lo_ST->Clone("h_1LM_VR_lo_ST");
+  h_1LM_VR_lo_ST->Add(h_1M_VR_lo_ST);
+  low_hists[h_1LM_VR_ST] = h_1LM_VR_lo_ST;
+  TH3D* h_1LM_MR_lo_ST = (TH3D*) h_1L_MR_lo_ST->Clone("h_1LM_MR_lo_ST");
+  h_1LM_MR_lo_ST->Add(h_1M_MR_lo_ST);
+  low_hists[h_1LM_MR_ST] = h_1LM_MR_lo_ST;
   TH3D* h_LLM_SR_lo_ST = (TH3D*) h_LL_SR_lo_ST->Clone("h_LLM_SR_lo_ST");
   h_LLM_SR_lo_ST->Add(h_LM_SR_lo_ST);
   low_hists[h_LLM_SR_ST] = h_LLM_SR_lo_ST;
@@ -1509,11 +1830,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HLM_MR_ST] = h_HLM_MR_lo_ST;
 
   vector<TH3D*> hists = {
-    h_LL_MR_STC,  h_LM_MR_STC,  h_LLM_MR_STC, h_LH_MR_STC,  h_HL_MR_STC,   h_HM_MR_STC,  h_HLM_MR_STC, h_HH_MR_STC,  h_LL_VR_STC,  h_LM_VR_STC,  h_LLM_VR_STC, h_LH_VR_STC,  h_HL_VR_STC,  h_HM_VR_STC,  h_HLM_VR_STC, h_HH_VR_STC,  h_LL_SR_STC,  h_LM_SR_STC,  h_LLM_SR_STC, h_LH_SR_STC,  h_HL_SR_STC,  h_HM_SR_STC,  h_HLM_SR_STC, h_HH_SR_STC,
+    h_1L_MR_STC,  h_1M_MR_STC,  h_1LM_MR_STC, h_1H_MR_STC, h_LL_MR_STC,  h_LM_MR_STC,  h_LLM_MR_STC, h_LH_MR_STC, h_HL_MR_STC,  h_HM_MR_STC,  h_HLM_MR_STC, h_HH_MR_STC,  
+    h_1L_VR_STC,  h_1M_VR_STC,  h_1LM_VR_STC, h_1H_VR_STC, h_LL_VR_STC,  h_LM_VR_STC,  h_LLM_VR_STC, h_LH_VR_STC, h_HL_VR_STC,  h_HM_VR_STC,  h_HLM_VR_STC, h_HH_VR_STC, 
+    h_1L_SR_STC,  h_1M_SR_STC,  h_1LM_SR_STC, h_1H_SR_STC, h_LL_SR_STC,  h_LM_SR_STC,  h_LLM_SR_STC, h_LH_SR_STC, h_HL_SR_STC,  h_HM_SR_STC,  h_HLM_SR_STC, h_HH_SR_STC,
 
-    h_LL_MR_ST,  h_LM_MR_ST,  h_LLM_MR_ST, h_LH_MR_ST,  h_HL_MR_ST,   h_HM_MR_ST,  h_HLM_MR_ST, h_HH_MR_ST,  h_LL_VR_ST,  h_LM_VR_ST,  h_LLM_VR_ST, h_LH_VR_ST,  h_HL_VR_ST,  h_HM_VR_ST,  h_HLM_VR_ST, h_HH_VR_ST,  h_LL_SR_ST,  h_LM_SR_ST,  h_LLM_SR_ST, h_LH_SR_ST,  h_HL_SR_ST,  h_HM_SR_ST,  h_HLM_SR_ST, h_HH_SR_ST,
+    h_1L_MR_ST,  h_1M_MR_ST,  h_1LM_MR_ST, h_1H_MR_ST, h_LL_MR_ST,  h_LM_MR_ST,  h_LLM_MR_ST, h_LH_MR_ST, h_HL_MR_ST,  h_HM_MR_ST,  h_HLM_MR_ST, h_HH_MR_ST,  
+    h_1L_VR_ST,  h_1M_VR_ST,  h_1LM_VR_ST, h_1H_VR_ST, h_LL_VR_ST,  h_LM_VR_ST,  h_LLM_VR_ST, h_LH_VR_ST, h_HL_VR_ST,  h_HM_VR_ST,  h_HLM_VR_ST, h_HH_VR_ST, 
+    h_1L_SR_ST,  h_1M_SR_ST,  h_1LM_SR_ST, h_1H_SR_ST, h_LL_SR_ST,  h_LM_SR_ST,  h_LLM_SR_ST, h_LH_SR_ST, h_HL_SR_ST,  h_HM_SR_ST,  h_HLM_SR_ST, h_HH_SR_ST,
 
-    h_fracFS_23, h_fracFS_4};
+    h_fracFS_1, h_fracFS_23, h_fracFS_4};
 
   cout << "About to write" << endl;
   

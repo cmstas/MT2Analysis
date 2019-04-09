@@ -6,6 +6,7 @@ import re
 import sys
 import os
 import subprocess
+import ppmUtils as utils
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
@@ -428,7 +429,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
         print syst_errs
         print errs["Baseline"+ptstring+" FS"]
     gsyst = getPoissonGraph( hsyst, [syst_errs for i in range(len(def_errs))] )
-    tl.AddEntry(hist,"Variations")
+    tl.AddEntry(hist,"Variations","pLE")
     tl.AddEntry(hdef,"Baseline, Stat Error Only")
     tl.AddEntry(hsyst,"Baseline, Quadrature(Stat, Syst)")    
     hsyst.GetYaxis().SetTitleOffset(1.7)
@@ -439,6 +440,18 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     gvar.Draw("p same")
     hist.Draw("same")
     hsyst.Draw("AXIS same")
+    if desc.find("17") >= 0 and desc.find("18") >= 0:
+        lumi = 101 # 2017-18
+    elif desc.find("17") >= 0:
+        lumi = 42.0 # 2017
+    elif desc.find("18") >= 0:
+        lumi = 58.9
+    elif desc.find("16") >= 0:
+        lumi = 35.9
+    else:
+        print "didn't recognize lumi period"
+        exit(1)
+    utils.CMS_Style(simplecanvas,extraText="Simulation Preliminary" if desc.find("MC") >= 0 else "Preliminary",lumi=str(lumi)+" fb^{-1}",relPosX=0.15)
     tl.Draw()
     os.system("mkdir -p fshort_variations/{}".format(desc))
     simplecanvas.SaveAs("fshort_variations/{}/{}.{}".format(desc,hist.GetName(),format))

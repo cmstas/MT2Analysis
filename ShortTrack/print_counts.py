@@ -9,12 +9,14 @@ from printing_functions import *
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more status messages
-printTables = True
+printTables = False
 full_unblind = True
 doMC = True
-makePullPlots = True
-makePostFitPlots = True
-makeSSRplots = True
+doBenchmarks = False
+doMonojet = False
+makePullPlots = False
+makePostFitPlots = False
+makeSSRplots = False
 format = "pdf"
 colorTables = False
 
@@ -69,21 +71,22 @@ if doMC:
     m18=ROOT.TFile.Open("output_merged/mc_2018_{}.root".format(tag))
     m16=ROOT.TFile.Open("output_merged/mc_2016_{}.root".format(tag))
 
-    sig1718 = {}
-    sig1718[(1800,1400,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1400.root".format(tag))
-    sig1718[(1800,1600,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1600.root".format(tag))
-    sig1718[(1800,1700,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1700.root".format(tag))
-    sig1718[(1800,1400,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1400.root".format(tag))
-    sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1600.root".format(tag))
-    sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(tag))
-
-    siglimits = {}
-    siglimits[(1800,1400,10)] = 0.56
-    siglimits[(1800,1600,10)] = 1.3
-    siglimits[(1800,1700,10)] = 3.3
-    siglimits[(1800,1400,90)] = 0.058
-    siglimits[(1800,1600,90)] = 0.14
-    siglimits[(1800,1700,90)] = 0.28
+    if doBenchmarks:
+        sig1718 = {}
+        sig1718[(1800,1400,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1400.root".format(tag))
+        sig1718[(1800,1600,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1600.root".format(tag))
+        sig1718[(1800,1700,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1700.root".format(tag))
+        sig1718[(1800,1400,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1400.root".format(tag))
+        sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1600.root".format(tag))
+        sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(tag))
+        
+        siglimits = {}
+        siglimits[(1800,1400,10)] = 0.56
+        siglimits[(1800,1600,10)] = 1.3
+        siglimits[(1800,1700,10)] = 3.3
+        siglimits[(1800,1400,90)] = 0.058
+        siglimits[(1800,1600,90)] = 0.14
+        siglimits[(1800,1700,90)] = 0.28
 
 D18f,eD18f,sD18f=getFshorts(d18)
 D17f,eD17f,sD17f=getFshorts(d17)
@@ -95,10 +98,12 @@ if doMC:
     M17f,eM17f,sM17f=getFshorts(m17)
     M18f,eM18f,sM18f=getFshorts(m18)
 
-# Mglu, Mlsp, ctau, limit mu
-signal_points=[(1800,1400,10),(1800,1600,10),(1800,1700,10),(1800,1400,90),(1800,1600,90),(1800,1700,90)]
-signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
-signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
+if doBenchmarks:
+    # Mglu, Mlsp, ctau, limit mu
+    signal_points=[(1800,1400,10),(1800,1600,10),(1800,1700,10),(1800,1400,90),(1800,1600,90),(1800,1700,90)]
+    signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
+    signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
+
 D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f)
 D17,eD17,sD17=getCounts(d17,D17f,sD17f)
 D18,eD18,sD18=getCounts(d18,D18f,sD18f)
@@ -109,6 +114,7 @@ if doMC:
     M18,eM18,sM18=getCounts(m18,M18f,sM18f,True)
     M16,eM16,sM16=getCounts(m16,M16f,sM16f,True)
 
+if doBenchmarks:
     S1718 = {}
     eS1718 = {}
     for sp in signal_points:
@@ -163,7 +169,14 @@ allSR16 = regionsNoL16SR+regionsLSR
 allVR = allVR16 + allVR1718
 allSR = allSR16 + allSR1718
 
+regions_monojetL = ["L " + kin + " " + reg for kin in ["1LM","1H"] for reg in ["SR"]]
+regions_monojet = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","P3","P4","M"] for pt in ["lo","hi"] for kin in ["1L","1M","1H"] ]
+regions_monojet += regions_monojetL
+
+regions_monojetVR = [ region.replace("SR","VR") for region in regions_monojet ]
+
 allregions = allVR + allSR
+
 
 rescale16 = 1/4.0 if not full_unblind else 1.0
 rescale1718 = 1/5.0 if not full_unblind else 1.0
@@ -225,7 +238,7 @@ if makePullPlots:
     makePlotRaw(allVR16,D16,eD16,sD16,D16f,"2016 DATA VR NoNC",combineSysts=False,doPullPlot=True,inclNCsyst=False)
 
 if makePostFitPlots:
-    fpostfit=ROOT.TFile.Open("../scripts/fits_{}_10cm_1800-1400_Data_SR/fitDiagnostics_fit_CRonly_result.root".format(tag))
+    fpostfit=ROOT.TFile.Open("../scripts/fits_approval_T1qqqq_10_Data_SR/fitDiagnostics_fit_CRonly_result.root".format(tag))
     if fpostfit == None:
         print "Couldn't find postfit file"
         print "Run scripts/getShortTrackFits.sh, or produced manually using something like combine -M FitDiagnostics -d combined.txt -n _fit_CRonly_result --saveShapes --saveWithUncertainties --setParameters mask_ch1=1 (with correctly named channels; see scripts/combineDir.sh)"
@@ -233,22 +246,22 @@ if makePostFitPlots:
     D16p,eD16p=getCountsPostfit(fpostfit,"2016")
     D1718p,eD1718p=getCountsPostfit(fpostfit,"2017and2018")
 
-    f_pf = ROOT.TFile.Open("../scripts/fits_{}_10cm_1800-1400_Data_SR/fitDiagnostics_fit_result.root".format(tag))
-    if f_pf == None:
-        print "Couldn't find postfit signal counts for 10cm 1800-1400. Use combine -M FitDiagnostics -d combined.txt -n _fit_10cm_1800-1400 --saveShapes --saveWithUncertainties --setParameters"
-    S16p,eS16p = getSignalCountsPostfit(f_pf,"2016")
-    S1718p,eS1718p = getSignalCountsPostfit(f_pf,"2017and2018")
-    f_pf.Close()
-    makePlotPostfitSvsBG(allSR1718,D1718,S1718p,eS1718p,"2017-18 DATA SR 10-1800-1400",rescale1718,doPullPlot=False)
-    makePlotPostfitSvsBG(allSR16,D16,S16p,eS16p,"2016 DATA SR 10-1800-1400",rescale16,doPullPlot=False)
-    f_pf = ROOT.TFile.Open("../scripts/fits_{}_90cm_1800-1600_Data_SR/fitDiagnostics_fit_result.root".format(tag))
-    if f_pf == None:
-        print "Couldn't find postfit signal counts for 90cm 1800-1600. Use combine -M FitDiagnostics -d combined.txt -n _fit_90cm_1800-1600 --saveShapes --saveWithUncertainties --setParameters"
-    S16p,eS16p = getSignalCountsPostfit(f_pf,"2016")
-    S1718p,eS1718p = getSignalCountsPostfit(f_pf,"2017and2018")
-    f_pf.Close()
-    makePlotPostfitSvsBG(allSR1718,D1718,S1718p,eS1718p,"2017-18 DATA SR 90-1800-1600",rescale1718,doPullPlot=False)
-    makePlotPostfitSvsBG(allSR16,D16,S16p,eS16p,"2016 DATA SR 90-1800-1600",rescale16,doPullPlot=False)
+#    f_pf = ROOT.TFile.Open("../scripts/fits_{}_10cm_1800-1400_Data_SR/fitDiagnostics_fit_result.root".format(tag))
+#    if f_pf == None:
+#        print "Couldn't find postfit signal counts for 10cm 1800-1400. Use combine -M FitDiagnostics -d combined.txt -n _fit_10cm_1800-1400 --saveShapes --saveWithUncertainties --setParameters"
+#    S16p,eS16p = getSignalCountsPostfit(f_pf,"2016")
+#    S1718p,eS1718p = getSignalCountsPostfit(f_pf,"2017and2018")
+#    f_pf.Close()
+#    makePlotPostfitSvsBG(allSR1718,D1718,S1718p,eS1718p,"2017-18 DATA SR 10-1800-1400",rescale1718,doPullPlot=False)
+#    makePlotPostfitSvsBG(allSR16,D16,S16p,eS16p,"2016 DATA SR 10-1800-1400",rescale16,doPullPlot=False)
+#    f_pf = ROOT.TFile.Open("../scripts/fits_{}_90cm_1800-1600_Data_SR/fitDiagnostics_fit_result.root".format(tag))
+#    if f_pf == None:
+#        print "Couldn't find postfit signal counts for 90cm 1800-1600. Use combine -M FitDiagnostics -d combined.txt -n _fit_90cm_1800-1600 --saveShapes --saveWithUncertainties --setParameters"
+#    S16p,eS16p = getSignalCountsPostfit(f_pf,"2016")
+#    S1718p,eS1718p = getSignalCountsPostfit(f_pf,"2017and2018")
+#    f_pf.Close()
+#    makePlotPostfitSvsBG(allSR1718,D1718,S1718p,eS1718p,"2017-18 DATA SR 90-1800-1600",rescale1718,doPullPlot=False)
+#    makePlotPostfitSvsBG(allSR16,D16,S16p,eS16p,"2016 DATA SR 90-1800-1600",rescale16,doPullPlot=False)
 
     # Pull plots not implemented yet
     # Only makes sense to do these for SR
@@ -272,7 +285,7 @@ if makePostFitPlots:
         makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=True)
 
 if makeSSRplots:
-    fcorr = ROOT.TFile.Open("../scripts/fits_preapproval_10cm_1800-1400_Data_SR/fitDiagnostics_covariance.root")
+    fcorr = ROOT.TFile.Open("../scripts/fits_approval_T1qqqq_10_Data_SR/fitDiagnostics_covariance.root")
     if fcorr == None:
         print "Couldn't find a background-only covariance file. Make it using combine -M FitDiagnostics -t -1 --expectSignal 0 --rMin -1 [COMBINED DATACARD] --forceRecreateNLL  --saveWithUncertainties --saveOverallShapes --numToysForShapes 200"
     CORR = getCorr(fcorr)
@@ -292,7 +305,7 @@ if doMC:
     makePlotRaw(allSR1718,M1718,eM1718,sM1718,M1718f,"2017-18 MC SR",doPullPlot=False)
     makePlotRaw(allSR16,M16,eM16,sM16,M16f,"2016 MC SR",doPullPlot=False)
 
-if doMC:
+if doBenchmarks:
     for sp in signal_points:
         m1=sp[0]
         m2=sp[1]
@@ -319,7 +332,7 @@ fshort_regions_1718 += [ "L 23", "L 4" ]
 
 if doMC:
     makePlotFshort(fshort_regions_16,D16f,eD16f,sD16f,M16f,eM16f,sM16f,"2016")
-    makePlotFshort(fshort_regions_1718,D1718f,eD1718f,sD1718f,M1718f,eM1718f,sM1718f,"2017-18")
+    makePlotFshort(fshort_regions_1718,D1718f,eD1718f,sD1718f,M1718f,eM1718f,sM1718f,"2017-2018")
 
 if printTables:
     output = open("{0}/regions_stc_data_VR.tex".format(tabledir),"w")
@@ -354,7 +367,24 @@ if printTables:
     printFooter(output)
     output.close()
 
-    if doMC:
+    if doMonojet:
+        output = open("{0}/regions_stc_data_monojetSR_combinedSyst.tex".format(tabledir),"w")
+        printHeader(output)
+        startMergedRegionTableDataSTC(output)
+        for region in regions_monojet:
+            output.write(getMergedLineDataSTC_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718))
+        printFooter(output)
+        output.close()
+
+        output = open("{0}/regions_stc_data_monojetVR_combinedSyst.tex".format(tabledir),"w")
+        printHeader(output)
+        startMergedRegionTableDataSTC(output)
+        for region in regions_monojetVR:
+            output.write(getMergedLineDataSTC_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718))
+        printFooter(output)
+        output.close()
+
+    if doMC and doBenchmarks:
 #        output = open("{0}/counts_data_SR.tex".format(tabledir),"w")
 #        printHeader(output)
 #        startMergedCountsTable(output)
@@ -471,6 +501,23 @@ if doMC and printTables:
     printFooter(output)
     output.close()
 
+    if doMonojet:
+        output = open("{0}/regions_stc_mc_monojetSR.tex".format(tabledir),"w")
+        printHeader(output)
+        startMergedRegionTableMCSTC(output)
+        for region in regions_monojet:
+            output.write(getMergedLineMCSTC(region,M16,eM16,sM16,M1718,eM1718,sM1718))
+        printFooter(output)
+        output.close()
+
+        output = open("{0}/regions_stc_mc_monojetVR.tex".format(tabledir),"w")
+        printHeader(output)
+        startMergedRegionTableMCSTC(output)
+        for region in regions_monojetVR:
+            output.write(getMergedLineMCSTC(region,M16,eM16,sM16,M1718,eM1718,sM1718))
+        printFooter(output)
+        output.close()
+
 fs_regions = [cat + " " + nj + " " + pt for cat in ["P","P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fs_regions += ["L 23","L 4"]
 
@@ -504,17 +551,18 @@ printFooter(output)
 output.close()
 
 
-limits_10 = [siglimits[sp] for sp in signal_points_10]
-limits_90 = [siglimits[sp] for sp in signal_points_90]
-makePlotSigErr(allVR1718,D1718,eD1718,sD1718,list_of_vals_10,list_of_tags,colors,limits_10,1+(59.97/41.97),"2017-18 VR 10 cm")
-makePlotSigErr(allVR16,D16,eD16,sD16,list_of_vals_10,list_of_tags,colors,limits_10,35.9/41.97,"2016 VR 10 cm")
-makePlotSigErr(allVR1718,D1718,eD1718,sD1718,list_of_vals_90,list_of_tags,colors,limits_90,1+(59.97/41.97),"2017-18 VR 90 cm")
-makePlotSigErr(allVR16,D16,eD16,sD16,list_of_vals_90,list_of_tags,colors,limits_90,35.9/41.97,"2016 VR 90 cm")
-
-makePlotSigErr(allSR1718,D1718,eD1718,sD1718,list_of_vals_10,list_of_tags,colors,limits_10,1+(59.97/41.97),"2017-18 SR 10 cm")
-makePlotSigErr(allSR16,D16,eD16,sD16,list_of_vals_10,list_of_tags,colors,limits_10,35.9/41.97,"2016 SR 10 cm")
-makePlotSigErr(allSR1718,D1718,eD1718,sD1718,list_of_vals_90,list_of_tags,colors,limits_90,1+(59.97/41.97),"2017-18 SR 90 cm")
-makePlotSigErr(allSR16,D16,eD16,sD16,list_of_vals_90,list_of_tags,colors,limits_90,35.9/41.97,"2016 SR 90 cm")
+if doBenchmarks:
+    limits_10 = [siglimits[sp] for sp in signal_points_10]
+    limits_90 = [siglimits[sp] for sp in signal_points_90]
+    makePlotSigErr(allVR1718,D1718,eD1718,sD1718,list_of_vals_10,list_of_tags,colors,limits_10,1+(59.97/41.97),"2017-18 VR 10 cm")
+    makePlotSigErr(allVR16,D16,eD16,sD16,list_of_vals_10,list_of_tags,colors,limits_10,35.9/41.97,"2016 VR 10 cm")
+    makePlotSigErr(allVR1718,D1718,eD1718,sD1718,list_of_vals_90,list_of_tags,colors,limits_90,1+(59.97/41.97),"2017-18 VR 90 cm")
+    makePlotSigErr(allVR16,D16,eD16,sD16,list_of_vals_90,list_of_tags,colors,limits_90,35.9/41.97,"2016 VR 90 cm")
+    
+    makePlotSigErr(allSR1718,D1718,eD1718,sD1718,list_of_vals_10,list_of_tags,colors,limits_10,1+(59.97/41.97),"2017-18 SR 10 cm")
+    makePlotSigErr(allSR16,D16,eD16,sD16,list_of_vals_10,list_of_tags,colors,limits_10,35.9/41.97,"2016 SR 10 cm")
+    makePlotSigErr(allSR1718,D1718,eD1718,sD1718,list_of_vals_90,list_of_tags,colors,limits_90,1+(59.97/41.97),"2017-18 SR 90 cm")
+    makePlotSigErr(allSR16,D16,eD16,sD16,list_of_vals_90,list_of_tags,colors,limits_90,35.9/41.97,"2016 SR 90 cm")
 
 print "Done"
 
