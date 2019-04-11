@@ -12,6 +12,7 @@ const float isoSTC = 6, qualSTC = 3;
 bool adjL = true; // use fshort'(M) = fshort(M) * fshort(L)_mc / fshort(M)_mc instead of raw fshort(M) in place of fshort(L)
 const bool EventWise = false; // Count events with Nst == 1 and Nst == 2, or just counts STs?
 const bool skipHighEventWeights = true;
+const bool prioritize = true; // only count the longest, then highest pt, track
 
 const bool merge17and18 = true;
 
@@ -108,6 +109,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Nlep = 0 hists
 
   // NjHt
+  TH2D* h_1L_MR = (TH2D*)h_eventwise_countsVR.Clone("h_1L_MR");
+  TH2D* h_1M_MR = (TH2D*)h_eventwise_countsVR.Clone("h_1M_MR");
+  TH2D* h_1H_MR = (TH2D*)h_eventwise_countsVR.Clone("h_1H_MR");
   TH2D* h_LL_MR = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR");
   TH2D* h_LM_MR = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR");
   TH2D* h_LH_MR = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR");
@@ -115,6 +119,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_MR = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR");
   TH2D* h_HH_MR = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR");
 
+  TH2D* h_1L_VR = (TH2D*)h_eventwise_countsVR.Clone("h_1L_VR");
+  TH2D* h_1M_VR = (TH2D*)h_eventwise_countsVR.Clone("h_1M_VR");
+  TH2D* h_1H_VR = (TH2D*)h_eventwise_countsVR.Clone("h_1H_VR");
   TH2D* h_LL_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR");
   TH2D* h_LM_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR");
   TH2D* h_LH_VR = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR");
@@ -122,6 +129,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR");
   TH2D* h_HH_VR = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR");
 
+  TH2D* h_1L_SR = (TH2D*)h_eventwise_counts.Clone("h_1L_SR");
+  TH2D* h_1M_SR = (TH2D*)h_eventwise_counts.Clone("h_1M_SR");
+  TH2D* h_1H_SR = (TH2D*)h_eventwise_counts.Clone("h_1H_SR");
   TH2D* h_LL_SR = (TH2D*)h_eventwise_counts.Clone("h_LL_SR");
   TH2D* h_LM_SR = (TH2D*)h_eventwise_counts.Clone("h_LM_SR");
   TH2D* h_LH_SR = (TH2D*)h_eventwise_counts.Clone("h_LH_SR");
@@ -130,6 +140,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR = (TH2D*)h_eventwise_counts.Clone("h_HH_SR");
 
   // Separate fshorts
+  TH2D* h_1L_MR_1 = (TH2D*)h_eventwise_countsVR.Clone("h_1L_MR_1");
+  TH2D* h_1M_MR_1 = (TH2D*)h_eventwise_countsVR.Clone("h_1M_MR_1");
+  TH2D* h_1H_MR_1 = (TH2D*)h_eventwise_countsVR.Clone("h_1H_MR_1");
   TH2D* h_LL_MR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_23");
   TH2D* h_LM_MR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_23");
   TH2D* h_LH_MR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_23");
@@ -137,6 +150,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_MR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_4");
   TH2D* h_HH_MR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_4");
 
+  TH2D* h_1L_VR_1 = (TH2D*)h_eventwise_countsVR.Clone("h_1L_VR_1");
+  TH2D* h_1M_VR_1 = (TH2D*)h_eventwise_countsVR.Clone("h_1M_VR_1");
+  TH2D* h_1H_VR_1 = (TH2D*)h_eventwise_countsVR.Clone("h_1H_VR_1");
   TH2D* h_LL_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23");
   TH2D* h_LM_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23");
   TH2D* h_LH_VR_23 = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23");
@@ -144,6 +160,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_4");
   TH2D* h_HH_VR_4 = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_4");
 
+  TH2D* h_1L_SR_1 = (TH2D*)h_eventwise_counts.Clone("h_1L_SR_1");
+  TH2D* h_1M_SR_1 = (TH2D*)h_eventwise_counts.Clone("h_1M_SR_1");
+  TH2D* h_1H_SR_1 = (TH2D*)h_eventwise_counts.Clone("h_1H_SR_1");
   TH2D* h_LL_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_23");
   TH2D* h_LM_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_23");
   TH2D* h_LH_SR_23 = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23");
@@ -154,6 +173,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   // Hi pt
 
   // NjHt
+  TH2D* h_1L_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1L_MR_hi");
+  TH2D* h_1M_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1M_MR_hi");
+  TH2D* h_1H_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1H_MR_hi");
   TH2D* h_LL_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_hi");
   TH2D* h_LM_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_hi");
   TH2D* h_LH_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_hi");
@@ -161,6 +183,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_hi");
   TH2D* h_HH_MR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_hi");
 
+  TH2D* h_1L_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1L_VR_hi");
+  TH2D* h_1M_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1M_VR_hi");
+  TH2D* h_1H_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1H_VR_hi");
   TH2D* h_LL_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_hi");
   TH2D* h_LM_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_hi");
   TH2D* h_LH_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_hi");
@@ -168,6 +193,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_hi");
   TH2D* h_HH_VR_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_hi");
 
+  TH2D* h_1L_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_1L_SR_hi");
+  TH2D* h_1M_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_1M_SR_hi");
+  TH2D* h_1H_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_1H_SR_hi");
   TH2D* h_LL_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_hi");
   TH2D* h_LM_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_hi");
   TH2D* h_LH_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_hi");
@@ -176,6 +204,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR_hi = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_hi");
 
   // Separate fshorts
+  TH2D* h_1L_MR_1_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1L_MR_1_hi");
+  TH2D* h_1M_MR_1_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1M_MR_1_hi");
+  TH2D* h_1H_MR_1_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1H_MR_1_hi");
   TH2D* h_LL_MR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_23_hi");
   TH2D* h_LM_MR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_23_hi");
   TH2D* h_LH_MR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_23_hi");
@@ -183,6 +214,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_MR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_4_hi");
   TH2D* h_HH_MR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_4_hi");
 
+  TH2D* h_1L_VR_1_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1L_VR_1_hi");
+  TH2D* h_1M_VR_1_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1M_VR_1_hi");
+  TH2D* h_1H_VR_1_hi = (TH2D*)h_eventwise_countsVR.Clone("h_1H_VR_1_hi");
   TH2D* h_LL_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23_hi");
   TH2D* h_LM_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23_hi");
   TH2D* h_LH_VR_23_hi = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23_hi");
@@ -190,6 +224,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_VR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_4_hi");
   TH2D* h_HH_VR_4_hi = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_4_hi");
 
+  TH2D* h_1L_SR_1_hi = (TH2D*)h_eventwise_counts.Clone("h_1L_SR_1_hi");
+  TH2D* h_1M_SR_1_hi = (TH2D*)h_eventwise_counts.Clone("h_1M_SR_1_hi");
+  TH2D* h_1H_SR_1_hi = (TH2D*)h_eventwise_counts.Clone("h_1H_SR_1_hi");
   TH2D* h_LL_SR_23_hi = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_23_hi");
   TH2D* h_LM_SR_23_hi = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_23_hi");
   TH2D* h_LH_SR_23_hi = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23_hi");
@@ -199,6 +236,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Lo pt
   // NjHt
+  TH2D* h_1L_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1L_MR_lo");
+  TH2D* h_1M_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1M_MR_lo");
+  TH2D* h_1H_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1H_MR_lo");
   TH2D* h_LL_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_lo");
   TH2D* h_LM_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_lo");
   TH2D* h_LH_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_lo");
@@ -206,6 +246,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_lo");
   TH2D* h_HH_MR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_lo");
 
+  TH2D* h_1L_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1L_VR_lo");
+  TH2D* h_1M_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1M_VR_lo");
+  TH2D* h_1H_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1H_VR_lo");
   TH2D* h_LL_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_lo");
   TH2D* h_LM_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_lo");
   TH2D* h_LH_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_lo");
@@ -213,6 +256,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_lo");
   TH2D* h_HH_VR_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_lo");
 
+  TH2D* h_1L_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_1L_SR_lo");
+  TH2D* h_1M_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_1M_SR_lo");
+  TH2D* h_1H_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_1H_SR_lo");
   TH2D* h_LL_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_lo");
   TH2D* h_LM_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_lo");
   TH2D* h_LH_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_lo");
@@ -221,6 +267,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR_lo = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_lo");
 
   // Separate fshorts
+  TH2D* h_1L_MR_1_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1L_MR_1_lo");
+  TH2D* h_1M_MR_1_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1M_MR_1_lo");
+  TH2D* h_1H_MR_1_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1H_MR_1_lo");
   TH2D* h_LL_MR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_MR_23_lo");
   TH2D* h_LM_MR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_MR_23_lo");
   TH2D* h_LH_MR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_MR_23_lo");
@@ -228,6 +277,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_MR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_MR_4_lo");
   TH2D* h_HH_MR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_MR_4_lo");
 
+  TH2D* h_1L_VR_1_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1L_VR_1_lo");
+  TH2D* h_1M_VR_1_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1M_VR_1_lo");
+  TH2D* h_1H_VR_1_lo = (TH2D*)h_eventwise_countsVR.Clone("h_1H_VR_1_lo");
   TH2D* h_LL_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LL_VR_23_lo");
   TH2D* h_LM_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LM_VR_23_lo");
   TH2D* h_LH_VR_23_lo = (TH2D*)h_eventwise_countsVR.Clone("h_LH_VR_23_lo");
@@ -235,6 +287,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HM_VR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HM_VR_4_lo");
   TH2D* h_HH_VR_4_lo = (TH2D*)h_eventwise_countsVR.Clone("h_HH_VR_4_lo");
 
+  TH2D* h_1L_SR_1_lo = (TH2D*)h_eventwise_counts.Clone("h_1L_SR_1_lo");
+  TH2D* h_1M_SR_1_lo = (TH2D*)h_eventwise_counts.Clone("h_1M_SR_1_lo");
+  TH2D* h_1H_SR_1_lo = (TH2D*)h_eventwise_counts.Clone("h_1H_SR_1_lo");
   TH2D* h_LL_SR_23_lo = (TH2D*)h_eventwise_counts.Clone("h_LL_SR_23_lo");
   TH2D* h_LM_SR_23_lo = (TH2D*)h_eventwise_counts.Clone("h_LM_SR_23_lo");
   TH2D* h_LH_SR_23_lo = (TH2D*)h_eventwise_counts.Clone("h_LH_SR_23_lo");
@@ -243,36 +298,60 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HH_SR_4_lo = (TH2D*)h_eventwise_counts.Clone("h_HH_SR_4_lo");
 
   unordered_map<TH2D*,TH2D*> low_hists;
+  low_hists[h_1L_MR] = h_1L_MR_lo;
+  low_hists[h_1M_MR] = h_1M_MR_lo;
+  low_hists[h_1H_MR] = h_1H_MR_lo;
   low_hists[h_LL_MR] = h_LL_MR_lo;
   low_hists[h_LM_MR] = h_LM_MR_lo;
   low_hists[h_LH_MR] = h_LH_MR_lo;
   low_hists[h_HL_MR] = h_HL_MR_lo;
   low_hists[h_HM_MR] = h_HM_MR_lo;
   low_hists[h_HH_MR] = h_HH_MR_lo;
+
+  low_hists[h_1L_VR] = h_1L_VR_lo;
+  low_hists[h_1M_VR] = h_1M_VR_lo;
+  low_hists[h_1H_VR] = h_1H_VR_lo;
   low_hists[h_LL_VR] = h_LL_VR_lo;
   low_hists[h_LM_VR] = h_LM_VR_lo;
   low_hists[h_LH_VR] = h_LH_VR_lo;
   low_hists[h_HL_VR] = h_HL_VR_lo;
   low_hists[h_HM_VR] = h_HM_VR_lo;
   low_hists[h_HH_VR] = h_HH_VR_lo;
+
+  low_hists[h_1L_SR] = h_1L_SR_lo;
+  low_hists[h_1M_SR] = h_1M_SR_lo;
+  low_hists[h_1H_SR] = h_1H_SR_lo;
   low_hists[h_LL_SR] = h_LL_SR_lo;
   low_hists[h_LM_SR] = h_LM_SR_lo;
   low_hists[h_LH_SR] = h_LH_SR_lo;
   low_hists[h_HL_SR] = h_HL_SR_lo;
   low_hists[h_HM_SR] = h_HM_SR_lo;
   low_hists[h_HH_SR] = h_HH_SR_lo;
+
+  low_hists[h_1L_MR_1] = h_1L_MR_1_lo;
+  low_hists[h_1M_MR_1] = h_1M_MR_1_lo;
+  low_hists[h_1H_MR_1] = h_1H_MR_1_lo;
   low_hists[h_LL_MR_23] = h_LL_MR_23_lo;
   low_hists[h_LM_MR_23] = h_LM_MR_23_lo;
   low_hists[h_LH_MR_23] = h_LH_MR_23_lo;
+
+  low_hists[h_1L_VR_1] = h_1L_VR_1_lo;
+  low_hists[h_1M_VR_1] = h_1M_VR_1_lo;
+  low_hists[h_1H_VR_1] = h_1H_VR_1_lo;
   low_hists[h_LL_VR_23] = h_LL_VR_23_lo;
   low_hists[h_LM_VR_23] = h_LM_VR_23_lo;
   low_hists[h_LH_VR_23] = h_LH_VR_23_lo;
+
   low_hists[h_HL_MR_4] = h_HL_MR_4_lo;
   low_hists[h_HM_MR_4] = h_HM_MR_4_lo;
   low_hists[h_HH_MR_4] = h_HH_MR_4_lo;
   low_hists[h_HL_VR_4] = h_HL_VR_4_lo;
   low_hists[h_HM_VR_4] = h_HM_VR_4_lo;
   low_hists[h_HH_VR_4] = h_HH_VR_4_lo;
+
+  low_hists[h_1L_SR_1] = h_1L_SR_1_lo;
+  low_hists[h_1M_SR_1] = h_1M_SR_1_lo;
+  low_hists[h_1H_SR_1] = h_1H_SR_1_lo;
   low_hists[h_LL_SR_23] = h_LL_SR_23_lo;
   low_hists[h_LM_SR_23] = h_LM_SR_23_lo;
   low_hists[h_LH_SR_23] = h_LH_SR_23_lo;
@@ -281,36 +360,60 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   low_hists[h_HH_SR_4] = h_HH_SR_4_lo;
 
   unordered_map<TH2D*,TH2D*> hi_hists;
+  hi_hists[h_1L_MR] = h_1L_MR_hi;
+  hi_hists[h_1M_MR] = h_1M_MR_hi;
+  hi_hists[h_1H_MR] = h_1H_MR_hi;
   hi_hists[h_LL_MR] = h_LL_MR_hi;
   hi_hists[h_LM_MR] = h_LM_MR_hi;
   hi_hists[h_LH_MR] = h_LH_MR_hi;
-  hi_hists[h_LL_VR] = h_LL_VR_hi;
-  hi_hists[h_LM_VR] = h_LM_VR_hi;
-  hi_hists[h_LH_VR] = h_LH_VR_hi;
   hi_hists[h_HL_MR] = h_HL_MR_hi;
   hi_hists[h_HM_MR] = h_HM_MR_hi;
   hi_hists[h_HH_MR] = h_HH_MR_hi;
+
+  hi_hists[h_1L_VR] = h_1L_VR_hi;
+  hi_hists[h_1M_VR] = h_1M_VR_hi;
+  hi_hists[h_1H_VR] = h_1H_VR_hi;
+  hi_hists[h_LL_VR] = h_LL_VR_hi;
+  hi_hists[h_LM_VR] = h_LM_VR_hi;
+  hi_hists[h_LH_VR] = h_LH_VR_hi;
   hi_hists[h_HL_VR] = h_HL_VR_hi;
   hi_hists[h_HM_VR] = h_HM_VR_hi;
   hi_hists[h_HH_VR] = h_HH_VR_hi;
+
+  hi_hists[h_1L_SR] = h_1L_SR_hi;
+  hi_hists[h_1M_SR] = h_1M_SR_hi;
+  hi_hists[h_1H_SR] = h_1H_SR_hi;
   hi_hists[h_LL_SR] = h_LL_SR_hi;
   hi_hists[h_LM_SR] = h_LM_SR_hi;
   hi_hists[h_LH_SR] = h_LH_SR_hi;
   hi_hists[h_HL_SR] = h_HL_SR_hi;
   hi_hists[h_HM_SR] = h_HM_SR_hi;
   hi_hists[h_HH_SR] = h_HH_SR_hi;
+
+  hi_hists[h_1L_MR_1] = h_1L_MR_1_hi;
+  hi_hists[h_1M_MR_1] = h_1M_MR_1_hi;
+  hi_hists[h_1H_MR_1] = h_1H_MR_1_hi;
   hi_hists[h_LL_MR_23] = h_LL_MR_23_hi;
   hi_hists[h_LM_MR_23] = h_LM_MR_23_hi;
   hi_hists[h_LH_MR_23] = h_LH_MR_23_hi;
-  hi_hists[h_HL_MR_4] = h_HL_MR_4_hi;
-  hi_hists[h_HM_MR_4] = h_HM_MR_4_hi;
-  hi_hists[h_HH_MR_4] = h_HH_MR_4_hi;
+
+  hi_hists[h_1L_VR_1] = h_1L_VR_1_hi;
+  hi_hists[h_1M_VR_1] = h_1M_VR_1_hi;
+  hi_hists[h_1H_VR_1] = h_1H_VR_1_hi;
   hi_hists[h_LL_VR_23] = h_LL_VR_23_hi;
   hi_hists[h_LM_VR_23] = h_LM_VR_23_hi;
   hi_hists[h_LH_VR_23] = h_LH_VR_23_hi;
+
+  hi_hists[h_HL_MR_4] = h_HL_MR_4_hi;
+  hi_hists[h_HM_MR_4] = h_HM_MR_4_hi;
+  hi_hists[h_HH_MR_4] = h_HH_MR_4_hi;
   hi_hists[h_HL_VR_4] = h_HL_VR_4_hi;
   hi_hists[h_HM_VR_4] = h_HM_VR_4_hi;
   hi_hists[h_HH_VR_4] = h_HH_VR_4_hi;
+
+  hi_hists[h_1L_SR_1] = h_1L_SR_1_hi;
+  hi_hists[h_1M_SR_1] = h_1M_SR_1_hi;
+  hi_hists[h_1H_SR_1] = h_1H_SR_1_hi;
   hi_hists[h_LL_SR_23] = h_LL_SR_23_hi;
   hi_hists[h_LM_SR_23] = h_LM_SR_23_hi;
   hi_hists[h_LH_SR_23] = h_LH_SR_23_hi;
@@ -909,17 +1012,36 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     // apply HEM veto, and simulate effects in MC
     if(doHEMveto && config_.year == 2018){
       bool hasHEMjet = false;
+      float lostHEMtrackPt = 0;
+      // monojet, VL, and L HT are handled specially (lower pt threshold, and apply lostTrack veto)
+      bool isLowHT = (t.nJet30==1 || (t.nlep != 2 && t.ht < 575) || (t.nlep == 2 && t.zll_ht < 575));
+      float actual_HEM_ptCut = isLowHT ? 20.0 : HEM_ptCut;
       if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
 	for(int i=0; i<t.njet; i++){
-	  if(t.jet_pt[i] < HEM_ptCut)
+	  if(t.jet_pt[i] < actual_HEM_ptCut)
 	    break;
 	  if(t.jet_eta[i] > HEM_region[0] && t.jet_eta[i] < HEM_region[1] && 
 	     t.jet_phi[i] > HEM_region[2] && t.jet_phi[i] < HEM_region[3])
 	    hasHEMjet = true;
 	}
+	for (int i=0; i<t.ntracks; i++){
+	  // Is the track in the HEM region?
+	  if ( !(t.track_eta[i] > HEM_region[0] && t.track_eta[i] < HEM_region[1] &&
+		 t.track_phi[i] > HEM_region[2] && t.track_phi[i] < HEM_region[3]))
+	    continue;
+	  // Found a track in the HEM region. Is is high enough quality to veto the event?
+	  // if (!t.track_isHighPurity[i]) continue;
+	  if (fabs(t.track_dz[i]) > 0.20 || fabs(t.track_dxy[i]) > 0.10) continue;
+	  // if (t.track_nPixelLayersWithMeasurement[i] < 3) continue;
+	  // if (t.track_nLostInnerPixelHits[i] > 0) continue;
+	  // if (t.track_nLostOuterHits[i] > 2) continue;
+	  // May wish to add this guy
+	  //if (t.track_ptErr[i_trk] / (t.track_pt[i_trk]*t.track_pt[i_trk]) > 0.02) continue;
+	  lostHEMtrackPt += t.track_pt[i];
+	}
       }
-      if(hasHEMjet){
-	// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+      // May wish to set lostHEMtrackPt threshold to some higher value; this is equivalent to "any lost track" (saving only pT > 15 GeV tracks in babies for now)
+      if(hasHEMjet || (isLowHT && lostHEMtrackPt > 0)){// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	continue;
       }
     }
@@ -929,23 +1051,34 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     const float mt2 = useGENMET ? t.mt2_genmet : t.mt2;
     const float met_pt = useGENMET ? t.met_genPt : t.met_pt;
 
-    if (t.nJet30 < 2) {
-      continue;
-    }
-    if (t.ht < 250) {
-
-      continue;
-    }
     if (unlikely(t.nJet30FailId != 0)) {
       continue;
     }
-    if (mt2 < 60) {
+    if ( t.nJet30 == 1 && !(isSignal || (t.jet_id[0] >= 4)) ) {
       continue;
     }
 
-    // Let low met events through regardless of Ht if they're in MR
-    if (met_pt < 30 || (t.ht < 1200 && met_pt < 250 && mt2 > 100)) {
+    if (t.ht < 250) {
+      continue;
+    }
+
+    if (t.nJet30 < 1) {
+      continue;
+    }
+    else if (t.nJet30 > 1) {
+      if (mt2 < 60) {
 	continue;
+      }
+      
+      // Let low met events through regardless of Ht if they're in MR
+      if (met_pt < 30 || (t.ht < 1200 && met_pt < 250 && mt2 > 100)) {
+	continue;
+      }
+    }
+    else {
+      if (met_pt < 200 || ht < 200 || t.jet1_pt < 200) {
+	continue;
+      }
     }
 
     if (diffMetMht > 0.5) {
@@ -1012,8 +1145,64 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     TH2D* hist;    
     TH2D* hist_Nj;
     
-    // L*
-    if (t.nJet30 < 4) {
+    // 1*
+    if (t.nJet30 == 1) {
+      // 1H
+      if (t.ht >= 1200) {
+	// MR FIXME what to use as monojet MR?
+	if (false) {
+	  hist = h_1H_MR;
+	  hist_Nj = h_1H_MR_1;
+	}
+	// VR 
+	else if (met_pt < 250) {
+	  hist = h_1H_VR;
+	  hist_Nj = h_1H_VR_1;
+	}
+	// SR 
+	else { //if ( !(blind && t.isData) ) {
+	  hist = h_1H_SR;
+	  hist_Nj = h_1H_SR_1;
+	}
+      }
+      // 1M
+      else if (t.ht >= 450) {
+	// MR FIXME
+	if (false) {
+	  hist = h_1M_MR;
+	  hist_Nj = h_1M_MR_1;
+	}
+	// VR 
+	else if (met_pt < 250) {
+	  hist = h_1M_VR;
+	  hist_Nj = h_1M_VR_1;
+	}
+	// SR 
+	else { //if (! (blind && t.isData) ){
+	  hist = h_1M_SR;
+	  hist_Nj = h_1M_SR_1;
+	}
+      }
+      // 1L
+      else {
+	// MR FIXME
+	if (false) {
+	  hist = h_1L_MR;
+	  hist_Nj = h_1L_MR_1;
+	}
+	// VR
+	else if (met_pt < 250) {
+	  hist = h_1L_VR;
+	  hist_Nj = h_1L_VR_1;
+	}
+	// SR 
+	else { //if (! (blind && t.isData) ){
+	  hist = h_1L_SR;
+	  hist_Nj = h_1L_SR_1;
+	}
+      }
+    }
+    else if (t.nJet30 < 4) {
       // LH
       if (t.ht >= 1200) {
 	// MR
@@ -1188,8 +1377,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       nSTm = 0;      
       nSTl_rej = 0;
       nSTl_acc = 0;
+
+      bool overlapping_track[t.ntracks];
+      for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
+	overlapping_track[i_trk] = false;
+      }
+      for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {
+	for (int j_trk = i_trk + 1; j_trk < t.ntracks; j_trk++) {
+	  if (DeltaR(t.track_eta[i_trk],t.track_eta[j_trk],t.track_phi[i_trk],t.track_phi[j_trk]) < 0.1) {
+	    overlapping_track[i_trk] = true;
+	    overlapping_track[j_trk] = true;
+	  }
+	}
+      }
       
       for (int i_trk = 0; i_trk < t.ntracks; i_trk++) {   
+	
+	if (overlapping_track[i_trk]) continue; // veto any tracks closely overlapping other lost tracks (pt > 15 GeV, with iso cut for 15-20 GeV)
 
 	bool isChargino = isSignal && t.track_matchedCharginoIdx[i_trk] >= 0;
 	if (isSignal && !isChargino) {
@@ -1431,7 +1635,96 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	}
       } // Track loop
     } // recalculate
-    
+
+    if (prioritize) {
+      if (nSTl_acc + nSTm + nSTp > 1) {
+	cout << "2 ST:" << endl;
+	cout << hist_Nj->GetName() << endl;
+	cout << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	cout << "L: " << nSTl_acc << endl;
+	cout << "M: " << nSTm << endl;
+	cout << "P4: " << nSTp4 << endl;
+	cout << "P3: " << nSTp3 << endl;
+	// if has ST, don't count STCs
+	nSTCl_acc = 0;
+	nSTCm = 0; nSTCm_hi = 0; nSTCm_lo = 0;
+	nSTCp = 0; nSTCp_hi = 0; nSTCp_lo = 0;
+	nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	nSTCp4 = 0; nSTCp4_hi = 0; nSTCp4_lo = 0;
+	if (nSTl_acc > 0) {
+	  nSTl_acc = 1;
+	  nSTm = 0; nSTm_hi = 0; nSTm_lo = 0;
+	  nSTp = 0; nSTp_hi = 0; nSTp_lo = 0;
+	  nSTp3 = 0; nSTp3_hi = 0; nSTp3_lo = 0;
+	  nSTp4 = 0; nSTp4_hi = 0; nSTp4_lo = 0;
+	}
+	if (nSTm > 0) {
+	  nSTm = 1; nSTm_hi = 0; nSTm_lo = 0;
+	  if (nSTm_hi > 0) {nSTm_hi = 1; nSTm_lo = 0;} else {nSTm_lo = 1;}
+	  nSTp = 0; nSTp_hi = 0; nSTp_lo = 0;
+	  nSTp3 = 0; nSTp3_hi = 0; nSTp3_lo = 0;
+	  nSTp4 = 0; nSTp4_hi = 0; nSTp4_lo = 0;
+	}
+	if (nSTp > 0) {
+	  nSTp = 1; 
+	  if (nSTp_hi > 0) {nSTp_hi = 1; nSTp_lo = 0;} else {nSTp_lo = 1;}
+	  if (nSTp4 > 0) {
+	    nSTp4 = 1; 
+	    if (nSTp4_hi > 0) {nSTp4_hi = 1; nSTp4_lo = 0;} else {nSTp4_lo = 1;}
+	    nSTp3 = 0; nSTp3_hi = 0; nSTp3_lo = 0;
+	  }
+	  else {
+	    nSTp3 = 1; 
+	    if (nSTp3_hi > 0) {nSTp3_hi = 1; nSTp3_lo = 0;} else {nSTp3_lo = 1;} 
+	  }
+	}
+      }
+      else if (nSTCl_acc + nSTCm + nSTCp > 1) {
+	cout << "2 STC:" << endl;
+	cout << hist_Nj->GetName() << endl;
+	cout << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	cout << "L: " << nSTCl_acc << endl;
+	cout << "M: " << nSTCm << endl;
+	cout << "P4: " << nSTCp4 << endl;
+	cout << "P3: " << nSTCp3 << endl;
+	if (nSTCl_acc > 0) {
+	  nSTCl_acc = 1;
+	  nSTCm = 0; nSTCm_hi = 0; nSTCm_lo = 0;
+	  nSTCp = 0; nSTCp_hi = 0; nSTCp_lo = 0;
+	  nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	  nSTCp4 = 0; nSTCp4_hi = 0; nSTCp4_lo = 0;
+	}
+	if (nSTCm > 0) {
+	  nSTCm = 1; nSTCm_hi = 0; nSTCm_lo = 0;
+	  if (nSTCm_hi > 0) {nSTCm_hi = 1; nSTCm_lo = 0;} else {nSTCm_lo = 1;}
+	  nSTCp = 0; nSTCp_hi = 0; nSTCp_lo = 0;
+	  nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	  nSTCp4 = 0; nSTCp4_hi = 0; nSTCp4_lo = 0;
+	}
+	if (nSTCp > 0) {
+	  nSTCp = 1; 
+	  if (nSTCp_hi > 0) {nSTCp_hi = 1; nSTCp_lo = 0;} else {nSTCp_lo = 1;}
+	  if (nSTCp4 > 0) {
+	    nSTCp4 = 1; 
+	    if (nSTCp4_hi > 0) {nSTCp4_hi = 1; nSTCp4_lo = 0;} else {nSTCp4_lo = 1;}
+	    nSTCp3 = 0; nSTCp3_hi = 0; nSTCp3_lo = 0;
+	  }
+	  else {
+	    nSTCp3 = 1; 
+	    if (nSTCp3_hi > 0) {nSTCp3_hi = 1; nSTCp3_lo = 0;} else {nSTCp3_lo = 1;} 
+	  }
+	}
+      }
+      else if (nSTCl_acc + nSTCm + nSTCp + nSTl_acc + nSTm + nSTp > 1) {
+	cout << "STC & ST:" << endl;
+	cout << hist_Nj->GetName() << endl;
+	cout << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	cout << "L: " << nSTCl_acc << ", " << nSTl_acc << endl;
+	cout << "M: " << nSTCm << ", " << nSTm << endl;
+	cout << "P4: " << nSTCp4 << ", " << nSTp4 << endl;
+	cout << "P3: " << nSTCp3 << ", " << nSTp3 << endl;	
+      }
+    }
     if (nSTCl_acc + nSTCm + nSTCp == 2 && EventWise) {
       cout << "2 STC, P3: " << nSTCp3 << " P4: " << nSTCp4 << " M: " << nSTCm << " L: " << nSTCl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
       float pred_weight = weight;
@@ -1631,6 +1924,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   
   // Post-processing
   
+  TH2D* h_1LM_SR = (TH2D*) h_1L_SR->Clone("h_1LM_SR");
+  h_1LM_SR->Add(h_1M_SR);
+  TH2D* h_1LM_VR = (TH2D*) h_1L_VR->Clone("h_1LM_VR");
+  h_1LM_VR->Add(h_1M_VR);
+  TH2D* h_1LM_MR = (TH2D*) h_1L_MR->Clone("h_1LM_MR");
+  h_1LM_MR->Add(h_1M_MR);
   TH2D* h_LLM_SR = (TH2D*) h_LL_SR->Clone("h_LLM_SR");
   h_LLM_SR->Add(h_LM_SR);
   TH2D* h_LLM_VR = (TH2D*) h_LL_VR->Clone("h_LLM_VR");
@@ -1644,6 +1943,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_HLM_MR = (TH2D*) h_HL_MR->Clone("h_HLM_MR");
   h_HLM_MR->Add(h_HM_MR);
 
+  TH2D* h_1LM_SR_hi = (TH2D*) h_1L_SR_hi->Clone("h_1LM_SR_hi");
+  h_1LM_SR_hi->Add(h_1M_SR_hi);
+  hi_hists[h_1LM_SR] = h_1LM_SR_hi;
+  TH2D* h_1LM_VR_hi = (TH2D*) h_1L_VR_hi->Clone("h_1LM_VR_hi");
+  h_1LM_VR_hi->Add(h_1M_VR_hi);
+  hi_hists[h_1LM_VR] = h_1LM_VR_hi;
+  TH2D* h_1LM_MR_hi = (TH2D*) h_1L_MR_hi->Clone("h_1LM_MR_hi");
+  h_1LM_MR_hi->Add(h_1M_MR_hi);
+  hi_hists[h_1LM_MR] = h_1LM_MR_hi;
   TH2D* h_LLM_SR_hi = (TH2D*) h_LL_SR_hi->Clone("h_LLM_SR_hi");
   h_LLM_SR_hi->Add(h_LM_SR_hi);
   hi_hists[h_LLM_SR] = h_LLM_SR_hi;
@@ -1663,6 +1971,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_HLM_MR_hi->Add(h_HM_MR_hi);
   hi_hists[h_HLM_MR] = h_HLM_MR_hi;
 
+  TH2D* h_1LM_SR_lo = (TH2D*) h_1L_SR_lo->Clone("h_1LM_SR_lo");
+  h_1LM_SR_lo->Add(h_1M_SR_lo);
+  low_hists[h_1LM_SR] = h_1LM_SR_lo;
+  TH2D* h_1LM_VR_lo = (TH2D*) h_1L_VR_lo->Clone("h_1LM_VR_lo");
+  h_1LM_VR_lo->Add(h_1M_VR_lo);
+  low_hists[h_1LM_VR] = h_1LM_VR_lo;
+  TH2D* h_1LM_MR_lo = (TH2D*) h_1L_MR_lo->Clone("h_1LM_MR_lo");
+  h_1LM_MR_lo->Add(h_1M_MR_lo);
+  low_hists[h_1LM_MR] = h_1LM_MR_lo;
   TH2D* h_LLM_SR_lo = (TH2D*) h_LL_SR_lo->Clone("h_LLM_SR_lo");
   h_LLM_SR_lo->Add(h_LM_SR_lo);
   low_hists[h_LLM_SR] = h_LLM_SR_lo;
@@ -1682,9 +1999,39 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_HLM_MR_lo->Add(h_HM_MR_lo);
   low_hists[h_HLM_MR] = h_HLM_MR_lo;
 
-  vector<TH2D*> hists   = {h_LL_SR, h_LM_SR, h_LLM_SR, h_LH_SR, h_HL_SR, h_HM_SR, h_HLM_SR, h_HH_SR, h_LL_VR, h_LM_VR, h_LLM_VR, h_LH_VR, h_HL_VR, h_HM_VR, h_HLM_VR, h_HH_VR,
-			   h_LL_MR, h_LM_MR, h_LLM_MR, h_LH_MR, h_HL_MR, h_HM_MR, h_HLM_MR, h_HH_MR};
+  vector<TH2D*> hists   = {h_1L_SR, h_1M_SR, h_1LM_SR, h_1H_SR, h_LL_SR, h_LM_SR, h_LLM_SR, h_LH_SR, h_HL_SR, h_HM_SR, h_HLM_SR, h_HH_SR, 
+			   h_1L_VR, h_1M_VR, h_1LM_VR, h_1H_VR, h_HL_VR, h_LL_VR, h_LM_VR, h_LLM_VR, h_LH_VR, h_HL_VR, h_HM_VR, h_HLM_VR, h_HH_VR,
+			   h_1L_MR, h_1M_MR, h_1LM_MR, h_1H_MR, h_LL_MR, h_LM_MR, h_LLM_MR, h_LH_MR, h_HL_MR, h_HM_MR, h_HLM_MR, h_HH_MR};
 
+
+  TH2D* h_1LM_SR_1 = (TH2D*) h_1L_SR_1->Clone("h_1LM_SR_1");
+  h_1LM_SR_1->Add(h_1M_SR_1);
+  TH2D* h_1LM_VR_1 = (TH2D*) h_1L_VR_1->Clone("h_1LM_VR_1");
+  h_1LM_VR_1->Add(h_1M_VR_1);
+  TH2D* h_1LM_MR_1 = (TH2D*) h_1L_MR_1->Clone("h_1LM_MR_1");
+  h_1LM_MR_1->Add(h_1M_MR_1);
+
+  TH2D* h_1LM_SR_1_hi = (TH2D*) h_1L_SR_1_hi->Clone("h_1LM_SR_1_hi");
+  h_1LM_SR_1_hi->Add(h_1M_SR_1_hi);
+  hi_hists[h_1LM_SR_1] = h_1LM_SR_1_hi;
+  TH2D* h_1LM_VR_1_hi = (TH2D*) h_1L_VR_1_hi->Clone("h_1LM_VR_1_hi");
+  h_1LM_VR_1_hi->Add(h_1M_VR_1_hi);
+  hi_hists[h_1LM_VR_1] = h_1LM_VR_1_hi;
+  TH2D* h_1LM_MR_1_hi = (TH2D*) h_1L_MR_1_hi->Clone("h_1LM_MR_1_hi");
+  h_1LM_MR_1_hi->Add(h_1M_MR_1_hi);
+  hi_hists[h_1LM_MR_1] = h_1LM_MR_1_hi;
+
+  TH2D* h_1LM_SR_1_lo = (TH2D*) h_1L_SR_1_lo->Clone("h_1LM_SR_1_lo");
+  h_1LM_SR_1_lo->Add(h_1M_SR_1_lo);
+  low_hists[h_1LM_SR_1] = h_1LM_SR_1_lo;
+  TH2D* h_1LM_VR_1_lo = (TH2D*) h_1L_VR_1_lo->Clone("h_1LM_VR_1_lo");
+  h_1LM_VR_1_lo->Add(h_1M_VR_1_lo);
+  low_hists[h_1LM_VR_1] = h_1LM_VR_1_lo;
+  TH2D* h_1LM_MR_1_lo = (TH2D*) h_1L_MR_1_lo->Clone("h_1LM_MR_1_lo");
+  h_1LM_MR_1_lo->Add(h_1M_MR_1_lo);
+  low_hists[h_1LM_MR_1] = h_1LM_MR_1_lo;
+
+  vector<TH2D*> hists1   = {h_1L_SR_1, h_1M_SR_1, h_1LM_SR_1, h_1H_SR_1, h_1L_VR_1, h_1M_VR_1, h_1LM_VR_1, h_1H_VR_1, h_1L_MR_1, h_1M_MR_1, h_1LM_MR_1, h_1H_MR_1};
 
   TH2D* h_LLM_SR_23 = (TH2D*) h_LL_SR_23->Clone("h_LLM_SR_23");
   h_LLM_SR_23->Add(h_LM_SR_23);
@@ -1963,6 +2310,11 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
   for (vector<TH2D*>::iterator hist = hists.begin(); hist != hists.end(); hist++) {
+    (*hist)->Write();
+    low_hists[(*hist)]->Write();
+    hi_hists[(*hist)]->Write();
+  }
+  for (vector<TH2D*>::iterator hist = hists1.begin(); hist != hists1.end(); hist++) {
     (*hist)->Write();
     low_hists[(*hist)]->Write();
     hi_hists[(*hist)]->Write();

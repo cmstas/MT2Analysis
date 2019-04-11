@@ -41,10 +41,13 @@ filenames = [d1718, d16]
 
 histnames = ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["H"] for ht in ["L","LM","M","H"] for reg in ["SR"] for njsplit in ["_4"] for ptstring in ["","_lo","_hi"]]
 histnames += ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["L"] for ht in ["L","LM","M","H"] for reg in ["SR"] for njsplit in ["_23"] for ptstring in ["","_lo","_hi"]]
+histnames += ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["1"] for ht in ["L","LM","M","H"] for reg in ["SR"] for njsplit in ["_23"] for ptstring in ["","_lo","_hi"]]
 
 def GetFShortName(histname):
     nj_h = histname[2]
-    if nj_h == "L":
+    if nj_h == "1":
+        nj = "1"
+    elif nj_h == "L":
         nj = "23"
     else:
         nj = "4"
@@ -79,7 +82,7 @@ for filename in filenames:
         if hdata == None:
             print histname
             exit(1)
-        scanname = histname.replace("_23","").replace("_4","")
+        scanname = histname.replace("_1","").replace("_23","").replace("_4","")
         print ">"+scanname
         hsig_STC_scan = signalfile.Get(scanname+"_STC")
         try:

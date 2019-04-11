@@ -128,7 +128,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
   }
   // Monojet
-  string jetpt[] = {"SR","VR","MR","pt60","pt100","pt150"};
+  string jetpt[] = {"SR","VR","MR"};
   string trackpt[] = {"","_hipt","_lowpt"};
   for (int jetptbin = 0; jetptbin < 6; jetptbin++) {
     string jpt = jetpt[jetptbin];
@@ -152,13 +152,15 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
   cout << "Booked fs hists" << endl;
 
+  const int n_xy_bins = 16;
+  const float xy_bins[n_xy_bins + 1] = {5, 7.5, 10, 12.5, 15.0, 17.5, 20, 30, 40, 50, 60, 70, 80, 90, 95, 97.5, 100};
   // Signal efficiency
-  TH1D* h_sigpassST = new TH1D("h_sigpass","Signal Tracks Passing Selections vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
-  TH1D* h_sigpassSTC = new TH1D("h_sigpassSTC","Signal Tracks Passing Selections vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
-  TH1D* h_sigeffST = new TH1D("h_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
-  TH1D* h_sigeffSTC = new TH1D("h_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",10,0,100);
-  TH1D* h_CharLength = new TH1D("h_CharLength","Chargino Track Length",10,0,100);
-  TH1D* h_CharLength_etaphi = new TH1D("h_CharLength_etaphi","Chargino Track Length (within #eta-#phi Acceptance)",10,0,100);
+  TH1D* h_sigpassST = new TH1D("h_sigpass","Signal Tracks Passing Selections vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",n_xy_bins,xy_bins);
+  TH1D* h_sigpassSTC = new TH1D("h_sigpassSTC","Signal Tracks Passing Selections vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",n_xy_bins,xy_bins);
+  TH1D* h_sigeffST = new TH1D("h_sigeff","Signal ST Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",n_xy_bins,xy_bins);
+  TH1D* h_sigeffSTC = new TH1D("h_sigeffSTC","Signal STC Efficiency vs. Transverse Decay Length, Starting from p_{T} > 15 GeV lostTracks",n_xy_bins,xy_bins);
+  TH1D* h_CharLength = new TH1D("h_CharLength","Chargino Track Length",n_xy_bins,xy_bins);
+  TH1D* h_CharLength_etaphi = new TH1D("h_CharLength_etaphi","Chargino Track Length (within #eta-#phi Acceptance)",n_xy_bins,xy_bins);
 
   unordered_map<string,TH2D*> mtptHists;
   unordered_map<string,TH2D*> mtmetHists;
@@ -473,22 +475,44 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     // apply HEM veto, and simulate effects in MC
     if(doHEMveto && config_.year == 2018){
       bool hasHEMjet = false;
+      float lostHEMtrackPt = 0;
+      // monojet, VL, and L HT are handled specially (lower pt threshold, and apply lostTrack veto)
+      bool isLowHT = (t.nJet30==1 || (t.nlep != 2 && t.ht < 575) || (t.nlep == 2 && t.zll_ht < 575));
+      float actual_HEM_ptCut = isLowHT ? 20.0 : HEM_ptCut;
       if((t.isData && t.run >= HEM_startRun) || (!t.isData && t.evt % HEM_fracDen < HEM_fracNum)){ 
 	for(int i=0; i<t.njet; i++){
-	  if(t.jet_pt[i] < HEM_ptCut)
+	  if(t.jet_pt[i] < actual_HEM_ptCut)
 	    break;
 	  if(t.jet_eta[i] > HEM_region[0] && t.jet_eta[i] < HEM_region[1] && 
 	     t.jet_phi[i] > HEM_region[2] && t.jet_phi[i] < HEM_region[3])
 	    hasHEMjet = true;
 	}
+	for (int i=0; i<t.ntracks; i++){
+	  // Is the track in the HEM region?
+	  if ( !(t.track_eta[i] > HEM_region[0] && t.track_eta[i] < HEM_region[1] &&
+		 t.track_phi[i] > HEM_region[2] && t.track_phi[i] < HEM_region[3]))
+	    continue;
+	  // Found a track in the HEM region. Is is high enough quality to veto the event?
+	  // if (!t.track_isHighPurity[i]) continue;
+	  if (fabs(t.track_dz[i]) > 0.20 || fabs(t.track_dxy[i]) > 0.10) continue;
+	  // if (t.track_nPixelLayersWithMeasurement[i] < 3) continue;
+	  // if (t.track_nLostInnerPixelHits[i] > 0) continue;
+	  // if (t.track_nLostOuterHits[i] > 2) continue;
+	  // May wish to add this guy
+	  //if (t.track_ptErr[i_trk] / (t.track_pt[i_trk]*t.track_pt[i_trk]) > 0.02) continue;
+	  lostHEMtrackPt += t.track_pt[i];
+	}
       }
-      if(hasHEMjet){
-	// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+      // May wish to set lostHEMtrackPt threshold to some higher value; this is equivalent to "any lost track" (saving only pT > 15 GeV tracks in babies for now)
+      if(hasHEMjet || (isLowHT && lostHEMtrackPt > 0)){// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	continue;
       }
     }
 
     if (unlikely(t.nJet30FailId != 0)) {
+      continue;
+    }
+    if ( t.nJet30 == 1 && !(isSignal || (t.jet_id[0] >= 4)) ) {
       continue;
     }
     if (isSignal && t.nJet20BadFastsim > 0) continue;
@@ -510,7 +534,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       
     if (lepveto) continue;
       
-    bool passMonojet = met >= 250 && t.jet1_pt >= 250 && (t.nJet30 == 1 || DeltaPhi(met_phi, t.jet_phi[1]) < 0.3) && diffMet < 0.5;
+    bool passMonojet = met >= 200 && t.jet1_pt >= 200 && ht >= 200 && t.nJet30 == 1 && diffMet < 0.5;
     bool passMultijet = diffMet < 0.5 && t.nJet30 > 1 && ht >= 250 && mt2 >= 60 && met >= 30 && deltaPhiMin > 0.3;
 
     if (applyKinematicPreselection && !(passMonojet || passMultijet)) {
@@ -678,32 +702,19 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
     // Monojet
     else {
+      // MR
+      if (t.jet1_pt < 300 && met > 200 && ht > 200) { // relax the MET/HT cuts for the measurement region
+	histsToFill.push_back(fsHists["h_fs_1_MR"]);	  
+      }
+      else if (t.jet1_pt < 350 && met > 250 && ht > 250) {
+	  histsToFill.push_back(fsHists["h_fs_1_VR"]);
+	}
       // SR 
-      if (t.nJet30 == 1 && !(blind && t.isData)) {
+      else if (t.jet1_pt > 350 && met > 250 && ht > 250 && !(blind && t.isData)) {
 	histsToFill.push_back(fsHists["h_fs_1_SR"]);
       }
-      // VR and MR, unbalanced dijet
-      else if (t.nJet30 == 2) {
-	const float jet2pt = t.jet_pt[1];
-	if (jet2pt < 60) {
-	  histsToFill.push_back(fsHists["h_fs_1_VR"]);	  
-	}
-	// MR and variations
-	else {
-	  histsToFill.push_back(fsHists["h_fs_1_MR"]);
-	  if (jet2pt < 100) {
-	    histsToFill.push_back(fsHists["h_fs_1_pt60"]);
-	  }
-	  else if (jet2pt < 200) {
-	    histsToFill.push_back(fsHists["h_fs_1_pt100"]);
-	  }
-	  else {
-	    histsToFill.push_back(fsHists["h_fs_1_pt150"]);
-	  }
-	}
-      }
       else {
-	continue; // to get here, must be blinded and in data
+	continue; // to get here, must be blinded and in data, or see a weird "monojet" event where jet1 pt and met/ht are very different
       }
     }
 
@@ -734,7 +745,22 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
 
     const int ntracks = t.ntracks;
+    bool overlapping_track[ntracks];
+    for (int i_trk = 0; i_trk < ntracks; i_trk++) {
+      overlapping_track[i_trk] = false;
+    }
+    for (int i_trk = 0; i_trk < ntracks; i_trk++) {
+      for (int j_trk = i_trk + 1; j_trk < ntracks; j_trk++) {
+	if (DeltaR(t.track_eta[i_trk],t.track_eta[j_trk],t.track_phi[i_trk],t.track_phi[j_trk]) < 0.1) {
+	  overlapping_track[i_trk] = true;
+	  overlapping_track[j_trk] = true;
+	}
+      }
+    }
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
+
+      if (overlapping_track[i_trk]) continue; // veto any tracks closely overlapping other lost tracks (pt > 15 GeV, with iso cut for 15-20 GeV)
+
       bool PassesFullIsoSel = false; bool PassesFullIsoSelSTC = false;
       bool isQualityTrack = false; bool isQualityTrackSTC = false;
 

@@ -32,7 +32,7 @@ simplecanvas.SetRightMargin(0.16)
 
 ROOT.gPad.SetPhi(-135)
 
-makepdfs = False
+makepdfs = True
 
 if len(sys.argv) < 2: 
     print "Which file?"

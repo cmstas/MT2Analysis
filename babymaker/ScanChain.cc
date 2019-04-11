@@ -672,36 +672,34 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       }
       
       // MET FILTERS -- not present in fastsim
-      // if (!isFastsim) {
-	Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
-	Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
-	Flag_ecalLaserCorrFilter                      = cms3.filt_ecalLaser();
-	Flag_trkPOG_toomanystripclus53X               = cms3.filt_trkPOG_toomanystripclus53X();
-	Flag_hcalLaserEventFilter                     = cms3.filt_hcalLaser();
-	Flag_trkPOG_logErrorTooManyClusters           = cms3.filt_trkPOG_logErrorTooManyClusters();
-	Flag_trkPOGFilters                            = cms3.filt_trkPOGFilters();
-	Flag_trackingFailureFilter                    = cms3.filt_trackingFailure();
-	Flag_goodVertices                             = cms3.filt_goodVertices();
-	Flag_eeBadScFilter                            = cms3.filt_eeBadSc();
-	// note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
-	Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
-	Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
-	// note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
-	Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
-	Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
-        if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
-	if(config_.filters["ecalBadCalibFilterUpdate"] && !cms3_version.Contains("V09"))  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
-        if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
-        Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
-        Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
-        Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
-        // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
-        // since we don't store all PFCands. Should now just be able to use the filters from miniAOD above
-        Flag_badMuonFilterV2                        = badMuonFilterV2();         
-        Flag_badChargedHadronFilterV2               = badChargedCandidateFilterV2();          
-        Flag_METFilters                               = cms3.filt_metfilter();
-      // }
-      
+      Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
+      Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
+      Flag_ecalLaserCorrFilter                      = cms3.filt_ecalLaser();
+      Flag_trkPOG_toomanystripclus53X               = cms3.filt_trkPOG_toomanystripclus53X();
+      Flag_hcalLaserEventFilter                     = cms3.filt_hcalLaser();
+      Flag_trkPOG_logErrorTooManyClusters           = cms3.filt_trkPOG_logErrorTooManyClusters();
+      Flag_trkPOGFilters                            = cms3.filt_trkPOGFilters();
+      Flag_trackingFailureFilter                    = cms3.filt_trackingFailure();
+      Flag_goodVertices                             = cms3.filt_goodVertices();
+      Flag_eeBadScFilter                            = cms3.filt_eeBadSc();
+      // note: in CMS3, filt_cscBeamHalo and evt_cscTightHaloId are the same
+      Flag_CSCTightHaloFilter                       = cms3.filt_cscBeamHalo();
+      Flag_CSCTightHalo2015Filter                   = cms3.filt_cscBeamHalo2015();
+      // note: in CMS3, filt_hbheNoise and evt_hbheFilter are the same
+      Flag_HBHENoiseFilter                          = cms3.filt_hbheNoise();
+      Flag_HBHENoiseIsoFilter                       = cms3.filt_hbheNoiseIso();                
+      if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
+      if(config_.filters["ecalBadCalibFilterUpdate"] && !cms3_version.Contains("V09"))  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
+      if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
+      Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
+      Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
+      Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
+      // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
+      // since we don't store all PFCands. Should now just be able to use the filters from miniAOD above
+      Flag_badMuonFilterV2                        = badMuonFilterV2();         
+      Flag_badChargedHadronFilterV2               = badChargedCandidateFilterV2();          
+      Flag_METFilters                               = cms3.filt_metfilter();
+
       // gen block -- for MC only
       ngenPart = 0;
       ngenLep = 0;

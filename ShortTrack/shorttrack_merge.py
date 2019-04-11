@@ -595,6 +595,7 @@ for filename in filenames:
 
     histnames = ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["H"] for ht in ["L","LM","M","H"] for reg in ["MR","VR","SR"] for njsplit in ["","_4"] for ptstring in ["","_lo","_hi"]]
     histnames += ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["L"] for ht in ["L","LM","M","H"] for reg in ["MR","VR","SR"] for njsplit in ["","_23"] for ptstring in ["","_lo","_hi"]]
+    histnames += ["h_" + nj + ht + "_" + reg + njsplit + ptstring for nj in ["1"] for ht in ["L","LM","M","H"] for reg in ["MR","VR","SR"] for njsplit in ["","_1"] for ptstring in ["","_lo","_hi"]]
 
     for histname in histnames:
         h = filelist[0].Get(histname)
@@ -605,7 +606,11 @@ for filename in filenames:
         # First, sum all region histograms
         for f in filelist[1:]:
             hminor = f.Get(histname)
-            h.Add(hminor)
+            try:
+                h.Add(hminor)
+            except:
+                print histname
+                exit(1)
             if verbose:
                 print f.GetName()
                 print "adding:",hminor.GetBinContent(2,3),hminor.GetBinContent(2,2),hminor.GetBinContent(2,1)
@@ -629,7 +634,7 @@ for filename in filenames:
                     h_up.SetBinError(length,2,errstc[0]/nstc * nst_predicted) 
                     h_dn.SetBinError(length,2,errstc[1]/nstc * nst_predicted) 
                 else: # prediction upper error is upper error of 0 count, multiplied by appropriate fshort
-                    fs_to_use = fs[histname][length-1]
+                    fs_to_use = fs[histname][length-1] if histname.find("_1") < 0 else fs[histname.replace("h_1","h_L").replace("_1","_23")][length-1]
                     h.SetBinError(length,2,fs_to_use*errstc[0])
             # Now observed STs
             nst = h.GetBinContent(length,1)
@@ -655,9 +660,9 @@ for filename in filenames:
             stc_err_dn = h_stc_stats_dn.GetBinError(bin,3) # STC stat error
             nstc = h.GetBinContent(bin,3) 
             nst_pred = h.GetBinContent(bin,2) # prediction ST counts
-            fs_to_use = fs[histname][length]
-            fserr_to_use_up = fserr_stat_up[histname][length]
-            fserr_to_use_dn = fserr_stat_dn[histname][length]
+            fs_to_use = fs[histname][length] if histname.find("_1") < 0 else fs[histname.replace("h_1","h_L").replace("_1","_23")][length]
+            fserr_to_use_up = fserr_stat_up[histname][length] if histname.find("_1") < 0 else fserr_stat_up[histname.replace("h_1","h_L").replace("_1","_23")][length]
+            fserr_to_use_dn = fserr_stat_dn[histname][length] if histname.find("_1") < 0 else fserr_stat_dn[histname.replace("h_1","h_L").replace("_1","_23")][length]
             if nstc > 0 and fs_to_use > 0: # fshort is zero only in cases where we don't use it; still need a protection
                 new_err_up = sqrt( (stc_err_up/nstc)**2 + (fserr_to_use_up / fs_to_use)**2 ) * nst_pred
                 new_err_dn = sqrt( (stc_err_dn/nstc)**2 + (fserr_to_use_dn / fs_to_use)**2 ) * nst_pred
@@ -678,11 +683,11 @@ for filename in filenames:
         h_syst = h.Clone(h.GetName()+"_fshortsyst")
         for length in range(h.GetNbinsX()):
             bin = length+1            
-            fs_to_use = fs[histname][length]
+            fs_to_use = fs[histname][length] if histname.find("_1") < 0 else fs[histname.replace("h_1","h_L").replace("_1","_23")][length]
             if fs_to_use == 0: 
                 h_syst.SetBinError(bin,2,0) # just set these cases to 0 and move on
                 continue 
-            fserr_to_use = fserr_syst[histname][length]
+            fserr_to_use = fserr_syst[histname][length] if histname.find("_1") < 0 else fserr_syst[histname.replace("h_1","h_L").replace("_1","_23")][length]
             relerr = fserr_to_use / fs_to_use
             nst_pred = h_syst.GetBinContent(bin,2)
             h_syst.SetBinError(bin,2,relerr*nst_pred)

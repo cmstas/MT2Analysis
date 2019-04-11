@@ -2,16 +2,16 @@
 
 make -j 12 || return $?
 
-doD16=0
-doM16=0
-doD17=0
-doM17=0
+doD16=1
+doM16=1
+doD17=1
+doM17=1
 doD18=1
 doM18=1
 doS17=0
 
-tag=preapproval
-outtag=preapproval
+tag=postmoriond
+outtag=postmoriond
 LOGDIR=logs/${outtag}
 mkdir -p ${LOGDIR}
 

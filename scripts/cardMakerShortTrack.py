@@ -116,19 +116,33 @@ def makeTemplate(year,region,length):
     if fs <= 0:
         print "fs = {:.3f} in {}, aborting".format(fs,channel)
         exit(1)
-    h_fs_stat_up = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring+"_up").Clone("h_fs_{}_up".format(channel))
-    h_fs_stat_dn = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring+"_dn").Clone("h_fs_{}_dn".format(channel))
+    h_fs_stat_up = f.Get("h_FS_"+("23" if region.find("23") > 0 else ("1" if region[0] == "1" > 0 else "4"))+ptstring+"_up").Clone("h_fs_{}_up".format(channel))
+    h_fs_stat_dn = f.Get("h_FS_"+("23" if region.find("23") > 0 else ("1" if region[0] == "1" > 0 else "4"))+ptstring+"_dn").Clone("h_fs_{}_dn".format(channel))
     fserr_stat_up = 1+(h_fs_stat_up.GetBinError(length)/fs)
     fserr_stat_dn = 1-(h_fs_stat_dn.GetBinError(length)/fs)
-    fshort_id_string = "{}_{}{}_{}".format(category,"23" if region.find("23") > 0 else "4",ptstring,year)
+    fshort_id_string = "{}_{}{}_{}".format(category,"23" if region.find("23") > 0 else ("1" if region[0] == "1" > 0 else "4"),ptstring,year)
 
     if verbose: 
         print f.GetName()
         print "h_"+region
-    h = f.Get("h_"+region).Clone("h_{}".format(channel))
-    n_bkg = h.GetBinContent(length,2)
-    n_obs = h.GetBinContent(length,1) if not setBGtoObs else n_bkg
-    n_stc = round(h.GetBinContent(length,3))
+    if True: # true monojet turned on
+        h = f.Get("h_"+region).Clone("h_{}".format(channel))
+        n_bkg = h.GetBinContent(length,2)
+        n_obs = h.GetBinContent(length,1) if not setBGtoObs else n_bkg
+        n_stc = round(h.GetBinContent(length,3))
+    elif False: 
+        if category == "P" or category == "P3":
+            n_bkg = 1.0
+        elif category == "P4":
+            n_bkg = 0.8
+        elif category == "M":
+            n_bkg = 0.6
+        elif category == "L":
+            n_bkg = 0.2
+        n_obs = n_bkg
+        n_stc = n_bkg * 10
+        fserr_stat_up = 1.3
+        fserr_stat_dn = 0.7
 
     n_bkg = n_bkg if n_bkg >= n_zero else 0.001 # Printing exactly 0 background, when there's only one background, causes combine to crash
     n_stc = n_stc if n_stc >= n_zero else 0
@@ -148,13 +162,13 @@ def makeTemplate(year,region,length):
     template_list.append("jmax 1  number of backgrounds\n")
     template_list.append("kmax *\n")
     template_list.append("------------\n")
-    template_list.append("bin         {0}\n".format(channel))
+    template_list.append("bin         bin_{0}\n".format(channel))
     if not setBGplusSigToObs:
         template_list.append("observation {0:.3f}\n".format(n_obs))
     else:
         template_list.append("observation n_obs\n")
     template_list.append("------------\n")
-    template_list.append("bin             {0} {0}\n".format(channel))
+    template_list.append("bin             bin_{0} bin_{0}\n".format(channel))
     template_list.append("process          sig                  bg\n")
     template_list.append("process           0                   1\n")
     template_list.append("rate             n_sig          {0:.3f}\n".format(n_bkg))
@@ -175,7 +189,7 @@ def makeTemplate(year,region,length):
     if (doDummySignalSyst):
         template_list.append("name_syst_sig      lnN   sig_syst    -\n")
     else:
-        template_list.append("sig_pu                    lnN    1.046   -\n") # fully correlated across all bins, and years
+#        template_list.append("sig_pu                    lnN    1.046   -\n") # fully correlated across all bins, and years
         template_list.append("sig_jec_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == "2016" else 1+sqrt(2)*0.05)) # correlated across bins, but not years
         template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == "2016" else 1+sqrt(2)*0.05)) # correlated across bins, but not years
         template_list.append("sig_gen_{}                  lnN    genmet_sig   -\n".format(year)) # correlated across bins, but not years
@@ -192,13 +206,18 @@ def makeTemplate(year,region,length):
     if (doDummyBackgroundSyst):     # ad hoc 100% error on L tracks, 50% on P and M
         template_list.append("adhoc_{0}         lnN     -   {1:.3f}\n".format(channel,2 if length == 5 else 1.5))
     else:
-        # fshort systematic
-        h_fs_syst = f.Get("h_FS_"+("23" if region.find("23") > 0 else "4")+ptstring+"_syst").Clone("h_fs_{}".format(channel))
-        fserr_syst = 1+(h_fs_syst.GetBinError(length)/h_fs_syst.GetBinContent(length))
-        template_list.append("fshort_syst_{0}        lnN    -    {1:.3f}\n".format(fshort_id_string,fserr_syst))        
-        # nonclosure systematic
-        h_nonclosure = f.Get("h_"+region.replace("SR","VR")+"_nonclosure_systematic").Clone("h_{}_nc".format(channel)) # We want the nonclosure syst from the validation region
-        nc_syst = h_nonclosure.GetBinContent(length) + 1 # saved as a relative error, + 1 for combine formatting
+#        if region[0] != "1":
+        if True: # True monojet turned on
+            # fshort systematic
+            h_fs_syst = f.Get("h_FS_"+("23" if region.find("23") > 0 else ("1" if region[0] == "1" else "4"))+ptstring+"_syst").Clone("h_fs_{}".format(channel))
+            fserr_syst = 1+(h_fs_syst.GetBinError(length)/h_fs_syst.GetBinContent(length))
+            template_list.append("fshort_syst_{0}        lnN    -    {1:.3f}\n".format(fshort_id_string,fserr_syst))        
+            # nonclosure systematic
+            h_nonclosure = f.Get("h_"+region.replace("SR","VR")+"_nonclosure_systematic").Clone("h_{}_nc".format(channel)) # We want the nonclosure syst from the validation region
+            nc_syst = h_nonclosure.GetBinContent(length) + 1 # saved as a relative error, + 1 for combine formatting
+        else:
+            fserr_syst = 1.3
+            nc_syst = 1.3
         template_list.append("nonclosure_syst_{0}        lnN    -    {1:.3f}\n".format(channel,nc_syst))        
 
     template = "".join(template_list)
@@ -222,12 +241,12 @@ def makeCard(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
         f_gen = f_sig_16_GENMET
         f_contam = f_16_contam
         rescale_2016 = eff_2016_hi[length-1] if region.find("hi") >= 0 else eff_2016_lo[length-1]
-        rescale_sig = rescale_2016 * 35.9 / 41.97
+        rescale_sig = rescale_2016 * 35.92 / 41.529
     if year == "2017and2018": 
         f = f_sig_1718
         f_gen = f_sig_1718_GENMET
         f_contam = f_1718_contam
-        rescale_sig = (1 + 58.85 / 41.97)
+        rescale_sig = (41.37 + 59.66) / 41.529
 
     h_sig_reco = f.Get("h_"+region).Clone("sig_{}".format(channel))
     n_sig_reco = h_sig_reco.GetBinContent(length,1) * rescale_sig
@@ -313,21 +332,19 @@ def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
     if year == "2016": 
         f_contam = f_16_contam
         rescale_2016 = eff_2016_hi[length-1] if region.find("hi") >= 0 else eff_2016_lo[length-1]
-        rescale_sig = rescale_2016 * 35.9 / 41.97
+        rescale_sig = rescale_2016 * 35.92 / 41.529
     if year == "2017and2018": 
         f_contam = f_1718_contam
-        rescale_sig = 1 + 58.83 / 41.97
+        rescale_sig = (41.37 + 59.66) / 41.529
 
     n_sig = h_sigscan.GetBinContent(length,biny,binz) * rescale_sig
 #    print channel,n_sig
     delta_sig = h_deltascan.GetBinContent(length,biny,binz) * rescale_sig
     mcstat_sig = 1 + h_sigscan.GetBinError(length,biny,binz) * rescale_sig / n_sig if n_sig > 0 else 1 # use pre-adjusted n_sig for mc error
 
-    isr_sig = 1.0
-    if n_sig > 0:
-        h_isr_up = f.Get("h_isr_up").Clone("h_isr_up_{}".format(region+signal))
-        isr_sig = h_isr_up.GetBinContent(length,biny,binz)
-
+#    isr_sig = 1.10
+    n_isr = h_isrscan.GetBinContent(length,biny,binz) * rescale_sig
+    isr_sig = 1 + (n_isr - n_sig)/2
 
     # error assessed due to difference between reco and gen sig results
     genmet_sig = 1.0 + delta_sig/2/n_sig if n_sig > 0 else 1.0
@@ -374,7 +391,7 @@ all_points = set()
 nonzero_points = set() # This set of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
 if useSR: print "Using SRs"
 else: print "Using VRs"
-regions = ["LL_SR_23","LM_SR_23","LLM_SR_23","LH_SR_23","HL_SR_4","HM_SR_4","HLM_SR_4","HH_SR_4"] if useSR else ["LL_VR_23","LM_VR_23","LLM_VR_23","LH_VR_23","HL_VR_4","HM_VR_4","HLM_VR_4","HH_VR_4"]
+regions = ["1L_SR_23","1M_SR_23","1LM_SR_23","1H_SR_23","LL_SR_23","LM_SR_23","LLM_SR_23","LH_SR_23","HL_SR_4","HM_SR_4","HLM_SR_4","HH_SR_4"] if useSR else ["LL_VR_23","LM_VR_23","LLM_VR_23","LH_VR_23","HL_VR_4","HM_VR_4","HLM_VR_4","HH_VR_4"]
 # find ctau and mass point if only one in file
 if not doScan:
     tokens = signal.replace("-","_").split("_")
@@ -388,7 +405,7 @@ for region in regions:
     # Loop over track length bins in this signal region
     for length in range(1,6): # length 1 is inclusive P track, then P3, P4, M, L
         track_category = ["P","P3","P4","M","L"][length-1]
-        if region[0:3] == "LLM" or region[0:3] == "HLM":
+        if region[0:3] == "LLM" or region[0:3] == "HLM" or region[0:3] == "1LM":
             if length < 5: continue # LLM only used for L tracks
         elif region[1] == "L" or region[1] == "M":
             if length == 5: continue # L and M not used for L tracks
