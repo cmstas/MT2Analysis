@@ -806,6 +806,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       cout << "    muons ISO : " << config_.muSF_ISOfile_fastsim << ": " << config_.muSF_ISOhistName_fastsim << endl;
       if(config_.muSF_IPfile_fastsim!="")
           cout << "    muons IP : " << config_.muSF_IPfile_fastsim << ": " << config_.muSF_IPhistName_fastsim << endl;
+      else
+          cout << "    muons IP : not applying" << endl;
       setElSFfile_fastsim("../babymaker/"+config_.elSF_IDISOfile_fastsim, "../babymaker/"+config_.elSF_IDhistName_fastsim, "../babymaker/"+config_.elSF_ISOhistName_fastsim);
       setMuSFfile_fastsim("../babymaker/"+config_.muSF_IDfile_fastsim, "../babymaker/"+config_.muSF_ISOfile_fastsim, "../babymaker/"+config_.muSF_IPfile_fastsim, 
                           "../babymaker/"+config_.muSF_IDhistName_fastsim, "../babymaker/"+config_.muSF_ISOhistName_fastsim, "../babymaker/"+config_.muSF_IPhistName_fastsim);

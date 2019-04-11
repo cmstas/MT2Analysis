@@ -238,6 +238,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
           cout << "    muons ISO : " << config_.muSF_ISOfile_fastsim << ": " << config_.muSF_ISOhistName_fastsim << endl;
           if(config_.muSF_IPfile_fastsim!="")
               cout << "    muons IP : " << config_.muSF_IPfile_fastsim << ": " << config_.muSF_IPhistName_fastsim << endl;
+          else
+              cout << "    muons IP : not applying" << endl;
           setElSFfile_fastsim(config_.elSF_IDISOfile_fastsim, config_.elSF_IDhistName_fastsim, config_.elSF_ISOhistName_fastsim);
           setMuSFfile_fastsim(config_.muSF_IDfile_fastsim, config_.muSF_ISOfile_fastsim, config_.muSF_IPfile_fastsim, 
                               config_.muSF_IDhistName_fastsim, config_.muSF_ISOhistName_fastsim, config_.muSF_IPhistName_fastsim);

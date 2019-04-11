@@ -242,19 +242,22 @@ bool setElSFfile_fastsim(TString filenameIDISO, TString histnameID, TString hist
 bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP, TString histnameID, TString histnameISO, TString histnameIP){
   TFile * f1 = new TFile(filenameID);
   TFile * f2 = new TFile(filenameISO);
-  TFile * f3 = new TFile(filenameIP);
   if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
   if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
-  if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
   TH2D* h_id = (TH2D*) f1->Get(histnameID);
   TH2D* h_iso = (TH2D*) f2->Get(histnameISO);
-  TH2D* h_ip = (TH2D*) f3->Get(histnameIP);
-  if (!h_id || !h_iso || !h_ip) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find scale factor histogram"<<std::endl; return 0;}
   h_muSF_fastsim = (TH2D*) h_id->Clone("h_muSF_fastsim");
   h_muSF_fastsim->SetDirectory(0);
   h_muSF_fastsim->Multiply(h_iso);
-  h_muSF_fastsim->Multiply(h_ip);
-  //h_muSF_fastsim->Print("all");
+  if (!h_id || !h_iso) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find ID/ISO scale factor histogram"<<std::endl; return 0;}
+  if(filenameIP != ""){
+      TFile * f3 = new TFile(filenameIP);
+      if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
+      TH2D* h_ip = (TH2D*) f3->Get(histnameIP);
+      if (!h_ip) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find IP scale factor histogram"<<std::endl; return 0;}
+      h_muSF_fastsim->Multiply(h_ip);
+  }
+
   return true;
 }
 
