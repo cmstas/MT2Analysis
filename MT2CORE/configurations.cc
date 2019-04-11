@@ -96,7 +96,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT900");
         c.triggers["SR"].push_back("PFJet450");
@@ -227,7 +226,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
         c.triggers["SR"].push_back("PFJet500");
@@ -363,7 +361,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
         c.triggers["SR"].push_back("PFJet500");
@@ -434,7 +431,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
         c.triggers["SR"] = std::vector<std::string> ();
         c.triggers["SR"].push_back("PFHT1050");
         c.triggers["SR"].push_back("PFJet500");
@@ -516,7 +512,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
 
     }else if(tag == "mc_102x_fastsim_Autumn18"){
 
@@ -564,7 +559,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
 
     }else if(tag == "mc_80x_Summer16"){
@@ -690,7 +684,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
 
     }else if(tag == "mc_94x_Summer16"){
 
@@ -729,7 +722,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
 
     }else if(tag == "mc_94x_fastsim_Fall17"){
 
@@ -777,7 +769,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
         c.filters["ecalBadCalibFilterUpdate"] = true;
 
     }else if(tag == "mc_94x_fastsim_Summer16"){
@@ -826,7 +817,6 @@ MT2Configuration GetMT2Config(std::string tag){
         c.filters["HBHENoiseIsoFilter"] = true;
         c.filters["EcalDeadCellTriggerPrimitiveFilter"] = true;
         c.filters["badMuonFilter"] = true;
-        c.filters["badChargedCandidateFilter"] = true;
 
     }else{
         std::cout << "[MT2Configuration] ERROR! invalid tag \""+tag+"\"" << std::endl;

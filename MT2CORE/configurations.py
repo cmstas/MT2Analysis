@@ -43,7 +43,7 @@ MT2Config_defs["data_2017_31Mar2018"] = {
                   "EcalDeadCellTriggerPrimitiveFilter",
                   "ecalBadCalibFilterUpdate",
                   "badMuonFilter",
-                  "badChargedCandidateFilter"
+                  # "badChargedCandidateFilter"
                   ],
     "triggers" : {
         "SR" : [ 
@@ -267,7 +267,7 @@ MT2Config_defs["data_2016_94x"]["filters"] = [
     "HBHENoiseIsoFilter",
     "EcalDeadCellTriggerPrimitiveFilter",
     "badMuonFilter",
-    "badChargedCandidateFilter"
+    # "badChargedCandidateFilter"
     ]
 
 MT2Config_defs["mc_94x_Fall17"] = {
@@ -307,7 +307,7 @@ MT2Config_defs["mc_94x_Fall17"] = {
                   "EcalDeadCellTriggerPrimitiveFilter",
                   "ecalBadCalibFilterUpdate",
                   "badMuonFilter",
-                  "badChargedCandidateFilter"
+                  # "badChargedCandidateFilter"
                   ],
 }
 
@@ -366,7 +366,7 @@ MT2Config_defs["mc_102x_Autumn18"] = {
                   "EcalDeadCellTriggerPrimitiveFilter",
                   "ecalBadCalibFilterUpdate",
                   "badMuonFilter",
-                  "badChargedCandidateFilter"
+                  # "badChargedCandidateFilter"
                   ],
 }
 
@@ -446,7 +446,7 @@ MT2Config_defs["mc_94x_Summer16"] = {
                   "HBHENoiseIsoFilter",
                   "EcalDeadCellTriggerPrimitiveFilter",
                   "badMuonFilter",
-                  "badChargedCandidateFilter"
+                  # "badChargedCandidateFilter"
                   ],
 }
 
@@ -491,7 +491,7 @@ MT2Config_defs["mc_94x_fastsim_Summer16"]["filters"] = [
     "HBHENoiseIsoFilter",
     "EcalDeadCellTriggerPrimitiveFilter",
     "badMuonFilter",
-    "badChargedCandidateFilter"
+    # "badChargedCandidateFilter"
     ]
 
 MT2Config_defs["mc_94x_fastsim_Fall17"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
@@ -513,7 +513,7 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
     "HBHENoiseIsoFilter",
     "EcalDeadCellTriggerPrimitiveFilter",
     "badMuonFilter",
-    "badChargedCandidateFilter",
+    # "badChargedCandidateFilter",
     "ecalBadCalibFilterUpdate"
     ]
 
@@ -538,7 +538,7 @@ MT2Config_defs["mc_102x_fastsim_Autumn18"]["filters"] = [
     "HBHENoiseIsoFilter",
     "EcalDeadCellTriggerPrimitiveFilter",
     "badMuonFilter",
-    "badChargedCandidateFilter",
+    # "badChargedCandidateFilter",
     "ecalBadCalibFilterUpdate"
     ]
 

@@ -672,7 +672,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       }
       
       // MET FILTERS -- not present in fastsim
-      if (!isFastsim) {
+      // if (!isFastsim) {
 	Flag_EcalDeadCellTriggerPrimitiveFilter       = cms3.filt_ecalTP();
 	Flag_trkPOG_manystripclus53X                  = cms3.filt_trkPOG_manystripclus53X();
 	Flag_ecalLaserCorrFilter                      = cms3.filt_ecalLaser();
@@ -692,7 +692,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         if(config_.filters["ecalBadCalibFilter"])        Flag_ecalBadCalibFilter        = cms3.filt_ecalBadCalibFilter();
 	if(config_.filters["ecalBadCalibFilterUpdate"] && !cms3_version.Contains("V09"))  Flag_ecalBadCalibFilterUpdate  = cms3.filt_ecalBadCalibFilterUpdate();
         if(config_.filters["badMuonFilter"])             Flag_badMuonFilter             = cms3.filt_BadPFMuonFilter();
-        if(config_.filters["badChargedCandidateFilter"]) Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
+        Flag_badChargedCandidateFilter = cms3.filt_BadChargedCandidateFilter();
         Flag_globalTightHalo2016Filter                = cms3.filt_globalTightHalo2016();
         Flag_globalSuperTightHalo2016Filter           = cms3.filt_globalSuperTightHalo2016();
         // these were applied manually (post-miniaod) in 2016. Don't think they work in CMS4 anymore
@@ -700,7 +700,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         Flag_badMuonFilterV2                        = badMuonFilterV2();         
         Flag_badChargedHadronFilterV2               = badChargedCandidateFilterV2();          
         Flag_METFilters                               = cms3.filt_metfilter();
-      }
+      // }
       
       // gen block -- for MC only
       ngenPart = 0;
