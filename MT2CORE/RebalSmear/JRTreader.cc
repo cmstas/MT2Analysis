@@ -204,7 +204,7 @@ float JRTreader::GetJERCorrection(float eta, int unc_var){
         else if (eta >= 3.0 && eta < 3.2) return 1.187 + unc_var * 0.1243;
         else                              return 1.192 + unc_var * 0.1488;
     }
-    else if(config_tag == "data_2017_31Mar2018" || config_tag == "data_2018_17Sep2018"){
+    else if(config_tag == "data_2017_31Mar2018"){
         if      (eta >= 0.0 && eta < 0.5) return 1.143 + unc_var * 0.0222;
         else if (eta >= 0.5 && eta < 0.8) return 1.182 + unc_var * 0.0484;
         else if (eta >= 0.8 && eta < 1.1) return 1.099 + unc_var * 0.0456;
@@ -218,6 +218,20 @@ float JRTreader::GetJERCorrection(float eta, int unc_var){
         else if (eta >= 2.8 && eta < 3.0) return 2.292 + unc_var * 0.3743;
         else if (eta >= 3.0 && eta < 3.2) return 1.270 + unc_var * 0.1089;
         else                              return 1.154 + unc_var * 0.1524;
+    }else if(config_tag == "data_2018_17Sep2018"){
+        if      (eta >= 0.0 && eta < 0.5) return 1.150 + unc_var * 0.042;
+        else if (eta >= 0.5 && eta < 0.8) return 1.134 + unc_var * 0.080;
+        else if (eta >= 0.8 && eta < 1.1) return 1.102 + unc_var * 0.052;
+        else if (eta >= 1.1 && eta < 1.3) return 1.134 + unc_var * 0.112;
+        else if (eta >= 1.3 && eta < 1.7) return 1.104 + unc_var * 0.211;
+        else if (eta >= 1.7 && eta < 1.9) return 1.149 + unc_var * 0.159;
+        else if (eta >= 1.9 && eta < 2.1) return 1.148 + unc_var * 0.209;
+        else if (eta >= 2.1 && eta < 2.3) return 1.114 + unc_var * 0.191;
+        else if (eta >= 2.3 && eta < 2.5) return 1.347 + unc_var * 0.274;
+        else if (eta >= 2.5 && eta < 2.8) return 2.137 + unc_var * 0.524;
+        else if (eta >= 2.8 && eta < 3.0) return 1.650 + unc_var * 0.941;
+        else if (eta >= 3.0 && eta < 3.2) return 1.225 + unc_var * 0.194;
+        else                              return 1.082 + unc_var * 0.198;
     }else{
         cout << "WARNING: config tag " << config_tag << " doesn't have any define JER scale factors! Not applying any." << endl;
         return 1.0;
