@@ -4,7 +4,7 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="ShortTrackScans_2017_Apr10"
+TAG="ShortTrackScans_2017_Apr23"
 
 indir=/hadoop/cms/store/group/snt/run2_mc2017/
 
