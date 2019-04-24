@@ -4,9 +4,9 @@
 # All MT2 related datasets available on hadoop
 #
 
-TAG="ShortTrackScans_Mar7"
+TAG="ShortTrackScans_2016_Apr23"
 
-indir=/hadoop/cms/store/group/snt/run2_mc2017/
+indir=/hadoop/cms/store/group/snt/run2_mc2016_94x/
 
 #
 # T2qq
