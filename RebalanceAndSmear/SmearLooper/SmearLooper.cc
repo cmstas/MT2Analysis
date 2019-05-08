@@ -141,7 +141,7 @@ void SmearLooper::SetSignalRegions(){
 
     //store histograms with cut values for all variables
     for(unsigned int i = 0; i < SRVec.size(); i++){
-        // cout << "SR: " << SRVec.at(i).GetName() << endl;
+        cout << "SR: " << SRVec.at(i).GetName() << endl;
         std::vector<std::string> vars = SRVec.at(i).GetListOfVariables();
         TDirectory * dir = (TDirectory*)outfile_->Get(("sr"+SRVec.at(i).GetName()).c_str());
         if (dir == 0) {
@@ -883,6 +883,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
             if (config_.filters["HBHENoiseIsoFilter"] && !t.Flag_HBHENoiseIsoFilter) continue;
             if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
             if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
+            if (config_.filters["ecalBadCalibFilterUpdate"] && !t.Flag_ecalBadCalibFilterUpdate) continue;
             if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
             if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
             if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
@@ -1208,12 +1209,15 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                     float max_ptdiff = 0;
                     
                     bool foundHEMjet = false;
+                    float actual_HEM_ptCut = HEM_ptCut;
+                    if(nJet30==1 || ht<575)
+                        actual_HEM_ptCut = 20.0;
                     std::vector<LorentzVector> p4sForDphi;
                     for(unsigned int i=0; i<jet_pt_smeared.size(); i++){                        
                         if(doHEMregionVeto){
                             if(jet_eta[i] > HEM_region[0] && jet_eta[i] < HEM_region[1] && 
                                jet_phi[i] > HEM_region[2] && jet_phi[i] < HEM_region[3] && 
-                               jet_pt_smeared[i] > HEM_ptCut)
+                               jet_pt_smeared[i] > actual_HEM_ptCut)
                                 foundHEMjet = true;
                         }
                         if(jet_pt_smeared.at(i) < 30.0 || fabs(jet_eta.at(i)) > 4.7) continue;
@@ -1247,7 +1251,7 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
                         if(doHEMregionVeto){
                             if(PU_passes_id_jet_eta[i] > HEM_region[0] && PU_passes_id_jet_eta[i] < HEM_region[1] && 
                                PU_passes_id_jet_phi[i] > HEM_region[2] && PU_passes_id_jet_phi[i] < HEM_region[3] && 
-                               PU_passes_id_jet_pt[i] > HEM_ptCut)
+                               PU_passes_id_jet_pt[i] > actual_HEM_ptCut)
                                 foundHEMjet = true;
                         }
                         if(PU_passes_id_jet_pt.at(i) < 30.0 || fabs(PU_passes_id_jet_eta.at(i)) > 4.7) continue;
@@ -1476,10 +1480,13 @@ void SmearLooper::loop(TChain* chain, std::string output_name, int maxEvents){
 
                 if(doHEMregionVeto && candidateHEMevent){
                     bool foundjet = false;
+                    float actual_HEM_ptCut = HEM_ptCut;
+                    if(t.nJet30==1 || (t.nlep!=2 && t.ht<575) || (t.nlep==2 && t.zll_ht<575))
+                        actual_HEM_ptCut = 20.0;
                     for(int ijet=0; ijet<t.njet; ijet++){
                         if(t.jet_eta[ijet] < HEM_region[0] || t.jet_eta[ijet] > HEM_region[1]) continue;
                         if(t.jet_phi[ijet] < HEM_region[2] || t.jet_phi[ijet] > HEM_region[3]) continue;
-                        if(t.jet_pt[ijet] < HEM_ptCut) continue;
+                        if(t.jet_pt[ijet] < actual_HEM_ptCut) continue;
                         foundjet = true;
                         break;
                     }
@@ -1902,7 +1909,7 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
         for(unsigned int srN = 0; srN < SRVec.size(); srN++){
             if(SRVec.at(srN).PassesSelection(values)){
                 fillHistos(SRVec.at(srN).srHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-                break;//signal regions are orthogonal, event cannot be in more than one
+                // break;//signal regions are orthogonal, event cannot be in more than one
             }
         }
     }
@@ -1910,7 +1917,7 @@ void SmearLooper::fillHistosSignalRegion(const std::string& prefix, const std::s
         for(unsigned int srN = 0; srN < SRVec_temp.size(); srN++){
             if(SRVec_temp.at(srN).PassesSelection(values)){
                 fillHistos(SRVec_temp.at(srN).srHistMap, SRVec_temp.at(srN).GetNumberOfMT2Bins(), SRVec_temp.at(srN).GetMT2Bins(), prefix+SRVec_temp.at(srN).GetName(), suffix);
-                break;//signal regions are orthogonal, event cannot be in more than one
+                // break;//signal regions are orthogonal, event cannot be in more than one
             }
         }
     }
@@ -1996,7 +2003,7 @@ void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std:
         for(unsigned int srN = 0; srN < SRVec.size(); srN++){
             if(SRVec.at(srN).PassesSelectionCRRSInvertDPhi(values)){
                 fillHistos(SRVec.at(srN).crRSInvertDPhiHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-                break;
+                // break;
             }
         }
     }
@@ -2004,7 +2011,7 @@ void SmearLooper::fillHistosCRRSInvertDPhi(const std::string& prefix, const std:
         for(unsigned int srN = 0; srN < SRVec_temp.size(); srN++){
             if(SRVec_temp.at(srN).PassesSelectionCRRSInvertDPhi(values)){
                 fillHistos(SRVec_temp.at(srN).crRSInvertDPhiHistMap, SRVec_temp.at(srN).GetNumberOfMT2Bins(), SRVec_temp.at(srN).GetMT2Bins(), prefix+SRVec_temp.at(srN).GetName(), suffix);
-                break;
+                // break;
             }
         }
     }
@@ -2092,7 +2099,7 @@ void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std
         for(unsigned int srN = 0; srN < SRVec.size(); srN++){
             if(SRVec.at(srN).PassesSelectionCRRSMT2SideBand(values)){
                 fillHistos(SRVec.at(srN).crRSMT2SideBandHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-                break;
+                // break;
             }
         }
     }
@@ -2100,7 +2107,7 @@ void SmearLooper::fillHistosCRRSMT2SideBand(const std::string& prefix, const std
         for(unsigned int srN = 0; srN < SRVec_temp.size(); srN++){
             if(SRVec_temp.at(srN).PassesSelectionCRRSMT2SideBand(values)){
                 fillHistos(SRVec_temp.at(srN).crRSMT2SideBandHistMap, SRVec_temp.at(srN).GetNumberOfMT2Bins(), SRVec_temp.at(srN).GetMT2Bins(), prefix+SRVec_temp.at(srN).GetName(), suffix);
-                break;
+                // break;
             }
         }
     }
@@ -2143,7 +2150,7 @@ void SmearLooper::fillHistosCRRSDPhiMT2(const std::string& prefix, const std::st
         for(unsigned int srN = 0; srN < SRVec.size(); srN++){
             if(SRVec.at(srN).PassesSelectionCRRSDPhiMT2(values)){
                 fillHistos(SRVec.at(srN).crRSDPhiMT2HistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
-                break;
+                // break;
             }
         }
     }
@@ -2151,7 +2158,7 @@ void SmearLooper::fillHistosCRRSDPhiMT2(const std::string& prefix, const std::st
         for(unsigned int srN = 0; srN < SRVec_temp.size(); srN++){
             if(SRVec_temp.at(srN).PassesSelectionCRRSDPhiMT2(values)){
                 fillHistos(SRVec_temp.at(srN).crRSDPhiMT2HistMap, SRVec_temp.at(srN).GetNumberOfMT2Bins(), SRVec_temp.at(srN).GetMT2Bins(), prefix+SRVec_temp.at(srN).GetName(), suffix);
-                break;
+                // break;
             }
         }
     }
@@ -2510,6 +2517,49 @@ bool SmearLooper::passesTrigger() {
 
     if (not t.isData) return true;
 
+    // // 2016
+    // if(config_tag_.find("2016") != string::npos){
+    //     if (t.ht < 300)
+    //         return t.HLT_PFHT125_Prescale;
+    //     else if (t.ht < 400)
+    //         return t.HLT_PFHT200_Prescale;
+    //     else if (t.ht < 450)
+    //         return t.HLT_PFHT300_Prescale;
+    //     else if (t.ht < 575)
+    //         return t.HLT_PFHT350_Prescale;
+    //     else if (t.ht < 700)
+    //         return (t.HLT_PFHT475_Prescale or t.HLT_PFJet450);
+    //     else if (t.ht < 1000)
+    //         return (t.HLT_PFHT600_Prescale or t.HLT_PFJet450);
+    //     else
+    //         return (t.HLT_PFHT900 or t.HLT_PFJet450);
+    // }else{
+    //     // 2017
+    //     if(t.ht < 250)
+    //         return false;
+    //     if(t.ht >= 250 && t.ht < 340)
+    //         return t.HLT_PFHT180_Prescale;
+    //     if(t.ht >= 340 && t.ht < 480)
+    //         return t.HLT_PFHT250_Prescale;
+    //     if(t.ht >= 480 && t.ht < 540)
+    //         return t.HLT_PFHT370_Prescale;
+    //     if(t.ht >= 540 && t.ht < 640)
+    //         return t.HLT_PFHT430_Prescale;
+    //     if(t.ht >= 640 && t.ht < 720)
+    //         return t.HLT_PFHT510_Prescale || t.HLT_PFJet500;
+    //     if(t.ht >= 720 && t.ht < 820)
+    //         return t.HLT_PFHT590_Prescale || t.HLT_PFJet500;
+    //     if(t.ht >= 820 && t.ht < 940)
+    //         return t.HLT_PFHT680_Prescale || t.HLT_PFJet500;
+    //     if(t.ht >= 940 && t.ht < 1040)
+    //         return t.HLT_PFHT780_Prescale || t.HLT_PFJet500;
+    //     if(t.ht >= 1040 && t.ht < 1200)
+    //         return t.HLT_PFHT890_Prescale || t.HLT_PFJet500;
+    //     if(t.ht >= 1200)
+    //         return t.HLT_PFHT1050 || t.HLT_PFJet500;
+    // }
+
+
     // 2016
     if(config_tag_.find("2016") != string::npos){
         if (t.ht < 300)
@@ -2530,23 +2580,21 @@ bool SmearLooper::passesTrigger() {
         // 2017
         if(t.ht < 250)
             return false;
-        if(t.ht >= 250 && t.ht < 340)
+        if(t.ht >= 250 && t.ht < 440)
             return t.HLT_PFHT180_Prescale;
-        if(t.ht >= 340 && t.ht < 480)
-            return t.HLT_PFHT250_Prescale;
-        if(t.ht >= 480 && t.ht < 540)
+        if(t.ht >= 440 && t.ht < 520)
             return t.HLT_PFHT370_Prescale;
-        if(t.ht >= 540 && t.ht < 640)
+        if(t.ht >= 520 && t.ht < 620)
             return t.HLT_PFHT430_Prescale;
-        if(t.ht >= 640 && t.ht < 720)
+        if(t.ht >= 620 && t.ht < 700)
             return t.HLT_PFHT510_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 720 && t.ht < 820)
+        if(t.ht >= 700 && t.ht < 800)
             return t.HLT_PFHT590_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 820 && t.ht < 940)
+        if(t.ht >= 800 && t.ht < 900)
             return t.HLT_PFHT680_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 940 && t.ht < 1040)
+        if(t.ht >= 900 && t.ht < 1000)
             return t.HLT_PFHT780_Prescale || t.HLT_PFJet500;
-        if(t.ht >= 1040 && t.ht < 1200)
+        if(t.ht >= 1000 && t.ht < 1200)
             return t.HLT_PFHT890_Prescale || t.HLT_PFJet500;
         if(t.ht >= 1200)
             return t.HLT_PFHT1050 || t.HLT_PFJet500;
@@ -2559,6 +2607,153 @@ bool SmearLooper::passesTrigger() {
 float SmearLooper::getTriggerPrescale () {
 
     if (not t.isData) return 1;
+
+    // if(config_tag_.find("2016") != string::npos){
+    //     if(!prescalesByEvent){
+    //         if (t.ht < 250)
+    //             return -1;
+    //         else if (t.ht < 300)
+    //             return 9421;
+    //         else if (t.ht < 400)
+    //             return 5410;
+    //         else if (t.ht < 450)
+    //             return 917;
+    //         else if (t.ht < 575)
+    //             return 458;
+    //         else if(t.HLT_PFJet450)
+    //             return 1;
+    //         else if (t.ht < 700)
+    //             return 115;
+    //         else if (t.ht < 1000)
+    //             return 29;
+    //         else
+    //             return 1;
+    //     }else{
+    //         if (t.ht < 250)
+    //             return -1;
+    //         else if (t.ht < 300)
+    //             return t.HLT_PFHT125_Prescale;
+    //         else if (t.ht < 400)
+    //             return t.HLT_PFHT200_Prescale;
+    //         else if (t.ht < 450)
+    //             return t.HLT_PFHT300_Prescale;
+    //         else if (t.ht < 575)
+    //             return t.HLT_PFHT350_Prescale;
+    //         else if(t.HLT_PFJet450)
+    //             return 1;
+    //         else if (t.ht < 700)
+    //             return t.HLT_PFHT475_Prescale;
+    //         else if (t.ht < 1000)
+    //             return t.HLT_PFHT600_Prescale;
+    //         else
+    //             return 1;
+    //     }
+    // }else if(config_tag_.find("2017") != string::npos){
+    //     if(!prescalesByEvent){
+    //         if(t.ht < 250)
+    //             return -1;
+    //         else if(t.ht >= 250 && t.ht < 340)
+    //             return 3981.;
+    //         else if(t.ht >= 340 && t.ht < 480)
+    //             return 2760.;
+    //         else if(t.ht >= 480 && t.ht < 540)
+    //             return 863.3;
+    //         else if(t.ht >= 540 && t.ht < 640)
+    //             return 309.6;
+    //         else if(t.HLT_PFJet500)
+    //             return 1;
+    //         else if(t.ht >= 640 && t.ht < 720)
+    //             return 190.0;
+    //         else if(t.ht >= 720 && t.ht < 820)
+    //             return 94.8;
+    //         else if(t.ht >= 820 && t.ht < 940)
+    //             return 53.1;
+    //         else if(t.ht >= 940 && t.ht < 1040)
+    //             return 28.5;
+    //         else if(t.ht >= 1040 && t.ht < 1200)
+    //             return 14.8;
+    //         else
+    //             return 1;
+    //     }else{
+    //         if(t.ht < 250)
+    //             return -1;
+    //         else if(t.ht >= 250 && t.ht < 340)
+    //             return t.HLT_PFHT180_Prescale;
+    //         else if(t.ht >= 340 && t.ht < 480)
+    //             return t.HLT_PFHT250_Prescale;
+    //         else if(t.ht >= 480 && t.ht < 540)
+    //             return t.HLT_PFHT370_Prescale;
+    //         else if(t.ht >= 540 && t.ht < 640)
+    //             return t.HLT_PFHT430_Prescale; 
+    //         else if(t.HLT_PFJet500)
+    //             return 1;
+    //         else if(t.ht >= 640 && t.ht < 720)
+    //             return t.HLT_PFHT510_Prescale;
+    //         else if(t.ht >= 720 && t.ht < 820)
+    //             return t.HLT_PFHT590_Prescale;
+    //         else if(t.ht >= 820 && t.ht < 940)
+    //             return t.HLT_PFHT680_Prescale;
+    //         else if(t.ht >= 940 && t.ht < 1040)
+    //             return t.HLT_PFHT780_Prescale;
+    //         else if(t.ht >= 1040 && t.ht < 1200)
+    //             return t.HLT_PFHT890_Prescale;
+    //         else
+    //             return 1;
+    //     }
+    // }else{
+    //     if(!prescalesByEvent){
+    //         if(t.ht < 250)
+    //             return -1;
+    //         else if(t.ht >= 250 && t.ht < 340)
+    //             return 11433.;
+    //         else if(t.ht >= 340 && t.ht < 480)
+    //             return 4120.;
+    //         else if(t.ht >= 480 && t.ht < 540)
+    //             return 1604.;
+    //         else if(t.ht >= 540 && t.ht < 640)
+    //             return 502.5;
+    //         else if(t.HLT_PFJet500)
+    //             return 1;
+    //         else if(t.ht >= 640 && t.ht < 720)
+    //             return 255.3;
+    //         else if(t.ht >= 720 && t.ht < 820)
+    //             return 128.7;
+    //         else if(t.ht >= 820 && t.ht < 940)
+    //             return 64.8;
+    //         else if(t.ht >= 940 && t.ht < 1040)
+    //             return 32.5;
+    //         else if(t.ht >= 1040 && t.ht < 1200)
+    //             return 16.3;
+    //         else
+    //             return 1;
+    //     }else{
+    //         if(t.ht < 250)
+    //             return -1;
+    //         else if(t.ht >= 250 && t.ht < 340)
+    //             return t.HLT_PFHT180_Prescale;
+    //         else if(t.ht >= 340 && t.ht < 480)
+    //             return t.HLT_PFHT250_Prescale;
+    //         else if(t.ht >= 480 && t.ht < 540)
+    //             return t.HLT_PFHT370_Prescale;
+    //         else if(t.ht >= 540 && t.ht < 640)
+    //             return t.HLT_PFHT430_Prescale; 
+    //         else if(t.HLT_PFJet500)
+    //             return 1;
+    //         else if(t.ht >= 640 && t.ht < 720)
+    //             return t.HLT_PFHT510_Prescale;
+    //         else if(t.ht >= 720 && t.ht < 820)
+    //             return t.HLT_PFHT590_Prescale;
+    //         else if(t.ht >= 820 && t.ht < 940)
+    //             return t.HLT_PFHT680_Prescale;
+    //         else if(t.ht >= 940 && t.ht < 1040)
+    //             return t.HLT_PFHT780_Prescale;
+    //         else if(t.ht >= 1040 && t.ht < 1200)
+    //             return t.HLT_PFHT890_Prescale;
+    //         else
+    //             return 1;
+    //     }
+    // }
+
 
     if(config_tag_.find("2016") != string::npos){
         if(!prescalesByEvent){
@@ -2600,111 +2795,56 @@ float SmearLooper::getTriggerPrescale () {
             else
                 return 1;
         }
-    }else if(config_tag_.find("2017") != string::npos){
-        if(!prescalesByEvent){
-            if(t.ht < 250)
-                return -1;
-            else if(t.ht >= 250 && t.ht < 340)
-                return 3981.;
-            else if(t.ht >= 340 && t.ht < 480)
-                return 2760.;
-            else if(t.ht >= 480 && t.ht < 540)
-                return 863.3;
-            else if(t.ht >= 540 && t.ht < 640)
-                return 309.6;
-            else if(t.HLT_PFJet500)
-                return 1;
-            else if(t.ht >= 640 && t.ht < 720)
-                return 190.0;
-            else if(t.ht >= 720 && t.ht < 820)
-                return 94.8;
-            else if(t.ht >= 820 && t.ht < 940)
-                return 53.1;
-            else if(t.ht >= 940 && t.ht < 1040)
-                return 28.5;
-            else if(t.ht >= 1040 && t.ht < 1200)
-                return 14.8;
-            else
-                return 1;
-        }else{
-            if(t.ht < 250)
-                return -1;
-            else if(t.ht >= 250 && t.ht < 340)
-                return t.HLT_PFHT180_Prescale;
-            else if(t.ht >= 340 && t.ht < 480)
-                return t.HLT_PFHT250_Prescale;
-            else if(t.ht >= 480 && t.ht < 540)
-                return t.HLT_PFHT370_Prescale;
-            else if(t.ht >= 540 && t.ht < 640)
-                return t.HLT_PFHT430_Prescale; 
-            else if(t.HLT_PFJet500)
-                return 1;
-            else if(t.ht >= 640 && t.ht < 720)
-                return t.HLT_PFHT510_Prescale;
-            else if(t.ht >= 720 && t.ht < 820)
-                return t.HLT_PFHT590_Prescale;
-            else if(t.ht >= 820 && t.ht < 940)
-                return t.HLT_PFHT680_Prescale;
-            else if(t.ht >= 940 && t.ht < 1040)
-                return t.HLT_PFHT780_Prescale;
-            else if(t.ht >= 1040 && t.ht < 1200)
-                return t.HLT_PFHT890_Prescale;
-            else
-                return 1;
-        }
     }else{
         if(!prescalesByEvent){
             if(t.ht < 250)
                 return -1;
-            else if(t.ht >= 250 && t.ht < 340)
-                return 11433.;
-            else if(t.ht >= 340 && t.ht < 480)
-                return 4120.;
-            else if(t.ht >= 480 && t.ht < 540)
-                return 1604.;
-            else if(t.ht >= 540 && t.ht < 640)
-                return 502.5;
+            else if(t.ht >= 250 && t.ht < 440)
+                return 1316.;
+            else if(t.ht >= 440 && t.ht < 520)
+                return 707.;
+            else if(t.ht >= 520 && t.ht < 620)
+                return 307.;
             else if(t.HLT_PFJet500)
                 return 1;
-            else if(t.ht >= 640 && t.ht < 720)
-                return 255.3;
-            else if(t.ht >= 720 && t.ht < 820)
-                return 128.7;
-            else if(t.ht >= 820 && t.ht < 940)
-                return 64.8;
-            else if(t.ht >= 940 && t.ht < 1040)
-                return 32.5;
-            else if(t.ht >= 1040 && t.ht < 1200)
-                return 16.3;
+            else if(t.ht >= 620 && t.ht < 700)
+                return 145.;
+            else if(t.ht >= 700 && t.ht < 800)
+                return 67.4;
+            else if(t.ht >= 800 && t.ht < 900)
+                return 47.4;
+            else if(t.ht >= 900 && t.ht < 1000)
+                return 29.5;
+            else if(t.ht >= 1000 && t.ht < 1200)
+                return 17.1;
             else
                 return 1;
         }else{
             if(t.ht < 250)
                 return -1;
-            else if(t.ht >= 250 && t.ht < 340)
+            else if(t.ht >= 250 && t.ht < 440)
                 return t.HLT_PFHT180_Prescale;
-            else if(t.ht >= 340 && t.ht < 480)
-                return t.HLT_PFHT250_Prescale;
-            else if(t.ht >= 480 && t.ht < 540)
+            else if(t.ht >= 440 && t.ht < 520)
                 return t.HLT_PFHT370_Prescale;
-            else if(t.ht >= 540 && t.ht < 640)
+            else if(t.ht >= 520 && t.ht < 620)
                 return t.HLT_PFHT430_Prescale; 
             else if(t.HLT_PFJet500)
                 return 1;
-            else if(t.ht >= 640 && t.ht < 720)
+            else if(t.ht >= 620 && t.ht < 700)
                 return t.HLT_PFHT510_Prescale;
-            else if(t.ht >= 720 && t.ht < 820)
+            else if(t.ht >= 700 && t.ht < 800)
                 return t.HLT_PFHT590_Prescale;
-            else if(t.ht >= 820 && t.ht < 940)
+            else if(t.ht >= 800 && t.ht < 900)
                 return t.HLT_PFHT680_Prescale;
-            else if(t.ht >= 940 && t.ht < 1040)
+            else if(t.ht >= 900 && t.ht < 1000)
                 return t.HLT_PFHT780_Prescale;
-            else if(t.ht >= 1040 && t.ht < 1200)
+            else if(t.ht >= 1000 && t.ht < 1200)
                 return t.HLT_PFHT890_Prescale;
             else
                 return 1;
         }
     }
+
 }
 
 bool SmearLooper::passesTriggerSR(){

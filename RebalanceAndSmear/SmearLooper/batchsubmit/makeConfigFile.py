@@ -22,17 +22,17 @@ import re
 #samples = ["data_rereco_data_Run2016C_HTMHT"]
 #samples = ["data_rereco_data_Run2016[B-D]_(JetHT|HTMHT|MET)"]
 # samples = ["qcd_ht", "tt", "singletop", "wjets_ht", "zinv_ht"]
-samples = ["qcd_ht"]
+# samples = ["qcd_ht"]
 # samples = ["data_Run2016[B-H]_JetHT_17Jul2018"]
 # samples = ["data_Run2017[B-F]_JetHT_31Mar2018"]
-# samples = ["data_Run2018[A-D]_JetHT_.*"]
+samples = ["data_Run2018[A-D]_JetHT_.*"]
 
 test = False
-version="V00-10-09"
+version="V00-10-16_HEMsmear"
 doRebalanceAndSmear = True
-rebaltag="V00-10-09_2016fullYear"
-# rebaltag="V00-10-09_2017fullYear"
-# rebaltag="V00-10-09_2018fullYear"
+# rebaltag="V00-10-16_2016fullYear"
+# rebaltag="V00-10-16_2017fullYear"
+rebaltag="V00-10-16_2018fullYear"
 jrttag = "ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 jrtnames = {
     2016 : "ptBinned_80x_JetID_PUID_BTagSFs_core2sigma",
@@ -46,7 +46,7 @@ extratag = ""
 # extratag = "_newJER"
 # extratag = "_noJERsmear_v2"
 # extratag = "_noJERsmear_HEM2veto_pt20"
-# extratag = "_jerUP"
+# extratag = "_jerDOWN"
 username = os.environ["USER"]
 use_b_resp = True
 make_baby = False
