@@ -5,7 +5,7 @@ import numpy as np
 import random
 from common import *
 
-tag = "V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+tag = "V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 # tag = "V00-10-01_31Mar2018_ptBinned_94x_JetID_PUID_BTagSFs_noJERsmear"
 # tag = "V00-10-01_31Mar2018_ptBinned_94x_fixMatching5_ecalDeadCell_noJERsmear"
 # tag = "V00-10-01_31Mar2018_usedByJason"
@@ -14,7 +14,7 @@ doByTopoReg = False
 
 data_year = "All"
 data_year_txt = "2016-18"
-lumi = 136.3
+lumi = 137
 
 # data_year = 2018
 # data_year_txt = "2018"
@@ -27,6 +27,7 @@ lumi = 136.3
 # data_year = 2016
 # data_year_txt = "2016"
 # lumi = 35.9
+
 
 
 def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
@@ -51,9 +52,9 @@ def GetTotalHistogram(h, fid, h_name, cr, ht_regs, isDataRS=False):
 
 ROOT.gROOT.SetBatch(1)
 
-indir_MC = "../SmearLooper/output/V00-10-09_94x_2017_noRS"
+indir_MC = "../SmearLooper/output/V00-10-16_94x_{0}_noRS".format("combined" if data_year=="All" else data_year)
 indir_RS = "looper_output/{0}/{1}/".format(tag, "qcd" if RSfromMC else "data{0}".format(data_year))
-indir_data = "../SmearLooper/output/V00-10-09_94x_2017_noRS/"
+indir_data = "../SmearLooper/output/V00-10-16_94x_{0}_noRS/".format("combined" if data_year=="All" else data_year)
 
 username = os.environ["USER"]
 # tag = "nocut_aht500_10pctCorr"
@@ -159,12 +160,12 @@ for cr, ht_regs in dirs:
     h_mc_vec = [f.Get("srbase/h_{0}".format(var)).Clone() for f in mc_files]
     for h,f in zip(h_mc_vec, mc_files):
       GetTotalHistogram(h, f, var, cr, ht_regs, False)
-      h.Scale(lumi)
+      h.Scale(lumi/3 if data_year=="All" else lumi)
       h.Rebin(rebin[ivar])
     h_RS_temp = rs_file.Get("srbase/h_{0}".format(var)).Clone()
     GetTotalHistogram(h_RS_temp, rs_file, var, cr, ht_regs, True)
     if RSfromMC:
-      h_RS_temp.Scale(lumi)
+      h_RS_temp.Scale(lumi/3 if data_year=="All" else lumi)
 
     h_RS = h_RS_temp.Clone()
     # for i in range(1,151):

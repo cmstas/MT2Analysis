@@ -6,13 +6,13 @@ from common import *
 
 ROOT.gROOT.SetBatch(1)
 
-tag = "V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+tag = "V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 
 year = "All"
-lumi = 136.6
+lumi = 137
 
 # year = 2018
-# lumi = 58.8
+# lumi = 59.8
 
 # year = 2017
 # lumi = 41.5
@@ -20,9 +20,9 @@ lumi = 136.6
 # year = 2016
 # lumi = 35.9
 
-dir = "looper_output/V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma/data{0}/".format(year)
-dir_UP = "looper_output/V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerUP/data{0}/".format(year)
-dir_DOWN = "looper_output/V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerDOWN/data{0}/".format(year)
+dir = "looper_output/{0}/data{1}/".format(tag,year)
+dir_UP = "looper_output/{0}_jerUP/data{1}/".format(tag,year)
+dir_DOWN = "looper_output/{0}_jerDOWN/data{1}/".format(tag,year)
 
 NBINS = sum([len(x[1]) for x in topo_reg_defs.items()])
 

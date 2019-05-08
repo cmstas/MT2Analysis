@@ -6,11 +6,11 @@ from common import *  # useful things that are common to all plotting scripts
 
 r.gROOT.SetBatch(1)
 
-cr="crRSInvertDPhi"
+# cr="crRSInvertDPhi"
 # cr="crRSMT2SideBand"
-# cr="crRSDPhiMT2"
+cr="crRSDPhiMT2"
 
-tag = "V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+tag = "V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 RSfromMC = False
 
 year = "All"
@@ -34,8 +34,8 @@ username = os.environ["USER"]
 outdir = "/home/users/{0}/public_html/mt2/RebalanceAndSmear/{1}/".format(username,tag)
 
 dir_RS = "looper_output/{0}/{1}{2}".format(tag, "qcd" if RSfromMC else "data", year)
-dir_data = "../SmearLooper/output/V00-10-08_94x_2017_noRS/"
-dir_mc = "../SmearLooper/output/V00-10-08_94x_2017_noRS/"
+dir_data = "../SmearLooper/output/V00-10-16_94x_{0}_noRS/".format("combined" if year=="All" else year)
+dir_mc = "../SmearLooper/output/V00-10-16_94x_{0}_noRS/".format("combined" if year=="All" else year)
 
 f_rs = r.TFile(os.path.join(dir_RS,"merged_hists.root"))
 f_data = r.TFile(os.path.join(dir_data,"data_Run{0}.root".format(year)))
@@ -106,18 +106,19 @@ for ht_reg in ht_regs:
         if type(h_evts_wjets_sr) != type(r.TObject()):
             n_wjets_sr = h_evts_wjets_sr.IntegralAndError(1, 1, err_wjets_sr)
 
-        n_zinv_sr *= lumi
-        n_dy_dy *= lumi
-        n_top_sl *= lumi
-        n_top_sr *= lumi
-        n_wjets_sl *= lumi
-        n_wjets_sr *= lumi
-        err_zinv_sr *= lumi
-        err_dy_dy *= lumi
-        err_top_sl *= lumi
-        err_top_sr *= lumi
-        err_wjets_sl *= lumi
-        err_wjets_sr *= lumi
+        corr = 3.0 if year=="All" else 1.0
+        n_zinv_sr *= lumi / corr
+        n_dy_dy *= lumi / corr
+        n_top_sl *= lumi / corr
+        n_top_sr *= lumi / corr
+        n_wjets_sl *= lumi / corr
+        n_wjets_sr *= lumi / corr
+        err_zinv_sr *= lumi / corr
+        err_dy_dy *= lumi / corr
+        err_top_sl *= lumi / corr
+        err_top_sr *= lumi / corr
+        err_wjets_sl *= lumi / corr
+        err_wjets_sr *= lumi / corr
 
         rzinvdy = 0.0
         rzinvdy_err = 2.5
@@ -130,7 +131,7 @@ for ht_reg in ht_regs:
         top_contam_err = err_data_of * RSFOF
         n_zinv_est = rzinvdy * (n_data_dy - top_contam)
         err_zinv_est = 0.0
-        if (n_data_dy - top_contam > 0 and rzinvdy > 0):
+        if (n_data_dy - top_contam > 0 and rzinvdy > 0 and abs(n_zinv_est/n_zinv_sr-1) < 1):
             err_zinv_est = np.sqrt((err_data_dy)**2 + (top_contam_err)**2) / (n_data_dy-top_contam)
             err_zinv_est = n_zinv_est * np.sqrt((rzinvdy_err/rzinvdy)**2 + (err_zinv_est)**2)
         else:
@@ -171,10 +172,10 @@ pads.append(r.TPad("2","2",0.0,0.0,1.0,0.19))
 
 pads[0].SetTopMargin(0.08)
 pads[0].SetBottomMargin(0.13)
-pads[0].SetRightMargin(0.05)
+pads[0].SetRightMargin(0.02)
 pads[0].SetLeftMargin(0.07)
 
-pads[1].SetRightMargin(0.05)
+pads[1].SetRightMargin(0.02)
 pads[1].SetLeftMargin(0.07)
 
 pads[0].Draw()
@@ -201,6 +202,9 @@ hrs.SetLineColor(r.kBlack)
 hrs.SetFillColor(401)
 
 hzinv.GetYaxis().SetRangeUser(1e-1,1e6 if cr=="crRSInvertDPhi" else 1e8)
+hzinv.GetYaxis().SetTitle("Events / Bin")
+hzinv.GetYaxis().SetTitleSize(0.04)
+hzinv.GetYaxis().SetTitleOffset(0.9)
 hzinv.GetXaxis().SetLabelSize(0)
 hzinv.GetXaxis().SetTickLength(0.02)
 hzinv.GetXaxis().SetNdivisions(hzinv.GetNbinsX(), 0, 0)
@@ -240,7 +244,7 @@ for ix in bin_divisions:
     x = pads[0].GetLeftMargin() + ix * bin_width
     line.DrawLineNDC(x,1-pads[0].GetTopMargin(),x,pads[0].GetBottomMargin())
 
-leg = r.TLegend(0.76,0.73,0.945,0.91)
+leg = r.TLegend(0.79,0.73,0.975,0.91)
 leg.AddEntry(hdata, "Data", 'lp')
 leg.AddEntry(hrs, "R&S from " + ("MC" if RSfromMC else "Data"), 'f')
 leg.AddEntry(hzinv , "Z#rightarrow#nu#bar{#nu}", 'f')
@@ -277,11 +281,12 @@ for i in range(1,len(mod_bin_divisions)):
 
 text.SetTextAlign(31)
 text.SetTextFont(42)
-text.SetTextSize(0.04)
-text.DrawLatex(0.94,0.935,"{0} fb^{{-1}} (13 TeV)".format(lumi))
+text.SetTextSize(0.045)
+text.DrawLatex(0.97,0.935,"{0} fb^{{-1}} (13 TeV)".format(lumi))
 text.SetTextFont(62)
 text.SetTextAlign(11)
-text.DrawLatex(0.08, 0.935, "CMS Preliminary")
+# text.DrawLatex(0.08, 0.935, "CMS Preliminary")
+text.DrawLatex(0.08, 0.935, "CMS")
 
 binLabels_all = []
 for ht_reg in ht_regs:
@@ -290,7 +295,8 @@ text = r.TLatex()
 text.SetNDC(1)
 text.SetTextAlign(32)
 text.SetTextAngle(90)
-text.SetTextSize(min(bin_width * 1.76,0.027))
+text.SetTextSize(min(bin_width * 1.90,0.027))
+print bin_width
 text.SetTextFont(42)
 for ibin in range(len(binLabels_all)):
     x = pads[0].GetLeftMargin() + (ibin+0.5)*bin_width
