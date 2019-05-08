@@ -40,15 +40,17 @@ if "80x" in TAG:
     sig_scale[17] = 41.53 / 35.92
     sig_scale[18] = 59.97 / 35.92
 else:
-    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-15_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-15_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-15_2018fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    # f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-16_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-16_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-16_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-16_2018fullYear_17fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     sig_scale[16] = 1.0
+    # sig_scale[16] = 35.9 / 41.5
     sig_scale[17] = 1.0
-    # sig_scale[18] = 59.97 / 41.53
     sig_scale[18] = 1.0
+    # sig_scale[18] = 59.97 / 41.53
     
-    # sig_scale[16] = -1.0/999 * 35.9/41.5
+    # sig_scale[16] = -1.0/999
     # sig_scale[17] = -1.0/999
     # sig_scale[18] = -1.0/999
 

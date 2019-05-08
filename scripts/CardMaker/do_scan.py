@@ -4,8 +4,8 @@ import time
 import subprocess
 # this assumes you've already made template datacards for this tag! (makeTemplateCards.py)
 
-TAG = "V00-10-15_FullRunII_doubleMCstat"
-MODEL = "T2qq"
+TAG = "V00-10-16_FullRunII_quarterDecorr"
+MODEL = "rpvMonoPhi"
 
 MAXLOCALJOBS=25
 
@@ -36,7 +36,7 @@ points = []
 cmds = []
 if "T2cc" in MODEL:
     y_binwidth = 5
-    y_max = 800
+    y_max = 1100
 print "Searching for valid points..."
 for m1 in range(0, x_max+1, x_binwidth):
     for m2 in range(0, y_max+1, y_binwidth):

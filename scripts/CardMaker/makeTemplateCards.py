@@ -2,12 +2,13 @@ import os
 import ROOT as r
 from Datacard import *
 from nuisances import *
-from math import isnan, isinf
+from math import isnan, isinf, sqrt
 import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "V00-10-15_FullRunII_doubleMCstat"
+# TAG = "V00-10-16_FullRunII_newQCD"
+TAG = "blah"
 
 doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
@@ -23,16 +24,16 @@ f_lostlep = {}
 f_qcd = {}
 f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-14_combined/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-14_combined/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-14_combined/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-14_combined/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-14_combined/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-14_combined/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-14_combined/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-14_combined/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-14_combined/qcdFromRS_2018.root")
-f_data = r.TFile("../../MT2Looper/output/V00-10-14_combined/data_RunAll.root")
+f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined/zinvFromDY_2016.root")
+f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined/zinvFromDY_2017.root")
+f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined/zinvFromDY_2018.root")
+f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined/lostlepFromCRs_2016.root")
+f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined/lostlepFromCRs_2017.root")
+f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined/lostlepFromCRs_2018.root")
+f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined/qcdFromRS_2016.root")
+f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined/qcdFromRS_2017.root")
+f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined/qcdFromRS_2018.root")
+f_data = r.TFile("../../MT2Looper/output/V00-10-16_combined/data_RunAll.root")
 
 years = [16, 17, 18]
 # years = [18]
@@ -47,30 +48,36 @@ def getAverageWeight(h, bkg, year, dirname):
     if (bkg, year, dirname) == ("zinv", 16, "sr29M"):
         return 0.03
     if (bkg, year, dirname) == ("zinv", 17, "sr29M"):
-        return 0.005
+        return 0.03
     if (bkg, year, dirname) == ("zinv", 18, "sr29M"):
-        return 0.005
+        return 0.01
     if (bkg, year, dirname) == ("zinv", 17, "sr28UH"):
-        return 0.006
+        return 0.06
     if (bkg, year, dirname) == ("zinv", 18, "sr28UH"):
-        return 0.006
+        return 0.07
     if (bkg, year, dirname) == ("zinv", 17, "sr28H"):
-        return 0.006
+        return 0.05
     if (bkg, year, dirname) == ("zinv", 18, "sr28H"):
-        return 0.006
+        return 0.07
     if (bkg, year, dirname) == ("zinv", 16, "sr29H"):
         return 0.03
     if (bkg, year, dirname) == ("zinv", 17, "sr29H"):
-        return 0.006
+        return 0.05
     if (bkg, year, dirname) == ("zinv", 18, "sr29H"):
-        return 0.006
+        return 0.07
     if (bkg, year, dirname) == ("zinv", 17, "sr29UH"):
-        return 0.006
+        return 0.06
     if (bkg, year, dirname) == ("zinv", 18, "sr29UH"):
-        return 0.006
+        return 0.07
+    if (bkg, year, dirname) == ("zinv", 17, "sr48"):
+        return 0.03
+    if (bkg, year, dirname) == ("zinv", 17, "sr49"):
+        return 0.03
+    if (bkg, year, dirname) == ("zinv", 18, "sr49"):
+        return 0.09
 
     if h.Integral() == 0:
-        raise Exception("ERROR: cannot get average weight of an empty histogram!")
+        raise Exception("ERROR: cannot get average weight of an empty histogram! year: "+str(year))
     n_evts_effective = 0.0
     for i in range(1, h.GetNbinsX()+1):
         cont = h.GetBinContent(i)
@@ -382,7 +389,8 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 dc.SetNuisanceBkgValue(nuis_name, llep_val, "llep", y)
                 dc.SetNuisanceBkgValue(nuis_name, zinv_val, "zinv", y)
 
-        if nuis == "lep_eff" or nuis == "lep_eff2":
+        if nuis == "lep_eff" or nuis == "lep_eff_decorr":
+            decorr_frac = 0.5
             for y in years:
                 # lostlep
                 h_UP = f_lostlep[y].Get(dirname+"/h_mt2binsAlpha_lepeff_UP")
@@ -392,9 +400,9 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                 err_DN = abs(1.0 - h_DN.Integral(lowmt2bin,-1) / baseline_int)
                 err = max(err_UP, err_DN)
                 direc = 1 if h_UP.Integral(lowmt2bin,-1) > baseline_int else -1
-                err = 1.0 + direc*err            
-                if nuis == "lep_eff":
-                    dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
+                # err = 1.0 + direc*err
+                err = 1.0 + direc*err * (decorr_frac if "decorr" in nuis else sqrt(1.0-decorr_frac**2))
+                dc.SetNuisanceBkgValue(nuis_name, err, "llep", y)
 
                 # zinv
                 h_UP = f_zinvDY[y].Get(dirname+"/ratioCard_lepeff_UP")
@@ -408,12 +416,11 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
                     err_DN = abs(1.0 - rDN / rCN)
                     err = max(err_UP, err_DN)
                 direc = 1 if rUP > rCN else -1
-                err = 1.0 + direc*err
-                if nuis == "lep_eff2":
-                    err = 1.0 + (err-1.0)/2
+                # err = 1.0 + direc*err
+                err = 1.0 + direc*err * (decorr_frac if "decorr" in nuis else sqrt(1.0-decorr_frac**2))
                 dc.SetNuisanceBkgValue(nuis_name, err, "zinv", y)
 
-        if nuis=="zinv_alphaErr" or nuis=="zinv_alphaErr2":
+        if nuis=="zinv_alphaErr":
             for y in years:
                 err = 1.0
                 if zinv_zero_alpha[y]:
@@ -641,7 +648,7 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
 
 
 
-template_dir = os.path.join(outdir, "templates")
+template_dir = os.path.join(outdir, "templates" if not doSuperSignalRegions else "templates_ssr")
 os.system("mkdir -p "+template_dir)
 
 template_datacards = {}
@@ -660,7 +667,7 @@ for key in iterator:
     isSSR = dirname[-1].isdigit()
     if isSSR and not doSuperSignalRegions:
         continue
-    if not isSSR and doSuperSignalRegions:
+    if not (isSSR or dirname=="sr1J" or dirname=="sr2J" or dirname=="sr1VL") and doSuperSignalRegions:
         continue
 
     # print dirname

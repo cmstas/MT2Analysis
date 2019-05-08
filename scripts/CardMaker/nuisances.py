@@ -58,18 +58,14 @@ nuisances = {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
         },
-    # "lep_eff2" : {
-    #     "correlation" : PER_MT2_BIN,
-    #     "splitByYear" : DEFAULT_splitByYear,
-    #     },
+    "lep_eff_decorr" : {
+        "correlation" : PER_MT2_BIN,
+        "splitByYear" : DEFAULT_splitByYear,
+        },
     "zinv_alphaErr" : {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : False, # overwritten in cardmaker anyway (depends on if we're extrapolating or not)
         },
-    # "zinv_alphaErr2" : {
-    #     "correlation" : PER_MT2_BIN,
-    #     "splitByYear" : False, # overwritten in cardmaker anyway (depends on if we're extrapolating or not)
-    #     },
     "zinv_purity" : {
         "correlation" : PER_TOPO_REG_CRDY,
         "splitByYear" : False,

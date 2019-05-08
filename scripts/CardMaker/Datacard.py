@@ -279,6 +279,146 @@ class Datacard:
         
         return (sqrt(tot_up), sqrt(tot_dn))
 
+    @staticmethod
+    def MergeCards(datacards, mergedName):
+        # all datacards in the list should have the same backgrounds.
+        # Unpredictable behaviour if this isn't the case!
+        # Assumes backgrounds/signals are listed in same order in all datacards
+        # Assumes all gmN nuisances with different names are from orthogonal CRs
+        dc = datacards[0]
+        merged = Datacard(mergedName, dc.nbkg, dc.bkg_names, 1, dc.chan_names, dc.years,
+                          dc.split_bkg_by_year, dc.split_sig_by_year)
+        merged.SetObservation(sum(dc.GetObservation() for dc in datacards))
+
+        if merged.split_bkg_by_year:
+            bkg_rates = [dc.GetBackgroundRates(splitByYear=True) for dc in datacards]
+            for bkg in merged.bkg_names:
+                for y in merged.years:
+                    rate = sum(br[bkg+str(y)] for br in bkg_rates)
+                    merged.SetBkgRate(rate, bkg, y)
+        else:
+            bkg_rates = [dc.GetBackgroundRates(splitByYear=False) for dc in datacards]
+            for bkg in merged.bkg_names:
+                rate = sum(br[bkg] for br in bkg_rates)
+                merged.SetBkgRate(rate, bkg)
+
+        if merged.split_sig_by_year:
+            sig_rates = [dc.GetSignalRate(splitByYear=True) for dc in datacards]
+            for y in merged.years:
+                rate = sum(sr[y] for sr in sig_rates)
+                merged.SetSignalRate(rate, y)
+        else:
+            sig_rates = [dc.GetSignalRate(splitByYear=False) for dc in datacards]
+            rate = sum(sr for sr in sig_rates)
+            merged.SetSignalRate(rate)
+
+        ndicts = [dc.GetNuisanceDict() for dc in datacards]
+        nnames = set()
+        for dc in datacards:
+            nnames.update(dc.GetNuisanceNames())
+        lnNs = {}
+        gmNs = [[] for i in range(merged.n_split_bkg)]
+        for nname in nnames:
+            for i in range(len(ndicts)):
+                if nname not in ndicts[i]: 
+                    continue
+                nuis = ndicts[i][nname]
+                if nuis.type in ["lnN","lnU"]:
+                    if nname not in lnNs:
+                        lnNs[nname] = {"bkg_abs":[[0.0,0.0] for k in range(nuis.nbkg)], "sig_abs":[[0.0,0.0]for k in range(nuis.nsig)]}
+                    for j in range(nuis.nbkg):
+                        val = nuis.bkg_values[j]
+                        bkg = datacards[i].split_bkg_names[j]
+                        if type(val)==tuple and val[0] is not None:
+                            lnNs[nname]["bkg_abs"][j][0] += (val[0]-1.0) * datacards[i].bkg_rates[bkg]
+                            lnNs[nname]["bkg_abs"][j][1] += (val[1]-1.0) * datacards[i].bkg_rates[bkg]
+                        elif type(val)!=tuple and val is not None:
+                            lnNs[nname]["bkg_abs"][j][0] += (val-1.0) * datacards[i].bkg_rates[bkg]
+                            lnNs[nname]["bkg_abs"][j][1] += (val-1.0) * datacards[i].bkg_rates[bkg]
+                    for j in range(nuis.nsig):
+                        val = nuis.sig_value[j]
+                        if datacards[i].split_sig_by_year:
+                            sig_rate = datacards[i].sig_rate[datacards[i].years[j]]
+                        else:
+                            sig_rate = datacards[i].sig_rate
+                        if type(val)==tuple and val[0] is not None:
+                            lnNs[nname]["sig_abs"][j][0] += (val[0]-1.0) * sig_rate
+                            lnNs[nname]["sig_abs"][j][1] += (val[1]-1.0) * sig_rate
+                        elif type(val)!=tuple and val is not None:
+                            lnNs[nname]["sig_abs"][j][0] += (val-1.0) * sig_rate
+                            lnNs[nname]["sig_abs"][j][1] += (val-1.0) * sig_rate
+                else:
+                    # gmN
+                    for j in range(nuis.nbkg):
+                        if nuis.bkg_values[j] is not None:
+                            gmNs[j].append((nname, nuis.N, nuis.bkg_values[j]))
+
+
+        # now actually add to the merged card
+        for nname in lnNs:
+            merged.AddNuisance(nname, "lnN")
+            for i in range(len(merged.split_bkg_names)):
+                bkg_val = merged.bkg_rates[merged.split_bkg_names[i]]
+                nuis_up, nuis_dn = lnNs[nname]["bkg_abs"][i]
+                if bkg_val > 0:
+                    nuis_up = nuis_up / bkg_val + 1.0
+                    nuis_dn = nuis_dn / bkg_val + 1.0
+                else:
+                    nuis_up, nuis_dn = 1.0, 1.0
+                if abs(nuis_up-1.0)<0.0005 and abs(nuis_dn-1.0)<0.0005:
+                    continue
+                if abs(nuis_up-nuis_dn) < 0.001:
+                    merged.nuisances[nname].bkg_values[i] = nuis_up
+                else:
+                    merged.nuisances[nname].bkg_values[i] = (nuis_up,nuis_dn)
+            for i in range(merged.nsig):
+                sig_val = merged.sig_rate if merged.nsig==1 else merged.sig_rate[merged.years[i]]
+                nuis_up, nuis_dn = lnNs[nname]["sig_abs"][i]
+                if sig_val > 0:
+                    nuis_up = nuis_up / sig_val + 1.0
+                    nuis_dn = nuis_dn / sig_val + 1.0
+                else:
+                    nuis_up, nuis_dn = 1.0, 1.0
+                if abs(nuis_up-1.0)<0.0005 and abs(nuis_dn-1.0)<0.0005:
+                    continue
+                if abs(nuis_up-nuis_dn) < 0.001:
+                    merged.nuisances[nname].sig_value[i] = nuis_up
+                else:
+                    merged.nuisances[nname].sig_value[i] = (nuis_up,nuis_dn)
+
+        merged_regions= []
+        for i,g in enumerate(gmNs):
+            if len(g) == 0:
+                merged_regions.append(None)
+                continue
+            relnames = {}
+            totVal = 0.0
+            for x in g:
+                totVal += x[2]
+                if x[0] not in relnames:
+                    relnames[x[0]] = x[1]
+            totN = sum(relnames.values())
+            if totN == 0:
+                names = [x[0] for x in g]
+                val = totVal
+            else:
+                names = list(set(k for k in relnames.keys() if relnames[k]>0))
+                val = merged.bkg_rates[merged.split_bkg_names[i]] / totN
+            name = "_".join(sorted(set(names)))
+            # print merged.split_bkg_names[i], name, totN, val
+
+            if name not in merged.GetNuisanceNames():
+                merged.AddNuisance(name, "gmN")
+                merged.SetGMNNuisanceN(name, totN)
+            else:
+                if totN != merged.nuisances[name].N:
+                    raise Exception("ERROR: mismatch of gmN N values!")
+            
+            merged.nuisances[name].bkg_values[i] = val
+
+        return merged
+    
+
 
     def Write(self, outname, sortkey=str, suppressPointlessNuis=True):
         # write a nicely formatted datacard
