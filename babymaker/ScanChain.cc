@@ -719,7 +719,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	
 	// assume that first sparm value is parent mass, second is LSP mass
 	if (evt_id >= 1000 && evt_id < 1300) {
-	  if (sparm_values().size() == 2) {
+	  if (isFastsim && sparm_values().size() == 2) {
 	    GenSusyMScan1 = sparm_values().at(0);
 	    GenSusyMScan2 = sparm_values().at(1);
 	    // use sparm values to look up xsec
@@ -727,6 +727,35 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
                 evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
             else
                 evt_xsec = 1.0;
+	  }
+	  else if (!isFastsim) { // no sparm values in fullsim
+	    bool havePrimary = false;
+	    bool haveLSP = false;
+	    for (unsigned int iGen = 0; iGen < cms3.genps_p4().size() && !(havePrimary && haveLSP); iGen++) {
+	      const int id = abs(cms3.genps_id().at(iGen));
+	      // Gluino or L squark or R squark
+	      if (id == 1000021 || (id >= 1000001 && id <= 1000006) || (id >= 2000001 && id <= 2000006)) {
+		GenSusyMScan1 = (int) round(cms3.genps_p4().at(iGen).mass());
+		havePrimary = true;
+	      }
+	      else if (id == 1000022) {
+		GenSusyMScan2 = (int) round(cms3.genps_p4().at(iGen).mass());
+		haveLSP = true;
+	      }
+	    }
+	    if (!havePrimary) {
+	      cout << endl;
+	      cout << "ERROR: Couldn't find a gluino or squark mass in genps but this looks like a fullsim Susy sample" << endl;
+	      cout << endl;
+	      return;
+	    }
+	    if (!haveLSP) {
+	      cout << endl;
+	      cout << "ERROR: Couldn't find a LSP mass in genps but this looks like a fullsim Susy sample" << endl;
+	      cout << endl;
+	      return;
+	    }
+	    evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
 	  }
 	  else {
 	    std::cout << "WARNING: expected to find 2 sparm values, found instead " << sparm_values().size() << std::endl;
