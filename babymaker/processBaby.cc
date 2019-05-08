@@ -171,6 +171,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("SMS-T2bt"))                                                  sample = Form("T2bt_%s"                     , outfileid.Data());
   else if (infile.Contains("SMS-T2cc"))                                                  sample = Form("T2cc_%s"                     , outfileid.Data());
   else if (infile.Contains("SMS-T6qqWW"))                                                sample = Form("T6qqWW_%s"                   , outfileid.Data());
+  else if (infile.Contains("RPV-monoPhi"))                                                sample = Form("rpvMonoPhi_%s"                   , outfileid.Data());
   //Data
   else if (infile.Contains("Run2015B") && infile.Contains("PromptReco"))                 sample = Form("data_Run2015B_PromptReco_%s" , outfileid.Data());
   else if (infile.Contains("Run2015B") && infile.Contains("17Jul2015"))                  sample = Form("data_Run2015B_17Jul2015_%s"  , outfileid.Data());
@@ -220,6 +221,7 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2018B") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018B_17Sep2018_%s" , outfileid.Data());
   else if (infile.Contains("Run2018C") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018C_17Sep2018_%s" , outfileid.Data());
   else if (infile.Contains("Run2018D") && infile.Contains("17Sep2018"))                  sample = Form("data_Run2018D_17Sep2018_%s" , outfileid.Data());
+  else if (infile.Contains("Run2018D") && infile.Contains("22Jan2019"))                  sample = Form("data_Run2018D_22Jan2019_%s" , outfileid.Data());
   else if (infile.Contains("Run2018B") && infile.Contains("26Sep2018"))                  sample = Form("data_Run2018D_26Sep2018_%s" , outfileid.Data());
   else if (infile.Contains("dataRun2") && infile.Contains("2018B"))                      sample = Form("data_Run2018B_RelVal_%s" , outfileid.Data());
 
@@ -238,9 +240,13 @@ int main(int argc, char **argv) {
   else if(infile.Contains("Run2018") && infile.Contains("PromptReco")) config_tag = "data_2018_Prompt";
   else if(infile.Contains("Run2018") && infile.Contains("17Sep2018"))  config_tag = "data_2018_17Sep2018";
   else if(infile.Contains("Run2018") && infile.Contains("26Sep2018"))  config_tag = "data_2018_17Sep2018";
+  else if(infile.Contains("Run2018") && infile.Contains("22Jan2019"))  config_tag = "data_2018_17Sep2018";
   else if(infile.Contains("dataRun2") && infile.Contains("2018"))      config_tag = "data_2018_Prompt";
   else if(infile.Contains("RunIISummer16") && infile.Contains("80X"))  config_tag = "mc_80x_Summer16";
   else if(infile.Contains("RunIISummer16") && infile.Contains("Fast") && infile.Contains("94X"))  config_tag = "mc_94x_fastsim_Summer16";
+  else if(infile.Contains("PUSummer16v3Fast"))                         config_tag = "mc_94x_fastsim_Summer16";
+  else if(infile.Contains("PUFall17Fast"))                             config_tag = "mc_94x_fastsim_Fall17";
+  else if(infile.Contains("PUFall18Fast"))                             config_tag = "mc_102x_fastsim_Autumn18";
   else if(infile.Contains("RunIISummer16") && infile.Contains("94X"))  config_tag = "mc_94x_Summer16";
   else if(infile.Contains("Private_94x"))                              config_tag = "mc_94x_Summer16";
   else if(infile.Contains("RunIIFall17") && infile.Contains("Fast") && infile.Contains("94X"))  config_tag = "mc_94x_fastsim_Fall17";

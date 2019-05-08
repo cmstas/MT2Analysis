@@ -726,7 +726,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   h_sig_avgweight_isr_ = 0;
   h_sig_avgweight_isr_UP_ = 0;
   h_sig_avgweight_isr_DN_ = 0;
-  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos))) {
+  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
     std::string scan_name = sample;
     std::string weights_dir = "";
     if(sample.find("_10")!=string::npos || sample.find("_50")!=string::npos || sample.find("_200")!=string::npos){
@@ -742,8 +742,10 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
         else if(config_tag.find("94x_fastsim_Summer16") != string::npos)
             weights_dir = "../babymaker/data/sigweights_Summer16_94x/";
         if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
+        else if (sample.find("extraT2tt") != std::string::npos) scan_name = "extraT2tt";
         else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
         else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
+        else if (sample.find("rpvMonoPhi") != std::string::npos) scan_name = "rpvMonoPhi";
     }
     TFile* f_nsig_weights = new TFile(Form("%s/nsig_weights_%s.root", weights_dir.c_str(), scan_name.c_str()));
     TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
@@ -799,7 +801,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
   
-  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos))) {
+  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
       cout << "Applying fastsim lepton scale factors from the following files:\n";
       cout << "    els IDISO : " << config_.elSF_IDISOfile_fastsim << ": " << config_.elSF_IDhistName_fastsim << " (id), " << config_.elSF_ISOhistName_fastsim << " (iso)" << endl;
       cout << "    muons ID  : " << config_.muSF_IDfile_fastsim << ": " << config_.muSF_IDhistName_fastsim << endl;
@@ -1142,6 +1144,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
+          cout << evtweight_ << endl;
 	} else {
             if (!ignoreScale1fb){
                 evtweight_ = t.evt_scale1fb * lumi;
@@ -2348,8 +2351,9 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
     fillHistosDY(SRBaseMonojet.crdyHistMap, SRBaseMonojet.GetNumberOfMT2Bins(), SRBaseMonojet.GetMT2Bins(), "crdybaseJ", suffix);
     for(unsigned int srN = 0; srN < SRVecMonojet.size(); srN++){
       if(SRVecMonojet.at(srN).PassesSelectionCRDY(values_monojet)){
-        // cout << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
-	fillHistosDY(SRVecMonojet.at(srN).crdyHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix); 
+          // if(suffix=="")
+              // cout << endl << "FOUNDEVENT:" << prefix+SRVecMonojet.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+          fillHistosDY(SRVecMonojet.at(srN).crdyHistMap, SRVecMonojet.at(srN).GetNumberOfMT2Bins(), SRVecMonojet.at(srN).GetMT2Bins(), prefix+SRVecMonojet.at(srN).GetName(), suffix); 
       }
     }
   }
@@ -2367,9 +2371,10 @@ void MT2Looper::fillHistosCRDY(const std::string& prefix, const std::string& suf
   if(passBase && t.zll_ht > 1500.                  ) fillHistosDY(InclusiveRegions.at(4).crdyHistMap, SRBase.GetNumberOfMT2Bins(), SRBase.GetMT2Bins(), "crdybaseUH", suffix);
 
   for(unsigned int srN = 0; srN < SRVec.size(); srN++){
-    if(SRVec.at(srN).PassesSelectionCRDY(values)){        
-        // cout << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << " " << evtweight_ << endl;
-      fillHistosDY(SRVec.at(srN).crdyHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
+    if(SRVec.at(srN).PassesSelectionCRDY(values)){
+        // if(suffix=="")
+            // cout << endl << "FOUNDEVENT:" << prefix+SRVec.at(srN).GetName() << ":" << t.run << ":" << t.lumi << ":" << t.evt << endl;
+        fillHistosDY(SRVec.at(srN).crdyHistMap, SRVec.at(srN).GetNumberOfMT2Bins(), SRVec.at(srN).GetMT2Bins(), prefix+SRVec.at(srN).GetName(), suffix);
       //break; //not orthogonal any more 
     }
   }
@@ -2655,8 +2660,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
       plot1D("h_j1cemf"+s,  t.jet_cemf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1cemf", 100, 0, 1);      
       plot1D("h_j1nemf"+s,  t.jet_nemf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1nemf", 100, 0, 1);      
       plot1D("h_j1muf"+s,  t.jet_muf[t.good_jet_idxs[0]], evtweight_, h_1d, "; j1muf", 100, 0, 1);      
-      if(directoryname.Contains("srbaseJ") && t.jet_nemf[t.good_jet_idxs[0]] > 0.8)
-          cout << endl << "FOUNDEVENT: " << t.run << ":" <<t.lumi << ":" << t.evt << endl;
+      // if(directoryname.Contains("srbaseJ") && t.jet_nemf[t.good_jet_idxs[0]] > 0.8)
+          // cout << endl << "FOUNDEVENT: " << t.run << ":" <<t.lumi << ":" << t.evt << endl;
   }
 
 
