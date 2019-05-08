@@ -191,6 +191,10 @@ int sampleID (const string& name) {
     else if (name.find("SMS-T2bt") != string::npos) return 1150;
   }
 
+  else if (name.find("RPV-") != string::npos){
+      if (name.find("RPV-monoPhi") != string::npos) return 1201;
+  }
+
   cout << "sampleID: WARNING: sample not recognized!  " << name << endl;
   return -1;
 }

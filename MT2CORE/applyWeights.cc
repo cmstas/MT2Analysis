@@ -240,22 +240,33 @@ bool setElSFfile_fastsim(TString filenameIDISO, TString histnameID, TString hist
 
 //_________________________________________________________
 bool setMuSFfile_fastsim(TString filenameID, TString filenameISO, TString filenameIP, TString histnameID, TString histnameISO, TString histnameIP){
+
+  // 2017 ID file has an extra bin... do custom multiplication here. if/when we get new files, should double check that this binning works
+  double binsX[7] = {10., 20., 30., 40., 50., 100., 200.};
+  double binsY[5] = {0.0, 0.9, 1.2, 2.1, 2.4};
+  h_muSF_fastsim = new TH2D("h_muSF", ";pt;abs(eta)", 6, binsX, 4, binsY);
+  for(int ix=1; ix <= h_muSF->GetNbinsX(); ix++){
+      for(int iy=1; iy <= h_muSF->GetNbinsY(); iy++){
+          h_muSF_fastsim->SetBinContent(ix, iy, 1.0);
+          h_muSF_fastsim->SetBinError(ix, iy, 0.0);
+      }
+  }
+
   TFile * f1 = new TFile(filenameID);
   TFile * f2 = new TFile(filenameISO);
   if (!f1->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ID scale factor file "<<filenameID<<std::endl; return 0;}
   if (!f2->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find ISO scale factor file "<<filenameISO<<std::endl; return 0;}
   TH2D* h_id = (TH2D*) f1->Get(histnameID);
   TH2D* h_iso = (TH2D*) f2->Get(histnameISO);
-  h_muSF_fastsim = (TH2D*) h_id->Clone("h_muSF_fastsim");
-  h_muSF_fastsim->SetDirectory(0);
-  h_muSF_fastsim->Multiply(h_iso);
+  customMultiply(h_muSF_fastsim, h_id);
+  customMultiply(h_muSF_fastsim, h_iso);
   if (!h_id || !h_iso) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find ID/ISO scale factor histogram"<<std::endl; return 0;}
   if(filenameIP != ""){
       TFile * f3 = new TFile(filenameIP);
       if (!f3->IsOpen()) { std::cout<<"applyWeights::setMuSFfile: ERROR: Could not find IP scale factor file "<<filenameIP<<std::endl; return 0;}
       TH2D* h_ip = (TH2D*) f3->Get(histnameIP);
       if (!h_ip) { std::cout<<"applyWeights::setMuSFfile_fastsim: ERROR: Could not find IP scale factor histogram"<<std::endl; return 0;}
-      h_muSF_fastsim->Multiply(h_ip);
+      customMultiply(h_muSF_fastsim, h_ip);
   }
 
   return true;
