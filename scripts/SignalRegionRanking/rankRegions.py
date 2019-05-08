@@ -4,14 +4,14 @@ import ROOT
 
 ROOT.gROOT.SetBatch(True)
 
-lumi=150 # /fb
+lumi=137 # /fb
 
 signal_point = str(sys.argv[1])
 m1 = signal_point.split("_")[1]
 
 filename="Ranking_"+signal_point+".txt"
 
-xsecFileName="../..//babymaker/data/xsec_susy_13tev.root"
+xsecFileName="../../babymaker/data/xsec_susy_13tev_run2.root"
 
 if "T1" in signal_point:
     hname = "h_xsec_gluino"
@@ -41,7 +41,7 @@ for line in open(filename):
 output=open('Ranking_'+signal_point+'_ranked.txt', 'w+')
 limits=sorted(exp.items(), key=operator.itemgetter(1))    
 for l in limits:
-    output.write(str(l[0])+' & '+str(l[1])+' & '+str(obs[l[0]]) + ' & ' + str(sigyield[l[0]]) + ' & ' + ('%.3f' % (float(sigyield[l[0]])/(xsec*1000*lumi)*100.)) +'\\\\\n')
+    output.write(str(l[0])+' & '+str(exp[l[0]])+' & '+str(obs[l[0]]) + ' & ' + str(sigyield[l[0]]) + ' & ' + ('%.3f' % (float(sigyield[l[0]])/(xsec*1000*lumi)*100.)) +'\\\\\n')
 
 print "Percentage of ALL signal events falling into best bin:", str(float(sigyield[l[0]])/(xsec*1000*lumi)*100.)+"%" 
 print "Signal yield in best bin:", sigyield[l[0]] 

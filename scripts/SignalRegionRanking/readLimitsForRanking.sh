@@ -2,11 +2,11 @@
 
 #Model=T1tttt_1200_800
 #Model=T1tttt_1600_1000
-Model=T1tttt_1900_200
+Model=T2qq_1300_850
 tag=RegionTesting
 
 thisDir=`pwd`
-inputDir=$thisDir/../cards_NoPJmergedCRlowMT2atUHWithQCD_T1tttt/
+inputDir=$thisDir/../CardMaker/cards_FullRunII_17MCfor18_ttbbWeights_v3/T2qq/T2qq_1300_850/
 
 for i in $(ls $thisDir/scratch/ranking_${Model}/log_${Model}*${tag}.txt)
 do

@@ -28,7 +28,7 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     h_rsfof.GetYaxis().SetRangeUser(0, 2.0)
     h_rsfof.GetYaxis().SetTitle("R(SF/OF)")
     h_rsfof.GetYaxis().SetTitleSize(0.045)
-    h_rsfof.GetYaxis().SetTitleOffset(0.9)
+    h_rsfof.GetYaxis().SetTitleOffset(1.00)
     h_rsfof.GetXaxis().SetTitle(xaxis)
     h_rsfof.GetXaxis().SetTitleSize(0.045)
     h_rsfof.GetYaxis().SetLabelSize(0.04)
@@ -42,7 +42,7 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     h_rsfof.Draw("PE")
     
     leg = ROOT.TLegend(0.15, 0.80, 0.88, 0.88)
-    leg.AddEntry(h_rsfof, "Data", "pl")
+    leg.AddEntry(h_rsfof, "Data", "ple")
     leg.SetLineColor(ROOT.kWhite)
     leg.Draw()
 
@@ -72,7 +72,8 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     text.DrawLatex(0.9, 0.91, "{0} fb^{{-1}} (13 TeV)".format(lumi))
     text.SetTextFont(62)
     text.SetTextAlign(11)
-    text.DrawLatex(0.11, 0.91, "CMS Preliminary")
+    # text.DrawLatex(0.11, 0.91, "CMS Preliminary")
+    text.DrawLatex(0.11, 0.91, "CMS")
 
     h_rsfof.Draw("PE SAME")
 

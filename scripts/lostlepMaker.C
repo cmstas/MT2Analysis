@@ -535,7 +535,7 @@ void makeLostLepFromCRs( TFile* f_data , TFile* f_lostlep , vector<string> dirs,
 }
 
 //_______________________________________________________________________________
-void lostlepMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-09-04_41p96fb", string dataname = "data_Run2017"){
+void lostlepMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_2017fullYear", string dataname = "data_Run2017"){
 
   string output_name = input_dir+"/lostlepFromCRs.root";
   std::cout << "Writing to file: " << output_name << std::endl;

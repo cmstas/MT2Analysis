@@ -300,7 +300,7 @@ def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratio
     text.DrawLatex(left+(1-right-left)*0.5, 1-top-0.01-0.04, utils.GetHTtitle(ht_reg))
 
     # Draw the CMS and luminosity text
-    ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
+    ppmUtils.DrawCmsText(pads[0],text="CMS",textSize=0.038)
     ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.038)
 
     # draw the j/bj region labels
@@ -678,7 +678,7 @@ def MakeMacroRegionPlot(macro_reg, datacard_dir, datacard_name, outdir, userMax=
 
 
     # Draw the CMS and luminosity text
-    ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
+    ppmUtils.DrawCmsText(pads[0],text="CMS",textSize=0.038)
     ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.038)
 
     
@@ -965,7 +965,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     text.DrawLatex(left+(1-right-left)*0.5, y, "Integrated over M_{T2}")
 
     # Draw the CMS and luminosity text
-    ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
+    ppmUtils.DrawCmsText(pads[0],text="CMS",textSize=0.038)
     ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.038)
 
     #draw the lines separating the regions
@@ -1276,7 +1276,7 @@ def MakeHTBinPlot(datacard_dir, datacard_name, outdir, userMax=None, ratioRange=
     text.DrawLatex(left+0.03,1-top-0.03, "Pre-fit background")
 
     # Draw the CMS and luminosity text
-    ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.044)
+    ppmUtils.DrawCmsText(pads[0],text="CMS",textSize=0.044)
     ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.044)
 
     #draw the lines separating the regions
@@ -1489,7 +1489,7 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     text.DrawLatex(left+(1-right-left)*0.5, 1-top-0.01-0.04, utils.GetHTtitle(ht_reg))
 
     # Draw the CMS and luminosity text
-    ppmUtils.DrawCmsText(pads[0],text="CMS Preliminary",textSize=0.038)
+    ppmUtils.DrawCmsText(pads[0],text="CMS",textSize=0.038)
     ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.038)
 
     # draw the j/bj region labels

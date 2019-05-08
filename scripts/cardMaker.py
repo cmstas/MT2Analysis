@@ -6,12 +6,13 @@ import re
 from math import sqrt
 from sys import argv,exit
 import os
+from math import isnan
 
 # Suppresses warnings about TH1::Sumw2
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more error messages
-suppressZeroBins = True # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
+suppressZeroBins = False # Don't print cards for any MT2 bin with 0 signal, even if other bins in its region have nonzero signal
 suppressZeroTRs = False # Don't print cards for any of the MT2 bins in a region with 0 signal in any bin
 doSuperSignalRegions = False # Print cards for super signal regions
 dummy_alpha = 1
@@ -75,7 +76,7 @@ f_zgratio = ROOT.TFile("{0}/doubleRatio.root".format(indir))
 f_purity = ROOT.TFile("{0}/purity.root".format(indir))
 f_qcd = ROOT.TFile("{0}/qcdFromRS.root".format(indir))
 f_sig = ROOT.TFile("{0}/{1}.root".format(indir,signal))
-if (doData): f_data = ROOT.TFile("{0}/data_Run2016.root".format(indir))
+if (doData): f_data = ROOT.TFile("{0}/data_RunAll.root".format(indir))
 
 if f_lostlep.IsZombie():
     print "lostlepFromCRs.root does not exist\n"
@@ -170,6 +171,8 @@ def makeTemplate(directory,imt2):
     lostlep_alpha_tau3p_DN = 0.0
     lostlep_alpha_renorm_UP = 0.0
     lostlep_alpha_renorm_DN = 0.0
+    lostlep_alpha_TTHF_UP = 0.0
+    lostlep_alpha_TTHF_DN = 0.0
     lostlep_MCExtrap = 0.0
     err_lostlep_mcstat = 0.0
     n_zinv = 0.0
@@ -333,6 +336,7 @@ def makeTemplate(directory,imt2):
     ##############
 
     # If these histograms don't exist, we'll use the default values from above (0s, mostly).
+    lowbound = 2 if (suppressUHmt2bin and "UH" in directory) else 1
     if (not dir_lostlep == None):
         h_lostlep = f_lostlep.Get(fullhistname)
         if (not h_lostlep == None): 
@@ -351,56 +355,64 @@ def makeTemplate(directory,imt2):
         h_lostlep_alpha = f_lostlep.Get(fullhistnameAlpha)
         if (not h_lostlep_alpha == None):
             lostlep_alpha = h_lostlep_alpha.GetBinContent(imt2)
-            lostlep_alpha_topological = h_lostlep_alpha.Integral(0,-1)
+            lostlep_alpha_topological = h_lostlep_alpha.Integral(lowbound,-1)
             del h_lostlep_alpha
         h_lostlep_alpha_lepeff_UP = f_lostlep.Get(fullhistnameAlpha+"_lepeff_UP")
         if (not h_lostlep_alpha_lepeff_UP == None):
-            lostlep_alpha_lepeff_UP = h_lostlep_alpha_lepeff_UP.Integral(0,-1)
+            lostlep_alpha_lepeff_UP = h_lostlep_alpha_lepeff_UP.Integral(lowbound,-1)
             del h_lostlep_alpha_lepeff_UP
         h_lostlep_alpha_lepeff_DN = f_lostlep.Get(fullhistnameAlpha+"_lepeff_DN")
         if (not h_lostlep_alpha_lepeff_DN == None):
-            lostlep_alpha_lepeff_DN = h_lostlep_alpha_lepeff_DN.Integral(0,-1)
+            lostlep_alpha_lepeff_DN = h_lostlep_alpha_lepeff_DN.Integral(lowbound,-1)
             del h_lostlep_alpha_lepeff_DN
         h_lostlep_alpha_btagsf_heavy_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_UP")
         if (not h_lostlep_alpha_btagsf_heavy_UP == None):
-            lostlep_alpha_btagsf_heavy_UP = h_lostlep_alpha_btagsf_heavy_UP.Integral(0,-1)
+            lostlep_alpha_btagsf_heavy_UP = h_lostlep_alpha_btagsf_heavy_UP.Integral(lowbound,-1)
             del h_lostlep_alpha_btagsf_heavy_UP
         h_lostlep_alpha_btagsf_heavy_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_heavy_DN")
         if (not h_lostlep_alpha_btagsf_heavy_DN == None):
-            lostlep_alpha_btagsf_heavy_DN = h_lostlep_alpha_btagsf_heavy_DN.Integral(0,-1)
+            lostlep_alpha_btagsf_heavy_DN = h_lostlep_alpha_btagsf_heavy_DN.Integral(lowbound,-1)
             del h_lostlep_alpha_btagsf_heavy_DN
         h_lostlep_alpha_btagsf_light_UP = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_UP")
         if (not h_lostlep_alpha_btagsf_light_UP == None):
-            lostlep_alpha_btagsf_light_UP = h_lostlep_alpha_btagsf_light_UP.Integral(0,-1)
+            lostlep_alpha_btagsf_light_UP = h_lostlep_alpha_btagsf_light_UP.Integral(lowbound,-1)
             del h_lostlep_alpha_btagsf_light_UP
         h_lostlep_alpha_btagsf_light_DN = f_lostlep.Get(fullhistnameAlpha+"_btagsf_light_DN")
         if (not h_lostlep_alpha_btagsf_light_DN == None):
-            lostlep_alpha_btagsf_light_DN = h_lostlep_alpha_btagsf_light_DN.Integral(0,-1)
+            lostlep_alpha_btagsf_light_DN = h_lostlep_alpha_btagsf_light_DN.Integral(lowbound,-1)
             del h_lostlep_alpha_btagsf_light_DN
         h_lostlep_alpha_tau1p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau1p_UP")
         if (not h_lostlep_alpha_tau1p_UP == None):
-            lostlep_alpha_tau1p_UP = h_lostlep_alpha_tau1p_UP.Integral(0,-1)
+            lostlep_alpha_tau1p_UP = h_lostlep_alpha_tau1p_UP.Integral(lowbound,-1)
             del h_lostlep_alpha_tau1p_UP
         h_lostlep_alpha_tau1p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau1p_DN")
         if (not h_lostlep_alpha_tau1p_DN == None):
-            lostlep_alpha_tau1p_DN = h_lostlep_alpha_tau1p_DN.Integral(0,-1)
+            lostlep_alpha_tau1p_DN = h_lostlep_alpha_tau1p_DN.Integral(lowbound,-1)
             del h_lostlep_alpha_tau1p_DN
         h_lostlep_alpha_tau3p_UP = f_lostlep.Get(fullhistnameAlpha+"_tau3p_UP")
         if (not h_lostlep_alpha_tau3p_UP == None):
-            lostlep_alpha_tau3p_UP = h_lostlep_alpha_tau3p_UP.Integral(0,-1)
+            lostlep_alpha_tau3p_UP = h_lostlep_alpha_tau3p_UP.Integral(lowbound,-1)
             del h_lostlep_alpha_tau3p_UP
         h_lostlep_alpha_tau3p_DN = f_lostlep.Get(fullhistnameAlpha+"_tau3p_DN")
         if (not h_lostlep_alpha_tau3p_DN == None):
-            lostlep_alpha_tau3p_DN = h_lostlep_alpha_tau3p_DN.Integral(0,-1)
+            lostlep_alpha_tau3p_DN = h_lostlep_alpha_tau3p_DN.Integral(lowbound,-1)
             del h_lostlep_alpha_tau3p_DN
         h_lostlep_alpha_renorm_UP = f_lostlep.Get(fullhistnameAlpha+"_renorm_UP")
         if (not h_lostlep_alpha_renorm_UP == None):
-            lostlep_alpha_renorm_UP = h_lostlep_alpha_renorm_UP.Integral(0,-1)
+            lostlep_alpha_renorm_UP = h_lostlep_alpha_renorm_UP.Integral(lowbound,-1)
             del h_lostlep_alpha_renorm_UP
         h_lostlep_alpha_renorm_DN = f_lostlep.Get(fullhistnameAlpha+"_renorm_DN")
         if (not h_lostlep_alpha_renorm_DN == None):
-            lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN.Integral(0,-1)
+            lostlep_alpha_renorm_DN = h_lostlep_alpha_renorm_DN.Integral(lowbound,-1)
             del h_lostlep_alpha_renorm_DN
+        h_lostlep_alpha_TTHF_UP = f_lostlep.Get(fullhistnameAlpha+"_TTHF_UP")
+        if (not h_lostlep_alpha_TTHF_UP == None):
+            lostlep_alpha_TTHF_UP = h_lostlep_alpha_TTHF_UP.Integral(lowbound,-1)
+            del h_lostlep_alpha_TTHF_UP
+        h_lostlep_alpha_TTHF_DN = f_lostlep.Get(fullhistnameAlpha+"_TTHF_DN")
+        if (not h_lostlep_alpha_TTHF_DN == None):
+            lostlep_alpha_TTHF_DN = h_lostlep_alpha_TTHF_DN.Integral(lowbound,-1)
+            del h_lostlep_alpha_TTHF_DN
         h_lostlep_lastbin_hybrid = f_lostlep.Get(fullhistnameLastbinHybrid)
         if (not h_lostlep_lastbin_hybrid == None):
             lostlep_lastbin_hybrid = int(h_lostlep_lastbin_hybrid.GetBinContent(1))
@@ -413,6 +425,9 @@ def makeTemplate(directory,imt2):
     # At this stage, we've either extracted values for lostlep parameters from histograms, or those histograms didn't exist,
     # and we're using default values (mostly 0s).
 
+    if lostlep_alpha_topological==0.0:
+        lostlep_alpha_topological = 99999999.
+            
     # lepeff
     lostlep_alpha_lepeff_ERRup = abs(1.0-lostlep_alpha_lepeff_UP/lostlep_alpha_topological)
     lostlep_alpha_lepeff_ERRdn = abs(1.0-lostlep_alpha_lepeff_DN/lostlep_alpha_topological)
@@ -440,6 +455,11 @@ def makeTemplate(directory,imt2):
     lostlep_alpha_renorm_ERRup = abs(1.0-lostlep_alpha_renorm_UP/lostlep_alpha_topological)
     lostlep_alpha_renorm_ERRdn = abs(1.0-lostlep_alpha_renorm_DN/lostlep_alpha_topological)
     lostlep_alpha_renorm_ERR = max(lostlep_alpha_renorm_ERRup, lostlep_alpha_renorm_ERRdn)
+
+    # TTHF
+    lostlep_alpha_TTHF_ERRup = abs(1.0-lostlep_alpha_TTHF_UP/lostlep_alpha_topological)
+    lostlep_alpha_TTHF_ERRdn = abs(1.0-lostlep_alpha_TTHF_DN/lostlep_alpha_topological)
+    lostlep_alpha_TTHF_ERR = max(lostlep_alpha_TTHF_ERRup, lostlep_alpha_TTHF_ERRdn)
 
     # MC extrapolation (MT2 shape)
     lostlep_shape_ERR = 0.0
@@ -673,6 +693,7 @@ def makeTemplate(directory,imt2):
     lostlep_btageff = 1.0 + lostlep_alpha_btagsf_ERR
     lostlep_jec = 1.02
     lostlep_renorm = 1.0 + lostlep_alpha_renorm_ERR
+    lostlep_TTHF = 1.0 + lostlep_alpha_TTHF_ERR
     lostlep_alphaerr = 1.10
 
     name_lostlep_shape = "llep_shape_{0}_{1}_{2}".format(ht_str_crsl,jet_str_crsl,bjet_str_crsl)
@@ -695,6 +716,7 @@ def makeTemplate(directory,imt2):
     name_lostlep_btageff = "llep_btageff{0}".format(llep_corr_str)
     name_lostlep_jec = "jec{0}".format(llep_corr_str)
     name_lostlep_renorm = "llep_renorm{0}".format(llep_corr_str)
+    name_lostlep_TTHF = "llep_TTHF{0}".format(llep_corr_str)
     name_lostlep_mtcut = "llep_mtcut{0}".format(llep_corr_str)
 
     if (doSimpleLostlepNuisances):
@@ -891,6 +913,11 @@ def makeTemplate(directory,imt2):
     if njets_LOW == 1: n_syst += 2
     else: n_syst += 4
 
+    if isnan(n_zinvDY):
+        n_zinvDY = 0.0
+        zinvDY_rsfof = 1.0
+        print "ZINV ISNAN!",directory, imt2
+
     if doZinvFromDY:
         n_bkg = n_lostlep+n_zinvDY+n_qcd
     else:
@@ -1002,6 +1029,7 @@ def makeTemplate(directory,imt2):
             print "Zinv currently only implemented for DY\n"
             exit(1)
         template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_renorm,lostlep_renorm))
+        template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_TTHF,lostlep_TTHF))
     
     template_list.append("{0}        gmN {1:.0f}    -    -    {2:.5f}     - \n".format(name_lostlep_crstat,n_lostlep_cr_towrite,lostlep_alpha_towrite))
     template_list.append("{0}        lnN    -    -    {1:.3f}    - \n".format(name_lostlep_mcstat,lostlep_mcstat))

@@ -931,7 +931,7 @@ void makeZinvFromDY( TFile* fData , TFile* fZinv , TFile* fDY ,TFile* fTop, vect
 //_______________________________________________________________________________
 void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_combined_HEMveto"){
 
-    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-14_combined";
+    input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-16_combined";
     // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-11_2018fullYear_with2018MC";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_pred2016withFullCR";
   // input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-07_unblinded1718";
@@ -948,7 +948,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
 
   // get input files
   TFile* f_data = new TFile(Form("%s/data_RunAll.root",input_dir.c_str()));
-  TFile* f_zinv = new TFile(Form("%s/zinv_ht.root",input_dir.c_str()));
+  TFile* f_zinv = new TFile(Form("%s/zinv_ht_2018.root",input_dir.c_str()));
   TFile* f_gjet = new TFile(Form("%s/gjets_dr0p05_ht.root",input_dir.c_str()));
   //TFile* f_qcd = new TFile(Form("%s/qcd_pt.root",input_dir.c_str()));
   TFile* f_dy = new TFile(Form("%s/dyjetsll_ht.root",input_dir.c_str()));
@@ -984,7 +984,7 @@ void ZinvMaker(string input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2A
   // //makeZinvFromGJets( f_zinv , f_gjet , f_qcd, dirs, dirsGJ, output_name, 0 );
   // makeZinvFromGJets( f_zinv , f_gjet , f_dy ,dirs, output_name, 1.23 ); // not using QCD for now
 
-   output_name = input_dir+"/zinvFromDY.root";
+   output_name = input_dir+"/zinvFromDY_2018.root";
    makeZinvFromDY( f_data, f_zinv , f_dy , f_top, dirs, output_name ); 
 
 

@@ -1,9 +1,7 @@
 #!bin/bash
 
-declare -a Models=(T1tttt_1200_800 T1tttt_1900_200 T1tttt_1600_1000)
-homeDir=`pwd`
-homeDir=${homeDir%/SignalRegionRanking}
-inputDir=$homeDir/cards_NoPJmergedCRlowMT2atUHWithQCD_T1tttt/
+declare -a Models=(T2qq_1300_850)
+inputDir=$PWD/../CardMaker/cards_FullRunII_17MCfor18_ttbbWeights_v3/T2qq/T2qq_1300_850/
 
 tag=RegionTesting
 

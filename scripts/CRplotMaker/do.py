@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(1)
 from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
-year = "All"
+year = 2018
 
 pd.lumiUnit = "fb"
 if year==2016:
@@ -19,8 +19,8 @@ if year==2018:
 if year=="All":
     pd.lumi = 137
 
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-14_combined".format(year)
-output_dir = "crplots/V00-10-14_combined".format(year)
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-16_{0}fullYear_17fastsim/newEGamma".format(year)
+output_dir = "crplots/V00-10-16_{0}_fullYear_newEGamma".format(year)
 mcScale = 1.0
 dataname = "data_Run{0}".format(year)
 
@@ -85,19 +85,19 @@ MT2PlotMaker(input_dir, ["qcd_ht", "wjets_ht", "top", "zinv_ht"], dataname, "crq
 
 
  
-# # # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
-# # makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], dataname, output_dir, exts, ht_regs=["VL","L","M","H","UH"])
+# # Lost Lepton MT2 plots, normalized in each HT, nj, nb bin
+# makeNormalizedLostLep(input_dir, ["wjets_ht", "top"], dataname, output_dir, exts, ht_regs=["VL","L","M","H","UH"])
 
-# # Lost Lepton Hybrid MT2 plots
-makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["VL","L","M","H","UH"])
-# # makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["L","M","H","UH"])
-# # makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["M","H","UH"])
-# # makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["H","UH"])
-makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["VL"])
-makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["L"])
-makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["M"])
-makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["H"])
-makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["UH"])
+# # # Lost Lepton Hybrid MT2 plots
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["VL","L","M","H","UH"])
+# # # makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["L","M","H","UH"])
+# # # makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["M","H","UH"])
+# # # makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["H","UH"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["VL"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["L"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["M"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["H"])
+# makeLostLepHybrid(input_dir, ["lostlepFromCRs"], dataname, output_dir, exts, ht_regs=["UH"])
 
 
 

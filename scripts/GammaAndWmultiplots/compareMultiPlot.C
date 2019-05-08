@@ -70,7 +70,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   for( unsigned int i = 0 ; i < labels.size() ; ++i ){
     if (labels[i].Contains("data") || labels[i].Contains("Data")) mconly = false;
   }
-  cmsText = "CMS Preliminary";
+  cmsText = "CMS";
 //  cmsText = "CMS";
   lumi_13TeV = "137 fb^{-1}";
   if (mconly) {
@@ -138,7 +138,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     
     // main plot pad, for ratio on bottom
     plotpad = new TPad("plotpad","plotpad",0,0.2,1,0.99);
-    plotpad->SetTopMargin(0.05);
+    plotpad->SetTopMargin(0.065);
     plotpad->SetRightMargin(0.05);
     plotpad->SetBottomMargin(0.12);
     plotpad->Draw();
@@ -353,7 +353,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   else          ymax*=1.5;
   if (saveas.Contains("urity")) { ymin = 0.7; ymax = 1;}
 //  if (norm && logplot ) ymin = 0.00011;
-  if (norm && logplot ) ymin = ymin*0.08;
+  if (norm && logplot ) ymin = ymin*0.09;
   else if (norm) ymin = 0;
   ymax = 50;
   cout<<"ymin "<<ymin<<" ymax " << ymax <<endl;
@@ -368,11 +368,11 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   h_axes->GetXaxis()->SetTitleSize(0.05);
   h_axes->GetYaxis()->SetTitle(ytitle.c_str());
   // h_axes->GetYaxis()->SetRangeUser(1e-4, 10);
-  h_axes->GetYaxis()->SetLabelSize(0.04);
+  h_axes->GetYaxis()->SetLabelSize(0.05);
 //  h_axes->GetYaxis()->SetTitleOffset(1.5);
   // h_axes->GetYaxis()->SetTitleOffset(1);
-  h_axes->GetYaxis()->SetTitleOffset(1);
-  h_axes->GetYaxis()->SetTitleSize(0.05);
+  h_axes->GetYaxis()->SetTitleOffset(0.9);
+  h_axes->GetYaxis()->SetTitleSize(0.055);
   // h_axes->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
 
   // h_axes->GetYaxis()->SetTitleOffset(0.25);
@@ -382,8 +382,8 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   // h_axes->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
   h_axes->GetXaxis()->SetTitleSize(0.05);
   h_axes->GetXaxis()->SetLabelSize(0.05);
-  h_axes->GetXaxis()->SetTitleOffset(1);
-  h_axes->GetXaxis()->SetTickLength(0.07);
+  h_axes->GetXaxis()->SetTitleOffset(1.15);
+  h_axes->GetXaxis()->SetTickLength(0.05);
   
   // if (doRatio) {
   //   h_axes->GetXaxis()->SetLabelSize(0.);
@@ -417,7 +417,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
 
     }
     else sig_hists.at(isig)->Draw("same");
-    leg->AddEntry(sig_hists.at(isig),sig_names.at(isig),"lp");
+    leg->AddEntry(sig_hists.at(isig),sig_names.at(isig),"lpe");
   }
   
   //if (data_hist) data_hist->Draw("pe same");
@@ -477,8 +477,8 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
   
   
   if (doRatio) {
-    lumiTextSize     = 1.0;
-    cmsTextSize      = 1.0;
+    lumiTextSize     = 0.9;
+    cmsTextSize      = 0.9;
     CMS_lumi( plotpad, iPeriod, iPos );
   }
   else {
@@ -507,8 +507,8 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     
     // draw axis only
     TH1F* h_axis_ratio = new TH1F(Form("%s_axes",sig_hists[0]->GetName()),"",100,xmin,xmax);
-    h_axis_ratio->GetYaxis()->SetTitleOffset(0.25);
-    h_axis_ratio->GetYaxis()->SetTitleSize(0.18);
+    h_axis_ratio->GetYaxis()->SetTitleOffset(0.24);
+    h_axis_ratio->GetYaxis()->SetTitleSize(0.20);
     h_axis_ratio->GetYaxis()->SetNdivisions(5);
     h_axis_ratio->GetYaxis()->SetLabelSize(0.15);
     //h_axis_ratio->GetYaxis()->SetRangeUser(0.01,1.99);
@@ -516,6 +516,7 @@ void makeCMSPlot(  vector<TString> files,  vector<TString> labels, vector<TStrin
     //h_axis_ratio->GetYaxis()->SetRangeUser(0.001,1.);
 //    h_axis_ratio->GetYaxis()->SetTitle("Ratio to Z");
     h_axis_ratio->GetYaxis()->SetTitle("Ratio");
+    h_axis_ratio->GetYaxis()->CenterTitle();
     // h_axis_ratio->GetXaxis()->SetTitle(sig_hists[1]->GetXaxis()->GetTitle());
     h_axis_ratio->GetXaxis()->SetTitleSize(0.17);
     h_axis_ratio->GetXaxis()->SetLabelSize(0.17);

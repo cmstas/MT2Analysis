@@ -1,4 +1,6 @@
+import os,sys
 import ROOT, math
+import utils
 
 #snt_file = ROOT.TFile("/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6_12p9fb/data_Run2016_sync.root")
 #snt_file = ROOT.TFile("../MT2looper/output/V00-08-08_nojson_skim_base_mt2gt200_ZinvV6/zinv_ht.root")
@@ -65,21 +67,21 @@ import ROOT, math
 #eth_label = "gamma_est_integral" # data in combined file
 #eth_label = "gammaCR" # data in individual file
 
-#snt_label = "sr"
-#eth_label = "Zinv"
-
-
 # Working combos:
-snt_folder = "../../MT2looper/output/full2016unblind/"
-eth_folder = "20Jan16eth"
-#type = "data"
-type = "ZinvEst"
+snt_folder = "190403_postMoriond/"
+eth_folder = "190403_postMoriond/"
+# type = "data"
+# type = "ZinvEst"
 #type = "LLepEst"
 #type = "LLepCR"
-#type = "ZinvCR"
+type = "ZinvCR"
 #type = "ZinvCROF"
 
-print "Looking at: " + type
+outdir = "/home/users/bemarsh/public_html/mt2/sync/190403_postMoriond/"
+extratag = "_2016"
+
+fout = open(os.path.join(outdir, "{0}_comp{1}.txt".format(type, extratag)), 'w')
+fout.write("Looking at: " + type + '\n\n')
 
 if (type == "ZinvEst") :
     snt_file = ROOT.TFile(snt_folder+"/zinvFromDY.root")
@@ -88,8 +90,8 @@ if (type == "ZinvEst") :
     eth_label = "ZinvEstimateFromZll_hybrid"
 
 if (type == "data") :
-    snt_file = ROOT.TFile(snt_folder+"/data_Run2016.root")
-    eth_file = ROOT.TFile(eth_folder+"/dataSR_Jan20.root")
+    snt_file = ROOT.TFile(snt_folder+"/data_Run2018.root")
+    eth_file = ROOT.TFile(eth_folder+"/eth_postMoriond_2018.root")
     snt_label = "sr"
     eth_label = "data"
 
@@ -107,7 +109,7 @@ if (type == "LLepCR") :
 
 if (type == "ZinvCR") :
     snt_file = ROOT.TFile(snt_folder+"/data_Run2016.root")
-    eth_file = ROOT.TFile(eth_folder+"/zllCR_Jan20.root")
+    eth_file = ROOT.TFile(eth_folder+"/ethzll_postMoriond_2016.root")
     snt_label = "crdy"
     eth_label = "data"
 
@@ -125,33 +127,17 @@ snt_total = 0.
 
 # multijet regions
 for ht_reg in ["VL","L","M","H","UH"]:
-    for top_reg in range(1,16):
-        if (ht_reg == "VL" and top_reg >= 4 and top_reg <= 11):
-            continue
-        elif (ht_reg != "VL" and top_reg >= 12):
-            continue
+# for ht_reg in ["VL","L"]:
+    top_regs = [1,2,3,4,5,6,7,8,9,10,11]
+    if ht_reg in ["M","H","UH"]:
+        top_regs = [1,2,3,4,5,6,10,20,21,22,23,24,25,26,27,28,29]
+    for top_reg in top_regs:
         
         sntname = "{0}{1}{2}".format(snt_label,top_reg,ht_reg)
         
-        if ht_reg=="VL": ht_name = "HT250to450"
-        if ht_reg=="L" : ht_name = "HT450to575"
-        if ht_reg=="M" : ht_name = "HT575to1000"
-        if ht_reg=="H" : ht_name = "HT1000to1500"
-        if ht_reg=="UH": ht_name = "HT1500toInf"
+        
+        ethname = utils.SNTtoETH(sntname)
 
-        if top_reg in [1,2,3]: j_name = "j2to3"
-        if top_reg in [4,5,6]: j_name = "j4to6"
-        if top_reg in [7,8,9,11]: j_name = "j7toInf"
-        if top_reg in [10]: j_name = "j2to6"
-        if top_reg in [12,13,14]: j_name = "j4toInf"
-        if top_reg in [15]: j_name = "j2toInf"
-
-        if top_reg in [1,4,7,12]: b_name = "b0"
-        if top_reg in [2,5,8,13]: b_name = "b1"
-        if top_reg in [3,6,9,14]: b_name = "b2"
-        if top_reg in [10,11,15]: b_name = "b3toInf"
-
-        ethname = "{0}_{1}_{2}".format(ht_name,j_name,b_name)
         #print eth_label
         #print ethname
         try:
@@ -192,20 +178,7 @@ for ht_reg in ["VL","L","M","H","UH"]:
 
 for mj_reg in range(1,8)+range(11,16):
     sntname = "{0}{1}J".format(snt_label, mj_reg)
-
-    if mj_reg in [1,2,3,4,5,6,7]: jbj_name = "j1_b0"
-    else:                         jbj_name = "j1_b1toInf"
-
-    if mj_reg in [1,11]: ht_name = "HT250to350"
-    if mj_reg in [2,12]: ht_name = "HT350to450"
-    if mj_reg in [3,13]: ht_name = "HT450to575"
-    if mj_reg in [4,14]: ht_name = "HT575to700"
-    if mj_reg in [5]:    ht_name = "HT700to1000"
-    if mj_reg in [6]:    ht_name = "HT1000to1200"
-    if mj_reg in [7]:    ht_name = "HT1200toInf"
-    if mj_reg in [15]:   ht_name = "HT700toInf"
-
-    ethname = "{0}_{1}".format(ht_name,jbj_name)
+    ethname = utils.SNTtoETH(sntname)
 
     try:
        # print eth_label
@@ -226,7 +199,7 @@ for mj_reg in range(1,8)+range(11,16):
         elif (type == "ZinvCROF"):
             sntyield = int(snt_file.Get("{0}/h_mt2binsemu".format(sntname)).Integral(0,-1))   # int
     except:
-        sntyield = 0.
+        sntyield = 0
 #    ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label,ethname)).Integral(1,-1))         # int    
 #    ethyield = int(eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label,ethname)).Integral(1,1))         # int, first bin only    
 #    ethyield = (eth_file.Get("{0}/{1}/yield_{0}_{1}".format(eth_label,ethname)).Integral(1,-1))             # float
@@ -261,13 +234,16 @@ for key in eth_yields.keys():
 
 ratios_sorted = sorted(ratios.items(), key=lambda x: x[1], reverse=True)
 
-print "{0:30s} {1:>14s} {2:>14s} {3:>8s}".format("Region", "SNT yield", "ETH yield", "Ratio")
-print "--------------------------------------------------------------------------------"
+fout.write("{0:30s} {1:>14s} {2:>14s} {3:>8s}\n".format("Region", "SNT yield", "ETH yield", "Ratio"))
+fout.write("--------------------------------------------------------------------------------\n")
 for key,r in ratios_sorted: 
-    if (type == "data"):
-        print "{0:30s} {1:14d} {2:14d} {3:8.5f}".format(key,snt_yields[key],eth_yields[key],r)         # int
+    if (type == "data" or type=="ZinvCR"):
+        print key, snt_yields[key], eth_yields[key]
+        fout.write("{0:30s} {1:14d} {2:14d} {3:8.5f}\n".format(key,snt_yields[key],eth_yields[key],r))         # int
     else:
-        print "{0:30s} {1:14f} {2:14f} {3:8.5f}".format(key,snt_yields[key],eth_yields[key],r)         # float
+        fout.write("{0:30s} {1:14f} {2:14f} {3:8.5f}\n".format(key,snt_yields[key],eth_yields[key],r))        # float
 
-print "--------------------------------------------------------------------------------"
-print "{0:30s} {1:14f} {2:14f} {3:8.5f}".format("total events",snt_total,eth_total,snt_total/eth_total)
+fout.write("--------------------------------------------------------------------------------\n")
+fout.write("{0:30s} {1:14f} {2:14f} {3:8.5f}\n".format("total events",snt_total,eth_total,snt_total/eth_total))
+
+fout.close()
