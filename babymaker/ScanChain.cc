@@ -543,7 +543,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      if (event == 0) {
 		cout << "WARNING: " << e.what() << endl;
 		// cout << "WARNING: Setting evt_nEvts to 0, evt_scale1fb to 1.0, evt_xsec to 0" << endl;
-                if(dataset_name.find("SMS-") == string::npos){
+                if(dataset_name.find("SMS-") == string::npos && dataset_name.find("RPV") == string::npos){
                     cout << "ABORTING. This is for safety so we don't get silent scale1fb errors when babymaking. Comment out if you want to proceed." << endl;
                     return;
                 }
@@ -718,12 +718,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
         if (verbose) cout << "before sparm values" << endl;
 	
 	// assume that first sparm value is parent mass, second is LSP mass
-	if (evt_id >= 1000 && evt_id < 1200) {
+	if (evt_id >= 1000 && evt_id < 1300) {
 	  if (sparm_values().size() == 2) {
 	    GenSusyMScan1 = sparm_values().at(0);
 	    GenSusyMScan2 = sparm_values().at(1);
 	    // use sparm values to look up xsec
-	    evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
+            if(evt_id < 1200)
+                evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
+            else
+                evt_xsec = 1.0;
 	  }
 	  else {
 	    std::cout << "WARNING: expected to find 2 sparm values, found instead " << sparm_values().size() << std::endl;

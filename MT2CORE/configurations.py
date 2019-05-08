@@ -517,11 +517,9 @@ MT2Config_defs["mc_94x_fastsim_Fall17"]["filters"] = [
     "ecalBadCalibFilterUpdate"
     ]
 
-MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_94x_Fall17"])
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["year"] = 2018
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["lumi"] = 59.74
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["btagcalib_csv_fastsim"] = "DeepCSV_94X_2017_Fastsim.csv"
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["btageff_file_fastsim"] = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
+MT2Config_defs["mc_102x_fastsim_Autumn18"] = copy.deepcopy(MT2Config_defs["mc_102x_Autumn18"])
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["btagcalib_csv_fastsim"] = "DeepCSV_102X_2018_Fastsim.csv"
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["btageff_file_fastsim"] = "btageff__DeepCSV_SMS_T2tt_fastsim_Autumn18.root"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_IDISOfile_fastsim"] = "lepsf/Fall17/ElectronScaleFactors_Run2017_Fastsim.root"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_IDhistName_fastsim"] = "CutBasedVetoNoIso94XV2_sf"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["elSF_ISOhistName_fastsim"] = "MVAVLooseTightIP2DMini_sf"
@@ -531,7 +529,7 @@ MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IPfile_fastsim"] = ""
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IDhistName_fastsim"] = "histo2D"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_ISOhistName_fastsim"] = "miniIso02_LooseId_sf"
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["muSF_IPhistName_fastsim"] = ""
-MT2Config_defs["mc_102x_fastsim_Autumn18"]["JECs"] = [ ["", "Fall17_FastsimV1"] ]
+MT2Config_defs["mc_102x_fastsim_Autumn18"]["JECs"] = [ ["", "Autumn18_FastsimV1"] ]
 MT2Config_defs["mc_102x_fastsim_Autumn18"]["filters"] = [
     "goodVertices",
     "HBHENoiseFilter",
