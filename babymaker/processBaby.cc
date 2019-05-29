@@ -252,6 +252,7 @@ int main(int argc, char **argv) {
   else if(infile.Contains("RunIIFall17") && infile.Contains("Fast") && infile.Contains("94X"))  config_tag = "mc_94x_fastsim_Fall17";
   else if(infile.Contains("RunIIFall17") && infile.Contains("94X"))    config_tag = "mc_94x_Fall17";
   else if(infile.Contains("RunIIAutumn18") && infile.Contains("102X")) config_tag = isFastsim ? "mc_102x_fastsim_Autumn18" : "mc_102x_Autumn18";
+  else if(infile.Contains("privateMC_102")) config_tag = "mc_102x_Autumn18";
   else if(infile.Contains("RunIISpring16") && infile.Contains("Fast") && infile.Contains("80X"))  config_tag = "mc_80x_fastsim_Moriond17";
   else{
     std::cout << "[processBaby] ERROR! could not determine correct configuration to use" << std::endl;
