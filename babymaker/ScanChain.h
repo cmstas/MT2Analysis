@@ -805,10 +805,12 @@ class babyMaker {
   Float_t         track_genMatchDR[maxntracks];
   Float_t         track_nearestCharginoDR[maxntracks];
   Float_t         track_decayXY[maxntracks];
+  Float_t         track_decayZ[maxntracks];
 
   static const int max_nchargino = 2;
   Float_t         chargino_minDR[max_nchargino];
   Float_t         chargino_decayXY[max_nchargino];
+  Float_t         chargino_decayZ[max_nchargino];
   Float_t         chargino_eta[max_nchargino];
   Float_t         chargino_phi[max_nchargino];
   Float_t         chargino_pt[max_nchargino];  
