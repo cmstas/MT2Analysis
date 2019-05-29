@@ -19,7 +19,7 @@ divideTopDiagonal = False
 
 ROOT.gROOT.SetBatch(True)
 
-models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt","T2cc"]
+models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt","T2cc","T2bW","T2bt","extraT2tt","rpvMonoPhi"]
 model = "mymodel"
 for m in models:
     if m in INPUT:
@@ -29,8 +29,36 @@ print "model =", model
 
 # xsfile = "SUSYCrossSections13TeVgluglu.root" if "T1" in model else "SUSYCrossSections13TeVstopstop.root" if model=="T2tt" or model=="T2bb" or model=="T2cc" else "SUSYCrossSections13TeVsquarkantisquark.root" if model=="T2qq" else "theXSfile.root"
 f_xs = ROOT.TFile("xsec_susy_13tev_run2.root")
-xshist = "h_xsec_gluino" if "T1" in model else "h_xsec_stop" if model=="T2tt" or model=="T2bb" or model=="T2cc" else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
+xshist = "h_xsec_gluino" if "T1" in model else "h_xsec_stop" if model in ["T2tt","T2bb","T2cc","T2bW","T2bt","extraT2tt"] else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
 h_xs = f_xs.Get(xshist)
+
+if model=="rpvMonoPhi":
+    xs_map = {}
+    with open("xsecs_monophi_NNPDF23_lo_as_0130_qed.txt") as fid:
+        for line in fid:
+            sp = line.split()
+            mass = int(sp[0].strip("."))
+            xs = float(sp[1])
+            unc_stat = float(sp[2])
+            unc_scale = max(float(sp[3]),float(sp[4]))
+            unc_pdf = max(float(sp[5]),float(sp[6]))
+            unc = sqrt(unc_stat**2 + unc_scale**2 + unc_pdf**2)
+            xs_map[mass] = (xs,unc)
+    sorted_masses = sorted(float(x) for x in xs_map.keys())
+    def getMonoPhiXS(m):        
+        if m < sorted_masses[0]:
+            xs  =  xs_map[sorted_masses[0]][0] + (xs_map[sorted_masses[0]][0] - xs_map[sorted_masses[1]][0]) * (sorted_masses[0]-m) / (sorted_masses[1]-sorted_masses[0])
+            unc =  xs_map[sorted_masses[0]][1] + (xs_map[sorted_masses[0]][1] - xs_map[sorted_masses[1]][1]) * (sorted_masses[0]-m) / (sorted_masses[1]-sorted_masses[0])
+        elif m > sorted_masses[-1]:
+            xs  =  xs_map[sorted_masses[-1]][0] - (xs_map[sorted_masses[-2]][0] - xs_map[sorted_masses[-1]][0]) * (m-sorted_masses[-1]) / (sorted_masses[-1]-sorted_masses[-2])
+            unc =  xs_map[sorted_masses[-1]][1] - (xs_map[sorted_masses[-2]][1] - xs_map[sorted_masses[-1]][1]) * (m-sorted_masses[-1]) / (sorted_masses[-1]-sorted_masses[-2])
+        else:
+            i = 0
+            while m > sorted_masses[i]:
+                i += 1
+            xs  =  xs_map[sorted_masses[i-1]][0] - (xs_map[sorted_masses[i-1]][0] - xs_map[sorted_masses[i]][0]) * (m-sorted_masses[i-1]) / (sorted_masses[i]-sorted_masses[i-1])
+            unc =  xs_map[sorted_masses[i-1]][1] - (xs_map[sorted_masses[i-1]][1] - xs_map[sorted_masses[i]][1]) * (m-sorted_masses[i-1]) / (sorted_masses[i]-sorted_masses[i-1])
+        return xs, unc
 
 limits = ["obs", "exp", "ep1s", "em1s", "ep2s", "em2s", "op1s", "om1s","sig"]
 #limits = ["obs", "exp"]
@@ -55,7 +83,12 @@ def getLimitXS ( h_lim_mu, h_xs):
         m = h_lim_xs.GetXaxis().GetBinCenter(ix)
         for iy in range(1,h_lim_xs.GetNbinsY()+1):
             r = h_lim_xs.GetBinContent(ix,iy)
-            xs  = h_xs.GetBinContent(h_xs.FindBin(m))
+            if model=="rpvMonoPhi":
+                xs = getMonoPhiXS(m)[0]
+            else:
+                xs  = h_xs.GetBinContent(h_xs.FindBin(m))
+            if model == "T2qq":  # xsecs in file are 10-fold. Correct for that here, to 8-fold
+                xs = xs*0.8
             h_lim_xs.SetBinContent(ix, iy, r*xs)
     return h_lim_xs
     
@@ -71,8 +104,11 @@ def readLimitsFromFile(INPUT, fileMap, h_lims_mu0, h_lims_xs0, h_lims_yn0):
             rlim[lim]  = float(line.split()[index])
 
         # get xs for the given mass
-        xs  = h_xs.GetBinContent(h_xs.FindBin(m1))
-        exs = h_xs.GetBinError  (h_xs.FindBin(m1))
+        if model=="rpvMonoPhi":
+            xs, exs = getMonoPhiXS(m1)
+        else:
+            xs  = h_xs.GetBinContent(h_xs.FindBin(m1))
+            exs = h_xs.GetBinError  (h_xs.FindBin(m1))
 
         if model == "T2qq":  # xsecs in file are 10-fold. Correct for that here, to 8-fold
             xs, exs = xs*0.8, exs*0.8
@@ -86,12 +122,15 @@ def readLimitsFromFile(INPUT, fileMap, h_lims_mu0, h_lims_xs0, h_lims_yn0):
         binY=h_lims_mu0[lim].GetYaxis().FindBin(m2)
     
         for lim in limits:
-            if model == "T2qq":
-                # limits calculated assuming 10-fold xsec. Correct for that here (we want either 8-fold or 1-fold)
-                if doOneFold:
-                    rlim[lim] *= 10.0/1.0 # from 10-fold to 1-fold
-                else:
-                    rlim[lim] *= 10.0/8.0 # from 10-fold to 8-fold
+            if lim != "sig":
+                if model == "T2qq":
+                    # limits calculated assuming 10-fold xsec. Correct for that here (we want either 8-fold or 1-fold)
+                    if doOneFold:
+                        rlim[lim] *= 10.0/1.0 # from 10-fold to 1-fold
+                    else:
+                        rlim[lim] *= 10.0/8.0 # from 10-fold to 8-fold
+                if model == "rpvMonoPhi":
+                    rlim[lim] *= 1.0 / xs # the xs in cards is hardcoded to 1.0 pb
             h_lims_mu0[lim].SetBinContent(binX, binY, rlim[lim])
             h_lims_xs0[lim].SetBinContent(binX, binY, rlim[lim]*xs)
             h_lims_yn0[lim].SetBinContent(binX, binY, 1 if rlim[lim]<1 else 1e-3)
@@ -252,12 +291,12 @@ h_lims_xs   = {} # limits in cross-section, interpolated
 g2_lims_mu  = {} # TGraph2D limits in signal-strength, automatic interpolation
 
 m1min, m1max = 0, 2800
-m2min, m2max = 0, 2000
+m2min, m2max = 0, 2400
 xbinSize = 25
-#xbinSize = 25 if model!='T2cc' else 5
+xbinSize = 25 if model!='T2cc' else 5
 ybinSize = 25 if model!='T2cc' else 5
 
-mass1 = "mGlu" if "T1" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if model=="T2tt" else "m1"
+mass1 = "mGlu" if "T1" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if "T2tt" in model else "m1"
 mass2 = "mLSP"
 
 # create histos
