@@ -225,6 +225,9 @@ int main(int argc, char **argv) {
   else if (infile.Contains("Run2018B") && infile.Contains("26Sep2018"))                  sample = Form("data_Run2018D_26Sep2018_%s" , outfileid.Data());
   else if (infile.Contains("dataRun2") && infile.Contains("2018B"))                      sample = Form("data_Run2018B_RelVal_%s" , outfileid.Data());
 
+  else if (infile.Contains("Tprime")) sample = Form("Tprime_%s", outfileid.Data());
+  else if (infile.Contains("Bprime")) sample = Form("Bprime_%s", outfileid.Data());
+
   //otherwise
   else sample = Form("unknown_%s", outfileid.Data());
 
