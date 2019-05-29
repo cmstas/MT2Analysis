@@ -647,10 +647,12 @@ public :
   Float_t         track_genMatchDR[maxntracks];
   Float_t         track_nearestCharginoDR[maxntracks];
   Float_t         track_decayXY[maxntracks];
+  Float_t         track_decayZ[maxntracks];
 
   static const int max_nchargino = 2;
   Float_t         chargino_minDR[max_nchargino];
   Float_t         chargino_decayXY[max_nchargino];
+  Float_t         chargino_decayZ[max_nchargino];
   Float_t         chargino_eta[max_nchargino];
   Float_t         chargino_phi[max_nchargino];
   Float_t         chargino_pt[max_nchargino];
@@ -1261,8 +1263,10 @@ public :
    TBranch        *b_track_genMatchDR;
    TBranch        *b_track_nearestCharginoDR;
    TBranch        *b_track_decayXY;
+   TBranch        *b_track_decayZ;
    TBranch        *b_chargino_minDR;
    TBranch        *b_chargino_decayXY;
+   TBranch        *b_chargino_decayZ;
    TBranch        *b_chargino_isDisappearing;
    TBranch        *b_chargino_matchedTrackIdx;
    TBranch        *b_chargino_pt;
@@ -1926,9 +1930,11 @@ void mt2tree::Init(TTree *tree)
    if(bs->FindObject("track_genPdgId"))                         fChain->SetBranchAddress("track_genPdgId", track_genPdgId, &b_track_genPdgId); 
    if(bs->FindObject("track_genMatchDR"))                       fChain->SetBranchAddress("track_genMatchDR", track_genMatchDR, &b_track_genMatchDR); 
    if(bs->FindObject("track_decayXY"))                          fChain->SetBranchAddress("track_decayXY", track_decayXY, &b_track_decayXY); 
+   if(bs->FindObject("track_decayZ"))                           fChain->SetBranchAddress("track_decayZ", track_decayZ, &b_track_decayZ); 
    if(bs->FindObject("track_nearestCharginoDR"))                fChain->SetBranchAddress("track_nearestCharginoDR", track_nearestCharginoDR, &b_track_nearestCharginoDR); 
    if(bs->FindObject("chargino_minDR"))                         fChain->SetBranchAddress("chargino_minDR", chargino_minDR, &b_chargino_minDR); 
    if(bs->FindObject("chargino_decayXY"))                       fChain->SetBranchAddress("chargino_decayXY", chargino_decayXY, &b_chargino_decayXY); 
+   if(bs->FindObject("chargino_decayZ"))                        fChain->SetBranchAddress("chargino_decayZ", chargino_decayZ, &b_chargino_decayZ); 
    if(bs->FindObject("chargino_isDisappearing"))                fChain->SetBranchAddress("chargino_isDisappearing", chargino_isDisappearing, &b_chargino_isDisappearing); 
    if(bs->FindObject("chargino_matchedTrackIdx"))               fChain->SetBranchAddress("chargino_matchedTrackIdx", chargino_matchedTrackIdx, &b_chargino_matchedTrackIdx); 
    if(bs->FindObject("chargino_pt"))                            fChain->SetBranchAddress("chargino_pt", chargino_pt, &b_chargino_pt); 
