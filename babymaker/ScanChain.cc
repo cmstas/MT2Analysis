@@ -3221,7 +3221,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  if (verbose) cout << "Before chargino matching" << endl;
 	  // find charginos and see if they have decay lengths in the range of interest, 10 to 100 cm
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
-	    if (abs(cms3.genps_id().at(iGen)) != 1000024 && cms3.genps_isLastCopy().at(iGen)) continue; // looking for final state charginos
+	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || !cms3.genps_isLastCopy().at(iGen)) continue; // looking for final state charginos
 	    chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
 	    chargino_decayZ[nCharginos] = cms3.genps_decayZ().at(iGen);
 	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
