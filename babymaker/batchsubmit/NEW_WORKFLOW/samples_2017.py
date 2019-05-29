@@ -164,6 +164,12 @@ samples_2017 = {
         "/SMS-T2bW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM"                     : [None, None, None, "T2bW"],
         "/SMS-T2bt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM"                     : [None, None, None, "T2bt"],
         "/SMS-T2cc_genHT-160_genMET-80_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM" : [None, None, None, "T2cc"],
+        "/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM" : [None, None, None, "T5qqqqVV_mChg0p5mGlumLSP"],
+        "/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM" : [None, None, None, "T5qqqqVV_mChg0p5mGlumLSP_ext1"],
+        "/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM" : [None, None, None, "T5qqqqVV_dM20"],
+        "/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM" : [None, None, None, "T5qqqqVV_dM20_ext1"],
+        "/RPV-monoPhi_TuneCP2_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM" : [None, None, None, "rpvMonoPhi"],
+        "/SMS-T2tt_mStop-2000to2500_TuneCP2_13TeV-madgraphMLM-pythia8/privateMC_PUFall17Fast_94X/MINIAODSIM" : [None, None, None, "extraT2tt"],
         }
 
     }

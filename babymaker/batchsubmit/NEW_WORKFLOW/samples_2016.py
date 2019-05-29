@@ -217,6 +217,10 @@ samples_2016 = {
         "/SMS-T2bW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [None, None, None, "T2bW"],
         "/SMS-T2bt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [None, None, None, "T2bt"],
         "/SMS-T2cc_genHT-160_genMET-80_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [None, None, None, "T2cc"],
+        "/SMS-T5qqqqVV_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [None, None, None, "T5qqqqVV_mChg0p5mGlumLSP"],
+        "/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [None, None, None, "T5qqqqVV_dM20"],
+        "/RPV-monoPhi_TuneCUETP8M1_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM" : [None, None, None, "rpvMonoPhi"],
+        "/SMS-T2tt_mStop-2000to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/privateMC_PUSummer16v3Fast_94X/MINIAODSIM" : [None, None, None, "extraT2tt"]
         }
 
     }

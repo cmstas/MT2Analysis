@@ -37,9 +37,12 @@ samples_2018 = {
         "/JetHT/Run2018D-PromptReco-v2/MINIAOD"      : [None, None, None, "data_Run2018D_JetHT_PromptReco-v2"],
         "/MET/Run2018D-PromptReco-v2/MINIAOD"        : [None, None, None, "data_Run2018D_MET_PromptReco-v2"],
         "/SingleMuon/Run2018D-PromptReco-v2/MINIAOD" : [None, None, None, "data_Run2018D_SingleMuon_PromptReco-v2"],
-        "/EGamma/Run2018D-PromptReco-v2/MINIAOD"     : [None, None, None, "data_Run2018D_EGamma_PromptReco-v2"],
+        # "/EGamma/Run2018D-PromptReco-v2/MINIAOD"     : [None, None, None, "data_Run2018D_EGamma_PromptReco-v2"],
         "/DoubleMuon/Run2018D-PromptReco-v2/MINIAOD" : [None, None, None, "data_Run2018D_DoubleMuon_PromptReco-v2"],
         "/MuonEG/Run2018D-PromptReco-v2/MINIAOD"     : [None, None, None, "data_Run2018D_MuonEG_PromptReco-v2"],
+
+        # re-prompt-reco to recover missing files
+        "/EGamma/Run2018D-22Jan2019-v2/MINIAOD"      : [None, None, None, "data_Run2018D_EGamma_22Jan2019-v2"],
         },
     "ttbar" : {
         # "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM" : [88.29, 1.0, 1.0, "ttdl_powheg"],
@@ -112,6 +115,27 @@ samples_2018 = {
         "/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM" : [1098,   1.0, 1.0, "qcd_ht1000to1500"],
         "/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM" : [98.90,  1.0, 1.0, "qcd_ht1500to2000"],
         "/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM"  : [20.26,  1.0, 1.0, "qcd_ht2000toInf"],
+        },
+    "signal" : {
+        "/SMS-T1qqqq_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T1qqqq"],
+        "/SMS-T1bbbb_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T1bbbb"],
+        "/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T1tttt"],
+        "/SMS-T2tt_mStop-150to250_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2tt_mStop150to250"],
+        "/SMS-T2tt_mStop-250to350_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2tt_mStop250to350"],
+        "/SMS-T2tt_mStop-350to400_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2tt_mStop350to400"],
+        "/SMS-T2tt_mStop-400to1200_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T2tt_mStop400to1200"],
+        "/SMS-T2tt_mStop-1200to2000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T2tt_mStop1200to2000"],
+        "/SMS-T2tt_mStop-2000to2500_TuneCP2_13TeV-madgraphMLM-pythia8/privateMC_PUFall18Fast_102X/MINIAODSIM" : [None, None, None, "extraT2tt"],
+        "/SMS-T2qq_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2qq_mSq0to1850"],
+        "/SMS-T2qq_mSq-1850to2600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2qq_mSq1850to2600"],
+        "/SMS-T2bb_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2bb_mSbot0to1850"],
+        "/SMS-T2bb_mSbot-1650to2600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM" : [None, None, None, "T2bb_mSbot1850to2600"],
+        "/SMS-T2bt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T2bt"],
+        "/SMS-T2bW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T2bW"],
+        "/SMS-T2cc_genHT-160_genMET-80_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v1/MINIAODSIM" : [None, None, None, "T2cc"],
+        "/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T5qqqqVV_dM20"],
+        "/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "T5qqqqVV_mChg0p5mGlumLSP"],
+        "/RPV-monoPhi_TuneCP2_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v2/MINIAODSIM" : [None, None, None, "rpvMonoPhi"],
         },
     
 
