@@ -263,6 +263,9 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
     h_sig_xsec->SetDirectory(rootdir);
     f_xsec->Close();
   }
+
+  const bool isVLQ = baby_name.find("prime") != std::string::npos;
+  if (isVLQ) cout << "Running on vector-like quark signal sample." << endl;
   
   // File Loop
   int nDuplicates = 0;
@@ -543,7 +546,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      if (event == 0) {
 		cout << "WARNING: " << e.what() << endl;
 		// cout << "WARNING: Setting evt_nEvts to 0, evt_scale1fb to 1.0, evt_xsec to 0" << endl;
-                if(dataset_name.find("SMS-") == string::npos && dataset_name.find("RPV") == string::npos){
+                if(dataset_name.find("SMS-") == string::npos && dataset_name.find("RPV") == string::npos && !isVLQ){
                     cout << "ABORTING. This is for safety so we don't get silent scale1fb errors when babymaking. Comment out if you want to proceed." << endl;
                     return;
                 }
@@ -756,11 +759,37 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      return;
 	    }
 	    evt_xsec = h_sig_xsec->GetBinContent(h_sig_xsec->FindBin(GenSusyMScan1));
-	  }
+	  }  
 	  else {
 	    std::cout << "WARNING: expected to find 2 sparm values, found instead " << sparm_values().size() << std::endl;
 	  }
 	}
+	else if (isVLQ) {
+	  bool haveVLQmass = false;	    
+	  int qDecay = -1;
+	  int qbarDecay = -1;
+	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size() && (!haveVLQmass || qDecay < 0 || qbarDecay < 0); iGen++) {
+	    const int id = abs(cms3.genps_id().at(iGen));
+	    if (id == 8000001 || id == 7000001) {
+	      GenSusyMScan1 = (int) round(cms3.genps_p4().at(iGen).M());
+	      haveVLQmass = true;
+	    }
+	    // check if double Z
+	    else if (id > 22 && id < 26) { // 23 = W, 24 = Z, 25 = h
+	      const int mother_id = cms3.genps_id_simplemother().at(iGen);
+	      if (mother_id == 8000001 || mother_id == 7000001) {
+		qDecay = id;
+	      }
+	      else if (mother_id == -8000001 || mother_id == -7000001) {
+		qbarDecay = id;
+	      }
+	    }
+	  }
+	  // Use GenSusyMScan2 to indicate the decay: 2323 is double Z, 2324 is one Z one W, etc
+	  GenSusyMScan2 = qDecay * 100 + qbarDecay;
+	}
+	  
+
 
 	// get filter efficiency value for T2cc sample
 	if (evt_id == 1130) {
@@ -3186,13 +3215,15 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
       if (doShortTrackInfo) {	
 
 	unsigned int Ch1_idx = 1000000; unsigned int Ch2_idx = 1000000;
-	const int charginoStatus = isFastsim ? 22 : 1;
+	// seems to be 22 even in fullsim now
+	//	const int charginoStatus = 22; //isFastsim ? 22 : 1;
 	if (!isData) {
 	  if (verbose) cout << "Before chargino matching" << endl;
 	  // find charginos and see if they have decay lengths in the range of interest, 10 to 100 cm
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size(); iGen++) {	      
-	    if (abs(cms3.genps_id().at(iGen)) != 1000024 || cms3.genps_status().at(iGen) != charginoStatus) continue; // looking for final state charginos
+	    if (abs(cms3.genps_id().at(iGen)) != 1000024 && cms3.genps_isLastCopy().at(iGen)) continue; // looking for final state charginos
 	    chargino_decayXY[nCharginos] = cms3.genps_decayXY().at(iGen);
+	    chargino_decayZ[nCharginos] = cms3.genps_decayZ().at(iGen);
 	    chargino_eta[nCharginos] = cms3.genps_p4().at(iGen).eta();
 	    chargino_phi[nCharginos] = cms3.genps_p4().at(iGen).phi();
 	    chargino_pt[nCharginos] = cms3.genps_p4().at(iGen).pt();  
@@ -3245,7 +3276,8 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	    track_isBadCharginoTrack[ntracks] += 1<<0;
 	    float this_decayXY = chargino_decayXY[track_matchedCharginoIdx[ntracks]];
 	    if (this_decayXY > 0 && this_decayXY < 100) {
-	      cout << "Non-lostTrack disappearing chargino, track " << i_it << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand "  : ": General " ) << cms3.isotracks_particleId().at(i_it) << " decayXY " << chargino_decayXY[track_matchedCharginoIdx[ntracks]] << " nLayers " << cms3.isotracks_trackerLayersWithMeasurement().at(i_it) << endl;
+	      cout << "Non-lostTrack disappearing chargino, track " << i_it << (cms3.isotracks_isPFCand().at(i_it) ? ": PF cand "  : ": General " ) << cms3.isotracks_particleId().at(i_it) << " decayXY " << chargino_decayXY[track_matchedCharginoIdx[ntracks]] << " nLayers " << cms3.isotracks_trackerLayersWithMeasurement().at(i_it)
+		   << " eta " << cms3.isotracks_p4().at(i_it).eta() << " phi " << cms3.isotracks_p4().at(i_it).eta() << " MOHs " << cms3.isotracks_numberOfLostHitsOuter().at(i_it) << endl;
 	    }
 	  }
 	  if (cms3.isotracks_pttrk().at(i_it) < 15) {
@@ -3280,6 +3312,7 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	      // If we matched a chargino ...
 	      if (abs(track_genPdgId[ntracks]) == 1000024) {
 		track_decayXY[ntracks] = cms3.genps_decayXY().at(genIdx);
+		track_decayZ[ntracks] = cms3.genps_decayZ().at(genIdx);
 		track_isDisappearingChargino[ntracks] = track_decayXY[ntracks] > 10 && track_decayXY[ntracks] < 100;
 	      } 
 	      // if a chargino matched this track, but this track did not match a chargino...
@@ -4209,11 +4242,13 @@ void babyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("track_genMatchDR", track_genMatchDR, "track_genMatchDR[ntracks]/F");
   BabyTree_->Branch("track_nearestCharginoDR", track_nearestCharginoDR, "track_nearestCharginoDR[ntracks]/F");
   BabyTree_->Branch("track_decayXY", track_decayXY, "track_decayXY[ntracks]/F");
+  BabyTree_->Branch("track_decayZ", track_decayZ, "track_decayZ[ntracks]/F");
   BabyTree_->Branch("nCharginos", &nCharginos);
   BabyTree_->Branch("chargino_minDR", chargino_minDR, "chargino_minDR[nCharginos]/F");
   BabyTree_->Branch("chargino_isDisappearing", chargino_isDisappearing, "chargino_isDisappearing[nCharginos]/I");
   BabyTree_->Branch("chargino_matchedTrackIdx", chargino_matchedTrackIdx, "chargino_matchedTrackIdx[nCharginos]/I");
   BabyTree_->Branch("chargino_decayXY", chargino_decayXY, "chargino_decayXY[nCharginos]/F");
+  BabyTree_->Branch("chargino_decayZ", chargino_decayZ, "chargino_decayZ[nCharginos]/F");
   BabyTree_->Branch("chargino_eta", chargino_eta, "chargino_eta[nCharginos]/F");
   BabyTree_->Branch("chargino_phi", chargino_phi, "chargino_phi[nCharginos]/F");
   BabyTree_->Branch("chargino_pt", chargino_pt, "chargino_pt[nCharginos]/F");
@@ -4901,6 +4936,7 @@ void babyMaker::InitBabyNtuple () {
   for (int i = 0; i < max_nchargino; i++) {
     chargino_minDR[i] = -999;
     chargino_decayXY[i] = -999;
+    chargino_decayZ[i] = -999;
     chargino_eta[i] = -999;
     chargino_phi[i] = -999;
     chargino_pt[i] = -999;
