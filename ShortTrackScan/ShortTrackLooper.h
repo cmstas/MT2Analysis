@@ -38,8 +38,9 @@ class ShortTrackLooper {
   ShortTrackLooper();
   ~ShortTrackLooper();
   int InEtaPhiVetoRegion(float eta, float phi, int year);
-  int loop(TChain* ch_st, char* infile, std::string config, char* runtag);
+  int loop(TChain* ch_st, char* infile, std::string config, char* runtag, double ctau_in, double ctau_out);
   float getAverageISRWeight(const std::string sample, const std::string config_tag);
+  double Theta(float eta);
  private:
   MT2Configuration config_;
   MT2Configuration data_config_;

@@ -33,7 +33,9 @@ float HEM_region[4] = {-4.7, -1.4, -1.6, -0.8}; // etalow, etahigh, philow, phih
 // turn on to apply L1prefire inefficiency weights to MC (2016/17 only)
 bool applyL1PrefireWeights = true;
 
-TFile VetoFile("../FshortLooper/veto_etaphi.root");
+
+
+TFile VetoFile("veto_etaphi.root");
 TH2F* veto_etaphi_16 = (TH2F*) VetoFile.Get("etaphi_veto_16");
 TH2F* veto_etaphi_17 = (TH2F*) VetoFile.Get("etaphi_veto_17");
 TH2F* veto_etaphi_18 = (TH2F*) VetoFile.Get("etaphi_veto_18");
@@ -46,8 +48,17 @@ int ShortTrackLooper::InEtaPhiVetoRegion(float eta, float phi, int year) {
   return (int) veto_hist->GetBinContent(veto_hist->FindBin(eta,phi));
 }
 
-int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, char * runtag) {
+int ShortTrackLooper::loop(TChain* ch, char * outtag, std::string config_tag, char * runtag, double ctau_in = -1, double ctau_out = -1) {
   string tag(outtag);
+
+  cout << "Input  ctau: " << ctau_in << endl;
+  cout << "Output ctau: " << ctau_out << endl;
+
+  double tau_in = ctau_in / TMath::C() / 100;
+  double tau_out = ctau_out / TMath::C() / 100;
+
+  config_ = GetMT2Config(config_tag);
+  const int year = config_.year;  
 
   string signame = tag.substr(tag.rfind("/") + 1);
   bool isT2bt = signame.find("bt") != std::string::npos;
@@ -69,18 +80,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   }
 
   bool useGENMET = tag.find("GENMET") != std::string::npos;
-  bool useISR_UP = tag.find("ISR") != std::string::npos;
+  bool noISR = tag.find("ISR") != std::string::npos; // the ISR file does NOT apply ISR correction, used to calaculate ISR error
   bool useMC = tag.find("MC") != std::string::npos;
 
   TH1F* h_xsec = 0;
-  TFile * f_xsec = TFile::Open("../babymaker/data/xsec_susy_13tev_run2.root");
+  TFile * f_xsec = TFile::Open("xsec_susy_13tev_run2.root");
   TString xsec_name = "h_xsec_gluino";
   if (tag.find("T2") != std::string::npos) {
-    if (tag.find("t") != std::string::npos) {
-      xsec_name = "h_xsec_stop";
+    if (tag.find("T2qq") != std::string::npos) {
+      xsec_name = "h_xsec_squark";
     }
     else {
-      xsec_name = "h_xsec_squark";
+      xsec_name = "h_xsec_stop";
     }
   }
 
@@ -95,8 +106,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH2D* h_sig_avgweight_isr_ = 0;
   TH2D* h_sig_avgweight_isr_UP_ = 0;
   TH2D* h_sig_avgweight_isr_DN_ = 0;
-  string weights_dir = "../babymaker/data/short_track";
-  TFile* f_nsig_weights = new TFile(Form("%s/nsig_weights_%s.root", weights_dir.c_str(), signame.c_str()));
+  string weights_dir = "short_track";
+  string weights_name = signame;
+  if (ctau_in != ctau_out) {
+    string sample_name = weights_name.substr(0,weights_name.find("_"));
+    weights_name = sample_name + "_" + to_string( (int) ctau_in);
+  }
+  TFile* f_nsig_weights = new TFile(Form("%s/%d/nsig_weights_%s.root", weights_dir.c_str(), year, weights_name.c_str()));
   TH2D* h_sig_nevents_temp = (TH2D*) f_nsig_weights->Get("h_nsig");
   TH2D* h_sig_avgweight_isr_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr");
   TH2D* h_sig_avgweight_isr_UP_temp = (TH2D*) f_nsig_weights->Get("h_avg_weight_isr_UP");
@@ -116,12 +132,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << (merge17and18 ? "" : "not ") << "merging 2017 and 2018" << endl;
 
-  const TString FshortName16Data = Form("../FshortLooper/output/Fshort_data_2016_%s.root",runtag);
-  const TString FshortName16MC = Form("../FshortLooper/output/Fshort_mc_2016_%s.root",runtag);
-  const TString FshortName17Data = Form("../FshortLooper/output/Fshort_data_%s_%s.root",(merge17and18 ? "2017and2018" : "2017"), runtag);
-  const TString FshortName17MC = Form("../FshortLooper/output/Fshort_mc_%s_%s.root",(merge17and18 ? "2017and2018" : "2017"),runtag);
-  const TString FshortName18Data = Form("../FshortLooper/output/Fshort_data_%s_%s.root",(merge17and18 ? "2017and2018" : "2018"),runtag);
-  const TString FshortName18MC = Form("../FshortLooper/output/Fshort_mc_%s_%s.root",(merge17and18 ? "2017and2018" : "2018"), runtag);
+  const TString FshortName16Data = Form("Fshort_data_2016_%s.root",runtag);
+  const TString FshortName16MC = Form("Fshort_mc_2016_%s.root",runtag);
+  const TString FshortName17Data = Form("Fshort_data_%s_%s.root",(merge17and18 ? "2017and2018" : "2017"), runtag);
+  const TString FshortName17MC = Form("Fshort_mc_%s_%s.root",(merge17and18 ? "2017and2018" : "2017"),runtag);
+  const TString FshortName18Data = Form("Fshort_data_%s_%s.root",(merge17and18 ? "2017and2018" : "2018"),runtag);
+  const TString FshortName18MC = Form("Fshort_mc_%s_%s.root",(merge17and18 ? "2017and2018" : "2018"), runtag);
 
   cout << "Will load observed MR ST counts from: " 
        << FshortName16Data.Data()
@@ -143,11 +159,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   const int n_track_bins = 5;
   const float track_bins[6] = {0.,1.,2.,3.,4.,5.};
-  
-  // 0 to 2825 in steps of 25 for non T2bt, else 0 to 1600 in steps of 17-ish: 0, 17, 33, 50, 67, 83
-  int n_m1bins = isT2bt ? 97 : 113;
+
+  const int n_DLbins = 100;
+  float *DLbins = new float[n_DLbins+1];
+  for (int i = 0; i <= n_DLbins; i++) DLbins[i] = i*5;
+
+  const int n_factorbins = 12;
+  float *Factorbins = new float[n_factorbins+1];
+  for (int i = 0; i <= n_factorbins; i++) Factorbins[i] = i*0.5;
+
+  const int n_betabins = 10;
+  float *Betabins = new float[n_betabins+1];
+  for (int i = 0; i <= n_betabins; i++) Betabins[i] = i*0.1;
+
+  // 0 to 2825 in steps of 25 for non T2bt, else 0 to 2500 in steps of 17-ish: 0, 17, 33, 50, 67, 83
+  int n_m1bins = isT2bt ? 151 : 113;
   float* m1bins = new float[n_m1bins+1];
-  int n_m2bins = isT2bt ? 97 : 113;
+  int n_m2bins = isT2bt ? 151 : 113;
   float* m2bins = new float[n_m2bins+1];
   float stepsize = isT2bt ? 16.6667 : 25.0;
   for (int i = 0; i <= n_m1bins; i++) {
@@ -156,6 +184,27 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   for (int i = 0; i <= n_m2bins; i++) {
     m2bins[i] = i*stepsize;
   }
+
+  TH3D* h_decay_factor = new TH3D("h_decay_factor","t/#tau_{in} for Charginos with DecayXY > 10 cm",n_factorbins,Factorbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_decay_factor_P3 = new TH3D("h_decay_factor_P3","t/#tau_{in} for P3 ST Charginos",n_factorbins,Factorbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_decay_factor_P4 = new TH3D("h_decay_factor_P4","t/#tau_{in} for P4 ST Charginos",n_factorbins,Factorbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_decay_factor_M = new TH3D("h_decay_factor_M","t/#tau_{in} for M ST Charginos",n_factorbins,Factorbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_decay_factor_L = new TH3D("h_decay_factor_L","t/#tau_{in} for L ST Charginos",n_factorbins,Factorbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_beta = new TH3D("h_beta","Chargino #beta Distribution",n_betabins,Betabins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_DL_raw = new TH3D("h_DL_raw","Decay Length Distribution Before Reweighting",n_DLbins,DLbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_DL = new TH3D("h_DL","Decay Length Distribution after Reweighting",n_DLbins,DLbins,n_m1bins,m1bins,n_m2bins,m2bins);
+
+  int n_wbins = 6;
+  const float wbins [n_wbins] = {-3, -2, -1, 0, 1, 2, 3};
+
+  TH2D* h_weight_raw = new TH2D("h_weight_raw","Total Weight before Reweight",n_m1bins,m1bins,n_m2bins,m2bins);
+  TH2D* h_eff_den = new TH2D("h_eff_den","Total Weight after Reweight",n_m1bins,m1bins,n_m2bins,m2bins);
+  TH2D* h_weight_nospikes = new TH2D("h_weight_nospikes","Total Weight after Reweight, Spike Events Removed",n_m1bins,m1bins,n_m2bins,m2bins);
+  TH2D* h_nevents = new TH2D("h_nevents","Number of Events without Spike Removal",n_m1bins,m1bins,n_m2bins,m2bins);
+  TH2D* h_nospikes = new TH2D("h_nospikes","Number of Events after Reweight, Spike Events Removed",n_m1bins,m1bins,n_m2bins,m2bins);
+  TH2D* h_eff_num = new TH2D("h_eff_num","Weight of Passing Events",n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_weight_all = new TH3D("h_weight_all","Initial Log(Reweight) Dist",n_wbins,wbins,n_m1bins,m1bins,n_m2bins,m2bins);
+  TH3D* h_weight_acc = new TH3D("h_weight_acc","Selected Log(Reweight) Dist",n_wbins,wbins,n_m1bins,m1bins,n_m2bins,m2bins);
 
   TH3D h_counts_STC ("h_counts_STC","STC Counts by Length;",n_track_bins,track_bins,n_m1bins,m1bins,n_m2bins,m2bins);
   h_counts_STC.GetXaxis()->SetBinLabel(Pidx,"P");
@@ -376,7 +425,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH3D* h_fracFS_1 = (TH3D*) h_fracFS->Clone("h_fracFS_1");
   TH3D* h_fracFS_23 = (TH3D*) h_fracFS->Clone("h_fracFS_23");
   TH3D* h_fracFS_4 = (TH3D*) h_fracFS->Clone("h_fracFS_4");
-  TH3D* h_fracFS_1_hi = (TH3D*) h_fracFS->Clone("h_fracFS_23_hi");
+  TH3D* h_fracFS_1_hi = (TH3D*) h_fracFS->Clone("h_fracFS_1_hi");
   TH3D* h_fracFS_23_hi = (TH3D*) h_fracFS->Clone("h_fracFS_23_hi");
   TH3D* h_fracFS_4_hi = (TH3D*) h_fracFS->Clone("h_fracFS_4_hi");
   TH3D* h_fracFS_1_lo = (TH3D*) h_fracFS->Clone("h_fracFS_1_lo");
@@ -506,7 +555,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   hi_hists[h_fracFS_4] = h_fracFS_4_hi;
 
   // Load the configuration and output to screen
-  config_ = GetMT2Config(config_tag);
   cout << "[ShortTrackLooper::loop] using configuration tag: " << config_tag << endl;
   cout << "                  JSON: " << config_.json << endl;
   cout << "                  lumi: " << config_.lumi << " fb-1" << endl;
@@ -550,7 +598,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   TH1D* h_nTrueInt_weights_ = 0;
   if (doNTrueIntReweight && config_.pu_weights_file != "") {
-    TFile* f_weights = new TFile(("../babymaker/data/" + config_.pu_weights_file).c_str());
+    TFile* f_weights = new TFile((config_.pu_weights_file).c_str());
     TH1D* h_nTrueInt_weights_temp = (TH1D*) f_weights->Get("pileupWeight");
     //	outfile_->cd();
     h_nTrueInt_weights_ = (TH1D*) h_nTrueInt_weights_temp->Clone("h_pileupWeight");
@@ -561,10 +609,8 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   if (applyJSON && config_.json != "") {
     cout << "[ShortTrackLooper::loop] Loading json file: " << config_.json << endl;
-    set_goodrun_file(("../babymaker/jsons/"+config_.json).c_str());
+    set_goodrun_file((config_.json).c_str());
   }
-
-  const int year = config_.year;  
 
   cout << "Getting transfer factors" << endl;
 
@@ -604,7 +650,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs_Nj23;
   TH1D* h_fs_Nj4;
   // Monojet turned on
-  h_fs_Nj1 = ((TH2D*) FshortFile->Get("h_fsMR_1_Baseline"))->ProjectionX("h_fs_1",2,2);
+  h_fs_Nj1 = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline"))->ProjectionX("h_fs_1",2,2);
   h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23",2,2);
   h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4",2,2);
   h_fs_Nj1->SetDirectory(0);
@@ -630,7 +676,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs_Nj23_hi;
   TH1D* h_fs_Nj4_hi;
   // Monojet turned on
-  h_fs_Nj1_hi = ((TH2D*) FshortFile->Get("h_fsMR_1_Baseline_hipt"))->ProjectionX("h_fs_1_hi",2,2);
+  h_fs_Nj1_hi = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_hipt"))->ProjectionX("h_fs_1_hi",2,2);
   h_fs_Nj23_hi = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt"))->ProjectionX("h_fs_23_hi",2,2);
   h_fs_Nj4_hi = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_hipt"))->ProjectionX("h_fs_4_hi",2,2);
   h_fs_Nj1_hi->SetDirectory(0);
@@ -656,7 +702,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs_Nj23_lo;
   TH1D* h_fs_Nj4_lo;
   // Monojet turned on
-  h_fs_Nj1_lo = ((TH2D*) FshortFile->Get("h_fsMR_1_Baseline_lowpt"))->ProjectionX("h_fs_1_lo",2,2);
+  h_fs_Nj1_lo = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_lowpt"))->ProjectionX("h_fs_1_lo",2,2);
   h_fs_Nj23_lo = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt"))->ProjectionX("h_fs_23_lo",2,2);
   h_fs_Nj4_lo = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt"))->ProjectionX("h_fs_4_lo",2,2);
   h_fs_Nj1_lo->SetDirectory(0);
@@ -741,10 +787,111 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   int nDuplicates = 0; int numberOfAllSTs = 0; int numberOfAllSTCs = 0; int numberOfUnmatchedSTs = 0; int numberOfUnmatchedSTCs = 0;
   int GoodEventCounter = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
-  //  for( unsigned int event = 0; event < 2; ++event) {    
+  //  for( unsigned int event = 0; event < 10000; ++event) {    
     //    if (event % 1000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
 
     t.GetEntry(event); 
+
+    const float lumi = config_.lumi; 
+    int bin_xsec = h_xsec->GetXaxis()->FindBin(t.GenSusyMScan1);      
+    const float xs = h_xsec->GetBinContent(bin_xsec);
+    int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
+    int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
+    double nevents = h_sig_nevents_->GetBinContent(binx,biny);
+
+    float weight = lumi * xs * 1000 / nevents;
+    
+    if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80) {
+      weight *= t.weight_L1prefire;
+    }
+    
+    if (doNTrueIntReweight) {
+      if(h_nTrueInt_weights_==0){
+	cout << "[ShortTrackLooper::loop] WARNING! You requested to do nTrueInt reweighting but didn't supply a PU weights file. Turning off." << endl;
+      }else{
+	int nTrueInt_input = t.nTrueInt;
+	float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
+	weight *= puWeight;
+      }
+    }
+
+    if (applyISRWeights && !noISR) {
+      int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
+      int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+      float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
+      float weight_isr = t.weight_isr / avgweight_isr;
+      weight *= weight_isr;
+    }
+
+    double weight_adj = 1;
+    double ch_1_decay_factor = -999.0;
+    double ch_2_decay_factor = -999.0;
+    if (ctau_in != ctau_out) {
+      for (int ic = 0; ic < t.nCharginos; ic++) {
+	double ch_decayXY = t.chargino_decayXY[ic];
+	double ch_decayZ = t.chargino_decayZ[ic];
+	// double ch_theta = Theta(t.chargino_eta[ic]);       
+	// double boosted_ch_decay_length = ch_decayXY/TMath::Sin(ch_theta);	
+	double boosted_ch_decay_length = TMath::Sqrt(ch_decayXY*ch_decayXY + ch_decayZ*ch_decayZ);
+	//	double p = t.chargino_pt[ic] / ch_theta;
+	double p = t.chargino_pt[ic] / ch_decayXY * boosted_ch_decay_length;
+	double gamma = TMath::Sqrt(p*p/(t.GenSusyMScan2 * t.GenSusyMScan2) + 1);
+	double betaC = TMath::Sqrt(1-1/gamma/gamma) * TMath::C() * 100; // *100 to convert to cm/s
+	h_beta->Fill(TMath::Sqrt(1-1/gamma/gamma),t.GenSusyMScan1,t.GenSusyMScan2);
+	double boosted_ch_lifetime = boosted_ch_decay_length / betaC;
+	double ch_lifetime = boosted_ch_lifetime / gamma;	
+	if (ch_decayXY > 10) {
+	  h_decay_factor->Fill(ch_lifetime/tau_in,t.GenSusyMScan1,t.GenSusyMScan2);
+	}
+	if (ic == 0) ch_1_decay_factor = ch_lifetime/tau_in;
+	else ch_2_decay_factor = ch_lifetime/tau_in;
+	double new_prob = 1/tau_out * TMath::Exp(-ch_lifetime / tau_out);
+	double old_prob = 1/tau_in * TMath::Exp(-ch_lifetime / tau_in);
+	double weight_adjustment = new_prob / old_prob;
+	weight *= weight_adjustment;
+	weight_adj *= weight_adjustment;
+	/*
+	if (ch_decayXY > 0) {
+	  cout << "ch_decayXY = " << ch_decayXY << endl;
+	  cout << "ch_theta = " << ch_theta << endl;
+	  cout << "boosted_ch_DL = " << boosted_ch_decay_length << endl;
+	  cout << "p = " << p << endl;
+	  cout << "gamma = " << gamma << endl;
+	  cout << "betaC = " << betaC << endl;
+	  cout << "ch_tau = " << ch_lifetime << endl;
+	  cout << "tau_in = " << tau_in << endl;
+	  cout << "tau_out = " << tau_out << endl;
+	  cout << "new prob = " << new_prob << endl;
+	  cout << "old prob = " << old_prob << endl;
+	  cout << "weight adjustment = " << weight_adjustment << endl;
+	  return 0;
+	}
+	*/
+	h_DL_raw->Fill(ch_lifetime*betaC*gamma,t.GenSusyMScan1,t.GenSusyMScan2,1);
+	h_DL->Fill(ch_lifetime*betaC*gamma,t.GenSusyMScan1,t.GenSusyMScan2,weight_adjustment);	
+      }
+    }
+
+    h_weight_raw->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight/weight_adj);
+    h_eff_den->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight);
+    h_weight_all->Fill(TMath::Log10(weight_adj),t.GenSusyMScan1,t.GenSusyMScan2);
+    h_nevents->Fill(t.GenSusyMScan1,t.GenSusyMScan2,1);
+    if (weight_adj > 10) {
+      cout << "Track length reweight factor > 10: evt = " << t.evt << " (" << t.GenSusyMScan1 << ", " << t.GenSusyMScan2 << ") GeV, produces weight "
+	   << weight << " from weight " << weight/weight_adj;
+      if (weight > 1) {
+	cout << ". Skipping since weight > 1" << endl;
+	continue;
+      }
+      else {
+	cout << ". Allowing since weight < 1" << endl;
+      }
+    }
+    h_weight_nospikes->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight);
+    h_nospikes->Fill(t.GenSusyMScan1,t.GenSusyMScan2,1);
+
+    // skim
+    if ((t.nshorttrackcandidates == 0 && t.nshorttracks == 0)  || (t.ht < 200)) continue;
 
     //---------------------
     // skip duplicates -- needed when running on mutiple streams in data
@@ -790,7 +937,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
     if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
     if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
-    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    //    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
     if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
     if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
     
@@ -867,7 +1014,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     
     const bool lepveto = t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0;
 
-    if (lepveto) {
+    int nLongCharginos = 0;
+    for (int i_ch = 0; i_ch < t.nCharginos; i_ch++) {
+      if (t.chargino_decayXY[i_ch] >= 490 || fabs(t.chargino_decayZ[i_ch]) >= 820) nLongCharginos++;
+    }
+
+    if (lepveto || nLongCharginos > 0) {
       continue;
     }
 
@@ -903,43 +1055,6 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     //    if (! (passPrescaleTrigger || passSRTrigger)) continue;
     if (!passSRTrigger) continue;
 
-    const float lumi = config_.lumi; 
-    int bin_xsec = h_xsec->GetXaxis()->FindBin(t.GenSusyMScan1);      
-    const float xs = h_xsec->GetBinContent(bin_xsec);
-    int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
-    int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
-    double nevents = h_sig_nevents_->GetBinContent(binx,biny);
-    float weight = lumi * xs * 1000 / nevents;
-    
-    if(applyL1PrefireWeights && (config_.year==2016 || config_.year==2017) && config_.cmssw_ver!=80) {
-      weight *= t.weight_L1prefire;
-    }
-    
-    if (doNTrueIntReweight) {
-      if(h_nTrueInt_weights_==0){
-	cout << "[ShortTrackLooper::loop] WARNING! You requested to do nTrueInt reweighting but didn't supply a PU weights file. Turning off." << endl;
-      }else{
-	int nTrueInt_input = t.nTrueInt;
-	float puWeight = h_nTrueInt_weights_->GetBinContent(h_nTrueInt_weights_->FindBin(nTrueInt_input));
-	weight *= puWeight;
-      }
-    }
-
-    if (applyISRWeights) {
-      int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
-      int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
-      if (useISR_UP) {
-	float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
-	float weight_isr_UP = t.weight_isr_UP / avgweight_isr_UP;
-	weight *= weight_isr_UP;
-      }
-      else {
-	float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
-	float weight_isr = t.weight_isr / avgweight_isr;
-	weight *= weight_isr;
-      }
-    }
-
     if (weight > 1.0 && !t.isData && !isSignal && skipHighEventWeights) continue;
     
     TH3D* hist_STC;    
@@ -967,15 +1082,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     */
     // Just call everything the 1L region for now
     if (t.nJet30 == 1) {
-      if (t.jet1_pt >= 350 && met > 250 && t.ht > 250) {
+      if (t.jet1_pt >= 350 && met_pt > 250 && t.ht > 250) {
 	hist_STC = h_1L_SR_STC;
 	hist_ST = h_1L_SR_ST;
       }
-      if (t.jet1_pt >= 300 && met > 250 && t.ht > 250) {
+      else if (t.jet1_pt >= 275 && met_pt > 250 && t.ht > 250) {
 	hist_STC = h_1L_VR_STC;
 	hist_ST = h_1L_VR_ST;
       }
-      else if (t.jet1_pt >= 200 && met > 200 && t.ht > 200) { // low Ht
+      else if (t.jet1_pt >= 200 && met_pt > 200 && t.ht > 200) { // low Ht
 	hist_STC = h_1L_MR_STC;
 	hist_ST = h_1L_MR_ST;
       }
@@ -1184,11 +1299,13 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
 	if (overlapping_track[i_trk]) continue; // veto any tracks closely overlapping other lost tracks (pt > 15 GeV, with iso cut for 15-20 GeV)
 
-	bool isChargino = isSignal && t.track_matchedCharginoIdx[i_trk] >= 0;
+	int charginoMatch = t.track_matchedCharginoIdx[i_trk];
+	bool isChargino = isSignal && charginoMatch >= 0;
 	if (isSignal && !isChargino) {
 	  for (int i_chargino = 0; i_chargino < t.nCharginos; i_chargino++) {
 	    if (DeltaR(t.track_eta[i_trk],t.chargino_eta[i_chargino],t.track_phi[i_trk],t.chargino_phi[i_chargino]) < 0.1) {
 	      isChargino = true;
+	      charginoMatch = i_chargino;
 	      break;
 	    }
 	  }
@@ -1350,6 +1467,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	    if (isST) {
 	      nSTl_acc++;
 	      numberOfAllSTs++;
+	      if (mt2 > 200) h_decay_factor_L->Fill(charginoMatch == 0 ? ch_1_decay_factor : ch_2_decay_factor,t.GenSusyMScan1,t.GenSusyMScan2);
 	    }
 	    else {
 	      nSTCl_acc++;
@@ -1383,21 +1501,29 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	    t.track_pt[i_trk] < 50 ? nSTp_lo++ : nSTp_hi++;
 	    if (t.track_nLayersWithMeasurement[i_trk] == 3) {
 	      nSTp3++;
+	      if (mt2 > 200) h_decay_factor_P3->Fill(charginoMatch == 0 ? ch_1_decay_factor : ch_2_decay_factor,t.GenSusyMScan1,t.GenSusyMScan2);
 	      t.track_pt[i_trk] < 50 ? nSTp3_lo++ : nSTp3_hi++;
  	    }
 	    else {
 	      nSTp4++;
+	      if (mt2 > 200) h_decay_factor_P4->Fill(charginoMatch == 0 ? ch_1_decay_factor : ch_2_decay_factor,t.GenSusyMScan1,t.GenSusyMScan2);
 	      t.track_pt[i_trk] < 50 ? nSTp4_lo++ : nSTp4_hi++;
 	    }
 	  }
 	  else if (lenIndex == 2) {
 	    nSTm++;
+	    if (mt2 > 200) h_decay_factor_M->Fill(charginoMatch == 0 ? ch_1_decay_factor : ch_2_decay_factor,t.GenSusyMScan1,t.GenSusyMScan2);
 	    t.track_pt[i_trk] < 50 ? nSTm_lo++ : nSTm_hi++;
 	  }
 	}
       } // Track loop
     } // recalculate
     
+    if (nSTl_acc + nSTm + nSTp > 1) {
+      h_eff_num->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight);
+      h_weight_acc->Fill(TMath::Log10(weight_adj),t.GenSusyMScan1,t.GenSusyMScan2);
+    }
+
     if (prioritize) {
       if (nSTl_acc + nSTm + nSTp > 1) {
 	// if has ST, don't count STCs
@@ -1842,9 +1968,28 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   cout << "About to write" << endl;
   
+  TH2D* h_rescale = (TH2D*) h_weight_raw->Clone("h_reweight_rescale");
+  h_rescale->Divide(h_eff_den);
+  h_rescale->SetTitle("Post-reweight / Pre-reweight Total Integral");
+
   TFile outfile_(Form("%s.root",outtag),"RECREATE"); 
   outfile_.cd();
   for (vector<TH3D*>::iterator hist = hists.begin(); hist != hists.end(); hist++) {
+  if (ctau_in != ctau_out) {
+      cout << "Rescaling counts to adjust for reweighting, see h_reweight_rescale" << endl;    
+      cout << "Integral: " << (*hist)->Integral();
+      for (int x = 1; x <= h_rescale->GetNbinsX(); x++) {
+	for (int y = 1; y <= h_rescale->GetNbinsY(); y++) {
+	  double factor = h_rescale->GetBinContent(x,y);
+	  for (int z = 1; z <= (*hist)->GetNbinsZ(); z++) {
+	    (*hist)->SetBinContent(z,x,y,(*hist)->GetBinContent(z,x,y)*factor);
+	    low_hists[(*hist)]->SetBinContent(z,x,y,low_hists[(*hist)]->GetBinContent(z,x,y)*factor);
+	    hi_hists[(*hist)]->SetBinContent(z,x,y,hi_hists[(*hist)]->GetBinContent(z,x,y)*factor);
+	  }
+	}
+      }
+      cout << " -> " << (*hist)->Integral() << endl;;
+    }
     (*hist)->Write();
     low_hists[(*hist)]->Write();
     hi_hists[(*hist)]->Write();
@@ -1855,6 +2000,27 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_2STC_VR->Write();
   h_2STC_SR->Write();
   */
+
+  h_decay_factor->Write();
+  h_decay_factor_P3->Write();
+  h_decay_factor_P4->Write();
+  h_decay_factor_M->Write();
+  h_decay_factor_L->Write();
+  h_beta->Write();
+  h_DL_raw->Write();
+  h_DL->Write();
+
+  h_rescale->Write();
+  h_weight_raw->Write();
+  h_weight_nospikes->Write();
+  h_eff_den->Write();
+  h_eff_num->Write();
+
+  h_weight_all->Write();
+  h_weight_acc->Write();
+
+  h_nospikes->Write();
+  h_nevents->Write();
   
   outfile_.Close();
   cout << "Wrote everything" << endl;
@@ -1868,16 +2034,22 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
 int main (int argc, char ** argv) {
 
-  if (argc < 5) {
-    cout << "Usage: ./ShortTrackLooper.exe <outtag> <infile> <config> <runtag>" << endl;
+  if (argc < 5 && argc != 7) {
+    cout << "Usage: ./ShortTrackLooper.exe <outtag> <infile> <config> <runtag> [<ctau in> <ctau out>]" << endl;
     return 1;
   }
 
   TChain *ch = new TChain("mt2");
+  //  ch->AddFile(Form("%s.root",argv[2]));
+  //ch->AddFile(Form("%s_ext1.root",argv[2]));
   ch->Add(Form("%s*.root",argv[2]));
-
   ShortTrackLooper * stl = new ShortTrackLooper();
-  stl->loop(ch,argv[1],string(argv[3]),argv[4]);
+  if (argc == 5) {
+    stl->loop(ch,argv[1],string(argv[3]),argv[4]);
+  }
+  else {
+    stl->loop(ch,argv[1],string(argv[3]),argv[4],atof(argv[5]),atof(argv[6]));
+  }
   return 0;
 }
 
@@ -1906,6 +2078,11 @@ float ShortTrackLooper::getAverageISRWeight(const string sample, const string co
     cout << "Didn't recognize config " << config_tag << endl;
     return 1.0;
   }
+}
+
+double ShortTrackLooper::Theta(float eta) {
+  double exp_eta = 2*TMath::Exp(-eta);
+  return TMath::ATan(exp_eta);
 }
 
 

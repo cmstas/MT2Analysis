@@ -770,14 +770,14 @@ void babyMaker::ScanChain(TChain* chain, std::string baby_name, const std::strin
 	  int qbarDecay = -1;
 	  for (unsigned int iGen = 0; iGen < cms3.genps_p4().size() && (!haveVLQmass || qDecay < 0 || qbarDecay < 0); iGen++) {
 	    const int id = abs(cms3.genps_id().at(iGen));
-	    if (id == 8000001 || id == 7000001) {
+	    if (id == 8000001 || id == 8000002) {
 	      GenSusyMScan1 = (int) round(cms3.genps_p4().at(iGen).M());
 	      haveVLQmass = true;
 	    }
 	    // check if double Z
 	    else if (id > 22 && id < 26) { // 23 = W, 24 = Z, 25 = h
 	      const int mother_id = cms3.genps_id_simplemother().at(iGen);
-	      if (mother_id == 8000001 || mother_id == 7000001) {
+	      if (mother_id == 8000001 || mother_id == 8000002) {
 		qDecay = id;
 	      }
 	      else if (mother_id == -8000001 || mother_id == -7000001) {
