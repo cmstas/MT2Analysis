@@ -7,10 +7,10 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-# TAG = "V00-10-16_FullRunII_newQCD"
-TAG = "blah"
+TAG = "V00-10-17_FullRunII"
+# TAG = "blah"
 
-doSuperSignalRegions = False
+doSuperSignalRegions = True
 suppressFirstUHmt2bin = True # start UH at 400
 RsfofErr = 0.15
 lumi_syst_16 = 0.025
@@ -24,16 +24,16 @@ f_lostlep = {}
 f_qcd = {}
 f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined/qcdFromRS_2018.root")
-f_data = r.TFile("../../MT2Looper/output/V00-10-16_combined/data_RunAll.root")
+f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/zinvFromDY_2016.root")
+f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/zinvFromDY_2017.root")
+f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/zinvFromDY_2018.root")
+f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/lostlepFromCRs_2016.root")
+f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/lostlepFromCRs_2017.root")
+f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/lostlepFromCRs_2018.root")
+f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/qcdFromRS_2016.root")
+f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/qcdFromRS_2017.root")
+f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/qcdFromRS_2018.root")
+f_data = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/data_RunAll.root")
 
 years = [16, 17, 18]
 # years = [18]

@@ -17,8 +17,16 @@ int main(int argc, char **argv) {
   std::string output_dir(argv[4]);
 
   TChain *ch = new TChain("mt2"); 
+
+  // T5qqqqWW comes from T5qqqqVV sample; replace here so we can find the correct files
+  // BR correction factor is handled in the looper
+  std::string modsamp = sample;
+  std::string::size_type i = modsamp.find("T5qqqqWW");
+  std::cout << "BLAH" << i << std::endl;
+  if(i != std::string::npos)
+      modsamp.replace(i, 8, "T5qqqqVV");
  
-  TString infile = Form("%s/%s*.root",input_dir.c_str(),sample.c_str());
+  TString infile = Form("%s/%s*.root",input_dir.c_str(),modsamp.c_str());
   // TString infile = Form("%s/%s.root",input_dir.c_str(),sample.c_str());
   ch->Add(infile);
   if (ch->GetEntries() == 0) {

@@ -146,6 +146,8 @@ class MT2Looper {
   float weight_ZMT2_DN_;
   float weight_trigeff_UP_;
   float weight_trigeff_DN_;
+  int GenSusyMScan1_;
+  int GenSusyMScan2_;
 
   std::vector<const Int_t*> trigs_SR_;
   std::vector<const Int_t*> trigs_Photon_;

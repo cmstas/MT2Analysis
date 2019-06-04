@@ -726,7 +726,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   h_sig_avgweight_isr_ = 0;
   h_sig_avgweight_isr_UP_ = 0;
   h_sig_avgweight_isr_DN_ = 0;
-  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
+  if ((doScanWeights || applyBtagSF) && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || 
+                                         (sample.find("T5") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
     std::string scan_name = sample;
     std::string weights_dir = "";
     if(sample.find("_10")!=string::npos || sample.find("_50")!=string::npos || sample.find("_200")!=string::npos){
@@ -736,7 +737,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
         if(config_tag.find("80x_fastsim_Moriond17") != string::npos)
             weights_dir = "../babymaker/data/";
         else if(config_tag.find("102x_fastsim_Autumn18") != string::npos)
-            weights_dir = "../babymaker/data/sigweights_Fall17/";
+            weights_dir = "../babymaker/data/sigweights_Autumn18/";
+            // weights_dir = "../babymaker/data/sigweights_Fall17/";
         else if(config_tag.find("94x_fastsim_Fall17") != string::npos)
             weights_dir = "../babymaker/data/sigweights_Fall17/";
         else if(config_tag.find("94x_fastsim_Summer16") != string::npos)
@@ -745,6 +747,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
         else if (sample.find("extraT2tt") != std::string::npos) scan_name = "extraT2tt";
         else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
         else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
+        else if (sample.find("T5qqqqVV") != std::string::npos) scan_name = sample;
+        else if (sample.find("T5qqqqWW") != std::string::npos){ scan_name = sample; scan_name.replace(scan_name.find("T5qqqqWW"), 8, "T5qqqqVV"); }
         else if (sample.find("rpvMonoPhi") != std::string::npos) scan_name = "rpvMonoPhi";
     }
     TFile* f_nsig_weights = new TFile(Form("%s/nsig_weights_%s.root", weights_dir.c_str(), scan_name.c_str()));
@@ -801,7 +805,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
   
-  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
+  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || 
+                                 (sample.find("T5") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
       cout << "Applying fastsim lepton scale factors from the following files:\n";
       cout << "    els IDISO : " << config_.elSF_IDISOfile_fastsim << ": " << config_.elSF_IDhistName_fastsim << " (id), " << config_.elSF_ISOhistName_fastsim << " (iso)" << endl;
       cout << "    muons ID  : " << config_.muSF_IDfile_fastsim << ": " << config_.muSF_IDhistName_fastsim << endl;
@@ -824,21 +829,35 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       setDilepTrigEffFile("../babymaker/"+config_.dilep_trigeff_file);
   }
 
+  bool isT2tt = (sample.find("T2tt")==0);  
+  bool isT2cc = (sample.find("T2cc")==0);  
   // set up signal binning
-  if (sample.find("T2cc") != std::string::npos) {
+  if ( isT2cc ) {
     // 5 GeV binning up to 800 GeV
     n_m2bins = 221;
+  }
+  if( isT2tt) {
+      // 8.333 GeV binning on x-axis, 12.5 GeV binning on y-axis
+      n_m1bins = 241;
+      n_m2bins = 93;
   }
   m1bins = new float[n_m1bins+1];
   m2bins = new float[n_m2bins+1];
     
   for (int i = 0; i <= n_m1bins; ++i) {
-    m1bins[i] = i*25.;
+      if(isT2tt)
+          m1bins[i] = i*25.0/3;
+      else
+          m1bins[i] = i*25.;
   }
   for (int i = 0; i <= n_m2bins; ++i) {
     // 5 GeV binning for T2cc
-    if (sample.find("T2cc") != std::string::npos) m2bins[i] = i*5.;
-    else m2bins[i] = i*25.;
+      if (isT2cc)
+          m2bins[i] = i*5.;
+      else if(isT2tt)
+          m2bins[i] = i*12.5;
+      else 
+          m2bins[i] = i*25.;
   }
   
   cout << "[MT2Looper::loop] setting up histos" << endl;
@@ -1129,6 +1148,23 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       else if (doJECVars == 0) {}
       else { cerr << "WARNING: options doJECVars has illegal value!" << endl; }
       
+      bool isT5qqqqWW = false;
+      if(isSignal_){
+          GenSusyMScan1_ = t.GenSusyMScan1;
+          GenSusyMScan2_ = t.GenSusyMScan2;
+          // binning issues due to rounding in MINIAOD. This ensures that with 8.333 GeV binning,
+          // every bin has only 1 mass point
+          if(GenSusyMScan1_ % 25 == 8)
+              GenSusyMScan1_ += 1;
+
+          if(sample.find("T5qqqqWW") != string::npos){
+              isT5qqqqWW = true;
+              // this selects only WW events
+              if(t.nCharginos != 2)
+                  continue;
+          }
+      }
+
       //---------------------
       // set weights and start making plots
       //---------------------
@@ -1140,11 +1176,14 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       // apply relevant weights to MC
       if (!t.isData) {
 	if (isSignal_ && doScanWeights) {
-	  int binx = h_sig_nevents_->GetXaxis()->FindBin(t.GenSusyMScan1);
-	  int biny = h_sig_nevents_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	  int binx = h_sig_nevents_->GetXaxis()->FindBin(GenSusyMScan1_);
+	  int biny = h_sig_nevents_->GetYaxis()->FindBin(GenSusyMScan2_);
 	  double nevents = h_sig_nevents_->GetBinContent(binx,biny);
 	  evtweight_ = lumi * t.evt_xsec*t.evt_filter*1000./nevents; // assumes xsec, filter are already filled correctly
-          cout << evtweight_ << endl;
+          // 4/9 BR to WW, so weight by 9/4 to recover inclusive xsec
+          if(isT5qqqqWW)
+              evtweight_ *= 9.0/4.0;
+          // cout << evtweight_ << endl;
 	} else {
             if (!ignoreScale1fb){
                 evtweight_ = t.evt_scale1fb * lumi;
@@ -1158,8 +1197,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  if (fabs(t.weight_btagsf) < 0.001) continue;
 	  evtweight_ *= t.weight_btagsf;
 	  if (isSignal_) {
-	    int binx = h_sig_avgweight_btagsf_->GetXaxis()->FindBin(t.GenSusyMScan1);
-	    int biny = h_sig_avgweight_btagsf_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	    int binx = h_sig_avgweight_btagsf_->GetXaxis()->FindBin(GenSusyMScan1_);
+	    int biny = h_sig_avgweight_btagsf_->GetYaxis()->FindBin(GenSusyMScan2_);
 	    float avgweight_btagsf = h_sig_avgweight_btagsf_->GetBinContent(binx,biny);
 	    evtweight_ /= avgweight_btagsf;
 	  }
@@ -1208,8 +1247,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  }
 	}
 	if (isSignal_ && applyISRWeights) {
-	  int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
-	  int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	  int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(GenSusyMScan1_);
+	  int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(GenSusyMScan2_);
 	  float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
 	  evtweight_ *= t.weight_isr / avgweight_isr;
 	}
@@ -1306,8 +1345,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 	  
 	  //commented out until sig_avgweight histogram is added
 	  
-	  // int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(t.GenSusyMScan1);
-	  // int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(t.GenSusyMScan2);
+	  // int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(GenSusyMScan1_);
+	  // int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(GenSusyMScan2_);
 	  // float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
 	  // float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
 	  // float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
@@ -2724,12 +2763,12 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
   } // nocut region only
 
   if (isSignal_) {
-    plot3D("h_mt2bins_sigscan"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
 
   if (!t.isData && isSignal_ && doSystVariationPlots) {
-    int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(t.GenSusyMScan1);
-    int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(t.GenSusyMScan2);
+    int binx = h_sig_avgweight_isr_->GetXaxis()->FindBin(GenSusyMScan1_);
+    int biny = h_sig_avgweight_isr_->GetYaxis()->FindBin(GenSusyMScan2_);
     // remove central value ISR weight when doing variation
     float avgweight_isr = h_sig_avgweight_isr_->GetBinContent(binx,biny);
     float avgweight_isr_UP = h_sig_avgweight_isr_UP_->GetBinContent(binx,biny);
@@ -2737,13 +2776,13 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     if(applyISRWeights){
         plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
         plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-        plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-        plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / t.weight_isr * avgweight_isr * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }else{
         plot1D("h_mt2bins_isr_UP"+s,       mt2_temp,   evtweight_ * t.weight_isr_UP / avgweight_isr_UP, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
         plot1D("h_mt2bins_isr_DN"+s,       mt2_temp,   evtweight_ * t.weight_isr_DN / avgweight_isr_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-        plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-        plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_isr_UP"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ * t.weight_isr_UP / avgweight_isr_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_isr_DN"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ * t.weight_isr_DN / avgweight_isr_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }
   }
 
@@ -2767,8 +2806,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     float avgweight_light_DN = 1.;
 
     if (isSignal_) {
-      binx = h_sig_avgweight_btagsf_heavy_UP_->GetXaxis()->FindBin(t.GenSusyMScan1);
-      biny = h_sig_avgweight_btagsf_heavy_UP_->GetYaxis()->FindBin(t.GenSusyMScan2);
+      binx = h_sig_avgweight_btagsf_heavy_UP_->GetXaxis()->FindBin(GenSusyMScan1_);
+      biny = h_sig_avgweight_btagsf_heavy_UP_->GetYaxis()->FindBin(GenSusyMScan2_);
       avgweight_btagsf = h_sig_avgweight_btagsf_->GetBinContent(binx,biny);
       avgweight_heavy_UP = h_sig_avgweight_btagsf_heavy_UP_->GetBinContent(binx,biny);
       avgweight_heavy_DN = h_sig_avgweight_btagsf_heavy_DN_->GetBinContent(binx,biny);
@@ -2782,10 +2821,10 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_btagsf_heavy_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_btagsf_light_DN"+s,       mt2_temp,   evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     if (isSignal_) {
-      plot3D("h_mt2bins_sigscan_btagsf_heavy_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_light_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_heavy_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-      plot3D("h_mt2bins_sigscan_btagsf_light_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_heavy_UP"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_UP / avgweight_heavy_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_light_UP"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_UP / avgweight_light_UP, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_heavy_DN"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_heavy_DN / avgweight_heavy_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+      plot3D("h_mt2bins_sigscan_btagsf_light_DN"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / t.weight_btagsf * avgweight_btagsf * t.weight_btagsf_light_DN / avgweight_light_DN, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }
   }
 
@@ -2816,8 +2855,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     if(isSignal_){
-        plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-        plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+        plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ / cor_lepeff_sr_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
     }    
   }
 
@@ -2825,8 +2864,8 @@ void MT2Looper::fillHistos(std::map<std::string, TH1*>& h_1d, int n_mt2bins, flo
     // if lepeff goes up, number of events in SR should go down. Already taken into account in unc_lepeff_sr_
     plot1D("h_mt2bins_lepeff_UP"+s,       mt2_temp,   evtweight_ * unc_lepeff_sr_UP_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_lepeff_DN"+s,       mt2_temp,   evtweight_ * unc_lepeff_sr_DN_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
-    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_UP"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ * unc_lepeff_sr_UP_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_lepeff_DN"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_ * unc_lepeff_sr_DN_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
   
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
@@ -3508,7 +3547,7 @@ void MT2Looper::fillHistosGenMET(std::map<std::string, TH1*>& h_1d, int n_mt2bin
   plot1D("h_mt2bins_genmet"+s,       mt2_temp,   evtweight_, h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
 
   if (isSignal_) {
-    plot3D("h_mt2bins_sigscan_genmet"+s, mt2_temp, t.GenSusyMScan1, t.GenSusyMScan2, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+    plot3D("h_mt2bins_sigscan_genmet"+s, mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
   }
   
   outfile_->cd();

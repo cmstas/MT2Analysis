@@ -40,15 +40,21 @@ if "80x" in TAG:
     sig_scale[17] = 41.53 / 35.92
     sig_scale[18] = 59.97 / 35.92
 else:
-    # f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-16_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-16_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-16_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
-    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-16_2018fullYear_17fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    # f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-16_2018fullYear_17fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
+    f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-17_2018fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     sig_scale[16] = 1.0
-    # sig_scale[16] = 35.9 / 41.5
     sig_scale[17] = 1.0
     sig_scale[18] = 1.0
-    # sig_scale[18] = 59.97 / 41.53
+
+    # f_sig[16] = r.TFile("/nfs-6/userdata/dpgilber/VLQs/{0}.root".format(signame))
+    # f_sig[17] = r.TFile("/nfs-6/userdata/dpgilber/VLQs/{0}.root".format(signame))
+    # f_sig[18] = r.TFile("/nfs-6/userdata/dpgilber/VLQs/{0}.root".format(signame))
+    # sig_scale[16] = 35.9 / 59.8
+    # sig_scale[17] = 41.5 / 59.8
+    # sig_scale[18] = 1.0
+
     
     # sig_scale[16] = -1.0/999
     # sig_scale[17] = -1.0/999
@@ -66,7 +72,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
     dirname = dc.info["dirname"]
     imt2 = dc.info["imt2"]
 
-    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame or "T2bt" in signame
+    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame or "T2bt" in signame or "T5qqqqVV" in signame or "Tprime" in signame
 
     name = "{0}_{1}_{2}_{3}".format(dc.GetName(), signame, im1, im2)
     dc.SetName(name)
@@ -299,11 +305,17 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
                     err = 1.0+err if errup>0 else 1.0/(1.0+err)
                 dc.SetNuisanceSignalValue(nuis_name, err, y)
 
-        if nuis == "sig_MCstat_16":
-            err = 1.0 + ((err_sig_mcstat_rel[16])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
-            dc.SetNuisanceSignalValue(nuis_name, err, 16)
+        if nuis == "sig_MCstat":
+            for y in [16,17,18]:
+                err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
 
-        if nuis == "sig_MCstat_1718":
+        if nuis == "sig_MCstat16":
+            for y in [16]:
+                err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
+                dc.SetNuisanceSignalValue(nuis_name, err, y)
+
+        if nuis == "sig_MCstat1718":
             for y in [17,18]:
                 err = 1.0 + ((err_sig_mcstat_rel[y])**2 + 0.000)**0.5   # used to wrap JEC/renorm uncertainties here, now split
                 dc.SetNuisanceSignalValue(nuis_name, err, y)

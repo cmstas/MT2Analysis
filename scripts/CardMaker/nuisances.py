@@ -37,15 +37,18 @@ nuisances = {
         "correlation" : CORR_ACROSS_ALLBINS,
         "splitByYear" : DEFAULT_splitByYear,
         },
-    # special handling of signal MCstat, since 17+18 are correlated (same MC)
-    "sig_MCstat_16" : {
+    "sig_MCstat" : {
         "correlation" : PER_MT2_BIN,
-        "splitByYear" : False,
+        "splitByYear" : True,
         },
-    "sig_MCstat_1718" : {
-        "correlation" : PER_MT2_BIN,
-        "splitByYear" : False,
-        },
+    # "sig_MCstat16" : {
+    #     "correlation" : PER_MT2_BIN,
+    #     "splitByYear" : False,
+    #     },
+    # "sig_MCstat1718" : {
+    #     "correlation" : PER_MT2_BIN,
+    #     "splitByYear" : False,
+    #     },
     "sig_jec_renorm" : {
         "correlation" : PER_MT2_BIN,
         "splitByYear" : DEFAULT_splitByYear,

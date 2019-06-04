@@ -9,9 +9,9 @@ indir = sys.argv[1]
 MODEL = sys.argv[2]
 
 outdir = os.path.join(indir, "flattened_signal", MODEL)
-if os.path.exists(outdir):
-    print "looks like this has already been done for this model!"
-    exit(0)
+# if os.path.exists(outdir):
+#     print "looks like this has already been done for this model!"
+#     exit(0)
 
 os.system("mkdir -p "+outdir)
 
@@ -39,23 +39,40 @@ cmds = []
 if "T2cc" in MODEL:
     y_binwidth = 5
     y_max = 800
+if MODEL=="T2tt":
+    y_binwidth = 12.5
+    y_max = 1150
+    x_binwidth = 25.0/3
+    x_max = 2000
+
+found_some = False
 points = []
-for m1 in range(0, x_max+1, x_binwidth):
-    for m2 in range(0, y_max+1, y_binwidth):
+for im1 in range(0, int(round(x_max/x_binwidth))+1):
+    for im2 in range(0, int(round(y_max/y_binwidth))+1):
+        m1 = int(round(im1 * x_binwidth))
+        m2 = int(round(im2 * y_binwidth))
+        if m1%25 == 8:
+            m1 += 1
         xbin = h_nsig.GetXaxis().FindBin(m1)
         ybin = h_nsig.GetYaxis().FindBin(m2)
         if h_nsig.GetBinContent(xbin, ybin) < 1:
             continue
+        if os.path.exists(os.path.join(outdir, "{0}_{1}_{2}.root".format(MODEL,m1,m2))):
+            found_some = True
+            continue
         points.append((m1,m2))
 print "Found {0} points".format(len(points))
-
+if len(points)==0:
+    exit(0)
+if found_some:
+    print "Some points already exist, so we're skipping them!"
 
 iterator = fin.GetListOfKeys()
 for key in iterator:
     dirname = key.GetTitle()
     if "sr" not in dirname and "crsl" not in dirname:
         continue
-    if "t" not in MODEL and "crsl" in dirname:
+    if "t" not in MODEL and "VV" not in MODEL and "crsl" in dirname:
         continue
     if "base" in dirname or "ttbar" in dirname or "wjets" in dirname or "mu" in dirname or "el" in dirname:
         continue
