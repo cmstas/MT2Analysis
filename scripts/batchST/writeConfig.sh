@@ -5,13 +5,14 @@ do echo "No Proxy found issuing \"voms-proxy-init -voms cms\""
    voms-proxy-init -hours 168 -voms cms
 done
 
-CARDDIR=$1
-MODEL=$2
-TAG=$3
-OUTNAME=$4
+TAG=$1
+SAMPLE=$2
+CTAU=$3
 
+# UNIVERSE="grid"
 UNIVERSE="vanilla"
 EXE="wrapper.sh"
+INPUT="wrapper.sh, cardMakerShortTrack.py"
 # can add other US sites here if desired
 SITE="T2_US_UCSD"
 SUBMITLOGDIR="${PWD}/submit_logs"
@@ -19,8 +20,8 @@ JOBLOGDIR="${PWD}/job_logs"
 PROXY=$(voms-proxy-info -path)
 USERNAME=$(whoami)
 
-LOGDIR="/data/tmp/$USER/condor_submit_logs/$MODEL"
-OUTDIR="/data/tmp/$USER/condor_job_logs/$MODEL"
+LOGDIR="/data/tmp/$USER/condor_submit_logs/CardMaking/${TAG}_${SAMPLE}_${CTAU}"
+OUTDIR="/data/tmp/$USER/condor_job_logs/CardMaking/${TAG}_${SAMPLE}_${CTAU}"
 LOG="${LOGDIR}/condor_`date "+%m_%d_%Y"`.log"
 OUT="${OUTDIR}/1e.\$(Cluster).\$(Process).out"
 ERR="${OUTDIR}/1e.\$(Cluster).\$(Process).err"
@@ -39,7 +40,8 @@ fi
 # prepare input sandbox
 #
 
-COPYDIR=/hadoop/cms/store/user/${USERNAME}/ShortTrackScanLimits/${OUTNAME}/${MODEL}
+COPYDIR=/hadoop/cms/store/user/${USERNAME}/SigScanCards/${TAG}
+echo "[writeConfig] running on input ${TAG}"
 echo "[writeConfig] copying output to ${COPYDIR}"
 
 if [ ! -d "${COPYDIR}" ]; then
@@ -50,18 +52,13 @@ fi
 #
 # write configuration
 #
-
-condor_dir=condor_${TAG}_${OUTNAME}
-
-mkdir -p ${condor_dir}
-
-cmdfile=${condor_dir}/${MODEL}.cmd
    
 #Grid_Resource=gt2 osg-gw-6.t2.ucsd.edu:2119/jobmanager-condor
 Grid_Resource="condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu"
 echo "
 universe=${UNIVERSE}
 when_to_transfer_output = ON_EXIT
+transfer_input_files=${INPUT}
 #the actual executable to run is not transfered by its name.
 #In fact, some sites may do weird things like renaming it and such.
 +DESIRED_Sites=\"${SITE}\"
@@ -72,21 +69,10 @@ output=${OUT}
 error =${ERR}
 notification=Never
 x509userproxy=${PROXY}
-" > $cmdfile
-
-    #
-    # now set the rest of the arguments 
-    # for each job
-    # 
-
-    for MASSPOINT in `ls ${CARDDIR}/*`; do
-        echo "
-transfer_input_files=wrapper.sh, job_input.tar, ${MASSPOINT}, combineDir.sh
 executable=${EXE}
 transfer_executable=True
-arguments=${MASSPOINT##*/} ${COPYDIR}
+arguments=${TAG} ${SAMPLE} ${CTAU} ${COPYDIR}
 queue
-" >> $cmdfile
-    done
+" > condor/${TAG}_${SAMPLE}_${CTAU}.cmd
 
-echo "[writeConfig] wrote $cmdfile" 
+echo "[writeConfig] wrote condor/${TAG}_${SAMPLE}_${CTAU}.cmd" 

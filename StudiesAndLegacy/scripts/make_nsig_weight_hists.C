@@ -25,6 +25,32 @@ void make_nsig_weight_hists(TString dir, TString sample) {
     y_min = -5.;
     y_max = 1005.;
   }
+  if (sample.Contains("T2bt")) {
+    /*
+    x_nbins = 97;
+    x_min = -8.3333;
+    x_max = 1608.3333;
+    y_nbins = 97;
+    y_min = -8.3333;
+    y_max = 1608.3333;    
+    */
+    x_nbins = 151;
+    x_min = -8.3333;
+    x_max = 2508.3333;
+    y_nbins = 151;
+    y_min = -8.3333;
+    y_max = x_max;
+  }
+
+  if (sample.Contains("prime")) {
+    x_nbins = 10;
+    x_min = 850;
+    x_max = 1850;
+    y_nbins = 1;
+    // GenSusyMScan2 is just 2323 to indicate Z decay
+    y_min = 2322.5;
+    y_max = 2323.5;
+  }
   
   TH2D* h_nsig = new TH2D("h_nsig",";mass1 [GeV];mass2 [GeV]", x_nbins, x_min, x_max, y_nbins, y_min, y_max);
   TH2D* h_avg_weight_btagsf = (TH2D*) h_nsig->Clone("h_avg_weight_btagsf");
