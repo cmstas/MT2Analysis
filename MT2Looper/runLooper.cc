@@ -22,7 +22,6 @@ int main(int argc, char **argv) {
   // BR correction factor is handled in the looper
   std::string modsamp = sample;
   std::string::size_type i = modsamp.find("T5qqqqWW");
-  std::cout << "BLAH" << i << std::endl;
   if(i != std::string::npos)
       modsamp.replace(i, 8, "T5qqqqVV");
  

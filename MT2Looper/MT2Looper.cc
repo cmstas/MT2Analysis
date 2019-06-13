@@ -87,9 +87,9 @@ bool applyWeights = false;
 // turn on to apply btag sf to central value
 bool applyBtagSF = true; // default true
 // turn on to apply lepton sf to central value - take from babies
-bool applyLeptonSFfromBabies = true;
+bool applyLeptonSFfromBabies = false;
 // turn on to apply lepton sf to central value - reread from files
-bool applyLeptonSFfromFiles = false; // default true
+bool applyLeptonSFfromFiles = true; // default true
 // turn on to apply lepton sf to central value also for 0L SR. values chosen by options above
 bool applyLeptonSFtoSR = false;
 // turn on to apply reweighting to ttbar based on top pt
@@ -747,8 +747,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
         else if (sample.find("extraT2tt") != std::string::npos) scan_name = "extraT2tt";
         else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
         else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
-        else if (sample.find("T5qqqqVV") != std::string::npos) scan_name = sample;
-        else if (sample.find("T5qqqqWW") != std::string::npos){ scan_name = sample; scan_name.replace(scan_name.find("T5qqqqWW"), 8, "T5qqqqVV"); }
+        else if (sample.find("T5qqqqVV") != std::string::npos) scan_name = sample.substr(0,8);
+        else if (sample.find("T5qqqqWW") != std::string::npos){ scan_name = sample.substr(0,8); scan_name.replace(scan_name.find("T5qqqqWW"), 8, "T5qqqqVV"); }
         else if (sample.find("rpvMonoPhi") != std::string::npos) scan_name = "rpvMonoPhi";
     }
     TFile* f_nsig_weights = new TFile(Form("%s/nsig_weights_%s.root", weights_dir.c_str(), scan_name.c_str()));
@@ -785,6 +785,15 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
   if (verbose) cout<<__LINE__<<endl;
 
   if (config_tag.find("data") == string::npos && applyLeptonSFfromFiles) {
+      config_.elSF_IDISOfile = "../babymaker/"+config_.elSF_IDISOfile;
+      config_.elSF_TRKfile = "../babymaker/"+config_.elSF_TRKfile;
+      config_.elSF_TRKfileLowPt = "../babymaker/"+config_.elSF_TRKfileLowPt;
+      config_.muSF_IDfile = "../babymaker/"+config_.muSF_IDfile;
+      config_.muSF_ISOfile = "../babymaker/"+config_.muSF_ISOfile;
+      if(config_.muSF_IPfile != "")
+          config_.muSF_IPfile = "../babymaker/"+config_.muSF_IPfile;
+      if(config_.muSF_TRKfile != "")
+          config_.muSF_TRKfile = "../babymaker/"+config_.muSF_TRKfile;
       cout << "Applying lepton scale factors from the following files:\n";
       cout << "    els IDISO      : " << config_.elSF_IDISOfile << ": " << config_.elSF_IDhistName << " (id), " << config_.elSF_ISOhistName << " (iso)" << endl;
       cout << "    els TRK        : " << config_.elSF_TRKfile << endl;
@@ -799,14 +808,18 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
           cout << "    muons TRK: " << config_.muSF_TRKfile << ": " << config_.muSF_TRKLT10histName << " (pT<10), " << config_.muSF_TRKGT10histName << " (pt>10)" << endl;
       else
           cout << "    muons TRK: not applying" << endl;
-      setElSFfile("../babymaker/"+config_.elSF_IDISOfile, "../babymaker/"+config_.elSF_TRKfile, "../babymaker/"+config_.elSF_TRKfileLowPt, config_.elSF_IDhistName, config_.elSF_ISOhistName);
-      setMuSFfile("../babymaker/"+config_.muSF_IDfile, "../babymaker/"+config_.muSF_ISOfile, "../babymaker/"+config_.muSF_IPfile, "../babymaker/"+config_.muSF_TRKfile,
+      setElSFfile(config_.elSF_IDISOfile, config_.elSF_TRKfile, config_.elSF_TRKfileLowPt, config_.elSF_IDhistName, config_.elSF_ISOhistName);
+      setMuSFfile(config_.muSF_IDfile, config_.muSF_ISOfile, config_.muSF_IPfile, config_.muSF_TRKfile,
                   config_.muSF_IDhistName, config_.muSF_ISOhistName, config_.muSF_IPhistName, config_.muSF_TRKLT10histName, config_.muSF_TRKGT10histName);
       setVetoEffFile_fullsim("../babymaker/lepsf/vetoeff_emu_etapt_lostlep.root");  // same values for Moriond17 as ICHEP16
   }
   
-  if (applyLeptonSFfromFiles && ((sample.find("T1") != std::string::npos) || (sample.find("T2") != std::string::npos) || 
-                                 (sample.find("T5") != std::string::npos) || (sample.find("T6") != std::string::npos) || (sample.find("rpv") != std::string::npos))) {
+  if (applyLeptonSFfromFiles && (config_tag.find("fastsim") != string::npos)){
+      config_.elSF_IDISOfile_fastsim = "../babymaker/"+config_.elSF_IDISOfile_fastsim;
+      config_.muSF_IDfile_fastsim = "../babymaker/"+config_.muSF_IDfile_fastsim;
+      config_.muSF_ISOfile_fastsim = "../babymaker/"+config_.muSF_ISOfile_fastsim;
+      if(config_.muSF_IPfile_fastsim != "")
+          config_.muSF_IPfile_fastsim = "../babymaker/"+config_.muSF_IPfile_fastsim;
       cout << "Applying fastsim lepton scale factors from the following files:\n";
       cout << "    els IDISO : " << config_.elSF_IDISOfile_fastsim << ": " << config_.elSF_IDhistName_fastsim << " (id), " << config_.elSF_ISOhistName_fastsim << " (iso)" << endl;
       cout << "    muons ID  : " << config_.muSF_IDfile_fastsim << ": " << config_.muSF_IDhistName_fastsim << endl;
@@ -815,10 +828,9 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
           cout << "    muons IP : " << config_.muSF_IPfile_fastsim << ": " << config_.muSF_IPhistName_fastsim << endl;
       else
           cout << "    muons IP : not applying" << endl;
-      setElSFfile_fastsim("../babymaker/"+config_.elSF_IDISOfile_fastsim, "../babymaker/"+config_.elSF_IDhistName_fastsim, "../babymaker/"+config_.elSF_ISOhistName_fastsim);
-      setMuSFfile_fastsim("../babymaker/"+config_.muSF_IDfile_fastsim, "../babymaker/"+config_.muSF_ISOfile_fastsim, "../babymaker/"+config_.muSF_IPfile_fastsim, 
-                          "../babymaker/"+config_.muSF_IDhistName_fastsim, "../babymaker/"+config_.muSF_ISOhistName_fastsim, "../babymaker/"+config_.muSF_IPhistName_fastsim);
-      setVetoEffFile_fastsim("lepsf/vetoeff_emu_etapt_T1tttt.root");  
+      setElSFfile_fastsim(config_.elSF_IDISOfile_fastsim, config_.elSF_IDhistName_fastsim, config_.elSF_ISOhistName_fastsim);
+      setMuSFfile_fastsim(config_.muSF_IDfile_fastsim, config_.muSF_ISOfile_fastsim, config_.muSF_IPfile_fastsim, 
+                          config_.muSF_IDhistName_fastsim, config_.muSF_ISOhistName_fastsim, config_.muSF_IPhistName_fastsim);
       setVetoEffFile_fastsim("../babymaker/lepsf/vetoeff_emu_etapt_T1tttt.root");  
   }
   if (verbose) cout<<__LINE__<<endl;
@@ -1512,7 +1524,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       bool doOFplots = false;
       bool doLowPtOFplots = false;
       bool doInclusivePtPlot = false;
-      if (t.nlep == 2 && !isSignal_) {
+      if (t.nlep == 2) {
         bool passSFtrig = passTrigger(t, trigs_DilepSF_);
 	bool passOFtrig = passTrigger(t, trigs_DilepOF_);
 	if ( (t.lep_charge[0] * t.lep_charge[1] == -1)
@@ -3246,7 +3258,6 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
       }
   }
 
-
   // lepton efficiency variation in control region: smallish uncertainty on leptons which ARE vetoed
   if (!t.isData && doLepEffVars && (applyLeptonSFfromFiles || applyLeptonSFfromBabies)) {
     // lepsf was already applied as a central value, take it back out
@@ -3274,7 +3285,11 @@ void MT2Looper::fillHistosDY(std::map<std::string, TH1*>& h_1d, int n_mt2bins, f
     plot1D("h_mt2bins_renorm_UP"+s,        zll_mt2_temp,   evtweight_renormUp_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
     plot1D("h_mt2bins_renorm_DN"+s,        zll_mt2_temp,   evtweight_renormDn_ , h_1d, "; M_{T2} [GeV]", n_mt2bins, mt2bins);
   }
-  
+
+  if (isSignal_) {
+    plot3D("h_mt2bins_sigscan"+s, zll_mt2_temp, GenSusyMScan1_, GenSusyMScan2_, evtweight_, h_1d, ";M_{T2} [GeV];mass1 [GeV];mass2 [GeV]", n_mt2bins, mt2bins, n_m1bins, m1bins, n_m2bins, m2bins);
+  }  
+
   outfile_->cd();
   return;
 }
