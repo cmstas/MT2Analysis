@@ -7,10 +7,10 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "V00-10-17_FullRunII"
+TAG = "V00-10-17_FullRunII_withDYContam"
 # TAG = "blah"
 
-doSuperSignalRegions = True
+doSuperSignalRegions = False
 suppressFirstUHmt2bin = True # start UH at 400
 RsfofErr = 0.15
 lumi_syst_16 = 0.025
@@ -300,8 +300,10 @@ def makeTemplate(dirname, imt2, use_pred_for_obs=True, template_output_dir=None)
     if imt2 >= crdy_lastbin_hybrid:
         n_zinv_MCCR = float(f_zinvDY[years[0]].Get(dirname+"/h_mt2binsMCCR").Integral(crdy_lastbin_hybrid, -1))
     zinv_zero_alpha = {}
+    dc.info["zinv_alpha"] = {}
     for y in years:
         alpha = h_zinv_purity[y].GetBinContent(imt2) * h_zinv_ratio[y].GetBinContent(imt2)
+        dc.info["zinv_alpha"][y] = alpha
 
         nuis_name = "zinv_CRstat_"+crdy_name_per_topo_reg
         zinv_zero_alpha[y] = False

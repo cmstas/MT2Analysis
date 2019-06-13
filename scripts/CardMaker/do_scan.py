@@ -4,8 +4,8 @@ import time
 import subprocess
 # this assumes you've already made template datacards for this tag! (makeTemplateCards.py)
 
-TAG = "V00-10-17_FullRunII"
-MODEL = "T5qqqqVV_mChg0p5mGlumLSP"
+TAG = "V00-10-17_FullRunII_withDYContam"
+MODEL = "T1tttt"
 
 MAXLOCALJOBS=20
 
@@ -21,7 +21,7 @@ elif "_10" in MODEL or "_50" in MODEL or "_200" in MODEL:
     # short-track
     f_nsig = r.TFile("../../babymaker/data/short_track/nsig_weights_{0}.root".format(MODEL))
 else:
-    f_nsig = r.TFile("../../babymaker/data/sigweights_Fall17/nsig_weights_{0}.root".format(MODEL))
+    f_nsig = r.TFile("../../babymaker/data/sigweights_Fall17/nsig_weights_{0}.root".format(MODEL).replace("T5qqqqWW","T5qqqqVV"))
 h_nsig = f_nsig.Get("h_nsig")
 
 if not h_nsig:

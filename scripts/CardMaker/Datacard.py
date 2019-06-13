@@ -201,8 +201,11 @@ class Datacard:
         self.nuisances[fullname].bkg_values[fullidx] = value
 
 
-    def GetTotalUncertainty(self, signal=False, returnDict=False):
+    def GetTotalUncertainty(self, signal=False, returnDict=False, bkgMatch=None):
         # get total background uncertainty (if signal==False) or total signal uncertainty
+        # If returnDict==True, returns a dictionary of the contribution from each individual nuisance
+        # otherwise, returns just the total up/down uncertainty
+        # If bkgMatch is set, only look at backgrounds whose names contain the string bkgMatch
         alpha = 1-0.6827
         tot_err_up = 0.0
         tot_err_dn = 0.0
@@ -228,6 +231,8 @@ class Datacard:
                         bkg = self.split_bkg_names[i]
                         if val is None:
                             continue
+                        if bkgMatch and bkgMatch not in bkg:
+                            continue
                         if type(val)==tuple:
                             err_up += (val[0]-1.0) * self.bkg_rates[bkg]
                             err_dn += (val[1]-1.0) * self.bkg_rates[bkg]
@@ -243,10 +248,13 @@ class Datacard:
                         bkg = self.split_bkg_names[i]
                         if val is None:
                             continue
+                        if bkgMatch and bkgMatch not in bkg:
+                            continue
                         err_up += val * (ROOT.Math.gamma_quantile_c(alpha/2, nuis.N+1, 1) - nuis.N)
                         err_dn += val * (0 if nuis.N==0 else nuis.N-ROOT.Math.gamma_quantile(alpha/2, nuis.N, 1))
 
-            nuis_dict[name] = [err_up, err_dn]
+            if abs(err_up) > 0 or abs(err_dn) > 0:
+                nuis_dict[name] = [err_up, err_dn]
 
             # print nuis.name, err_up, err_dn
             tot_err_up += err_up**2

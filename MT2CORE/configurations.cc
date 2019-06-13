@@ -539,11 +539,11 @@ MT2Configuration GetMT2Config(std::string tag){
         c.muSF_IPhistName    = "";
         c.muSF_TRKLT10histName = "";
         c.muSF_TRKGT10histName = "";
-        c.elSF_IDISOfile_fastsim    = "lepsf/Fall17/ElectronScaleFactors_Run2017_Fastsim.root";
+        c.elSF_IDISOfile_fastsim    = "lepsf/Autumn18/detailed_ele_full_fast_sf_18.root";
         c.elSF_IDhistName_fastsim   = "CutBasedVetoNoIso94XV2_sf";
         c.elSF_ISOhistName_fastsim  = "MVAVLooseTightIP2DMini_sf";
         c.muSF_IDfile_fastsim       = "lepsf/moriond17/sf_mu_looseID.root";
-        c.muSF_ISOfile_fastsim      = "lepsf/Fall17/detailed_mu_full_fast_sf_17.root";
+        c.muSF_ISOfile_fastsim      = "lepsf/Autumn18/detailed_mu_full_fast_sf_18.root";
         c.muSF_IPfile_fastsim       = "";
         c.muSF_IDhistName_fastsim   = "histo2D";
         c.muSF_ISOhistName_fastsim  = "miniIso02_LooseId_sf";

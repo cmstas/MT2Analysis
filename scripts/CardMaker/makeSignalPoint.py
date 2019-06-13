@@ -40,6 +40,7 @@ if "80x" in TAG:
     sig_scale[17] = 41.53 / 35.92
     sig_scale[18] = 59.97 / 35.92
 else:
+
     f_sig[16] = r.TFile("../../MT2Looper/output/V00-10-16_2016fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     f_sig[17] = r.TFile("../../MT2Looper/output/V00-10-16_2017fullYear/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
     # f_sig[18] = r.TFile("../../MT2Looper/output/V00-10-16_2018fullYear_17fastsim/flattened_signal/{0}/{0}_{1}_{2}.root".format(signame, M1, M2))
@@ -72,7 +73,8 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
     dirname = dc.info["dirname"]
     imt2 = dc.info["imt2"]
 
-    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame or "T2bt" in signame or "T5qqqqVV" in signame or "Tprime" in signame
+    isSignalWithLeptons = "T1tttt" in signame or "T2tt" in signame or "T2tb" in signame or "T2bt" in signame or "T5qqqq" in signame or "Tprime" in signame
+    isSignalWithDileptons = "T5qqqqVV" in signame
 
     name = "{0}_{1}_{2}_{3}".format(dc.GetName(), signame, im1, im2)
     dc.SetName(name)
@@ -85,6 +87,7 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
     h_aux = {}
     h_crsl_sig = {}
     h_crsl_aux = {}
+    h_crdy_sig = {}
     for an in aux_names:
         h_aux[an] = {}
         h_crsl_aux[an] = {}
@@ -121,19 +124,26 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
                         h_crsl_aux[an][y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}_{5}".format(an, y, dirname+"sl", 
                                                                                                              im1, im2, imt2),
                                                                   bin1, bin1, bin2, bin2)
+            if subtractSignalContam and isSignalWithDieptons:
+                h_sigscan = f_sig[y].Get(dirname.replace("sr","crdy")+"/h_mt2bins_sigscan")
+                if h_sigscan:
+                    h_crdy_sig[y] = h_sigscan.ProjectionX("h_mt2bins_{0}_{1}_{2}_{3}_{4}".format(y, dirname+"dy", im1, im2, imt2),
+                                                          bin1, bin1, bin2, bin2)
+
     else:
         # doing a single-point sample
         for y in years:
             h_sig[y] = f_sig[y].Get(dirname+"/h_mt2bins")
             if not h_sig[y]:
                 if verbose: print "Could not get h_mt2bins for dir {0}, year {1}, skipping".format(dirname, y)
-                continue
             for an in aux_names:
                 h_aux[an][y] = f_sig[y].Get(dirname+"/h_mt2bins_"+an)
             if subtractSignalContam and isSignalWithLeptons:
                 h_crsl_sig[y] = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins")
                 for an in aux_names:
                     h_crsl_aux[an][y] = f_sig[y].Get(dirname.replace("sr","crsl")+"/h_mt2bins_"+an)
+            if subtractSignalContam and isSignalWithDileptons:
+                h_crdy_sig[y] = f_sig[y].Get(dirname.replace("sr","crdy")+"/h_mt2bins")
 
 
     totTR = 0.0
@@ -198,44 +208,49 @@ def printFullCard(signal_dc, im1, im2, output_dir, isScan=False, addSigToObs=Fal
     n_aux_cor = {}
     n_sig_crsl = {}
     n_aux_crsl = {}
+    n_sig_crdy = {}
     for an in aux_names:
         n_aux_cor[an] = {}
         n_aux_crsl[an] = {}
     for y in years:
         n_sig_cor[y] = n_sig[y]
         n_sig_crsl[y] = 0.0
+        n_sig_crdy[y] = 0.0
         n_sig_cor_recogenaverage[y] = n_sig_recogenaverage[y]
         for an in aux_names:
             n_aux_cor[an][y] = n_aux[an][y]
             n_aux_crsl[an][y] = 0.0
 
-        if subtractSignalContam and isSignalWithLeptons and h_sig[y]:
-            if h_crsl_sig[y]:
+        if subtractSignalContam and (isSignalWithLeptons or isSignalWithDileptons) and h_sig[y]:
+            if isSignalWithLeptons and h_crsl_sig[y]:
                 if imt2 >= dc.info["lostlep_lastbin_hybrid"]:
-                    n_sig_crsl[y] = h_crsl_sig[y].Integral(dc.info["lostlep_lastbin_hybrid"], -1)
+                    n_sig_crsl[y] = sum(h_crsl_sig[year].Integral(dc.info["lostlep_lastbin_hybrid"], -1) if h_crsl_sig[year] else 0.0 for year in years)
                 else:
-                    n_sig_crsl[y] = h_crsl_sig[y].GetBinContent(imt2)
+                    n_sig_crsl[y] = sum(h_crsl_sig[year].GetBinContent(imt2) if h_crsl_sig[year] else 0.0 for year in years)
                 for an in aux_names:
                     if not h_crsl_aux[an][y]:
                         continue
                     if imt2 >= dc.info["lostlep_lastbin_hybrid"]:
-                        n_aux_crsl[an][y] = h_crsl_aux[an][y].Integral(dc.info["lostlep_lastbin_hybrid"], -1)
+                        n_aux_crsl[an][y] = sum(h_crsl_aux[an][year].Integral(dc.info["lostlep_lastbin_hybrid"], -1) if h_crsl_aux[an][year] else 0.0 for year in years)
                     else:
-                        n_aux_crsl[an][y] = h_crsl_aux[an][y].GetBinContent(imt2)
+                        n_aux_crsl[an][y] = sum(h_crsl_aux[an][year].GetBinContent(imt2) if h_crsl_aux[an][year] else 0.0 for year in years)
+            if isSignalWithDileptons and h_crdy_sig[y]:
+                n_sig_crdy[y] = sum(h_crdy_sig[year].Integral()if h_crdy_sig[year] else 0.0 for year in years)
 
-                nextra = n_sig_crsl[y] * dc.info["lostlep_alpha"][y]
-                nextra_genmet = n_aux_crsl["genmet"][y] * dc.info["lostlep_alpha"][y]
-                nextra_recogenaverage = (nextra + nextra_genmet) / 2.0
-                n_sig_cor[y] = n_sig[y] - nextra
-                n_sig_cor_recogenaverage[y] = n_sig_recogenaverage[y] - nextra_recogenaverage
-                # prootect against negative values
-                if n_sig_cor[y] * sig_scale[y] < 0.0:
-                    n_sig_cor[y] = 0.0
-                if n_sig_cor_recogenaverage[y] * sig_scale[y] < 0.0:
-                    n_sig_cor_recogenaverage[y] = 0.0
-                err_sig_recogenaverage[y] = 0.0
-                if n_sig_cor_recogenaverage[y] > 0:
-                    err_sig_recogenaverage[y] = abs(n_sig_cor[y] - n_sig_cor_recogenaverage[y]) / 2.0 / n_sig_cor_recogenaverage[y]
+
+            nextra = n_sig_crsl[y] * dc.info["lostlep_alpha"][y] + n_sig_crdy[y] * dc.info["zinv_alpha"][y]
+            nextra_genmet = n_aux_crsl["genmet"][y] * dc.info["lostlep_alpha"][y] + n_sig_crdy[y] * dc.info["zinv_alpha"][y]
+            nextra_recogenaverage = (nextra + nextra_genmet) / 2.0
+            n_sig_cor[y] = n_sig[y] - nextra
+            n_sig_cor_recogenaverage[y] = n_sig_recogenaverage[y] - nextra_recogenaverage
+            # prootect against negative values
+            if n_sig_cor[y] * sig_scale[y] < 0.0:
+                n_sig_cor[y] = 0.0
+            if n_sig_cor_recogenaverage[y] * sig_scale[y] < 0.0:
+                n_sig_cor_recogenaverage[y] = 0.0
+            err_sig_recogenaverage[y] = 0.0
+            if n_sig_cor_recogenaverage[y] > 0:
+                err_sig_recogenaverage[y] = abs(n_sig_cor[y] - n_sig_cor_recogenaverage[y]) / 2.0 / n_sig_cor_recogenaverage[y]
 
     totsig = 0.0
     for y in years:
@@ -352,7 +367,6 @@ print full_outdir
 
 allfalse = True
 for name,dc in templates.items():
-
     result = printFullCard(dc, M1, M2, full_outdir, isScan=isScan, addSigToObs=False)
     if result is not None:
         allfalse = False

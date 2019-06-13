@@ -286,8 +286,17 @@ weightStruct getLepSFFromFile_fastsim(float pt, float eta, int pdgId) {
   float eta_cutoff = std::max(-2.39,std::min(2.39,double(eta)));
 
   if (abs(pdgId) == 11) {
-    int binx = h_elSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
-    int biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta_cutoff));
+      bool invertedBins = false;
+      if(h_elSF_fastsim->GetYaxis()->GetXmax() > 20) // the y-axis is pT if the maximum is high enough
+          invertedBins = true;
+      int binx, biny;
+      if(!invertedBins){
+          binx = h_elSF_fastsim->GetXaxis()->FindBin(pt_cutoff);
+          biny = h_elSF_fastsim->GetYaxis()->FindBin(fabs(eta_cutoff));
+      }else{
+          binx = h_elSF_fastsim->GetXaxis()->FindBin(fabs(eta_cutoff));
+          biny = h_elSF_fastsim->GetYaxis()->FindBin(pt_cutoff);
+      }
     float central = h_elSF_fastsim->GetBinContent(binx,biny);
     float err  = 0.02; // 2% for all pt
     weights.cent = central;

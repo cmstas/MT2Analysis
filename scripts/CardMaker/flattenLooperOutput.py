@@ -70,9 +70,11 @@ if found_some:
 iterator = fin.GetListOfKeys()
 for key in iterator:
     dirname = key.GetTitle()
-    if "sr" not in dirname and "crsl" not in dirname:
+    if "sr" not in dirname and "crsl" not in dirname and "crdy" not in dirname:
         continue
-    if "t" not in MODEL and "VV" not in MODEL and "crsl" in dirname:
+    if "T5qqqqVV" not in MODEL and "crdy" in dirname:
+        continue
+    if "t" not in MODEL and "T5qqqq" not in MODEL and "W" not in MODEL and "crsl" in dirname:
         continue
     if "base" in dirname or "ttbar" in dirname or "wjets" in dirname or "mu" in dirname or "el" in dirname:
         continue
