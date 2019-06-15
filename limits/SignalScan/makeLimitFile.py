@@ -63,15 +63,16 @@ for line in open(POINTSFILE,"r"):
         f_limit.Close()
 	
 	f_sig = ROOT.TFile.Open(theDir+"sig_"+line+".root")
-	tree = f_sig.Get("limit")
-	if not tree:
+        if f_sig:
+            tree = f_sig.Get("limit")
+	if not f_sig or not tree:
             print "No tree in sig file for {0}. Setting to 0".format(line)
             sig = 0.0
         else:
             tree.GetEntry(0)
             sig = tree.limit
-
-        f_sig.Close()
+        if f_sig:
+            f_sig.Close()
 	
 
 	f.write(m1+" "+m2+" "+str(exp)+" "+str(obs)+" "+str(ep1s)+" "+str(em1s)+" "+str(ep2s)+" "+str(em2s)+" "+str(sig)+"\n")

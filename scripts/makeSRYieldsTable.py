@@ -78,6 +78,7 @@ for ht_reg in ["monojet", "VL","L","Ml","Mh","Hl","Hh","UHl","UHh"]:
 predictions, the first uncertainty listed is statistical (from the limited size of data control samples
 and Monte Carlo samples), and the second is systematic.}
 \label{tab:yieldsREGION}
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{c|c||c|c|c|c|c} \hline
 \multicolumn{7}{c}{""".replace("REGION", ht_reg).replace("NBINS", str(len(dcs[ht_reg]))).replace("TITLE", titles[ht_reg])
 
