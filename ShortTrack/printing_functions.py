@@ -11,9 +11,11 @@ plotdir = ""
 tabledir = ""
 colorTables = False
 format = "pdf"
-#extraText = None
-extraText = "Preliminary"
+extraText = None
+#extraText = "Preliminary"
 legopt = "pLEf"
+legoptNoL = "ep"
+legoptNoE = "pLf"
 
 pred_color = ROOT.kRed-4
 stat_color = ROOT.kCyan
@@ -108,6 +110,14 @@ def printHeader(outfile):
 
     outfile.write("\onehalfspacing\n\n")
 
+
+def startBGandObsTableData(outfile):
+    outfile.write("\\begin{document}\n\n")
+
+    outfile.write("\\begin{tabular}{l | *2c | *2c | *2c}\n")
+    outfile.write("\\toprule\n")
+    outfile.write("Background & Observation\\\\ \n ")
+    outfile.write("\hline\n")
 
 def startRegionTableData(outfile):
     outfile.write("\\begin{document}\n\n")
@@ -388,7 +398,12 @@ def getPullPlot(g_data, g_pred, g_ratio, desc=""):
                 pull = GetPull(ypred, g_pred.GetErrorYlow(ibin), ydata)
         else:
             if ydata > ypred:
-                err_data = sqrt(ypred)
+                try:
+                    err_data = sqrt(ypred)
+                except:                    
+                    print desc,"bin",ibin
+                    print ypred
+                    exit(1)
                 err_pred = g_pred.GetErrorYhigh(ibin)
             else:
                 err_data = sqrt(ypred)
@@ -518,55 +533,57 @@ def correspondingFshort(region):
         pt = ""
     return cat+nj+pt
 
-def getFshorts(f,inclMonojet=False):
+def getFshorts(f,inclMonojet=True):
     filename = f.GetName()[:f.GetName().find(".root")]
     h_FS = f.Get("h_FS").Clone(filename+"fs1")
+    if inclMonojet: h_FS_1 = f.Get("h_FS_1").Clone(filename+"fs2_1")
     h_FS_23 = f.Get("h_FS_23").Clone(filename+"fs2")
     h_FS_4 = f.Get("h_FS_4").Clone(filename+"fs3")
-    if inclMonojet: h_FS_1 = f.Get("h_FS_1").Clone(filename+"fs2_1")
     h_FS_hi = f.Get("h_FS_hi").Clone(filename+"fs4")
+    if inclMonojet: h_FS_1_hi = f.Get("h_FS_1_hi").Clone(filename+"fs2_1")
     h_FS_23_hi = f.Get("h_FS_23_hi").Clone(filename+"fs5")
     h_FS_4_hi = f.Get("h_FS_4_hi").Clone(filename+"fs6")
-    if inclMonojet: h_FS_1 = f.Get("h_FS_1_hi").Clone(filename+"fs2_1")
     h_FS_lo = f.Get("h_FS_lo").Clone(filename+"fs7")
+    if inclMonojet: h_FS_1_lo = f.Get("h_FS_1_lo").Clone(filename+"fs7_1")
     h_FS_23_lo = f.Get("h_FS_23_lo").Clone(filename+"fs8")
     h_FS_4_lo = f.Get("h_FS_4_lo").Clone(filename+"fs9")
-    if inclMonojet: h_FS_1_lo = f.Get("h_FS_1_lo").Clone(filename+"fs7_1")
     h_FS_up = f.Get("h_FS_up").Clone(filename+"fs10")
+    if inclMonojet: h_FS_1_up = f.Get("h_FS_1_up").Clone(filename+"fs12_1")
     h_FS_23_up = f.Get("h_FS_23_up").Clone(filename+"fs11")
     h_FS_4_up = f.Get("h_FS_4_up").Clone(filename+"fs12")
-    if inclMonojet: h_FS_1_up = f.Get("h_FS_1_up").Clone(filename+"fs12")
     h_FS_hi_up = f.Get("h_FS_hi_up").Clone(filename+"fs13")
+    if inclMonojet: h_FS_1_hi_up = f.Get("h_FS_1_hi_up").Clone(filename+"fs14_1")
     h_FS_23_hi_up = f.Get("h_FS_23_hi_up").Clone(filename+"fs14")
     h_FS_4_hi_up = f.Get("h_FS_4_hi_up").Clone(filename+"fs15")
     h_FS_lo_up = f.Get("h_FS_lo_up").Clone(filename+"fs16")
+    if inclMonojet: h_FS_1_lo_up = f.Get("h_FS_1_lo_up").Clone(filename+"fs18_1")
     h_FS_23_lo_up = f.Get("h_FS_23_lo_up").Clone(filename+"fs17")
     h_FS_4_lo_up = f.Get("h_FS_4_lo_up").Clone(filename+"fs18")
-    if inclMonojet: h_FS_1_lo_up = f.Get("h_FS_1_lo_up").Clone(filename+"fs18_1")
     h_FS_dn = f.Get("h_FS_dn").Clone(filename+"fs19")
+    if inclMonojet: h_FS_1_dn = f.Get("h_FS_1_dn").Clone(filename+"fs21_1")
     h_FS_23_dn = f.Get("h_FS_23_dn").Clone(filename+"fs20")
     h_FS_4_dn = f.Get("h_FS_4_dn").Clone(filename+"fs21")
-    if inclMonojet: h_FS_1_dn = f.Get("h_FS_1_dn").Clone(filename+"fs21_1")
     h_FS_hi_dn = f.Get("h_FS_hi_dn").Clone(filename+"fs22")
+    if inclMonojet: h_FS_1_hi_dn = f.Get("h_FS_1_hi_dn").Clone(filename+"fs24_1")
     h_FS_23_hi_dn = f.Get("h_FS_23_hi_dn").Clone(filename+"fs23")
     h_FS_4_hi_dn = f.Get("h_FS_4_hi_dn").Clone(filename+"fs24")
-    if inclMonojet: h_FS_1_hi_dn = f.Get("h_FS_1_hi_dn").Clone(filename+"fs24_1")
     h_FS_lo_dn = f.Get("h_FS_lo_dn").Clone(filename+"fs25")
+    if inclMonojet: h_FS_1_lo_dn = f.Get("h_FS_1_lo_dn").Clone(filename+"fs27_1")
     h_FS_23_lo_dn = f.Get("h_FS_23_lo_dn").Clone(filename+"fs26")
     h_FS_4_lo_dn = f.Get("h_FS_4_lo_dn").Clone(filename+"fs27")
-    if inclMonojet: h_FS_1_lo_dn = f.Get("h_FS_1_lo_dn").Clone(filename+"fs27_1")
     h_FS_syst = f.Get("h_FS_syst").Clone(filename+"fs28")
+    if inclMonojet: h_FS_1_syst = f.Get("h_FS_1_syst").Clone(filename+"fs30_1")
     h_FS_23_syst = f.Get("h_FS_23_syst").Clone(filename+"fs29")
     h_FS_4_syst = f.Get("h_FS_4_syst").Clone(filename+"fs30")
-    if inclMonojet: h_FS_1_syst = f.Get("h_FS_1_syst").Clone(filename+"fs30_1")
     h_FS_hi_syst = f.Get("h_FS_hi_syst").Clone(filename+"fs31")
+    if inclMonojet: h_FS_1_hi_syst = f.Get("h_FS_1_hi_syst").Clone(filename+"fs33_1")
     h_FS_23_hi_syst = f.Get("h_FS_23_hi_syst").Clone(filename+"fs32")
     h_FS_4_hi_syst = f.Get("h_FS_4_hi_syst").Clone(filename+"fs33")
-    if inclMonojet: h_FS_1_hi_syst = f.Get("h_FS_1_hi_syst").Clone(filename+"fs33_1")
     h_FS_lo_syst = f.Get("h_FS_lo_syst").Clone(filename+"fs34")
+    if inclMonojet: h_FS_1_lo_syst = f.Get("h_FS_1_lo_syst").Clone(filename+"fs36_1")
     h_FS_23_lo_syst = f.Get("h_FS_23_lo_syst").Clone(filename+"fs35")
     h_FS_4_lo_syst = f.Get("h_FS_4_lo_syst").Clone(filename+"fs36")
-    if inclMonojet: h_FS_1_lo_syst = f.Get("h_FS_1_lo_syst").Clone(filename+"fs36_1")
+
     vals = {}
     errs = {}
     systs = {}
@@ -800,7 +817,7 @@ def getFshorts(f,inclMonojet=False):
 
     return vals,errs,systs
 
-def getCounts(f,fshorts,fshort_systs,isMC = False,isSig = False,inclMonojet=False):
+def getCounts(f,fshorts,fshort_systs,isMC = False,isSig = False,inclMonojet=True):
     filename = f.GetName()[:f.GetName().find(".root")]
     vals = {}
     stats = {}
@@ -845,8 +862,7 @@ def getCounts(f,fshorts,fshort_systs,isMC = False,isSig = False,inclMonojet=Fals
             if vals[prefix+" pre"] > 0:
                 systs[prefix+" fsrel"] = hist_fs.GetBinError(bin,2) / vals[prefix+" pre"]
             else:
-                # FIXME using 23 fshort for monojet, change the replace("1","L")
-                fsregion = prefix.replace(" MR","").replace(" VR","").replace(" SR","").replace("1","L").replace("HLM","4").replace("LLM","23").replace("LL","23").replace("LM","23").replace("LH","23").replace("HL","4").replace("HM","4").replace("HH","4")                
+                fsregion = prefix.replace(" MR","").replace(" VR","").replace(" SR","").replace("HLM","4").replace("LLM","23").replace("1LM","1").replace("1L","1").replace("1M","1").replace("1H","1").replace("LL","23").replace("LM","23").replace("LH","23").replace("HL","4").replace("HM","4").replace("HH","4")
                 systs[prefix+" fsrel"] = fshort_systs[fsregion] / fshorts[fsregion] if fshorts[fsregion] > 0 else 0
             systs[prefix+" nc"] = hist_nc.GetBinContent(bin)*hist_stcstats.GetBinContent(bin,2) # syst is relative to prediction
             systs[prefix+" ncrel"] = hist_nc.GetBinContent(bin) # syst is relative to prediction
@@ -956,7 +972,7 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
         hdata.SetBinContent(bin_index,dval)
         hdata_syst.SetBinContent(bin_index,dval)
     hmc_syst.GetXaxis().LabelsOption("v")
-    hmc_syst.GetXaxis().SetLabelSize(2.5*hmc_syst.GetXaxis().GetLabelSize())
+    hmc_syst.GetXaxis().SetLabelSize(2.4*hmc_syst.GetXaxis().GetLabelSize())
     hmc_syst.GetXaxis().SetTitleOffset(4.8)
     hmc_syst.SetMinimum(0)
     hmc_syst.SetMaximum(1.5*max(hmc.GetMaximum(),hdata.GetMaximum()))
@@ -971,7 +987,7 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
 #    print hmc_syst.GetYaxis().GetTitleSize()
     hmc_syst.GetYaxis().SetTitleSize(0.07)
     hmc_syst.GetYaxis().SetTitleOffset(0.5)
-    hmc_syst.GetYaxis().SetLabelSize(1.3*hmc_syst.GetYaxis().GetLabelSize())
+    hmc_syst.GetYaxis().SetLabelSize(1.25*hmc_syst.GetYaxis().GetLabelSize())
     gdata = getPoissonGraph( hdata, derr_list )
 #    gmc = getPoissonGraph( hmc, merr_list )
     gdata_syst = getPoissonGraph( hdata_syst, dsyst_list )
@@ -980,7 +996,7 @@ def makePlotFshort(regions,dvals,derrs,dsysts,mvals,merrs,msysts,desc):
     gdata_syst.SetMarkerColor(ROOT.kBlack)
 #    gmc_syst = getPoissonGraph( hmc_syst, msyst_list )
 #    tlfs.AddEntry(hdata,desc+" Data",legopt)
-    tlfs.AddEntry(hdata_syst,desc+" data",legopt)
+    tlfs.AddEntry(hdata_syst,desc+" data",legoptNoL)
 #    tlfs.AddEntry(hmc,desc+" MC",legopt)
 #    tlfs.AddEntry(hmc_syst,desc+" MC, with Syst",legopt)
 #    hmc.Draw("E2")
@@ -1003,6 +1019,7 @@ def getBinLabelColor(region):
     track_category = tokens[0]
     njet = tokens[1][0]
     pt = "" if len(tokens) < 4 else tokens[3]
+    if region.find("1") > 0: return ROOT.kBlack
     if track_category == "P":
         if njet == "L":
             if pt == "hi":
@@ -1060,8 +1077,9 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     elif desc.find("17"):
         lumi = 41.5
         if desc.find("18"):
-            lumi += 59.8
-    elif desc.find("18"):
+            lumi = 101
+            #lumi += 59.8
+    elif desc.find("18"):        
         lumi = 59.8
     else: lumi = 1.0
     ratiocanvas.cd()
@@ -1113,7 +1131,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
             most_discrepant_region = region
     print desc,"Most discrepant:",most_discrepant_region,"sigma",most_discrepant_sigma,"obs",most_discrepant_obs,"pred",most_discrepant_pred,"perr",most_discrepant_perr
     hpred.GetXaxis().LabelsOption("v")
-    size_fac = 1.7 if not doPullPlot else 1.3
+    size_fac = 1.6 if not doPullPlot else 1.3
     hpred.GetXaxis().SetLabelSize(size_fac*hpred.GetXaxis().GetLabelSize())
     hpred.GetXaxis().SetTitleOffset(4.8)
     hpred.SetMinimum(-0.001)
@@ -1134,6 +1152,9 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     gpred_stat.SetFillColor(stat_color)
     gpred_withfs.SetFillColor(fs_color)
     gpred_all.SetFillColor(all_color)
+    hpred.GetYaxis().SetTitleSize(2.0*hpred.GetYaxis().GetTitleSize())
+    hpred.GetYaxis().SetTitleOffset(0.6)
+    hpred.GetYaxis().SetLabelSize(1.5*hpred.GetYaxis().GetLabelSize())
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
     if not combineSysts:
@@ -1147,22 +1168,22 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
-    tl.AddEntry(gobs,"Observation","pLE")
-    tl.AddEntry(gpred_stat,"Prediction, Statistical Errors","pLE")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
+    tl.AddEntry(gobs,"Observation",legoptNoL)
+    tl.AddEntry(gpred_stat,"Prediction, Statistical Errors",legoptNoE)
     if not combineSysts or not inclNCsyst:
-        tl.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst","pLE")
+        tl.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst",legoptNoE)
     if inclNCsyst:
-        tl.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst","pLE")
+        tl.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst",legoptNoE)
     tl.Draw()
     pads[1].cd()
     if doPullPlot:
         print desc,"pull plot"
         h1 = ROOT.TH1D("fill_for_"+desc,";;Pull",len(regions),0,len(regions))
         h2 = ROOT.TH1D("fill2_for_"+desc,";;Pull",len(regions),0,len(regions))
-        h2.GetYaxis().SetTitleSize(h2.GetYaxis().GetTitleSize()*2)
-        h2.GetYaxis().SetTitleOffset(0.6)
-        h2.GetYaxis().SetLabelSize(h2.GetYaxis().GetLabelSize()*2)
+        h2.GetYaxis().SetTitleSize(h2.GetYaxis().GetTitleSize()*4)
+        h2.GetYaxis().SetTitleOffset(0.3)
+        h2.GetYaxis().SetLabelSize(h2.GetYaxis().GetLabelSize()*1.9)
         h1.SetFillColor(ROOT.kWhite)
         h1.SetLineColor(ROOT.kBlack)
         h2.SetFillColor(ROOT.kGray)
@@ -1252,9 +1273,9 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         gobs_norm.SetMarkerStyle(20)
         gobs_norm.SetMarkerSize(2)
         gobs_norm.SetMarkerColor(ROOT.kBlack)
-        h1.GetYaxis().SetLabelSize(hpred.GetYaxis().GetLabelSize()*.83/.16/2)
-        h1.GetYaxis().SetTitleSize(hpred.GetYaxis().GetTitleSize()*.83/.16/2)
-        h1.GetYaxis().SetTitleOffset(0.35)
+        h1.GetYaxis().SetLabelSize(hpred.GetYaxis().GetLabelSize()*2)
+        h1.GetYaxis().SetTitleSize(hpred.GetYaxis().GetTitleSize()*2)
+        h1.GetYaxis().SetTitleOffset(0.2)
         h1.Draw("AXIS")
         # "0" option forces the drawing of error bars even if the central value is off-scale
         gall_norm.Draw("0 2 same")
@@ -1278,14 +1299,14 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     tr.Clear()
-    tr.AddEntry(gobs,"Observation","pLE")
-    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors","pLE")
+    tr.AddEntry(gobs,"Observation",legoptNoL)
+    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors",legoptNoE)
     if not combineSysts or not inclNCsyst:
-        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst","pLE")
+        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst",legoptNoE)
     if inclNCsyst:
-        tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst","pLE")
+        tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst",legoptNoE)
     tr.Draw()
     pads[0].SetLogy(True)
     ratiocanvas.SaveAs("{}/{}_raw_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
@@ -1297,7 +1318,8 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
     elif desc.find("17"):
         lumi = 41.5
         if desc.find("18"):
-            lumi += 59.8
+            lumi = 101
+            #lumi += 59.8
     elif desc.find("18"):
         lumi = 59.8
     else: lumi = 1.0
@@ -1373,13 +1395,13 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
-    tl.AddEntry(gobs,"Observation","pLE")
-    tl.AddEntry(gpred_stat,"Prediction, Statistical Errors","pLE")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
+    tl.AddEntry(gobs,"Observation",legoptNoL)
+    tl.AddEntry(gpred_stat,"Prediction, Statistical Errors",legoptNoE)
     if not combineSysts:
-        tl.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst","pLE")
-    tl.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst","pLE")
-    tl.AddEntry(hpost,"Prediction, Post-Fit","pLE")
+        tl.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst",legoptNoE)
+    tl.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst",legoptNoE)
+    tl.AddEntry(hpost,"Prediction, Post-Fit",legoptNoE)
     tl.Draw()
     pads[1].cd()
     if doPullPlot:
@@ -1505,14 +1527,14 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     tr.Clear()
-    tr.AddEntry(gobs,"Observation","pLE")
-    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors","pLE")
+    tr.AddEntry(gobs,"Observation",legoptNoL)
+    tr.AddEntry(gpred_stat,"Prediction, Statistical Errors",legoptNoE)
     if not combineSysts:
-        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst","pLE")
-    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst","pLE")
-    tr.AddEntry(hpost,"Prediction, Post-Fit","pLE")
+        tr.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst",legoptNoE)
+    tr.AddEntry(gpred_all,"Prediction, with Total Error" if combineSysts else "Prediction, with also VR Syst",legoptNoE)
+    tr.AddEntry(hpost,"Prediction, Post-Fit",legoptNoE)
     tr.Draw()
     pads[0].SetLogy(True)
     ratiocanvas.SaveAs("{}/{}_post_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
@@ -1524,7 +1546,8 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
     elif desc.find("17"):
         lumi = 41.5
         if desc.find("18"):
-            lumi += 59.8
+            lumi = 101
+            #lumi += 59.8
     elif desc.find("18"):
         lumi = 59.8
     else: lumi = 1.0
@@ -1572,9 +1595,9 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
     hpost.Draw("AXIS same")
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
-    tl.AddEntry(gobs,"Observation","pLE")
-    tl.AddEntry(hpost,"Prediction, Post-Fit","pLE")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
+    tl.AddEntry(gobs,"Observation",legoptNoL)
+    tl.AddEntry(hpost,"Prediction, Post-Fit",legoptNoE)
     tl.Draw()
     pads[1].cd()
     if doPullPlot:
@@ -1661,10 +1684,10 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     tr.Clear()
-    tr.AddEntry(gobs,"Observation","pLE")
-    tr.AddEntry(hpost,"Prediction, Post-Fit","pLE")
+    tr.AddEntry(gobs,"Observation",legoptNoL)
+    tr.AddEntry(hpost,"Prediction, Post-Fit",legoptNoE)
     tr.Draw()
     pads[0].SetLogy(True)
     ratiocanvas.SaveAs("{}/{}_postonly_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
@@ -1676,7 +1699,8 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
     elif desc.find("17"):
         lumi = 41.5
         if desc.find("18"):
-            lumi += 59.8
+            lumi = 101
+#            lumi += 59.8
     elif desc.find("18"):
         lumi = 59.8
     else: lumi = 1.0
@@ -1737,10 +1761,10 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
     hpost.Draw("AXIS same")
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
-    tl.AddEntry(gobs,"Observation","pLE")
-    tl.AddEntry(hpost,"Predicted Background, Post-Fit","pLE")
-    tl.AddEntry(hpostS,"Predicted Signal","pLE")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
+    tl.AddEntry(gobs,"Observation",legoptNoL)
+    tl.AddEntry(hpost,"Predicted Background, Post-Fit",legoptNoE)
+    tl.AddEntry(hpostS,"Predicted Signal",legoptNoE)
     tl.Draw()
     pads[1].cd()
     if doPullPlot:
@@ -1829,11 +1853,11 @@ def makePlotPostfitSvsBG(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     tr.Clear()
-    tr.AddEntry(gobs,"Observation","pLE")
-    tr.AddEntry(hpost,"Background, Post-Fit","pLE")
-    tr.AddEntry(hpostS,"Signal, Post-Fit","pLE")
+    tr.AddEntry(gobs,"Observation",legoptNoL)
+    tr.AddEntry(hpost,"Background, Post-Fit",legoptNoE)
+    tr.AddEntry(hpostS,"Signal, Post-Fit",legoptNoE)
     tr.Draw()
     pads[0].SetLogy(True)
     ratiocanvas.SaveAs("{}/{}_postonlySvsBG_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
@@ -1884,7 +1908,8 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
         lumi = 41.5
         year = "2017"
         if desc.find("18"):
-            lumi += 59.8
+            lumi = 101
+#            lumi += 59.8
             year = "2017and2018"
     elif desc.find("18"):
         lumi = 59.8
@@ -1981,8 +2006,8 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
-    tr.AddEntry(gobs,"Observation","pLE")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
+    tr.AddEntry(gobs,"Observation",legoptNoL)
     tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
     tr.Draw()
     pads[1].cd()
@@ -2034,9 +2059,9 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     tr.Clear()
-    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gobs,"Observation",legoptNoL)
     tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
     tr.Draw()
     pads[0].SetLogy(True)
@@ -2051,7 +2076,8 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
         lumi = 41.5
         year = "2017"
         if desc.find("18"):
-            lumi += 59.8
+            lumi = 101
+            #lumi += 59.8
             year = "2017and2018"
     elif desc.find("18"):
         lumi = 59.8
@@ -2147,8 +2173,8 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
-    tr.AddEntry(gobs,"Observation","pLE")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
+    tr.AddEntry(gobs,"Observation",legoptNoL)
     tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
     tr.Draw()
     pads[1].cd()
@@ -2200,9 +2226,9 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
-    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(pads[0],extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     tr.Clear()
-    tr.AddEntry(gobs,"Observation","pLE")
+    tr.AddEntry(gobs,"Observation",legoptNoL)
     tr.AddEntry(gpred_all,"Prediction, with Total{} Error".format("" if doFullCovariance else " (Uncorrelated)"))
     tr.Draw()
     pads[0].SetLogy(True)
@@ -2299,7 +2325,7 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
     gobs.SetMarkerColor(ROOT.kBlack)
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
     hpred.Draw("AXIS same") # make tick marks show above fill areas
-    tl.AddEntry(gobs,"Observation","pLE")
+    tl.AddEntry(gobs,"Observation",legoptNoL)
     if not combineErrors:
         tl.AddEntry(gpred_stat,"Prediction, Statistical Errors")
         tl.AddEntry(gpred_withfs,"Prediction, with f_{short} Syst")
@@ -2314,7 +2340,7 @@ def makeSignalPlot(regions,vals_bg,stats_bg,systs_bg,list_of_vals_sig,list_of_er
     tl.Draw()
 #    utils.DrawCmsText(singlecanvas,cmstext)
 #    utils.DrawLumiText(singlecanvas,lumi)
-    utils.CMS_Style(singlecanvas,extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(singlecanvas,extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     unblind = "partialunblind" if rescale_unblind < 1.0 else "fullunblind"
     singlecanvas.SaveAs("{}/{}_counts_{}.{}".format(plotdir,desc.replace(" ","_").replace("(","").replace(")","").replace(",",""),unblind,format))
 
@@ -2327,7 +2353,8 @@ def makePullPlot(regions,vals,stats,systs,desc,rescale=1.0):
     elif desc.find("17"):
         lumi = 41.5
         if desc.find("18"):
-            lumi += 59.8
+            lumi = 101
+            #lumi += 59.8
     elif desc.find("18"):
         lumi = 59.8
     else: lumi = 1.0
@@ -2384,7 +2411,7 @@ def makePullPlot(regions,vals,stats,systs,desc,rescale=1.0):
     hpred.Draw("AXIS same")
 #    utils.DrawCmsText(simplecanvas,cmstext)
 #    utils.DrawLumiText(simplecanvas,lumi)
-    utils.CMS_Style(simplecanvas,extraText=extraText,lumi=str(lumi)+" fb^{1}")
+    utils.CMS_Style(simplecanvas,extraText=extraText,lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
     simplecanvas.SaveAs("{}/{}_pull.{}".format(plotdir,desc.replace(" ","_"),format))
 
 # compare signal yields at limiting mu, and systematic error, in VR
@@ -2698,17 +2725,35 @@ def getMergedLineData_Combined(region,D16,eD16,sD16,D1718,eD1718,sD1718,rescale1
         syst1718 = "$<${:.1f}\%$>$".format(100*sqrt(sD1718[region+" fsrel"]**2 + sD1718[region+" ncrel"]**2))
 
     if cat == "P ": # Don't return 2017-18
-        return colorline+"{} & - & - & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & - & - & \\textbf{{{}}} $^{{+{}}}_{{-{}}}$ (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), syst16, D16[region+" obs"])
 
     elif cat == "P3" or cat == "P4": # Don't return 2016
-        return colorline+"{} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & \\textbf{{{}}} $^{{+{}}}_{{-{}}}$ (stat) $\pm$ {} (syst) & {:.0f} & - & -\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), syst1718, D1718[region+" obs"])
 
     else:
-        return colorline+"{} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f} & \\textbf{{{}}} +{}-{} (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
+        return colorline+"{} & \\textbf{{{}}} $^{{+{}}}_{{-{}}}$ (stat) $\pm$ {} (syst) & {:.0f} & \\textbf{{{}}} $^{{+{}}}_{{-{}}}$ (stat) $\pm$ {} (syst) & {:.0f}\\\\ \n".format(region.replace(" VR","").replace(" SR",""),
                                                                                                                                                                                                                                     pred1718, "%#.2g"%(eD1718[region+" pre"][0]*rescale1718), "%#.2g"%(eD1718[region+" pre"][1]*rescale1718), syst1718, D1718[region+" obs"],
                            pred16, "%#.2g"%(eD16[region+" pre"][0]*rescale16), "%#.2g"%(eD16[region+" pre"][1]*rescale16), syst16, D16[region+" obs"])
+
+def getBGandObsData_Combined(region,D,eD,sD,rescale=1.0): # rescale multiplies prediction to enable partial unblinding
+    if not colorTables:
+        colorline = ""
+    elif region[0] == "P":
+        colorline = "\\rowcolor{green!25}"
+    elif region[0] == "M":
+        colorline = "\\rowcolor{blue!25}"
+    else:
+        colorline = "\\rowcolor{red!25}"
+    cat = region[0:2]    
+    pred = "%#.3g"%(D[region+" pre"]*rescale)
+    if pred > 0:
+        syst = "%#.3g"%(sqrt(sD[region+" fs"]**2 + sD[region+" nc"]**2))
+    else: 
+        syst = "%#.3g"%(100*sqrt(sD[region+" fsrel"]**2 + sD[region+" ncrel"]**2))
+    lineToReturn = colorline+"\\textbf{{{}}} $^{{+{}}}_{{-{}}}$ $\pm$ {} & {:.0f}\\\\ % {} \n".format(pred, "%#.3g"%(eD[region+" pre"][0]*rescale), "%#.3g"%(eD[region+" pre"][1]*rescale), syst, D[region+" obs"],region)    
+    return lineToReturn.replace(".}","}").replace(". "," ")
 
 def getMergedLineMCSTC(region,M16,eM16,sM16,M1718,eM1718,sM1718,rescale16=1.0,rescale17=1.0): # rescale multiplies prediction to enable partial unblinding
     if not colorTables:

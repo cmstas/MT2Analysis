@@ -9,7 +9,7 @@ from printing_functions import *
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more status messages
-printTables = False
+printTables = True
 full_unblind = True
 doMC = True
 doBenchmarks = False
@@ -88,15 +88,15 @@ if doMC:
         siglimits[(1800,1600,90)] = 0.14
         siglimits[(1800,1700,90)] = 0.28
 
-D18f,eD18f,sD18f=getFshorts(d18)
-D17f,eD17f,sD17f=getFshorts(d17)
-D1718f,eD1718f,sD1718f=getFshorts(d1718)
-D16f,eD16f,sD16f=getFshorts(d16)
+D18f,eD18f,sD18f=getFshorts(d18,doMonojet)
+D17f,eD17f,sD17f=getFshorts(d17,doMonojet)
+D1718f,eD1718f,sD1718f=getFshorts(d1718,doMonojet)
+D16f,eD16f,sD16f=getFshorts(d16,doMonojet)
 if doMC:
-    M1718f,eM1718f,sM1718f=getFshorts(m1718)
-    M16f,eM16f,sM16f=getFshorts(m16)
-    M17f,eM17f,sM17f=getFshorts(m17)
-    M18f,eM18f,sM18f=getFshorts(m18)
+    M1718f,eM1718f,sM1718f=getFshorts(m1718,doMonojet)
+    M16f,eM16f,sM16f=getFshorts(m16,doMonojet)
+    M17f,eM17f,sM17f=getFshorts(m17,doMonojet)
+    M18f,eM18f,sM18f=getFshorts(m18,doMonojet)
 
 if doBenchmarks:
     # Mglu, Mlsp, ctau, limit mu
@@ -104,15 +104,15 @@ if doBenchmarks:
     signal_points_10=[(1800,1400,10),(1800,1600,10),(1800,1700,10)]
     signal_points_90=[(1800,1400,90),(1800,1600,90),(1800,1700,90)]
 
-D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f)
-D17,eD17,sD17=getCounts(d17,D17f,sD17f)
-D18,eD18,sD18=getCounts(d18,D18f,sD18f)
-D16,eD16,sD16=getCounts(d16,D16f,sD16f)
+D1718,eD1718,sD1718=getCounts(d1718,D1718f,sD1718f,inclMonojet=doMonojet)
+D17,eD17,sD17=getCounts(d17,D17f,sD17f,inclMonojet=doMonojet)
+D18,eD18,sD18=getCounts(d18,D18f,sD18f,inclMonojet=doMonojet)
+D16,eD16,sD16=getCounts(d16,D16f,sD16f,inclMonojet=doMonojet)
 if doMC:
-    M1718,eM1718,sM1718=getCounts(m1718,M1718f,sM1718f,True)
-    M17,eM17,sM17=getCounts(m17,M17f,sM17f,True)
-    M18,eM18,sM18=getCounts(m18,M18f,sM18f,True)
-    M16,eM16,sM16=getCounts(m16,M16f,sM16f,True)
+    M1718,eM1718,sM1718=getCounts(m1718,M1718f,sM1718f,True,inclMonojet=doMonojet)
+    M17,eM17,sM17=getCounts(m17,M17f,sM17f,True,inclMonojet=doMonojet)
+    M18,eM18,sM18=getCounts(m18,M18f,sM18f,True,inclMonojet=doMonojet)
+    M16,eM16,sM16=getCounts(m16,M16f,sM16f,True,inclMonojet=doMonojet)
 
 if doBenchmarks:
     S1718 = {}
@@ -145,16 +145,22 @@ if doMC:
 #regionsNicelyOrderedSR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","P3","P4","M"]  for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]] + regionsLSR
 #regionsNicelyOrderedVR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","P3","P4","M"]  for kin in ["LL","LM","LH","HL","HM","HH"] for pt in ["lo","hi"]] + regionsLVR
 
-# Correlation order (New)
-regionsNoL16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","M"] for pt in ["lo","hi"] for kin in ["LL","LM","LH","HL","HM","HH"]]
-regionsNoL16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","M"] for pt in ["lo","hi"] for kin in ["LL","LM","LH","HL","HM","HH"]]
-regionsNoL1718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3","P4","M"] for pt in ["lo","hi"] for kin in ["LL","LM","LH","HL","HM","HH"] ]
-regionsNoL1718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3","P4","M"] for pt in ["lo","hi"] for kin in ["LL","LM","LH","HL","HM","HH"] ]
-regionsLVR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["VR"]]
-regionsLSR = ["L " + kin + " " + reg for kin in ["LLM","LH","HLM","HH"] for reg in ["SR"]]
+kinA = ["LL","LM","LH","HL","HM","HH"] #["1L","LL","LM","LH","HL","HM","HH"]]
+kinB = ["LLM","LH","HLM","HH"] #["1L","LLM","LH","HLM","HH"] 
 
-regionsNicelyOrderedSR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","P3","P4","M"] for pt in ["lo","hi"] for kin in ["LL","LM","LH","HL","HM","HH"] ] + regionsLSR
-regionsNicelyOrderedVR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","P3","P4","M"] for pt in ["lo","hi"] for kin in ["LL","LM","LH","HL","HM","HH"]] + regionsLVR
+# Correlation order (New)
+regionsNoL16VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","M"] for pt in ["lo","hi"] for kin in kinA]
+regionsNoL16SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","M"] for pt in ["lo","hi"] for kin in kinA]
+regionsNoL1718VR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P3","P4","M"] for pt in ["lo","hi"] for kin in kinA ]
+regionsNoL1718SR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3","P4","M"] for pt in ["lo","hi"] for kin in kinA ]
+regionsLVR = ["L " + kin + " " + reg for kin in kinB for reg in ["VR"]]
+regionsLSR = ["L " + kin + " " + reg for kin in kinB for reg in ["SR"]]
+
+regionsNicelyOrderedSR = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","P3","P4","M"] for pt in ["lo","hi"] for kin in kinA ] + regionsLSR
+regionsNicelyOrderedVR = [cat + " " + kin + " " + reg + " " + pt for reg in ["VR"] for cat in ["P","P3","P4","M"] for pt in ["lo","hi"] for kin in kinA] + regionsLVR
+
+regionsBGandObsSR16 = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","M"] for kin in kinA for pt in ["lo","hi"]  ] + regionsLSR
+regionsBGandObsSR1718 = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3","P4","M"] for kin in kinA for pt in ["lo","hi"]  ] + regionsLSR
 
 
 allVRnoL = regionsNoL16VR + regionsNoL1718VR
@@ -227,7 +233,7 @@ makePlotRaw(allVR16,D16,eD16,sD16,D16f,"2016 DATA VR",doPullPlot=False)
 makePlotRaw(allSR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA SR",rescale1718,doPullPlot=False)
 makePlotRaw(allSR16,D16,eD16,sD16,D16f,"2016 DATA SR",rescale16,doPullPlot=False)
 
-if makePullPlots:
+if makePullPlots:    
     makePlotRaw(allVR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA VR",doPullPlot=True)
     makePlotRaw(allVR16,D16,eD16,sD16,D16f,"2016 DATA VR",doPullPlot=True)
     makePlotRaw(allSR1718,D1718,eD1718,sD1718,D1718f,"2017-18 DATA SR",rescale1718,doPullPlot=True)
@@ -324,9 +330,13 @@ if doBenchmarks:
         makeSignalPlot(allSR16,D16,eD16,sD16,list_of_vals_10,list_of_errs_10,35.9/41.97,"2016 10 cm",list_of_tags,colors,rescale16)
         makeSignalPlot(allSR16,D16,eD16,sD16,list_of_vals_90,list_of_errs_90,35.9/41.97,"2016 90 cm",list_of_tags,colors,rescale16)
 
+#fshort_regions_16 = [cat + " " + nj + " " + pt for cat in ["P","M"] for nj in ["1","23","4"] for pt in ["hi","lo"]]
+#fshort_regions_16 += [ "L 1", "L 23", "L 4" ]
 fshort_regions_16 = [cat + " " + nj + " " + pt for cat in ["P","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fshort_regions_16 += [ "L 23", "L 4" ]
 
+#fshort_regions_1718 = [cat + " " + nj + " " + pt for cat in ["P3","P4","M"] for nj in ["1","23","4"] for pt in ["hi","lo"]]
+#fshort_regions_1718 += [ "L 1", "L 23", "L 4" ]
 fshort_regions_1718 = [cat + " " + nj + " " + pt for cat in ["P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fshort_regions_1718 += [ "L 23", "L 4" ]
 
@@ -467,6 +477,22 @@ if printTables:
     printFooter(output)
     output.close()
 
+    output = open("{0}/BGandObs_data_SR_16_combinedSyst.tex".format(tabledir),"w")
+    printHeader(output)
+    startBGandObsTableData(output)
+    for region in regionsBGandObsSR16:
+        output.write(getBGandObsData_Combined(region,D16,eD16,sD16))
+    printFooter(output)
+    output.close()
+
+    output = open("{0}/BGandObs_data_SR_1718_combinedSyst.tex".format(tabledir),"w")
+    printHeader(output)
+    startBGandObsTableData(output)
+    for region in regionsBGandObsSR1718:
+        output.write(getBGandObsData_Combined(region,D1718,eD1718,sD1718))
+    printFooter(output)
+    output.close()
+
 
 if doMC and printTables:
     output = open("{0}/regions_mc_VR.tex".format(tabledir),"w")
@@ -518,6 +544,8 @@ if doMC and printTables:
         printFooter(output)
         output.close()
 
+#fs_regions = [cat + " " + nj + " " + pt for cat in ["P","P3","P4","M"] for nj in ["1","23","4"] for pt in ["hi","lo"]]
+#fs_regions += ["L 1", "L 23","L 4"]
 fs_regions = [cat + " " + nj + " " + pt for cat in ["P","P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fs_regions += ["L 23","L 4"]
 
