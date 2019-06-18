@@ -3,7 +3,7 @@
 import ROOT
 import re
 from math import sqrt
-from sys import argv,exit
+from sys import argv,exit,stdout
 import os
 
 # Suppresses warnings about TH1::Sumw2
@@ -22,6 +22,9 @@ setBGplusSigToObs = False
 # We print only to a certain number of figures, so nonzero values at precisions lower than that need to be considered equivalent to 0
 n_zero = 1e-3
 alpha_zero = 1e-5
+
+# Use 2017&2018 fastsim sig MC for 2016, with correlated statistical errors
+correlate_sig = False
 
 if len(argv) < 3:
     print "Usage: {0} [signal file name] [tag] [output directory] [doScan = False] [useMC = True] [useSR = True]".format(argv[0])
@@ -224,9 +227,18 @@ def makeTemplate(year,region,length):
         template_list.append("sig_renorm_{}                    lnN    {:.3f}   -\n".format(year,1.05 if year == "2016" else 1+sqrt(2)*0.05)) # correlated across bins, but not years
         template_list.append("sig_gen_{}                  lnN    genmet_sig   -\n".format(year)) # correlated across bins, but not years
         template_list.append("sig_isr_{}                  lnN    isr_sig   -\n".format(year)) # sig_isr is fully correlated across all bins, but not years
-#        if year != "2016": 
-        template_list.append("sig_fastsim                 lnN    1.06  -\n") # fully correlated error assessed to cover fastsim vs fullsim signal efficiency
-        template_list.append("sig_acceptance                 lnN    1.10  -\n") # fully correlated error assessed to cover signal acceptance uncertainty
+        if year != "2016" or correlate_sig: 
+            template_list.append("sig_fastsim                 lnN    1.06  -\n") # fully correlated error assessed to cover fastsim vs fullsim signal efficiency
+        # fully correlated error assessed to cover signal acceptance uncertainty, half the difference between MC efficiency and unity
+        if year == "2016" and not correlate_sig:
+            # For 2016 fullsim, apply 25% uncertainty for P tracks and 15% uncertainty for M and L
+            if length <= 3:
+                template_list.append("sig_acceptance                 lnN    1.25  -\n") 
+            else:
+                template_list.append("sig_acceptance                 lnN    1.15  -\n")
+        else:
+            # for fastsim (including when scaling 2017&2018 to 2016) apply flat 10% uncertainty
+            template_list.append("sig_acceptance                 lnN    1.10  -\n") 
 
     # background errors
     
@@ -332,7 +344,7 @@ def makeCard(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
     outfile.close()
     return n_sig > 0
 
-def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1,rescale17=False):
+def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
     category = ["P","P3","P4","M","L"][length-1]
     channel = region+"_"+category+"_"+year
     cardname = "{0}/datacard_{1}_{2}_{3}_{4}.txt".format(outdir,channel,signal,im1,im2)
@@ -368,7 +380,7 @@ def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1,r
 
     if year == "2016": 
         f_contam = f_16_contam
-        rescale_2016 = eff_2016_hi[length-1] if region.find("hi") >= 0 else eff_2016_lo[length-1]
+        rescale_2016 = 1 if not correlate_sig else (eff_2016_hi[length-1] if region.find("hi") >= 0 else eff_2016_lo[length-1])
 #        rescale_sig = 1 if not rescale17 else 35.9/41.5 * rescale_2016
         rescale_sig = rescale_2016
     if year == "2017and2018": 
@@ -419,12 +431,13 @@ def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1,r
         to_print = to_print.replace("name_sig_syst",name_syst_sig)
         to_print = to_print.replace("sig_syst","1.3") # arbitrary 30% signal systematic
     else:
-        mcstat_channel = region+"_"+ (category if category != "P3" else "P") # correlate errors in 2016 and 2017-18, as we use the same signal; correlate P and P3
+        mcstat_channel = channel if not correlate_sig else region+"_"+ (category if category != "P3" else "P") # correlate errors in 2016 and 2017-18, as we use the same signal; correlate P and P3
         to_print = to_print.replace("name_sig_mcstat","sig_mcstat_{}".format(mcstat_channel))
         to_print = to_print.replace("mcstat_sig","{0:.3f}".format(mcstat_sig))
         to_print = to_print.replace("isr_sig","{0:.3f}".format(isr_sig))
         to_print = to_print.replace("genmet_sig","{0:.3f}".format(genmet_sig))
-        if year == "2016" and rescale17: to_print += "rescale_2017to2016_sig_{} lnN  {:.3f}   -\n".format(category, 1+abs(0.5*(1-rescale_2016)))
+        if year == "2016" and correlate_sig: to_print += "rescale_2017and2018to2016_sig_{} lnN  {:.3f}   -\n".format(category, 1+abs(0.5*(1-rescale_2016)))
+        if year == "2017and2018" or correlate_sig: to_print += "mugenveto_sig lnN  {:.3f}   -\n".format(1.015)
 
     outfile = open(cardname,"w")
     outfile.write(to_print)
@@ -457,7 +470,8 @@ if not doScan:
 #h_nevents_17.SetDirectory(0)
 #f_weights_17.Close()                             
 for region in regions:
-    if verbose: print region
+    print region
+    stdout.flush()
     # Loop over track length bins in this signal region
     for length in range(1,6): # length 1 is inclusive P track, then P3, P4, M, L
         track_category = ["P","P3","P4","M","L"][length-1]
@@ -511,7 +525,6 @@ for region in regions:
 #                            nsig_y = h_nevents_16.GetYaxis().FindBin(m2)
 #                            nsig_16 = h_nevents_16.GetBinContent(nsig_x,nsig_y)
 #                            nsig_17 = h_nevents_17.GetBinContent(nsig_x,nsig_y)
-                            rescale17 = False
 #                            if nsig_16 == 0:
 #                                if nsig_17 > 0:
 #                                    rescale17 = True
@@ -522,7 +535,7 @@ for region in regions:
                             # Replace signal placeholders and print the card
                             masspoint_outdir = outdir+"/{}_{}".format(m1,m2)
                             os.system("mkdir -p "+masspoint_outdir)
-                            n_sig = makeCardScan(year,fullregion,template,signal,masspoint_outdir,length,background,m1,m2,rescale17=rescale17)
+                            n_sig = makeCardScan(year,fullregion,template,signal,masspoint_outdir,length,background,m1,m2)
                             # If no histograms are found for that mass point, don't add it to the list of processed points
                             if n_sig > 0:
 #                                totals_m1_m2[ (m1,m2,year) ] += n_sig
