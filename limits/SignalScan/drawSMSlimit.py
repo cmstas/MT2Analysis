@@ -19,7 +19,7 @@ divideTopDiagonal = False
 
 ROOT.gROOT.SetBatch(True)
 
-models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt","T2cc","T2bW","T2bt","extraT2tt","rpvMonoPhi"]
+models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt","T2cc","T2bW","T2bt","extraT2tt","rpvMonoPhi","T5qqqqWW","T5qqqqVV"]
 model = "mymodel"
 for m in models:
     if m in INPUT:
@@ -29,7 +29,7 @@ print "model =", model
 
 # xsfile = "SUSYCrossSections13TeVgluglu.root" if "T1" in model else "SUSYCrossSections13TeVstopstop.root" if model=="T2tt" or model=="T2bb" or model=="T2cc" else "SUSYCrossSections13TeVsquarkantisquark.root" if model=="T2qq" else "theXSfile.root"
 f_xs = ROOT.TFile("xsec_susy_13tev_run2.root")
-xshist = "h_xsec_gluino" if "T1" in model else "h_xsec_stop" if model in ["T2tt","T2bb","T2cc","T2bW","T2bt","extraT2tt"] else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
+xshist = "h_xsec_gluino" if "T1" in model or "T5" in model else "h_xsec_stop" if model in ["T2tt","T2bb","T2cc","T2bW","T2bt","extraT2tt"] else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
 h_xs = f_xs.Get(xshist)
 
 if model=="rpvMonoPhi":
@@ -292,9 +292,8 @@ g2_lims_mu  = {} # TGraph2D limits in signal-strength, automatic interpolation
 
 m1min, m1max = 0, 2800
 m2min, m2max = 0, 2400
-xbinSize = 25
-xbinSize = 25 if model!='T2cc' else 5
-ybinSize = 25 if model!='T2cc' else 5
+xbinSize = 5 if model=="T2cc" else 25.0/3 if model=="T2tt" else 25
+ybinSize = 5 if model=="T2cc" else 25.0/2 if model=="T2tt" else 25
 
 mass1 = "mGlu" if "T1" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if "T2tt" in model else "m1"
 mass2 = "mLSP"
@@ -303,7 +302,7 @@ mass2 = "mLSP"
 for lim in limits:
     # uniform 25 GeV binning
     #h_lims_mu0[lim] = ROOT.TH2F(lim+"_mu0", model, (m1max-m1min+binSize)/binSize, m1min-binSize/2., m1max+binSize/2., (m2max-m2min+binSize)/binSize, m2min-binSize/2., m2max+binSize/2.)
-    h_lims_mu0[lim] = ROOT.TH2F(lim+"_mu0", model, (m1max-m1min+xbinSize)/xbinSize, m1min-xbinSize/2., m1max+xbinSize/2., (m2max-m2min+2*ybinSize)/(ybinSize), m2min-3*ybinSize/2., m2max+ybinSize/2.)
+    h_lims_mu0[lim] = ROOT.TH2F(lim+"_mu0", model, int((m1max-m1min+xbinSize)/xbinSize), m1min-xbinSize/2., m1max+xbinSize/2., int((m2max-m2min+2*ybinSize)/(ybinSize)), m2min-3*ybinSize/2., m2max+ybinSize/2.)
     h_lims_mu0[lim].SetXTitle(mass1)    
     h_lims_mu0[lim].SetYTitle(mass2)
 
@@ -347,6 +346,12 @@ for lim in limits:
             if isnan(h_lims_mu[lim].GetBinContent(ix,iy)): #if nan set to neighbour average
                 val = (h_lims_mu[lim].GetBinContent(ix+1,iy) + h_lims_mu[lim].GetBinContent(ix-1,iy) + h_lims_mu[lim].GetBinContent(ix,iy+1) + h_lims_mu[lim].GetBinContent(ix,iy-1) )/4.0
                 h_lims_mu[lim].SetBinContent(ix,iy,val)
+
+    # hard-code here because the interpolation is being weird
+    if lim.startswith("o") and model=="T1qqqq":
+        h_lims_mu[lim].SetBinContent(42,90,0.98)
+        h_lims_mu[lim].SetBinContent(43,91,0.98)
+        h_lims_mu[lim].SetBinContent(44,92,0.98)
 
 
 
