@@ -1354,19 +1354,31 @@ def MakeHTBinPlot(datacard_dir, datacard_name, outdir, userMax=None, ratioRange=
 
 
 
-def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacard_name2, outdir, iBkgd=1, userMax=None):
+def MakeComparison(ht_reg, outdir, doWhat="data", h1_name="h1", h2_name="h2", userMax=None, ratioRange=None):
+    #doWhat is one of data,zinv,llep,qcd,bkg
+
+    if len(utils.datacards)==0:
+        print "ERROR: must load pickled datacards first! (utils.LoadPickledDatacards)"
+        return
+    if len(utils.datacards2)==0:
+        print "ERROR: must load pickled second set of datacards first! (utils.LoadPickledDatacards)"
+        return
+
     jbj_regs = utils.GetJBJregions(ht_reg)
 
     #list of lists, one per jbj region, of low edges of MT2 bins
     mt2bins = utils.GetMT2bins(ht_reg)
 
-    nBinsTotal = sum([len(bins)-1 for bins in mt2bins])
+    # nBinsTotal = sum([len(bins)-1 for bins in mt2bins]) + 1
+    nBinsTotal = sum([(len(bins)-1 if len(bins)>2 else len(bins)) for bins in mt2bins]) # always at least 2 for readability
+    nBinsPadding = 2 if ht_reg in ["HT575to1200", "HT1200to1500", "HT1500toInf"] else 0 # extra bins to add to right for readability
+    nBinsTotal += nBinsPadding
     bkg_processes = ["zinv","llep","qcd"]
     nBkgs = len(bkg_processes)
 
     ## setup histograms
-    h_snt = ROOT.TH1D("h_snt","",nBinsTotal,0,nBinsTotal)
-    h_eth = ROOT.TH1D("h_eth","",nBinsTotal,0,nBinsTotal)
+    h1 = ROOT.TH1D("h1","",nBinsTotal,0,nBinsTotal)
+    h2 = ROOT.TH1D("h2","",nBinsTotal,0,nBinsTotal)
 
     ## fill histograms
     ibin = 0
@@ -1378,39 +1390,72 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
             mt2left = mt2bins[ijbj][imt2]
             mt2right = mt2bins[ijbj][imt2+1]
             mt2name = utils.GetMT2name(mt2left,mt2right)
+            
             if ht_reg != "monojet":
-                datacard_name_fmt1 = datacard_name1.format(ht_reg,jbj_reg,mt2name)
-                datacard_name_fmt2 = datacard_name2.format(ht_reg,jbj_reg,mt2name)
+                datacard_name = "{0}_{1}_{2}".format(ht_reg,jbj_reg,mt2name)
             else:
                 ht_name = "HT{0}to{1}".format(mt2left,mt2right)
                 ht_name = ht_name.replace("-1","Inf")
-                datacard_name_fmt1 = datacard_name1.format(ht_name,jbj_reg,"m0toInf")
-                datacard_name_fmt2 = datacard_name2.format(ht_name,jbj_reg,"m0toInf")
+                datacard_name = "{0}_{1}_{2}".format(ht_name,jbj_reg,"m0toInf")
 
-            # get yields. first entry is data, rest are background predictions
-            yields1 = utils.GetYieldsFromDatacard(os.path.join(datacard_dir1,datacard_name_fmt1),bkg_processes)
-            yields2 = utils.GetYieldsFromDatacard(os.path.join(datacard_dir2,datacard_name_fmt2),bkg_processes)
-            h_snt.SetBinContent(ibin, yields1[iBkgd])
-            h_eth.SetBinContent(ibin, yields2[iBkgd])
+            dc1 = utils.datacards[datacard_name]
+            dc2 = utils.datacards2[datacard_name]
                 
-            # get uncertainties
-            pred_unc1 = utils.GetUncertaintiesFromDatacard(os.path.join(datacard_dir1,datacard_name_fmt1),bkg_processes)
-            pred_unc2 = utils.GetUncertaintiesFromDatacard(os.path.join(datacard_dir2,datacard_name_fmt2),bkg_processes)
-            h_snt.SetBinError(ibin, pred_unc1[iBkgd-1][0]*yields1[iBkgd])
-            h_eth.SetBinError(ibin, pred_unc2[iBkgd-1][0]*yields2[iBkgd])
+            # get yields. first entry is data, rest are background predictions
+            obs1 = int(round(dc1.GetObservation()))
+            obs2 = int(round(dc2.GetObservation()))
+            yields1 = dc1.GetBackgroundRates()
+            yields2 = dc2.GetBackgroundRates()
+            for bkg in yields1:
+                if yields1[bkg] < 0:
+                    print "WARNING: negative prediction for bkg {0} in card {1}. Setting to 0.0".format(bkg, datacard_name)
+                    yields1[bkg] = 0.0
+                if yields2[bkg] < 0:
+                    print "WARNING: negative prediction for bkg {0} in card {1}. Setting to 0.0".format(bkg, datacard_name)
+                    yields2[bkg] = 0.0
+            tot_pred1 = sum(yields1.values())
+            tot_pred2 = sum(yields2.values())
+            tot_unc_up1, tot_unc_down1 = dc1.GetTotalUncertainty()
+            tot_unc_up2, tot_unc_down2 = dc2.GetTotalUncertainty()
 
+            if doWhat=="data":
+                h1.SetBinContent(ibin, obs1)
+                h2.SetBinContent(ibin, obs2)
+                h1.SetBinError(ibin, sqrt(obs1))
+                h2.SetBinError(ibin, sqrt(obs2))
+            elif doWhat=="bkg":
+                h1.SetBinContent(ibin, tot_pred1)
+                h2.SetBinContent(ibin, tot_pred2)
+                h1.SetBinError(ibin, tot_unc_up1)
+                h2.SetBinError(ibin, tot_unc_up2)
+            else:
+                h1.SetBinContent(ibin, yields1[doWhat])
+                h2.SetBinContent(ibin, yields2[doWhat])
+                
             binLabels.append(utils.GetMT2label(mt2left,mt2right))
 
+        # add an extra bin if only 1 in this topo reg, for readability
+        if len(mt2bins[ijbj])-1==1:
+            ibin += 1
+            h1.SetBinContent(ibin, -1)
+            h2.SetBinContent(ibin, -1)
+            binLabels.append("")
 
-    h_snt.SetMarkerStyle(20)
-    h_snt.SetMarkerSize(0.5)
-    h_snt.SetMarkerColor(ROOT.kBlack)
-    h_snt.SetLineColor(ROOT.kBlack)
+    for i in range(nBinsPadding):
+        binLabels.append("")
+        h1.SetBinContent(nBinsTotal-i, -1)
+        h2.SetBinContent(nBinsTotal-i, -1)
 
-    h_eth.SetMarkerStyle(20)
-    h_eth.SetMarkerSize(0.5)
-    h_eth.SetMarkerColor(ROOT.kRed)
-    h_eth.SetLineColor(ROOT.kRed)
+
+    h1.SetMarkerStyle(20)
+    h1.SetMarkerSize(0.5)
+    h1.SetMarkerColor(ROOT.kBlack)
+    h1.SetLineColor(ROOT.kBlack)
+
+    h2.SetMarkerStyle(20)
+    h2.SetMarkerSize(0.5)
+    h2.SetMarkerColor(ROOT.kRed)
+    h2.SetLineColor(ROOT.kRed)
 
     ROOT.gStyle.SetOptStat(0)
     ROOT.gStyle.SetLineWidth(1)
@@ -1442,18 +1487,18 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     if userMax!=None:
         yMax = userMax
     else:
-        yMax = h_snt.GetMaximum() ** (2.0)
-    h_snt.GetYaxis().SetRangeUser(yMin,yMax)
-    h_snt.GetYaxis().SetTitle("Events / Bin")
-    h_snt.GetYaxis().SetTitleOffset(1.2)
-    h_snt.GetYaxis().SetTickLength(0.02)
-    h_snt.GetXaxis().SetRangeUser(0,nBinsTotal)
-    h_snt.GetXaxis().SetNdivisions(nBinsTotal,0,0)
-    h_snt.GetXaxis().SetLabelSize(0)
-    h_snt.GetXaxis().SetTickLength(0.015)
+        yMax = h1.GetMaximum() ** (1.5)
+    h1.GetYaxis().SetRangeUser(yMin,yMax)
+    h1.GetYaxis().SetTitle("Events / Bin")
+    h1.GetYaxis().SetTitleOffset(1.2)
+    h1.GetYaxis().SetTickLength(0.02)
+    h1.GetXaxis().SetRangeUser(0,nBinsTotal)
+    h1.GetXaxis().SetNdivisions(nBinsTotal,0,0)
+    h1.GetXaxis().SetLabelSize(0)
+    h1.GetXaxis().SetTickLength(0.015)
 
-    h_snt.Draw("PE")
-    h_eth.Draw("SAME PE")
+    h1.Draw("PE")
+    h2.Draw("SAME PE")
 
     # save for later
     left = pads[0].GetLeftMargin()
@@ -1467,19 +1512,19 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     text.SetNDC(1)
     text.SetTextAlign(32)
     text.SetTextAngle(90)
-    text.SetTextSize(min(binWidth * 1.2,0.026))
+    text.SetTextSize(min(binWidth * 1.6,0.021))
     text.SetTextFont(62)
     for ibin in range(nBinsTotal):
         x = left + (ibin+0.5)*binWidth
         y = pads[0].GetBottomMargin()-0.009
         text.DrawLatex(x,y,binLabels[ibin])
         
-    # draw the "Pre-fit background" text
+    # draw the "Pre/Post-fit background" text
     text.SetTextAlign(13)
     text.SetTextFont(42)
     text.SetTextAngle(0)
-    text.SetTextSize(0.04)
-    text.DrawLatex(left+0.02,1-top-0.01, "ETH/SNT comparison: {0}".format(bkg_processes[iBkgd-1]))
+    text.SetTextSize(0.05)
+    text.DrawLatex(left+0.04,1-top-0.01, doWhat+" comparison")
 
     # draw the HT bin  in upper middle
     text.SetTextAlign(21)
@@ -1492,26 +1537,30 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     ppmUtils.DrawCmsText(pads[0],text="CMS",textSize=0.038)
     ppmUtils.DrawLumiText(pads[0],lumi=utils.lumi,textSize=0.038)
 
+
     # draw the j/bj region labels
     ibin = 0
     for ijbj,jbj_reg in enumerate(jbj_regs):
-        xcenter = left + binWidth*(ibin+(len(mt2bins[ijbj])-1)*0.5)
+        n_bins = len(mt2bins[ijbj])-1
+        if n_bins == 1:
+            n_bins = 2
+        xcenter = left + binWidth*(ibin+(n_bins)*0.5)
         lines = utils.GetJBJtitle(jbj_reg)
-        text.SetTextAlign(23)
+        text.SetTextAlign(22)
         text.SetTextFont(62)
-        text.SetTextSize(0.030)
+        text.SetTextSize(min(0.030, 0.70 * n_bins/nBinsTotal))
         # in the last region, move the text left a bit to avoid overlap with tick marks
         if ijbj==len(jbj_regs)-1:
-            text.SetTextAlign(13)
+            text.SetTextAlign(12)
             xcenter = left + binWidth*ibin + 0.007
             xcenter = max(xcenter, 1-right-0.25)
-        y = bot+(1-top-bot)*0.85
+        y = bot+(1-top-bot)*0.83
         if xcenter > 1-right-0.19:
-            y = 0.67
+            y = 0.65
         text.DrawLatex(xcenter,y,lines[0])
         text.DrawLatex(xcenter,y-text.GetTextSize()-0.001,lines[1])
 
-        ibin += len(mt2bins[ijbj])-1
+        ibin += n_bins
 
     #draw the lines separating j-bj region
     line = ROOT.TLine()
@@ -1521,15 +1570,15 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     line.SetLineColor(ROOT.kBlack)
     ibin = 0
     for i in range(len(jbj_regs)-1):
-        ibin += len(mt2bins[i])-1
+        ibin += len(mt2bins[i])-1 if len(mt2bins[i])>2 else 2
         x = left+binWidth*ibin
         line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*0.85)        
     
     # legend
     leg = ROOT.TLegend(1-right-0.175,1-top-0.21,1-right-0.02,1-top-0.04)
     leg.SetBorderSize(1)
-    leg.AddEntry(h_snt,"SNT")
-    leg.AddEntry(h_eth,"ETH")
+    leg.AddEntry(h1,h1_name,'pel')
+    leg.AddEntry(h2,h2_name,'pel')
     leg.Draw()
 
 
@@ -1538,13 +1587,13 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     ####################
     
     pads[1].cd()
-    h_ratio = h_snt.Clone("h_ratio") #h_ratio is just a dummy histogram to draw axes correctly
-    h_ratio.Divide(h_eth)
+    h_ratio = h2.Clone("h_ratio") #h_ratio is just a dummy histogram to draw axes correctly
+    h_ratio.Divide(h1)
     for ibin in range(1,h_ratio.GetNbinsX()+1):
         h_ratio.SetBinError(ibin,0.0001)
-    h_ratio.GetYaxis().SetRangeUser(0.5,1.5)
-    h_ratio.GetYaxis().SetNdivisions(502)
-    h_ratio.GetYaxis().SetTitle("SNT/ETH")
+    h_ratio.GetYaxis().SetRangeUser(ratioRange[0], ratioRange[1])
+    h_ratio.GetYaxis().SetNdivisions(505)
+    h_ratio.GetYaxis().SetTitle(h2_name+"/"+h1_name)
     h_ratio.GetYaxis().SetTitleSize(0.16)
     h_ratio.GetYaxis().SetTitleOffset(0.18)
     h_ratio.GetYaxis().SetLabelSize(0.13)
@@ -1571,13 +1620,13 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     line.SetLineColor(ROOT.kBlack)
     ibin = 0
     for i in range(len(jbj_regs)-1):
-        ibin += len(mt2bins[i])-1
-        line.DrawLine(ibin,0,ibin,2)        
+        ibin += len(mt2bins[i])-1 if len(mt2bins[i])>2 else 2
+        line.DrawLine(ibin,ratioRange[0],ibin,ratioRange[1])
     
     h_ratio.Draw("SAME PE")
     h_ratio.Draw("SAME AXIS")
 
-    name = "eth_snt_compare_{0}_{1}".format(bkg_processes[iBkgd-1], ht_reg)
+    name = "compare_{0}_{1}".format(doWhat, ht_reg)
     try:
         os.makedirs(outdir)
     except:
@@ -1585,8 +1634,8 @@ def MakeComparison(ht_reg, datacard_dir1, datacard_dir2, datacard_name1, datacar
     c.SaveAs(os.path.join(outdir,name+".pdf"))
     c.SaveAs(os.path.join(outdir,name+".png"))
     
-    h_snt.Delete()
-    h_eth.Delete()
+    h1.Delete()
+    h2.Delete()
     h_ratio.Delete()
 
     

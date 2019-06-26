@@ -3,7 +3,7 @@ from Datacard import *
 from nuisances import *
 import cPickle as pickle
 
-tag = "V00-10-16_FullRunII_newQCD"
+tag = "V00-10-17_FullRunII"
 sig_syst = 1.15
 out_tag = "ssrs_sigSyst15"
 

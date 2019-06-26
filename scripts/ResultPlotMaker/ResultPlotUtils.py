@@ -8,11 +8,15 @@ import numpy as np
 
 lumi = 35.9
 datacards = {}
+datacards2 = {}
 postfit_file = None
 
-def LoadPickledDatacards(pickle_name):
-    global datacards
-    datacards = pickle.load(open(pickle_name, 'rb'))
+def LoadPickledDatacards(pickle_name, second_set=False):
+    global datacards, datacards2
+    if not second_set:
+        datacards = pickle.load(open(pickle_name, 'rb'))
+    else:
+        datacards2 = pickle.load(open(pickle_name, 'rb'))
 
 def LoadPostfitFile(fname):
     global postfit_file

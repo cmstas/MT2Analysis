@@ -7,7 +7,8 @@ import cPickle as pickle
 from copy import deepcopy
 
 
-TAG = "V00-10-17_FullRunII_withDYContam"
+TAG = "V00-10-18_FullRunII"
+# TAG = "just2018data_jecV15"
 # TAG = "blah"
 
 doSuperSignalRegions = False
@@ -24,16 +25,19 @@ f_lostlep = {}
 f_qcd = {}
 f_sig = {}
 
-f_zinvDY[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/zinvFromDY_2016.root")
-f_zinvDY[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/zinvFromDY_2017.root")
-f_zinvDY[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/zinvFromDY_2018.root")
-f_lostlep[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/lostlepFromCRs_2016.root")
-f_lostlep[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/lostlepFromCRs_2017.root")
-f_lostlep[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/lostlepFromCRs_2018.root")
-f_qcd[16] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/qcdFromRS_2016.root")
-f_qcd[17] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/qcdFromRS_2017.root")
-f_qcd[18] = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/qcdFromRS_2018.root")
-f_data = r.TFile("../../MT2Looper/output/V00-10-16_combined_newEGamma/data_RunAll.root")
+# indir = "../../MT2Looper/output/V00-10-16_combined_newEGamma/"
+indir = "../../MT2Looper/output/V00-10-18_combined/"
+
+f_zinvDY[16] = r.TFile(os.path.join(indir,"zinvFromDY_2016.root"))
+f_zinvDY[17] = r.TFile(os.path.join(indir,"zinvFromDY_2017.root"))
+f_zinvDY[18] = r.TFile(os.path.join(indir,"zinvFromDY_2018.root"))
+f_lostlep[16] = r.TFile(os.path.join(indir,"lostlepFromCRs_2016.root"))
+f_lostlep[17] = r.TFile(os.path.join(indir,"lostlepFromCRs_2017.root"))
+f_lostlep[18] = r.TFile(os.path.join(indir,"lostlepFromCRs_2018.root"))
+f_qcd[16] = r.TFile(os.path.join(indir,"qcdFromRS_2016.root"))
+f_qcd[17] = r.TFile(os.path.join(indir,"qcdFromRS_2017.root"))
+f_qcd[18] = r.TFile(os.path.join(indir,"qcdFromRS_2018.root"))
+f_data = r.TFile(os.path.join(indir,"data_RunAll.root"))
 
 years = [16, 17, 18]
 # years = [18]

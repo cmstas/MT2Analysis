@@ -4,8 +4,8 @@ import time
 import subprocess
 # this assumes you've already made template datacards for this tag! (makeTemplateCards.py)
 
-TAG = "V00-10-17_FullRunII_withDYContam"
-MODEL = "T1tttt"
+TAG = "V00-10-18_FullRunII"
+MODEL = "extraT2tt"
 
 MAXLOCALJOBS=20
 

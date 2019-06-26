@@ -172,11 +172,14 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
         sns = [utils.GetSampleName(s) for s in samples]
 
         yRangeUserRatio = (0,2)
+        # yRangeUserRatio = (0.5,1.5)
         scaleMCtoData = True
         if dirname=="crqcdbase":
             if "HEMveto" not in output_dir:
                 yRangeUserRatio = (0,10)
             scaleMCtoData=False
+
+        cmsText = pd.cmsPreliminaryText
 
         for ext in exts:
             saveAs = os.path.join(output_dir,dirname+tag,"{0}_{1}.{2}".format(dirname,vn,ext))
@@ -186,7 +189,7 @@ def MT2PlotMaker(rootdir, samples, data, dirname, plots, output_dir=".", exts=["
                            markerSize=markerSize, titleSize=0.035, subtitleSize=0.033, legCoords=(0.60,0.70,0.87,0.895), ratioTitle="Data/MC",
                            subLegText=subLegText, subLegTextSize=0.036, doBkgError=True, doOverflow=doOverflow, cmsTextSize=0.04,
                            convertToPoisson=True, drawZeros=drawZeros, h_sig_vec=h_sig_vecs[i], sig_names=signals, ratioType=0,
-                           yRangeUserRatio=yRangeUserRatio)
+                           yRangeUserRatio=yRangeUserRatio, cmsText=cmsText)
             
 
 

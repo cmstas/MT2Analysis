@@ -4,9 +4,9 @@ from Datacard import Datacard
 sys.path.append("ResultPlotMaker")
 from ResultPlotUtils import GetPull
 import cPickle as pickle
-from math import log10
+from math import *
 
-cards = pickle.load(open("CardMaker/cards_V00-10-16_FullRunII_newQCD/templates_ssr/template_datacards.pkl", 'rb'))
+cards = pickle.load(open("CardMaker/cards_V00-10-17_FullRunII/templates_ssr/template_datacards.pkl", 'rb'))
 
 ssrs = {
     "2j loose" : [2, 0, 1200, 1200],
@@ -80,17 +80,29 @@ order = ["2j loose", "2j tight", "4j loose", "4j tight", "7j loose", "7j tight",
 for ssr in order:
     pred, unc_up, unc_dn, obs = vals[ssr]
     sig = GetPull(pred, unc_up, obs)
+    
     if ssr == "MonoPhi":
         nj, nb, ht, mt2 = "1-3", 0, "250-450","200-300 ($\geq$1j)"
         exp = int(log10(obs))
         pred /= 10**exp
         unc_up /= 10**exp
-        sout += r"{0} & {1} & {2} & {3} & ${4}$ & $({5:.1f}\pm{6:.1f})\times10^{{{7:d}}}$ & ${8:.1f}\times10^{{{7:d}}}$ & - \\".format(
-            ssr, nj, nb, ht, mt2, pred, unc_up, exp, obs/10.0**exp)
+        unc_dn /= 10**exp
+        sout += r"{0} & {1} & {2} & {3} & ${4}$ & ${5:.1f}^{{+{6:.1f}}}_{{-{7:.1f}}}\times10^{{{8:d}}}$ & ${9:.1f}\times10^{{{8:d}}}$ & - \\".format(
+            ssr, nj, nb, ht, mt2, pred, unc_up, unc_dn, exp, obs/10.0**exp)
     else:
         nj, nb, ht, mt2 = ssrs[ssr]
-        sout += r"{0} & $\geq{1}$ & {2} & $>{3}$ & $>{4}$ & ${5:.1f}\pm{6:.1f}$ & {7} & - \\".format(
-            ssr, nj, "$\geq{0}$".format(nb) if nb>0 else "-", ht, mt2, pred, unc_up, obs)
+
+        prec = max(int(floor(log10(unc_up))) - 1, -1)
+        ndec = max(-prec, 0)
+        pred = "{{0:.{0}f}}".format(ndec).format(pred)
+        unc_up= "{{0:.{0}f}}".format(ndec).format(unc_up)
+        unc_dn = "{{0:.{0}f}}".format(ndec).format(unc_dn)
+        pred_str = "${0}^{{+{1}}}_{{-{2}}}$".format(pred,unc_up,unc_dn)
+        if unc_up==unc_dn:
+            pred_str = "${0}\pm{1}$".format(pred,unc_up)
+            
+        sout += r"{0} & $\geq{1}$ & {2} & $>{3}$ & $>{4}$ & {5} & {6} & - \\".format(
+            ssr, nj, "$\geq{0}$".format(nb) if nb>0 else "-", ht, mt2, pred_str, obs)
 
     if "tight" in ssr or "MonoPhi" in ssr:
         sout += r" \hline"
