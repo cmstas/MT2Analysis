@@ -1,0 +1,5 @@
+nlep==2 && lep_pdgId[0]==-lep_pdgId[1] &&
+(abs(lep_pdgId[0])==13 || lep_tightId[0]>0) &&
+(abs(lep_pdgId[1])==13 || lep_tightId[1]>0) &&
+fabs(zll_mass-91.19) < 20 && zll_pt>10 && 
+(( ((isData&&HLT_DoubleEl)||(!isData&&abs(lep_pdgId[0])==11)) && lep_pt[0]>25 && lep_pt[1]>15) || ( ((isData&&HLT_DoubleMu)||(!isData&&abs(lep_pdgId[0])==13)) && lep_pt[0]>20 && lep_pt[1]>10))

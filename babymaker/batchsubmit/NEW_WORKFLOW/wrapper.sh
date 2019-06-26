@@ -44,6 +44,7 @@ cd $OLDDIR
 echo
 
 echo "[wrapper] hostname  = " `hostname`
+echo "[wrapper] os vers   = " `uname -r`
 echo "[wrapper] date      = " `date`
 echo "[wrapper] linux timestamp = " `date +%s`
 echo "[wrapper] checking input file with ls"

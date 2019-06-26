@@ -1,0 +1,49 @@
+Collecting combine commands that do various things, since who can remember all of these things
+
+-------------------------------
+COMBINING CARDS
+-------------------------------
+combineCards.py -S datacard1.txt datacard2.txt ... > combined_card.txt
+ * the -S option makes it a fake shape analysis. Don't ask why this is necessary
+ * one issue is that it gives every card a default name "ch1", "ch2", etc.
+ * this is annoying when you have to get post-fit values for specific bins later
+ * can set name for each datcard with "combineCards.py -S dc_name1=datacard1.txt dc_name2=datacard2.txt ... > combined_card.txt"
+
+-------------------------------
+CONVERT TO ROO WORKSPACE
+-------------------------------
+text2workspace.txt combined_card.txt -b -o combined_card.root
+
+-------------------------------
+RUN LIMIT
+-------------------------------
+combine -M AsymptoticLimits datacard.root
+ * --noFitAsimov uses pre-fit asimov dataset (observation set to prediction)
+
+-------------------------------
+GET NUISANCE PULLS
+(and check closure for SUSY preapproval, with -t -1)
+-------------------------------
+combine -M FitDiagnostics -d datacard.root
+ * "-t -1" uses the Asimov dataset, which just sets observation to b or b+s (--expectSignal 0 or 1)
+ * should probably use --toysFrequentist. Sometimes without some gmN nuisances break. Don't ask why.
+python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py fitDiagnostics.root
+ * -a prints all nuisances, not just those that vary by a lot
+ * -g plots.root makes a root file of plots, but aren't really readable if you have a lot of nuisances
+
+
+-------------------------------
+GET POST-FIT VALUES
+-------------------------------
+combine -M FitDiagnostics --robustFit=1 --saveShapes --saveWithUncertainties --saveOverallShapes -d datacard.root
+ * pre-fit values stored in fitDiagnostics.root in "shapes_prefit/bin_name/bkg_name"
+ * post-fit values stored in "shapes_fit_b/bin_name/bkg_name"
+
+
+-------------------------------
+RUN LIMIT WITH TOYS (not Asymptotic aprox)
+-------------------------------
+combine -M HybridNew --frequentist --testStat LHC --LHCmode LHC-limits --seed -1 -T 100 -v 0 --rAbsAcc=0.05 --rRelAcc=0.05 --expectedFromGrid=0.5 --fork 15 -d datacard.root
+
+
+

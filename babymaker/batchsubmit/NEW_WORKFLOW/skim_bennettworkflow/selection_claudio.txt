@@ -1,0 +1,12 @@
+nlep==2 && 
+abs(lep_pdgId[0]) == abs(lep_pdgId[1]) &&
+lep_charge[0] * lep_charge[1] == -1 &&
+(abs(lep_pdgId[0]) == 13 ||  lep_tightId[0] > 0) &&
+(abs(lep_pdgId[1]) == 13 ||  lep_tightId[1] > 0) &&
+lep_pt[0] > 100 && lep_pt[1] > 35 && 
+zll_pt > 200 && abs(zll_mass-91.19)<20 &&
+((zll_ht>250 && zll_met_pt>250) || (zll_ht>1200 && zll_met_pt>30)) && 
+(nJet30==1 || (nJet30>=2 && zll_mt2>200)) && 
+zll_deltaPhiMin>0.3 && zll_diffMetMht/zll_met_pt < 0.5
+
+

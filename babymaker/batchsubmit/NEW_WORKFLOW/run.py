@@ -9,17 +9,17 @@ from utils import *
 
 USER = os.environ["USER"]
 
-tag = "V00-10-15_2016fullYear"
-# tag = "V00-10-15_2017fullYear"
-# tag = "V00-10-14_2018fullYear"
-# tag = "RebalanceAndSmear_V00-10-09_2016fullYear"
-# tag = "RebalanceAndSmear_V00-10-09_2017fullYear"
-# tag = "RebalanceAndSmear_V00-10-09_2018fullYear"
+# tag = "V00-10-16_2016fullYear"
+# tag = "V00-10-16_2017fullYear"
+tag = "V00-10-18_2018fullYear"
+# tag = "RebalanceAndSmear_V00-10-16_2016fullYear"
+# tag = "RebalanceAndSmear_V00-10-16_2017fullYear"
+# tag = "RebalanceAndSmear_V00-10-16_2018fullYear"
 skims = {}
 skims["base"] = [""]
 # skims["ST"] = [""]
 # skims["qcd"] = [""]
-# skims["RS"] = [""]
+# skims["RS"] = ["data","dyjets","ttsl","ttdl","ttw","ttz","ttg","tttt","singletop","wjets","zinv","ww","wz","qcd"]
 # skims["dilep"] = [""]
 # skims["ZllLowMET"] = ["DoubleMuon", "DoubleEG", "EGamma", "dyjetsll_ht", "ttsl", "ttdl", "ttw", "ttz", "tttt", "singletop"]
 # skims["ZllLowMET2"] = ["DoubleMuon", "DoubleEG", "EGamma", "dyjetsll_ht", "ttsl", "ttdl", "ttw", "ttz", "tttt", "singletop"]
@@ -36,7 +36,14 @@ sampnames = []
 for f in glob.glob("{0}/file_lists/*.txt".format(tag)):
     sampnames.append(os.path.split(f)[1].split(".")[0])
 
-# sampnames = ["qcd_ht1500to2000", "ttsl_powheg", "ttdl_powheg"]
+# # sampnames = ["qcd_ht1500to2000", "ttsl_powheg", "ttdl_powheg"]
+for s in list(sampnames):
+    # if "data" not in s:
+    # if "T1" in s or "T2" in s:
+    # if "rpv" not in s and "T2" not in s and "T1" not in s and "T5" not in s:
+    if "data" in s:
+        print s
+        sampnames.remove(s)
 
 for s in sampnames:
     if s not in d:
@@ -65,6 +72,7 @@ for s in sampnames:
             d[s].add_job(Job(bid, fin, fbaby, exe, tarball, args, True, "mt2"))
         elif forceRecheckExist and not os.path.exists(d[s].jobs[bid].output):
             d[s].jobs[bid].args = args
+            d[s].jobs[bid].input = fin
             d[s].jobs[bid].done = False
             d[s].jobs[bid].sweeprooted = False
 
@@ -90,7 +98,8 @@ for s in sampnames:
 
     for bid in d[s].jobs.keys():
         parent = "mt2_baby_"+bid.split("_")[-1]
-        if bid not in job_ids and parent not in job_ids:
+        # if bid not in job_ids and parent not in job_ids:
+        if bid not in job_ids:
             print "Job deleted! {0} from sample {1}".format(bid, s)
             d[s].remove_job(bid)
 
@@ -158,7 +167,7 @@ while not alldone:
                 d[s].waiting += 1
                 continue
 
-            if isCurrentlySubmitted(job, tag, condor_out):
+            if isCurrentlySubmitted(job, s, tag, condor_out):
                 d[s].running += 1
             else:
                 if len(condor_out)+N_submitted < 20000:
@@ -195,7 +204,7 @@ while not alldone:
 
 print "WOO! You made it! All {0} jobs are done!".format(sum([len(d[s].jobs) for s in d]))
 
-if not doMerge:
+if not doMerge or len(skims)==0:
     exit(0)
 
 print "Merging the skims now."

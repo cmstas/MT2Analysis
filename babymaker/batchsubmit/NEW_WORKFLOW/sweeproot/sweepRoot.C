@@ -115,8 +115,10 @@ int main(int argc, char** argv) {
       f = TFile::Open(fname, "READ");
 
       if (! f || f->IsZombie()) {
+          std::cout << "bad1!" << std::endl;
          if (doPrintBad) printbad.push_back(target);
          ++nbad;
+         f->Close();
          continue;
       }
 
@@ -126,10 +128,11 @@ int main(int argc, char** argv) {
       if (name != "") {
          TObject* obj = f->Get(name.c_str());
          if (! obj || obj->IsZombie()) {
-            //std::cout << "bad!" << std::endl;
+            std::cout << "bad2!" << std::endl;
             if (doMove) move(target);
             if (doPrintBad) printbad.push_back(target);
             ++nbad;
+            f->Close();
             continue;
          }
       }
@@ -149,8 +152,10 @@ int main(int argc, char** argv) {
                   break;
               }
           }
-          if(isBad)
-              continue;
+          if(isBad){
+            f->Close();
+            continue;
+          }
       }
       
       //std::cout << "good!" << std::endl;

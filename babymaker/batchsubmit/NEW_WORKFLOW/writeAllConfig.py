@@ -10,35 +10,36 @@ from samples_2018 import samples_2018
 
 checkForScale1fb = True
 
-tag = "V00-10-15_2016fullYear"
-# tag = "V00-10-15_2017fullYear"
-# tag = "V00-10-14_2018fullYear"
-# tag = "RebalanceAndSmear_V00-10-09_2016fullYear"
-# tag = "RebalanceAndSmear_V00-10-09_2017fullYear"
-# tag = "RebalanceAndSmear_V00-10-09_2018fullYear"
-samples = samples_2016
+# tag = "V00-10-16_2016fullYear"
+# tag = "V00-10-16_2017fullYear"
+tag = "V00-10-18_2018fullYear"
+# tag = "RebalanceAndSmear_V00-10-16_2016fullYear"
+# tag = "RebalanceAndSmear_V00-10-16_2017fullYear"
+# tag = "RebalanceAndSmear_V00-10-16_2018fullYear"
+# samples = samples_2016
 # samples = samples_2017
-# samples = samples_2018
+samples = samples_2018
 
-cms4tags = ["CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-17", "CMS4_V00-00-02_2017Sep27"]
+# cms4tags = ["CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-17", "CMS4_V00-00-02_2017Sep27"]
 # cms4tags = ["CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04", "CMS4_V09-04-19"]
-# cms4tags = ["CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04"]
+cms4tags = ["CMS4_V10-02-08", "CMS4_V10-02-06", "CMS4_V10-02-05", "CMS4_V10-02-04"]
 
 do = [
-    # "data",
-    # "ttbar",
-    # "wjets",
-    # "zinv",
-    # "dyjetsll",
-    # "qcd_ht",
-    # "singletop",
-    # "tttt",
-    # "gjets",
-    # "ttv",
-    # "diboson",
+    "data",
+    "ttbar",
+    "wjets",
+    "zinv",
+    "dyjetsll",
+    "qcd_ht",
+    "singletop",
+    "tttt",
+    "gjets",
+    "ttv",
+    "diboson",
     "signal",
 ]
 
+sigdir2018 = "/hadoop/cms/store/group/snt/run2_mc2018/"
 sigdir2017 = "/hadoop/cms/store/group/snt/run2_mc2017/"
 sigdir2016 = "/hadoop/cms/store/group/snt/run2_mc2016_94x/"
 
@@ -68,21 +69,39 @@ for type in samples:
     for ds in samples[type]:
         if "RebalanceAndSmear" in tag and type=="data" and "JetHT" not in ds:
             continue
+
         info = dis_client.query(ds, "snt")["response"]["payload"]
         if len(info)==0:
             if type=="signal":
                 if "2016" in tag:
                     sigdir = sigdir2016
+                    if "private" in ds:
+                        sigdir = "/hadoop/cms/store/group/snt/run2_mc2016_94x_private/"
                 if "2017" in tag:
                     sigdir = sigdir2017
-                sigdir += ds.strip("/").replace("/","_")+"_CMS4_V10-02-05"
+                    if "private" in ds:
+                        sigdir = "/hadoop/cms/store/group/snt/run2_mc2017_private/"
+                if "2018" in tag:
+                    sigdir = sigdir2018
+                    if "private" in ds:
+                        sigdir = "/hadoop/cms/store/group/snt/run2_mc2018_private/"
+
+                cms3tag = "CMS4_V10-02-08" if "2018" in tag and "private" not in ds else "CMS4_V10-02-05"
+                        
+                if "private" in ds:
+                    sigdir += ds.strip("/").replace("/","_").replace("MINIAODSIM","CMS4")+"_v1"
+                else:
+                    sigdir += ds.strip("/").replace("/","_")+"_" + cms3tag
+                # print sigdir
+
                 info = [{ "location" : sigdir,
-                          "cms3tag"  : "CMS4_V10-02-05",
+                          "cms3tag"  : cms3tag,
                           "xsec" : 1.0,
                           "kfactor" : 1.0,
                           "filter_eff" : 1.0,
                           "nevents_out" : 1,
                           }]
+
             else:
                 print "WARNING: dataset not found!", ds
                 continue

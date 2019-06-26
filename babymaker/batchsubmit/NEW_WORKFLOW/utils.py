@@ -93,13 +93,15 @@ x509userproxy=/tmp/x509up_u31592
                    
     fout.close()
 
-def isCurrentlySubmitted(job, tag, condor_out):
+def isCurrentlySubmitted(job, samp, tag, condor_out):
     for line in condor_out:
         if tag not in line:
             continue
         if job.id not in line:
             continue
         if job.input not in line:
+            continue
+        if samp not in line:
             continue
 
         return True
