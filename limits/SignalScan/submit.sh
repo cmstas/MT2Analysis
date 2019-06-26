@@ -61,6 +61,7 @@ notification=Never
 x509userproxy=${PROXY}
 executable=${EXE}
 transfer_executable=True
+RequestMemory=8000
 arguments=$SAMPLE $OUTPUTDIR 
 queue
 " > ${JOBCFGDIR}/condor_$SAMPLE.cmd
