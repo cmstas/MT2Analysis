@@ -1852,7 +1852,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (nSTCp4_lo > 0) {
       hist_lo->Fill(P4idx-0.5,2.0,weight*nSTCp4_lo); // Fill CR
       hist_Nj_lo->Fill(P4idx-0.5,2.0,weight*nSTCp4_lo); // Fill CR
-      hist_lo->Fill(P4idx-0.5,1.0, weight * ( fs_P4_hi * nSTCp4_lo) ); // Fill expected SR count
+      hist_lo->Fill(P4idx-0.5,1.0, weight * ( fs_P4_lo * nSTCp4_lo) ); // Fill expected SR count
       hist_Nj_lo->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_lo : fs_Nj23_P4_lo) * nSTCp4_lo ); // Fill expected SR count with separate Nj fs
     }
     
