@@ -24,6 +24,9 @@ int main(int argc, char **argv) {
   std::string::size_type i = modsamp.find("T5qqqqWW");
   if(i != std::string::npos)
       modsamp.replace(i, 8, "T5qqqqVV");
+  i = modsamp.find("T2WW");
+  if(i != std::string::npos)
+      modsamp.replace(i, 8, "T2bt");
  
   TString infile = Form("%s/%s*.root",input_dir.c_str(),modsamp.c_str());
   // TString infile = Form("%s/%s.root",input_dir.c_str(),sample.c_str());

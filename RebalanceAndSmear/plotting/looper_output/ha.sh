@@ -80,9 +80,19 @@ declare -a tags=()
 # tags+=(V00-10-07_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
 # tags+=(V00-10-07_HEMsmear_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
 
-tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
-tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerDOWN)
-tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerUP)
+# tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+# tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerDOWN)
+# tags+=(V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerUP)
+
+# tags+=(V00-10-14_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_ssr)
+# tags+=(V00-10-14_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_v2)
+# tags+=(V00-10-14_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_newHEMveto)
+
+# tags+=(V00-10-16_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+tags+=(V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+tags+=(V00-10-16_HEMsmear_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma)
+tags+=(V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerUP)
+tags+=(V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma_jerDOWN)
 
 # for TAG in ${tags[@]}; do
 #     nohup nice -n 10 ./hadd_output.py /hadoop/cms/store/user/bemarsh/smearoutput/${TAG}/ &> logs/log_${TAG}.txt &

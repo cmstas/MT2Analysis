@@ -8,16 +8,19 @@
 # MODEL="T1tttt"
 # MODEL="T1bbbb"
 # MODEL="T1qqqq"
-MODEL="T2tt"
+# MODEL="T2tt"
 # MODEL="T2bb"
 # MODEL="T2qq"
+# MODEL="T2cc"
+# MODEL="T2bt"
+MODEL="T2bW"
 #MODEL="T2-4bd_scan"
 
 #the suffix
-DATE="V00-10-12_FullRunII"
+DATE="V00-10-16_FullRunII_newQCD"
 
 #directory where cards and points_MODEL.txt can be found
-INDIR="/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/CardMaker/cards_V00-10-12_FullRunII/"
+INDIR="/home/users/bemarsh/analysis/mt2/current/MT2Analysis/scripts/CardMaker/cards_${DATE}/"
 
 LIMITDIR="/hadoop/cms/store/user/${USER}/combine/limits/${MODEL}_${DATE}"
 

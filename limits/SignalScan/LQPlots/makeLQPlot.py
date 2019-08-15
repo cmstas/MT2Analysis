@@ -160,7 +160,7 @@ h_axis.GetXaxis().SetTitle("m_{#kern[0.1]{LQ}} [GeV]")
 h_axis.GetXaxis().SetTitleOffset(1.05)
 h_axis.GetXaxis().SetTitleSize(0.042)
 h_axis.GetXaxis().SetNdivisions(505)
-h_axis.GetYaxis().SetTitle("#sigma #times #font[52]{B}^{2} [pb]")
+h_axis.GetYaxis().SetTitle("#sigma #bf{#it{#beta}}^{2} [pb]")
 h_axis.GetYaxis().SetTitleSize(0.042)
 
 h_axis.Draw()
@@ -259,11 +259,11 @@ x = 0.17
 y = 0.85
 text.DrawLatex(x, y, "pp #rightarrow LQ LQ")
 if MODEL == 't':
-    text.DrawLatex(x, y-0.05, "#font[52]{B}(LQ #rightarrow t #nu) = 1 #minus #beta")
+    text.DrawLatex(x, y-0.05, "#bf{#it{#Beta}}(LQ #rightarrow t #nu) = 1 #minus #beta")
 elif MODEL == 'b':
-    text.DrawLatex(x, y-0.05, "#font[52]{B}(LQ #rightarrow b #nu) = 100%")
+    text.DrawLatex(x, y-0.05, "#bf{#it{#Beta}}(LQ #rightarrow b #nu) = 100%")
 elif MODEL == 'q':
-    text.DrawLatex(x, y-0.05, "#font[52]{B}(LQ #rightarrow q #nu) = 100%")
+    text.DrawLatex(x, y-0.05, "#bf{#it{#Beta}}(LQ #rightarrow q #nu) = 100%")
     text.DrawLatex(x, y-0.10, "(q = u, d, s, or c)")
     
 # x1, y1, x2, y2 = 0.47, 0.41 if MODEL=='t' else 0.4725, 0.925, 0.91
@@ -300,7 +300,7 @@ line.SetLineWidth(3)
 line.SetLineColor(r.kBlack)
 y = y2-0.5*delta*compression
 line.DrawLineNDC(x1, y, x2, y)
-text.DrawLatex(x2+0.02, y, "Observed Limit (95% CL)")
+text.DrawLatex(x2+0.02, y, "Observed limit (95% CL)")
 line.SetLineStyle(2)
 y = y2-1.5*delta*compression
 line.DrawLineNDC(x1, y, x2, y)

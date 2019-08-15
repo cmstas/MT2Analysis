@@ -26,7 +26,7 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     c.SetTicky(1)
 
     h_rsfof.GetYaxis().SetRangeUser(0, 2.0)
-    h_rsfof.GetYaxis().SetTitle("R(SF/OF)")
+    h_rsfof.GetYaxis().SetTitle("R(SF/DF)")
     h_rsfof.GetYaxis().SetTitleSize(0.045)
     h_rsfof.GetYaxis().SetTitleOffset(1.00)
     h_rsfof.GetXaxis().SetTitle(xaxis)
@@ -64,7 +64,7 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     text.SetTextColor(ROOT.kBlack)
     text.SetTextFont(42)
     text.SetTextSize(0.04)
-    text.DrawLatex(0.15, 0.75, "R(SF/OF) = {0:.2f} #pm {1:.2f} (stat)".format(rsfof, rsfoferr))
+    text.DrawLatex(0.15, 0.75, "R(SF/DF) = {0:.2f} #pm {1:.2f} (stat)".format(rsfof, rsfoferr))
 
     text.SetTextColor(ROOT.kBlack)
     text.SetTextSize(0.045)

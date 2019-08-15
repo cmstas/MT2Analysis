@@ -55,14 +55,14 @@ def GetStatSyst(dc, bkg):
 
 titles = {
     "monojet": r"$\njets = 1$",
-    "VL": r"$250 \leq \Ht < 450$ GeV",
-    "L":  r"$450 \leq \Ht < 575$ GeV",
-    "Ml":  r"$575 \leq \Ht < 1200$ GeV, $\njets < 7$",
-    "Mh":  r"$575 \leq \Ht < 1200$ GeV, $\njets \geq 7$",
-    "Hl":  r"$1200 \leq \Ht < 1500$ GeV, $\njets < 7$",
-    "Hh":  r"$1200 \leq \Ht < 1500$ GeV, $\njets \geq 7$",
-    "UHl":  r"$\Ht \geq 1500$ GeV, $\njets < 7$",
-    "UHh":  r"$\Ht \geq 1500$ GeV, $\njets \geq 7$",
+    "VL": r"$250 \leq \Ht < 450$ \GeV",
+    "L":  r"$450 \leq \Ht < 575$ \GeV",
+    "Ml":  r"$575 \leq \Ht < 1200$ \GeV, $\njets < 7$",
+    "Mh":  r"$575 \leq \Ht < 1200$ \GeV, $\njets \geq 7$",
+    "Hl":  r"$1200 \leq \Ht < 1500$ \GeV, $\njets < 7$",
+    "Hh":  r"$1200 \leq \Ht < 1500$ \GeV, $\njets \geq 7$",
+    "UHl":  r"$\Ht \geq 1500$ \GeV, $\njets < 7$",
+    "UHh":  r"$\Ht \geq 1500$ \GeV, $\njets \geq 7$",
 }
 fout = open("/home/users/bemarsh/public_html/mt2/mt2_yields.txt", 'w')
 for ht_reg in ["monojet", "VL","L","Ml","Mh","Hl","Hh","UHl","UHh"]:
@@ -85,7 +85,7 @@ and Monte Carlo samples), and the second is systematic.}
     s += titles[ht_reg] + r"} \\ \hline" + "\n"
     s += r"\njets, \nbtags & "
     s += r"$p_\text{T}^\text{jet1}$" if ht_reg=="monojet" else r"\mttwo"
-    s += r" [GeV] & \znunu & Lost lepton & Multijet & Total background & Data \\" + "\n"
+    s += r" [\GeV] & Lost lepton & \znunu & Multijet & Total background & Data \\" + "\n"
     key = (lambda x:x) if ht_reg!="monojet" else (lambda x:(x[0][2],x[0][0]))
     for ((hlo,hhi),(jlo,jhi),(blo,bhi),(mlo,mhi)),dc in sorted(dcs[ht_reg].items(), key=key):
         if (jlo,jhi,blo,bhi) != prev:
@@ -171,7 +171,7 @@ and Monte Carlo samples), and the second is systematic.}
         tot_rate, (tot_stat_up, tot_stat_dn, tot_syst) = GetRoundedValues(tot_rate, (tot_stat_up, tot_stat_dn, tot_syst))
 
         def getstr(rate, stat_up, stat_dn, syst, boldrate=False):
-            if float(rate) < 0.01:
+            if float(rate) < 0.01 and float(stat_up)<0.01 and float(stat_dn)<0.01 and float(syst)<0.01:
                 return "$<0.01$"
             s = "$"
             if boldrate:
@@ -185,13 +185,13 @@ and Monte Carlo samples), and the second is systematic.}
             s += r"\pm" + syst + "$"
             return s
 
-        s += getstr(zinv_rate, zinv_stat_up, zinv_stat_dn, zinv_syst)
-        if zinv_exp > 0:
-            s += r" $\times 10^{0}$".format(zinv_exp)
-        s += " & "
         s += getstr(llep_rate, llep_stat_up, llep_stat_dn, llep_syst)
         if llep_exp > 0:
             s += r" $\times 10^{0}$".format(llep_exp)
+        s += " & "
+        s += getstr(zinv_rate, zinv_stat_up, zinv_stat_dn, zinv_syst)
+        if zinv_exp > 0:
+            s += r" $\times 10^{0}$".format(zinv_exp)
         s += " & "
         s += getstr(qcd_rate, qcd_stat_up, qcd_stat_dn, qcd_syst)
         s += " & "

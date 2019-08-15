@@ -56,7 +56,7 @@ def GetSampleName(sample):
              "fragphoton": "Frag. #gamma",
              "qcd_ht": "QCD",
              "2015qcd_ht": "QCD",
-             "lostlepFromCRs": "Lost Lepton",
+             "lostlepFromCRs": "Lost lepton",
              "ww_2l2nu": "WW(2l2#nu)"
              }
 

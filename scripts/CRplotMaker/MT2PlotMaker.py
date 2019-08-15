@@ -314,7 +314,6 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
     suffix = ''
 
     bkg_names = [utils.GetSampleName(s) for s in samples]
-
     try:
         os.makedirs(os.path.join(outdir, "lostlepHybrid"))
     except:
@@ -427,8 +426,8 @@ def makeLostLepHybrid(indir, samples=['lostlepFromCRs'], data='data_Run2016', ou
         for ext in exts:
             saveAs = os.path.join(outdir, "lostlepHybrid", "lostlepHybrid_{0}{1}_mt2bins.{2}".format(region_names[iregs],suffix,ext))
             ppm.plotDataMC(h_mt2binsAll_mc_cr_vec, bkg_names, h_mt2binsAll_data_cr, doPause=False, xAxisTitle="M_{T2}",
-                           lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True,
-                           saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", yAxisTitleSize=0.04, xAxisTitleSize=0.036,
+                           lumi=pd.lumi, lumiUnit=pd.lumiUnit, title=None, subtitles=subtitles, isLog=True, userMax=1e7,
+                           saveAs=saveAs, scaleMCtoData=False, xAxisUnit="GeV", yAxisTitleSize=0.04, xAxisTitleSize=0.035,
                            yAxisLabelSize=0.04, xAxisLabelSize=0.038, doSort=False, doMT2Colors=True,
                            markerSize=1.4, subtitleSize=0.040, doBkgError=True, doOverflow=False,
                            legCoords=(0.58,0.70,0.84,0.87), drawLegBox=False,

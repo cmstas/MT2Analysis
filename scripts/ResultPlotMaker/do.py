@@ -50,7 +50,7 @@ MakePlot("monojet", outdir, userMax=7e7, drawObs=True, doPostfit=doPostfit, scal
 # MakePlot("HT1500toInf", outdir, userMax=7e5, drawObs=True, scalePred=scalePred, doPull=True, ratioRange=(-5,5))
 # MakePlot("monojet", outdir, userMax=7e7, drawObs=True, scalePred=scalePred, doPull=True)
 
-makeinclusiveplot(outdir, userMax=1e8, ratioRange=(0,3))
+MakeInclusivePlot(outdir, userMax=1e8, ratioRange=(0,3))
 # MakeInclusivePlot(outdir, userMax=7e4, ratioRange=(0,3), do_ht_regs=["HT1200to1500"])
 
 # MakeHTBinPlot(datacard_dir, datacard_name, outdir, userMax=1e8, scalePred=scalePred, ratioRange=(0.5,1.5))

@@ -197,7 +197,7 @@ for cr, ht_regs in dirs:
       ppm.plotDataMC([h_RS]+h_mc_vec[::-1], ["RS QCD Pred", "Z(#nu#nu)+Jets", "W+Jets", "Top"], h_data=h_data,
                      saveAs=saveAs+ext, lumi=lumi, extraEnergyText=str(data_year_txt) if not RSfromMC else None,
                      xAxisTitle=titles[ivar], doMT2Colors=True, xRangeUser=xRangeUser[ivar],
-                     doOverflow=False, xAxisUnit=units[ivar], subLegText=subLegText,
+                     doOverflow=False, xAxisUnit=units[ivar], subLegText=subLegText, cmsText="CMS",
                      legCoords=(0.60,0.63,0.87,0.89), cmsTextSize=0.045)
 
 

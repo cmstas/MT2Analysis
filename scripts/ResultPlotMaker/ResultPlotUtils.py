@@ -490,7 +490,7 @@ def GetInclusiveBinLabel(reg):
 
 def GetLegendName(proc):
     if proc=="zinv": return "Z#rightarrow#nu#bar{#nu}"
-    if proc=="llep": return "Lost Lepton"
+    if proc=="llep": return "Lost lepton"
     if proc=="qcd": return "Multijet"
     
     return proc

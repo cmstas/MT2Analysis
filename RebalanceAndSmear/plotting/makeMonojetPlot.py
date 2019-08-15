@@ -5,14 +5,14 @@ import pyRootPlotMaker as ppm
 
 r.gROOT.SetBatch(1)
 
-# tag = "V00-10-01_31Mar2018_2016JRTs_withMonojet_v2"
-tag = "V00-10-04_fullBinning_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+tag = "V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+# tag = "V00-10-04_fullBinning_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 # tag = "V00-10-04_ptBinned_94x_JetID_PUID_BTagSFs_core2sigma"
 # tag = "V00-10-01_31Mar2018_usedByJason_withMonojet"
-isMC = True
+isMC = False
 
 year = "All"
-lumi = 77.4
+lumi = 137
 
 # year = 2017
 # lumi = 41.5
@@ -34,9 +34,9 @@ else:
     xnames=["p_{T}(jet1)", "H_{T}", "H_{T} (30 < p_{T}(jet2) < 60)"]
 
 dir_RS = "looper_output/{0}/{1}".format(tag, "qcd" if isMC else "data{0}".format(year))
-dir_data = "../SmearLooper/output/V00-10-04_94x_2017_noRS_fullBinning/"
+dir_data = "../SmearLooper/output/V00-10-16_94x_{0}_noRS/".format("combined" if year=="All" else year)
 # dir_data = "../SmearLooper/output/test/"
-dir_ewk = "../SmearLooper/output/V00-10-04_94x_2017_noRS_fullBinning"
+dir_ewk = "../SmearLooper/output/V00-10-16_94x_{0}_noRS/".format("combined" if year=="All" else year)
 
 ewk_samples = ["wjets_ht", "zinv_ht"]
 
@@ -60,11 +60,12 @@ for dir in dirs:
         if not isMC:
             h_ewk = [f.Get("{0}/h_{1}".format(dir,hname)) for f in f_ewk]
 
+        corr = 3.0 if year=="All" else 1.0
         if isMC:
-            h_rs.Scale(lumi)
-            h_data.Scale(lumi)
+            h_rs.Scale(lumi/corr)
+            h_data.Scale(lumi/corr)
         else:
-            [h.Scale(lumi) for h in h_ewk]
+            [h.Scale(lumi/corr) for h in h_ewk]
 
         h_bkg_vec = [h_rs] if isMC else [h_rs] + h_ewk
         bkg_names = ["RS from MC"] if isMC else ["RS from Data"] + ewk_samples
@@ -78,7 +79,7 @@ for dir in dirs:
         
         for ext in ["pdf","png"]:
             ppm.plotDataMC(h_bkg_vec, bkg_names, h_data, dataTitle="QCD MC" if isMC else "Data", lumi=lumi,
-                           xAxisTitle=xnames[ih], doPause=False, doMT2Colors=True, yRangeUserRatio=(0,3), 
+                           xAxisTitle=xnames[ih], doPause=False, doMT2Colors=True, yRangeUserRatio=(0,3), cmsText="CMS",
                            xRangeUser=xRangeUser[ih], doOverflow=False, isLog=isLog[ih], saveAs=saveAs+ext)
 
 

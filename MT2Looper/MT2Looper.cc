@@ -745,6 +745,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
             weights_dir = "../babymaker/data/sigweights_Summer16_94x/";
         if (sample.find("T1") != std::string::npos) scan_name = sample.substr(0,6);
         else if (sample.find("extraT2tt") != std::string::npos) scan_name = "extraT2tt";
+        else if (sample.find("T2WW") != std::string::npos){ scan_name = sample.substr(0,4); scan_name.replace(scan_name.find("T2WW"), 4, "T2bt"); }
         else if (sample.find("T2") != std::string::npos) scan_name = sample.substr(0,4);
         else if (sample.find("T6") != std::string::npos) scan_name = sample.substr(0,6);
         else if (sample.find("T5qqqqVV") != std::string::npos) scan_name = sample.substr(0,8);
@@ -1161,6 +1162,7 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
       else { cerr << "WARNING: options doJECVars has illegal value!" << endl; }
       
       bool isT5qqqqWW = false;
+      bool isT2WW = false;
       if(isSignal_){
           GenSusyMScan1_ = t.GenSusyMScan1;
           GenSusyMScan2_ = t.GenSusyMScan2;
@@ -1171,6 +1173,12 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
 
           if(sample.find("T5qqqqWW") != string::npos){
               isT5qqqqWW = true;
+              // this selects only WW events
+              if(t.nCharginos != 2)
+                  continue;
+          }
+          if(sample.find("T2WW") != string::npos){
+              isT2WW = true;
               // this selects only WW events
               if(t.nCharginos != 2)
                   continue;
@@ -1195,6 +1203,8 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
           // 4/9 BR to WW, so weight by 9/4 to recover inclusive xsec
           if(isT5qqqqWW)
               evtweight_ *= 9.0/4.0;
+          if(isT2WW)
+              evtweight_ *= 4.0;
           // cout << evtweight_ << endl;
 	} else {
             if (!ignoreScale1fb){
@@ -1330,43 +1340,43 @@ void MT2Looper::loop(TChain* chain, std::string sample, std::string config_tag, 
             }
         }
 
-      } // !isData
+        //weights for renorm/factorization scale variations
+        if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
+            if (!isSignal_) { 
+                if(t.nLHEweight >= 9){
+                    evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+                    evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+                }else{
+                    evtweight_renormUp_ = evtweight_;
+                    evtweight_renormDn_ = evtweight_;
+                }
 
-      //weights for renorm/factorization scale variations
-      if (doRenormFactScaleReweight && t.LHEweight_wgt[0] != 0 && t.LHEweight_wgt[0] != -999) {
-	if (!isSignal_) { 
-            if(t.nLHEweight >= 9){
-                evtweight_renormUp_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
-                evtweight_renormDn_ = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
-            }else{
-                evtweight_renormUp_ = evtweight_;
-                evtweight_renormDn_ = evtweight_;
+                if(evtweight_renormUp_ > 10)
+                    cout << "WARNING: very large renorm UP weight! Event: " << t.run << ":" << t.lumi << ":" << 
+                        t.evt << " weight: " << evtweight_renormUp_ << endl;
+                if(evtweight_renormDn_ > 10)
+                    cout << "WARNING: very large renorm DN weight! Event: " << t.run << ":" << t.lumi << ":" << 
+                        t.evt << " weight: " << evtweight_renormDn_ << endl;
             }
+            else {
+	  
+                evtweight_renormUp_ = evtweight_ ;
+                evtweight_renormDn_ = evtweight_ ;
+	  
+                //commented out until sig_avgweight histogram is added
+	  
+                // int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(GenSusyMScan1_);
+                // int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(GenSusyMScan2_);
+                // float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
+                // float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
+                // float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
+                // float avgweight_renorm_DN = h_sig_avgweight_renorm_DN_->GetBinContent(binx,biny);      
+                // evtweight_renormUp_ = weight_renorm_UP / avgweight_renorm_UP;
+                // evtweight_renormDn_ = weight_renorm_DN / avgweight_renorm_DN;
+            }
+        }
 
-          if(evtweight_renormUp_ > 10)
-              cout << "WARNING: very large renorm UP weight! Event: " << t.run << ":" << t.lumi << ":" << 
-                  t.evt << " weight: " << evtweight_renormUp_ << endl;
-          if(evtweight_renormDn_ > 10)
-              cout << "WARNING: very large renorm DN weight! Event: " << t.run << ":" << t.lumi << ":" << 
-                  t.evt << " weight: " << evtweight_renormDn_ << endl;
-	}
-	else {
-	  
-	  evtweight_renormUp_ = evtweight_ ;
-	  evtweight_renormDn_ = evtweight_ ;
-	  
-	  //commented out until sig_avgweight histogram is added
-	  
-	  // int binx = h_sig_avgweight_renorm_DN_->GetXaxis()->FindBin(GenSusyMScan1_);
-	  // int biny = h_sig_avgweight_renorm_DN_->GetYaxis()->FindBin(GenSusyMScan2_);
-	  // float weight_renorm_UP = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[4];
-	  // float avgweight_renorm_UP = h_sig_avgweight_renorm_UP_->GetBinContent(binx,biny);
-	  // float weight_renorm_DN = evtweight_ /  t.LHEweight_wgt[0] *  t.LHEweight_wgt[8];
-	  // float avgweight_renorm_DN = h_sig_avgweight_renorm_DN_->GetBinContent(binx,biny);      
-	  // evtweight_renormUp_ = weight_renorm_UP / avgweight_renorm_UP;
-	  // evtweight_renormDn_ = weight_renorm_DN / avgweight_renorm_DN;
-	}
-      }
+      } // !isData
     
       if (verbose) cout<<__LINE__<<endl;
 

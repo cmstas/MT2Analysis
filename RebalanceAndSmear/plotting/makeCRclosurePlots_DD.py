@@ -3,6 +3,7 @@ import os
 import ROOT as r
 import numpy as np
 from common import *  # useful things that are common to all plotting scripts
+from ppmUtils import *
 
 r.gROOT.SetBatch(1)
 
@@ -54,6 +55,7 @@ os.system("cp ~/scripts/index.php "+outdir)
 
 ibin = 0
 ht_regs = ["VL","L","M","H","UH"]
+nlowstat = 0
 for ht_reg in ht_regs:
     top_regs = topo_reg_defs[ht_reg]
     for top_reg in top_regs:
@@ -127,6 +129,7 @@ for ht_reg in ht_regs:
             if n_zinv_sr > 0:
                 rzinvdy_err = rzinvdy * np.sqrt((err_zinv_sr/n_zinv_sr)**2 + (err_dy_dy/n_dy_dy)**2)
 
+        lowstat = False
         top_contam = n_data_of * RSFOF
         top_contam_err = err_data_of * RSFOF
         n_zinv_est = rzinvdy * (n_data_dy - top_contam)
@@ -135,6 +138,7 @@ for ht_reg in ht_regs:
             err_zinv_est = np.sqrt((err_data_dy)**2 + (top_contam_err)**2) / (n_data_dy-top_contam)
             err_zinv_est = n_zinv_est * np.sqrt((rzinvdy_err/rzinvdy)**2 + (err_zinv_est)**2)
         else:
+            # lowstat = True
             n_zinv_est = n_zinv_sr
             err_zinv_est = err_zinv_sr * 2
 
@@ -148,8 +152,12 @@ for ht_reg in ht_regs:
             n_ll_est = ll_tf * n_data_sl
             err_ll_est = n_ll_est * np.sqrt((ll_tf_err/ll_tf)**2 + (err_data_sl/n_data_sl)**2)
         else:
+            lowstat = True
             n_ll_est = n_top_sr + n_wjets_sr
             err_ll_est = np.sqrt(err_top_sr**2 + err_wjets_sr**2)*2
+
+        if lowstat:
+            nlowstat += 1
 
         hrs.SetBinContent(ibin, n_rs)
         hrs.SetBinError(ibin, err_rs)
@@ -160,7 +168,7 @@ for ht_reg in ht_regs:
         hll.SetBinContent(ibin, n_ll_est)
         hll.SetBinError(ibin, err_ll_est)
         
-
+print "nlowstat:",nlowstat
 
 r.gStyle.SetOptStat(0)
 
@@ -202,7 +210,7 @@ hrs.SetLineColor(r.kBlack)
 hrs.SetFillColor(401)
 
 hzinv.GetYaxis().SetRangeUser(1e-1,1e6 if cr=="crRSInvertDPhi" else 1e8)
-hzinv.GetYaxis().SetTitle("Events / Bin")
+hzinv.GetYaxis().SetTitle("Events / bin")
 hzinv.GetYaxis().SetTitleSize(0.04)
 hzinv.GetYaxis().SetTitleOffset(0.9)
 hzinv.GetXaxis().SetLabelSize(0)
@@ -222,9 +230,14 @@ for i in range(hdata.GetNbinsX()):
 hstack.SetMinimum(0.1)
 hstack.SetMaximum(maxim**1.5)
 
+gdata = r.TGraphAsymmErrors()
+ConvertToPoissonGraph(hdata, gdata)
+gdata.SetMarkerStyle(20)
+
 hzinv.Draw("HIST")
 hstack.Draw("HIST SAME")
-hdata.Draw("PE SAME")
+# hdata.Draw("PE SAME")
+gdata.Draw("PZ SAME")
 hzinv.Draw("AXIS SAME")
 
 h_pred = hzinv.Clone("h_pred")
@@ -246,12 +259,13 @@ for ix in bin_divisions:
 
 leg = r.TLegend(0.79,0.73,0.975,0.91)
 leg.AddEntry(hdata, "Data", 'lp')
-leg.AddEntry(hrs, "R&S from " + ("MC" if RSfromMC else "Data"), 'f')
+leg.AddEntry(hrs, "R&S from " + ("MC" if RSfromMC else "data"), 'f')
 leg.AddEntry(hzinv , "Z#rightarrow#nu#bar{#nu}", 'f')
-leg.AddEntry(hll , "Lost Lepton", 'f')
+leg.AddEntry(hll , "Lost lepton", 'f')
 leg.Draw()
 
-ht_names = ["Very Low", "Low", "Medium", "High", "Extreme"]
+# ht_names = ["Very Low", "Low", "Medium", "High", "Extreme"]
+ht_names = ["[250,450]" ,"[450,575]", "[575,1200]", "[1200,1500]", "[1500, #infty]"]
 mod_bin_divisions = [0] + bin_divisions + [NBINS]
 print bin_divisions
 print mod_bin_divisions
@@ -264,7 +278,7 @@ for i in range(1,len(mod_bin_divisions)):
     if i==1:
         x += 0.007
     y = 0.78 if i<len(mod_bin_divisions)-1 else 0.68
-    text.DrawLatex(x, y, ht_names[i-1]+" H_{T}")    
+    text.DrawLatex(x, y, "H_{T} "+ht_names[i-1])    
     ydata, edata = 0.0, r.Double(0.0)
     yewk, eewk = 0.0, r.Double(0.0)
     yrs, ers = 0.0, r.Double(0.0)
@@ -337,7 +351,7 @@ for i in range(1, h_ratio.GetNbinsX()+1):
 
 h_ratio.GetYaxis().SetRangeUser(0,2)
 h_ratio.GetYaxis().SetNdivisions(505)
-h_ratio.GetYaxis().SetTitle("Data/Pred")
+h_ratio.GetYaxis().SetTitle("Data/pred.")
 h_ratio.GetYaxis().SetTitleSize(0.16)
 h_ratio.GetYaxis().SetTitleOffset(0.18)
 h_ratio.GetYaxis().SetLabelSize(0.13)
@@ -357,9 +371,15 @@ h_ratio_err.SetMarkerColor(r.kGray)
 h_ratio_err.SetFillStyle(1001)
 h_ratio_err.SetFillColor(r.kGray)
 
-h_ratio.Draw("PE")
+gratio = r.TGraphAsymmErrors()
+GetPoissonRatioGraph(h_pred, hdata, gratio, useMCErr=False)
+gratio.SetMarkerStyle(20)
+
+# h_ratio.Draw("PE")
+h_ratio.Draw("AXIS")
 h_ratio_err.Draw("E2 SAME")
-h_ratio.Draw("PE SAME")
+# h_ratio.Draw("PE SAME")
+gratio.Draw("PZ SAME")
 h_ratio.Draw("AXIS SAME")
 
 line = r.TLine()

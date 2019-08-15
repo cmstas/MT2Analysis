@@ -6,6 +6,7 @@
 
 lumi = 804
 lumiUnit = "pb"
+cmsPreliminaryText = "CMS"
 
 rl_plots = [
     ("ht",True,(250,1500),None,2),
@@ -44,8 +45,8 @@ dy_plots = [
     ("zllmass",True,(70,120),None),
     ("zllpt",True,(0,1000),None,1),
     ("nlepveto",False,None,None),
-    ("jetpt1",True,(0,1200),None),
-    ("jetpt2",True,(0,1200),None),    
+    ("jetpt1",True,(0,1200),None,2),
+    ("jetpt2",True,(0,1200),None,2),    
     ("leppt1",True,(0,500),None),
     ("leppt2",True,(0,500),None),    
     ("htEle",True,(250,1500),None),

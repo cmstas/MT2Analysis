@@ -7,14 +7,14 @@ ROOT.gROOT.SetBatch(1)
 from MT2PlotMaker import *
 import MT2PlotDefs as pd
 
-pd.lumi = 16.59
+pd.lumi = 59.8
 pd.lumiUnit = "fb"
-input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2looper/output/V00-10-01_2018_16p59fb_2017C_JECs"
+input_dir = "/home/users/bemarsh/analysis/mt2/current/MT2Analysis/MT2Looper/output/V00-10-16_2018fullYear_17fastsim"
 data1_name = "data_Run2018"
-data2_name = "data_Run2017_scaled"
-data1_leg = "Data 2018"
-data2_leg = "Data 2017 (scaled)"
-output_dir = "crplots/V00-10-01_2018_16p59fb_2017C_JECs"
+data2_name = "data_Run2018_jecV15"
+data1_leg = "2018, JEC V8"
+data2_leg = "2018, JEC V15"
+output_dir = "crplots/V00-10-16_2018fullYear_jecComp"
 
 # pd.lumi = 42.0
 # pd.lumiUnit = "fb"

@@ -13,6 +13,7 @@
 # MODEL="T2cc"
 # MODEL="T2bW"
 # MODEL="T2bt"
+MODEL="T2WW"
 # MODEL=T5qqqqWW
 # MODEL=T5qqqqVV
 # MODEL=TprimeTprime_2xZ
@@ -27,10 +28,10 @@
 # MODEL="T2qq_50"
 # MODEL="T2qq_200"
 # MODEL="rpvMonoPhi"
-MODEL="extraT2tt"
+# MODEL="extraT2tt"
 
 #the suffix
-DATE="V00-10-18_FullRunII"
+DATE="V00-10-17_FullRunII_withDYContam"
 # DATE="V00-10-16_FullRunII_newT2ttBinning"
 
 #directory where cards and points_MODEL.txt can be found

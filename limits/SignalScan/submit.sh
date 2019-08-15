@@ -17,7 +17,7 @@ echo $MODEL $SAMPLE $DATE $MODEL
 
 INPUT="job_input.tar.gz, card_tarballs/cards_${MODEL}_${DATE}/cards_$SAMPLE.tar.gz"
 # SITE="T2_US_UCSD"
-SITE="T2_US_UCSD,T2_US_Caltech,T3_US_UCR,T2_US_MIT,T2_US_Vanderbilt,T2_US_Wisconsin,T3_US_Baylor,T3_US_Colorado,T3_US_NotreDame,UCSB,T2_CH_CERN,T3_US_Rice,T3_US_Rutgers,T3_US_UMD,T3_US_Vanderbilt_EC2,T3_US_OSU"
+SITE="T2_US_UCSD,T2_US_Caltech,T3_US_UCR,T2_US_MIT,T2_US_Vanderbilt,T2_US_Wisconsin,T3_US_Baylor,T3_US_Colorado,T3_US_NotreDame,T3_US_Rice,T3_US_Rutgers,T3_US_UMD,T3_US_Vanderbilt_EC2,T3_US_OSU"
 PROXY=$(voms-proxy-info -path)
 SUBMITLOGDIR="${PWD}/submit_logs_$MODEL"
 JOBLOGDIR="/data/tmp/$USER/job_logs/mt2Limits_$MODEL"

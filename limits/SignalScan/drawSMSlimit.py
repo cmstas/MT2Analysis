@@ -19,7 +19,7 @@ divideTopDiagonal = False
 
 ROOT.gROOT.SetBatch(True)
 
-models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt","T2cc","T2bW","T2bt","extraT2tt","rpvMonoPhi","T5qqqqWW","T5qqqqVV"]
+models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt","T2cc","T2bW","T2bt","T2WW","extraT2tt","rpvMonoPhi","T5qqqqWW","T5qqqqVV"]
 model = "mymodel"
 for m in models:
     if m in INPUT:
@@ -29,7 +29,7 @@ print "model =", model
 
 # xsfile = "SUSYCrossSections13TeVgluglu.root" if "T1" in model else "SUSYCrossSections13TeVstopstop.root" if model=="T2tt" or model=="T2bb" or model=="T2cc" else "SUSYCrossSections13TeVsquarkantisquark.root" if model=="T2qq" else "theXSfile.root"
 f_xs = ROOT.TFile("xsec_susy_13tev_run2.root")
-xshist = "h_xsec_gluino" if "T1" in model or "T5" in model else "h_xsec_stop" if model in ["T2tt","T2bb","T2cc","T2bW","T2bt","extraT2tt"] else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
+xshist = "h_xsec_gluino" if "T1" in model or "T5" in model else "h_xsec_stop" if model in ["T2tt","T2bb","T2cc","T2bW","T2bt","T2WW","extraT2tt"] else "h_xsec_squark" if model=="T2qq" else "h_xsec_gluino"
 h_xs = f_xs.Get(xshist)
 
 if model=="rpvMonoPhi":

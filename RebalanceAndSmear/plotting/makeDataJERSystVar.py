@@ -6,7 +6,8 @@ from common import *
 
 ROOT.gROOT.SetBatch(1)
 
-tag = "V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+# tag = "V00-10-16_newJER_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
+tag = "V00-10-09_ptBinned_XXX_JetID_PUID_BTagSFs_core2sigma"
 
 year = "All"
 lumi = 137
@@ -20,7 +21,7 @@ lumi = 137
 # year = 2016
 # lumi = 35.9
 
-dir = "looper_output/{0}/data{1}/".format(tag,year)
+dir = "looper_output/{0}/data{1}_2017V00-10-09/".format(tag,year)
 dir_UP = "looper_output/{0}_jerUP/data{1}/".format(tag,year)
 dir_DOWN = "looper_output/{0}_jerDOWN/data{1}/".format(tag,year)
 
@@ -188,7 +189,7 @@ text.SetTextColor(ROOT.kBlack)
 text.DrawLatex(1.0-pads[0].GetRightMargin(), 1.0-pads[0].GetTopMargin()+0.01,"{0} fb^{{-1}} (13 TeV)".format(lumi))
 text.SetTextAlign(11)
 text.SetTextFont(62)
-text.DrawLatex(pads[0].GetLeftMargin()+0.01, 1.0-pads[0].GetTopMargin()+0.01,"CMS Preliminary")
+text.DrawLatex(pads[0].GetLeftMargin()+0.01, 1.0-pads[0].GetTopMargin()+0.01,"CMS")
 
 
 binLabels_all = []

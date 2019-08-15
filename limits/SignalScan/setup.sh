@@ -6,7 +6,7 @@ cp /nfs-7/userdata/bemarsh/mt2_limit_input/job_input.tar.gz .
 cp ../../babymaker/data/xsec_susy_13tev_run2.root .
 
 #checkout PlotsSMS package
-git clone git@github.com:CMS-SUS-XPAG/PlotsSMS.git
+git clone git@github.com:bjmarsh/PlotsSMS.git
 
 #put modified sms.py and model config files into PlotsSMS area
 cp sms.py PlotsSMS/python
