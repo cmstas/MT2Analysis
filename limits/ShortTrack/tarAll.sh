@@ -7,12 +7,15 @@ tag=$1
 #declare -a Samples=(T1qqqq)
 declare -a Samples=(T2bt)
 #declare -a Samples=(T2qq)
-#declare -a ctaus=(1 5 10 10val 30 50 50val 70 100 150 200 300 500 1000)
-#declare -a ctaus=(1 10 10val 30 50val 70 100 150 300 500 1000) # no 5, 50 or 200, for T2bt
-#declare -a ctaus=(1 5 10 10val 30 50 70 100 150 200 300 500 1000) # No 50val, for T2qq
-#declare -a ctaus=(1 5 30 50 50val 70 100 150 200 300 500)
-#declare -a ctaus=(10 50 200)
-declare -a ctaus=(50 200)
+#declare -a ctaus=(500 1000)
+declare -a ctaus=(1000)
+#declare -a ctaus=(1 5 10 50 100 150 200 300 500 1000) # no 30 yet, for T1qqqq
+#declare -a ctaus=(30)
+#declare -a ctaus=(1 5 10 30 100 150 200 300 500) # no 50 or 1000 yet, for T2qq
+#declare -a ctaus=(1 5 10) # rerun of T2qq from 10cm with 975 GeV
+#declare -a ctaus=(50 1000)
+#declare -a ctaus=(1 10 30 50 100 150 200 300 500 1000) # no 5 yet, for T2bt
+#declare -a ctaus=(5)
 
 for sample in ${Samples[@]}; do
     for ctau in ${ctaus[@]}; do

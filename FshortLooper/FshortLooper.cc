@@ -5,6 +5,8 @@ using namespace duplicate_removal;
 
 class mt2tree;
 
+const bool verbose = false;
+
 const bool recalculate = true; // recalculate Fshort with non-standard (ie not in babies) isolation and quality cutoffs, see below
 // only with recalculate = true
 const int applyRecoVeto = 2; // 0: None, 1: use MT2 ID leptons for the reco veto, 2: use any Reco ID (Default: 2)
@@ -22,11 +24,11 @@ const bool applyDileptonTriggerWeights = true;
 
 const bool blind = false;
 
-const bool skipHighWeights = true; // turn on to skip MC events with weight > 1, to keep errors reasonable
+const bool skipHighWeights = false; // turn on to skip MC events with weight > 1, to keep errors reasonable
 
 const bool fillCutHists = true; // turn on to fill extra histograms
 const bool fillUnimportantCutHists = false; // turn on to fill Nvertex, Eta, Ntag, DphiMet, and HitSignature histograms
-const bool doMatching = false; // turn on gen-matching (chargino matching is always on, for signal)
+const bool doMatching = true; // turn on gen-matching (chargino matching is always on, for signal)
 
 const bool fillNM1Hists = true; // turn on to fill NM1 histograms (need to set recalculate and fillCutHists to true)
 
@@ -66,9 +68,6 @@ bool FshortLooper::FillHists(const vector<TH2D*>& hists, const double weight, co
 int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::string mode) {
   string tag(outtag);
 
-  //bool isSignal_ = t.evt_id >= 1000;
-  bool isSignal = tag.find("sim") != std::string::npos;
-
   cout << "mode: " << mode << endl;
 
   bool applyCaloSel = mode.find("skipCaloSel") == std::string::npos;
@@ -77,6 +76,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   cout << (applyKinematicPreselection ? "applying" : "skipping") << " kinematic preselection" << endl;
   bool doNoLeps = mode.find("useZll") == std::string::npos;
   cout << (doNoLeps ? "All-hadronic" : "Zll") << endl;
+
+  //bool isSignal = t.evt_id >= 1000;
+  bool isSignal = tag.find("T1") != std::string::npos || tag.find("T2") != std::string::npos;
 
   cout << (isSignal ? "isSignal True" : "isSignal False") << endl;
 
@@ -128,9 +130,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
   }
   // Monojet
-  string jetpt[] = {"SR","VR","MR"};
+  string jetpt[] = {"SR","VR","MR_Baseline","MR_pt200","MR_pt250","MR_MetHt250","MR_MetHtPt250"};
   string trackpt[] = {"","_hipt","_lowpt"};
-  for (int jetptbin = 0; jetptbin < 6; jetptbin++) {
+  for (int jetptbin = 0; jetptbin < 7; jetptbin++) {
     string jpt = jetpt[jetptbin];
     for (int trackptbin = 0; trackptbin < 3; trackptbin++) {
       string hname = "h_fs_1_"+jpt+trackpt[trackptbin];
@@ -138,6 +140,20 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       fsHists[hname] = (TH2D*) h_fsMR_Base->Clone(hname.c_str());
     }
   }
+  // Monojet stability TProfiles
+  TH1D * h_jet1_phi_MR_ST = new TH1D("h_jet1_phi_MR_ST","#phi_{Jet 1} in MR (ST);#phi_{Jet 1};Count",20,-TMath::Pi(),TMath::Pi());
+  TH1D * h_jet1_phi_VR_ST = new TH1D("h_jet1_phi_VR_ST","#phi_{Jet 1} in VR (ST);#phi_{Jet 1};Count",20,-TMath::Pi(),TMath::Pi());
+  TH1D * h_jet1_phi_SR_ST = new TH1D("h_jet1_phi_SR_ST","#phi_{Jet 1} in SR (ST);#phi_{Jet 1};Count",20,-TMath::Pi(),TMath::Pi());
+  TH1D * h_jet1_phi_MR_STC = new TH1D("h_jet1_phi_MR_STC","#phi_{Jet 1} in MR (STC);#phi_{Jet 1};Count",20,-TMath::Pi(),TMath::Pi());
+  TH1D * h_jet1_phi_VR_STC = new TH1D("h_jet1_phi_VR_STC","#phi_{Jet 1} in VR (STC);#phi_{Jet 1};Count",20,-TMath::Pi(),TMath::Pi());
+  TH1D * h_jet1_phi_SR_STC = new TH1D("h_jet1_phi_SR_STC","#phi_{Jet 1} in SR (STC);#phi_{Jet 1};Count",20,-TMath::Pi(),TMath::Pi());
+
+  TH1D * h_jet1_eta_MR_ST = new TH1D("h_jet1_eta_MR_ST","#eta_{Jet 1} in MR (ST);#eta_{Jet 1};Count",24,-2.4,2.4);
+  TH1D * h_jet1_eta_VR_ST = new TH1D("h_jet1_eta_VR_ST","#eta_{Jet 1} in VR (ST);#eta_{Jet 1};Count",24,-2.4,2.4);
+  TH1D * h_jet1_eta_SR_ST = new TH1D("h_jet1_eta_SR_ST","#eta_{Jet 1} in SR (ST);#eta_{Jet 1};Count",24,-2.4,2.4);
+  TH1D * h_jet1_eta_MR_STC = new TH1D("h_jet1_eta_MR_STC","#eta_{Jet 1} in MR (STC);#eta_{Jet 1};Count",24,-2.4,2.4);
+  TH1D * h_jet1_eta_VR_STC = new TH1D("h_jet1_eta_VR_STC","#eta_{Jet 1} in VR (STC);#eta_{Jet 1};Count",24,-2.4,2.4);
+  TH1D * h_jet1_eta_SR_STC = new TH1D("h_jet1_eta_SR_STC","#eta_{Jet 1} in SR (STC);#eta_{Jet 1};Count",24,-2.4,2.4);
 
   std::unordered_map<TH2D*, TH1D*> max_stc_weights;
   std::unordered_map<TH2D*, TH1D*> max_st_weights;
@@ -185,6 +201,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     matches.push_back("_1newk_");
     matches.push_back("_3newk_");
   }
+  TH1D* h_nv_fullincl = new TH1D("h_nv_fullincl","N_{V}",14,0,70);
   if (fillCutHists) {
     TH2D* h_mtpt_base = new TH2D("h_mtpt_base","p_{T} x M_{T}(Track,MET)",10,0,200,10,0,500);
     TH2D* h_mtmet_base = new TH2D("h_mtmet_base","MET x M_{T}(Track,MET);M_{T} (GeV);MET (GeV)",10,0,500,10,0,500);
@@ -199,7 +216,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
     TH1D* h_dz_base = new TH1D("h_dz_base","dz",10,0,0.05);
     TH1D* h_dxy_base = new TH1D("h_dxy_base","dxy",10,0,0.02);
-    TH1D* h_nv_base = new TH1D("h_nv_base","N_{V}",8,0,40);
+    TH1D* h_nv_base = new TH1D("h_nv_base","N_{V}",14,0,70);
     TH1D* h_nlayer_base = new TH1D("h_nlayer_base","N_{Layer}",11,3,14);
     TH1D* h_pterr_base = new TH1D("h_pterr_base","#delta p_{T}/p_{T}^{2}",10,0,0.2);
     TH1D* h_iso_base = new TH1D("h_iso_base","AbsIso",20,0,10);
@@ -304,6 +321,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	      // delta Met
 	      hname = "h_deltaMet_"+suffix;
 	      cutHists[hname] = (TH1D*) h_deltaMet_base->Clone(hname.c_str());	    
+	      // N vertex
+	      hname = "h_nv_"+suffix;
+	      cutHists[hname] = (TH1D*) h_nv_base->Clone(hname.c_str());
 	      if (fillUnimportantCutHists) {
 		// Ntag
 		hname = "h_nb_"+suffix;
@@ -313,9 +333,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 		cutHists[hname] = (TH1D*) h_hp_base->Clone(hname.c_str());
 		if (len < 3) cutHists[hname]->GetXaxis()->SetRange(0,(1<<5)-1); // At most 4 layers for P tracks
 		else if (len == 4) cutHists[hname]->GetXaxis()->SetRange(0,(1<<7)-1); // At most 6 layers for M tracks
-		// N vertex
-		hname = "h_nv_"+suffix;
-		cutHists[hname] = (TH1D*) h_nv_base->Clone(hname.c_str());
 	      }
 	    }
 	  }
@@ -419,11 +436,13 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
   int chSTp15 = 0; int chSTm15 = 0; int chSTl15 = 0;
   int chSTp50 = 0; int chSTm50 = 0; int chSTl50 = 0;
   for( unsigned int event = 0; event < nEventsTree; ++event) {    
-  //  for( unsigned int event = 0; event < 10; ++event) {    
-    if (event % 100000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
+  //for( unsigned int event = 0; event < 10; ++event) {    
+    //if (event % 100000 == 0) cout << 100.0 * event / nEventsTree  << "%" << endl;
+
+    if (verbose) cout << ">>>Event: " << event << endl;
 
     t.GetEntry(event); 
-    
+
     //---------------------
     // skip duplicates -- needed when running on mutiple streams in data
     //---------------------
@@ -454,10 +473,10 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
     if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
     if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
-    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    //    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
     if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
     if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
-    
+   
     // random events with ht or met=="inf" or "nan" that don't get caught by the filters...
     if(isinf(t.met_pt) || isnan(t.met_pt) || isinf(t.ht) || isnan(t.ht)){
       cout << "WARNING: bad event with infinite MET/HT! " << t.run << ":" << t.lumi << ":" << t.evt
@@ -472,6 +491,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       continue;
     }
     
+    if (verbose) cout << "Passed all filters and sanity checks" << endl;
+
     // apply HEM veto, and simulate effects in MC
     if(doHEMveto && config_.year == 2018){
       bool hasHEMjet = false;
@@ -505,21 +526,30 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       }
       // May wish to set lostHEMtrackPt threshold to some higher value; this is equivalent to "any lost track" (saving only pT > 15 GeV tracks in babies for now)
       if(hasHEMjet || (isLowHT && lostHEMtrackPt > 0)){// cout << endl << "SKIPPED HEM EVT: " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	if (verbose) cout << "Failed HEM" << endl;
 	continue;
       }
     }
 
     if (unlikely(t.nJet30FailId != 0)) {
+      if (verbose) cout << "Failed JetID" << endl;
       continue;
     }
+
     if ( t.nJet30 == 1 && !(isSignal || (t.jet_id[0] >= 4)) ) {
+      if (verbose) cout << "Failed Monojet" << endl;
       continue;
     }
-    if (isSignal && t.nJet20BadFastsim > 0) continue;
+    if (isSignal && t.nJet20BadFastsim > 0) {
+      if (verbose) cout << "Bad Fastsim Jet" << endl;
+      continue;
+    }
     if (unlikely(t.met_miniaodPt / t.met_caloPt >= 5.0)) {
+      if (verbose) cout << "Failed DiffMet" << endl;
       continue;
     }
     if (unlikely(t.nJet200MuFrac50DphiMet > 0)) {
+      if (verbose) cout << "Failed Ad Hoc Mu Filter" << endl;
       continue;
     }    
     
@@ -532,12 +562,21 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
     const bool lepveto = doNoLeps ? t.nMuons10 + t.nElectrons10 + t.nPFLep5LowMT + t.nPFHad10LowMT > 0 : t.nLepLowMT == 1; //t.nlep != 2;
       
-    if (lepveto) continue;
+    int nLongCharginos = 0;
+    for (int i_ch = 0; i_ch < t.nCharginos; i_ch++) {
+      if (t.chargino_decayXY[i_ch] >= 490 || fabs(t.chargino_decayZ[i_ch]) >= 820) nLongCharginos++;
+    }
+
+    if (lepveto || (nLongCharginos > 0 && config_.year != 2016)) {
+      if (verbose) cout << "Failed Lep Veto" << endl;
+      continue;
+    }
       
     bool passMonojet = met >= 200 && t.jet1_pt >= 200 && ht >= 200 && t.nJet30 == 1 && diffMet < 0.5;
     bool passMultijet = diffMet < 0.5 && t.nJet30 > 1 && ht >= 250 && mt2 >= 60 && met >= 30 && deltaPhiMin > 0.3;
 
     if (applyKinematicPreselection && !(passMonojet || passMultijet)) {
+      if (verbose) cout << "Failed Kinematic Preselection" << endl;
       continue;
     }
 
@@ -549,13 +588,16 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       //    const bool passTrigger = passPrescaleTrigger || passSRTrigger;
       const bool passTrigger = doNoLeps ? passSRTrigger : passSRTrigger || passMonolepTrigger;//passDilepTrigger;
       
-      if (!passTrigger) continue;
+      if (!passTrigger) {
+	if (verbose) cout << "Failed Trigger" << endl;
+	continue;
+      }
     }
 
     float weight = t.isData ? 1.0 : (t.evt_scale1fb == 1 ? 1.8863e-06 : t.evt_scale1fb) * lumi; // manually correct high HT WJets
 
     if (isSignal) {
-      int bin = h_xsec->GetXaxis()->FindBin(1800);      
+      int bin = h_xsec->GetXaxis()->FindBin(t.GenSusyMScan1);      
       weight = h_xsec->GetBinContent(bin) * 1000 * lumi / nEventsTree;
     }
 
@@ -597,6 +639,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	weight *= getDileptonTriggerWeight(t.lep_pt[0], t.lep_pdgId[0], t.lep_pt[1], t.lep_pdgId[1], 0);
       }
 
+      if (verbose) cout << weight << endl;
+
       if (skipHighWeights && weight > 1.0) continue; // skip high weighted events
 
     }
@@ -604,6 +648,12 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     if (weight < 0.0) {
       cout << "Negative weight: " << weight << ", " << t.run << ":" << t.lumi << ":" << t.evt << endl;
     }
+
+    // Turn off monojet
+    if (t.nJet30 <= 1) continue;
+
+    // Fully inclusive pileup distribution
+    h_nv_fullincl->Fill(t.nVert-1,weight);
 
     vector<TH2D*> histsToFill; 
     vector<string> regsToFill;
@@ -703,8 +753,12 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     // Monojet
     else {
       // MR
-      if (t.jet1_pt < 300 && met > 200 && ht > 200) { // relax the MET/HT cuts for the measurement region
-	histsToFill.push_back(fsHists["h_fs_1_MR"]);	  
+      if (t.jet1_pt < 275 && met > 200 && ht > 200) { // relax the MET/HT cuts for the measurement region
+	histsToFill.push_back(fsHists["h_fs_1_MR_Baseline"]);	  
+	if (t.jet1_pt < 250) histsToFill.push_back(fsHists["h_fs_1_MR_pt200"]);	  
+	else histsToFill.push_back(fsHists["h_fs_1_MR_pt250"]);	  
+	if (met > 250 && ht > 250) histsToFill.push_back(fsHists["h_fs_1_MR_MetHt250"]);	  
+	if (met > 250 && ht > 250 && t.jet1_pt > 250) histsToFill.push_back(fsHists["h_fs_1_MR_MetHtPt250"]);	  
       }
       else if (t.jet1_pt < 350 && met > 250 && ht > 250) {
 	  histsToFill.push_back(fsHists["h_fs_1_VR"]);
@@ -717,10 +771,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	continue; // to get here, must be blinded and in data, or see a weird "monojet" event where jet1 pt and met/ht are very different
       }
     }
-
-    // Analysis code
-
-    // Main Looper
 
     int match_track_index_1 = -1; int match_track_index_2 = -1;
     for (int i_chargino = 0; i_chargino < t.nCharginos; i_chargino++) {
@@ -759,7 +809,10 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     }
     for (int i_trk = 0; i_trk < ntracks; i_trk++) {   
 
-      if (overlapping_track[i_trk]) continue; // veto any tracks closely overlapping other lost tracks (pt > 15 GeV, with iso cut for 15-20 GeV)
+      if (overlapping_track[i_trk]) {
+	if (verbose) cout << "Overlapping" << endl;
+	continue; // veto any tracks closely overlapping other lost tracks (pt > 15 GeV, with iso cut for 15-20 GeV)
+      }
 
       bool PassesFullIsoSel = false; bool PassesFullIsoSelSTC = false;
       bool isQualityTrack = false; bool isQualityTrackSTC = false;
@@ -767,7 +820,10 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       // Apply basic selections
       if (applyCaloSel) {
 	const bool CaloSel = !(t.track_DeadECAL[i_trk] || t.track_DeadHCAL[i_trk]) && InEtaPhiVetoRegion(t.track_eta[i_trk],t.track_phi[i_trk],year) == 0;
-	if (!CaloSel) continue;
+	if (!CaloSel) {
+	  if (verbose) cout << "Failed CaloSel" << endl;
+	  continue;
+	}
       }
 
       int lenIndex = -1;
@@ -794,6 +850,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  if (isChargino) {
 	    cout << "Chargino failed base selection" << endl;
 	  }
+	  if (verbose) cout << "Failed base selection" << endl;	  
 	  continue;
 	}
 
@@ -807,7 +864,8 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	const bool isShort = isP || isM || isL;
 
 	if (!isShort) {
-	  if (isChargino && !isShort) cout << "Chargino failed shortness selection. Layers: " << nLayers << ", MOH: " << t.track_nLostOuterHits[i_trk] << endl;
+	  if (isChargino) cout << "Chargino failed shortness selection. Layers: " << nLayers << ", MOH: " << t.track_nLostOuterHits[i_trk] << endl;
+	  if (verbose) cout << "Failed shortness selection" << endl;	  
 	  continue;
 	}
 
@@ -826,6 +884,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  const bool recoVeto = minrecodr < 0.1;
 	  const bool PassesRecoVeto = !recoVeto && nearestPFSel && !t.track_isLepOverlap[i_trk];
 	  if (!PassesRecoVeto) {
+	    if (verbose) cout << "Failed reco veto" << endl;	  
 	    continue;
 	  }	  
 	}
@@ -833,6 +892,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  const bool PassesRecoVeto = t.track_recoveto[i_trk] == 0;
 	  if (!PassesRecoVeto) {
 	    if (isChargino) cout << "Chargino failed reco veto, " << t.track_recoveto[i_trk] << endl;
+	    if (verbose) cout << "Failed reco veto" << endl;	  
 	    continue;
 	  }
 	} else {
@@ -857,6 +917,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
 	if (!fillNM1Hists && !PassesFullIsoSelSTC) {
 	  if (isChargino) cout << "Chargino failed isolation" << endl;
+	  if (verbose) cout << "Failed iso selection" << endl;	  
 	  continue;
 	}
 
@@ -897,6 +958,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 
 	if (!fillNM1Hists && !isQualityTrackSTC) {
 	  if (isChargino) cout << "Chargino failed quality" << endl;
+	  if (verbose) cout << "Failed quality selection" << endl;	  
 	  continue;
 	}
 
@@ -1004,6 +1066,15 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       const float mt = MT( t.track_pt[i_trk], t.track_phi[i_trk], met, met_phi );
       bool rejected = (t.track_pt[i_trk] < 150 && mt < 100);
 
+      if (verbose && isST && lenIndex == 3) {
+	if (rejected) {
+	  cout << "MtPt rejected" << endl;	  
+	}
+	else {
+	  cout << "L ST: MT2 = " << t.mt2 << " met " << t.met_pt << " nj " << t.nJet30 << " ht " << t.ht << endl;
+	}
+      }
+
       vector<int> fillIndices; vector<string> lengths;
       lengths.push_back("All");
       if (lenIndex == 1) {
@@ -1025,7 +1096,7 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
       else { // lenIndex == 3
 	if (!rejected) {
 	  fillIndices.push_back(5);
-	  if (isST) cout << "L ST with weight " << weight << t.run << ":" << t.lumi << ":" << t.evt << endl;
+	  if (isST) cout << "L ST with weight " << weight << " " << t.run << ":" << t.lumi << ":" << t.evt << endl;
 	  lengths.push_back("L");
 	} else {
 	  fillIndices.push_back(6);
@@ -1094,6 +1165,42 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 	  cout << "Chargino failed selection" << endl;
 	}
 	continue;
+      }
+
+      // Monojet distribution checks
+      if (t.nJet30 == 1) {
+	bool fillMR = histsToFill[0] == fsHists["h_fs_1_MR_Baseline"];	  
+	bool fillVR = histsToFill[0] == fsHists["h_fs_1_VR"];	  
+	bool fillSR = histsToFill[0] == fsHists["h_fs_1_SR"];	  
+	if (isST) {
+	  if (fillMR) {
+	    h_jet1_phi_MR_ST->Fill(t.jet_phi[0],weight);
+	    h_jet1_eta_MR_ST->Fill(t.jet_eta[0],weight);
+	  }
+	  else if (fillVR) {
+	    h_jet1_phi_VR_ST->Fill(t.jet_phi[0],weight);
+	    h_jet1_eta_VR_ST->Fill(t.jet_eta[0],weight);
+	  }
+	  else if (fillSR) {
+	    h_jet1_phi_SR_ST->Fill(t.jet_phi[0],weight);
+	    h_jet1_eta_SR_ST->Fill(t.jet_eta[0],weight);
+	  }
+	}
+	else if (isSTC) {
+	  if (fillMR) {
+	    h_jet1_phi_MR_STC->Fill(t.jet_phi[0],weight);
+	    h_jet1_eta_MR_STC->Fill(t.jet_eta[0],weight);
+	  }
+	  else if (fillVR) {
+	    h_jet1_phi_VR_STC->Fill(t.jet_phi[0],weight);
+	    h_jet1_eta_VR_STC->Fill(t.jet_eta[0],weight);
+	  }
+	  else if (fillSR) {
+	    h_jet1_phi_SR_STC->Fill(t.jet_phi[0],weight);
+	    h_jet1_eta_SR_STC->Fill(t.jet_eta[0],weight);
+	  }
+	}
+
       }
 
       // If we want to find fshort for matched chargino tracks and this is not one, then skip this fill
@@ -1193,6 +1300,9 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 		// delta Met
 		hname = "h_deltaMet_"+suffix;
 		cutHists[hname]->Fill((met - adjMet)/met,weight);
+		// N vertex
+		hname = "h_nv_"+suffix;
+		cutHists[hname]->Fill(t.nVert,weight);
 		if (fillUnimportantCutHists) {
 		  // Ntag
 		  hname = "h_nb_"+suffix;
@@ -1200,9 +1310,6 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
 		  // Hit Pattern
 		  hname = "h_hp_"+suffix;
 		  cutHists[hname]->Fill(t.track_HitSignature[i_trk] & ((1<<7)-1),weight); // Mask so we save only first 6 hits
-		  // N vertex
-		  hname = "h_nv_"+suffix;
-		  cutHists[hname]->Fill(t.nVert,weight);
 		}
 	      }
 	    }
@@ -1277,12 +1384,27 @@ int FshortLooper::loop(TChain* ch, char * outtag, std::string config_tag, std::s
     for (unordered_map<string,TH1D*>::iterator hist = cutHistsNM1.begin(); hist != cutHistsNM1.end(); hist++) (hist->second)->Write();
   }
 
+  h_jet1_phi_MR_ST->Write();
+  h_jet1_eta_MR_ST->Write();
+  h_jet1_phi_VR_ST->Write();
+  h_jet1_eta_VR_ST->Write();
+  h_jet1_phi_SR_ST->Write();
+  h_jet1_eta_SR_ST->Write();
+  h_jet1_phi_MR_STC->Write();
+  h_jet1_eta_MR_STC->Write();
+  h_jet1_phi_VR_STC->Write();
+  h_jet1_eta_VR_STC->Write();
+  h_jet1_phi_SR_STC->Write();
+  h_jet1_eta_SR_STC->Write();
+
   h_sigeffST->Write();
   h_sigeffSTC->Write();
   h_sigpassST->Write();
   h_sigpassSTC->Write();
   h_CharLength->Write();
   h_CharLength_etaphi->Write();
+
+  h_nv_fullincl->Write();
 
   outfile_.Close();
   cout << "Wrote everything" << endl;

@@ -446,7 +446,8 @@ def makeCardScan(year,region,template,signal,outdir,length,n_bkg,im1=-1,im2=-1):
 
 all_points = set()
 nonzero_points = set() # This set of successfully processed mass points is printed to a file and used by limits/SignalScan scripts to process the cards
-rescaled_points = set()
+nonzero_points_16 = set()
+nonzero_points_1718 = set()
 if useSR: print "Using SRs"
 else: print "Using VRs"
 regions = ["1L_SR_1","LL_SR_23","LM_SR_23","LLM_SR_23","LH_SR_23","HL_SR_4","HM_SR_4","HLM_SR_4","HH_SR_4"] if useSR else ["LL_VR_23","LM_VR_23","LLM_VR_23","LH_VR_23","HL_VR_4","HM_VR_4","HLM_VR_4","HH_VR_4"]
@@ -540,6 +541,10 @@ for region in regions:
                             if n_sig > 0:
 #                                totals_m1_m2[ (m1,m2,year) ] += n_sig
                                 nonzero_points.add( (m1,m2) )
+                                if year == "2016":
+                                    nonzero_points_16.add( (m1,m2) )
+                                else:
+                                    nonzero_points_1718.add( (m1,m2) )
                             im2 += y_binwidth
                         im1 += x_binwidth
                 else:
@@ -564,16 +569,23 @@ for region in regions:
         
         # Note: exactly the same problem applies to cardMaker.C, except replace "python" with "cling", the C++ interpeter used by ROOT macros.
 
-    # Print signal_points to a file
-    if (doScan):
-        points_file = open("{0}/points_{1}.txt".format(outdir,signal),"w")
-        points_file.write("--------------------------------------------\n")
-        points_file.write("- saw nonzero signal entries for the following points: \n")
-        for mass_point in nonzero_points:
+# Print signal_points to a file
+if (doScan):
+    points_file = open("{0}/points_{1}.txt".format(outdir,signal),"w")
+    points_file.write("--------------------------------------------\n")
+    points_file.write("- saw nonzero signal entries for the following points: \n")
+    for mass_point in nonzero_points:
+        if mass_point in nonzero_points_16 and mass_point in nonzero_points_1718:
             points_file.write("{0}_{1}_{2}\n".format(signal,mass_point[0],mass_point[1]))
-        for mass_point in (all_points - nonzero_points):
+        else:
             os.system("rm -rf {}/{}_{}".format(outdir,mass_point[0],mass_point[1]))
-        points_file.close()
+            if mass_point in nonzero_points_16:
+                print "Mass point {} nonzero only in 2016, missing in 2017-2018, removed".format(mass_point)
+            else: 
+                print "Mass point {} nonzero only in 2017-18, missing in 2016, removed".format(mass_point)
+    for mass_point in (all_points - nonzero_points):
+        os.system("rm -rf {}/{}_{}".format(outdir,mass_point[0],mass_point[1]))
+    points_file.close()
 
 #print ""
 #print "Rescaled points:"

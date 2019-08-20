@@ -57,6 +57,7 @@ fi
 Grid_Resource="condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu"
 echo "
 universe=${UNIVERSE}
+Requirements = (HAS_SINGULARITY=?=True) && (HAS_CVMFS_cms_cern_ch =?= true)
 when_to_transfer_output = ON_EXIT
 transfer_input_files=${INPUT}
 #the actual executable to run is not transfered by its name.
@@ -65,6 +66,8 @@ transfer_input_files=${INPUT}
 +remote_DESIRED_Sites=\"T2_US_UCSD\"
 +Owner = undefined
 log=${LOG}
+rank = (Memory >= 8000) * (Mips >= 20000) * (Mips)
+request_memory=4 GB 
 output=${OUT}
 error =${ERR}
 notification=Never

@@ -2,12 +2,18 @@
 
 tag=$1
 
-#declare -a Samples=(T1qqqq T2qq T2bt)
-#declare -a Samples=(T1qqqq T2bt)
-declare -a Samples=(T1qqqq)
+declare -a Samples=(T1qqqq T2qq T2bt)
+#declare -a Samples=(T2bt T2qq)
+#declare -a Samples=(T1qqqq)
 #declare -a Samples=(T2bt)
 #declare -a Samples=(T2qq)
-declare -a ctaus=(1 5 10 10val 30 50 50val 70 100 150 200 200val 300 500 1000)
+#declare -a ctaus=(1 5 10 10val 30 50 50val 100 150 200 200val 300 500 1000)
+#declare -a ctaus=(1 5 10 30 50 100 150 200 300 500 1000)
+#declare -a ctaus=(1 5 10)
+declare -a ctaus=(500 1000)
+#declare -a ctaus=(1 5 10 30 50) # complement for T2bt, for those samples which don't depend on 200
+#declare -a ctaus=(50val 100 150 200 300 500 1000) # for T2bt while 200 is unavailable
+#declare -a ctaus=(150) 
 
 #rm -rf output_unmerged/2017and2018_${tag}
 
@@ -33,6 +39,6 @@ for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 python genmet_and_isr.py ${SAMPLE}_${ctau} ${tag} 2018 >& /dev/null &"    
 #    eval $command
 	command="nohup nice -n 10 python genmet_and_isr.py ${SAMPLE}_${ctau} ${tag} 2017and2018 >& /dev/null &"
-	eval $command
+#	eval $command
     done
 done

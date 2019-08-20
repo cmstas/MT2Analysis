@@ -59,6 +59,7 @@ int ShortTrackLooper::loop(TChain* ch, char * outtag, std::string config_tag, ch
 
   config_ = GetMT2Config(config_tag);
   const int year = config_.year;  
+  const float max_weight = year == 2016 ? 5.0 : 1.0;
 
   string signame = tag.substr(tag.rfind("/") + 1);
   bool isT2bt = signame.find("bt") != std::string::npos;
@@ -875,16 +876,16 @@ int ShortTrackLooper::loop(TChain* ch, char * outtag, std::string config_tag, ch
     h_weight_raw->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight/weight_adj);
     h_eff_den->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight);
     h_weight_all->Fill(TMath::Log10(weight_adj),t.GenSusyMScan1,t.GenSusyMScan2);
-    h_nevents->Fill(t.GenSusyMScan1,t.GenSusyMScan2,1);
+    h_nevents->Fill(t.GenSusyMScan1,t.GenSusyMScan2,1);    
     if (weight_adj > 10) {
       cout << "Track length reweight factor > 10: evt = " << t.evt << " (" << t.GenSusyMScan1 << ", " << t.GenSusyMScan2 << ") GeV, produces weight "
 	   << weight << " from weight " << weight/weight_adj;
-      if (weight > 1) {
-	cout << ". Skipping since weight > 1" << endl;
+      if (weight > max_weight) {
+	cout << ". Skipping since weight > " << max_weight << endl;
 	continue;
       }
       else {
-	cout << ". Allowing since weight < 1" << endl;
+	cout << ". Allowing since weight < " << max_weight << endl;
       }
     }
     h_weight_nospikes->Fill(t.GenSusyMScan1,t.GenSusyMScan2,weight);
@@ -1019,7 +1020,7 @@ int ShortTrackLooper::loop(TChain* ch, char * outtag, std::string config_tag, ch
       if (t.chargino_decayXY[i_ch] >= 490 || fabs(t.chargino_decayZ[i_ch]) >= 820) nLongCharginos++;
     }
 
-    if (lepveto || nLongCharginos > 0) {
+    if (lepveto || (nLongCharginos > 0 && config_.year != 2016)) {
       continue;
     }
 

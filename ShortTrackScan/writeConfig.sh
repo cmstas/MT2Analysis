@@ -73,7 +73,7 @@ x509userproxy=${PROXY}
     # for each job
     # 
 
-    for FILE in `ls output_merged/T*${TAG}*.root`; do
+    for FILE in `ls output_merged/*${TAG}*.root`; do
         echo "
 transfer_input_files=${INPUT}, ${FILE}
 executable=${EXE}

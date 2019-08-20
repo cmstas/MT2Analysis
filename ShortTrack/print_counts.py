@@ -12,7 +12,7 @@ verbose = False # Print more status messages
 printTables = True
 full_unblind = True
 doMC = True
-doBenchmarks = False
+doBenchmarks = True
 doMonojet = False
 makePullPlots = False
 makePostFitPlots = False
@@ -65,20 +65,22 @@ d18=ROOT.TFile.Open("output_merged/data_2018_{}.root".format(tag))
 d17=ROOT.TFile.Open("output_merged/data_2017_{}.root".format(tag))
 d16=ROOT.TFile.Open("output_merged/data_2016_{}.root".format(tag))
 
+sigtag = "preapproval"
+
 if doMC:
-    m1718=ROOT.TFile.Open("output_merged/mc_2017and2018_{}.root".format(tag))
-    m17=ROOT.TFile.Open("output_merged/mc_2017_{}.root".format(tag))
-    m18=ROOT.TFile.Open("output_merged/mc_2018_{}.root".format(tag))
-    m16=ROOT.TFile.Open("output_merged/mc_2016_{}.root".format(tag))
+    m1718=ROOT.TFile.Open("output_merged/mc_2017and2018_{}.root".format(sigtag))
+    m17=ROOT.TFile.Open("output_merged/mc_2017_{}.root".format(sigtag))
+    m18=ROOT.TFile.Open("output_merged/mc_2018_{}.root".format(sigtag))
+    m16=ROOT.TFile.Open("output_merged/mc_2016_{}.root".format(sigtag))
 
     if doBenchmarks:
         sig1718 = {}
-        sig1718[(1800,1400,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1400.root".format(tag))
-        sig1718[(1800,1600,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1600.root".format(tag))
-        sig1718[(1800,1700,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1700.root".format(tag))
-        sig1718[(1800,1400,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1400.root".format(tag))
-        sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1600.root".format(tag))
-        sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(tag))
+        sig1718[(1800,1400,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1400.root".format(sigtag))
+        sig1718[(1800,1600,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1600.root".format(sigtag))
+        sig1718[(1800,1700,10)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_10cm_1800-1700.root".format(sigtag))
+        sig1718[(1800,1400,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1400.root".format(sigtag))
+        sig1718[(1800,1600,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1600.root".format(sigtag))
+        sig1718[(1800,1700,90)]=ROOT.TFile("output_unmerged/2017_{0}/signal/fastsim_90cm_1800-1700.root".format(sigtag))
         
         siglimits = {}
         siglimits[(1800,1400,10)] = 0.56
@@ -244,7 +246,8 @@ if makePullPlots:
     makePlotRaw(allVR16,D16,eD16,sD16,D16f,"2016 DATA VR NoNC",combineSysts=False,doPullPlot=True,inclNCsyst=False)
 
 if makePostFitPlots:
-    fpostfit=ROOT.TFile.Open("../scripts/fits_approval_T1qqqq_10_Data_SR/fitDiagnostics_fit_CRonly_result.root".format(tag))
+#    fpostfit=ROOT.TFile.Open("../scripts/fits_{}_T1qqqq_10_Data_SR/fitDiagnostics_fit_CRonly_result.root".format(tag))
+    fpostfit=ROOT.TFile.Open("../limits/ShortTrack/fits_longChiVeto_T1qqqq_10_Data_SR/fitDiagnostics_fit_CRonly_result.root")
     if fpostfit == None:
         print "Couldn't find postfit file"
         print "Run scripts/getShortTrackFits.sh, or produced manually using something like combine -M FitDiagnostics -d combined.txt -n _fit_CRonly_result --saveShapes --saveWithUncertainties --setParameters mask_ch1=1 (with correctly named channels; see scripts/combineDir.sh)"
@@ -291,7 +294,7 @@ if makePostFitPlots:
         makePlotPostfitOnly(allSR16,D16,D16p,eD16p,"2016 DATA SR",rescale16,doPullPlot=True)
 
 if makeSSRplots:
-    fcorr = ROOT.TFile.Open("../scripts/fits_approval_T1qqqq_10_Data_SR/fitDiagnostics_covariance.root")
+    fcorr = ROOT.TFile.Open("../limits/ShortTrack/fits_longChiVeto_T1qqqq_10_Data_SR/fitDiagnostics_covariance.root")
     if fcorr == None:
         print "Couldn't find a background-only covariance file. Make it using combine -M FitDiagnostics -t -1 --expectSignal 0 --rMin -1 [COMBINED DATACARD] --forceRecreateNLL  --saveWithUncertainties --saveOverallShapes --numToysForShapes 200"
     CORR = getCorr(fcorr)

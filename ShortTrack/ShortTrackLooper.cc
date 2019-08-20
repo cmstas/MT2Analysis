@@ -433,32 +433,41 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Save Fshorts used with errors
   TH1D* h_FS = new TH1D("h_FS","f_{short}",5,0,5);
+  TH1D* h_FS_1 = (TH1D*) h_FS->Clone("h_FS_1");
   TH1D* h_FS_23 = (TH1D*) h_FS->Clone("h_FS_23");
   TH1D* h_FS_4 = (TH1D*) h_FS->Clone("h_FS_4");
   TH1D* h_FS_hi = (TH1D*) h_FS->Clone("h_FS_hi");
+  TH1D* h_FS_1_hi = (TH1D*) h_FS->Clone("h_FS_1_hi");
   TH1D* h_FS_23_hi = (TH1D*) h_FS->Clone("h_FS_23_hi");
   TH1D* h_FS_4_hi = (TH1D*) h_FS->Clone("h_FS_4_hi");
   TH1D* h_FS_lo = (TH1D*) h_FS->Clone("h_FS_lo");
+  TH1D* h_FS_1_lo = (TH1D*) h_FS->Clone("h_FS_1_lo");
   TH1D* h_FS_23_lo = (TH1D*) h_FS->Clone("h_FS_23_lo");
   TH1D* h_FS_4_lo = (TH1D*) h_FS->Clone("h_FS_4_lo");
 
   TH1D* h_FS_up = (TH1D*) h_FS->Clone("h_FS_up");
+  TH1D* h_FS_1_up = (TH1D*) h_FS->Clone("h_FS_1_up");
   TH1D* h_FS_23_up = (TH1D*) h_FS->Clone("h_FS_23_up");
   TH1D* h_FS_4_up = (TH1D*) h_FS->Clone("h_FS_4_up");
   TH1D* h_FS_hi_up = (TH1D*) h_FS->Clone("h_FS_hi_up");
+  TH1D* h_FS_1_hi_up = (TH1D*) h_FS->Clone("h_FS_1_hi_up");
   TH1D* h_FS_23_hi_up = (TH1D*) h_FS->Clone("h_FS_23_hi_up");
   TH1D* h_FS_4_hi_up = (TH1D*) h_FS->Clone("h_FS_4_hi_up");
   TH1D* h_FS_lo_up = (TH1D*) h_FS->Clone("h_FS_lo_up");
+  TH1D* h_FS_1_lo_up = (TH1D*) h_FS->Clone("h_FS_1_lo_up");
   TH1D* h_FS_23_lo_up = (TH1D*) h_FS->Clone("h_FS_23_lo_up");
   TH1D* h_FS_4_lo_up = (TH1D*) h_FS->Clone("h_FS_4_lo_up");
 
   TH1D* h_FS_dn = (TH1D*) h_FS->Clone("h_FS_dn");
+  TH1D* h_FS_1_dn = (TH1D*) h_FS->Clone("h_FS_1_dn");
   TH1D* h_FS_23_dn = (TH1D*) h_FS->Clone("h_FS_23_dn");
   TH1D* h_FS_4_dn = (TH1D*) h_FS->Clone("h_FS_4_dn");
   TH1D* h_FS_hi_dn = (TH1D*) h_FS->Clone("h_FS_hi_dn");
+  TH1D* h_FS_1_hi_dn = (TH1D*) h_FS->Clone("h_FS_1_hi_dn");
   TH1D* h_FS_23_hi_dn = (TH1D*) h_FS->Clone("h_FS_23_hi_dn");
   TH1D* h_FS_4_hi_dn = (TH1D*) h_FS->Clone("h_FS_4_hi_dn");
   TH1D* h_FS_lo_dn = (TH1D*) h_FS->Clone("h_FS_lo_dn");
+  TH1D* h_FS_1_lo_dn = (TH1D*) h_FS->Clone("h_FS_1_lo_dn");
   TH1D* h_FS_23_lo_dn = (TH1D*) h_FS->Clone("h_FS_23_lo_dn");
   TH1D* h_FS_4_lo_dn = (TH1D*) h_FS->Clone("h_FS_4_lo_dn");
 
@@ -564,17 +573,23 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TFile* FshortFile = TFile::Open(FshortName,"READ");
   TFile* FshortFileMC = TFile::Open(FshortNameMC,"READ");
   TH1D* h_fs = ((TH2D*) FshortFile->Get("h_fsMR_Baseline"))->ProjectionX("h_fs",1,1);
+  TH1D* h_fs_Nj1 = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline"))->ProjectionX("h_fs_1",1,1);
   TH1D* h_fs_Nj23 = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23",1,1);
   TH1D* h_fs_Nj4 = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline"))->ProjectionX("h_fs_4",1,1);
   TH1D* h_fs_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_up"))->ProjectionX("h_fs_up",1,1);
+  TH1D* h_fs_Nj1_up = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_up"))->ProjectionX("h_fs_1_up",1,1);
   TH1D* h_fs_Nj23_up = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_up"))->ProjectionX("h_fs_23_up",1,1);
   TH1D* h_fs_Nj4_up = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_up"))->ProjectionX("h_fs_4_up",1,1);
   TH1D* h_fs_dn = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_dn"))->ProjectionX("h_fs_dn",1,1);
+  TH1D* h_fs_Nj1_dn = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_dn"))->ProjectionX("h_fs_1_dn",1,1);
   TH1D* h_fs_Nj23_dn = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_dn"))->ProjectionX("h_fs_23_dn",1,1);
   TH1D* h_fs_Nj4_dn = ((TH2D*) FshortFile->Get("h_fsMR_4_Baseline_dn"))->ProjectionX("h_fs_4_dn",1,1);
   TH1D* h_fs_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline"))->ProjectionX("h_fs_MC",1,1);
   TH1D* h_fs_MC_up = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline_up"))->ProjectionX("h_fs_MC_up",1,1);
   TH1D* h_fs_MC_dn = ((TH2D*) FshortFileMC->Get("h_fsMR_Baseline_dn"))->ProjectionX("h_fs_MC_dn",1,1);
+  TH1D* h_fs_Nj1_MC = ((TH2D*) FshortFileMC->Get("h_fs_1_MR_Baseline"))->ProjectionX("h_fs_1_MC",1,1);
+  TH1D* h_fs_Nj1_MC_up = ((TH2D*) FshortFileMC->Get("h_fs_1_MR_Baseline_up"))->ProjectionX("h_fs_1_MC_up",1,1);
+  TH1D* h_fs_Nj1_MC_dn = ((TH2D*) FshortFileMC->Get("h_fs_1_MR_Baseline_dn"))->ProjectionX("h_fs_1_MC_dn",1,1);
   TH1D* h_fs_Nj23_MC = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline"))->ProjectionX("h_fs_23_MC",1,1);
   TH1D* h_fs_Nj23_MC_up = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline_up"))->ProjectionX("h_fs_23_MC_up",1,1);
   TH1D* h_fs_Nj23_MC_dn = ((TH2D*) FshortFileMC->Get("h_fsMR_23_Baseline_dn"))->ProjectionX("h_fs_23_MC_dn",1,1);
@@ -585,6 +600,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const float mc_L_corr = adjL ? h_fs_MC->GetBinContent(Lidx) / h_fs_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
   const float mc_L_corr_err_up = adjL ? sqrt( pow((h_fs_MC_up->GetBinError(Lidx) / h_fs_MC->GetBinContent(Lidx)),2) + pow((h_fs_MC_up->GetBinError(Midx) / h_fs_MC->GetBinContent(Midx)),2)) * mc_L_corr : 0;
   const float mc_L_corr_err_dn = adjL ? sqrt( pow((h_fs_MC_dn->GetBinError(Lidx) / h_fs_MC->GetBinContent(Lidx)),2) + pow((h_fs_MC_dn->GetBinError(Midx) / h_fs_MC->GetBinContent(Midx)),2)) * mc_L_corr : 0;
+  const float mc_L_corr_1 = adjL ? h_fs_Nj1_MC->GetBinContent(Lidx) / h_fs_Nj1_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
+  const float mc_L_corr_err_1_up = adjL ? sqrt( pow((h_fs_Nj1_MC_up->GetBinError(4) / h_fs_Nj1_MC->GetBinContent(4)),2) + pow((h_fs_Nj1_MC_up->GetBinError(3) / h_fs_Nj1_MC->GetBinContent(3)),2)) * mc_L_corr_1 : 0;
+  const float mc_L_corr_err_1_dn = adjL ? sqrt( pow((h_fs_Nj1_MC_dn->GetBinError(4) / h_fs_Nj1_MC->GetBinContent(4)),2) + pow((h_fs_Nj1_MC_dn->GetBinError(3) / h_fs_Nj1_MC->GetBinContent(3)),2)) * mc_L_corr_1 : 0;
   const float mc_L_corr_23 = adjL ? h_fs_Nj23_MC->GetBinContent(Lidx) / h_fs_Nj23_MC->GetBinContent(Midx) : 1.0; // fs_L / fs_M
   const float mc_L_corr_err_23_up = adjL ? sqrt( pow((h_fs_Nj23_MC_up->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC_up->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
   const float mc_L_corr_err_23_dn = adjL ? sqrt( pow((h_fs_Nj23_MC_dn->GetBinError(4) / h_fs_Nj23_MC->GetBinContent(4)),2) + pow((h_fs_Nj23_MC_dn->GetBinError(3) / h_fs_Nj23_MC->GetBinContent(3)),2)) * mc_L_corr_23 : 0;
@@ -606,6 +624,21 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const double fs_L = adjL ? h_fs->GetBinContent(Midx) * mc_L_corr : h_fs->GetBinContent(Lidx);
   const double fs_L_err_up = adjL ? sqrt( pow((fs_M_err_up/fs_M),2) + pow((mc_L_corr_err_up / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(Lidx);
   const double fs_L_err_dn = adjL ? sqrt( pow((fs_M_err_dn/fs_M),2) + pow((mc_L_corr_err_dn / mc_L_corr),2) ) * fs_L : h_fs->GetBinError(Lidx);
+  const double fs_Nj1_P = h_fs_Nj1->GetBinContent(Pidx);
+  const double fs_Nj1_P_err_up = h_fs_Nj1_up->GetBinError(Pidx);
+  const double fs_Nj1_P_err_dn = h_fs_Nj1_dn->GetBinError(Pidx);
+  const double fs_Nj1_P3 = h_fs_Nj1->GetBinContent(P3idx);
+  const double fs_Nj1_P3_err_up = h_fs_Nj1_up->GetBinError(P3idx);
+  const double fs_Nj1_P3_err_dn = h_fs_Nj1_dn->GetBinError(P3idx);
+  const double fs_Nj1_P4 = h_fs_Nj1->GetBinContent(P4idx);
+  const double fs_Nj1_P4_err_up = h_fs_Nj1_up->GetBinError(P4idx);
+  const double fs_Nj1_P4_err_dn = h_fs_Nj1_dn->GetBinError(P4idx);
+  const double fs_Nj1_M = h_fs_Nj1->GetBinContent(Midx);
+  const double fs_Nj1_M_err_up = h_fs_Nj1_up->GetBinError(Midx);
+  const double fs_Nj1_M_err_dn = h_fs_Nj1_dn->GetBinError(Midx);
+  const double fs_Nj1_L = adjL ? h_fs_Nj1->GetBinContent(Midx) * mc_L_corr_1 : h_fs_Nj1->GetBinContent(Lidx);
+  const double fs_Nj1_L_err_up = adjL ? sqrt( pow((fs_Nj1_M_err_up/fs_Nj1_M),2) + pow((mc_L_corr_err_1_up / mc_L_corr_1),2) ) * fs_Nj1_L : h_fs_Nj1->GetBinError(Lidx);
+  const double fs_Nj1_L_err_dn = adjL ? sqrt( pow((fs_Nj1_M_err_dn/fs_Nj1_M),2) + pow((mc_L_corr_err_1_dn / mc_L_corr_1),2) ) * fs_Nj1_L : h_fs_Nj1->GetBinError(Lidx);
   const double fs_Nj23_P = h_fs_Nj23->GetBinContent(Pidx);
   const double fs_Nj23_P_err_up = h_fs_Nj23_up->GetBinError(Pidx);
   const double fs_Nj23_P_err_dn = h_fs_Nj23_dn->GetBinError(Pidx);
@@ -640,6 +673,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs_hi = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt"))->ProjectionX("h_fs_hi",1,1);
   TH1D* h_fs_hi_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt_up"))->ProjectionX("h_fs_hi_up",1,1);
   TH1D* h_fs_hi_dn = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_hipt_dn"))->ProjectionX("h_fs_hi_dn",1,1);
+  TH1D* h_fs_Nj1_hi = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_hipt"))->ProjectionX("h_fs_1_hi",1,1);
+  TH1D* h_fs_Nj1_hi_up = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_hipt_up"))->ProjectionX("h_fs_1_hi_up",1,1);
+  TH1D* h_fs_Nj1_hi_dn = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_hipt_dn"))->ProjectionX("h_fs_1_hi_dn",1,1);
   TH1D* h_fs_Nj23_hi = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt"))->ProjectionX("h_fs_23_hi",1,1);
   TH1D* h_fs_Nj23_hi_up = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt_up"))->ProjectionX("h_fs_23_hi_up",1,1);
   TH1D* h_fs_Nj23_hi_dn = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_hipt_dn"))->ProjectionX("h_fs_23_hi_dn",1,1);
@@ -659,6 +695,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const double fs_M_hi = h_fs_hi->GetBinContent(Midx);
   const double fs_M_err_hi_up = h_fs_hi_up->GetBinError(Midx);
   const double fs_M_err_hi_dn = h_fs_hi_dn->GetBinError(Midx);
+  const double fs_Nj1_P_hi = h_fs_Nj1_hi->GetBinContent(Pidx);
+  const double fs_Nj1_P_err_hi_up = h_fs_Nj1_hi_up->GetBinError(Pidx);
+  const double fs_Nj1_P_err_hi_dn = h_fs_Nj1_hi_dn->GetBinError(Pidx);
+  const double fs_Nj1_P3_hi = h_fs_Nj1_hi->GetBinContent(P3idx);
+  const double fs_Nj1_P3_err_hi_up = h_fs_Nj1_hi_up->GetBinError(P3idx);
+  const double fs_Nj1_P3_err_hi_dn = h_fs_Nj1_hi_dn->GetBinError(P3idx);
+  const double fs_Nj1_P4_hi = h_fs_Nj1_hi->GetBinContent(P4idx);
+  const double fs_Nj1_P4_err_hi_up = h_fs_Nj1_hi_up->GetBinError(P4idx);
+  const double fs_Nj1_P4_err_hi_dn = h_fs_Nj1_hi_dn->GetBinError(P4idx);
+  const double fs_Nj1_M_hi = h_fs_Nj1_hi->GetBinContent(Midx);
+  const double fs_Nj1_M_err_hi_up = h_fs_Nj1_hi_up->GetBinError(Midx);
+  const double fs_Nj1_M_err_hi_dn = h_fs_Nj1_hi_dn->GetBinError(Midx);
   const double fs_Nj23_P_hi = h_fs_Nj23_hi->GetBinContent(Pidx);
   const double fs_Nj23_P_err_hi_up = h_fs_Nj23_hi_up->GetBinError(Pidx);
   const double fs_Nj23_P_err_hi_dn = h_fs_Nj23_hi_dn->GetBinError(Pidx);
@@ -687,6 +735,9 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   TH1D* h_fs_lo = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt"))->ProjectionX("h_fs_lo",1,1);
   TH1D* h_fs_lo_up = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt_up"))->ProjectionX("h_fs_lo_up",1,1);
   TH1D* h_fs_lo_dn = ((TH2D*) FshortFile->Get("h_fsMR_Baseline_lowpt_dn"))->ProjectionX("h_fs_lo_dn",1,1);
+  TH1D* h_fs_Nj1_lo = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_lowpt"))->ProjectionX("h_fs_1_lo",1,1);
+  TH1D* h_fs_Nj1_lo_up = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_lowpt_up"))->ProjectionX("h_fs_1_lo_up",1,1);
+  TH1D* h_fs_Nj1_lo_dn = ((TH2D*) FshortFile->Get("h_fs_1_MR_Baseline_lowpt_dn"))->ProjectionX("h_fs_1_lo_dn",1,1);
   TH1D* h_fs_Nj23_lo = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt"))->ProjectionX("h_fs_23_lo",1,1);
   TH1D* h_fs_Nj23_lo_up = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt_up"))->ProjectionX("h_fs_23_lo_up",1,1);
   TH1D* h_fs_Nj23_lo_dn = ((TH2D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt_dn"))->ProjectionX("h_fs_23_lo_dn",1,1);
@@ -706,6 +757,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const double fs_M_lo = h_fs_lo->GetBinContent(Midx);
   const double fs_M_err_lo_up = h_fs_lo_up->GetBinError(Midx);
   const double fs_M_err_lo_dn = h_fs_lo_dn->GetBinError(Midx);
+  const double fs_Nj1_P_lo = h_fs_Nj1_lo->GetBinContent(Pidx);
+  const double fs_Nj1_P_err_lo_up = h_fs_Nj1_lo_up->GetBinError(Pidx);
+  const double fs_Nj1_P_err_lo_dn = h_fs_Nj1_lo_dn->GetBinError(Pidx);
+  const double fs_Nj1_P3_lo = h_fs_Nj1_lo->GetBinContent(P3idx);
+  const double fs_Nj1_P3_err_lo_up = h_fs_Nj1_lo_up->GetBinError(P3idx);
+  const double fs_Nj1_P3_err_lo_dn = h_fs_Nj1_lo_dn->GetBinError(P3idx);
+  const double fs_Nj1_P4_lo = h_fs_Nj1_lo->GetBinContent(P4idx);
+  const double fs_Nj1_P4_err_lo_up = h_fs_Nj1_lo_up->GetBinError(P4idx);
+  const double fs_Nj1_P4_err_lo_dn = h_fs_Nj1_lo_dn->GetBinError(P4idx);
+  const double fs_Nj1_M_lo = h_fs_Nj1_lo->GetBinContent(Midx);
+  const double fs_Nj1_M_err_lo_up = h_fs_Nj1_lo_up->GetBinError(Midx);
+  const double fs_Nj1_M_err_lo_dn = h_fs_Nj1_lo_dn->GetBinError(Midx);
   const double fs_Nj23_P_lo = h_fs_Nj23_lo->GetBinContent(Pidx);
   const double fs_Nj23_P_err_lo_up = h_fs_Nj23_lo_up->GetBinError(Pidx);
   const double fs_Nj23_P_err_lo_dn = h_fs_Nj23_lo_dn->GetBinError(Pidx);
@@ -760,6 +823,22 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "fs_L             : " << fs_L << endl;
   cout << "fs_L err up      : " << fs_L_err_up << endl;
   cout << "fs_L err dn      : " << fs_L_err_dn << endl;
+  cout << "fs_Nj1_P         : " << fs_Nj1_P << endl;
+  cout << "fs_Nj1_P err up  : " << fs_Nj1_P_err_up << endl;
+  cout << "fs_Nj1_P err dn  : " << fs_Nj1_P_err_dn << endl;
+  cout << "fs_Nj1_P3        : " << fs_Nj1_P3 << endl;
+  cout << "fs_Nj1_P3 err up : " << fs_Nj1_P3_err_up << endl;
+  cout << "fs_Nj1_P3 err dn : " << fs_Nj1_P3_err_up << endl;
+  cout << "fs_Nj1_P4        : " << fs_Nj1_P4 << endl;
+  cout << "fs_Nj1_P4 err up : " << fs_Nj1_P4_err_up << endl;
+  cout << "fs_Nj1_P4 err dn : " << fs_Nj1_P4_err_dn << endl;
+  cout << "fs_Nj1_M         : " << fs_Nj1_M << endl;
+  cout << "fs_Nj1_M err up  : " << fs_Nj1_M_err_up << endl;
+  cout << "fs_Nj1_M err dn  : " << fs_Nj1_M_err_dn << endl;
+  cout << "fs_Nj1_L (raw)   : " << h_fs_Nj1->GetBinContent(4) << endl;
+  cout << "fs_Nj1_L         : " << fs_Nj1_L << endl;
+  cout << "fs_Nj1_L err up  : " << fs_Nj1_L_err_up << endl;
+  cout << "fs_Nj1_L err dn  : " << fs_Nj1_L_err_dn << endl;
   cout << "fs_Nj23_P        : " << fs_Nj23_P << endl;
   cout << "fs_Nj23_P err up : " << fs_Nj23_P_err_up << endl;
   cout << "fs_Nj23_P err dn : " << fs_Nj23_P_err_dn << endl;
@@ -807,6 +886,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "fs_M             : " << fs_M_hi << endl;
   cout << "fs_M err up      : " << fs_M_err_hi_up << endl;
   cout << "fs_M err dn      : " << fs_M_err_hi_dn << endl;
+  cout << "fs_Nj1_P         : " << fs_Nj1_P_hi << endl;
+  cout << "fs_Nj1_P err up  : " << fs_Nj1_P_err_hi_up << endl;
+  cout << "fs_Nj1_P err dn  : " << fs_Nj1_P_err_hi_dn << endl;
+  cout << "fs_Nj1_P3        : " << fs_Nj1_P3_hi << endl;
+  cout << "fs_Nj1_P3 err up : " << fs_Nj1_P3_err_hi_up << endl;
+  cout << "fs_Nj1_P3 err dn : " << fs_Nj1_P3_err_hi_dn << endl;
+  cout << "fs_Nj1_P4        : " << fs_Nj1_P4_hi << endl;
+  cout << "fs_Nj1_P4 err up : " << fs_Nj1_P4_err_hi_up << endl;
+  cout << "fs_Nj1_P4 err dn : " << fs_Nj1_P4_err_hi_dn << endl;
+  cout << "fs_Nj1_M         : " << fs_Nj1_M_hi << endl;
+  cout << "fs_Nj1_M err up  : " << fs_Nj1_M_err_hi_up << endl;
+  cout << "fs_Nj1_M err dn  : " << fs_Nj1_M_err_hi_dn << endl;
   cout << "fs_Nj23_P        : " << fs_Nj23_P_hi << endl;
   cout << "fs_Nj23_P err up : " << fs_Nj23_P_err_hi_up << endl;
   cout << "fs_Nj23_P err dn : " << fs_Nj23_P_err_hi_dn << endl;
@@ -846,6 +937,18 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   cout << "fs_M             : " << fs_M_lo << endl;
   cout << "fs_M err up      : " << fs_M_err_lo_up << endl;
   cout << "fs_M err dn      : " << fs_M_err_lo_dn << endl;
+  cout << "fs_Nj1_P         : " << fs_Nj1_P_lo << endl;
+  cout << "fs_Nj1_P err up  : " << fs_Nj1_P_err_lo_up << endl;
+  cout << "fs_Nj1_P err dn  : " << fs_Nj1_P_err_lo_dn << endl;
+  cout << "fs_Nj1_P3        : " << fs_Nj1_P3_lo << endl;
+  cout << "fs_Nj1_P3 err up : " << fs_Nj1_P3_err_lo_up << endl;
+  cout << "fs_Nj1_P3 err dn : " << fs_Nj1_P3_err_lo_dn << endl;
+  cout << "fs_Nj1_P4        : " << fs_Nj1_P4_lo << endl;
+  cout << "fs_Nj1_P4 err up : " << fs_Nj1_P4_err_lo_up << endl;
+  cout << "fs_Nj1_P4 err dn : " << fs_Nj1_P4_err_lo_dn << endl;
+  cout << "fs_Nj1_M         : " << fs_Nj1_M_lo << endl;
+  cout << "fs_Nj1_M err up  : " << fs_Nj1_M_err_lo_up << endl;
+  cout << "fs_Nj1_M err dn  : " << fs_Nj1_M_err_lo_dn << endl;
   cout << "fs_Nj23_P        : " << fs_Nj23_P_lo << endl;
   cout << "fs_Nj23_P err up : " << fs_Nj23_P_err_lo_up << endl;
   cout << "fs_Nj23_P err dn : " << fs_Nj23_P_err_lo_dn << endl;
@@ -873,12 +976,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Now get systematics
   TH1D* h_fs_syst = (TH1D*) FshortFile->Get("h_fsMR_Baseline_syst");
+  TH1D* h_fs_syst_Nj1 = (TH1D*) FshortFile->Get("h_fs_1_MR_Baseline_syst");
   TH1D* h_fs_syst_Nj23 = (TH1D*) FshortFile->Get("h_fsMR_23_Baseline_syst");
   TH1D* h_fs_syst_Nj4 = (TH1D*) FshortFile->Get("h_fsMR_4_Baseline_syst");
   TH1D* h_fs_syst_hi = (TH1D*) FshortFile->Get("h_fsMR_Baseline_hipt_syst");
+  TH1D* h_fs_syst_Nj1_hi = (TH1D*) FshortFile->Get("h_fs_1_MR_Baseline_hipt_syst");
   TH1D* h_fs_syst_Nj23_hi = (TH1D*) FshortFile->Get("h_fsMR_23_Baseline_hipt_syst");
   TH1D* h_fs_syst_Nj4_hi = (TH1D*) FshortFile->Get("h_fsMR_4_Baseline_hipt_syst");
   TH1D* h_fs_syst_low = (TH1D*) FshortFile->Get("h_fsMR_Baseline_lowpt_syst");
+  TH1D* h_fs_syst_Nj1_low = (TH1D*) FshortFile->Get("h_fs_1_MR_Baseline_lowpt_syst");
   TH1D* h_fs_syst_Nj23_low = (TH1D*) FshortFile->Get("h_fsMR_23_Baseline_lowpt_syst");
   TH1D* h_fs_syst_Nj4_low = (TH1D*) FshortFile->Get("h_fsMR_4_Baseline_lowpt_syst");
 
@@ -887,6 +993,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const float fs_P4_syst = h_fs_syst->GetBinContent(P4idx);
   const float fs_M_syst  = h_fs_syst->GetBinContent(Midx);
   const float fs_L_syst  = fs_L;  // Always take 100% error for L tracks
+
+  const float fs_P_syst_Nj1  = h_fs_syst_Nj1->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj1 = h_fs_syst_Nj1->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj1 = h_fs_syst_Nj1->GetBinContent(P4idx);
+  const float fs_M_syst_Nj1  = h_fs_syst_Nj1->GetBinContent(Midx);
+  const float fs_L_syst_Nj1  = fs_Nj1_L;  // Always take 100% error for L tracks
 
   const float fs_P_syst_Nj23  = h_fs_syst_Nj23->GetBinContent(Pidx);
   const float fs_P3_syst_Nj23 = h_fs_syst_Nj23->GetBinContent(P3idx);
@@ -906,6 +1018,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const float fs_M_syst_lo  = h_fs_syst_low->GetBinContent(Midx);
   const float fs_L_syst_lo  = 0; // no split L 
 
+  const float fs_P_syst_Nj1_lo  = h_fs_syst_Nj1_low->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj1_lo = h_fs_syst_Nj1_low->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj1_lo = h_fs_syst_Nj1_low->GetBinContent(P4idx);
+  const float fs_M_syst_Nj1_lo  = h_fs_syst_Nj1_low->GetBinContent(Midx);
+  const float fs_L_syst_Nj1_lo  = 0; // no split L
+
   const float fs_P_syst_Nj23_lo  = h_fs_syst_Nj23_low->GetBinContent(Pidx);
   const float fs_P3_syst_Nj23_lo = h_fs_syst_Nj23_low->GetBinContent(P3idx);
   const float fs_P4_syst_Nj23_lo = h_fs_syst_Nj23_low->GetBinContent(P4idx);
@@ -923,6 +1041,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   const float fs_P4_syst_hi = h_fs_syst_hi->GetBinContent(P4idx);
   const float fs_M_syst_hi  = h_fs_syst_hi->GetBinContent(Midx);
   const float fs_L_syst_hi  = 0; // no split L
+
+  const float fs_P_syst_Nj1_hi  = h_fs_syst_Nj1_hi->GetBinContent(Pidx);
+  const float fs_P3_syst_Nj1_hi = h_fs_syst_Nj1_hi->GetBinContent(P3idx);
+  const float fs_P4_syst_Nj1_hi = h_fs_syst_Nj1_hi->GetBinContent(P4idx);
+  const float fs_M_syst_Nj1_hi  = h_fs_syst_Nj1_hi->GetBinContent(Midx);
+  const float fs_L_syst_Nj1_hi  = 0;  // No split L
 
   const float fs_P_syst_Nj23_hi  = h_fs_syst_Nj23_hi->GetBinContent(Pidx);
   const float fs_P3_syst_Nj23_hi = h_fs_syst_Nj23_hi->GetBinContent(P3idx);
@@ -991,7 +1115,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     if (config_.filters["EcalDeadCellTriggerPrimitiveFilter"] && !t.Flag_EcalDeadCellTriggerPrimitiveFilter) continue;
     if (config_.filters["ecalBadCalibFilter"] && !t.Flag_ecalBadCalibFilter) continue;
     if (config_.filters["badMuonFilter"] && !t.Flag_badMuonFilter) continue;
-    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
+    //    if (config_.filters["badChargedCandidateFilter"] && !t.Flag_badChargedCandidateFilter) continue; 
     if (config_.filters["badMuonFilterV2"] && !t.Flag_badMuonFilterV2) continue;
     if (config_.filters["badChargedHadronFilterV2"] && !t.Flag_badChargedHadronFilterV2) continue; 
     
@@ -1076,7 +1200,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       }
     }
     else {
-      if (met_pt < 200 || ht < 200 || t.jet1_pt < 200) {
+      if (met_pt < 200 || t.ht < 200 || t.jet1_pt < 200) {
 	continue;
       }
     }
@@ -1145,6 +1269,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
     TH2D* hist;    
     TH2D* hist_Nj;
     
+    /*
     // 1*
     if (t.nJet30 == 1) {
       // 1H
@@ -1164,6 +1289,7 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  hist = h_1H_SR;
 	  hist_Nj = h_1H_SR_1;
 	}
+
       }
       // 1M
       else if (t.ht >= 450) {
@@ -1200,6 +1326,24 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	  hist = h_1L_SR;
 	  hist_Nj = h_1L_SR_1;
 	}
+      }
+    */
+    // Just call everything the 1L region for now
+    if (t.nJet30 == 1) {
+      if (t.jet1_pt >= 350 && met_pt > 250 && t.ht > 250) {
+	hist = h_1L_SR;
+	hist_Nj = h_1L_SR_1;
+      }
+      else if (t.jet1_pt >= 275 && met_pt > 250 && t.ht > 250) {
+	hist = h_1L_VR;
+	hist_Nj = h_1L_VR_1;
+      }
+      else if (t.jet1_pt >= 200 && met_pt > 200 && t.ht > 200) { // low Ht
+	hist = h_1L_MR;
+	hist_Nj = h_1L_MR_1;
+      }
+      else {
+	continue; // probably some pathological monojet event with high jet1_pt but low met and ht
       }
     }
     else if (t.nJet30 < 4) {
@@ -1725,6 +1869,24 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	cout << "P3: " << nSTCp3 << ", " << nSTp3 << endl;	
       }
     }
+
+    if (nSTCl_acc + nSTCm + nSTCp + nSTl_acc + nSTm + nSTp > 0 && !t.Flag_badChargedCandidateFilter) {
+      string to_print = "L ST";
+      if (nSTm_hi > 0) to_print = "M hi ST";
+      else if (nSTm_lo > 0) to_print = "M lo ST";
+      else if (nSTp4_hi > 0) to_print = "P4 hi ST";
+      else if (nSTp4_lo > 0) to_print = "P4 lo ST";
+      else if (nSTp3_hi > 0) to_print = "P3 hi ST";
+      else if (nSTp3_lo > 0) to_print = "P3 lo ST";
+      else if (nSTCm_hi > 0) to_print = "M hi STC";
+      else if (nSTCm_lo > 0) to_print = "M lo STC";
+      else if (nSTCp4_hi > 0) to_print = "P4 hi STC";
+      else if (nSTCp4_lo > 0) to_print = "P4 lo STC";
+      else if (nSTCp3_hi > 0) to_print = "P3 hi STC";
+      else if (nSTCp3_lo > 0) to_print = "P3 lo STC";
+      cout << "Filtered " << to_print << " " << hist_Nj->GetName() << " " << t.run << ":" << t.lumi << ":" << t.evt << endl;
+    }
+
     if (nSTCl_acc + nSTCm + nSTCp == 2 && EventWise) {
       cout << "2 STC, P3: " << nSTCp3 << " P4: " << nSTCp4 << " M: " << nSTCm << " L: " << nSTCl_acc << " in " << t.run << ":" << t.lumi << ":" << t.evt;
       float pred_weight = weight;
@@ -1759,31 +1921,31 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 	hist->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR
 	hist_Nj->Fill(Lidx-0.5,2.0,weight*nSTCl_acc); // Fill CR      
 	hist->Fill(Lidx-0.5,1.0, weight * ( fs_L*nSTCl_acc ) ); // Fill expected SR count
-	hist_Nj->Fill(Lidx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_L : fs_Nj23_L) * nSTCl_acc ) ); // Fill expected SR count with separate Nj fshort
+	hist_Nj->Fill(Lidx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_L : (t.nJet30 > 1 ? fs_Nj23_L : fs_Nj1_L)) * nSTCl_acc ) ); // Fill expected SR count with separate Nj fshort
       }
       if (nSTCm > 0) {
 	hist->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
 	hist_Nj->Fill(Midx-0.5,2.0,weight*nSTCm); // Fill CR
 	hist->Fill(Midx-0.5,1.0, weight * ( fs_M * nSTCm ) ); // Fill expected SR count
-	hist_Nj->Fill(Midx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_M : fs_Nj23_M) * nSTCm) ); // Fill expected SR count with separate Nj fs
+	hist_Nj->Fill(Midx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_M : (t.nJet30 > 1 ? fs_Nj23_M : fs_Nj1_M)) * nSTCm) ); // Fill expected SR count with separate Nj fs
       }
       if (nSTCp > 0) {
 	hist->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
 	hist_Nj->Fill(Pidx-0.5,2.0,weight*nSTCp); // Fill CR
 	hist->Fill(Pidx-0.5,1.0, weight * ( fs_P * nSTCp ) ); // Fill expected SR count
-	hist_Nj->Fill(Pidx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P : fs_Nj23_P) * nSTCp) ); // Fill expected SR count with separate Nj fs
+	hist_Nj->Fill(Pidx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P : (t.nJet30 > 1 ? fs_Nj23_P : fs_Nj1_P)) * nSTCp) ); // Fill expected SR count with separate Nj fs
       }
       if (nSTCp3 > 0) {
 	hist->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
 	hist_Nj->Fill(P3idx-0.5,2.0,weight*nSTCp3); // Fill CR
 	hist->Fill(P3idx-0.5,1.0, weight * ( fs_P3 * nSTCp3 ) ); // Fill expected SR count
-	hist_Nj->Fill(P3idx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P3 : fs_Nj23_P3) * nSTCp3 ) ); // Fill expected SR count with separate Nj fs
+	hist_Nj->Fill(P3idx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P3 : (t.nJet30 > 1 ? fs_Nj23_P3 : fs_Nj1_P3)) * nSTCp3 ) ); // Fill expected SR count with separate Nj fs
       }
       if (nSTCp4 > 0) {
 	hist->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
 	hist_Nj->Fill(P4idx-0.5,2.0,weight*nSTCp4); // Fill CR
 	hist->Fill(P4idx-0.5,1.0, weight * ( fs_P4 * nSTCp4 ) ); // Fill expected SR count
-	hist_Nj->Fill(P4idx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P4 : fs_Nj23_P4) * nSTCp4 ) ); // Fill expected SR count with separate Nj fs
+	hist_Nj->Fill(P4idx-0.5,1.0, weight * ( (t.nJet30 > 3 ? fs_Nj4_P4 : (t.nJet30 > 1 ? fs_Nj23_P4 : fs_Nj1_P4)) * nSTCp4 ) ); // Fill expected SR count with separate Nj fs
       }
     }
     else if (nSTCl_acc + nSTCm + nSTCp > 2) {
@@ -1835,25 +1997,25 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       hist_lo->Fill(Midx-0.5,2.0,weight*nSTCm_lo); // Fill CR
       hist_Nj_lo->Fill(Midx-0.5,2.0,weight*nSTCm_lo); // Fill CR
       hist_lo->Fill(Midx-0.5,1.0, weight * ( fs_M_lo * nSTCm_lo ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(Midx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_M_lo : fs_Nj23_M_lo) * nSTCm_lo ); // Fill expected SR count with separate Nj fs
+      hist_Nj_lo->Fill(Midx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_M_lo : (t.nJet30 > 1 ? fs_Nj23_M_lo : fs_Nj1_M_lo)) * nSTCm_lo ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp_lo > 0) {
       hist_lo->Fill(Pidx-0.5,2.0,weight*nSTCp_lo); // Fill CR
       hist_Nj_lo->Fill(Pidx-0.5,2.0,weight*nSTCp_lo); // Fill CR
       hist_lo->Fill(Pidx-0.5,1.0, weight * ( fs_P_lo * nSTCp_lo ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(Pidx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P_lo : fs_Nj23_P_lo) * nSTCp_lo ); // Fill expected SR count with separate Nj fs
+      hist_Nj_lo->Fill(Pidx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P_lo : (t.nJet30 > 1 ? fs_Nj23_P_lo : fs_Nj1_P_lo)) * nSTCp_lo ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp3_lo > 0) {
       hist_lo->Fill(P3idx-0.5,2.0,weight*nSTCp3_lo); // Fill CR
       hist_Nj_lo->Fill(P3idx-0.5,2.0,weight*nSTCp3_lo); // Fill CR
       hist_lo->Fill(P3idx-0.5,1.0, weight * ( fs_P3_lo * nSTCp3_lo ) ); // Fill expected SR count
-      hist_Nj_lo->Fill(P3idx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_P3_lo : fs_Nj23_P3_lo) * nSTCp3_lo ); // Fill expected SR count with separate Nj fs
+      hist_Nj_lo->Fill(P3idx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_P3_lo : (t.nJet30 > 1 ? fs_Nj23_P3_lo : fs_Nj1_P3_lo)) * nSTCp3_lo ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp4_lo > 0) {
       hist_lo->Fill(P4idx-0.5,2.0,weight*nSTCp4_lo); // Fill CR
       hist_Nj_lo->Fill(P4idx-0.5,2.0,weight*nSTCp4_lo); // Fill CR
-      hist_lo->Fill(P4idx-0.5,1.0, weight * ( fs_P4_lo * nSTCp4_lo) ); // Fill expected SR count
-      hist_Nj_lo->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_lo : fs_Nj23_P4_lo) * nSTCp4_lo ); // Fill expected SR count with separate Nj fs
+      hist_lo->Fill(P4idx-0.5,1.0, weight * ( fs_P4 * nSTCp4_lo) ); // Fill expected SR count
+      hist_Nj_lo->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_lo : (t.nJet30 > 1 ? fs_Nj23_P4_lo : fs_Nj1_P4_lo)) * nSTCp4_lo ); // Fill expected SR count with separate Nj fs
     }
     
     // Eventwise ST fills
@@ -1881,25 +2043,25 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
       hist_hi->Fill(Midx-0.5,2.0,weight*nSTCm_hi); // Fill CR
       hist_Nj_hi->Fill(Midx-0.5,2.0,weight*nSTCm_hi); // Fill CR
       hist_hi->Fill(Midx-0.5,1.0, weight * ( fs_M_hi * nSTCm_hi) ); // Fill expected SR count
-      hist_Nj_hi->Fill(Midx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_M_hi : fs_Nj23_M_hi) * nSTCm_hi ); // Fill expected SR count with separate Nj fs
+      hist_Nj_hi->Fill(Midx-0.5,1.0, weight * ( t.nJet30 > 3 ? fs_Nj4_M_hi : (t.nJet30 > 1 ? fs_Nj23_M_hi : fs_Nj1_M_hi)) * nSTCm_hi ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp_hi > 0) {
       hist_hi->Fill(Pidx-0.5,2.0,weight*nSTCp_hi); // Fill CR
       hist_Nj_hi->Fill(Pidx-0.5,2.0,weight*nSTCp_hi); // Fill CR
       hist_hi->Fill(Pidx-0.5,1.0, weight * ( fs_P_hi * nSTCp_hi ) ); // Fill expected SR count
-      hist_Nj_hi->Fill(Pidx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P_hi : fs_Nj23_P_hi) * nSTCp_hi ); // Fill expected SR count with separate Nj fs
+      hist_Nj_hi->Fill(Pidx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P_hi : (t.nJet30 > 1 ? fs_Nj23_P_hi : fs_Nj1_P_hi)) * nSTCp_hi ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp3_hi > 0) {
       hist_hi->Fill(P3idx-0.5,2.0,weight*nSTCp3_hi); // Fill CR
       hist_Nj_hi->Fill(P3idx-0.5,2.0,weight*nSTCp3_hi); // Fill CR
       hist_hi->Fill(P3idx-0.5,1.0, weight * ( fs_P3_hi * nSTCp3_hi) ); // Fill expected SR count
-      hist_Nj_hi->Fill(P3idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P3_hi : fs_Nj23_P3_hi) * nSTCp3_hi ); // Fill expected SR count with separate Nj fs
+      hist_Nj_hi->Fill(P3idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P3_hi : (t.nJet30 > 1 ? fs_Nj23_P3_hi : fs_Nj1_P3_hi)) * nSTCp3_hi ); // Fill expected SR count with separate Nj fs
     }
     if (nSTCp4_hi > 0) {
       hist_hi->Fill(P4idx-0.5,2.0,weight*nSTCp4_hi); // Fill CR
       hist_Nj_hi->Fill(P4idx-0.5,2.0,weight*nSTCp4_hi); // Fill CR
-      hist_hi->Fill(P4idx-0.5,1.0, weight * ( fs_P4_hi * nSTCp4_hi) ); // Fill expected SR count
-      hist_Nj_hi->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_hi : fs_Nj23_P4_hi) * nSTCp4_hi ); // Fill expected SR count with separate Nj fs
+      hist_hi->Fill(P4idx-0.5,1.0, weight * ( fs_P4 * nSTCp4_hi) ); // Fill expected SR count
+      hist_Nj_hi->Fill(P4idx-0.5,1.0, weight * (t.nJet30 > 3 ? fs_Nj4_P4_hi : (t.nJet30 > 1 ? fs_Nj23_P4_hi : fs_Nj1_P4_hi)) * nSTCp4_hi ); // Fill expected SR count with separate Nj fs
     }
     
     // Eventwise ST fills
@@ -2108,6 +2270,22 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_up->SetBinError(Lidx,fs_L_err_up);
   h_FS_dn->SetBinError(Lidx,fs_L_err_dn);
 
+  h_FS_1->SetBinContent(Pidx,fs_Nj1_P);
+  h_FS_1->SetBinContent(P3idx,fs_Nj1_P3);
+  h_FS_1->SetBinContent(P4idx,fs_Nj1_P4);
+  h_FS_1->SetBinContent(Midx,fs_Nj1_M);
+  h_FS_1->SetBinContent(Lidx,fs_Nj1_L);
+  h_FS_1_up->SetBinError(Pidx,fs_Nj1_P_err_up);
+  h_FS_1_dn->SetBinError(Pidx,fs_Nj1_P_err_dn);
+  h_FS_1_up->SetBinError(P3idx,fs_Nj1_P3_err_up);
+  h_FS_1_dn->SetBinError(P3idx,fs_Nj1_P3_err_dn);
+  h_FS_1_up->SetBinError(P4idx,fs_Nj1_P4_err_up);
+  h_FS_1_dn->SetBinError(P4idx,fs_Nj1_P4_err_dn);
+  h_FS_1_up->SetBinError(Midx,fs_Nj1_M_err_up);
+  h_FS_1_dn->SetBinError(Midx,fs_Nj1_M_err_dn);
+  h_FS_1_up->SetBinError(Lidx,fs_Nj1_L_err_up);
+  h_FS_1_dn->SetBinError(Lidx,fs_Nj1_L_err_dn);
+
   h_FS_23->SetBinContent(Pidx,fs_Nj23_P);
   h_FS_23->SetBinContent(P3idx,fs_Nj23_P3);
   h_FS_23->SetBinContent(P4idx,fs_Nj23_P4);
@@ -2157,6 +2335,22 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_hi_dn->SetBinError(Midx,fs_M_err_hi_dn);
   h_FS_hi_up->SetBinError(Lidx,fs_L_err_up);
   h_FS_hi_dn->SetBinError(Lidx,fs_L_err_dn);
+
+  h_FS_1_hi->SetBinContent(Pidx,fs_Nj1_P_hi);
+  h_FS_1_hi->SetBinContent(P3idx,fs_Nj1_P3_hi);
+  h_FS_1_hi->SetBinContent(P4idx,fs_Nj1_P4_hi);
+  h_FS_1_hi->SetBinContent(Midx,fs_Nj1_M_hi);
+  h_FS_1_hi->SetBinContent(Lidx,fs_Nj1_L);
+  h_FS_1_hi_up->SetBinError(Pidx,fs_Nj1_P_err_hi_up);
+  h_FS_1_hi_dn->SetBinError(Pidx,fs_Nj1_P_err_hi_dn);
+  h_FS_1_hi_up->SetBinError(P3idx,fs_Nj1_P3_err_hi_up);
+  h_FS_1_hi_dn->SetBinError(P3idx,fs_Nj1_P3_err_hi_dn);
+  h_FS_1_hi_up->SetBinError(P4idx,fs_Nj1_P4_err_hi_up);
+  h_FS_1_hi_dn->SetBinError(P4idx,fs_Nj1_P4_err_hi_dn);
+  h_FS_1_hi_up->SetBinError(Midx,fs_Nj1_M_err_hi_up);
+  h_FS_1_hi_dn->SetBinError(Midx,fs_Nj1_M_err_hi_dn);
+  h_FS_1_hi_up->SetBinError(Lidx,fs_Nj1_L_err_up);
+  h_FS_1_hi_dn->SetBinError(Lidx,fs_Nj1_L_err_dn);
 
   h_FS_23_hi->SetBinContent(Pidx,fs_Nj23_P_hi);
   h_FS_23_hi->SetBinContent(P3idx,fs_Nj23_P3_hi);
@@ -2208,6 +2402,22 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_lo_up->SetBinError(Lidx,fs_L_err_up);
   h_FS_lo_dn->SetBinError(Lidx,fs_L_err_dn);
 
+  h_FS_1_lo->SetBinContent(Pidx,fs_Nj1_P_lo);
+  h_FS_1_lo->SetBinContent(P3idx,fs_Nj1_P3_lo);
+  h_FS_1_lo->SetBinContent(P4idx,fs_Nj1_P4_lo);
+  h_FS_1_lo->SetBinContent(Midx,fs_Nj1_M_lo);
+  h_FS_1_lo->SetBinContent(Lidx,fs_Nj1_L);
+  h_FS_1_lo_up->SetBinError(Pidx,fs_Nj1_P_err_lo_up);
+  h_FS_1_lo_dn->SetBinError(Pidx,fs_Nj1_P_err_lo_dn);
+  h_FS_1_lo_up->SetBinError(P3idx,fs_Nj1_P3_err_lo_up);
+  h_FS_1_lo_dn->SetBinError(P3idx,fs_Nj1_P3_err_lo_dn);
+  h_FS_1_lo_up->SetBinError(P4idx,fs_Nj1_P4_err_lo_up);
+  h_FS_1_lo_dn->SetBinError(P4idx,fs_Nj1_P4_err_lo_dn);
+  h_FS_1_lo_up->SetBinError(Midx,fs_Nj1_M_err_lo_up);
+  h_FS_1_lo_dn->SetBinError(Midx,fs_Nj1_M_err_lo_dn);
+  h_FS_1_lo_up->SetBinError(Lidx,fs_Nj1_L_err_up);
+  h_FS_1_lo_dn->SetBinError(Lidx,fs_Nj1_L_err_dn);
+
   h_FS_23_lo->SetBinContent(Pidx,fs_Nj23_P_lo);
   h_FS_23_lo->SetBinContent(P3idx,fs_Nj23_P3_lo);
   h_FS_23_lo->SetBinContent(P4idx,fs_Nj23_P4_lo);
@@ -2242,12 +2452,15 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
 
   // Now save the systematics
   TH1D* h_FS_syst = (TH1D*) h_FS->Clone("h_FS_syst");
+  TH1D* h_FS_1_syst = (TH1D*) h_FS_1->Clone("h_FS_1_syst");
   TH1D* h_FS_23_syst = (TH1D*) h_FS_23->Clone("h_FS_23_syst");
   TH1D* h_FS_4_syst = (TH1D*) h_FS_4->Clone("h_FS_4_syst");
   TH1D* h_FS_hi_syst = (TH1D*) h_FS_hi->Clone("h_FS_hi_syst");
+  TH1D* h_FS_1_hi_syst = (TH1D*) h_FS_1_hi->Clone("h_FS_1_hi_syst");
   TH1D* h_FS_23_hi_syst = (TH1D*) h_FS_23_hi->Clone("h_FS_23_hi_syst");
   TH1D* h_FS_4_hi_syst = (TH1D*) h_FS_4_hi->Clone("h_FS_4_hi_syst");
   TH1D* h_FS_lo_syst = (TH1D*) h_FS_lo->Clone("h_FS_lo_syst");
+  TH1D* h_FS_1_lo_syst = (TH1D*) h_FS_1_lo->Clone("h_FS_1_lo_syst");
   TH1D* h_FS_23_lo_syst = (TH1D*) h_FS_23_lo->Clone("h_FS_23_lo_syst");
   TH1D* h_FS_4_lo_syst = (TH1D*) h_FS_4_lo->Clone("h_FS_4_lo_syst");
 
@@ -2256,6 +2469,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_syst->SetBinError(P4idx,fs_P4_syst);
   h_FS_syst->SetBinError(Midx,fs_M_syst);
   h_FS_syst->SetBinError(Lidx,fs_L_syst);
+
+  h_FS_1_syst->SetBinError(Pidx,fs_P_syst_Nj1);
+  h_FS_1_syst->SetBinError(P3idx,fs_P3_syst_Nj1);
+  h_FS_1_syst->SetBinError(P4idx,fs_P4_syst_Nj1);
+  h_FS_1_syst->SetBinError(Midx,fs_M_syst_Nj1);
+  h_FS_1_syst->SetBinError(Lidx,fs_L_syst_Nj1);
 
   h_FS_23_syst->SetBinError(Pidx,fs_P_syst_Nj23);
   h_FS_23_syst->SetBinError(P3idx,fs_P3_syst_Nj23);
@@ -2275,6 +2494,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_hi_syst->SetBinError(Midx,fs_M_syst_hi);
   h_FS_hi_syst->SetBinError(Lidx,fs_L_syst_hi);
 
+  h_FS_1_hi_syst->SetBinError(Pidx,fs_P_syst_Nj1_hi);
+  h_FS_1_hi_syst->SetBinError(P3idx,fs_P3_syst_Nj1_hi);
+  h_FS_1_hi_syst->SetBinError(P4idx,fs_P4_syst_Nj1_hi);
+  h_FS_1_hi_syst->SetBinError(Midx,fs_M_syst_Nj1_hi);
+  h_FS_1_hi_syst->SetBinError(Lidx,fs_L_syst_Nj1_hi);
+
   h_FS_23_hi_syst->SetBinError(Pidx,fs_P_syst_Nj23_hi);
   h_FS_23_hi_syst->SetBinError(P3idx,fs_P3_syst_Nj23_hi);
   h_FS_23_hi_syst->SetBinError(P4idx,fs_P4_syst_Nj23_hi);
@@ -2292,6 +2517,12 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_FS_lo_syst->SetBinError(P4idx,fs_P4_syst_lo);
   h_FS_lo_syst->SetBinError(Midx,fs_M_syst_lo);
   h_FS_lo_syst->SetBinError(Lidx,fs_L_syst_lo);
+
+  h_FS_1_lo_syst->SetBinError(Pidx,fs_P_syst_Nj1_lo);
+  h_FS_1_lo_syst->SetBinError(P3idx,fs_P3_syst_Nj1_lo);
+  h_FS_1_lo_syst->SetBinError(P4idx,fs_P4_syst_Nj1_lo);
+  h_FS_1_lo_syst->SetBinError(Midx,fs_M_syst_Nj1_lo);
+  h_FS_1_lo_syst->SetBinError(Lidx,fs_L_syst_Nj1_lo);
 
   h_FS_23_lo_syst->SetBinError(Pidx,fs_P_syst_Nj23_lo);
   h_FS_23_lo_syst->SetBinError(P3idx,fs_P3_syst_Nj23_lo);
@@ -2335,42 +2566,54 @@ int ShortTrackLooper::loop (TChain* ch, char * outtag, std::string config_tag, c
   h_2STC_SR->Write();
 
   h_FS->Write();
+  h_FS_1->Write();
   h_FS_23->Write();
   h_FS_4->Write();
   h_FS_hi->Write();
+  h_FS_1_hi->Write();
   h_FS_23_hi->Write();
   h_FS_4_hi->Write();
   h_FS_lo->Write();
+  h_FS_1_lo->Write();
   h_FS_23_lo->Write();
   h_FS_4_lo->Write();
 
   h_FS_up->Write();
+  h_FS_1_up->Write();
   h_FS_23_up->Write();
   h_FS_4_up->Write();
   h_FS_hi_up->Write();
+  h_FS_1_hi_up->Write();
   h_FS_23_hi_up->Write();
   h_FS_4_hi_up->Write();
   h_FS_lo_up->Write();
+  h_FS_1_lo_up->Write();
   h_FS_23_lo_up->Write();
   h_FS_4_lo_up->Write();
 
   h_FS_dn->Write();
+  h_FS_1_dn->Write();
   h_FS_23_dn->Write();
   h_FS_4_dn->Write();
   h_FS_hi_dn->Write();
+  h_FS_1_hi_dn->Write();
   h_FS_23_hi_dn->Write();
   h_FS_4_hi_dn->Write();
   h_FS_lo_dn->Write();
+  h_FS_1_lo_dn->Write();
   h_FS_23_lo_dn->Write();
   h_FS_4_lo_dn->Write();
 
   h_FS_syst->Write();
+  h_FS_1_syst->Write();
   h_FS_23_syst->Write();
   h_FS_4_syst->Write();
   h_FS_hi_syst->Write();
+  h_FS_1_hi_syst->Write();
   h_FS_23_hi_syst->Write();
   h_FS_4_hi_syst->Write();
   h_FS_lo_syst->Write();
+  h_FS_1_lo_syst->Write();
   h_FS_23_lo_syst->Write();
   h_FS_4_lo_syst->Write();
 

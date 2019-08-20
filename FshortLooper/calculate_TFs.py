@@ -183,14 +183,14 @@ for rawname in names:
     # Fshort histograms
     if name.find("fs") < 0: continue
     if name.find("max_weight") >= 0: continue
-    if name.find("Baseline") < 0 and not (name.find("_1_") >= 0 and name.find("MR") >= 0): continue
+    if name.find("Baseline") < 0 and name.find("MR") < 0: continue
     if name.find("MR") < 0 and name.find("VR") < 0: continue
     if name.find("_dn") >= 0 or name.find("_up") >= 0: continue
     if verbose: print name
     if name.find("_1_") >= 0: # Monojet
         monojet = True
         if name.find("VR") >= 0: continue
-        variations = variations = ["pt60","pt100","pt150"]
+        variations = ["Baseline","pt200","pt250","MetHt250","MetHtPt250"]
     else:
         monojet = False
         variations = ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]
@@ -207,12 +207,13 @@ for rawname in names:
         else:
             fserr_up = h_fs_up.GetBinError(length,1)
             fserr_dn = h_fs_dn.GetBinError(length,1)
+#            max_correction_needed = fs if monojet else 0.1*fs
             max_correction_needed = 0.1*fs
             max_delta = 0
             max_variation_total_error = 0
             max_var = "Minimal"
             for variation in variations:
-                hnamevar = name.replace("Baseline",variation) if not monojet else name.replace("MR",variation)
+                hnamevar = name.replace("Baseline",variation)
                 h_fs_var = outfile.Get(hnamevar)
                 h_fs_var_up = outfile.Get(hnamevar+"_up")
                 h_fs_var_dn = outfile.Get(hnamevar+"_dn")

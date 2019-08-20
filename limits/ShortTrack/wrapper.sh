@@ -74,13 +74,20 @@ mv higgsCombine${MASSPOINT}.AsymptoticLimits.mH120.root limit_$MASSPOINT.root
 echo "[wrapper] limit finished"
 ls
 
-echo "[wrapper] Running significance"
-combine -M Significance --uncapped=1 --rMin=-2 -n ${MASSPOINT} ${MASSPOINT}.root
+#echo "[wrapper] Running significance"
+#echo ""
+#echo "[wrapper] Generating toys"
+#combine -M HybridNew $MASSPOINT.root --LHCmode LHC-significance  --saveToys --fullBToys --saveHybridResult -T 250 -i 2 -s 123456789 
 
-mv higgsCombine${MASSPOINT}.Significance.mH120.root sig_$MASSPOINT.root
+#echo "[wrapper] Calculating significance"
+#combine -M HybridNew $MASSPOINT.root --LHCmode LHC-significance --readHybridResult --toysFile=higgsCombineTest.HybridNew.mH120.123456789.root
 
-echo "[wrapper] significance finished"
-ls
+#combine -M Significance --uncapped=1 --rMin=-2 -n ${MASSPOINT} ${MASSPOINT}.root
+
+#mv higgsCombineTest.HybridNew.mH120.root sig_$MASSPOINT.root
+
+#echo "[wrapper] significance finished"
+#ls
 
 
 echo "[wrapper] copying file"
@@ -92,7 +99,7 @@ fi
 
 export LD_PRELOAD=/usr/lib64/gfal2-plugins/libgfal_plugin_xrootd.so
 gfal-copy -p -f -t 4200 --verbose file://`pwd`/limit_$MASSPOINT.root gsiftp://gftp.t2.ucsd.edu${COPYDIR}/
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/sig_$MASSPOINT.root gsiftp://gftp.t2.ucsd.edu${COPYDIR}/
+#gfal-copy -p -f -t 4200 --verbose file://`pwd`/sig_$MASSPOINT.root gsiftp://gftp.t2.ucsd.edu${COPYDIR}/
 
 echo "[wrapper] cleaning up"
 for FILE in `find . -not -name "*stderr" -not -name "*stdout"`; do rm -rf $FILE; done

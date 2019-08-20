@@ -24,6 +24,9 @@ fi
 
 INDIR=/hadoop/cms/store/user/dpgilber/ShortTrackScan/$YEAR
 declare -a Samples=(T1qqqq T2qq T2bt)
+#declare -a Samples=(T2bt)
+#declare -a Samples=(T2qq T2bt)
+#declare -a Samples=(T1qqqq)
 declare -a Extras=('' _ISR _GENMET)
 
 # UNIVERSE="grid"

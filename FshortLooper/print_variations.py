@@ -227,6 +227,9 @@ def getFshortMerged(region,data):
     systs18 = {}
     systs17 = {}
     systs16 = {}
+
+    monojet = region.find("1")>0
+
     if region[0] == "P":
         if region[1] == "3":
             cat = 2
@@ -253,9 +256,10 @@ def getFshortMerged(region,data):
     d18=ROOT.TFile.Open("output/Fshort_data_2018_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2018_{}.root".format(tag))
     d17=ROOT.TFile.Open("output/Fshort_data_2017_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2017_{}.root".format(tag))
     d16=ROOT.TFile.Open("output/Fshort_data_2016_{}.root".format(tag)) if data else ROOT.TFile.Open("output/Fshort_mc_2016_{}.root".format(tag))
+    variations = ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"] if not monojet else ["Baseline","pt200","pt250","MetHtPt250"]
     for ptstring in ["","_lowpt","_hipt"]:
-        for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"]:
-            hname = "h_fs"+fileregion+"_"+variation+ptstring
+        for variation in variations:
+            hname = "h_fs"+fileregion+"_"+variation+ptstring if not monojet else "h_fs_1_MR_"+variation+ptstring
 
             h = d1718.Get(hname).Clone(data_string+hname+"1718")
             h_up = d1718.Get(hname+"_up").Clone(data_string+hname+"_up1718")
@@ -298,7 +302,7 @@ def getFshortMerged(region,data):
             errs16[variation+ptstring + " FS"] = (h_up.GetBinError(cat,1), h_dn.GetBinError(cat,1))
             
 
-        hnamesyst = "h_fs"+fileregion+"_Baseline"+ptstring+"_syst"
+        hnamesyst = "h_fs"+fileregion+"_Baseline"+ptstring+"_syst" if not monojet else "h_fs_1_MR_Baseline"+ptstring+"_syst"
         h = d1718.Get(hnamesyst).Clone(data_string+hnamesyst+"_1718")
         systs1718["Baseline"+ptstring] = h.GetBinContent(cat)
         h = d18.Get(hnamesyst).Clone(data_string+hnamesyst+"_18")
@@ -335,7 +339,12 @@ writeabletag = { "Baseline" : "Baseline",
                  "HT450MET100_hipt" : "$H_{T} > 450$ and $\\text{MET} > 100$ GeV ($p_{T} > 50$ GeV)",
                  "MET30_hipt"   : "$30 < \\text{MET} < 100$ GeV ($p_{T} > 50$ GeV)",
                  "MET100_hipt" : "$ 100 < \\text{MET} < 250$ GeV ($p_{T} > 50$ GeV)",
-                 "MET250_hipt"  : "$\\text{MET} > 250$ GeV ($p_{T} > 50$ GeV)"
+                 "MET250_hipt"  : "$\\text{MET} > 250$ GeV ($p_{T} > 50$ GeV)",
+                 # monojet
+                 "pt200"        : "$200 < p_{T}^{\\text{Jet 1}} < 250$ GeV",
+                 "pt250"        : "250 < $p_{T}^{\\text{Jet 1}} < 275$ GeV",
+                 "MetHt250"     : "$\\text{MET}$, $H_{T} > 250$ GeV",
+                 "MetHtPt250"     : "$\\text{MET}$, $H_{T}$, $p_{T}^{\\text{Jet 1}} > 250$ GeV"
                  }
 
 roottag = { "Baseline" : "Baseline",
@@ -358,7 +367,16 @@ roottag = { "Baseline" : "Baseline",
                  "HT450MET100_hipt" : "H_{T} > 450 and MET > 100 GeV (p_{T} > 50 GeV)",
                  "MET30_hipt"   : "30 < MET < 100 GeV (p_{T} > 50 GeV)",
                  "MET100_hipt" : " 100 < MET < 250 GeV (p_{T} > 50 GeV)",
-                 "MET250_hipt"  : "MET > 250 GeV (p_{T} > 50 GeV)"
+                 "MET250_hipt"  : "MET > 250 GeV (p_{T} > 50 GeV)",
+            #monojet
+                 "pt200_lowpt"   : "200 < p_{T}^{Jet 1} < 250 GeV (p_{T}^{track} < 50 GeV)",
+                 "pt250_lowpt"   : "250 < p_{T}^{Jet 1} < 275 GeV (p_{T}^{track} < 50 GeV)",
+                 "MetHt250_lowpt"   : "MET, H_{T} > 250 GeV (p_{T}^{track} < 50 GeV)",
+                 "MetHtPt250_lowpt"   : "MET, H_{T}, p_{T}^{Jet 1} > 250 GeV (p_{T}^{track} < 50 GeV)",
+                 "pt200_hipt"   : "200 < p_{T}^{Jet 1} < 250 GeV (p_{T}^{track} > 50 GeV)",
+                 "pt250_hipt"   : "250 < p_{T}^{Jet 1} < 275 GeV (p_{T}^{track} > 50 GeV)",
+                 "MetHt250_hipt"   : "MET, H_{T} > 250 GeV (p_{T}^{track} > 50 GeV)",
+                 "MetHtPt250_hipt"   : "MET, H_{T}, p_{T}^{Jet 1} > 250 GeV (p_{T}^{track} > 50 GeV)"
                  }
 
 def getLineData(variation,D18,eD18,D17,eD17,D16,eD16):
@@ -443,7 +461,7 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     if desc.find("17") >= 0 and desc.find("18") >= 0:
         lumi = 101 # 2017-18
     elif desc.find("17") >= 0:
-        lumi = 42.0 # 2017
+        lumi = 41.4 # 2017
     elif desc.find("18") >= 0:
         lumi = 58.9
     elif desc.find("16") >= 0:
@@ -451,22 +469,41 @@ def makePlot(region,variations,vals,errs,systs,desc,ptstring=""):
     else:
         print "didn't recognize lumi period"
         exit(1)
-    utils.CMS_Style(simplecanvas,extraText="Simulation Preliminary" if desc.find("MC") >= 0 else "Preliminary",lumi=str(lumi)+" fb^{-1}",relPosX=0.15)
+    utils.CMS_Style(simplecanvas,extraText="Simulation" if desc.find("MC") >= 0 else "",lumi=str(lumi)+" fb^{-1}",relPosX=0.15)
     tl.Draw()
     os.system("mkdir -p fshort_variations/{}".format(desc))
     simplecanvas.SaveAs("fshort_variations/{}/{}.{}".format(desc,hist.GetName(),format))
 
-tablevariations = [variation + ptstring for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"] for ptstring in ["","_lowpt","_hipt"]]
-plotvariations = list(tablevariations)
-plotvariations.remove("Baseline")
-plotvariations_nopt = ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]
-plotvariations_lowpt = ["HT250_lowpt","HT450_lowpt","HT450MET100_lowpt","MET30_lowpt","MET100_lowpt","MET250_lowpt"]
-plotvariations_hipt = ["HT250_hipt","HT450_hipt","HT450MET100_hipt","MET30_hipt","MET100_hipt","MET250_hipt"]
+tablevariations_multijet = [variation + ptstring for variation in ["Baseline","HT250","HT450","HT450MET100","MET30","MET100","MET250"] for ptstring in ["","_lowpt","_hipt"]]
+tablevariations_monojet = [variation + ptstring for variation in ["Baseline","pt200","pt250","MetHt250","MetHtPt250"] for ptstring in ["","_lowpt","_hipt"]]
+plotvariations_multijet = list(tablevariations_multijet)
+plotvariations_monojet = list(tablevariations_monojet)
+plotvariations_multijet.remove("Baseline")
+plotvariations_monojet.remove("Baseline")
+plotvariations_multijet_nopt = ["HT250","HT450","HT450MET100","MET30","MET100","MET250"]
+plotvariations_multijet_lowpt = ["HT250_lowpt","HT450_lowpt","HT450MET100_lowpt","MET30_lowpt","MET100_lowpt","MET250_lowpt"]
+plotvariations_multijet_hipt = ["HT250_hipt","HT450_hipt","HT450MET100_hipt","MET30_hipt","MET100_hipt","MET250_hipt"]
+plotvariations_monojet_nopt = ["pt200","pt250","MetHtPt250"]
+plotvariations_monojet_lowpt = ["pt200_lowpt","pt250_lowpt","MetHtPt250_lowpt"]
+plotvariations_monojet_hipt = ["pt200_hipt","pt250_hipt","MetHtPt250_hipt"]
 
 #for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","L_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","L_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","L_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4","L_VR_4"]:
 # L regions lack stats
-for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4"]:
+for region in ["P_MR_1","P3_MR_1","P4_MR_1","M_MR_1","P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","P_MR_4","P3_MR_4","P4_MR_4","M_MR_4","P_VR_23","P3_VR_23","P4_VR_23","M_VR_23","P_VR_4","P3_VR_4","P4_VR_4","M_VR_4"]:
     print region
+
+    if region.find("1") >= 0:
+        tablevariations = tablevariations_monojet
+        plotvariations = plotvariations_monojet
+        plotvariations_nopt = plotvariations_monojet_nopt
+        plotvariations_lowpt = plotvariations_monojet_lowpt
+        plotvariations_hipt = plotvariations_monojet_hipt
+    else:
+        tablevariations = tablevariations_multijet
+        plotvariations = plotvariations_multijet
+        plotvariations_nopt = plotvariations_multijet_nopt
+        plotvariations_lowpt = plotvariations_multijet_lowpt
+        plotvariations_hipt = plotvariations_multijet_hipt
 
     D1718,eD1718,sD1718,D18,eD18,sD18,D17,eD17,sD17,D16,eD16,sD16=getFshortMerged(region,True)
 
@@ -481,7 +518,6 @@ for region in ["P_MR_23","P3_MR_23","P4_MR_23","M_MR_23","P_MR_4","P3_MR_4","P4_
     makePlot(region,plotvariations_hipt,D18,eD18,sD18,"2018_DATA_hipt","_hipt")
     makePlot(region,plotvariations_hipt,D17,eD17,sD17,"2017_DATA_hipt","_hipt")
     makePlot(region,plotvariations_hipt,D16,eD16,sD16,"2016_DATA_hipt","_hipt")
-
 
 
     makePlot(region,plotvariations_lowpt,M1718,eM1718,sM1718,"2017_MC_lowpt","_lowpt")
