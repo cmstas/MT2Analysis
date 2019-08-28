@@ -2,18 +2,18 @@
 
 make -j 12 || return $?
 
-doD16=1
-doM16=1
-doD17=1
-doM17=1
+doD16=0
+doM16=0
+doD17=0
+doM17=0
 doD18=1
 doM18=1
-doS17=1
+doS17=0
 
-tag=postmoriond
+tag=jecTest
 mode=default
 #mode=useZll
-skim_string=_skim_ST
+skim_string=_skim_ST2
 
 #tag=noCaloSel
 #mode=skipCaloSelskipKinSel
@@ -26,7 +26,7 @@ if [ "$doM16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Summer16
-    INDIR=/nfs-7/userdata/mt2/V00-10-12_2016fullYear${skim_string}/extmerge
+    INDIR=/nfs-7/userdata/mt2/V00-10-13_2016fullYear${skim_string}/extmerge
     declare -a Samples=(ttsl ttdl singletop qcd ttw ttz ttg tttt dy wjets_ht zinv ww wz)
     
     for SAMPLE in ${Samples[@]}; do
@@ -41,7 +41,7 @@ if [ "$doD16" -eq "1" ]; then
     OUTDIR=output_unmerged/2016_${tag}/data
     mkdir -p ${OUTDIR}
     CONFIG=data_2016_94x
-    INDIR=/nfs-7/userdata/mt2/V00-10-12_2016fullYear${skim_string}/extmerge
+    INDIR=/nfs-7/userdata/mt2/V00-10-12_2016fullYear${skim_string}
     declare -a Samples=(data_Run2016B data_Run2016C data_Run2016D data_Run2016E data_Run2016F data_Run2016G data_Run2016H)
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}.txt &"
@@ -56,7 +56,7 @@ if [ "$doM17" -eq "1" ]; then
     OUTDIR=output_unmerged/2017_${tag}
     mkdir -p ${OUTDIR}
     CONFIG=mc_94x_Fall17
-    INDIR=/nfs-7/userdata/mt2/V00-10-12_2017fullYear${skim_string}
+    INDIR=/nfs-7/userdata/mt2/V00-10-16_2017fullYear_skim_ST
     declare -a Samples=(ttsl ttdl singletop qcd ttw ttz tttt ttg dy gjets wjets_ht zinv ww wz)    
     for SAMPLE in ${Samples[@]}; do
 	command="nohup nice -n 10 ./FshortLooper.exe ${OUTDIR}/${SAMPLE} ${INDIR}/${SAMPLE} ${CONFIG} ${mode} >& ${LOGDIR}/log_${SAMPLE}_2017.txt &"
