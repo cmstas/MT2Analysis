@@ -1,5 +1,5 @@
 import os,sys
-sys.path.append("../CardMaker")
+sys.path.append(os.path.dirname(__file__)+"/../CardMaker")
 from Datacard import *
 import ROOT
 import math

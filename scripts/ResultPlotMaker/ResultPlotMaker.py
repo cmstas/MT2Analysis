@@ -252,15 +252,19 @@ def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratio
 
     # get a graph using proper asymmetric poissonian errors
     g_data = ROOT.TGraphAsymmErrors()
-    ppmUtils.ConvertToPoissonGraph(h_data, g_data, drawZeros=True)
+    ppmUtils.ConvertToPoissonGraph(h_data, g_data, drawZeros=True, drawXerr=False)
     # g_data.SetPointError(g_data.GetN()-1, 0, 0, 0, 0)
     g_data.SetMarkerStyle(20)
     g_data.SetMarkerSize(1.2)
     g_data.SetLineWidth(1)
+    # draw with zero marker size so error bars drawn all the way to x axis in the case of 0 content
+    g_data_clone = g_data.Clone()
+    g_data_clone.SetMarkerSize(0.0)
     
     # draw the graph and then axes again on top
     if drawObs:
         g_data.Draw("SAME P")      
+        g_data_clone.Draw("SAME P")      
     h_data.Draw("SAME AXIS")
 
     # save for later
@@ -343,7 +347,7 @@ def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratio
     leg = ROOT.TLegend(1-right-0.175,1-top-0.23,1-right-0.02,1-top-0.01)
     leg.SetBorderSize(1)
     leg.SetCornerRadius(0.3)
-    leg.AddEntry(g_data,"Data","lp")
+    leg.AddEntry(g_data,"Data","pe")
     for i in range(nBkgs):
         leg.AddEntry(h_bkg_vec[i], utils.GetLegendName(bkg_processes[i]),'f')
     if drawSignal:
@@ -369,7 +373,7 @@ def MakePlot(ht_reg, outdir, userMax=None, doPostfit=False, scalePred=1.0, ratio
     if not doPull:
         for i in range(1,nBkgs):
             h_pred.Add(h_bkg_vec[i])
-        ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, useMCErr=False)
+        ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, drawXerr=False, useMCErr=False)
     else:
         utils.GetPullPlot(g_data, g_unc, g_ratio)
         g_unc_ratio = ROOT.TGraphAsymmErrors()
@@ -919,14 +923,18 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
 
     # get a graph using proper asymmetric poissonian errors
     g_data = ROOT.TGraphAsymmErrors()
-    ppmUtils.ConvertToPoissonGraph(h_data, g_data, drawZeros=True)
+    ppmUtils.ConvertToPoissonGraph(h_data, g_data, drawZeros=True, drawXerr=False)
 #    g_data.SetPointError(g_data.GetN()-1, 0, 0, 0, 0)
     g_data.SetMarkerStyle(20)
     g_data.SetMarkerSize(1.8)
     g_data.SetLineWidth(1)
+    # draw with zero marker size so error bars drawn all the way to x axis in the case of 0 content
+    g_data_clone = g_data.Clone()
+    g_data_clone.SetMarkerSize(0.0)
     
     # draw the graph and then axes again on top
     g_data.Draw("SAME P")      
+    g_data_clone.Draw("SAME P")      
     h_data.Draw("SAME AXIS")
 
     # save for later
@@ -1018,7 +1026,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     leg = ROOT.TLegend(x1,1-top-0.23,1-right-0.02,1-top-0.01)
     leg.SetBorderSize(1)
     leg.SetCornerRadius(0.3)
-    leg.AddEntry(g_data,"Data","lp")
+    leg.AddEntry(g_data,"Data","pe")
     for i in range(nBkgs):
         leg.AddEntry(h_bkg_vec[i], utils.GetLegendName(bkg_processes[i]),'f')
     if drawSignal:
@@ -1035,7 +1043,7 @@ def MakeInclusivePlot(outdir, userMax=None, ratioRange=(0,2),
     h_ratio.Reset()
     g_ratio = ROOT.TGraphAsymmErrors()
     h_pred = h_bkg_tot.Clone("h_pred")
-    ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, useMCErr=False)
+    ppmUtils.GetPoissonRatioGraph(h_pred, h_data, g_ratio, drawZeros=True, drawXerr=False, useMCErr=False)
     h_ratio.GetYaxis().SetRangeUser(*ratioRange)
     h_ratio.GetYaxis().SetNdivisions(505)
     h_ratio.GetYaxis().SetTitle("Data/pred.")
