@@ -72,7 +72,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 12 in Appendix B.1
+location: Table 12 in Appendix B.1, or Figure 5 (upper, left side)
 name: Table 12
 ---
 data_file: yields_mt2_VL.yaml
@@ -81,7 +81,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 13 in Appendix B.1
+location: Table 13 in Appendix B.1, or Figure 23 (upper)
 name: Table 13
 ---
 data_file: yields_mt2_Ll.yaml
@@ -90,7 +90,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 14 in Appendix B.1
+location: Table 14 in Appendix B.1, or Figure 23 (lower)
 name: Table 14
 ---
 data_file: yields_mt2_Lh.yaml
@@ -99,7 +99,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 15 in Appendix B.1
+location: Table 15 in Appendix B.1, or Figure 23 (lower)
 name: Table 15
 ---
 data_file: yields_mt2_Ml.yaml
@@ -108,7 +108,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 16 in Appendix B.1
+location: Table 16 in Appendix B.1, or Figure 5 (lower)
 name: Table 16
 ---
 data_file: yields_mt2_Mm.yaml
@@ -117,7 +117,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 17 in Appendix B.1
+location: Table 17 in Appendix B.1, or Figure 5 (lower)
 name: Table 17
 ---
 data_file: yields_mt2_Mh.yaml
@@ -126,7 +126,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 18 in Appendix B.1
+location: Table 18 in Appendix B.1, or Figure 5 (lower)
 name: Table 18
 ---
 data_file: yields_mt2_Hl.yaml
@@ -135,7 +135,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 19 in Appendix B.1
+location: Table 19 in Appendix B.1, or Figure 24 (upper) in Appendix C.1
 name: Table 19
 ---
 data_file: yields_mt2_Hm.yaml
@@ -144,7 +144,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 20 in Appendix B.1
+location: Table 20 in Appendix B.1, or Figure 24 (upper) in Appendix C.1
 name: Table 20
 ---
 data_file: yields_mt2_Hh.yaml
@@ -153,7 +153,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 21 in Appendix B.1
+location: Table 21 in Appendix B.1, or Figure 24 (upper) in Appendix C.1
 name: Table 21
 ---
 data_file: yields_mt2_UHl.yaml
@@ -162,7 +162,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 22 in Appendix B.1
+location: Table 22 in Appendix B.1, or Figure 24 (lower) in Appendix C.1
 name: Table 22
 ---
 data_file: yields_mt2_UHh.yaml
@@ -171,5 +171,34 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
-location: Table 23 in Appendix B.1
+location: Table 23 in Appendix B.1, or Figure 24 (lower) in Appendix C.1
 name: Table 23
+---
+data_file: mt2_covariance.yaml
+description: 'Covariance matrix for the 282 signal regions of the inclusive $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 2
+name: $M_\mathrm{T2}$ covariance matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_covariance.png}
+---
+data_file: mt2_correlation.yaml
+description: 'Correlation matrix for the 282 signal regions of the inclusive $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 1
+name: $M_\mathrm{T2}$ correlation matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_correlation.png}
+---
+data_file: mt2_covmat_bin_mappings.yaml
+description: 'Bin number definitions for the $M_\mathrm{T2}$ covariance and correlation matrices'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Bin definitions for Additional Figures 1 and 2
+name: $M_\mathrm{T2}$ covariance matrix bin mappings
+
