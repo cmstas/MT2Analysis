@@ -23,6 +23,8 @@ stat_color = ROOT.kCyan
 fs_color = ROOT.kGray+1
 all_color = ROOT.kGray+2
 
+maxRatio = 8
+
 eff_2016_lo = [2.32,0,0,1.17,0.78]
 eff_2016_hi = [0.45,0,0,1.17,0.78]
 
@@ -85,12 +87,14 @@ pads[0].SetTopMargin(0.08)
 pads[0].SetLeftMargin(0.12)
 pads[0].SetBottomMargin(0.17)
 pads[1].SetLeftMargin(0.12)
+#pads[1].SetBottomMargin(0.16)
 pads[0].Draw()
 pads[1].Draw()
 
 
 tl=ROOT.TLegend(0.2,0.60,0.4,0.85)
-tr=ROOT.TLegend(0.55,0.70,0.75,0.90)
+#tr=ROOT.TLegend(0.55,0.70,0.75,0.90)
+tr=ROOT.TLegend(0.67,0.70,0.87,0.90)
 
 def printHeader(outfile):
     outfile.write("\documentclass[10pt]{article}\n\n")
@@ -1078,7 +1082,7 @@ def getBinLabelColor(region):
            color = ROOT.kOrange+4
     return color
 
-def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts = True, doPullPlot = False, inclNCsyst = True, doTests = True): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
+def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts = True, doPullPlot = False, inclNCsyst = True, doTests = False): # Raw means non-normalized. "rescale" multiplies prediction, to enable partial unblinding.
     if desc.find("16") >= 0:
         lumi = 35.9
     elif desc.find("17"):
@@ -1150,6 +1154,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     hobs.SetMinimum(hpred.GetMinimum())
     hobs.SetMaximum(hpred.GetMaximum())
     hpred.SetLineColor(pred_color)
+    # Linear scale
     pads[0].cd()    
     gpred_stat = getPoissonGraph( hpred, perrs )
     gpred_stat.SetName("stat"+desc.replace("-","_").replace(" ","_"))
@@ -1198,8 +1203,14 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
     gobs.SetMarkerStyle(20)
     gobs.SetMarkerSize(2)
+    gobs.SetLineWidth(3)
     gobs.SetMarkerColor(ROOT.kBlack)
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    #gobs_nomarker = gobs.Clone(gobs.GetName()+"_nomarker") # no marker to avoid holes in error bars
+    gobs_nomarker = gobs.Clone() # no marker to avoid holes in error bars
+    gobs.SetLineWidth(1) # for whatever reason, the *original* histogram needs its line width set to 1 *after* drawing it with line width 3, to change the behavior of the *cloned* nomarker histogram to line width 1...
+    gobs_nomarker.SetMarkerSize(0.0)
+    gobs_nomarker.Draw("p same")
     hpred.Draw("AXIS same") # make tick marks show above fill areas
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
@@ -1275,7 +1286,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         singlecanvas.SaveAs("{}/{}_1d_pull.pdf".format(plotdir,desc.replace(" ","_")))
         pads[1].cd()
     else:        
-        h1=ROOT.TH1D("hratio"+desc,";;Data / pred",len(perrs),0,len(perrs))
+        h1=ROOT.TH1D("hratio"+desc,";;#kern[2.0]{D}ata / pred.",len(perrs),0,len(perrs))
         h1.SetLineWidth(3)
         h1.SetLineColor(pred_color)
         hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
@@ -1304,7 +1315,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
                 perrs_withfs_norm.append( [this_perr_withfs[i]/this_pred for i in [0,1]] )
                 perrs_stat_norm.append( [this_perr_stat[i]/this_pred for i in [0,1]] )
                 oerrs_norm.append( [this_oerr[i]/this_pred for i in [0,1]] )
-        h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),5))
+        h1.SetMaximum(min(round(hobs_norm.GetMaximum()+1),maxRatio))
         h1.SetMinimum(-0.001)
         gall_norm = getPoissonGraph( h1, perrs_all_norm )
         gall_norm.SetFillColor(all_color)
@@ -1317,8 +1328,12 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         gobs_norm.SetMarkerSize(2)
         gobs_norm.SetMarkerColor(ROOT.kBlack)
         h1.GetYaxis().SetLabelSize(hpred.GetYaxis().GetLabelSize()*2)
-        h1.GetYaxis().SetTitleSize(hpred.GetYaxis().GetTitleSize()*2)
-        h1.GetYaxis().SetTitleOffset(0.2)
+        pad1_ht = float(pads[1].YtoPixel(pads[1].GetY1()))
+        pad0_ht = float(pads[0].YtoPixel(pads[0].GetY1()))
+        pad_size_ratio = pad1_ht / pad0_ht
+        h1.GetYaxis().SetTitleSize(hpred.GetYaxis().GetTitleSize() / pad_size_ratio) # was *2 like labelsize        
+        h1.GetYaxis().SetTitleOffset(hpred.GetYaxis().GetTitleOffset() * pad_size_ratio)
+        h1.GetYaxis().CenterTitle(False)
         h1.Draw("AXIS")
         # "0" option forces the drawing of error bars even if the central value is off-scale
         gall_norm.Draw("0 2 same")
@@ -1328,9 +1343,11 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         gobs_norm.Draw("0 p same")
         h1.Draw("same")
     ratiocanvas.SaveAs("{}/{}_raw_{}.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
+    # Now logscale
     pads[0].cd()
-    hpred.SetMinimum(0.1)
+    hpred.SetMinimum(0.01)
     hpred.SetMaximum(200)
+    pads[0].SetLogy(True)
     hpred.Draw("") # only want the axis from the histogram, for bin titles
     if inclNCsyst:
         gpred_all.Draw("2 same") # 2 means draw filled rectangles for errors
@@ -1339,6 +1356,7 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     gpred_stat.Draw("2 same")
     hpred.Draw("same") # drawn without errors, and without connecting the lines, see above
     gobs.Draw("p same") # p draws in a typical histogram style, with markers
+    gobs_nomarker.Draw("p same")
     hpred.Draw("AXIS same") # make tick marks show above fill areas
     if not colorLabels:
         pads[0].cd()
@@ -1358,6 +1376,24 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
         for ibin in line_bins: 
             x = left+binWidth*ibin
             line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*0.85)  
+        # now also for ratio plot
+        pads[1].cd()
+        left = pads[1].GetLeftMargin()
+        right = pads[1].GetRightMargin()
+        top = pads[1].GetTopMargin()
+        bot = pads[1].GetBottomMargin()
+        binWidth = (1.0-right-left)/hpred.GetNbinsX()
+        line = ROOT.TLine()
+        line.SetNDC(1)
+        line.SetLineStyle(2)
+        line.SetLineWidth(1)
+        line.SetLineColor(ROOT.kBlack)
+        # in 2017-18, P3, P4, M each have L lo, L hi, H lo, H hi, and then L has only 1 divisions
+        # 2016 has only a single P
+        line_bins = [3,6,9,12, 15,18,21,24, 27,30,33,36, 38] if desc.find("2017") >= 0 else [3,6,9,12, 15,18,21,24, 26]
+        for ibin in line_bins: 
+            x = left+binWidth*ibin
+            line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*1.0)  
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
     utils.CMS_Style(pads[0],extraText=extraText+("" if desc.find("MC") < 0 else " Simulation"),lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
@@ -1369,7 +1405,6 @@ def makePlotRaw(regions,vals,stats,systs,fshorts,desc,rescale=1.0, combineSysts 
     if inclNCsyst:
         tr.AddEntry(gpred_all,"Prediction, with total error" if combineSysts else "Prediction, with also VR syst",legoptNoE)
     tr.Draw()
-    pads[0].SetLogy(True)
     ratiocanvas.SaveAs("{}/{}_raw_{}_logscale.{}".format(plotdir,desc.replace(" ","_"),"pull" if doPullPlot else "ratio",format))
     pads[0].SetLogy(False)
 
@@ -1607,6 +1642,24 @@ def makePlotPostfit(regions,vals,stats,systs,fshorts,vals_postfit,errs_postfit,d
         for ibin in line_bins: 
             x = left+binWidth*ibin
             line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*0.85)  
+        # now also for ratio plot
+        pads[1].cd()
+        left = pads[1].GetLeftMargin()
+        right = pads[1].GetRightMargin()
+        top = pads[1].GetTopMargin()
+        bot = pads[1].GetBottomMargin()
+        binWidth = (1.0-right-left)/hpost.GetNbinsX()
+        line = ROOT.TLine()
+        line.SetNDC(1)
+        line.SetLineStyle(2)
+        line.SetLineWidth(1)
+        line.SetLineColor(ROOT.kBlack)
+        # in 2017-18, P3, P4, M each have L lo, L hi, H lo, H hi, and then L has only 1 divisions
+        # 2016 has only a single P
+        line_bins = [3,6,9,12, 15,18,21,24, 27,30,33,36, 38] if desc.find("2017") >= 0 else [3,6,9,12, 15,18,21,24, 26]
+        for ibin in line_bins: 
+            x = left+binWidth*ibin
+            line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*1.0)  
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
     utils.CMS_Style(pads[0],extraText=extraText+("" if desc.find("MC") < 0 else " Simulation"),lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
@@ -1654,6 +1707,9 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
         perrs.append( [errs_postfit[region]*rescale, errs_postfit[region]*rescale] )
         hpost.SetBinContent(bin_index,vals_postfit[region]*rescale)
         hpost.SetBinError(bin_index,errs_postfit[region]*rescale)
+    hpost.GetYaxis().SetTitleSize(2.0*hpost.GetYaxis().GetTitleSize())
+    hpost.GetYaxis().SetTitleOffset(0.6)
+    hpost.GetYaxis().SetLabelSize(1.5*hpost.GetYaxis().GetLabelSize())
     hpost.GetXaxis().LabelsOption("v")
     size_fac = 1.6 if not doPullPlot else 1.3
     hpost.GetXaxis().SetLabelSize(size_fac*hpost.GetXaxis().GetLabelSize())
@@ -1750,9 +1806,9 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
         gobs_norm.SetMarkerStyle(20)
         gobs_norm.SetMarkerSize(2)
         gobs_norm.SetMarkerColor(ROOT.kBlack)
-        h1.GetYaxis().SetLabelSize(hpost.GetYaxis().GetLabelSize()*.83/.16/2)
-        h1.GetYaxis().SetTitleSize(hpost.GetYaxis().GetTitleSize()*.83/.16/2)
-        h1.GetYaxis().SetTitleOffset(0.35)
+        h1.GetYaxis().SetLabelSize(hpost.GetYaxis().GetLabelSize()*2)
+        h1.GetYaxis().SetTitleSize(hpost.GetYaxis().GetTitleSize()*2)
+        h1.GetYaxis().SetTitleOffset(0.2)
         # "0" option forces the drawing of error bars even if the central value is off-scale
         h1_noerr=h1.Clone(h1.GetName()+"_noerr")
         for bin in range(1,h1.GetNbinsX()+1): h1_noerr.SetBinError(bin,1e-9)
@@ -1785,6 +1841,24 @@ def makePlotPostfitOnly(regions,vals,vals_postfit,errs_postfit,desc,rescale=1.0,
         for ibin in line_bins: 
             x = left+binWidth*ibin
             line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*0.85)  
+        # now also for ratio plot
+        pads[1].cd()
+        left = pads[1].GetLeftMargin()
+        right = pads[1].GetRightMargin()
+        top = pads[1].GetTopMargin()
+        bot = pads[1].GetBottomMargin()
+        binWidth = (1.0-right-left)/hpost.GetNbinsX()
+        line = ROOT.TLine()
+        line.SetNDC(1)
+        line.SetLineStyle(2)
+        line.SetLineWidth(1)
+        line.SetLineColor(ROOT.kBlack)
+        # in 2017-18, P3, P4, M each have L lo, L hi, H lo, H hi, and then L has only 1 divisions
+        # 2016 has only a single P
+        line_bins = [3,6,9,12, 15,18,21,24, 27,30,33,36, 38] if desc.find("2017") >= 0 else [3,6,9,12, 15,18,21,24, 26]
+        for ibin in line_bins: 
+            x = left+binWidth*ibin
+            line.DrawLineNDC(x,bot,x,bot+(1-top-bot)*1.0)  
 #    utils.DrawCmsText(pads[0],cmstext)
 #    utils.DrawLumiText(pads[0],lumi)
     utils.CMS_Style(pads[0],extraText=extraText+("" if desc.find("MC") < 0 else " Simulation"),lumi=str(lumi)+" fb^{-1}",cmsTextSize=0.70,lumiTextSize=0.70,relPosX=0.08)
@@ -2137,7 +2211,7 @@ def makePlotSSRsCovar(region_sets,vals,stats,systs, covars, desc, ssr_names, res
     tr.AddEntry(gpred_all,"Prediction, with total{} error".format("" if doFullCovariance else " (uncorrelated)"))
     tr.Draw()
     pads[1].cd()
-    h1=ROOT.TH1D("hratio"+desc,";;Data / pred",len(perrs_all),0,len(perrs_all))
+    h1=ROOT.TH1D("hratio"+desc,";;Data / pred.",len(perrs_all),0,len(perrs_all))
     h1.SetLineWidth(3)
     h1.SetLineColor(pred_color)
     hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
@@ -2304,7 +2378,7 @@ def makePlotSSRsCorr(region_sets,vals,stats,systs, covars, desc, ssr_names, resc
     tr.AddEntry(gpred_all,"Prediction, with total{} error".format("" if doFullCovariance else " (uncorrelated)"))
     tr.Draw()
     pads[1].cd()
-    h1=ROOT.TH1D("hratio"+desc,";;Data / pred",len(perrs_all),0,len(perrs_all))
+    h1=ROOT.TH1D("hratio"+desc,";;Data / pred.",len(perrs_all),0,len(perrs_all))
     h1.SetLineWidth(3)
     h1.SetLineColor(pred_color)
     hobs_norm = hobs.Clone(hobs.GetName()+"_norm")
@@ -3103,3 +3177,55 @@ def get17vs18FSLineMC(cat):
     else:
         colorline = "\\rowcolor{red!25}"                                   
     return colorline+"{} & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst) & \\textbf{{{:2.2g}}} +{:2.2g}-{:2.2g} (stat) $\pm$ {:2.2g} (syst)\\\\ \n".format(cat,M17f[cat],eM17f[cat][0],eM17f[cat][1],sM17f[cat],M18f[cat],eM18f[cat][0],eM18f[cat][1],sM18f[cat])
+
+def getYAMLtrklen(region):
+    tokens = region.split()
+    return "  - value: {}\n".format(tokens[0])
+
+def getYAMLnjet(region):
+    tokens = region.split()
+    njht = tokens[1]
+    nj = njht[0]
+    if nj == "L":
+        low = 2
+        high = 3
+    else:
+        low = 4
+        high = -1
+    return "  - {{low: {}, high: {}}}\n".format(low,high)
+
+def getYAMLht(region):
+    tokens = region.split()
+    njht = tokens[1]
+    ht = njht[1:]
+    if ht == "L":
+        low = 250
+        high = 450
+    elif ht == "M":
+        low = 450
+        high = 1200
+    elif ht == "H":
+        low = 1200
+        high = -1
+    else: # LM
+        low = 250
+        high = 1200 
+    return "  - {{low: {}, high: {}}}\n".format(low,high)
+    
+def getYAMLtrkpt(region):
+    if region.find("hi") >= 0:
+        return "  - {low: 50, high: -1}\n"
+    elif region.find("lo") >= 0:
+        return "  - {low: 15, high: 50}\n"
+    else:
+        return "  - {low: 15, high: -1}\n"
+
+def getYAMLbg(region,vals,stats,systs):
+    returnstr =  "  - value: {}\n".format( "%#.3g" % vals[region+" pre"] )
+    returnstr += "    errors:\n"
+    returnstr += "    - {{asymerror: {{plus: {}, minus: -{}}}, label: stat}}\n".format("%#.2g" % stats[region+" pre"][0], "%#.2g" % stats[region+" pre"][1])
+    returnstr += "    - {{symerror: {}, label: syst}}\n".format("%#.2g" % (sqrt(systs[region+" fs"]**2 + systs[region+" nc"]**2)))
+    return returnstr
+
+def getYAMLobs(region,vals):
+    return "  - value: {}\n".format( int(vals[region+" obs"]) ) 

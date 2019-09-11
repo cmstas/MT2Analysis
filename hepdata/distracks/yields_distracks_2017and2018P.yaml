@@ -51,6 +51,32 @@ independent_variables:
   - {low: 4, high: -1}
   - {low: 4, high: -1}
   - {low: 4, high: -1}
+- header: {name: '$H_\mathrm{T}$', units: GEV}
+  values:
+  - {low: 250, high: 450}
+  - {low: 250, high: 450}
+  - {low: 450, high: 1200}
+  - {low: 450, high: 1200}
+  - {low: 1200, high: -1}
+  - {low: 1200, high: -1}
+  - {low: 250, high: 450}
+  - {low: 250, high: 450}
+  - {low: 450, high: 1200}
+  - {low: 450, high: 1200}
+  - {low: 1200, high: -1}
+  - {low: 1200, high: -1}
+  - {low: 250, high: 450}
+  - {low: 250, high: 450}
+  - {low: 450, high: 1200}
+  - {low: 450, high: 1200}
+  - {low: 1200, high: -1}
+  - {low: 1200, high: -1}
+  - {low: 250, high: 450}
+  - {low: 250, high: 450}
+  - {low: 450, high: 1200}
+  - {low: 450, high: 1200}
+  - {low: 1200, high: -1}
+  - {low: 1200, high: -1}
 - header: {name: 'Track $p_\mathrm{T}$', units: GEV}
   values:
   - {low: 15, high: 50}
