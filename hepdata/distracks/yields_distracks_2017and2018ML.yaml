@@ -1,0 +1,136 @@
+independent_variables:
+- header: {name: 'Track Length'}
+  values:
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: M
+  - value: L
+  - value: L
+  - value: L
+  - value: L
+- header: {name: '$N_\mathrm{j}$'}
+  values:
+  - {low: 2, high: 3}
+  - {low: 2, high: 3}
+  - {low: 2, high: 3}
+  - {low: 2, high: 3}
+  - {low: 2, high: 3}
+  - {low: 2, high: 3}
+  - {low: 4, high: -1}
+  - {low: 4, high: -1}
+  - {low: 4, high: -1}
+  - {low: 4, high: -1}
+  - {low: 4, high: -1}
+  - {low: 4, high: -1}
+  - {low: 2, high: 3}
+  - {low: 2, high: 3}
+  - {low: 4, high: -1}
+  - {low: 4, high: -1}
+- header: {name: 'Track $p_\mathrm{T}$', units: GEV}
+  values:
+  - {low: 15, high: 50}
+  - {low: 50, high: -1}
+  - {low: 15, high: 50}
+  - {low: 50, high: -1}
+  - {low: 15, high: 50}
+  - {low: 50, high: -1}
+  - {low: 15, high: 50}
+  - {low: 50, high: -1}
+  - {low: 15, high: 50}
+  - {low: 50, high: -1}
+  - {low: 15, high: 50}
+  - {low: 50, high: -1}
+  - {low: 15, high: -1}
+  - {low: 15, high: -1}
+  - {low: 15, high: -1}
+  - {low: 15, high: -1}
+dependent_variables:
+- header: {name: 'Background'}
+  values:
+  - value: 8.4
+    errors:
+    - {asymerror: {plus: 2.4, minus: -2.0}, label: stat}
+    - {symerror: 3.4, label: syst}
+  - value: 5.4
+    errors:
+    - {asymerror: {plus: 2.2, minus: -1.8}, label: stat}
+    - {symerror: 2.6, label: syst}
+  - value: 1.90
+    errors:
+    - {asymerror: {plus: 0.85, minus: -0.66}, label: stat}
+    - {symerror: 0.92, label: syst}
+  - value: 1.12
+    errors:
+    - {asymerror: {plus: 0.77, minus: -0.54}, label: stat}
+    - {symerror: 0.97, label: syst}
+  - value: 0.0
+    errors:
+    - {asymerror: {plus: 0.36, minus: -0.0}, label: stat}
+  - value: 0.0
+    errors:
+    - {asymerror: {plus: 0.46, minus: -0.0}, label: stat}
+  - value: 1.6
+    errors:
+    - {asymerror: {plus: 0.6, minus: -0.5}, label: stat}
+    - {asymerror: {plus: 3.0, minus: -1.6}, label: syst}
+  - value: 1.11
+    errors:
+    - {asymerror: {plus: 0.57, minus: -0.42}, label: stat}
+    - {symerror: 0.58, label: syst}
+  - value: 1.9
+    errors:
+    - {asymerror: {plus: 0.6, minus: -0.5}, label: stat}
+    - {asymerror: {plus: 3.5, minus: -1.9}, label: syst}
+  - value: 1.5
+    errors:
+    - {asymerror: {plus: 0.7, minus: -0.5}, label: stat}
+    - {symerror: 1.1, label: syst}
+  - value: 0.38
+    errors:
+    - {asymerror: {plus: 0.31, minus: -0.19}, label: stat}
+    - {asymerror: {plus: 0.70, minus: -0.38}, label: syst}
+  - value: 0.12
+    errors:
+    - {asymerror: {plus: 0.29, minus: -0.10}, label: stat}
+    - {symerror: 0.04, label: syst}
+  - value: 0.46
+    errors:
+    - {asymerror: {plus: 0.26, minus: -0.20}, label: stat}
+    - {asymerror: {plus: 0.53, minus: -0.46}, label: syst}
+  - value: 0.0
+    errors:
+    - {asymerror: {plus: 0.14, minus: -0.0}, label: stat}
+  - value: 0.013
+    errors:
+    - {asymerror: {plus: 0.015, minus: -0.014}, label: stat}
+    - {asymerror: {plus: 0.018, minus: -0.013}, label: syst}
+  - value: 0.000
+    errors:
+    - {asymerror: {plus: 0.008, minus: -0.0}, label: stat}
+- header: {name: 'Data'}
+  values:
+  - value: 8
+  - value: 2
+  - value: 6
+  - value: 1
+  - value: 0
+  - value: 0
+  - value: 3
+  - value: 1
+  - value: 3
+  - value: 0
+  - value: 1
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
