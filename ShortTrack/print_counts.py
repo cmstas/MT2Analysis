@@ -9,14 +9,15 @@ from printing_functions import *
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 verbose = False # Print more status messages
-printTables = True
+printTables = False
 full_unblind = True
 doMC = True
-doBenchmarks = True
+doBenchmarks = False
 doMonojet = False
 makePullPlots = False
 makePostFitPlots = False
 makeSSRplots = False
+makeYAMLtables = True
 format = "pdf"
 colorTables = False
 
@@ -552,21 +553,118 @@ if doMC and printTables:
 fs_regions = [cat + " " + nj + " " + pt for cat in ["P","P3","P4","M"] for nj in ["23","4"] for pt in ["hi","lo"]]
 fs_regions += ["L 23","L 4"]
 
-output = open("{0}/fshorts_data.tex".format(tabledir),"w")
-printHeader(output)
-startMergedFshortTableData(output)
-for fs_region in fs_regions:
-    output.write(getMergedFSLineData(fs_region,D16f,eD16f,sD16f,D1718f,eD1718f,sD1718f))
-printFooter(output)
-output.close()
 
-if doMC:
-    output = open("{0}/fshorts_mc.tex".format(tabledir),"w")
+if printTables:
+    output = open("{0}/fshorts_data.tex".format(tabledir),"w")
     printHeader(output)
-    startMergedFshortTableMC(output)
+    startMergedFshortTableData(output)
     for fs_region in fs_regions:
-        output.write(getMergedFSLineMC(fs_region,M16f,eM16f,sM16f,M1718f,eM1718f,sM1718f))
+        output.write(getMergedFSLineData(fs_region,D16f,eD16f,sD16f,D1718f,eD1718f,sD1718f))
     printFooter(output)
+    output.close()
+
+    if doMC:
+        output = open("{0}/fshorts_mc.tex".format(tabledir),"w")
+        printHeader(output)
+        startMergedFshortTableMC(output)
+        for fs_region in fs_regions:
+            output.write(getMergedFSLineMC(fs_region,M16f,eM16f,sM16f,M1718f,eM1718f,sM1718f))
+        printFooter(output)
+        output.close()
+
+if makeYAMLtables:
+    regionsYAML16 = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P","M"] for kin in kinA for pt in ["lo","hi"]  ] + regionsLSR
+    regionsYAML1718P = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["P3","P4"] for kin in kinA for pt in ["lo","hi"]  ]
+    regionsYAML1718ML = [cat + " " + kin + " " + reg + " " + pt for reg in ["SR"] for cat in ["M"] for kin in kinA for pt in ["lo","hi"]  ] + regionsLSR
+    # 2016
+    trklen =  "- header: {name: 'Track Length'}\n"
+    trklen += "  values:\n"
+    njet =  "- header: {name: '$N_\mathrm{j}$'}\n"
+    njet += "  values:\n"
+    ht =  "- header: {name: '$H_\mathrm{T}$', units: GEV}\n"
+    ht += "  values:\n"
+    pt =  "- header: {name: 'Track $p_\mathrm{T}$', units: GEV}\n"
+    pt += "  values:\n"
+    bg =  "- header: {name: 'Background'}\n"
+    bg += "  values:\n"
+    obs =  "- header: {name: 'Data'}\n"
+    obs += "  values:\n"
+    for region in regionsYAML16:
+        trklen += getYAMLtrklen(region)
+        njet += getYAMLnjet(region)
+        ht += getYAMLht(region)
+        pt += getYAMLtrkpt(region)
+        bg += getYAMLbg(region,D16,eD16,sD16)
+        obs += getYAMLobs(region,D16)
+    output = open("yields_distracks_2016.yaml","w")
+    output.write("independent_variables:\n")
+    output.write(trklen)
+    output.write(njet)
+    output.write(ht)
+    output.write(pt)
+    output.write("dependent_variables:\n")
+    output.write(bg)
+    output.write(obs)
+    output.close()
+    # 17-18 P
+    trklen =  "- header: {name: 'Track Length'}\n"
+    trklen += "  values:\n"
+    njet =  "- header: {name: '$N_\mathrm{j}$'}\n"
+    njet += "  values:\n"
+    ht =  "- header: {name: '$H_\mathrm{T}$', units: GEV}\n"
+    ht += "  values:\n"
+    pt =  "- header: {name: 'Track $p_\mathrm{T}$', units: GEV}\n"
+    pt += "  values:\n"
+    bg =  "- header: {name: 'Background'}\n"
+    bg += "  values:\n"
+    obs =  "- header: {name: 'Data'}\n"
+    obs += "  values:\n"
+    for region in regionsYAML1718P:
+        trklen += getYAMLtrklen(region)
+        njet += getYAMLnjet(region)
+        ht += getYAMLht(region)
+        pt += getYAMLtrkpt(region)
+        bg += getYAMLbg(region,D1718,eD1718,sD1718)
+        obs += getYAMLobs(region,D1718)
+    output = open("yields_distracks_2017and2018P.yaml","w")
+    output.write("independent_variables:\n")
+    output.write(trklen)
+    output.write(njet)
+    output.write(ht)
+    output.write(pt)
+    output.write("dependent_variables:\n")
+    output.write(bg)
+    output.write(obs)
+    output.close()
+    # 17-18 ML
+    trklen =  "- header: {name: 'Track Length'}\n"
+    trklen += "  values:\n"
+    njet =  "- header: {name: '$N_\mathrm{j}$'}\n"
+    njet += "  values:\n"
+    ht =  "- header: {name: '$H_\mathrm{T}$', units: GEV}\n"
+    ht += "  values:\n"
+    pt =  "- header: {name: 'Track $p_\mathrm{T}$', units: GEV}\n"
+    pt += "  values:\n"
+    bg =  "- header: {name: 'Background'}\n"
+    bg += "  values:\n"
+    obs =  "- header: {name: 'Data'}\n"
+    obs += "  values:\n"
+    for region in regionsYAML1718ML:
+        trklen += getYAMLtrklen(region)
+        njet += getYAMLnjet(region)
+        ht += getYAMLht(region)
+        pt += getYAMLtrkpt(region)
+        bg += getYAMLbg(region,D1718,eD1718,sD1718)
+        obs += getYAMLobs(region,D1718)
+    output = open("yields_distracks_2017and2018ML.yaml","w")
+    output.write("independent_variables:\n")
+    output.write(trklen)
+    output.write(njet)
+    output.write(ht)
+    output.write(pt)
+    output.write("dependent_variables:\n")
+    output.write(bg)
+    output.write(obs)
     output.close()
 
 
