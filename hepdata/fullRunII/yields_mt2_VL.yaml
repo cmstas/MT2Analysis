@@ -97,6 +97,9 @@ independent_variables:
   - {low: 300, high: -1}
 dependent_variables:
 - header: {name: 'Lost lepton'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
   - value: 73700
     errors:
@@ -219,6 +222,9 @@ dependent_variables:
     - {symerror: 0.35, label: stat}
     - {symerror: 0.20, label: syst}
 - header: {name: '$Z\to\nu\bar{\nu}$'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
   - value: 156000
     errors:
@@ -341,6 +347,9 @@ dependent_variables:
     - {asymerror: {plus: 0.11, minus: -0.06}, label: stat}
     - {symerror: 0.14, label: syst}
 - header: {name: 'Multijet'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
   - value: 580
     errors:
@@ -463,6 +472,9 @@ dependent_variables:
     - {symerror: 0, label: stat}
     - {symerror: 0, label: syst}
 - header: {name: 'Total background'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
   - value: 231000
     errors:
@@ -585,6 +597,9 @@ dependent_variables:
     - {asymerror: {plus: 0.37, minus: -0.35}, label: stat}
     - {symerror: 0.24, label: syst}
 - header: {name: 'Data'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
   - value: 240867
   - value: 44074

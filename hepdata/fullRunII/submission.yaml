@@ -18,74 +18,158 @@ comment: >
 data_license: {description: The content can be shared and adapted but you must give
     appropriate credit and cannot restrict access to others., name: cc-by-4.0, url: 'https://creativecommons.org/licenses/by/4.0/'}
 ---
+data_file: LQ_q.yaml
+description: |
+    Cross section limits for $\mathrm{LQ}\to\mathrm{q}\nu$, where $q=u,\,d,\,s,\,\mathrm{or}\,c$. 
+    Limits are at the 95% confidence level. 
+    Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
+    Branching ratio is 100% to $\mathrm{q}\nu$.
+keywords:
+- {name: reactions, values: [P P --> LQ LQ X, LQ --> Q NU]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Leptoquark, Cross Section]}
+location: Figure 16 (upper left)
+name: 'Figure 16 ($\mathrm{LQ}\to\mathrm{q}\nu$)'
+additional_resources:
+- {description: Image file, location: thumb_LQ_q.png}
+- {description: Thumbnail image file, location: thumb_LQ_q.png}
+---
+data_file: LQ_b.yaml
+description: |
+    Cross section limits for $\mathrm{LQ}\to\mathrm{b}\nu$.
+    Limits are at the 95% confidence level. 
+    Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
+    Branching ratio is 100% to $\mathrm{b}\nu$.
+keywords:
+- {name: reactions, values: [P P --> LQ LQ X, LQ --> BQ NU]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Leptoquark, Cross Section]}
+location: Figure 16 (upper right)
+name: 'Figure 16 ($\mathrm{LQ}\to\mathrm{b}\nu$)'
+additional_resources:
+- {description: Image file, location: thumb_LQ_b.png}
+- {description: Thumbnail image file, location: thumb_LQ_b.png}
+---
+data_file: LQ_t.yaml
+description: |
+    Cross section limits for $\mathrm{LQ}\to\mathrm{t}\nu$. 
+    Limits are at the 95% confidence level. 
+    Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
+    Branching ratio is $\mathcal{B}(\mathrm{LQ}\to\mathrm{t}\nu)=1-\beta$, and $\mathcal{B}(\mathrm{LQ}\to\mathrm{b}\tau)=\beta$.
+keywords:
+- {name: reactions, values: [P P --> LQ LQ X, LQ --> TQ NU]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Leptoquark, Cross Section]}
+location: Figure 16 (lower)
+name: 'Figure 16 ($\mathrm{LQ}\to\mathrm{t}\nu$)'
+additional_resources:
+- {description: Image file, location: thumb_LQ_t.png}
+- {description: Thumbnail image file, location: thumb_LQ_t.png}
+---
 data_file: yields_mt2_monojet.yaml
 description: 'Predictions and observations for monojet signal regions'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 12 in Appendix B.1
 name: Table 12
 ---
 data_file: yields_mt2_VL.yaml
 description: 'Predictions and observations for signal regions with $250 \leq H_\mathrm{T} < 450$ GeV'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 13 in Appendix B.1
 name: Table 13
 ---
 data_file: yields_mt2_Ll.yaml
 description: 'Predictions and observations for signal regions with $450 \leq H_\mathrm{T} < 575$ GeV and $N_\mathrm{j}<7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 14 in Appendix B.1
 name: Table 14
 ---
 data_file: yields_mt2_Lh.yaml
 description: 'Predictions and observations for signal regions with $450 \leq H_\mathrm{T} < 575$ GeV and $N_\mathrm{j}\geq7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 15 in Appendix B.1
 name: Table 15
 ---
 data_file: yields_mt2_Ml.yaml
 description: 'Predictions and observations for signal regions with $575 \leq H_\mathrm{T} < 1200$ GeV and $N_\mathrm{j}^\mathrm{hi}<4$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 16 in Appendix B.1
 name: Table 16
 ---
 data_file: yields_mt2_Mm.yaml
 description: 'Predictions and observations for signal regions with $575 \leq H_\mathrm{T} < 1200$ GeV and $4\leq N_\mathrm{j}^\mathrm{hi}<7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 17 in Appendix B.1
 name: Table 17
 ---
 data_file: yields_mt2_Mh.yaml
 description: 'Predictions and observations for signal regions with $575 \leq H_\mathrm{T} < 1200$ GeV and $N_\mathrm{j}\geq7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 18 in Appendix B.1
 name: Table 18
 ---
 data_file: yields_mt2_Hl.yaml
 description: 'Predictions and observations for signal regions with $1200 \leq H_\mathrm{T} < 1500$ GeV and $N_\mathrm{j}^\mathrm{hi}<4$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 19 in Appendix B.1
 name: Table 19
 ---
 data_file: yields_mt2_Hm.yaml
 description: 'Predictions and observations for signal regions with $1200 \leq H_\mathrm{T} < 1500$ GeV and $4\leq N_\mathrm{j}^\mathrm{hi}<7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 20 in Appendix B.1
 name: Table 20
 ---
 data_file: yields_mt2_Hh.yaml
 description: 'Predictions and observations for signal regions with $1200 \leq H_\mathrm{T} < 1500$ GeV and $N_\mathrm{j}\geq7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 21 in Appendix B.1
 name: Table 21
 ---
 data_file: yields_mt2_UHl.yaml
 description: 'Predictions and observations for signal regions with $H_\mathrm{T} \geq 1500$ GeV and $N_\mathrm{j}<7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 22 in Appendix B.1
 name: Table 22
 ---
 data_file: yields_mt2_UHh.yaml
 description: 'Predictions and observations for signal regions with $H_\mathrm{T} \geq 1500$ GeV and $N_\mathrm{j}\geq7$'
-keywords: []
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
 location: Table 23 in Appendix B.1
 name: Table 23
