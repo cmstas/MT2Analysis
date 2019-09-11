@@ -1,0 +1,438 @@
+independent_variables:
+- header: {name: '$N_\mathrm{j}$'}
+  values:
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 7, high: 9}
+  - {low: 10, high: -1}
+  - {low: 10, high: -1}
+  - {low: 10, high: -1}
+  - {low: 10, high: -1}
+  - {low: 10, high: -1}
+  - {low: 10, high: -1}
+  - {low: 10, high: -1}
+- header: {name: '$N_\mathrm{b}$'}
+  values:
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 1
+  - value: 1
+  - value: 1
+  - value: 2
+  - value: 2
+  - value: 2
+  - value: 3
+  - value: 3
+  - {low: 4, high: -1}
+  - value: 0
+  - value: 0
+  - value: 1
+  - value: 1
+  - value: 2
+  - value: 3
+  - {low: 4, high: -1}
+- header: {name: '$M_\mathrm{T2}$', units: GEV}
+  values:
+  - {low: 400, high: 600}
+  - {low: 600, high: 800}
+  - {low: 800, high: 1000}
+  - {low: 1000, high: 1400}
+  - {low: 1400, high: -1}
+  - {low: 400, high: 600}
+  - {low: 600, high: 800}
+  - {low: 800, high: -1}
+  - {low: 400, high: 600}
+  - {low: 600, high: 800}
+  - {low: 800, high: -1}
+  - {low: 400, high: 800}
+  - {low: 800, high: -1}
+  - {low: 400, high: -1}
+  - {low: 400, high: 800}
+  - {low: 800, high: -1}
+  - {low: 400, high: 800}
+  - {low: 800, high: -1}
+  - {low: 400, high: -1}
+  - {low: 400, high: -1}
+  - {low: 400, high: -1}
+dependent_variables:
+- header: {name: 'Lost lepton'}
+  values:
+  - value: 14.3
+    errors:
+    - {asymerror: {plus: 1.8, minus: -1.7}, label: stat}
+    - {symerror: 1.7, label: syst}
+  - value: 3.77
+    errors:
+    - {asymerror: {plus: 0.56, minus: -0.55}, label: stat}
+    - {symerror: 0.69, label: syst}
+  - value: 1.16
+    errors:
+    - {asymerror: {plus: 0.18, minus: -0.17}, label: stat}
+    - {symerror: 0.30, label: syst}
+  - value: 0.58
+    errors:
+    - {symerror: 0.11, label: stat}
+    - {symerror: 0.19, label: syst}
+  - value: 0.05
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.02, label: syst}
+  - value: 12.8
+    errors:
+    - {asymerror: {plus: 2.5, minus: -2.3}, label: stat}
+    - {symerror: 1.6, label: syst}
+  - value: 3.49
+    errors:
+    - {asymerror: {plus: 0.94, minus: -0.89}, label: stat}
+    - {symerror: 0.76, label: syst}
+  - value: 1.09
+    errors:
+    - {asymerror: {plus: 0.34, minus: -0.32}, label: stat}
+    - {symerror: 0.45, label: syst}
+  - value: 8.1
+    errors:
+    - {asymerror: {plus: 1.8, minus: -1.6}, label: stat}
+    - {symerror: 1.0, label: syst}
+  - value: 1.78
+    errors:
+    - {asymerror: {plus: 0.54, minus: -0.52}, label: stat}
+    - {symerror: 0.40, label: syst}
+  - value: 0.40
+    errors:
+    - {asymerror: {plus: 0.19, minus: -0.18}, label: stat}
+    - {symerror: 0.17, label: syst}
+  - value: 2.40
+    errors:
+    - {asymerror: {plus: 0.74, minus: -0.72}, label: stat}
+    - {symerror: 0.29, label: syst}
+  - value: 0.16
+    errors:
+    - {symerror: 0.09, label: stat}
+    - {symerror: 0.07, label: syst}
+  - value: 0.52
+    errors:
+    - {asymerror: {plus: 0.23, minus: -0.22}, label: stat}
+    - {symerror: 0.08, label: syst}
+  - value: 1.41
+    errors:
+    - {symerror: 0.38, label: stat}
+    - {symerror: 0.33, label: syst}
+  - value: 0.05
+    errors:
+    - {symerror: 0.02, label: stat}
+    - {symerror: 0.02, label: syst}
+  - value: 2.16
+    errors:
+    - {asymerror: {plus: 0.71, minus: -0.69}, label: stat}
+    - {symerror: 0.25, label: syst}
+  - value: 0.55
+    errors:
+    - {symerror: 0.30, label: stat}
+    - {symerror: 0.22, label: syst}
+  - value: 1.98
+    errors:
+    - {asymerror: {plus: 0.69, minus: -0.67}, label: stat}
+    - {symerror: 0.24, label: syst}
+  - value: 0.77
+    errors:
+    - {symerror: 0.35, label: stat}
+    - {symerror: 0.09, label: syst}
+  - value: 0.09
+    errors:
+    - {symerror: 0.05, label: stat}
+    - {symerror: 0.01, label: syst}
+- header: {name: '$Z\to\nu\bar{\nu}$'}
+  values:
+  - value: 32.3
+    errors:
+    - {asymerror: {plus: 7.5, minus: -6.2}, label: stat}
+    - {symerror: 4.3, label: syst}
+  - value: 8.3
+    errors:
+    - {asymerror: {plus: 1.9, minus: -1.6}, label: stat}
+    - {symerror: 2.2, label: syst}
+  - value: 3.70
+    errors:
+    - {asymerror: {plus: 0.86, minus: -0.71}, label: stat}
+    - {symerror: 0.83, label: syst}
+  - value: 2.96
+    errors:
+    - {asymerror: {plus: 0.69, minus: -0.57}, label: stat}
+    - {symerror: 0.86, label: syst}
+  - value: 0.71
+    errors:
+    - {asymerror: {plus: 0.17, minus: -0.14}, label: stat}
+    - {symerror: 0.30, label: syst}
+  - value: 9.2
+    errors:
+    - {asymerror: {plus: 4.2, minus: -3.0}, label: stat}
+    - {symerror: 1.4, label: syst}
+  - value: 2.4
+    errors:
+    - {asymerror: {plus: 1.1, minus: -0.8}, label: stat}
+    - {symerror: 1.0, label: syst}
+  - value: 2.10
+    errors:
+    - {asymerror: {plus: 0.96, minus: -0.69}, label: stat}
+    - {symerror: 0.93, label: syst}
+  - value: 2.4
+    errors:
+    - {asymerror: {plus: 1.1, minus: -0.8}, label: stat}
+    - {symerror: 0.4, label: syst}
+  - value: 0.62
+    errors:
+    - {asymerror: {plus: 0.28, minus: -0.20}, label: stat}
+    - {symerror: 0.25, label: syst}
+  - value: 0.55
+    errors:
+    - {asymerror: {plus: 0.25, minus: -0.18}, label: stat}
+    - {symerror: 0.25, label: syst}
+  - value: 0.32
+    errors:
+    - {asymerror: {plus: 0.15, minus: -0.10}, label: stat}
+    - {symerror: 0.12, label: syst}
+  - value: 0.08
+    errors:
+    - {asymerror: {plus: 0.04, minus: -0.03}, label: stat}
+    - {symerror: 0.04, label: syst}
+  - value: 0.07
+    errors:
+    - {asymerror: {plus: 0.03, minus: -0.02}, label: stat}
+    - {symerror: 0.06, label: syst}
+  - value: 1.52
+    errors:
+    - {asymerror: {plus: 0.35, minus: -0.29}, label: stat}
+    - {symerror: 0.34, label: syst}
+  - value: 0.37
+    errors:
+    - {asymerror: {plus: 0.09, minus: -0.07}, label: stat}
+    - {symerror: 0.17, label: syst}
+  - value: 0.56
+    errors:
+    - {asymerror: {plus: 0.25, minus: -0.18}, label: stat}
+    - {symerror: 0.16, label: syst}
+  - value: 0.13
+    errors:
+    - {asymerror: {plus: 0.06, minus: -0.04}, label: stat}
+    - {symerror: 0.07, label: syst}
+  - value: 0.30
+    errors:
+    - {asymerror: {plus: 0.14, minus: -0.10}, label: stat}
+    - {symerror: 0.12, label: syst}
+  - value: 0.00
+    errors:
+    - {asymerror: {plus: 0.45, minus: -0.00}, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0.00
+    errors:
+    - {asymerror: {plus: 0.45, minus: -0.00}, label: stat}
+    - {symerror: 0.00, label: syst}
+- header: {name: 'Multijet'}
+  values:
+  - value: 1.50
+    errors:
+    - {symerror: 0.13, label: stat}
+    - {symerror: 0.44, label: syst}
+  - value: 0.18
+    errors:
+    - {symerror: 0.04, label: stat}
+    - {symerror: 0.05, label: syst}
+  - value: 0.01
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0.01
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0.82
+    errors:
+    - {symerror: 0.09, label: stat}
+    - {symerror: 0.24, label: syst}
+  - value: 0.06
+    errors:
+    - {symerror: 0.02, label: stat}
+    - {symerror: 0.02, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0.35
+    errors:
+    - {symerror: 0.06, label: stat}
+    - {symerror: 0.10, label: syst}
+  - value: 0.02
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.01, label: syst}
+  - value: 0.01
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0.10
+    errors:
+    - {symerror: 0.03, label: stat}
+    - {symerror: 0.03, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0.02
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.01, label: syst}
+  - value: 0.23
+    errors:
+    - {symerror: 0.05, label: stat}
+    - {symerror: 0.08, label: syst}
+  - value: 0.01
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0.14
+    errors:
+    - {symerror: 0.04, label: stat}
+    - {symerror: 0.05, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0.05
+    errors:
+    - {symerror: 0.02, label: stat}
+    - {symerror: 0.02, label: syst}
+  - value: 0.05
+    errors:
+    - {symerror: 0.03, label: stat}
+    - {symerror: 0.02, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+- header: {name: 'Total background'}
+  values:
+  - value: 48.1
+    errors:
+    - {asymerror: {plus: 7.7, minus: -6.4}, label: stat}
+    - {symerror: 5.0, label: syst}
+  - value: 12.3
+    errors:
+    - {asymerror: {plus: 2.0, minus: -1.7}, label: stat}
+    - {symerror: 2.3, label: syst}
+  - value: 4.86
+    errors:
+    - {asymerror: {plus: 0.88, minus: -0.73}, label: stat}
+    - {symerror: 0.90, label: syst}
+  - value: 3.55
+    errors:
+    - {asymerror: {plus: 0.69, minus: -0.58}, label: stat}
+    - {symerror: 0.89, label: syst}
+  - value: 0.76
+    errors:
+    - {asymerror: {plus: 0.17, minus: -0.14}, label: stat}
+    - {symerror: 0.30, label: syst}
+  - value: 22.9
+    errors:
+    - {asymerror: {plus: 4.9, minus: -3.8}, label: stat}
+    - {symerror: 2.3, label: syst}
+  - value: 5.9
+    errors:
+    - {asymerror: {plus: 1.4, minus: -1.2}, label: stat}
+    - {symerror: 1.2, label: syst}
+  - value: 3.2
+    errors:
+    - {asymerror: {plus: 1.0, minus: -0.8}, label: stat}
+    - {symerror: 1.0, label: syst}
+  - value: 10.9
+    errors:
+    - {asymerror: {plus: 2.1, minus: -1.8}, label: stat}
+    - {symerror: 1.2, label: syst}
+  - value: 2.41
+    errors:
+    - {asymerror: {plus: 0.61, minus: -0.56}, label: stat}
+    - {symerror: 0.49, label: syst}
+  - value: 0.96
+    errors:
+    - {asymerror: {plus: 0.31, minus: -0.26}, label: stat}
+    - {symerror: 0.30, label: syst}
+  - value: 2.82
+    errors:
+    - {asymerror: {plus: 0.76, minus: -0.72}, label: stat}
+    - {symerror: 0.32, label: syst}
+  - value: 0.24
+    errors:
+    - {symerror: 0.09, label: stat}
+    - {symerror: 0.08, label: syst}
+  - value: 0.61
+    errors:
+    - {asymerror: {plus: 0.23, minus: -0.22}, label: stat}
+    - {symerror: 0.10, label: syst}
+  - value: 3.17
+    errors:
+    - {asymerror: {plus: 0.52, minus: -0.48}, label: stat}
+    - {symerror: 0.49, label: syst}
+  - value: 0.43
+    errors:
+    - {asymerror: {plus: 0.09, minus: -0.08}, label: stat}
+    - {symerror: 0.17, label: syst}
+  - value: 2.85
+    errors:
+    - {asymerror: {plus: 0.76, minus: -0.71}, label: stat}
+    - {symerror: 0.31, label: syst}
+  - value: 0.68
+    errors:
+    - {asymerror: {plus: 0.31, minus: -0.30}, label: stat}
+    - {symerror: 0.23, label: syst}
+  - value: 2.33
+    errors:
+    - {asymerror: {plus: 0.70, minus: -0.68}, label: stat}
+    - {symerror: 0.28, label: syst}
+  - value: 0.82
+    errors:
+    - {asymerror: {plus: 0.57, minus: -0.35}, label: stat}
+    - {symerror: 0.09, label: syst}
+  - value: 0.09
+    errors:
+    - {asymerror: {plus: 0.45, minus: -0.05}, label: stat}
+    - {symerror: 0.01, label: syst}
+- header: {name: 'Data'}
+  values:
+  - value: 36
+  - value: 9
+  - value: 6
+  - value: 4
+  - value: 2
+  - value: 25
+  - value: 7
+  - value: 2
+  - value: 10
+  - value: 5
+  - value: 0
+  - value: 2
+  - value: 0
+  - value: 1
+  - value: 11
+  - value: 0
+  - value: 3
+  - value: 0
+  - value: 0
+  - value: 1
+  - value: 0
