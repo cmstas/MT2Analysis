@@ -35,3 +35,24 @@ description: 'Predictions and observations for 2017-2018 medium (M) and long (L)
 keywords: []
 location: Table 26 in Appendix B.2
 name: Table 26
+---
+data_file: distracks_covariance.yaml
+description: 'Covariance matrix for the 68 signal regions of the disappearing tracks $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 4
+name: $M_\mathrm{T2}$ covariance matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_covariance.png}
+---
+data_file: distracks_correlation.yaml
+description: 'Correlation matrix for the 68 signal regions of the disappearing tracks $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 3
+name: $M_\mathrm{T2}$ correlation matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_correlation.png}
+
