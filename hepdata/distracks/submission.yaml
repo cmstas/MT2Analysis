@@ -42,7 +42,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 location: Additional Figure 4
-name: $M_\mathrm{T2}$ covariance matrix
+name: $M_\mathrm{T2}$ disappearing tracks covariance matrix
 additional_resources:
 - {description: Thumbnail image file, location: thumb_distracks_covariance.png}
 ---
@@ -52,7 +52,7 @@ keywords:
 - {name: reactions, values: [P P --> X X]}
 - {name: cmenergies, values: [13000]}
 location: Additional Figure 3
-name: $M_\mathrm{T2}$ correlation matrix
+name: $M_\mathrm{T2}$ disappearing tracks correlation matrix
 additional_resources:
 - {description: Thumbnail image file, location: thumb_distracks_correlation.png}
 
