@@ -18,6 +18,141 @@ comment: >
 data_license: {description: The content can be shared and adapted but you must give
     appropriate credit and cannot restrict access to others., name: cc-by-4.0, url: 'https://creativecommons.org/licenses/by/4.0/'}
 ---
+data_file: distracks_limits_T1qqqq_10.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino is long-lived with $c\tau_0 = 10$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 17 (upper left)
+name: 'Figure 17 (T1qqqq 10 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T1qqqq_10.png}
+---
+data_file: distracks_limits_T1qqqq_50.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino is long-lived with $c\tau_0 = 50$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 17 (upper right)
+name: 'Figure 17 (T1qqqq 50 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T1qqqq_50.png}
+---
+data_file: distracks_limits_T1qqqq_200.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino is long-lived with $c\tau_0 = 200$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 17 (lower)
+name: 'Figure 17 (T1qqqq 200 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T1qqqq_200.png}
+---
+data_file: distracks_limits_T2qq_10.yaml
+description: >
+    Exclusion limits at 95% CL for direct light squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 10$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 18 (upper left)
+name: 'Figure 18 (T2qq 10 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2qq_10.png}
+---
+data_file: distracks_limits_T2qq_50.yaml
+description: >
+    Exclusion limits at 95% CL for direct light squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 50$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 18 (upper right)
+name: 'Figure 18 (T2qq 50 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2qq_50.png}
+---
+data_file: distracks_limits_T2qq_200.yaml
+description: >
+    Exclusion limits at 95% CL for direct light squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 200$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 18 (lower)
+name: 'Figure 18 (T2qq 200 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2qq_200.png}
+---
+data_file: distracks_limits_T2bt_10.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 10$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 19 (upper left)
+name: 'Figure 19 (T2bt 10 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2bt_10.png}
+---
+data_file: distracks_limits_T2bt_50.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 50$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 19 (upper right)
+name: 'Figure 19 (T2bt 50 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2bt_50.png}
+---
+data_file: distracks_limits_T2bt_200.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 200$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 19 (lower)
+name: 'Figure 19 (T2bt 200 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2bt_200.png}
+---
 data_file: yields_distracks_2016.yaml
 description: 'Predictions and observations for 2016 disappearing track signal regions'
 keywords: []
