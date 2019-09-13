@@ -153,6 +153,137 @@ name: 'Figure 19 (T2bt 200 cm)'
 additional_resources:
 - {description: Thumbnail image file, location: thumb_distracks_T2bt_200.png}
 ---
+data_file: distracks_limits_maxchexcl_T1qqqq.yaml
+description: >
+    The maximum chargino mass excluded at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the gluino mass is fixed to 1900 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 20 (upper left)
+name: 'Figure 20 (T1qqqq Max Chargino Exclusion)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T1qqqq.png}
+---
+data_file: distracks_limits_maxchexcl_T2qq_1squark.yaml
+description: >
+    The maximum chargino mass excluded at 95% CL for direct squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the squark mass is fixed to 900 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, for a single light squark.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 22 (lower left)
+name: 'Figure 22 (T2qq Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T2qq_1squark.png}
+---
+data_file: distracks_limits_maxchexcl_T2qq.yaml
+description: >
+    The maximum chargino mass excluded at 95% CL for direct squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the squark mass is fixed to 1500 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, and the eight light squarks' masses are assumed to be degenerate.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 20 (lower right)
+name: 'Figure 20 (T2qq Max Chargino Exclusion)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T2qq.png}
+---
+data_file: distracks_limits_maxchexcl_T2bt.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the stop mass is fixed to 1000 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 21
+name: 'Figure 21 (T2bt Max Chargino Exclusion)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T2bt.png}
+---
+data_file: distracks_limits_fixedmasses_T1qqqq.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 5$ to 1000 cm while the gluino mass is fixed to 1600 GeV and the neutralino's
+    mass is fixed to 1575 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 22 (upper)
+name: 'Figure 22 (T1qqqq Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_fixedmasses_T1qqqq.png}
+---
+data_file: distracks_limits_fixedmasses_T2qq.yaml
+description: >
+    Exclusion limits at 95% CL for direct squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 5$ to 1000 cm while the squark mass is fixed to 2000 GeV and the neutralino's
+    mass is fixed to 1000 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, and the eight light squarks' masses are assumed to be degenerate.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 22 (lower left)
+name: 'Figure 22 (T2qq Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_fixedmasses_T2qq.png}
+---
+data_file: distracks_limits_fixedmasses_T2bt.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 5$ to 1000 cm while the stop mass is fixed to 1100 GeV and the neutralino's
+    mass is fixed to 1000 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 22 (lower right)
+name: 'Figure 22 (T2bt Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_fixedmasses_T2bt.png}
+---
 data_file: yields_distracks_2016.yaml
 description: 'Predictions and observations for 2016 disappearing track signal regions'
 keywords: []

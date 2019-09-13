@@ -1,0 +1,82 @@
+independent_variables:
+- header: {name: 'c\tau_0(\tilde{\chi}^{\pm}_1)', units: CM}
+  values:
+  - value: 1
+  - value: 5
+  - value: 10
+  - value: 30
+  - value: 50
+  - value: 100
+  - value: 200
+  - value: 500
+  - value: 1000
+  - value: 2000
+dependent_variables:
+- header: {name: 'Observed maximum $m_{\tilde{\chi}^{\pm}_1}$ excluded (95% CL)', units: GEV}
+  qualifiers:
+  - {name: 'Theory $\sigma$', value: 8.9 $\pm$ 1.4 fb}
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  - {name: '$B(\tilde{g}\rightarrow q\bar{q}\tilde{\chi}^{0}_{1})$', value: '$\frac{1}{3}$'}
+  - {name: '$B(\tilde{g}\rightarrow q_{d}\bar{q}_{u}\tilde{\chi}^{+}_{1})$', value: '$\frac{1}{3}$'}
+  - {name: '$B(\tilde{g}\rightarrow q_{u}\bar{q}_{d}\tilde{\chi}^{-}_{1})$', value: '$\frac{1}{3}$'}
+  values:
+  - value: 915
+  - value: 937
+  - value: 1402
+  - value: 1642
+  - value: 1881
+  - value: 1887
+  - value: 1886
+  - value: 1878
+  - value: 1741
+  - value: 1697
+- header: {name: 'Expected maximum $m_{\tilde{\chi}^{\pm}_1}$ excluded (95% CL)', units: GEV}
+  qualifiers:
+  - {name: 'Theory $\sigma$', value: 8.9 $\pm$ 1.4 fb}
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  - {name: '$B(\tilde{g}\rightarrow q\bar{q}\tilde{\chi}^{0}_{1})$', value: '$\frac{1}{3}$'}
+  - {name: '$B(\tilde{g}\rightarrow q_{d}\bar{q}_{u}\tilde{\chi}^{+}_{1})$', value: '$\frac{1}{3}$'}
+  - {name: '$B(\tilde{g}\rightarrow q_{u}\bar{q}_{d}\tilde{\chi}^{-}_{1})$', value: '$\frac{1}{3}$'}
+  values:
+  - value: 959
+    errors:
+    - {asymerror: {plus: 115, minus: -165}, label: '1 s.d.'}
+    - {asymerror: {plus: 204, minus: -425}, label: '2 s.d.'}
+  - value: 1033
+    errors:
+    - {asymerror: {plus: 118, minus: -100}, label: '1 s.d.'}
+    - {asymerror: {plus: 215, minus: -165}, label: '2 s.d.'}
+  - value: 1418
+    errors:
+    - {asymerror: {plus: 108, minus: -101}, label: '1 s.d.'}
+    - {asymerror: {plus: 184, minus: -168}, label: '2 s.d.'}
+  - value: 1617
+    errors:
+    - {asymerror: {plus: 87, minus: -144}, label: '1 s.d.'}
+    - {asymerror: {plus: 128, minus: -242}, label: '2 s.d.'}
+  - value: 1816
+    errors:
+    - {asymerror: {plus: 66, minus: -187}, label: '1 s.d.'}
+    - {asymerror: {plus: 72, minus: -317}, label: '2 s.d.'}
+  - value: 1880
+    errors:
+    - {asymerror: {plus: 8, minus: -163}, label: '1 s.d.'}
+    - {asymerror: {plus: 12, minus: -381}, label: '2 s.d.'}
+  - value: 1880
+    errors:
+    - {asymerror: {plus: 8, minus: -158}, label: '1 s.d.'}
+    - {asymerror: {plus: 12, minus: -349}, label: '2 s.d.'}
+  - value: 1786
+    errors:
+    - {asymerror: {plus: 95, minus: -69}, label: '1 s.d.'}
+    - {asymerror: {plus: 102, minus: -104}, label: '2 s.d.'}
+  - value: 1718
+    errors:
+    - {asymerror: {plus: 48, minus: -26}, label: '1 s.d.'}
+    - {asymerror: {plus: 159, minus: -40}, label: '2 s.d.'}
+  - value: 1630
+    errors:
+    - {asymerror: {plus: 81, minus: -79}, label: '1 s.d.'}
+    - {asymerror: {plus: 116, minus: -119}, label: '2 s.d.'}
