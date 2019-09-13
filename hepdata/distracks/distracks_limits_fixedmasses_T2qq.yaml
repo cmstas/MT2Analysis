@@ -10,7 +10,7 @@ independent_variables:
   - value: 500
   - value: 1000
 dependent_variables:
-- header: {name: 'Observed $\sigma$ limit (95% CL)', units: PB}
+- header: {name: 'Observed $\sigma$ limit (95% CL)', units: FB}
   qualifiers:
   - {name: 'Theory $\sigma$', value: 0.12 $\pm$ 0.03 fb}
   - {name: '$\sqrt{s}$', value: 13 TeV}
@@ -26,7 +26,7 @@ dependent_variables:
   - value: 0.12
   - value: 0.23
   - value: 0.41
-- header: {name: 'Expected $\sigma$ limit (95% CL)', units: PB}
+- header: {name: 'Expected $\sigma$ limit (95% CL)', units: FB}
   qualifiers:
   - {name: 'Theory $\sigma$', value: 0.12 $\pm$ 0.03 fb}
   - {name: '$\sqrt{s}$', value: 13 TeV}
