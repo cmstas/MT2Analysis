@@ -23,10 +23,9 @@ description: >
     Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
     to light-flavor quarks ($\tilde{g}\to q\bar{q}\tilde{\chi}_1^0$). Signal cross sections 
     are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
-    fraction to $q\bar{q}\tilde{\chi}_1^0$. Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
+    fraction to $q\bar{q}\tilde{\chi}_1^0$. 
 keywords:
-- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO]}
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> QUARK QUARKBAR NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
 location: Figure 11 (upper)
@@ -40,10 +39,9 @@ description: >
     to light-flavor quarks and either a $\tilde{\chi}_2^0$ that decays to $Z\tilde{\chi}_1^0$ (1/3 of the time),
     or a $\tilde{\chi}_1^\pm$ that decays to $W^\pm\tilde{\chi}_1^0$ (2/3 of the time). Signal cross sections
     are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
-    fraction to $q_i\bar{q}_j V\tilde{\chi}_1^0$.. Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
+    fraction to $q_i\bar{q}_j V\tilde{\chi}_1^0$.
 keywords:
-- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR Z0 NEUTRALINO, GLUINO --> Q QBAR W+ NEUTRALINO]}
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> QUARK QUARKBAR Z0 NEUTRALINO, GLUINO --> QUARK QUARKBAR W+ NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
 location: Figure 11 (lower left)
@@ -56,10 +54,9 @@ description: >
     Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
     to light-flavor quarks and a $\tilde{\chi}_1^\pm$ that decays to $W^\pm\tilde{\chi}_1^0$.
     Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
-    fraction to $q_i\bar{q}_j W\pm\tilde{\chi}_1^0$.. Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
+    fraction to $q_i\bar{q}_j W\pm\tilde{\chi}_1^0$.
 keywords:
-- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR W+ NEUTRALINO, GLUINO --> Q QBAR W- NEUTRALINO]}
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> QUARK QUARKBAR W+ NEUTRALINO, GLUINO --> QUARK QUARKBAR W- NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
 location: Figure 11 (lower right)
@@ -72,8 +69,7 @@ description: >
     Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
     to bottom quarks ($\tilde{g}\to b\bar{b}\tilde{\chi}_1^0$). Signal cross sections 
     are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
-    fraction for the given decay. Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
+    fraction for the given decay.
 keywords:
 - {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> BOTTOM BOTTOMBAR NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -88,8 +84,7 @@ description: >
     Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
     to top quarks ($\tilde{g}\to t\bar{t}\tilde{\chi}_1^0$). Signal cross sections 
     are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
-    fraction for the given decay. Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
+    fraction for the given decay.
 keywords:
 - {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> TOP TOPBAR NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -103,11 +98,12 @@ data_file: mt2_limits_T2qq.yaml
 description: >
     Exclusion limits at 95% CL for light-flavor squark pair production, where the squarks decay 
     to $q\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
-    order in $\alpha_S$, assuming unity branching fraction for the given decay and 8-fold degeneracy
-    in the light-flavor squarks. Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
+    order in $\alpha_S$, assuming unity branching fraction for the given decay and 1-fold degeneracy
+    in the light-flavor squarks (corresponding to the inner set of curves in the limit plot).
+    To get the theory cross section for other N-fold degeneracy assumptions (e.g. 8-fold for the outer
+    curves in the limit plot), just multiply by N.
 keywords:
-- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO]}
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> QUARK NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
 - {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
 location: Figure 13 (upper left)
@@ -120,8 +116,6 @@ description: >
     Exclusion limits at 95% CL for bottom squark pair production, where the squarks decay 
     to $b\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
     order in $\alpha_S$, assuming unity branching fraction for the given decay.
-    Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
 keywords:
 - {name: reactions, values: [P P --> SBOTTOM SBOTTOM, P P --> SBOTTOM SBOTTOM X, SBOTTOM --> BOTTOM NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -136,8 +130,6 @@ description: >
     Exclusion limits at 95% CL for top squark pair production, where the squarks decay 
     to $t\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
     order in $\alpha_S$, assuming unity branching fraction for the given decay.
-    Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
 keywords:
 - {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -153,8 +145,6 @@ description: >
     to $b\tilde{\chi}_1^\pm$ and the $\tilde{\chi}_1^0$ decay to $W^\pm\tilde{\chi}_1^0$.
     Signal cross sections are calculated at approximately NNLO+NNLL 
     order in $\alpha_S$, assuming unity branching fraction for the given decay.
-    Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
 keywords:
 - {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> BOTTOM CHARGINO, CHARGINO --> W+ NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -170,8 +160,6 @@ description: >
     either to $b\tilde{\chi}_1^\pm\to bW^\pm\tilde{\chi}_1^0$ or to $t\tilde{\chi}_1^0$.
     Signal cross sections are calculated at approximately NNLO+NNLL 
     order in $\alpha_S$, assuming unity branching fraction for the given decay.
-    Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
 keywords:
 - {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> BOTTOM CHARGINO, CHARGINO --> W+ NEUTRALINO, STOP --> TOP NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -186,8 +174,6 @@ description: >
     Exclusion limits at 95% CL for top squark pair production, where the squarks decay 
     to $c\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
     order in $\alpha_S$, assuming unity branching fraction for the given decay.
-    Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
 keywords:
 - {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> CHARM NEUTRALINO]}
 - {name: cmenergies, values: [13000]}
@@ -203,8 +189,6 @@ description: >
     colored scalar decays to a massive Dirac fermion and a quark.
     Signal cross sections are calculated at leading order in $\alpha_S$,
     assuming unity branching fraction for the given decay.
-    Limits are quoted in terms of $\mu$, the signal strengh multiplier. 
-    To get a cross section limit, multiply the limit on $\mu$ by the given theory cross section.
 keywords:
 - {name: reactions, values: []}
 - {name: cmenergies, values: [13000]}
@@ -221,7 +205,7 @@ description: |
     Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
     Branching ratio is assumed to be 100% to $\mathrm{q}\nu$.
 keywords:
-- {name: reactions, values: [P P --> LQ LQ X, P P --> LQ LQ, LQ --> Q NU]}
+- {name: reactions, values: [P P --> LQ LQ X, P P --> LQ LQ, LQ --> QUARK NU]}
 - {name: cmenergies, values: [13000]}
 - {name: observables, values: [SIG]}
 - {name: phrases, values: [Leptoquark, Integrated Cross Section, Cross Section]}

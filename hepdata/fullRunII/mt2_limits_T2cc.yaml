@@ -325,1270 +325,1270 @@ dependent_variables:
   values:
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 7.550e+01
     errors:
-    - {asymerror: {plus: 4.909e+00, minus: -4.909e+00}}
+    - {symerror: 4.907e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 4.200e+01
     errors:
-    - {asymerror: {plus: 2.735e+00, minus: -2.735e+00}}
+    - {symerror: 2.734e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 2.480e+01
     errors:
-    - {asymerror: {plus: 1.623e+00, minus: -1.623e+00}}
+    - {symerror: 1.622e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.550e+01
     errors:
-    - {asymerror: {plus: 1.021e+00, minus: -1.021e+00}}
+    - {symerror: 1.020e+00}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 1.000e+01
     errors:
-    - {asymerror: {plus: 6.654e-01, minus: -6.654e-01}}
+    - {symerror: 6.650e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 6.570e+00
     errors:
-    - {asymerror: {plus: 4.412e-01, minus: -4.412e-01}}
+    - {symerror: 4.408e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 4.430e+00
     errors:
-    - {asymerror: {plus: 3.013e-01, minus: -3.013e-01}}
+    - {symerror: 3.008e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 3.060e+00
     errors:
-    - {asymerror: {plus: 2.110e-01, minus: -2.110e-01}}
+    - {symerror: 2.108e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 2.150e+00
     errors:
-    - {asymerror: {plus: 1.504e-01, minus: -1.504e-01}}
+    - {symerror: 1.503e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.540e+00
     errors:
-    - {asymerror: {plus: 1.096e-01, minus: -1.096e-01}}
+    - {symerror: 1.095e-01}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 1.110e+00
     errors:
-    - {asymerror: {plus: 8.057e-02, minus: -8.057e-02}}
+    - {symerror: 8.048e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 8.190e-01
     errors:
-    - {asymerror: {plus: 6.054e-02, minus: -6.054e-02}}
+    - {symerror: 6.044e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 6.090e-01
     errors:
-    - {asymerror: {plus: 4.590e-02, minus: -4.590e-02}}
+    - {symerror: 4.586e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 4.580e-01
     errors:
-    - {asymerror: {plus: 3.519e-02, minus: -3.519e-02}}
+    - {symerror: 3.513e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 3.470e-01
     errors:
-    - {asymerror: {plus: 2.714e-02, minus: -2.714e-02}}
+    - {symerror: 2.710e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.660e-01
     errors:
-    - {asymerror: {plus: 2.121e-02, minus: -2.121e-02}}
+    - {symerror: 2.117e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 2.050e-01
     errors:
-    - {asymerror: {plus: 1.667e-02, minus: -1.667e-02}}
+    - {symerror: 1.665e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.600e-01
     errors:
-    - {asymerror: {plus: 1.326e-02, minus: -1.327e-02}}
+    - {symerror: 1.325e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 1.250e-01
     errors:
-    - {asymerror: {plus: 1.058e-02, minus: -1.058e-02}}
+    - {symerror: 1.056e-02}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 9.870e-02
     errors:
-    - {asymerror: {plus: 8.531e-03, minus: -8.531e-03}}
+    - {symerror: 8.518e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 7.830e-02
     errors:
-    - {asymerror: {plus: 6.902e-03, minus: -6.902e-03}}
+    - {symerror: 6.890e-03}
   - value: 6.240e-02
     errors:
-    - {asymerror: {plus: 5.611e-03, minus: -5.611e-03}}
+    - {symerror: 5.604e-03}
   - value: 6.240e-02
     errors:
-    - {asymerror: {plus: 5.611e-03, minus: -5.611e-03}}
+    - {symerror: 5.604e-03}
   - value: 6.240e-02
     errors:
-    - {asymerror: {plus: 5.611e-03, minus: -5.611e-03}}
+    - {symerror: 5.604e-03}
   - value: 6.240e-02
     errors:
-    - {asymerror: {plus: 5.611e-03, minus: -5.611e-03}}
+    - {symerror: 5.604e-03}
   - value: 6.240e-02
     errors:
-    - {asymerror: {plus: 5.611e-03, minus: -5.611e-03}}
+    - {symerror: 5.604e-03}
   - value: 6.240e-02
     errors:
-    - {asymerror: {plus: 5.611e-03, minus: -5.611e-03}}
+    - {symerror: 5.604e-03}
   - value: 5.000e-02
     errors:
-    - {asymerror: {plus: 4.586e-03, minus: -4.586e-03}}
+    - {symerror: 4.580e-03}
   - value: 5.000e-02
     errors:
-    - {asymerror: {plus: 4.586e-03, minus: -4.586e-03}}
+    - {symerror: 4.580e-03}
   - value: 5.000e-02
     errors:
-    - {asymerror: {plus: 4.586e-03, minus: -4.586e-03}}
+    - {symerror: 4.580e-03}
   - value: 4.030e-02
     errors:
-    - {asymerror: {plus: 3.772e-03, minus: -3.772e-03}}
-- header: {name: 'Observed $\mu$ limit'}
+    - {symerror: 3.768e-03}
+- header: {name: 'Observed $\sigma$ limit', units: PB}
   qualifiers:
   - {name: '$\sqrt{s}$', value: 13 TeV}
   - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
-  - value: 0.0907
-  - value: 0.0848
-  - value: 0.0862
-  - value: 0.0739
-  - value: 0.0701
-  - value: 0.0639
-  - value: 0.0403
-  - value: 0.1066
-  - value: 0.1370
-  - value: 0.1278
-  - value: 0.1050
-  - value: 0.0962
-  - value: 0.0774
-  - value: 0.0561
-  - value: 0.1163
-  - value: 0.1184
-  - value: 0.1199
-  - value: 0.1052
-  - value: 0.0906
-  - value: 0.0759
-  - value: 0.0611
-  - value: 0.1835
-  - value: 0.1803
-  - value: 0.1652
-  - value: 0.1597
-  - value: 0.1354
-  - value: 0.1063
-  - value: 0.0867
-  - value: 0.2323
-  - value: 0.2133
-  - value: 0.1709
-  - value: 0.1374
-  - value: 0.1357
-  - value: 0.1077
-  - value: 0.0915
-  - value: 0.2343
-  - value: 0.2479
-  - value: 0.2242
-  - value: 0.1815
-  - value: 0.1664
-  - value: 0.1639
-  - value: 0.1340
-  - value: 0.2782
-  - value: 0.2713
-  - value: 0.2282
-  - value: 0.1879
-  - value: 0.1897
-  - value: 0.1803
-  - value: 0.1471
-  - value: 0.3194
-  - value: 0.3122
-  - value: 0.2971
-  - value: 0.2746
-  - value: 0.2302
-  - value: 0.1912
-  - value: 0.1815
-  - value: 0.3476
-  - value: 0.3896
-  - value: 0.3216
-  - value: 0.3123
-  - value: 0.3645
-  - value: 0.2403
-  - value: 0.1858
-  - value: 0.4196
-  - value: 0.4197
-  - value: 0.4073
-  - value: 0.3656
-  - value: 0.3378
-  - value: 0.3003
-  - value: 0.2529
-  - value: 0.5782
-  - value: 0.4972
-  - value: 0.4425
-  - value: 0.4021
-  - value: 0.3540
-  - value: 0.3649
-  - value: 0.3076
-  - value: 0.6724
-  - value: 0.6214
-  - value: 0.5061
-  - value: 0.5179
-  - value: 0.4569
-  - value: 0.3879
-  - value: 0.3645
-  - value: 0.7054
-  - value: 0.7530
-  - value: 0.7193
-  - value: 0.6565
-  - value: 0.7325
-  - value: 0.4642
-  - value: 0.4277
-  - value: 0.7856
-  - value: 0.7526
-  - value: 0.6910
-  - value: 0.6699
-  - value: 0.6059
-  - value: 0.5988
-  - value: 0.5093
-  - value: 1.0265
-  - value: 0.7362
-  - value: 0.6848
-  - value: 0.6249
-  - value: 0.6311
-  - value: 0.6911
-  - value: 0.7291
-  - value: 1.1277
-  - value: 0.9516
-  - value: 0.8851
-  - value: 0.8560
-  - value: 0.8340
-  - value: 0.7271
-  - value: 0.6415
-  - value: 1.1022
-  - value: 1.0394
-  - value: 1.1256
-  - value: 0.9901
-  - value: 0.8546
-  - value: 0.7295
-  - value: 0.6961
-  - value: 1.3446
-  - value: 1.4076
-  - value: 1.4553
-  - value: 1.3730
-  - value: 1.2029
-  - value: 1.0288
-  - value: 1.0670
-  - value: 2.2936
-  - value: 1.1835
-  - value: 1.1736
-  - value: 1.1672
-  - value: 1.0830
-  - value: 1.1516
-  - value: 1.2361
-  - value: 1.7870
-  - value: 1.4239
-  - value: 1.3513
-  - value: 1.6684
-  - value: 1.6627
-  - value: 1.5182
-  - value: 1.3809
-  - value: 2.4382
-  - value: 2.2057
-  - value: 1.7376
-  - value: 1.7420
-  - value: 1.9992
-  - value: 1.7602
-  - value: 1.5548
-  - value: 2.3981
-  - value: 2.6375
-  - value: 2.9504
-  - value: 2.5022
-  - value: 2.0931
-  - value: 1.7443
-  - value: 2.9655
-  - value: 3.2671
-  - value: 3.4951
-  - value: 3.8515
-- header: {name: 'Expected $\mu$ limit'}
+  - value: 6.85e+00
+  - value: 6.41e+00
+  - value: 6.51e+00
+  - value: 5.58e+00
+  - value: 5.29e+00
+  - value: 4.82e+00
+  - value: 3.04e+00
+  - value: 4.48e+00
+  - value: 5.75e+00
+  - value: 5.37e+00
+  - value: 4.41e+00
+  - value: 4.04e+00
+  - value: 3.25e+00
+  - value: 2.35e+00
+  - value: 2.88e+00
+  - value: 2.94e+00
+  - value: 2.97e+00
+  - value: 2.61e+00
+  - value: 2.25e+00
+  - value: 1.88e+00
+  - value: 1.51e+00
+  - value: 2.84e+00
+  - value: 2.80e+00
+  - value: 2.56e+00
+  - value: 2.48e+00
+  - value: 2.10e+00
+  - value: 1.65e+00
+  - value: 1.34e+00
+  - value: 2.32e+00
+  - value: 2.13e+00
+  - value: 1.71e+00
+  - value: 1.37e+00
+  - value: 1.36e+00
+  - value: 1.08e+00
+  - value: 9.15e-01
+  - value: 1.54e+00
+  - value: 1.63e+00
+  - value: 1.47e+00
+  - value: 1.19e+00
+  - value: 1.09e+00
+  - value: 1.08e+00
+  - value: 8.80e-01
+  - value: 1.23e+00
+  - value: 1.20e+00
+  - value: 1.01e+00
+  - value: 8.32e-01
+  - value: 8.40e-01
+  - value: 7.99e-01
+  - value: 6.51e-01
+  - value: 9.77e-01
+  - value: 9.55e-01
+  - value: 9.09e-01
+  - value: 8.40e-01
+  - value: 7.04e-01
+  - value: 5.85e-01
+  - value: 5.55e-01
+  - value: 7.47e-01
+  - value: 8.38e-01
+  - value: 6.92e-01
+  - value: 6.71e-01
+  - value: 7.84e-01
+  - value: 5.17e-01
+  - value: 3.99e-01
+  - value: 6.46e-01
+  - value: 6.46e-01
+  - value: 6.27e-01
+  - value: 5.63e-01
+  - value: 5.20e-01
+  - value: 4.63e-01
+  - value: 3.90e-01
+  - value: 6.42e-01
+  - value: 5.52e-01
+  - value: 4.91e-01
+  - value: 4.46e-01
+  - value: 3.93e-01
+  - value: 4.05e-01
+  - value: 3.41e-01
+  - value: 5.51e-01
+  - value: 5.09e-01
+  - value: 4.14e-01
+  - value: 4.24e-01
+  - value: 3.74e-01
+  - value: 3.18e-01
+  - value: 2.98e-01
+  - value: 4.30e-01
+  - value: 4.59e-01
+  - value: 4.38e-01
+  - value: 4.00e-01
+  - value: 4.46e-01
+  - value: 2.83e-01
+  - value: 2.60e-01
+  - value: 3.60e-01
+  - value: 3.45e-01
+  - value: 3.16e-01
+  - value: 3.07e-01
+  - value: 2.77e-01
+  - value: 2.74e-01
+  - value: 2.33e-01
+  - value: 3.56e-01
+  - value: 2.55e-01
+  - value: 2.38e-01
+  - value: 2.17e-01
+  - value: 2.19e-01
+  - value: 2.40e-01
+  - value: 2.53e-01
+  - value: 3.00e-01
+  - value: 2.53e-01
+  - value: 2.35e-01
+  - value: 2.28e-01
+  - value: 2.22e-01
+  - value: 1.93e-01
+  - value: 1.71e-01
+  - value: 2.26e-01
+  - value: 2.13e-01
+  - value: 2.31e-01
+  - value: 2.03e-01
+  - value: 1.75e-01
+  - value: 1.50e-01
+  - value: 1.43e-01
+  - value: 2.15e-01
+  - value: 2.25e-01
+  - value: 2.33e-01
+  - value: 2.20e-01
+  - value: 1.92e-01
+  - value: 1.65e-01
+  - value: 1.71e-01
+  - value: 2.87e-01
+  - value: 1.48e-01
+  - value: 1.47e-01
+  - value: 1.46e-01
+  - value: 1.35e-01
+  - value: 1.44e-01
+  - value: 1.55e-01
+  - value: 1.76e-01
+  - value: 1.41e-01
+  - value: 1.33e-01
+  - value: 1.65e-01
+  - value: 1.64e-01
+  - value: 1.50e-01
+  - value: 1.36e-01
+  - value: 1.91e-01
+  - value: 1.73e-01
+  - value: 1.36e-01
+  - value: 1.36e-01
+  - value: 1.57e-01
+  - value: 1.38e-01
+  - value: 1.22e-01
+  - value: 1.50e-01
+  - value: 1.65e-01
+  - value: 1.84e-01
+  - value: 1.56e-01
+  - value: 1.31e-01
+  - value: 1.09e-01
+  - value: 1.48e-01
+  - value: 1.63e-01
+  - value: 1.75e-01
+  - value: 1.55e-01
+- header: {name: 'Expected $\sigma$ limit', units: PB}
   qualifiers:
   - {name: '$\sqrt{s}$', value: 13 TeV}
   - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
   values:
-  - value: 0.0784
-    errors:
-    - {asymerror: {plus: 0.0316, minus: -0.0221}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0722, minus: -0.0358}, label: '2 $\sigma$'}
-  - value: 0.0790
-    errors:
-    - {asymerror: {plus: 0.0319, minus: -0.0223}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0724, minus: -0.0361}, label: '2 $\sigma$'}
-  - value: 0.0750
-    errors:
-    - {asymerror: {plus: 0.0314, minus: -0.0212}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0709, minus: -0.0344}, label: '2 $\sigma$'}
-  - value: 0.0726
-    errors:
-    - {asymerror: {plus: 0.0309, minus: -0.0205}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0699, minus: -0.0340}, label: '2 $\sigma$'}
-  - value: 0.0667
-    errors:
-    - {asymerror: {plus: 0.0288, minus: -0.0190}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0654, minus: -0.0313}, label: '2 $\sigma$'}
-  - value: 0.0615
-    errors:
-    - {asymerror: {plus: 0.0269, minus: -0.0175}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0614, minus: -0.0288}, label: '2 $\sigma$'}
-  - value: 0.0619
-    errors:
-    - {asymerror: {plus: 0.0250, minus: -0.0174}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0554, minus: -0.0281}, label: '2 $\sigma$'}
-  - value: 0.0943
-    errors:
-    - {asymerror: {plus: 0.0389, minus: -0.0265}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0879, minus: -0.0433}, label: '2 $\sigma$'}
-  - value: 0.0967
-    errors:
-    - {asymerror: {plus: 0.0399, minus: -0.0275}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0908, minus: -0.0449}, label: '2 $\sigma$'}
-  - value: 0.0964
-    errors:
-    - {asymerror: {plus: 0.0400, minus: -0.0275}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0909, minus: -0.0451}, label: '2 $\sigma$'}
-  - value: 0.0928
-    errors:
-    - {asymerror: {plus: 0.0392, minus: -0.0265}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0886, minus: -0.0434}, label: '2 $\sigma$'}
-  - value: 0.0914
-    errors:
-    - {asymerror: {plus: 0.0385, minus: -0.0260}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0876, minus: -0.0425}, label: '2 $\sigma$'}
-  - value: 0.0894
-    errors:
-    - {asymerror: {plus: 0.0378, minus: -0.0253}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0854, minus: -0.0413}, label: '2 $\sigma$'}
-  - value: 0.0833
-    errors:
-    - {asymerror: {plus: 0.0338, minus: -0.0232}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0753, minus: -0.0378}, label: '2 $\sigma$'}
-  - value: 0.1216
-    errors:
-    - {asymerror: {plus: 0.0499, minus: -0.0342}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1111, minus: -0.0560}, label: '2 $\sigma$'}
-  - value: 0.1216
-    errors:
-    - {asymerror: {plus: 0.0499, minus: -0.0344}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1127, minus: -0.0565}, label: '2 $\sigma$'}
-  - value: 0.1214
-    errors:
-    - {asymerror: {plus: 0.0500, minus: -0.0346}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1142, minus: -0.0568}, label: '2 $\sigma$'}
-  - value: 0.1141
-    errors:
-    - {asymerror: {plus: 0.0470, minus: -0.0324}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1067, minus: -0.0532}, label: '2 $\sigma$'}
-  - value: 0.1068
-    errors:
-    - {asymerror: {plus: 0.0439, minus: -0.0302}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0993, minus: -0.0496}, label: '2 $\sigma$'}
-  - value: 0.0995
-    errors:
-    - {asymerror: {plus: 0.0409, minus: -0.0280}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0918, minus: -0.0460}, label: '2 $\sigma$'}
-  - value: 0.0930
-    errors:
-    - {asymerror: {plus: 0.0382, minus: -0.0261}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.0850, minus: -0.0429}, label: '2 $\sigma$'}
-  - value: 0.1421
-    errors:
-    - {asymerror: {plus: 0.0584, minus: -0.0403}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1322, minus: -0.0661}, label: '2 $\sigma$'}
-  - value: 0.1425
-    errors:
-    - {asymerror: {plus: 0.0597, minus: -0.0402}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1355, minus: -0.0660}, label: '2 $\sigma$'}
-  - value: 0.1439
-    errors:
-    - {asymerror: {plus: 0.0606, minus: -0.0404}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1367, minus: -0.0668}, label: '2 $\sigma$'}
-  - value: 0.1442
-    errors:
-    - {asymerror: {plus: 0.0603, minus: -0.0407}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1360, minus: -0.0675}, label: '2 $\sigma$'}
-  - value: 0.1400
-    errors:
-    - {asymerror: {plus: 0.0586, minus: -0.0397}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1322, minus: -0.0655}, label: '2 $\sigma$'}
-  - value: 0.1343
-    errors:
-    - {asymerror: {plus: 0.0562, minus: -0.0384}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1269, minus: -0.0626}, label: '2 $\sigma$'}
-  - value: 0.1253
-    errors:
-    - {asymerror: {plus: 0.0513, minus: -0.0355}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1150, minus: -0.0580}, label: '2 $\sigma$'}
-  - value: 0.1774
-    errors:
-    - {asymerror: {plus: 0.0729, minus: -0.0505}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1634, minus: -0.0819}, label: '2 $\sigma$'}
-  - value: 0.1750
-    errors:
-    - {asymerror: {plus: 0.0731, minus: -0.0494}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1650, minus: -0.0820}, label: '2 $\sigma$'}
-  - value: 0.1728
-    errors:
-    - {asymerror: {plus: 0.0719, minus: -0.0492}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1627, minus: -0.0812}, label: '2 $\sigma$'}
-  - value: 0.1708
-    errors:
-    - {asymerror: {plus: 0.0709, minus: -0.0489}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1609, minus: -0.0803}, label: '2 $\sigma$'}
-  - value: 0.1694
-    errors:
-    - {asymerror: {plus: 0.0708, minus: -0.0480}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1598, minus: -0.0787}, label: '2 $\sigma$'}
-  - value: 0.1641
-    errors:
-    - {asymerror: {plus: 0.0678, minus: -0.0461}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1520, minus: -0.0756}, label: '2 $\sigma$'}
-  - value: 0.1473
-    errors:
-    - {asymerror: {plus: 0.0582, minus: -0.0407}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1285, minus: -0.0668}, label: '2 $\sigma$'}
-  - value: 0.2129
-    errors:
-    - {asymerror: {plus: 0.0879, minus: -0.0608}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1988, minus: -0.0998}, label: '2 $\sigma$'}
-  - value: 0.2122
-    errors:
-    - {asymerror: {plus: 0.0884, minus: -0.0602}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2000, minus: -0.0995}, label: '2 $\sigma$'}
-  - value: 0.2129
-    errors:
-    - {asymerror: {plus: 0.0886, minus: -0.0605}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2006, minus: -0.0998}, label: '2 $\sigma$'}
-  - value: 0.2136
-    errors:
-    - {asymerror: {plus: 0.0891, minus: -0.0610}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2015, minus: -0.1002}, label: '2 $\sigma$'}
-  - value: 0.2158
-    errors:
-    - {asymerror: {plus: 0.0893, minus: -0.0615}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2015, minus: -0.1002}, label: '2 $\sigma$'}
-  - value: 0.2094
-    errors:
-    - {asymerror: {plus: 0.0861, minus: -0.0597}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1942, minus: -0.0976}, label: '2 $\sigma$'}
-  - value: 0.1920
-    errors:
-    - {asymerror: {plus: 0.0773, minus: -0.0539}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1717, minus: -0.0884}, label: '2 $\sigma$'}
-  - value: 0.2567
-    errors:
-    - {asymerror: {plus: 0.1068, minus: -0.0726}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2398, minus: -0.1206}, label: '2 $\sigma$'}
-  - value: 0.2613
-    errors:
-    - {asymerror: {plus: 0.1093, minus: -0.0739}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2448, minus: -0.1228}, label: '2 $\sigma$'}
-  - value: 0.2579
-    errors:
-    - {asymerror: {plus: 0.1078, minus: -0.0733}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2432, minus: -0.1209}, label: '2 $\sigma$'}
-  - value: 0.2552
-    errors:
-    - {asymerror: {plus: 0.1067, minus: -0.0728}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2422, minus: -0.1195}, label: '2 $\sigma$'}
-  - value: 0.2571
-    errors:
-    - {asymerror: {plus: 0.1073, minus: -0.0733}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2424, minus: -0.1202}, label: '2 $\sigma$'}
-  - value: 0.2551
-    errors:
-    - {asymerror: {plus: 0.1048, minus: -0.0725}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2363, minus: -0.1175}, label: '2 $\sigma$'}
-  - value: 0.2288
-    errors:
-    - {asymerror: {plus: 0.0893, minus: -0.0622}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.1955, minus: -0.1021}, label: '2 $\sigma$'}
-  - value: 0.3079
-    errors:
-    - {asymerror: {plus: 0.1264, minus: -0.0871}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2856, minus: -0.1431}, label: '2 $\sigma$'}
-  - value: 0.3165
-    errors:
-    - {asymerror: {plus: 0.1299, minus: -0.0887}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2913, minus: -0.1449}, label: '2 $\sigma$'}
-  - value: 0.3199
-    errors:
-    - {asymerror: {plus: 0.1313, minus: -0.0900}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2985, minus: -0.1471}, label: '2 $\sigma$'}
-  - value: 0.3148
-    errors:
-    - {asymerror: {plus: 0.1307, minus: -0.0885}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2964, minus: -0.1453}, label: '2 $\sigma$'}
-  - value: 0.3030
-    errors:
-    - {asymerror: {plus: 0.1266, minus: -0.0858}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2859, minus: -0.1396}, label: '2 $\sigma$'}
-  - value: 0.3002
-    errors:
-    - {asymerror: {plus: 0.1243, minus: -0.0848}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2783, minus: -0.1376}, label: '2 $\sigma$'}
-  - value: 0.2870
-    errors:
-    - {asymerror: {plus: 0.1142, minus: -0.0788}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2519, minus: -0.1286}, label: '2 $\sigma$'}
-  - value: 0.3857
-    errors:
-    - {asymerror: {plus: 0.1584, minus: -0.1089}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3576, minus: -0.1806}, label: '2 $\sigma$'}
-  - value: 0.3818
-    errors:
-    - {asymerror: {plus: 0.1570, minus: -0.1086}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3565, minus: -0.1763}, label: '2 $\sigma$'}
-  - value: 0.3798
-    errors:
-    - {asymerror: {plus: 0.1587, minus: -0.1074}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3580, minus: -0.1784}, label: '2 $\sigma$'}
-  - value: 0.3874
-    errors:
-    - {asymerror: {plus: 0.1605, minus: -0.1088}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3600, minus: -0.1787}, label: '2 $\sigma$'}
-  - value: 0.3905
-    errors:
-    - {asymerror: {plus: 0.1601, minus: -0.1097}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3613, minus: -0.1801}, label: '2 $\sigma$'}
-  - value: 0.3743
-    errors:
-    - {asymerror: {plus: 0.1506, minus: -0.1043}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3395, minus: -0.1711}, label: '2 $\sigma$'}
-  - value: 0.3371
-    errors:
-    - {asymerror: {plus: 0.1306, minus: -0.0924}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.2898, minus: -0.1516}, label: '2 $\sigma$'}
-  - value: 0.4540
-    errors:
-    - {asymerror: {plus: 0.1872, minus: -0.1286}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4240, minus: -0.2111}, label: '2 $\sigma$'}
-  - value: 0.4563
-    errors:
-    - {asymerror: {plus: 0.1891, minus: -0.1288}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4268, minus: -0.2139}, label: '2 $\sigma$'}
-  - value: 0.4620
-    errors:
-    - {asymerror: {plus: 0.1904, minus: -0.1304}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4297, minus: -0.2166}, label: '2 $\sigma$'}
-  - value: 0.4548
-    errors:
-    - {asymerror: {plus: 0.1888, minus: -0.1293}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4263, minus: -0.2132}, label: '2 $\sigma$'}
-  - value: 0.4531
-    errors:
-    - {asymerror: {plus: 0.1884, minus: -0.1293}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4254, minus: -0.2124}, label: '2 $\sigma$'}
-  - value: 0.4492
-    errors:
-    - {asymerror: {plus: 0.1841, minus: -0.1270}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4141, minus: -0.2086}, label: '2 $\sigma$'}
-  - value: 0.4154
-    errors:
-    - {asymerror: {plus: 0.1646, minus: -0.1157}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.3645, minus: -0.1899}, label: '2 $\sigma$'}
-  - value: 0.5375
-    errors:
-    - {asymerror: {plus: 0.2229, minus: -0.1535}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5063, minus: -0.2520}, label: '2 $\sigma$'}
-  - value: 0.5635
-    errors:
-    - {asymerror: {plus: 0.2316, minus: -0.1596}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5293, minus: -0.2651}, label: '2 $\sigma$'}
-  - value: 0.5492
-    errors:
-    - {asymerror: {plus: 0.2256, minus: -0.1551}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5155, minus: -0.2574}, label: '2 $\sigma$'}
-  - value: 0.5260
-    errors:
-    - {asymerror: {plus: 0.2183, minus: -0.1504}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4957, minus: -0.2466}, label: '2 $\sigma$'}
-  - value: 0.5363
-    errors:
-    - {asymerror: {plus: 0.2217, minus: -0.1530}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5002, minus: -0.2511}, label: '2 $\sigma$'}
-  - value: 0.5499
-    errors:
-    - {asymerror: {plus: 0.2215, minus: -0.1545}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4953, minus: -0.2535}, label: '2 $\sigma$'}
-  - value: 0.4802
-    errors:
-    - {asymerror: {plus: 0.1879, minus: -0.1327}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.4085, minus: -0.2178}, label: '2 $\sigma$'}
-  - value: 0.6266
-    errors:
-    - {asymerror: {plus: 0.2596, minus: -0.1790}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5857, minus: -0.2937}, label: '2 $\sigma$'}
-  - value: 0.6405
-    errors:
-    - {asymerror: {plus: 0.2670, minus: -0.1846}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6045, minus: -0.3009}, label: '2 $\sigma$'}
-  - value: 0.6417
-    errors:
-    - {asymerror: {plus: 0.2663, minus: -0.1844}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6047, minus: -0.3012}, label: '2 $\sigma$'}
-  - value: 0.6470
-    errors:
-    - {asymerror: {plus: 0.2690, minus: -0.1855}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6089, minus: -0.3042}, label: '2 $\sigma$'}
-  - value: 0.6401
-    errors:
-    - {asymerror: {plus: 0.2692, minus: -0.1836}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6054, minus: -0.3012}, label: '2 $\sigma$'}
-  - value: 0.6152
-    errors:
-    - {asymerror: {plus: 0.2559, minus: -0.1754}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5717, minus: -0.2876}, label: '2 $\sigma$'}
-  - value: 0.5920
-    errors:
-    - {asymerror: {plus: 0.2382, minus: -0.1661}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5256, minus: -0.2726}, label: '2 $\sigma$'}
-  - value: 0.7388
-    errors:
-    - {asymerror: {plus: 0.3110, minus: -0.2148}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.7061, minus: -0.3486}, label: '2 $\sigma$'}
-  - value: 0.7698
-    errors:
-    - {asymerror: {plus: 0.3191, minus: -0.2199}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.7250, minus: -0.3608}, label: '2 $\sigma$'}
-  - value: 0.7283
-    errors:
-    - {asymerror: {plus: 0.3099, minus: -0.2121}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6995, minus: -0.3438}, label: '2 $\sigma$'}
-  - value: 0.7364
-    errors:
-    - {asymerror: {plus: 0.3104, minus: -0.2128}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6967, minus: -0.3451}, label: '2 $\sigma$'}
-  - value: 0.7093
-    errors:
-    - {asymerror: {plus: 0.2960, minus: -0.2055}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6676, minus: -0.3332}, label: '2 $\sigma$'}
-  - value: 0.7462
-    errors:
-    - {asymerror: {plus: 0.3035, minus: -0.2119}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.6749, minus: -0.3439}, label: '2 $\sigma$'}
-  - value: 0.6792
-    errors:
-    - {asymerror: {plus: 0.2682, minus: -0.1893}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.5878, minus: -0.3106}, label: '2 $\sigma$'}
-  - value: 0.8746
-    errors:
-    - {asymerror: {plus: 0.3655, minus: -0.2493}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8261, minus: -0.4092}, label: '2 $\sigma$'}
-  - value: 0.8737
-    errors:
-    - {asymerror: {plus: 0.3612, minus: -0.2480}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8190, minus: -0.4070}, label: '2 $\sigma$'}
-  - value: 0.8935
-    errors:
-    - {asymerror: {plus: 0.3697, minus: -0.2544}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8396, minus: -0.4175}, label: '2 $\sigma$'}
-  - value: 0.9061
-    errors:
-    - {asymerror: {plus: 0.3799, minus: -0.2578}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8563, minus: -0.4227}, label: '2 $\sigma$'}
-  - value: 0.8541
-    errors:
-    - {asymerror: {plus: 0.3604, minus: -0.2461}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8143, minus: -0.4007}, label: '2 $\sigma$'}
-  - value: 0.8512
-    errors:
-    - {asymerror: {plus: 0.3507, minus: -0.2455}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.7895, minus: -0.3977}, label: '2 $\sigma$'}
-  - value: 0.8212
-    errors:
-    - {asymerror: {plus: 0.3273, minus: -0.2318}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.7271, minus: -0.3784}, label: '2 $\sigma$'}
-  - value: 1.0715
-    errors:
-    - {asymerror: {plus: 0.4490, minus: -0.3101}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.0137, minus: -0.5024}, label: '2 $\sigma$'}
-  - value: 1.0768
-    errors:
-    - {asymerror: {plus: 0.4475, minus: -0.3092}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.0099, minus: -0.5012}, label: '2 $\sigma$'}
-  - value: 1.0514
-    errors:
-    - {asymerror: {plus: 0.4390, minus: -0.3012}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.9875, minus: -0.4913}, label: '2 $\sigma$'}
-  - value: 1.0357
-    errors:
-    - {asymerror: {plus: 0.4337, minus: -0.2959}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.9728, minus: -0.4855}, label: '2 $\sigma$'}
-  - value: 1.0501
-    errors:
-    - {asymerror: {plus: 0.4395, minus: -0.3003}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.9906, minus: -0.4924}, label: '2 $\sigma$'}
-  - value: 0.9837
-    errors:
-    - {asymerror: {plus: 0.4026, minus: -0.2792}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8954, minus: -0.4577}, label: '2 $\sigma$'}
-  - value: 0.9256
-    errors:
-    - {asymerror: {plus: 0.3694, minus: -0.2601}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 0.8098, minus: -0.4268}, label: '2 $\sigma$'}
-  - value: 1.1960
-    errors:
-    - {asymerror: {plus: 0.5117, minus: -0.3469}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1585, minus: -0.5639}, label: '2 $\sigma$'}
-  - value: 1.2312
-    errors:
-    - {asymerror: {plus: 0.5219, minus: -0.3534}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1740, minus: -0.5781}, label: '2 $\sigma$'}
-  - value: 1.2326
-    errors:
-    - {asymerror: {plus: 0.5261, minus: -0.3583}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1803, minus: -0.5832}, label: '2 $\sigma$'}
-  - value: 1.2437
-    errors:
-    - {asymerror: {plus: 0.5270, minus: -0.3623}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1871, minus: -0.5870}, label: '2 $\sigma$'}
-  - value: 1.2544
-    errors:
-    - {asymerror: {plus: 0.5253, minus: -0.3603}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1768, minus: -0.5880}, label: '2 $\sigma$'}
-  - value: 1.2120
-    errors:
-    - {asymerror: {plus: 0.5088, minus: -0.3468}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1338, minus: -0.5686}, label: '2 $\sigma$'}
-  - value: 1.1412
-    errors:
-    - {asymerror: {plus: 0.4627, minus: -0.3216}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.0209, minus: -0.5274}, label: '2 $\sigma$'}
-  - value: 1.2935
-    errors:
-    - {asymerror: {plus: 0.5613, minus: -0.3801}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.2821, minus: -0.6159}, label: '2 $\sigma$'}
-  - value: 1.3456
-    errors:
-    - {asymerror: {plus: 0.5711, minus: -0.3899}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.2967, minus: -0.6318}, label: '2 $\sigma$'}
-  - value: 1.3291
-    errors:
-    - {asymerror: {plus: 0.5865, minus: -0.3904}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.3231, minus: -0.6331}, label: '2 $\sigma$'}
-  - value: 1.3356
-    errors:
-    - {asymerror: {plus: 0.5787, minus: -0.3906}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.3058, minus: -0.6362}, label: '2 $\sigma$'}
-  - value: 1.3421
-    errors:
-    - {asymerror: {plus: 0.5710, minus: -0.3909}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.2885, minus: -0.6393}, label: '2 $\sigma$'}
-  - value: 1.3385
-    errors:
-    - {asymerror: {plus: 0.5595, minus: -0.3877}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.2596, minus: -0.6364}, label: '2 $\sigma$'}
-  - value: 1.2858
-    errors:
-    - {asymerror: {plus: 0.5132, minus: -0.3571}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.1173, minus: -0.5929}, label: '2 $\sigma$'}
-  - value: 1.6054
-    errors:
-    - {asymerror: {plus: 0.6825, minus: -0.4670}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.5458, minus: -0.7567}, label: '2 $\sigma$'}
-  - value: 1.6713
-    errors:
-    - {asymerror: {plus: 0.7085, minus: -0.4833}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.6000, minus: -0.7882}, label: '2 $\sigma$'}
-  - value: 1.6840
-    errors:
-    - {asymerror: {plus: 0.7118, minus: -0.4837}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.6075, minus: -0.7932}, label: '2 $\sigma$'}
-  - value: 1.6221
-    errors:
-    - {asymerror: {plus: 0.6953, minus: -0.4719}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.5701, minus: -0.7684}, label: '2 $\sigma$'}
-  - value: 1.6174
-    errors:
-    - {asymerror: {plus: 0.6900, minus: -0.4673}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.5517, minus: -0.7627}, label: '2 $\sigma$'}
-  - value: 1.6930
-    errors:
-    - {asymerror: {plus: 0.7042, minus: -0.4854}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.5732, minus: -0.7901}, label: '2 $\sigma$'}
-  - value: 1.5804
-    errors:
-    - {asymerror: {plus: 0.6449, minus: -0.4492}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.4251, minus: -0.7327}, label: '2 $\sigma$'}
-  - value: 1.8008
-    errors:
-    - {asymerror: {plus: 0.7973, minus: -0.5342}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.8207, minus: -0.8655}, label: '2 $\sigma$'}
-  - value: 1.8273
-    errors:
-    - {asymerror: {plus: 0.7704, minus: -0.5302}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.7507, minus: -0.8591}, label: '2 $\sigma$'}
-  - value: 1.8131
-    errors:
-    - {asymerror: {plus: 0.7826, minus: -0.5298}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.7765, minus: -0.8585}, label: '2 $\sigma$'}
-  - value: 1.8064
-    errors:
-    - {asymerror: {plus: 0.7969, minus: -0.5359}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.7990, minus: -0.8683}, label: '2 $\sigma$'}
-  - value: 1.9902
-    errors:
-    - {asymerror: {plus: 0.8513, minus: -0.5904}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.9204, minus: -0.9569}, label: '2 $\sigma$'}
-  - value: 1.9108
-    errors:
-    - {asymerror: {plus: 0.7877, minus: -0.5474}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.7538, minus: -0.8976}, label: '2 $\sigma$'}
-  - value: 1.7576
+  - value: 5.92e+00
+    errors:
+    - {asymerror: {plus: 2.39e+00, minus: -1.67e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.45e+00, minus: -2.71e+00}, label: '2 s.d.'}
+  - value: 5.96e+00
+    errors:
+    - {asymerror: {plus: 2.41e+00, minus: -1.68e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.47e+00, minus: -2.72e+00}, label: '2 s.d.'}
+  - value: 5.66e+00
+    errors:
+    - {asymerror: {plus: 2.37e+00, minus: -1.60e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.36e+00, minus: -2.59e+00}, label: '2 s.d.'}
+  - value: 5.48e+00
+    errors:
+    - {asymerror: {plus: 2.33e+00, minus: -1.55e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.27e+00, minus: -2.57e+00}, label: '2 s.d.'}
+  - value: 5.04e+00
+    errors:
+    - {asymerror: {plus: 2.17e+00, minus: -1.43e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.94e+00, minus: -2.36e+00}, label: '2 s.d.'}
+  - value: 4.64e+00
+    errors:
+    - {asymerror: {plus: 2.03e+00, minus: -1.32e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.63e+00, minus: -2.17e+00}, label: '2 s.d.'}
+  - value: 4.67e+00
+    errors:
+    - {asymerror: {plus: 1.89e+00, minus: -1.31e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.18e+00, minus: -2.12e+00}, label: '2 s.d.'}
+  - value: 3.96e+00
+    errors:
+    - {asymerror: {plus: 1.63e+00, minus: -1.11e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.69e+00, minus: -1.82e+00}, label: '2 s.d.'}
+  - value: 4.06e+00
+    errors:
+    - {asymerror: {plus: 1.68e+00, minus: -1.16e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.81e+00, minus: -1.89e+00}, label: '2 s.d.'}
+  - value: 4.05e+00
+    errors:
+    - {asymerror: {plus: 1.68e+00, minus: -1.16e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.82e+00, minus: -1.90e+00}, label: '2 s.d.'}
+  - value: 3.90e+00
+    errors:
+    - {asymerror: {plus: 1.65e+00, minus: -1.11e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.72e+00, minus: -1.82e+00}, label: '2 s.d.'}
+  - value: 3.84e+00
+    errors:
+    - {asymerror: {plus: 1.62e+00, minus: -1.09e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.68e+00, minus: -1.78e+00}, label: '2 s.d.'}
+  - value: 3.76e+00
+    errors:
+    - {asymerror: {plus: 1.59e+00, minus: -1.06e+00}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.59e+00, minus: -1.73e+00}, label: '2 s.d.'}
+  - value: 3.50e+00
+    errors:
+    - {asymerror: {plus: 1.42e+00, minus: -9.76e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.16e+00, minus: -1.59e+00}, label: '2 s.d.'}
+  - value: 3.01e+00
+    errors:
+    - {asymerror: {plus: 1.24e+00, minus: -8.47e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.76e+00, minus: -1.39e+00}, label: '2 s.d.'}
+  - value: 3.01e+00
+    errors:
+    - {asymerror: {plus: 1.24e+00, minus: -8.54e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.79e+00, minus: -1.40e+00}, label: '2 s.d.'}
+  - value: 3.01e+00
+    errors:
+    - {asymerror: {plus: 1.24e+00, minus: -8.59e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.83e+00, minus: -1.41e+00}, label: '2 s.d.'}
+  - value: 2.83e+00
+    errors:
+    - {asymerror: {plus: 1.16e+00, minus: -8.04e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.65e+00, minus: -1.32e+00}, label: '2 s.d.'}
+  - value: 2.65e+00
+    errors:
+    - {asymerror: {plus: 1.09e+00, minus: -7.50e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.46e+00, minus: -1.23e+00}, label: '2 s.d.'}
+  - value: 2.47e+00
+    errors:
+    - {asymerror: {plus: 1.02e+00, minus: -6.95e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.28e+00, minus: -1.14e+00}, label: '2 s.d.'}
+  - value: 2.31e+00
+    errors:
+    - {asymerror: {plus: 9.47e-01, minus: -6.48e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.11e+00, minus: -1.06e+00}, label: '2 s.d.'}
+  - value: 2.20e+00
+    errors:
+    - {asymerror: {plus: 9.04e-01, minus: -6.24e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.05e+00, minus: -1.02e+00}, label: '2 s.d.'}
+  - value: 2.21e+00
+    errors:
+    - {asymerror: {plus: 9.25e-01, minus: -6.23e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.10e+00, minus: -1.02e+00}, label: '2 s.d.'}
+  - value: 2.23e+00
+    errors:
+    - {asymerror: {plus: 9.39e-01, minus: -6.26e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.12e+00, minus: -1.04e+00}, label: '2 s.d.'}
+  - value: 2.24e+00
+    errors:
+    - {asymerror: {plus: 9.35e-01, minus: -6.31e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.11e+00, minus: -1.05e+00}, label: '2 s.d.'}
+  - value: 2.17e+00
+    errors:
+    - {asymerror: {plus: 9.08e-01, minus: -6.15e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.05e+00, minus: -1.01e+00}, label: '2 s.d.'}
+  - value: 2.08e+00
+    errors:
+    - {asymerror: {plus: 8.72e-01, minus: -5.95e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.97e+00, minus: -9.70e-01}, label: '2 s.d.'}
+  - value: 1.94e+00
+    errors:
+    - {asymerror: {plus: 7.95e-01, minus: -5.51e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.78e+00, minus: -8.99e-01}, label: '2 s.d.'}
+  - value: 1.77e+00
+    errors:
+    - {asymerror: {plus: 7.29e-01, minus: -5.05e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.63e+00, minus: -8.19e-01}, label: '2 s.d.'}
+  - value: 1.75e+00
+    errors:
+    - {asymerror: {plus: 7.31e-01, minus: -4.94e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.65e+00, minus: -8.20e-01}, label: '2 s.d.'}
+  - value: 1.73e+00
+    errors:
+    - {asymerror: {plus: 7.19e-01, minus: -4.92e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.63e+00, minus: -8.12e-01}, label: '2 s.d.'}
+  - value: 1.71e+00
+    errors:
+    - {asymerror: {plus: 7.09e-01, minus: -4.89e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.61e+00, minus: -8.03e-01}, label: '2 s.d.'}
+  - value: 1.69e+00
+    errors:
+    - {asymerror: {plus: 7.08e-01, minus: -4.80e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.60e+00, minus: -7.87e-01}, label: '2 s.d.'}
+  - value: 1.64e+00
+    errors:
+    - {asymerror: {plus: 6.78e-01, minus: -4.61e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.52e+00, minus: -7.56e-01}, label: '2 s.d.'}
+  - value: 1.47e+00
+    errors:
+    - {asymerror: {plus: 5.82e-01, minus: -4.07e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.28e+00, minus: -6.68e-01}, label: '2 s.d.'}
+  - value: 1.40e+00
+    errors:
+    - {asymerror: {plus: 5.77e-01, minus: -3.99e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.31e+00, minus: -6.56e-01}, label: '2 s.d.'}
+  - value: 1.39e+00
+    errors:
+    - {asymerror: {plus: 5.81e-01, minus: -3.95e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.31e+00, minus: -6.53e-01}, label: '2 s.d.'}
+  - value: 1.40e+00
+    errors:
+    - {asymerror: {plus: 5.82e-01, minus: -3.97e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.32e+00, minus: -6.56e-01}, label: '2 s.d.'}
+  - value: 1.40e+00
+    errors:
+    - {asymerror: {plus: 5.85e-01, minus: -4.01e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.32e+00, minus: -6.58e-01}, label: '2 s.d.'}
+  - value: 1.42e+00
+    errors:
+    - {asymerror: {plus: 5.87e-01, minus: -4.04e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.32e+00, minus: -6.58e-01}, label: '2 s.d.'}
+  - value: 1.38e+00
+    errors:
+    - {asymerror: {plus: 5.66e-01, minus: -3.92e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.28e+00, minus: -6.42e-01}, label: '2 s.d.'}
+  - value: 1.26e+00
+    errors:
+    - {asymerror: {plus: 5.08e-01, minus: -3.54e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.13e+00, minus: -5.81e-01}, label: '2 s.d.'}
+  - value: 1.14e+00
+    errors:
+    - {asymerror: {plus: 4.73e-01, minus: -3.22e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.06e+00, minus: -5.34e-01}, label: '2 s.d.'}
+  - value: 1.16e+00
+    errors:
+    - {asymerror: {plus: 4.84e-01, minus: -3.28e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.08e+00, minus: -5.44e-01}, label: '2 s.d.'}
+  - value: 1.14e+00
+    errors:
+    - {asymerror: {plus: 4.78e-01, minus: -3.25e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.08e+00, minus: -5.36e-01}, label: '2 s.d.'}
+  - value: 1.13e+00
+    errors:
+    - {asymerror: {plus: 4.73e-01, minus: -3.23e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.07e+00, minus: -5.29e-01}, label: '2 s.d.'}
+  - value: 1.14e+00
+    errors:
+    - {asymerror: {plus: 4.75e-01, minus: -3.25e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.07e+00, minus: -5.33e-01}, label: '2 s.d.'}
+  - value: 1.13e+00
+    errors:
+    - {asymerror: {plus: 4.64e-01, minus: -3.21e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.05e+00, minus: -5.21e-01}, label: '2 s.d.'}
+  - value: 1.01e+00
+    errors:
+    - {asymerror: {plus: 3.95e-01, minus: -2.76e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 8.66e-01, minus: -4.52e-01}, label: '2 s.d.'}
+  - value: 9.42e-01
+    errors:
+    - {asymerror: {plus: 3.87e-01, minus: -2.67e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 8.74e-01, minus: -4.38e-01}, label: '2 s.d.'}
+  - value: 9.68e-01
+    errors:
+    - {asymerror: {plus: 3.98e-01, minus: -2.72e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 8.91e-01, minus: -4.43e-01}, label: '2 s.d.'}
+  - value: 9.79e-01
+    errors:
+    - {asymerror: {plus: 4.02e-01, minus: -2.76e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 9.13e-01, minus: -4.50e-01}, label: '2 s.d.'}
+  - value: 9.63e-01
+    errors:
+    - {asymerror: {plus: 4.00e-01, minus: -2.71e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 9.07e-01, minus: -4.45e-01}, label: '2 s.d.'}
+  - value: 9.27e-01
+    errors:
+    - {asymerror: {plus: 3.88e-01, minus: -2.62e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 8.75e-01, minus: -4.27e-01}, label: '2 s.d.'}
+  - value: 9.19e-01
+    errors:
+    - {asymerror: {plus: 3.80e-01, minus: -2.59e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 8.52e-01, minus: -4.21e-01}, label: '2 s.d.'}
+  - value: 8.78e-01
+    errors:
+    - {asymerror: {plus: 3.49e-01, minus: -2.41e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.71e-01, minus: -3.93e-01}, label: '2 s.d.'}
+  - value: 8.29e-01
+    errors:
+    - {asymerror: {plus: 3.40e-01, minus: -2.34e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.69e-01, minus: -3.88e-01}, label: '2 s.d.'}
+  - value: 8.21e-01
+    errors:
+    - {asymerror: {plus: 3.38e-01, minus: -2.33e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.66e-01, minus: -3.79e-01}, label: '2 s.d.'}
+  - value: 8.16e-01
+    errors:
+    - {asymerror: {plus: 3.41e-01, minus: -2.31e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.70e-01, minus: -3.84e-01}, label: '2 s.d.'}
+  - value: 8.33e-01
+    errors:
+    - {asymerror: {plus: 3.45e-01, minus: -2.34e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.74e-01, minus: -3.84e-01}, label: '2 s.d.'}
+  - value: 8.40e-01
+    errors:
+    - {asymerror: {plus: 3.44e-01, minus: -2.36e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.77e-01, minus: -3.87e-01}, label: '2 s.d.'}
+  - value: 8.05e-01
+    errors:
+    - {asymerror: {plus: 3.24e-01, minus: -2.24e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 7.30e-01, minus: -3.68e-01}, label: '2 s.d.'}
+  - value: 7.25e-01
+    errors:
+    - {asymerror: {plus: 2.81e-01, minus: -1.99e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.23e-01, minus: -3.26e-01}, label: '2 s.d.'}
+  - value: 6.99e-01
+    errors:
+    - {asymerror: {plus: 2.88e-01, minus: -1.98e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.53e-01, minus: -3.25e-01}, label: '2 s.d.'}
+  - value: 7.03e-01
+    errors:
+    - {asymerror: {plus: 2.91e-01, minus: -1.98e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.57e-01, minus: -3.29e-01}, label: '2 s.d.'}
+  - value: 7.11e-01
+    errors:
+    - {asymerror: {plus: 2.93e-01, minus: -2.01e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.62e-01, minus: -3.34e-01}, label: '2 s.d.'}
+  - value: 7.00e-01
+    errors:
+    - {asymerror: {plus: 2.91e-01, minus: -1.99e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.57e-01, minus: -3.28e-01}, label: '2 s.d.'}
+  - value: 6.98e-01
+    errors:
+    - {asymerror: {plus: 2.90e-01, minus: -1.99e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.55e-01, minus: -3.27e-01}, label: '2 s.d.'}
+  - value: 6.92e-01
+    errors:
+    - {asymerror: {plus: 2.84e-01, minus: -1.96e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 6.38e-01, minus: -3.21e-01}, label: '2 s.d.'}
+  - value: 6.40e-01
+    errors:
+    - {asymerror: {plus: 2.54e-01, minus: -1.78e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.61e-01, minus: -2.92e-01}, label: '2 s.d.'}
+  - value: 5.97e-01
+    errors:
+    - {asymerror: {plus: 2.47e-01, minus: -1.70e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.62e-01, minus: -2.80e-01}, label: '2 s.d.'}
+  - value: 6.25e-01
+    errors:
+    - {asymerror: {plus: 2.57e-01, minus: -1.77e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.88e-01, minus: -2.94e-01}, label: '2 s.d.'}
+  - value: 6.10e-01
+    errors:
+    - {asymerror: {plus: 2.50e-01, minus: -1.72e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.72e-01, minus: -2.86e-01}, label: '2 s.d.'}
+  - value: 5.84e-01
+    errors:
+    - {asymerror: {plus: 2.42e-01, minus: -1.67e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.50e-01, minus: -2.74e-01}, label: '2 s.d.'}
+  - value: 5.95e-01
+    errors:
+    - {asymerror: {plus: 2.46e-01, minus: -1.70e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.55e-01, minus: -2.79e-01}, label: '2 s.d.'}
+  - value: 6.10e-01
+    errors:
+    - {asymerror: {plus: 2.46e-01, minus: -1.71e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 5.50e-01, minus: -2.81e-01}, label: '2 s.d.'}
+  - value: 5.33e-01
+    errors:
+    - {asymerror: {plus: 2.09e-01, minus: -1.47e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.53e-01, minus: -2.42e-01}, label: '2 s.d.'}
+  - value: 5.13e-01
+    errors:
+    - {asymerror: {plus: 2.13e-01, minus: -1.47e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.80e-01, minus: -2.41e-01}, label: '2 s.d.'}
+  - value: 5.25e-01
+    errors:
+    - {asymerror: {plus: 2.19e-01, minus: -1.51e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.95e-01, minus: -2.46e-01}, label: '2 s.d.'}
+  - value: 5.26e-01
+    errors:
+    - {asymerror: {plus: 2.18e-01, minus: -1.51e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.95e-01, minus: -2.47e-01}, label: '2 s.d.'}
+  - value: 5.30e-01
+    errors:
+    - {asymerror: {plus: 2.20e-01, minus: -1.52e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.99e-01, minus: -2.49e-01}, label: '2 s.d.'}
+  - value: 5.24e-01
+    errors:
+    - {asymerror: {plus: 2.20e-01, minus: -1.50e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.96e-01, minus: -2.47e-01}, label: '2 s.d.'}
+  - value: 5.04e-01
+    errors:
+    - {asymerror: {plus: 2.10e-01, minus: -1.44e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.68e-01, minus: -2.36e-01}, label: '2 s.d.'}
+  - value: 4.85e-01
+    errors:
+    - {asymerror: {plus: 1.95e-01, minus: -1.36e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.30e-01, minus: -2.23e-01}, label: '2 s.d.'}
+  - value: 4.50e-01
+    errors:
+    - {asymerror: {plus: 1.89e-01, minus: -1.31e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.30e-01, minus: -2.12e-01}, label: '2 s.d.'}
+  - value: 4.69e-01
+    errors:
+    - {asymerror: {plus: 1.94e-01, minus: -1.34e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.42e-01, minus: -2.20e-01}, label: '2 s.d.'}
+  - value: 4.44e-01
+    errors:
+    - {asymerror: {plus: 1.89e-01, minus: -1.29e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.26e-01, minus: -2.09e-01}, label: '2 s.d.'}
+  - value: 4.48e-01
+    errors:
+    - {asymerror: {plus: 1.89e-01, minus: -1.30e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.24e-01, minus: -2.10e-01}, label: '2 s.d.'}
+  - value: 4.32e-01
+    errors:
+    - {asymerror: {plus: 1.80e-01, minus: -1.25e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.07e-01, minus: -2.03e-01}, label: '2 s.d.'}
+  - value: 4.54e-01
+    errors:
+    - {asymerror: {plus: 1.85e-01, minus: -1.29e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 4.11e-01, minus: -2.09e-01}, label: '2 s.d.'}
+  - value: 4.14e-01
+    errors:
+    - {asymerror: {plus: 1.63e-01, minus: -1.15e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.58e-01, minus: -1.89e-01}, label: '2 s.d.'}
+  - value: 4.01e-01
+    errors:
+    - {asymerror: {plus: 1.67e-01, minus: -1.14e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.78e-01, minus: -1.87e-01}, label: '2 s.d.'}
+  - value: 4.00e-01
+    errors:
+    - {asymerror: {plus: 1.65e-01, minus: -1.14e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.75e-01, minus: -1.86e-01}, label: '2 s.d.'}
+  - value: 4.09e-01
+    errors:
+    - {asymerror: {plus: 1.69e-01, minus: -1.17e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.85e-01, minus: -1.91e-01}, label: '2 s.d.'}
+  - value: 4.15e-01
+    errors:
+    - {asymerror: {plus: 1.74e-01, minus: -1.18e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.92e-01, minus: -1.94e-01}, label: '2 s.d.'}
+  - value: 3.91e-01
+    errors:
+    - {asymerror: {plus: 1.65e-01, minus: -1.13e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.73e-01, minus: -1.84e-01}, label: '2 s.d.'}
+  - value: 3.90e-01
+    errors:
+    - {asymerror: {plus: 1.61e-01, minus: -1.12e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.62e-01, minus: -1.82e-01}, label: '2 s.d.'}
+  - value: 3.76e-01
+    errors:
+    - {asymerror: {plus: 1.50e-01, minus: -1.06e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.33e-01, minus: -1.73e-01}, label: '2 s.d.'}
+  - value: 3.72e-01
+    errors:
+    - {asymerror: {plus: 1.56e-01, minus: -1.08e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.52e-01, minus: -1.74e-01}, label: '2 s.d.'}
+  - value: 3.74e-01
+    errors:
+    - {asymerror: {plus: 1.55e-01, minus: -1.07e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.50e-01, minus: -1.74e-01}, label: '2 s.d.'}
+  - value: 3.65e-01
+    errors:
+    - {asymerror: {plus: 1.52e-01, minus: -1.05e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.43e-01, minus: -1.70e-01}, label: '2 s.d.'}
+  - value: 3.59e-01
+    errors:
+    - {asymerror: {plus: 1.51e-01, minus: -1.03e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.38e-01, minus: -1.68e-01}, label: '2 s.d.'}
+  - value: 3.64e-01
+    errors:
+    - {asymerror: {plus: 1.53e-01, minus: -1.04e-01}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.44e-01, minus: -1.71e-01}, label: '2 s.d.'}
+  - value: 3.41e-01
+    errors:
+    - {asymerror: {plus: 1.40e-01, minus: -9.69e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.11e-01, minus: -1.59e-01}, label: '2 s.d.'}
+  - value: 3.21e-01
+    errors:
+    - {asymerror: {plus: 1.28e-01, minus: -9.02e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.81e-01, minus: -1.48e-01}, label: '2 s.d.'}
+  - value: 3.18e-01
+    errors:
+    - {asymerror: {plus: 1.36e-01, minus: -9.23e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.08e-01, minus: -1.50e-01}, label: '2 s.d.'}
+  - value: 3.27e-01
+    errors:
+    - {asymerror: {plus: 1.39e-01, minus: -9.40e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.12e-01, minus: -1.54e-01}, label: '2 s.d.'}
+  - value: 3.28e-01
+    errors:
+    - {asymerror: {plus: 1.40e-01, minus: -9.53e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.14e-01, minus: -1.55e-01}, label: '2 s.d.'}
+  - value: 3.31e-01
+    errors:
+    - {asymerror: {plus: 1.40e-01, minus: -9.64e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.16e-01, minus: -1.56e-01}, label: '2 s.d.'}
+  - value: 3.34e-01
+    errors:
+    - {asymerror: {plus: 1.40e-01, minus: -9.58e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.13e-01, minus: -1.56e-01}, label: '2 s.d.'}
+  - value: 3.22e-01
+    errors:
+    - {asymerror: {plus: 1.35e-01, minus: -9.22e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 3.02e-01, minus: -1.51e-01}, label: '2 s.d.'}
+  - value: 3.04e-01
+    errors:
+    - {asymerror: {plus: 1.23e-01, minus: -8.55e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.72e-01, minus: -1.40e-01}, label: '2 s.d.'}
+  - value: 2.65e-01
+    errors:
+    - {asymerror: {plus: 1.15e-01, minus: -7.79e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.63e-01, minus: -1.26e-01}, label: '2 s.d.'}
+  - value: 2.76e-01
+    errors:
+    - {asymerror: {plus: 1.17e-01, minus: -7.99e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.66e-01, minus: -1.30e-01}, label: '2 s.d.'}
+  - value: 2.72e-01
+    errors:
+    - {asymerror: {plus: 1.20e-01, minus: -8.00e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.71e-01, minus: -1.30e-01}, label: '2 s.d.'}
+  - value: 2.74e-01
+    errors:
+    - {asymerror: {plus: 1.19e-01, minus: -8.01e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.68e-01, minus: -1.30e-01}, label: '2 s.d.'}
+  - value: 2.75e-01
+    errors:
+    - {asymerror: {plus: 1.17e-01, minus: -8.01e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.64e-01, minus: -1.31e-01}, label: '2 s.d.'}
+  - value: 2.74e-01
+    errors:
+    - {asymerror: {plus: 1.15e-01, minus: -7.95e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.58e-01, minus: -1.30e-01}, label: '2 s.d.'}
+  - value: 2.64e-01
+    errors:
+    - {asymerror: {plus: 1.05e-01, minus: -7.32e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.29e-01, minus: -1.22e-01}, label: '2 s.d.'}
+  - value: 2.57e-01
+    errors:
+    - {asymerror: {plus: 1.09e-01, minus: -7.47e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.47e-01, minus: -1.21e-01}, label: '2 s.d.'}
+  - value: 2.67e-01
+    errors:
+    - {asymerror: {plus: 1.13e-01, minus: -7.73e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.56e-01, minus: -1.26e-01}, label: '2 s.d.'}
+  - value: 2.69e-01
+    errors:
+    - {asymerror: {plus: 1.14e-01, minus: -7.74e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.57e-01, minus: -1.27e-01}, label: '2 s.d.'}
+  - value: 2.60e-01
+    errors:
+    - {asymerror: {plus: 1.11e-01, minus: -7.55e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.51e-01, minus: -1.23e-01}, label: '2 s.d.'}
+  - value: 2.59e-01
+    errors:
+    - {asymerror: {plus: 1.10e-01, minus: -7.48e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.48e-01, minus: -1.22e-01}, label: '2 s.d.'}
+  - value: 2.71e-01
+    errors:
+    - {asymerror: {plus: 1.13e-01, minus: -7.77e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.52e-01, minus: -1.26e-01}, label: '2 s.d.'}
+  - value: 2.53e-01
+    errors:
+    - {asymerror: {plus: 1.03e-01, minus: -7.19e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.28e-01, minus: -1.17e-01}, label: '2 s.d.'}
+  - value: 2.25e-01
+    errors:
+    - {asymerror: {plus: 9.97e-02, minus: -6.68e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.28e-01, minus: -1.08e-01}, label: '2 s.d.'}
+  - value: 2.28e-01
+    errors:
+    - {asymerror: {plus: 9.63e-02, minus: -6.63e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.19e-01, minus: -1.07e-01}, label: '2 s.d.'}
+  - value: 2.27e-01
+    errors:
+    - {asymerror: {plus: 9.78e-02, minus: -6.62e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.22e-01, minus: -1.07e-01}, label: '2 s.d.'}
+  - value: 2.26e-01
+    errors:
+    - {asymerror: {plus: 9.96e-02, minus: -6.70e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.25e-01, minus: -1.09e-01}, label: '2 s.d.'}
+  - value: 2.49e-01
+    errors:
+    - {asymerror: {plus: 1.06e-01, minus: -7.38e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.40e-01, minus: -1.20e-01}, label: '2 s.d.'}
+  - value: 2.39e-01
+    errors:
+    - {asymerror: {plus: 9.85e-02, minus: -6.84e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.19e-01, minus: -1.12e-01}, label: '2 s.d.'}
+  - value: 2.20e-01
     errors:
-    - {asymerror: {plus: 0.6998, minus: -0.4976}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.5468, minus: -0.8105}, label: '2 $\sigma$'}
-  - value: 2.1623
+    - {asymerror: {plus: 8.75e-02, minus: -6.22e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.93e-01, minus: -1.01e-01}, label: '2 s.d.'}
+  - value: 2.13e-01
     errors:
-    - {asymerror: {plus: 0.9608, minus: -0.6418}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.1848, minus: -1.0407}, label: '2 $\sigma$'}
-  - value: 2.1281
+    - {asymerror: {plus: 9.48e-02, minus: -6.33e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.16e-01, minus: -1.03e-01}, label: '2 s.d.'}
+  - value: 2.10e-01
     errors:
-    - {asymerror: {plus: 0.9314, minus: -0.6299}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.1196, minus: -1.0213}, label: '2 $\sigma$'}
-  - value: 2.0043
+    - {asymerror: {plus: 9.19e-02, minus: -6.22e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.09e-01, minus: -1.01e-01}, label: '2 s.d.'}
+  - value: 1.98e-01
     errors:
-    - {asymerror: {plus: 0.8935, minus: -0.6003}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.0307, minus: -0.9734}, label: '2 $\sigma$'}
-  - value: 2.0199
+    - {asymerror: {plus: 8.82e-02, minus: -5.92e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.00e-01, minus: -9.61e-02}, label: '2 s.d.'}
+  - value: 1.99e-01
     errors:
-    - {asymerror: {plus: 0.9163, minus: -0.6098}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.0691, minus: -0.9888}, label: '2 $\sigma$'}
-  - value: 2.0839
+    - {asymerror: {plus: 9.04e-02, minus: -6.02e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.04e-01, minus: -9.76e-02}, label: '2 s.d.'}
+  - value: 2.06e-01
     errors:
-    - {asymerror: {plus: 0.9381, minus: -0.6294}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.1130, minus: -1.0197}, label: '2 $\sigma$'}
-  - value: 2.1815
+    - {asymerror: {plus: 9.26e-02, minus: -6.21e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.09e-01, minus: -1.01e-01}, label: '2 s.d.'}
+  - value: 2.15e-01
     errors:
-    - {asymerror: {plus: 0.9566, minus: -0.6537}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.1490, minus: -1.0592}, label: '2 $\sigma$'}
-  - value: 2.1148
+    - {asymerror: {plus: 9.44e-02, minus: -6.45e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.12e-01, minus: -1.05e-01}, label: '2 s.d.'}
+  - value: 2.09e-01
     errors:
-    - {asymerror: {plus: 0.8717, minus: -0.6142}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 1.9463, minus: -0.9952}, label: '2 $\sigma$'}
-  - value: 2.6105
+    - {asymerror: {plus: 8.60e-02, minus: -6.06e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.92e-01, minus: -9.82e-02}, label: '2 s.d.'}
+  - value: 2.04e-01
     errors:
-    - {asymerror: {plus: 1.1532, minus: -0.7791}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.6034, minus: -1.2633}, label: '2 $\sigma$'}
-  - value: 2.5734
+    - {asymerror: {plus: 9.03e-02, minus: -6.10e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.04e-01, minus: -9.89e-02}, label: '2 s.d.'}
+  - value: 2.02e-01
     errors:
-    - {asymerror: {plus: 1.1338, minus: -0.7662}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.5869, minus: -1.2424}, label: '2 $\sigma$'}
-  - value: 2.4992
+    - {asymerror: {plus: 8.88e-02, minus: -6.00e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.03e-01, minus: -9.73e-02}, label: '2 s.d.'}
+  - value: 1.96e-01
     errors:
-    - {asymerror: {plus: 1.0672, minus: -0.7235}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.4083, minus: -1.1727}, label: '2 $\sigma$'}
-  - value: 2.7422
+    - {asymerror: {plus: 8.36e-02, minus: -5.66e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.89e-01, minus: -9.18e-02}, label: '2 s.d.'}
+  - value: 2.15e-01
     errors:
-    - {asymerror: {plus: 1.1704, minus: -0.7934}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.6388, minus: -1.2866}, label: '2 $\sigma$'}
-  - value: 2.5865
+    - {asymerror: {plus: 9.16e-02, minus: -6.21e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 2.07e-01, minus: -1.01e-01}, label: '2 s.d.'}
+  - value: 2.03e-01
     errors:
-    - {asymerror: {plus: 1.0864, minus: -0.7408}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.4252, minus: -1.2136}, label: '2 $\sigma$'}
-  - value: 2.5211
+    - {asymerror: {plus: 8.51e-02, minus: -5.80e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.90e-01, minus: -9.50e-02}, label: '2 s.d.'}
+  - value: 1.97e-01
     errors:
-    - {asymerror: {plus: 1.0762, minus: -0.7298}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.4273, minus: -1.1825}, label: '2 $\sigma$'}
-  - value: 2.4165
+    - {asymerror: {plus: 8.43e-02, minus: -5.71e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.90e-01, minus: -9.26e-02}, label: '2 s.d.'}
+  - value: 1.89e-01
     errors:
-    - {asymerror: {plus: 0.9670, minus: -0.6860}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.1507, minus: -1.1199}, label: '2 $\sigma$'}
-  - value: 3.1152
+    - {asymerror: {plus: 7.57e-02, minus: -5.37e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.68e-01, minus: -8.77e-02}, label: '2 s.d.'}
+  - value: 1.94e-01
     errors:
-    - {asymerror: {plus: 1.3469, minus: -0.9081}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.0498, minus: -1.4846}, label: '2 $\sigma$'}
-  - value: 3.0668
+    - {asymerror: {plus: 8.40e-02, minus: -5.67e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.90e-01, minus: -9.26e-02}, label: '2 s.d.'}
+  - value: 1.91e-01
     errors:
-    - {asymerror: {plus: 1.3443, minus: -0.8996}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.0341, minus: -1.4615}, label: '2 $\sigma$'}
-  - value: 3.0336
+    - {asymerror: {plus: 8.39e-02, minus: -5.61e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.89e-01, minus: -9.12e-02}, label: '2 s.d.'}
+  - value: 1.89e-01
     errors:
-    - {asymerror: {plus: 1.3263, minus: -0.8923}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.0153, minus: -1.4457}, label: '2 $\sigma$'}
-  - value: 3.0727
+    - {asymerror: {plus: 8.28e-02, minus: -5.57e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.88e-01, minus: -9.02e-02}, label: '2 s.d.'}
+  - value: 1.92e-01
     errors:
-    - {asymerror: {plus: 1.3648, minus: -0.9176}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.0919, minus: -1.4867}, label: '2 $\sigma$'}
-  - value: 3.0375
+    - {asymerror: {plus: 8.52e-02, minus: -5.73e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.93e-01, minus: -9.28e-02}, label: '2 s.d.'}
+  - value: 1.90e-01
     errors:
-    - {asymerror: {plus: 1.3466, minus: -0.9046}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.0290, minus: -1.4656}, label: '2 $\sigma$'}
-  - value: 2.9438
+    - {asymerror: {plus: 8.40e-02, minus: -5.64e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.89e-01, minus: -9.15e-02}, label: '2 s.d.'}
+  - value: 1.84e-01
     errors:
-    - {asymerror: {plus: 1.2700, minus: -0.8590}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 2.8391, minus: -1.3918}, label: '2 $\sigma$'}
-  - value: 3.6695
+    - {asymerror: {plus: 7.92e-02, minus: -5.36e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.77e-01, minus: -8.68e-02}, label: '2 s.d.'}
+  - value: 1.83e-01
     errors:
-    - {asymerror: {plus: 1.5788, minus: -1.0755}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.5846, minus: -1.7425}, label: '2 $\sigma$'}
-  - value: 3.6279
+    - {asymerror: {plus: 7.89e-02, minus: -5.38e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.79e-01, minus: -8.71e-02}, label: '2 s.d.'}
+  - value: 1.81e-01
     errors:
-    - {asymerror: {plus: 1.5609, minus: -1.0604}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.5438, minus: -1.7180}, label: '2 $\sigma$'}
-  - value: 3.5863
+    - {asymerror: {plus: 7.80e-02, minus: -5.30e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.77e-01, minus: -8.59e-02}, label: '2 s.d.'}
+  - value: 1.79e-01
     errors:
-    - {asymerror: {plus: 1.5411, minus: -1.0456}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 3.4985, minus: -1.6941}, label: '2 $\sigma$'}
-  - value: 4.3945
+    - {asymerror: {plus: 7.71e-02, minus: -5.23e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.75e-01, minus: -8.47e-02}, label: '2 s.d.'}
+  - value: 1.77e-01
     errors:
-    - {asymerror: {plus: 1.8732, minus: -1.2757}, label: '1 $\sigma$'}
-    - {asymerror: {plus: 4.2273, minus: -2.0679}, label: '2 $\sigma$'}
+    - {asymerror: {plus: 7.55e-02, minus: -5.14e-02}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.70e-01, minus: -8.33e-02}, label: '2 s.d.'}
 - header: {name: 'Significance'}
   qualifiers:
   - {name: '$\sqrt{s}$', value: 13 TeV}
