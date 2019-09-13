@@ -1,0 +1,692 @@
+additional_resources:
+- {description: arXiv, location: 'https://arxiv.org/abs/1909.03460'}
+comment: >
+    Two related searches for phenomena beyond the standard model (BSM) are performed using events with hadronic jets 
+    and significant transverse momentum imbalance. The results are based on a sample of proton-proton collisions at a 
+    center-of-mass energy of 13 TeV, collected by the CMS experiment at the LHC in 2016--2018 and corresponding to an 
+    integrated luminosity of 137 fb$^{-1}$. The first search is inclusive, based on signal regions defined by the hadronic energy 
+    in the event, the jet multiplicity, the number of jets identified as originating from bottom quarks, and the value 
+    of the kinematic variable $M_\mathrm{T2}$ for events with at least two jets. For events with exactly one jet, the transverse
+    momentum of the jet is used instead. The second search looks in addition for disappearing tracks produced by BSM 
+    long-lived charged particles that decay within the volume of the tracking detector. No excess event yield is observed 
+    above the predicted standard model background. This is used to constrain a range of BSM models that predict the following: 
+    the pair production of gluinos and squarks in the context of supersymmetry models conserving $R$-parity, with or without 
+    intermediate long-lived charginos produced in the decay chain; the resonant production of a colored scalar state decaying 
+    to a massive Dirac fermion and a quark; or the pair production of scalar and vector leptoquarks each decaying to a 
+    neutrino and a top, bottom, or light-flavor quark. In most of the cases, the results obtained are the most stringent 
+    constraints to date.
+data_license: {description: The content can be shared and adapted but you must give
+    appropriate credit and cannot restrict access to others., name: cc-by-4.0, url: 'https://creativecommons.org/licenses/by/4.0/'}
+---
+data_file: mt2_limits_T1qqqq.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks ($\tilde{g}\to q\bar{q}\tilde{\chi}_1^0$). Signal cross sections 
+    are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
+    fraction to $q\bar{q}\tilde{\chi}_1^0$. 
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> QUARK QUARKBAR NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 11 (upper)
+name: 'Figure 11 (T1qqqq)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T1qqqq.png}
+---
+data_file: mt2_limits_T5qqqqVV.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either a $\tilde{\chi}_2^0$ that decays to $Z\tilde{\chi}_1^0$ (1/3 of the time),
+    or a $\tilde{\chi}_1^\pm$ that decays to $W^\pm\tilde{\chi}_1^0$ (2/3 of the time). Signal cross sections
+    are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
+    fraction to $q_i\bar{q}_j V\tilde{\chi}_1^0$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> QUARK QUARKBAR Z0 NEUTRALINO, GLUINO --> QUARK QUARKBAR W+ NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 11 (lower left)
+name: 'Figure 11 (T5qqqqVV)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T5qqqqVV.png}
+---
+data_file: mt2_limits_T5qqqqWW.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and a $\tilde{\chi}_1^\pm$ that decays to $W^\pm\tilde{\chi}_1^0$.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
+    fraction to $q_i\bar{q}_j W\pm\tilde{\chi}_1^0$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> QUARK QUARKBAR W+ NEUTRALINO, GLUINO --> QUARK QUARKBAR W- NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 11 (lower right)
+name: 'Figure 11 (T5qqqqWW)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T5qqqqWW.png}
+---
+data_file: mt2_limits_T1bbbb.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to bottom quarks ($\tilde{g}\to b\bar{b}\tilde{\chi}_1^0$). Signal cross sections 
+    are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
+    fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> BOTTOM BOTTOMBAR NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Bottom, Cross Section]}
+location: Figure 12 (left)
+name: 'Figure 12 (T1bbbb)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T1bbbb.png}
+---
+data_file: mt2_limits_T1tttt.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to top quarks ($\tilde{g}\to t\bar{t}\tilde{\chi}_1^0$). Signal cross sections 
+    are calculated at approximately NNLO+NNLL order in $\alpha_S$, assuming unity branching 
+    fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> TOP TOPBAR NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Top, Cross Section]}
+location: Figure 12 (right)
+name: 'Figure 12 (T1tttt)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T1tttt.png}
+---
+data_file: mt2_limits_T2qq.yaml
+description: >
+    Exclusion limits at 95% CL for light-flavor squark pair production, where the squarks decay 
+    to $q\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
+    order in $\alpha_S$, assuming unity branching fraction for the given decay and 1-fold degeneracy
+    in the light-flavor squarks (corresponding to the inner set of curves in the limit plot).
+    To get the theory cross section for other N-fold degeneracy assumptions (e.g. 8-fold for the outer
+    curves in the limit plot), just multiply by N.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> QUARK NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 13 (upper left)
+name: 'Figure 13 (T2qq)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T2qq.png}
+---
+data_file: mt2_limits_T2bb.yaml
+description: >
+    Exclusion limits at 95% CL for bottom squark pair production, where the squarks decay 
+    to $b\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
+    order in $\alpha_S$, assuming unity branching fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> SBOTTOM SBOTTOM, P P --> SBOTTOM SBOTTOM X, SBOTTOM --> BOTTOM NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Bottom, Squark, Cross Section]}
+location: Figure 13 (upper right)
+name: 'Figure 13 (T2bb)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T2bb.png}
+---
+data_file: mt2_limits_T2tt.yaml
+description: >
+    Exclusion limits at 95% CL for top squark pair production, where the squarks decay 
+    to $t\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
+    order in $\alpha_S$, assuming unity branching fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Top, Squark, Cross Section]}
+location: Figure 13 (lower)
+name: 'Figure 13 (T2tt)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T2tt.png}
+---
+data_file: mt2_limits_T2bW.yaml
+description: >
+    Exclusion limits at 95% CL for top squark pair production, where the squarks decay 
+    to $b\tilde{\chi}_1^\pm$ and the $\tilde{\chi}_1^0$ decay to $W^\pm\tilde{\chi}_1^0$.
+    Signal cross sections are calculated at approximately NNLO+NNLL 
+    order in $\alpha_S$, assuming unity branching fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> BOTTOM CHARGINO, CHARGINO --> W+ NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Top, Squark, Cross Section]}
+location: Figure 14 (upper left)
+name: 'Figure 14 (T2bW)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T2bW.png}
+---
+data_file: mt2_limits_T2bt.yaml
+description: >
+    Exclusion limits at 95% CL for top squark pair production, where the squarks decay 
+    either to $b\tilde{\chi}_1^\pm\to bW^\pm\tilde{\chi}_1^0$ or to $t\tilde{\chi}_1^0$.
+    Signal cross sections are calculated at approximately NNLO+NNLL 
+    order in $\alpha_S$, assuming unity branching fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> BOTTOM CHARGINO, CHARGINO --> W+ NEUTRALINO, STOP --> TOP NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Top, Squark, Cross Section]}
+location: Figure 14 (upper right)
+name: 'Figure 14 (T2bt)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T2bt.png}
+---
+data_file: mt2_limits_T2cc.yaml
+description: >
+    Exclusion limits at 95% CL for top squark pair production, where the squarks decay 
+    to $c\tilde{\chi}_1^0$. Signal cross sections are calculated at approximately NNLO+NNLL 
+    order in $\alpha_S$, assuming unity branching fraction for the given decay.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> CHARM NEUTRALINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Top, Squark, Charm, Cross Section]}
+location: Figure 14 (lower)
+name: 'Figure 14 (T2cc)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_T2cc.png}
+---
+data_file: mt2_limits_rpvMonoPhi.yaml
+description: >
+    Exclusion limits at 95% CL for the mono-$\phi$ model, in which a resonantly-produced
+    colored scalar decays to a massive Dirac fermion and a quark.
+    Signal cross sections are calculated at leading order in $\alpha_S$,
+    assuming unity branching fraction for the given decay.
+keywords:
+- {name: reactions, values: []}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Colored Scalar, Resonance, Cross Section]}
+location: Figure 15
+name: 'Figure 15 (mono-$\phi$)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_rpvMonoPhi.png}
+---
+data_file: LQ_q.yaml
+description: |
+    Cross section limits for $\mathrm{LQ}\to\mathrm{q}\nu$, where $q=u,\,d,\,s,\,\mathrm{or}\,c$. 
+    Limits are at the 95% confidence level. 
+    Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
+    Branching ratio is assumed to be 100% to $\mathrm{q}\nu$.
+keywords:
+- {name: reactions, values: [P P --> LQ LQ X, P P --> LQ LQ, LQ --> QUARK NU]}
+- {name: cmenergies, values: [13000]}
+- {name: observables, values: [SIG]}
+- {name: phrases, values: [Leptoquark, Integrated Cross Section, Cross Section]}
+location: Figure 16 (upper left)
+name: 'Figure 16 ($\mathrm{LQ}\to\mathrm{q}\nu$)'
+additional_resources:
+- {description: Image file, location: thumb_LQ_q.png}
+- {description: Thumbnail image file, location: thumb_LQ_q.png}
+---
+data_file: LQ_b.yaml
+description: |
+    Cross section limits for $\mathrm{LQ}\to\mathrm{b}\nu$.
+    Limits are at the 95% confidence level. 
+    Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
+    Branching ratio is assumed to be 100% to $\mathrm{b}\nu$.
+keywords:
+- {name: reactions, values: [P P --> LQ LQ X, P P --> LQ LQ, LQ --> BOTTOM NU]}
+- {name: cmenergies, values: [13000]}
+- {name: observables, values: [SIG]}
+- {name: phrases, values: [Leptoquark, Cross Section, Integrated Cross Section, Bottom]}
+location: Figure 16 (upper right)
+name: 'Figure 16 ($\mathrm{LQ}\to\mathrm{b}\nu$)'
+additional_resources:
+- {description: Image file, location: thumb_LQ_b.png}
+- {description: Thumbnail image file, location: thumb_LQ_b.png}
+---
+data_file: LQ_t.yaml
+description: |
+    Cross section limits for $\mathrm{LQ}\to\mathrm{t}\nu$. 
+    Limits are at the 95% confidence level. 
+    Theory cross sections are LO for vector LQ, and NLO for scalar LQ.
+    Branching ratios are assumed to be $\mathcal{B}(\mathrm{LQ}\to\mathrm{t}\nu)=1-\beta$, and $\mathcal{B}(\mathrm{LQ}\to\mathrm{b}\tau)=\beta$.
+keywords:
+- {name: reactions, values: [P P --> LQ LQ X, P P --> LQ LQ, LQ --> TOP NU]}
+- {name: cmenergies, values: [13000]}
+- {name: observables, values: [SIG]}
+- {name: phrases, values: [Leptoquark, Cross Section, Integrated Cross Section,Top]}
+location: Figure 16 (lower)
+name: 'Figure 16 ($\mathrm{LQ}\to\mathrm{t}\nu$)'
+additional_resources:
+- {description: Image file, location: thumb_LQ_t.png}
+- {description: Thumbnail image file, location: thumb_LQ_t.png}
+---
+data_file: yields_mt2_monojet.yaml
+description: 'Predictions and observations for monojet signal regions'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 12 in Appendix B.1, or Figure 5 (upper, left side)
+name: Table 12
+---
+data_file: yields_mt2_VL.yaml
+description: 'Predictions and observations for signal regions with $250 \leq H_\mathrm{T} < 450$ GeV'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 13 in Appendix B.1, or Figure 23 (upper)
+name: Table 13
+---
+data_file: yields_mt2_Ll.yaml
+description: 'Predictions and observations for signal regions with $450 \leq H_\mathrm{T} < 575$ GeV and $N_\mathrm{j}<7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 14 in Appendix B.1, or Figure 23 (lower)
+name: Table 14
+---
+data_file: yields_mt2_Lh.yaml
+description: 'Predictions and observations for signal regions with $450 \leq H_\mathrm{T} < 575$ GeV and $N_\mathrm{j}\geq7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 15 in Appendix B.1, or Figure 23 (lower)
+name: Table 15
+---
+data_file: yields_mt2_Ml.yaml
+description: 'Predictions and observations for signal regions with $575 \leq H_\mathrm{T} < 1200$ GeV and $N_\mathrm{j}^\mathrm{hi}<4$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 16 in Appendix B.1, or Figure 5 (lower)
+name: Table 16
+---
+data_file: yields_mt2_Mm.yaml
+description: 'Predictions and observations for signal regions with $575 \leq H_\mathrm{T} < 1200$ GeV and $4\leq N_\mathrm{j}^\mathrm{hi}<7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 17 in Appendix B.1, or Figure 5 (lower)
+name: Table 17
+---
+data_file: yields_mt2_Mh.yaml
+description: 'Predictions and observations for signal regions with $575 \leq H_\mathrm{T} < 1200$ GeV and $N_\mathrm{j}\geq7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 18 in Appendix B.1, or Figure 5 (lower)
+name: Table 18
+---
+data_file: yields_mt2_Hl.yaml
+description: 'Predictions and observations for signal regions with $1200 \leq H_\mathrm{T} < 1500$ GeV and $N_\mathrm{j}^\mathrm{hi}<4$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 19 in Appendix B.1, or Figure 24 (upper) in Appendix C.1
+name: Table 19
+---
+data_file: yields_mt2_Hm.yaml
+description: 'Predictions and observations for signal regions with $1200 \leq H_\mathrm{T} < 1500$ GeV and $4\leq N_\mathrm{j}^\mathrm{hi}<7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 20 in Appendix B.1, or Figure 24 (upper) in Appendix C.1
+name: Table 20
+---
+data_file: yields_mt2_Hh.yaml
+description: 'Predictions and observations for signal regions with $1200 \leq H_\mathrm{T} < 1500$ GeV and $N_\mathrm{j}\geq7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 21 in Appendix B.1, or Figure 24 (upper) in Appendix C.1
+name: Table 21
+---
+data_file: yields_mt2_UHl.yaml
+description: 'Predictions and observations for signal regions with $H_\mathrm{T} \geq 1500$ GeV and $N_\mathrm{j}<7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 22 in Appendix B.1, or Figure 24 (lower) in Appendix C.1
+name: Table 22
+---
+data_file: yields_mt2_UHh.yaml
+description: 'Predictions and observations for signal regions with $H_\mathrm{T} \geq 1500$ GeV and $N_\mathrm{j}\geq7$'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 23 in Appendix B.1, or Figure 24 (lower) in Appendix C.1
+name: Table 23
+---
+data_file: mt2_covariance.yaml
+description: 'Covariance matrix for the 282 signal regions of the inclusive $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 2
+name: $M_\mathrm{T2}$ covariance matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_covariance.png}
+---
+data_file: mt2_correlation.yaml
+description: 'Correlation matrix for the 282 signal regions of the inclusive $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 1
+name: $M_\mathrm{T2}$ correlation matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_correlation.png}
+---
+data_file: mt2_covmat_bin_mappings.yaml
+description: 'Bin number definitions for the $M_\mathrm{T2}$ covariance and correlation matrices'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Bin definitions for Additional Figures 1 and 2
+name: $M_\mathrm{T2}$ covariance matrix bin mappings
+
+---
+data_file: distracks_limits_T1qqqq_10.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino is long-lived with $c\tau_0 = 10$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 17 (upper left)
+name: 'Figure 17 (T1qqqq 10 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T1qqqq_10.png}
+---
+data_file: distracks_limits_T1qqqq_50.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino is long-lived with $c\tau_0 = 50$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 17 (upper right)
+name: 'Figure 17 (T1qqqq 50 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T1qqqq_50.png}
+---
+data_file: distracks_limits_T1qqqq_200.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino is long-lived with $c\tau_0 = 200$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 17 (lower)
+name: 'Figure 17 (T1qqqq 200 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T1qqqq_200.png}
+---
+data_file: distracks_limits_T2qq_10.yaml
+description: >
+    Exclusion limits at 95% CL for direct light squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 10$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 18 (upper left)
+name: 'Figure 18 (T2qq 10 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2qq_10.png}
+---
+data_file: distracks_limits_T2qq_50.yaml
+description: >
+    Exclusion limits at 95% CL for direct light squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 50$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 18 (upper right)
+name: 'Figure 18 (T2qq 50 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2qq_50.png}
+---
+data_file: distracks_limits_T2qq_200.yaml
+description: >
+    Exclusion limits at 95% CL for direct light squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 200$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 18 (lower)
+name: 'Figure 18 (T2qq 200 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2qq_200.png}
+---
+data_file: distracks_limits_T2bt_10.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 10$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 19 (upper left)
+name: 'Figure 19 (T2bt 10 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2bt_10.png}
+---
+data_file: distracks_limits_T2bt_50.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 50$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 19 (upper right)
+name: 'Figure 19 (T2bt 50 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2bt_50.png}
+---
+data_file: distracks_limits_T2bt_200.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino is long-lived with $c\tau_0 = 200$ cm and mass O(100) MeV greater than the neutralino's mass. 
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 19 (lower)
+name: 'Figure 19 (T2bt 200 cm)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_T2bt_200.png}
+---
+data_file: distracks_limits_maxchexcl_T1qqqq.yaml
+description: >
+    The maximum chargino mass excluded at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the gluino mass is fixed to 1900 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 20 (upper left)
+name: 'Figure 20 (T1qqqq Max Chargino Exclusion)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T1qqqq.png}
+---
+data_file: distracks_limits_maxchexcl_T2qq_1squark.yaml
+description: >
+    The maximum chargino mass excluded at 95% CL for direct squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the squark mass is fixed to 900 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, for a single light squark.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 22 (lower left)
+name: 'Figure 22 (T2qq Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T2qq_1squark.png}
+---
+data_file: distracks_limits_maxchexcl_T2qq.yaml
+description: >
+    The maximum chargino mass excluded at 95% CL for direct squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the squark mass is fixed to 1500 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, and the eight light squarks' masses are assumed to be degenerate.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 20 (lower right)
+name: 'Figure 20 (T2qq Max Chargino Exclusion)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T2qq.png}
+---
+data_file: distracks_limits_maxchexcl_T2bt.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 1$ to 2000 cm while the stop mass is fixed to 1000 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+    If all kinematically allowed chargino masses are excluded, the curves, including 68 and 95% expected, tend to overlap.
+    At short decay lengths, horizontal exclusion lines are obtained from the inclusive analysis, as this is not affected by track
+    reconstruction inefficiencies, which may arise when the chargino decays before the CMS tracker, and therefore shows better sensitivity
+    to scenarios with very small lifetime compared to the disappearing track search, based on median expected limits.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 21
+name: 'Figure 21 (T2bt Max Chargino Exclusion)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_maxchexcl_T2bt.png}
+---
+data_file: distracks_limits_fixedmasses_T1qqqq.yaml
+description: >
+    Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{3}$), or the lightest
+    chargino (probability $\frac{1}{3}$ for each charge), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 5$ to 1000 cm while the gluino mass is fixed to 1600 GeV and the neutralino's
+    mass is fixed to 1575 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> GLUINO GLUINO, P P --> GLUINO GLUINO X, GLUINO --> Q QBAR NEUTRALINO, GLUINO --> Q QBAR CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Gluino, Cross Section]}
+location: Figure 22 (upper)
+name: 'Figure 22 (T1qqqq Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_fixedmasses_T1qqqq.png}
+---
+data_file: distracks_limits_fixedmasses_T2qq.yaml
+description: >
+    Exclusion limits at 95% CL for direct squark pair production, where the squarks decay 
+    to light-flavor quarks and either the lightest neutralino (probability $\frac{1}{2}$), or the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 5$ to 1000 cm while the squark mass is fixed to 2000 GeV and the neutralino's
+    mass is fixed to 1000 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$, and the eight light squarks' masses are assumed to be degenerate.
+keywords:
+- {name: reactions, values: [P P --> SQUARK SQUARK, P P --> SQUARK SQUARK X, SQUARK --> Q NEUTRALINO, SQUARK --> Q CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Squark, Cross Section]}
+location: Figure 22 (lower left)
+name: 'Figure 22 (T2qq Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_fixedmasses_T2qq.png}
+---
+data_file: distracks_limits_fixedmasses_T2bt.yaml
+description: >
+    Exclusion limits at 95% CL for direct stop pair production, where the stops decay 
+    to either a top and the lightest neutralino (probability $\frac{1}{2}$), or a bottom and the lightest
+    chargino (probability $\frac{1}{2}$), and the chargino mass is O(100) MeV greater than the neutralino's mass. 
+    The chargino's lifetime is varied from $c\tau_{0} = 5$ to 1000 cm while the stop mass is fixed to 1100 GeV and the neutralino's
+    mass is fixed to 1000 GeV.
+    Signal cross sections are calculated at approximately NNLO+NNLL order in $\alpha_S$.
+keywords:
+- {name: reactions, values: [P P --> STOP STOP, P P --> STOP STOP X, STOP --> TOP NEUTRALINO, STOP --> BOTTOM CHARGINO]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [SUSY, Supersymmetry, Stop, Cross Section]}
+location: Figure 22 (lower right)
+name: 'Figure 22 (T2bt Fixed Masses)'
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_fixedmasses_T2bt.png}
+---
+data_file: yields_distracks_2016.yaml
+description: 'Predictions and observations for 2016 disappearing track signal regions'
+keywords: []
+location: Table 24 in Appendix B.2
+name: Table 24
+---
+data_file: yields_distracks_2017and2018P.yaml
+description: 'Predictions and observations for 2017-2018 pixel track signal regions'
+keywords: []
+location: Table 25 in Appendix B.2
+name: Table 25
+---
+data_file: yields_distracks_2017and2018ML.yaml
+description: 'Predictions and observations for 2017-2018 medium (M) and long (L) length track signal regions'
+keywords: []
+location: Table 26 in Appendix B.2
+name: Table 26
+---
+data_file: distracks_covariance.yaml
+description: 'Covariance matrix for the 68 signal regions of the disappearing tracks $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 4
+name: $M_\mathrm{T2}$ disappearing tracks covariance matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_covariance.png}
+---
+data_file: distracks_correlation.yaml
+description: 'Correlation matrix for the 68 signal regions of the disappearing tracks $M_\mathrm{T2}$ search'
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+location: Additional Figure 3
+name: $M_\mathrm{T2}$ disappearing tracks correlation matrix
+additional_resources:
+- {description: Thumbnail image file, location: thumb_distracks_correlation.png}
+

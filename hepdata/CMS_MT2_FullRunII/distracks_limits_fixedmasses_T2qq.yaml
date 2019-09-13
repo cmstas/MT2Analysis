@@ -1,0 +1,68 @@
+independent_variables:
+- header: {name: 'c\tau_0(\tilde{\chi}^{\pm}_1)', units: CM}
+  values:
+  - value: 5
+  - value: 10
+  - value: 30
+  - value: 50
+  - value: 100
+  - value: 200
+  - value: 500
+  - value: 1000
+dependent_variables:
+- header: {name: 'Observed $\sigma$ limit (95% CL)', units: PB}
+  qualifiers:
+  - {name: 'Theory $\sigma$', value: 0.12 $\pm$ 0.03 fb}
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  - {name: '$B(\tilde{q}\rightarrow q\tilde{\chi}^{0}_{1})$', value: '$\frac{1}{2}$'}
+  - {name: '$B(\tilde{q}\rightarrow q$^{\prime}$\tilde{\chi}^{\pm}_{1})$', value: '$\frac{1}{2}$'}
+  values:
+  - value: 0.73
+  - value: 0.24
+  - value: 0.094
+  - value: 0.081
+  - value: 0.087
+  - value: 0.12
+  - value: 0.23
+  - value: 0.41
+- header: {name: 'Expected $\sigma$ limit (95% CL)', units: PB}
+  qualifiers:
+  - {name: 'Theory $\sigma$', value: 0.12 $\pm$ 0.03 fb}
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  - {name: '$B(\tilde{q}\rightarrow q\tilde{\chi}^{0}_{1})$', value: '$\frac{1}{2}$'}
+  - {name: '$B(\tilde{q}\rightarrow q$^{\prime}$\tilde{\chi}^{\pm}_{1})$', value: '$\frac{1}{2}$'}
+  values:
+  - value: 0.68
+    errors:
+    - {asymerror: {plus: 0.48, minus: -0.27}, label: '1 s.d.'}
+    - {asymerror: {plus: 1.2, minus: -0.42}, label: '2 s.d.'}
+  - value: 0.24
+    errors:
+    - {asymerror: {plus: 0.18, minus: -0.10}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.47, minus: -0.16}, label: '2 s.d.'}
+  - value: 0.10
+    errors:
+    - {asymerror: {plus: 0.084, minus: -0.045}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.21, minus: -0.068}, label: '2 s.d.'}
+  - value: 0.089
+    errors:
+    - {asymerror: {plus: 0.075, minus: -0.040}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.18, minus: -0.060}, label: '2 s.d.'}
+  - value: 0.096
+    errors:
+    - {asymerror: {plus: 0.083, minus: -0.044}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.19, minus: -0.065}, label: '2 s.d.'}
+  - value: 0.13
+    errors:
+    - {asymerror: {plus: 0.11, minus: -0.058}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.26, minus: -0.087}, label: '2 s.d.'}
+  - value: 0.25
+    errors:
+    - {asymerror: {plus: 0.22, minus: -0.12}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.51, minus: -0.17}, label: '2 s.d.'}
+  - value: 0.45
+    errors:
+    - {asymerror: {plus: 0.40, minus: -0.21}, label: '1 s.d.'}
+    - {asymerror: {plus: 0.91, minus: -0.31}, label: '2 s.d.'}

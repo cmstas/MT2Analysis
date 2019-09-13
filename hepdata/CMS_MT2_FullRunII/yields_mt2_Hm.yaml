@@ -1,0 +1,433 @@
+independent_variables:
+- header: {name: '$N_\mathrm{j}$'}
+  values:
+  - {low: 2, high: 6}
+  - {low: 2, high: 6}
+  - {low: 2, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+  - {low: 4, high: 6}
+- header: {name: '$N_\mathrm{b}$'}
+  values:
+  - {low: 3, high: -1}
+  - {low: 3, high: -1}
+  - {low: 3, high: -1}
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 0
+  - value: 1
+  - value: 1
+  - value: 1
+  - value: 1
+  - value: 1
+  - value: 1
+  - value: 2
+  - value: 2
+  - value: 2
+  - value: 2
+  - value: 2
+- header: {name: '$M_\mathrm{T2}$', units: GEV}
+  values:
+  - {low: 200, high: 400}
+  - {low: 400, high: 600}
+  - {low: 600, high: -1}
+  - {low: 200, high: 400}
+  - {low: 400, high: 600}
+  - {low: 600, high: 800}
+  - {low: 800, high: 1000}
+  - {low: 1000, high: 1200}
+  - {low: 1200, high: -1}
+  - {low: 200, high: 400}
+  - {low: 400, high: 600}
+  - {low: 600, high: 800}
+  - {low: 800, high: 1000}
+  - {low: 1000, high: 1200}
+  - {low: 1200, high: -1}
+  - {low: 200, high: 400}
+  - {low: 400, high: 600}
+  - {low: 600, high: 800}
+  - {low: 800, high: 1000}
+  - {low: 1000, high: -1}
+dependent_variables:
+- header: {name: 'Lost lepton'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+  - value: 22.6
+    errors:
+    - {asymerror: {plus: 4.7, minus: -4.2}, label: stat}
+    - {symerror: 1.8, label: syst}
+  - value: 1.58
+    errors:
+    - {asymerror: {plus: 0.51, minus: -0.48}, label: stat}
+    - {symerror: 0.34, label: syst}
+  - value: 0.47
+    errors:
+    - {asymerror: {plus: 0.27, minus: -0.26}, label: stat}
+    - {symerror: 0.19, label: syst}
+  - value: 606
+    errors:
+    - {asymerror: {plus: 21, minus: -20}, label: stat}
+    - {symerror: 41, label: syst}
+  - value: 84.3
+    errors:
+    - {asymerror: {plus: 7.4, minus: -6.9}, label: stat}
+    - {symerror: 5.8, label: syst}
+  - value: 21.1
+    errors:
+    - {asymerror: {plus: 3.2, minus: -2.9}, label: stat}
+    - {symerror: 2.3, label: syst}
+  - value: 7.6
+    errors:
+    - {asymerror: {plus: 1.2, minus: -1.1}, label: stat}
+    - {symerror: 1.1, label: syst}
+  - value: 2.23
+    errors:
+    - {asymerror: {plus: 0.36, minus: -0.33}, label: stat}
+    - {symerror: 0.61, label: syst}
+  - value: 0.47
+    errors:
+    - {asymerror: {plus: 0.10, minus: -0.09}, label: stat}
+    - {symerror: 0.19, label: syst}
+  - value: 278
+    errors:
+    - {asymerror: {plus: 15, minus: -14}, label: stat}
+    - {symerror: 20, label: syst}
+  - value: 30.3
+    errors:
+    - {asymerror: {plus: 4.0, minus: -3.7}, label: stat}
+    - {symerror: 2.7, label: syst}
+  - value: 8.2
+    errors:
+    - {asymerror: {plus: 1.4, minus: -1.3}, label: stat}
+    - {symerror: 1.0, label: syst}
+  - value: 2.36
+    errors:
+    - {asymerror: {plus: 0.56, minus: -0.54}, label: stat}
+    - {symerror: 0.50, label: syst}
+  - value: 1.00
+    errors:
+    - {symerror: 0.24, label: stat}
+    - {symerror: 0.31, label: syst}
+  - value: 0.07
+    errors:
+    - {symerror: 0.02, label: stat}
+    - {symerror: 0.03, label: syst}
+  - value: 120.4
+    errors:
+    - {asymerror: {plus: 9.1, minus: -8.7}, label: stat}
+    - {symerror: 9.8, label: syst}
+  - value: 11.9
+    errors:
+    - {symerror: 1.4, label: stat}
+    - {symerror: 1.5, label: syst}
+  - value: 3.49
+    errors:
+    - {symerror: 0.83, label: stat}
+    - {symerror: 0.75, label: syst}
+  - value: 0.66
+    errors:
+    - {symerror: 0.16, label: stat}
+    - {symerror: 0.20, label: syst}
+  - value: 0.15
+    errors:
+    - {symerror: 0.04, label: stat}
+    - {symerror: 0.06, label: syst}
+- header: {name: '$Z\to\nu\bar{\nu}$'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+  - value: 0.0
+    errors:
+    - {asymerror: {plus: 6.6, minus: -0.0}, label: stat}
+    - {symerror: 0.0, label: syst}
+  - value: 0.0
+    errors:
+    - {asymerror: {plus: 1.6, minus: -0.0}, label: stat}
+    - {symerror: 0.0, label: syst}
+  - value: 0.00
+    errors:
+    - {asymerror: {plus: 0.94, minus: -0.00}, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 909
+    errors:
+    - {asymerror: {plus: 63, minus: -59}, label: stat}
+    - {symerror: 90, label: syst}
+  - value: 234
+    errors:
+    - {asymerror: {plus: 16, minus: -15}, label: stat}
+    - {symerror: 34, label: syst}
+  - value: 75
+    errors:
+    - {symerror: 5, label: stat}
+    - {symerror: 17, label: syst}
+  - value: 35.2
+    errors:
+    - {asymerror: {plus: 2.4, minus: -2.3}, label: stat}
+    - {symerror: 8.0, label: syst}
+  - value: 14.1
+    errors:
+    - {asymerror: {plus: 1.0, minus: -0.9}, label: stat}
+    - {symerror: 4.2, label: syst}
+  - value: 3.0
+    errors:
+    - {symerror: 0.2, label: stat}
+    - {symerror: 1.3, label: syst}
+  - value: 254
+    errors:
+    - {asymerror: {plus: 33, minus: -30}, label: stat}
+    - {symerror: 28, label: syst}
+  - value: 65
+    errors:
+    - {asymerror: {plus: 9, minus: -8}, label: stat}
+    - {symerror: 10, label: syst}
+  - value: 21.0
+    errors:
+    - {asymerror: {plus: 2.8, minus: -2.5}, label: stat}
+    - {symerror: 4.8, label: syst}
+  - value: 9.8
+    errors:
+    - {asymerror: {plus: 1.3, minus: -1.1}, label: stat}
+    - {symerror: 2.3, label: syst}
+  - value: 4.0
+    errors:
+    - {symerror: 0.5, label: stat}
+    - {symerror: 1.2, label: syst}
+  - value: 0.86
+    errors:
+    - {asymerror: {plus: 0.11, minus: -0.10}, label: stat}
+    - {symerror: 0.37, label: syst}
+  - value: 45
+    errors:
+    - {asymerror: {plus: 18, minus: -13}, label: stat}
+    - {symerror: 5, label: syst}
+  - value: 11.5
+    errors:
+    - {asymerror: {plus: 4.6, minus: -3.4}, label: stat}
+    - {symerror: 1.8, label: syst}
+  - value: 3.7
+    errors:
+    - {asymerror: {plus: 1.5, minus: -1.1}, label: stat}
+    - {symerror: 1.0, label: syst}
+  - value: 1.73
+    errors:
+    - {asymerror: {plus: 0.69, minus: -0.51}, label: stat}
+    - {symerror: 0.48, label: syst}
+  - value: 0.84
+    errors:
+    - {asymerror: {plus: 0.34, minus: -0.25}, label: stat}
+    - {symerror: 0.36, label: syst}
+- header: {name: 'Multijet'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+  - value: 4.4
+    errors:
+    - {symerror: 0.2, label: stat}
+    - {symerror: 1.5, label: syst}
+  - value: 0.02
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.01, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 208
+    errors:
+    - {symerror: 12, label: stat}
+    - {symerror: 64, label: syst}
+  - value: 0.88
+    errors:
+    - {symerror: 0.09, label: stat}
+    - {symerror: 0.27, label: syst}
+  - value: 0.06
+    errors:
+    - {symerror: 0.02, label: stat}
+    - {symerror: 0.02, label: syst}
+  - value: 0.01
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 97
+    errors:
+    - {symerror: 2, label: stat}
+    - {symerror: 30, label: syst}
+  - value: 0.33
+    errors:
+    - {symerror: 0.06, label: stat}
+    - {symerror: 0.10, label: syst}
+  - value: 0.02
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.01, label: syst}
+  - value: 0.01
+    errors:
+    - {symerror: 0.01, label: stat}
+    - {symerror: 0.00, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 26.0
+    errors:
+    - {symerror: 0.6, label: stat}
+    - {symerror: 8.1, label: syst}
+  - value: 0.11
+    errors:
+    - {symerror: 0.03, label: stat}
+    - {symerror: 0.04, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+  - value: 0
+    errors:
+    - {symerror: 0, label: stat}
+    - {symerror: 0, label: syst}
+- header: {name: 'Total background'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+  - value: 27.0
+    errors:
+    - {asymerror: {plus: 8.1, minus: -4.2}, label: stat}
+    - {symerror: 2.4, label: syst}
+  - value: 1.6
+    errors:
+    - {asymerror: {plus: 1.7, minus: -0.5}, label: stat}
+    - {symerror: 0.3, label: syst}
+  - value: 0.47
+    errors:
+    - {asymerror: {plus: 0.98, minus: -0.26}, label: stat}
+    - {symerror: 0.19, label: syst}
+  - value: 1720
+    errors:
+    - {asymerror: {plus: 70, minus: -60}, label: stat}
+    - {symerror: 130, label: syst}
+  - value: 319
+    errors:
+    - {asymerror: {plus: 18, minus: -17}, label: stat}
+    - {symerror: 36, label: syst}
+  - value: 96
+    errors:
+    - {symerror: 6, label: stat}
+    - {symerror: 17, label: syst}
+  - value: 42.7
+    errors:
+    - {asymerror: {plus: 2.7, minus: -2.5}, label: stat}
+    - {symerror: 8.2, label: syst}
+  - value: 16.3
+    errors:
+    - {symerror: 1.0, label: stat}
+    - {symerror: 4.2, label: syst}
+  - value: 3.5
+    errors:
+    - {symerror: 0.2, label: stat}
+    - {symerror: 1.3, label: syst}
+  - value: 629
+    errors:
+    - {asymerror: {plus: 36, minus: -33}, label: stat}
+    - {symerror: 50, label: syst}
+  - value: 96
+    errors:
+    - {asymerror: {plus: 9, minus: -8}, label: stat}
+    - {symerror: 11, label: syst}
+  - value: 29.2
+    errors:
+    - {asymerror: {plus: 3.1, minus: -2.8}, label: stat}
+    - {symerror: 5.0, label: syst}
+  - value: 12.2
+    errors:
+    - {asymerror: {plus: 1.4, minus: -1.3}, label: stat}
+    - {symerror: 2.4, label: syst}
+  - value: 5.0
+    errors:
+    - {asymerror: {plus: 0.6, minus: -0.5}, label: stat}
+    - {symerror: 1.2, label: syst}
+  - value: 0.92
+    errors:
+    - {asymerror: {plus: 0.11, minus: -0.10}, label: stat}
+    - {symerror: 0.37, label: syst}
+  - value: 191
+    errors:
+    - {asymerror: {plus: 20, minus: -16}, label: stat}
+    - {symerror: 15, label: syst}
+  - value: 23.4
+    errors:
+    - {asymerror: {plus: 4.8, minus: -3.7}, label: stat}
+    - {symerror: 2.6, label: syst}
+  - value: 7.2
+    errors:
+    - {asymerror: {plus: 1.7, minus: -1.4}, label: stat}
+    - {symerror: 1.3, label: syst}
+  - value: 2.38
+    errors:
+    - {asymerror: {plus: 0.71, minus: -0.54}, label: stat}
+    - {symerror: 0.53, label: syst}
+  - value: 1.00
+    errors:
+    - {asymerror: {plus: 0.34, minus: -0.25}, label: stat}
+    - {symerror: 0.36, label: syst}
+- header: {name: 'Data'}
+  qualifiers:
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+  - value: 25
+  - value: 3
+  - value: 4
+  - value: 1768
+  - value: 301
+  - value: 99
+  - value: 41
+  - value: 15
+  - value: 5
+  - value: 579
+  - value: 79
+  - value: 16
+  - value: 9
+  - value: 6
+  - value: 1
+  - value: 194
+  - value: 27
+  - value: 7
+  - value: 3
+  - value: 0

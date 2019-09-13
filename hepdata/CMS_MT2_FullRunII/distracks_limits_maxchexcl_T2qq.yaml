@@ -1,0 +1,80 @@
+independent_variables:
+- header: {name: 'c\tau_0(\tilde{\chi}^{\pm}_1)', units: CM}
+  values:
+  - value: 1
+  - value: 5
+  - value: 10
+  - value: 30
+  - value: 50
+  - value: 100
+  - value: 200
+  - value: 500
+  - value: 1000
+  - value: 2000
+dependent_variables:
+- header: {name: 'Observed maximum $m_{\tilde{\chi}^{\pm}_1}$ excluded (95% CL)', units: GEV}
+  qualifiers:
+  - {name: 'Theory $\sigma$', value: 2.1 $\pm$ 0.3 fb}
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  - {name: '$B(\tilde{q}\rightarrow q\tilde{\chi}^{0}_{1})$', value: '$\frac{1}{2}$'}
+  - {name: '$B(\tilde{q}\rightarrow q$^{\prime}$\tilde{\chi}^{\pm}_{1})$', value: '$\frac{1}{2}$'}
+  values:
+  - value: 827
+  - value: 947
+  - value: 1295
+  - value: 1477
+  - value: 1484
+  - value: 1488
+  - value: 1487
+  - value: 1479
+  - value: 1402
+  - value: 1313
+- header: {name: 'Expected maximum $m_{\tilde{\chi}^{\pm}_1}$ excluded (95% CL)', units: GEV}
+  qualifiers:
+  - {name: 'Theory $\sigma$', value: 2.1 $\pm$ 0.3 fb}
+  - {name: '$\sqrt{s}$', value: 13 TeV}
+  - {name: '$\mathcal{L}_\mathrm{int}$', value: '137 fb$^{-1}$'}
+  - {name: '$B(\tilde{q}\rightarrow q\tilde{\chi}^{0}_{1})$', value: '$\frac{1}{2}$'}
+  - {name: '$B(\tilde{q}\rightarrow q$^{\prime}$\tilde{\chi}^{\pm}_{1})$', value: '$\frac{1}{2}$'}
+  values:
+  - value: 718
+    errors:
+    - {asymerror: {plus: 92, minus: -124}, label: '1 s.d.'}
+    - {asymerror: {plus: 155, minus: -285}, label: '2 s.d.'}
+  - value: 930
+    errors:
+    - {asymerror: {plus: 117, minus: -79}, label: '1 s.d.'}
+    - {asymerror: {plus: 199, minus: -129}, label: '2 s.d.'}
+  - value: 1237
+    errors:
+    - {asymerror: {plus: 55, minus: -71}, label: '1 s.d.'}
+    - {asymerror: {plus: 89, minus: -116}, label: '2 s.d.'}
+  - value: 1399
+    errors:
+    - {asymerror: {plus: 77, minus: -46}, label: '1 s.d.'}
+    - {asymerror: {plus: 85, minus: -73}, label: '2 s.d.'}
+  - value: 1476
+    errors:
+    - {asymerror: {plus: 9, minus: -97}, label: '1 s.d.'}
+    - {asymerror: {plus: 14, minus: -160}, label: '2 s.d.'}
+  - value: 1482
+    errors:
+    - {asymerror: {plus: 7, minus: -47}, label: '1 s.d.'}
+    - {asymerror: {plus: 11, minus: -121}, label: '2 s.d.'}
+  - value: 1481
+    errors:
+    - {asymerror: {plus: 8, minus: -60}, label: '1 s.d.'}
+    - {asymerror: {plus: 12, minus: -138}, label: '2 s.d.'}
+  - value: 1440
+    errors:
+    - {asymerror: {plus: 42, minus: -101}, label: '1 s.d.'}
+    - {asymerror: {plus: 49, minus: -161}, label: '2 s.d.'}
+  - value: 1349
+    errors:
+    - {asymerror: {plus: 105, minus: -51}, label: '1 s.d.'}
+    - {asymerror: {plus: 133, minus: -78}, label: '2 s.d.'}
+  - value: 1277
+    errors:
+    - {asymerror: {plus: 55, minus: -32}, label: '1 s.d.'}
+    - {asymerror: {plus: 129, minus: -49}, label: '2 s.d.'}
