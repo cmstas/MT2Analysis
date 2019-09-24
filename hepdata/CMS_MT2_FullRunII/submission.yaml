@@ -18,6 +18,21 @@ comment: >
 data_license: {description: The content can be shared and adapted but you must give
     appropriate credit and cannot restrict access to others., name: cc-by-4.0, url: 'https://creativecommons.org/licenses/by/4.0/'}
 ---
+data_file: yields_ssrs.yaml
+description: >
+    Definitions of super signal regions, along with predictions, observed data, and the
+    observed 95% CL upper limits on the number of signal events contributing to 
+    each region ($N_{95}^\mathrm{max}$). The limits are given under assumptions
+    of 0% and 15% for the uncertainty on the signal acceptance.
+    All selection criteria as in the full analysis are applied.
+    For regions with $N_\mathrm{j}=1$, $H_\mathrm{T}\equiv p_\mathrm{T}^\mathrm{jet}$.
+keywords:
+- {name: reactions, values: [P P --> X X]}
+- {name: cmenergies, values: [13000]}
+- {name: phrases, values: [Hadronic, Missing Energy, Jets, Inclusive]}
+location: Table 6
+name: Table 6 (SSRs)
+---
 data_file: mt2_limits_T1qqqq.yaml
 description: >
     Exclusion limits at 95% CL for direct gluino pair production, where the gluinos decay 
