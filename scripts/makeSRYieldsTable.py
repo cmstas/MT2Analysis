@@ -1,4 +1,4 @@
-import sys
+import sys, os
 sys.path.append("./CardMaker")
 from Datacard import Datacard
 import cPickle as pickle
@@ -6,7 +6,7 @@ from math import sqrt, log10, floor
 
 datacards = pickle.load(open("CardMaker/cards_V00-10-17_FullRunII/templates/template_datacards.pkl", 'rb'))
 
-dcs = {"monojet":{},"VL":{},"L":{},"Ml":{},"Hl":{},"UHl":{},"Mh":{},"Hh":{},"UHh":{}}
+dcs = {"monojet":{},"VL":{},"Ll":{},"Lh":{},"Ml":{},"Mm":{},"Mh":{},"Hl":{},"Hm":{},"Hh":{},"UHl":{},"UHh":{}}
 for name,dc in datacards.items():
     hlo = int(name.split("HT")[1].split("_")[0].split("to")[0].replace("Inf","-1"))
     hhi = int(name.split("HT")[1].split("_")[0].split("to")[-1].replace("Inf","-1"))
@@ -20,10 +20,13 @@ for name,dc in datacards.items():
     ht_reg = ""
     if jlo == 1: ht_reg = "monojet"
     elif hlo == 250: ht_reg = "VL"
-    elif hlo == 450: ht_reg = "L"
-    elif hlo == 575 and jlo<7:  ht_reg = "Ml"
+    elif hlo == 450 and jlo<7: ht_reg = "Ll"
+    elif hlo == 450 and jlo>=7: ht_reg = "Lh"
+    elif hlo == 575 and jhi<4:  ht_reg = "Ml"
+    elif hlo == 575 and jlo<7:  ht_reg = "Mm"
     elif hlo == 575 and jlo>=7: ht_reg = "Mh"
-    elif hlo == 1200 and jlo<7:  ht_reg = "Hl"
+    elif hlo == 1200 and jhi<4:  ht_reg = "Hl"
+    elif hlo == 1200 and jlo<7:  ht_reg = "Hm"
     elif hlo == 1200 and jlo>=7: ht_reg = "Hh"
     elif hlo == 1500 and jlo<7:  ht_reg = "UHl"
     elif hlo == 1500 and jlo>=7: ht_reg = "UHh"
@@ -56,17 +59,22 @@ def GetStatSyst(dc, bkg):
 titles = {
     "monojet": r"$\njets = 1$",
     "VL": r"$250 \leq \Ht < 450$ \GeV",
-    "L":  r"$450 \leq \Ht < 575$ \GeV",
-    "Ml":  r"$575 \leq \Ht < 1200$ \GeV, $\njets < 7$",
+    "Ll":  r"$450 \leq \Ht < 575$ \GeV, $\njets < 7$",
+    "Lh":  r"$450 \leq \Ht < 575$ \GeV, $\njets \geq 7$",
+    "Ml":  r"$575 \leq \Ht < 1200$ \GeV, $\njets^\mathrm{hi} < 4$",
+    "Mm":  r"$575 \leq \Ht < 1200$ \GeV, $4 \leq \njets^\mathrm{hi} < 7$",
     "Mh":  r"$575 \leq \Ht < 1200$ \GeV, $\njets \geq 7$",
-    "Hl":  r"$1200 \leq \Ht < 1500$ \GeV, $\njets < 7$",
+    "Hl":  r"$1200 \leq \Ht < 1500$ \GeV, $\njets^\mathrm{hi} < 4$",
+    "Hm":  r"$1200 \leq \Ht < 1500$ \GeV, $4 \leq \njets^\mathrm{hi} < 7$",
     "Hh":  r"$1200 \leq \Ht < 1500$ \GeV, $\njets \geq 7$",
     "UHl":  r"$\Ht \geq 1500$ \GeV, $\njets < 7$",
     "UHh":  r"$\Ht \geq 1500$ \GeV, $\njets \geq 7$",
 }
+ht_regs = ["monojet", "VL","Ll","Lh","Ml","Mm","Mh","Hl","Hm","Hh","UHl","UHh"]
+# ht_regs = ["monojet"]
+yaml_data = {ht_reg:[] for ht_reg in ht_regs}
 fout = open("/home/users/bemarsh/public_html/mt2/mt2_yields.txt", 'w')
-for ht_reg in ["monojet", "VL","L","Ml","Mh","Hl","Hh","UHl","UHh"]:
-# for ht_reg in ["monojet"]:
+for ht_reg in ht_regs:
     s = ""
     prev = (0,0,0,0)
     s += r"""
@@ -202,6 +210,15 @@ and Monte Carlo samples), and the second is systematic.}
 
         s += "\\\\ \n"
 
+        yaml_data[ht_reg].append({
+                "bounds": ((hlo,hhi),(jlo,jhi),(blo,bhi),(mlo,mhi)),
+                "zinv": (zinv_rate, (zinv_stat_up, zinv_stat_dn, zinv_syst)),
+                "llep": (llep_rate, (llep_stat_up, llep_stat_dn, llep_syst)),
+                "qcd": (qcd_rate, (qcd_stat_up, qcd_stat_dn, qcd_syst)),
+                "total": (tot_rate, (tot_stat_up, tot_stat_dn, tot_syst)),
+                "obs": str(int(dc.GetObservation())),
+                })
+
     s += r"""
 \hline
 \end{tabular}
@@ -211,3 +228,131 @@ and Monte Carlo samples), and the second is systematic.}
     fout.write(s + "\n\n")
 
 fout.close()
+
+yaml_dir = "/home/users/bemarsh/public_html/mt2/hepdata/fullRunII"
+os.system("mkdir -p "+yaml_dir)
+for ht_reg, data in yaml_data.items():
+    fout = open(os.path.join(yaml_dir, "yields_mt2_{0}.yaml".format(ht_reg)), 'w')
+    
+    fout.write(
+"""independent_variables:
+- header: {name: '$N_\mathrm{j}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        jlo,jhi = d["bounds"][1]
+        if jlo==jhi:
+            fout.write("  - value: {0}\n".format(jlo))
+        else:
+            fout.write("  - {{low: {0}, high: {1}}}\n".format(jlo,jhi).replace("-1","-1"))
+
+    fout.write(
+"""- header: {name: '$N_\mathrm{b}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        blo,bhi = d["bounds"][2]
+        if blo==bhi:
+            fout.write("  - value: {0}\n".format(blo))
+        else:
+            fout.write("  - {{low: {0}, high: {1}}}\n".format(blo,bhi).replace("-1","-1"))
+
+    fout.write(
+"""- header: {name: '$M_\mathrm{T2}$', units: GEV}
+  values:
+"""
+)
+    for d in data[:]:
+        mlo,mhi = d["bounds"][0 if ht_reg=="monojet" else 3]
+        if mlo==mhi:
+            fout.write("  - value: {0}\n".format(mlo))
+        else:
+            fout.write("  - {{low: {0}, high: {1}}}\n".format(mlo,mhi).replace("-1","-1"))
+
+    fout.write(
+"""dependent_variables:
+- header: {name: 'Lost lepton'}
+  qualifiers:
+  - {name: '$\\sqrt{s}$', value: 13 TeV}
+  - {name: '$\\mathcal{L}_\\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        rate,(stat_up,stat_down,syst)  = d["llep"]
+        fout.write("  - value: {0}\n    errors:\n".format(rate))
+        if stat_up == stat_down:
+            fout.write("    - {{symerror: {0}, label: stat}}\n".format(stat_up))
+        else:
+            fout.write("    - {{asymerror: {{plus: {0}, minus: -{1}}}, label: stat}}\n".format(stat_up,stat_down))
+        fout.write("    - {{symerror: {0}, label: syst}}\n".format(syst))
+
+    fout.write(
+"""- header: {name: '$Z\\to\\nu\\bar{\\nu}$'}
+  qualifiers:
+  - {name: '$\\sqrt{s}$', value: 13 TeV}
+  - {name: '$\\mathcal{L}_\\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        rate,(stat_up,stat_down,syst)  = d["zinv"]
+        fout.write("  - value: {0}\n    errors:\n".format(rate))
+        if stat_up == stat_down:
+            fout.write("    - {{symerror: {0}, label: stat}}\n".format(stat_up))
+        else:
+            fout.write("    - {{asymerror: {{plus: {0}, minus: -{1}}}, label: stat}}\n".format(stat_up,stat_down))
+        fout.write("    - {{symerror: {0}, label: syst}}\n".format(syst))
+
+    fout.write(
+"""- header: {name: 'Multijet'}
+  qualifiers:
+  - {name: '$\\sqrt{s}$', value: 13 TeV}
+  - {name: '$\\mathcal{L}_\\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        rate,(stat_up,stat_down,syst)  = d["qcd"]
+        fout.write("  - value: {0}\n    errors:\n".format(rate))
+        if stat_up == stat_down:
+            fout.write("    - {{symerror: {0}, label: stat}}\n".format(stat_up))
+        else:
+            fout.write("    - {{asymerror: {{plus: {0}, minus: -{1}}}, label: stat}}\n".format(stat_up,stat_down))
+        fout.write("    - {{symerror: {0}, label: syst}}\n".format(syst))
+
+    fout.write(
+"""- header: {name: 'Total background'}
+  qualifiers:
+  - {name: '$\\sqrt{s}$', value: 13 TeV}
+  - {name: '$\\mathcal{L}_\\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        rate,(stat_up,stat_down,syst)  = d["total"]
+        fout.write("  - value: {0}\n    errors:\n".format(rate))
+        if stat_up == stat_down:
+            fout.write("    - {{symerror: {0}, label: stat}}\n".format(stat_up))
+        else:
+            fout.write("    - {{asymerror: {{plus: {0}, minus: -{1}}}, label: stat}}\n".format(stat_up,stat_down))
+        fout.write("    - {{symerror: {0}, label: syst}}\n".format(syst))
+
+    fout.write(
+"""- header: {name: 'Data'}
+  qualifiers:
+  - {name: '$\\sqrt{s}$', value: 13 TeV}
+  - {name: '$\\mathcal{L}_\\mathrm{int}$', value: '137 fb$^{-1}$'}
+  values:
+"""
+)
+    for d in data[:]:
+        obs = d["obs"]
+        fout.write("  - value: {0}\n".format(obs))
+
+    fout.close()
+
+
+

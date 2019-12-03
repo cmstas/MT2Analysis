@@ -25,19 +25,31 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     c = ROOT.TCanvas("c","c",700, 600)
     c.SetTicky(1)
 
-    h_rsfof.GetYaxis().SetRangeUser(0, 2.0)
-    h_rsfof.GetYaxis().SetTitle("R(SF/DF)")
+    c.SetTopMargin(0.08)
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.08)
+    c.SetLeftMargin(0.12)
+
+    h_rsfof.GetYaxis().SetRangeUser(0.001, 2.0)
+    h_rsfof.GetYaxis().SetTitle("R^{SF/DF}")
     h_rsfof.GetYaxis().SetTitleSize(0.045)
-    h_rsfof.GetYaxis().SetTitleOffset(1.00)
+    h_rsfof.GetYaxis().SetTitleOffset(1.10)
     h_rsfof.GetXaxis().SetTitle(xaxis)
     h_rsfof.GetXaxis().SetTitleSize(0.045)
     h_rsfof.GetYaxis().SetLabelSize(0.04)
     h_rsfof.GetXaxis().SetLabelSize(0.04)
+    h_rsfof.GetXaxis().SetLabelOffset(0.008)
+    h_rsfof.GetXaxis().SetTitleOffset(1.10)
     h_rsfof.SetMarkerStyle(20)
     h_rsfof.SetMarkerSize(1.0)
     h_rsfof.SetMarkerColor(ROOT.kBlue+1)
     h_rsfof.SetLineColor(ROOT.kBlue+1)
     h_rsfof.SetLineWidth(2)
+
+    if "nBJet" in name:
+        h_rsfof.GetXaxis().SetNdivisions(6)
+    if "nJet" in name:
+        h_rsfof.GetXaxis().SetNdivisions(13)
 
     h_rsfof.Draw("PE")
     
@@ -63,17 +75,17 @@ def makePlot(h_rsfof, rsfof, rsfoferr, outdir=".", name="ht", xaxis="H_{T} [GeV]
     text.SetNDC(1)
     text.SetTextColor(ROOT.kBlack)
     text.SetTextFont(42)
-    text.SetTextSize(0.04)
-    text.DrawLatex(0.15, 0.75, "R(SF/DF) = {0:.2f} #pm {1:.2f} (stat)".format(rsfof, rsfoferr))
+    text.SetTextSize(0.042)
+    text.DrawLatex(0.177, 0.75, "R^{{SF/DF}} = {0:.2f} #pm {1:.2f} (stat)".format(rsfof, rsfoferr))
 
     text.SetTextColor(ROOT.kBlack)
     text.SetTextSize(0.045)
     text.SetTextAlign(31)
-    text.DrawLatex(0.9, 0.91, "{0} fb^{{-1}} (13 TeV)".format(lumi))
+    text.DrawLatex(0.92, 0.93, "{0} fb^{{-1}} (13 TeV)".format(lumi))
     text.SetTextFont(62)
     text.SetTextAlign(11)
     # text.DrawLatex(0.11, 0.91, "CMS Preliminary")
-    text.DrawLatex(0.11, 0.91, "CMS")
+    text.DrawLatex(0.13, 0.93, "CMS")
 
     h_rsfof.Draw("PE SAME")
 
@@ -119,7 +131,7 @@ h_nJet30_SF = h_nJet30_SF.Rebin(nJet30_bins.size-1, "h_nJet30_RSFOF", nJet30_bin
 h_nJet30_OF = h_nJet30_OF.Rebin(nJet30_bins.size-1, "h_nJet30_OF", nJet30_bins)
 
 h_nJet30_SF.Divide(h_nJet30_OF)
-makePlot(h_nJet30_SF, rSFOF, rSFOFerr, outdir=outdir, name="rsfof_nJet30", xaxis="N_{J}")
+makePlot(h_nJet30_SF, rSFOF, rSFOFerr, outdir=outdir, name="rsfof_nJet30", xaxis="N_{#kern[0.5]{j}}")
 
 ## as a function of nbjets
 h_nBJet20_SF = fin.Get("crdybaseIncl/h_nBJet20LowPt")
@@ -129,4 +141,4 @@ h_nBJet20_SF = h_nBJet20_SF.Rebin(nBJet20_bins.size-1, "h_nBJet20_RSFOF", nBJet2
 h_nBJet20_OF = h_nBJet20_OF.Rebin(nBJet20_bins.size-1, "h_nBJet20_OF", nBJet20_bins)
 
 h_nBJet20_SF.Divide(h_nBJet20_OF)
-makePlot(h_nBJet20_SF, rSFOF, rSFOFerr, outdir=outdir, name="rsfof_nBJet20", xaxis="N_{b}")
+makePlot(h_nBJet20_SF, rSFOF, rSFOFerr, outdir=outdir, name="rsfof_nBJet20", xaxis="N_{#kern[0.2]{b}}")
