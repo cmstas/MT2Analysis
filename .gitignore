@@ -45,3 +45,5 @@ limits/SignalScan/limits*.txt
 limits/SignalScan/limits*.root
 babymaker/batchsubmit/NEW_WORKFLOW/V*
 babymaker/batchsubmit/skim_bennettworkflow/log*
+hepdata/ROOTLimits
+hepdata/*.tar.gz
