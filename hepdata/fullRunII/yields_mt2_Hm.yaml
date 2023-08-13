@@ -250,9 +250,6 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.01, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 208
     errors:
     - {symerror: 12, label: stat}
@@ -270,13 +267,7 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 97
     errors:
     - {symerror: 2, label: stat}
@@ -294,13 +285,7 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 26.0
     errors:
     - {symerror: 0.6, label: stat}
@@ -310,17 +295,8 @@ dependent_variables:
     - {symerror: 0.03, label: stat}
     - {symerror: 0.04, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
 - header: {name: 'Total background'}
   qualifiers:
   - {name: '$\sqrt{s}$', value: 13 TeV}

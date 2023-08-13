@@ -349,21 +349,9 @@ dependent_variables:
     - {symerror: 0.02, label: stat}
     - {symerror: 0.01, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 9.7
     errors:
     - {symerror: 0.7, label: stat}
@@ -373,41 +361,17 @@ dependent_variables:
     - {symerror: 0.02, label: stat}
     - {symerror: 0.01, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 1.38
     errors:
     - {symerror: 0.13, label: stat}
     - {symerror: 0.43, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 8.3
     errors:
     - {symerror: 0.9, label: stat}
@@ -429,9 +393,6 @@ dependent_variables:
     - {symerror: 0.02, label: stat}
     - {symerror: 0.02, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 2.7
     errors:
     - {symerror: 0.2, label: stat}
@@ -441,17 +402,11 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 1.04
     errors:
     - {symerror: 0.10, label: stat}
     - {symerror: 0.42, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0.31
     errors:
     - {symerror: 0.06, label: stat}

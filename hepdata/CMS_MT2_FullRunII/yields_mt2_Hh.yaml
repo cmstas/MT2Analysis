@@ -247,9 +247,6 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 58
     errors:
     - {symerror: 2, label: stat}
@@ -267,9 +264,6 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.01, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 21.4
     errors:
     - {symerror: 0.5, label: stat}
@@ -283,9 +277,6 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 5.0
     errors:
     - {symerror: 0.3, label: stat}
@@ -295,17 +286,11 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.01, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0.88
     errors:
     - {symerror: 0.10, label: stat}
     - {symerror: 0.32, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
 - header: {name: 'Total background'}
   qualifiers:
   - {name: '$\sqrt{s}$', value: 13 TeV}

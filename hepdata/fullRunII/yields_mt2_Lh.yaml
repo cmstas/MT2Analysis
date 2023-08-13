@@ -186,9 +186,6 @@ dependent_variables:
     - {symerror: 0.04, label: stat}
     - {symerror: 0.03, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0.15
     errors:
     - {symerror: 0.06, label: stat}
@@ -198,9 +195,6 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
 - header: {name: 'Total background'}
   qualifiers:
   - {name: '$\sqrt{s}$', value: 13 TeV}

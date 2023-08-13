@@ -409,21 +409,12 @@ dependent_variables:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0.01
     errors:
     - {symerror: 0.01, label: stat}
     - {symerror: 0.00, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 38
     errors:
     - {symerror: 15, label: stat}
@@ -437,17 +428,8 @@ dependent_variables:
     - {symerror: 0.06, label: stat}
     - {symerror: 0.10, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 3.8
     errors:
     - {symerror: 0.5, label: stat}
@@ -461,13 +443,7 @@ dependent_variables:
     - {symerror: 0.03, label: stat}
     - {symerror: 0.03, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 3.1
     errors:
     - {symerror: 0.8, label: stat}
@@ -501,9 +477,6 @@ dependent_variables:
     - {symerror: 0.04, label: stat}
     - {symerror: 0.06, label: syst}
   - value: 0
-    errors:
-    - {symerror: 0, label: stat}
-    - {symerror: 0, label: syst}
   - value: 0.29
     errors:
     - {symerror: 0.05, label: stat}
